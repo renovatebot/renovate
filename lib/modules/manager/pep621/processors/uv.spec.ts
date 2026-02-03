@@ -1,25 +1,25 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import type { RepoGlobalConfig } from '../../../../config/types';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { getPkgReleases as _getPkgReleases } from '../../../datasource';
-import { GitRefsDatasource } from '../../../datasource/git-refs';
-import { GitTagsDatasource } from '../../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
-import { PypiDatasource } from '../../../datasource/pypi';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types';
-import { parsePyProject } from '../extract';
-import { depTypes } from '../utils';
-import { UvProcessor } from './uv';
-import { mockExecAll } from '~test/exec-util';
-import { fs, hostRules, logger, partial } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { GitRefsDatasource } from '../../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
+import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
+import { PypiDatasource } from '../../../datasource/pypi/index.ts';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import { parsePyProject } from '../extract.ts';
+import { depTypes } from '../utils.ts';
+import { UvProcessor } from './uv.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, hostRules, logger, partial } from '~test/util.ts';
 
 vi.mock('google-auth-library');
-vi.mock('../../../../util/fs');
-vi.mock('../../../datasource');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../datasource/index.ts');
 
 const googleAuth = vi.mocked(_googleAuth);
 const getPkgReleases = vi.mocked(_getPkgReleases);
@@ -458,7 +458,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -493,7 +493,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/renovatebot/base-image',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -505,7 +505,7 @@ describe('modules/manager/pep621/processors/uv', () => {
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool python 3.11.1 ' +
             '&& ' +

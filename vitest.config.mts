@@ -121,6 +121,7 @@ export default defineConfig(() =>
       test: {
         exclude: [
           ...defaultExclude,
+          'dist/**/*',
           'tools/docs/test/**/*.test.mjs',
           '.worktrees/**/*',
         ],

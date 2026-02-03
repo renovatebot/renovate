@@ -1,8 +1,8 @@
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getEnv } from '../env';
-import type { FileChange } from './types';
+import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { getEnv } from '../env.ts';
+import type { FileChange } from './types.ts';
 
 export function checkForPlatformFailure(err: Error): Error | null {
   if (getEnv().NODE_ENV === 'test') {

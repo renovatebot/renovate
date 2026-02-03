@@ -1,10 +1,10 @@
-import { logger } from '../../../logger';
-import { hashStream } from '../../../util/hash';
-import { Http } from '../../../util/http';
-import type { UpdateDependencyConfig } from '../types';
-import { findHandlerByType } from './handlers';
-import type { HomebrewManagerData } from './types';
-import { updateRubyString } from './utils';
+import { logger } from '../../../logger/index.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
+import { findHandlerByType } from './handlers/index.ts';
+import type { HomebrewManagerData } from './types.ts';
+import { updateRubyString } from './utils.ts';
 
 const http = new Http('homebrew');
 

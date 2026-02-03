@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { CpanDatasource } from '../../datasource/cpan';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
+import type { Category } from '../../../constants/index.ts';
+import { CpanDatasource } from '../../datasource/cpan/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'cpanfile';
 export const url =

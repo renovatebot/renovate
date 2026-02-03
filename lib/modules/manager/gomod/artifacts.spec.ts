@@ -1,33 +1,33 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import * as docker from '../../../util/exec/docker';
-import type { StatusResult } from '../../../util/git/types';
-import * as _hostRules from '../../../util/host-rules';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import * as _artifactsExtra from './artifacts-extra';
-import * as gomod from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, git, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as _artifactsExtra from './artifacts-extra.ts';
+import * as gomod from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 
-type FS = typeof import('../../../util/fs');
+type FS = typeof import('../../../util/fs/index.ts');
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http');
-vi.mock('../../../util/fs', async () => {
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/index.ts');
+vi.mock('../../../util/fs/index.ts', async () => {
   // restore
   return mockDeep({
     isValidLocalPath: (await vi.importActual<FS>('../../../util/fs'))
       .isValidLocalPath,
   });
 });
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('./artifacts-extra', () => mockDeep());
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('./artifacts-extra.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -61,7 +61,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 const config: UpdateArtifactsConfig = {
@@ -820,7 +820,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -836,7 +836,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CGO_ENABLED ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
@@ -975,7 +975,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -1004,7 +1004,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GIT_CONFIG_VALUE_5 ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
@@ -1085,7 +1085,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         options: {
@@ -1505,7 +1505,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -1521,7 +1521,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CGO_ENABLED ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
@@ -1570,7 +1570,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -1586,7 +1586,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CGO_ENABLED ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
@@ -1635,7 +1635,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -1651,7 +1651,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CGO_ENABLED ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
@@ -1700,7 +1700,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -1716,7 +1716,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CGO_ENABLED ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
@@ -2367,7 +2367,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     const expectedResult = [
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
       },
       {},
       {
@@ -2384,7 +2384,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CGO_ENABLED ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
@@ -2565,7 +2565,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     const expectedResult = [
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
       },
       {},
       {
@@ -2582,7 +2582,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CGO_ENABLED ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +

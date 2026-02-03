@@ -1,11 +1,14 @@
 // TODO #22198
 import type { Merge } from 'type-fest';
-import type { RenovateConfig, ValidationMessage } from '../../../config/types';
-import { addMeta, logger, removeMeta } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { flattenUpdates } from './flatten';
-import { generateBranchConfig } from './generate';
+import type {
+  RenovateConfig,
+  ValidationMessage,
+} from '../../../config/types.ts';
+import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import { flattenUpdates } from './flatten.ts';
+import { generateBranchConfig } from './generate.ts';
 
 export type BranchifiedConfig = Merge<
   RenovateConfig,

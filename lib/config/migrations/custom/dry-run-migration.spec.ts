@@ -1,4 +1,4 @@
-import { DryRunMigration } from './dry-run-migration';
+import { DryRunMigration } from './dry-run-migration.ts';
 
 describe('config/migrations/custom/dry-run-migration', () => {
   it('should migrate dryRun=true to dryRun=full', async () => {

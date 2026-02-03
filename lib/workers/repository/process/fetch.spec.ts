@@ -1,14 +1,14 @@
-import { getConfig } from '../../../config/defaults';
-import { MavenDatasource } from '../../../modules/datasource/maven';
-import type { PackageFile } from '../../../modules/manager/types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { fetchUpdates } from './fetch';
-import * as lookup from './lookup';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../config/defaults.ts';
+import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { fetchUpdates } from './fetch.ts';
+import * as lookup from './lookup/index.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 const lookupUpdates = vi.mocked(lookup).lookupUpdates;
 
-vi.mock('./lookup');
+vi.mock('./lookup/index.ts');
 
 describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {

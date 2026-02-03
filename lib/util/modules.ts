@@ -1,30 +1,8 @@
 import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
 import upath from 'upath';
 
 // TODO: move to `test/util.ts` or `test/modules.ts`
-
-function relatePath(here: string, there: string): string {
-  const thereParts = upath.normalizeTrim(there).split('/');
-  const hereParts = upath.normalizeTrim(here).split('/');
-
-  let idx = 0;
-  while (
-    typeof thereParts[idx] === 'string' &&
-    typeof hereParts[idx] === 'string' &&
-    thereParts[idx] === hereParts[idx]
-  ) {
-    idx += 1;
-  }
-
-  const result: string[] = [];
-  for (let x = 0; x < hereParts.length - idx; x += 1) {
-    result.push('..');
-  }
-  for (let y = idx; y < thereParts.length; y += 1) {
-    result.push(thereParts[y]);
-  }
-  return result.join('/');
-}
 
 export async function loadModules<T>(
   dirname: string,
@@ -42,8 +20,9 @@ export async function loadModules<T>(
     .sort();
 
   for (const moduleName of moduleNames) {
-    const modulePath = upath.join(relatePath(__dirname, dirname), moduleName);
-    const module = await import(modulePath);
+    const modulePath = upath.join(dirname, moduleName);
+    const moduleUrl = pathToFileURL(modulePath).href;
+    const module = await import(moduleUrl);
     // istanbul ignore if
     if (!module || (validate && !validate(module, moduleName))) {
       throw new Error(`Invalid module: ${modulePath}`);

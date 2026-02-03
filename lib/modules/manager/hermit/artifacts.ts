@@ -1,13 +1,16 @@
 import { quote } from 'shlex';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import * as p from '../../../util/promises';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { ReadContentResult } from './types';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import {
+  localPathIsSymbolicLink,
+  readLocalSymlink,
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import * as p from '../../../util/promises.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type { ReadContentResult } from './types.ts';
 
 /**
  * updateArtifacts runs hermit install for each updated dependencies

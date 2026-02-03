@@ -1,6 +1,6 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import { setBaseUrl } from '../../../util/http/forgejo';
-import { toBase64 } from '../../../util/string';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { setBaseUrl } from '../../../util/http/forgejo.ts';
+import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,
   closePR,
@@ -32,7 +32,7 @@ import {
   updateIssue,
   updateIssueLabels,
   updatePR,
-} from './forgejo-helper';
+} from './forgejo-helper.ts';
 import type {
   Branch,
   Comment,
@@ -45,9 +45,9 @@ import type {
   Repo,
   RepoContents,
   User,
-} from './types';
-import * as httpMock from '~test/http-mock';
-import { logger, partial } from '~test/util';
+} from './types.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger, partial } from '~test/util.ts';
 
 describe('modules/platform/forgejo/forgejo-helper', () => {
   const forgejoApiHost = 'https://forgejo.renovatebot.com/';

@@ -1,19 +1,19 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { logger } from '../../../../../../logger';
-import { Releases } from '../../../../../../modules/datasource/forgejo-releases/schema';
+import { logger } from '../../../../../../logger/index.ts';
+import { Releases } from '../../../../../../modules/datasource/forgejo-releases/schema.ts';
 import {
   ContentsListResponse,
   ContentsResponse,
-} from '../../../../../../modules/platform/gitea/schema';
-import { ForgejoHttp } from '../../../../../../util/http/forgejo';
-import { fromBase64 } from '../../../../../../util/string';
-import { compareChangelogFilePath } from '../common';
+} from '../../../../../../modules/platform/gitea/schema.ts';
+import { ForgejoHttp } from '../../../../../../util/http/forgejo.ts';
+import { fromBase64 } from '../../../../../../util/string.ts';
+import { compareChangelogFilePath } from '../common.ts';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
-} from '../types';
+} from '../types.ts';
 
 export const id = 'forgejo-changelog';
 const http = new ForgejoHttp(id);

@@ -371,7 +371,7 @@ Will then output:
     {
       "manager": "regex",
       "datasource": "docker",
-      "depName": "ghcr.io/containerbase/sidecar",
+      "depName": "ghcr.io/renovatebot/base-image",
       "packageFile": "lib/config/options/index.ts",
       "registryUrls": ["https://ghcr.io"]
     }

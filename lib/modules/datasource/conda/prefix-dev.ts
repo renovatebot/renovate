@@ -1,9 +1,9 @@
-import { logger } from '../../../logger';
-import { isNotNullOrUndefined } from '../../../util/array';
-import type { Http } from '../../../util/http';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release, ReleaseResult } from '../types';
-import { type File, PagedResponse } from './schema/prefix-dev';
+import { logger } from '../../../logger/index.ts';
+import { isNotNullOrUndefined } from '../../../util/array.ts';
+import type { Http } from '../../../util/http/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release, ReleaseResult } from '../types.ts';
+import { type File, PagedResponse } from './schema/prefix-dev.ts';
 
 const MAX_PREFIX_DEV_GRAPHQL_PAGE = 100;
 

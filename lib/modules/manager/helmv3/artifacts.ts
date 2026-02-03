@@ -1,31 +1,31 @@
 import { isString, isTruthy } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
   getParentDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import * as yaml from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { generateHelmEnvs, generateLoginCmd } from './common';
-import { isOCIRegistry, removeOCIPrefix } from './oci';
-import type { ChartDefinition, Repository, RepositoryRule } from './types';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as yaml from '../../../util/yaml.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { generateHelmEnvs, generateLoginCmd } from './common.ts';
+import { isOCIRegistry, removeOCIPrefix } from './oci.ts';
+import type { ChartDefinition, Repository, RepositoryRule } from './types.ts';
 import {
   aliasRecordToRepositories,
   getRepositories,
   isFileInDir,
-} from './utils';
+} from './utils.ts';
 
 async function helmCommands(
   execOptions: ExecOptions,

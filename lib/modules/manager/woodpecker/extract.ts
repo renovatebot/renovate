@@ -1,9 +1,9 @@
 import { isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { parseSingleYaml } from '../../../util/yaml';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import type { WoodpeckerConfig } from './types';
+import { logger } from '../../../logger/index.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import type { WoodpeckerConfig } from './types.ts';
 
 function woodpeckerVersionDecider(
   woodpeckerConfig: WoodpeckerConfig,

@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
-import { logger } from '~test/util';
+import { extractPackageFile } from './index.ts';
+import { logger } from '~test/util.ts';
 
 describe('modules/manager/renovate-config-presets/extract', () => {
   describe('extractPackageFile()', () => {

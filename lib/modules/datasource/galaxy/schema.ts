@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MaybeTimestamp } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export type GalaxyV1 = z.infer<typeof GalaxyV1>;
 export const GalaxyV1 = z.object({

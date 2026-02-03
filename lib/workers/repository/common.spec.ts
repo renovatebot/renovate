@@ -1,5 +1,5 @@
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN } from 'bunyan';
-import { formatProblemLevel } from './common';
+import { formatProblemLevel } from './common.ts';
 
 describe('workers/repository/common', () => {
   describe('formatProblemLevel()', () => {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release } from '../types.ts';
 
 /**
  * In the JSR.io API, if a package has had any version published on or after 2025-09-18,

@@ -1,8 +1,8 @@
-import { cleanup, get, init, set } from '.';
+import { cleanup, get, init, set } from './index.ts';
 
-vi.mock('./file');
-vi.mock('./redis');
-vi.mock('./sqlite');
+vi.mock('./file.ts');
+vi.mock('./redis.ts');
+vi.mock('./sqlite.ts');
 
 describe('util/cache/package/index', () => {
   beforeEach(() => {
@@ -14,9 +14,7 @@ describe('util/cache/package/index', () => {
     expect(
       await set('_test-namespace', 'some-key', 'some-value', 5),
     ).toBeUndefined();
-    expect(async () => {
-      await cleanup({});
-    }).not.toThrow();
+    await expect(cleanup({})).resolves.toBeUndefined();
   });
 
   it('sets and gets file', async () => {

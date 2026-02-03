@@ -1,14 +1,14 @@
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../config/global';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import type { Pr } from '../../modules/platform';
+import { GlobalConfig } from '../../config/global.ts';
+import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import type { Pr } from '../../modules/platform/index.ts';
 import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
-} from './error-config';
-import { partial, platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './error-config.ts';
+import { partial, platform } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 let config: RenovateConfig;
 

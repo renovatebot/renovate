@@ -1,31 +1,31 @@
 import { isString } from '@sindresorhus/is';
-import { getConfig } from '../../../config/defaults';
-import { GlobalConfig } from '../../../config/global';
-import { addMeta } from '../../../logger';
-import { hashMap } from '../../../modules/manager';
-import * as _repoCache from '../../../util/cache/repository';
+import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { addMeta } from '../../../logger/index.ts';
+import { hashMap } from '../../../modules/manager/index.ts';
+import * as _repoCache from '../../../util/cache/repository/index.ts';
 import type {
   BranchCache,
   RepoCacheData,
-} from '../../../util/cache/repository/types';
-import { fingerprint } from '../../../util/fingerprint';
-import type { LongCommitSha } from '../../../util/git/types';
-import { counts } from '../../global/limits';
-import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import * as _branchWorker from '../update/branch';
-import * as _limits from './limits';
+} from '../../../util/cache/repository/types.ts';
+import { fingerprint } from '../../../util/fingerprint.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { counts } from '../../global/limits.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import * as _branchWorker from '../update/branch/index.ts';
+import * as _limits from './limits.ts';
 import {
   compareCacheFingerprint,
   generateCommitFingerprintConfig,
   syncBranchState,
   writeUpdates,
-} from './write';
-import { logger, partial, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './write.ts';
+import { logger, partial, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../../../util/cache/repository');
-vi.mock('./limits');
-vi.mock('../update/branch');
+vi.mock('../../../util/cache/repository/index.ts');
+vi.mock('./limits.ts');
+vi.mock('../update/branch/index.ts');
 
 const branchWorker = vi.mocked(_branchWorker);
 const limits = vi.mocked(_limits);

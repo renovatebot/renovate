@@ -1,4 +1,4 @@
-import { SemanticCommitMessage } from './semantic-commit-message';
+import { SemanticCommitMessage } from './semantic-commit-message.ts';
 
 describe('workers/repository/model/semantic-commit-message', () => {
   it('should format message without prefix', () => {

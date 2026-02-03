@@ -1,4 +1,4 @@
-import { fingerprint } from './fingerprint';
+import { fingerprint } from './fingerprint.ts';
 
 describe('util/fingerprint', () => {
   const obj: any = {

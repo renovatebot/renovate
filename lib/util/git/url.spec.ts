@@ -1,8 +1,8 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url';
-import { hostRules } from '~test/util';
+import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url.ts';
+import { hostRules } from '~test/util.ts';
 
-vi.mock('../host-rules', () => mockDeep());
+vi.mock('../host-rules.ts', () => mockDeep());
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {

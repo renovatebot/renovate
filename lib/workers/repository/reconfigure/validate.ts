@@ -1,15 +1,15 @@
-import { isNonEmptyString } from '@sindresorhus/is';
-import { massageConfig } from '../../../config/massage';
-import type { RenovateConfig } from '../../../config/types';
-import { validateConfig } from '../../../config/validation';
-import { logger } from '../../../logger';
-import type { Pr } from '../../../modules/platform';
-import { platform } from '../../../modules/platform';
-import { ensureComment } from '../../../modules/platform/comment';
-import { getBranchCommit } from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { setReconfigureBranchCache } from './reconfigure-cache';
-import { getReconfigureBranchName, setBranchStatus } from './utils';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { massageConfig } from '../../../config/massage.ts';
+import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { ensureComment } from '../../../modules/platform/comment.ts';
+import type { Pr } from '../../../modules/platform/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { getBranchCommit } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { setReconfigureBranchCache } from './reconfigure-cache.ts';
+import { getReconfigureBranchName, setBranchStatus } from './utils.ts';
 
 export async function validateReconfigureBranch(
   config: RenovateConfig,
@@ -44,12 +44,12 @@ export async function validateReconfigureBranch(
 
   // perform validation and provide a passing or failing check based on result
   const massagedConfig = massageConfig(reconfigureConfig);
-  const validationResult = await validateConfig('repo', massagedConfig);
+  const res = await migrateAndValidate({}, massagedConfig);
 
   // failing check
-  if (validationResult.errors.length > 0) {
+  if (isNonEmptyArray(res.errors)) {
     logger.debug(
-      { errors: validationResult.errors.map((err) => err.message).join(', ') },
+      { errors: res.errors.map((err) => err.message).join(', ') },
       'Validation Errors',
     );
 
@@ -57,7 +57,7 @@ export async function validateReconfigureBranch(
     if (reconfigurePr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
       body += `Location: \`${configFileName}\`\n`;
-      body += `Message: \`${validationResult.errors
+      body += `Message: \`${res.errors
         .map((e) => e.message)
         .join(', ')
         .replace(regEx(/`/g), "'")}\`\n`;
