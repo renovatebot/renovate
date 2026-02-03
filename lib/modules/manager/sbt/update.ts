@@ -62,8 +62,8 @@ export function updateDependency({
 
       updatedContent = updatedContent.replace(
         patternSharedVariable,
-        (match, typed) => {
-          return `${sharedVariableName}${typed ?? ''} = "${newValue}"`;
+        (match) => {
+          return match.replace(currentValue, newValue);
         },
       );
     } else {
@@ -77,12 +77,9 @@ export function updateDependency({
         'g',
       );
 
-      updatedContent = updatedContent.replace(
-        pattern,
-        (match, percentSigns) => {
-          return `"${groupId}" ${percentSigns} "${artifactId}" % "${newValue}"`;
-        },
-      );
+      updatedContent = updatedContent.replace(pattern, (match) => {
+        return match.replace(currentValue, newValue);
+      });
     }
   }
 
@@ -100,8 +97,10 @@ export function updateDependency({
       'g',
     );
 
-    updatedContent = updatedContent.replace(pattern, (match, percentSigns) => {
-      return `"${newGroupId}" ${percentSigns} "${newArtifactId}"`;
+    updatedContent = updatedContent.replace(pattern, (match) => {
+      return match
+        .replace(groupId, newGroupId)
+        .replace(artifactId, newArtifactId);
     });
   }
 
