@@ -631,6 +631,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
+    default: '12021',
   },
   {
     name: 'composerIgnorePlatformReqs',
