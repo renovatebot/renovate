@@ -55,11 +55,10 @@ export async function extractPackageFile(
 
   // collect all root input aliases, these are a map of input name -> alias, the alias is the item we want to
   // update under nodes
-  const aliasVals = [];
+  const rootAliases = new Set<string>();
   for (const input in rootInputs) {
-    aliasVals.push(rootInputs[input]);
+    rootAliases.add(rootInputs[input] as string);
   }
-  const rootAliases = new Set(aliasVals);
 
   for (const [depName, flakeInput] of Object.entries(flakeLock.nodes) as [
     string,
