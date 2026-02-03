@@ -378,8 +378,8 @@ importers:
         specifier: 1.1.30
         version: 1.1.30(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)
       '@containerbase/istanbul-reports-html':
-        specifier: 1.1.27
-        version: 1.1.27
+        specifier: 1.1.28
+        version: 1.1.28
       '@containerbase/semantic-release-pnpm':
         specifier: 1.3.16
         version: 1.3.16(semantic-release@25.0.2(typescript@5.9.3))
@@ -1052,8 +1052,8 @@ packages:
       eslint-plugin-import: ^2.31.0
       eslint-plugin-promise: ^7.0.0
 
-  '@containerbase/istanbul-reports-html@1.1.27':
-    resolution: {integrity: sha512-mxAy/sMbrJah+RV7vrEZpuUGWfDV4tDTx3LNCvBhlIrBKB3z0+Qfd1X0mvSta8+PI8KQybm0H+7KSY+MU44rCw==}
+  '@containerbase/istanbul-reports-html@1.1.28':
+    resolution: {integrity: sha512-FFboqCL+78QaQScyQG3y56t1U3eJUVnvQpQ4BKu6YBczCGdZ+Wyz3SpkRdnauNqoMWO8XbaVduodUZPb1cAd1A==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
   '@containerbase/semantic-release-pnpm@1.3.16':
@@ -4025,6 +4025,7 @@ packages:
 
   glob@10.5.0:
     resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@13.0.0:
@@ -4033,7 +4034,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-agent@3.0.0:
     resolution: {integrity: sha512-PT6XReJ+D07JvGoxQMkT6qji/jVNfX/h364XHZOWeRzy64sSFr+xJ5OX7LI3b4MPQzdL4H8Y8M0xzPpsVMwA8Q==}
@@ -7987,7 +7988,7 @@ snapshots:
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.2)
       eslint-plugin-promise: 7.2.1(eslint@9.39.2)
 
-  '@containerbase/istanbul-reports-html@1.1.27':
+  '@containerbase/istanbul-reports-html@1.1.28':
     dependencies:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
