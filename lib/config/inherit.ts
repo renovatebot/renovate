@@ -4,6 +4,7 @@ export const NOT_PRESENT = Symbol('not-present');
 
 export class InheritConfig {
   static OPTIONS: readonly (keyof GlobalInheritableConfig)[] = [
+    'bbUseDevelopmentBranch',
     'configFileNames',
     'onboardingAutoCloseAge',
   ];
