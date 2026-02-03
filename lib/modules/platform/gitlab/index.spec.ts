@@ -3636,6 +3636,26 @@ describe('modules/platform/gitlab/index', () => {
         'PR platform automerge re-attempted...prNo: 12345',
       );
     });
+
+    it('should skip retries when merge_when_pipeline_succeeds is already enabled', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'ci_must_pass',
+          merge_when_pipeline_succeeds: true,
+          pipeline: {
+            status: 'failed',
+          },
+        });
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+      );
+    });
   });
 
   describe('mergePr(pr)', () => {
