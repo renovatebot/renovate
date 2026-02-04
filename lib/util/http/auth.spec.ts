@@ -25,16 +25,17 @@ describe('util/http/auth', () => {
       `);
     });
 
-    it('gitea password', () => {
-      const opts: GotOptions = {
-        headers: {},
-        hostType: 'gitea',
-        password: 'XXXX',
-      };
+    describe('gitea', () => {
+      it('gitea password', () => {
+        const opts: GotOptions = {
+          headers: {},
+          hostType: 'gitea',
+          password: 'XXXX',
+        };
 
-      applyAuthorization(opts);
+        applyAuthorization(opts);
 
-      expect(opts).toMatchInlineSnapshot(`
+        expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
             "authorization": "Basic OlhYWFg=",
@@ -43,18 +44,18 @@ describe('util/http/auth', () => {
           "password": "XXXX",
         }
       `);
-    });
+      });
 
-    it('gittea token', () => {
-      const opts: GotOptions = {
-        headers: {},
-        token: 'XXXX',
-        hostType: 'gitea',
-      };
+      it('gittea token', () => {
+        const opts: GotOptions = {
+          headers: {},
+          token: 'XXXX',
+          hostType: 'gitea',
+        };
 
-      applyAuthorization(opts);
+        applyAuthorization(opts);
 
-      expect(opts).toMatchInlineSnapshot(`
+        expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
             "authorization": "Bearer XXXX",
@@ -63,35 +64,37 @@ describe('util/http/auth', () => {
           "token": "XXXX",
         }
       `);
-    });
-
-    it('github token', () => {
-      const opts: GotOptions = {
-        headers: {},
-        token: 'XXX',
-        hostType: 'github',
-      };
-
-      applyAuthorization(opts);
-
-      expect(opts).toEqual({
-        headers: {
-          authorization: 'token XXX',
-        },
-        hostType: 'github',
-        token: 'XXX',
       });
     });
 
-    it('github token for datasource using github api', () => {
-      const opts: GotOptions = {
-        headers: {},
-        token: 'ZZZZ',
-        hostType: 'github-releases',
-      };
-      applyAuthorization(opts);
+    describe('github', () => {
+      it('github token', () => {
+        const opts: GotOptions = {
+          headers: {},
+          token: 'XXX',
+          hostType: 'github',
+        };
 
-      expect(opts).toMatchInlineSnapshot(`
+        applyAuthorization(opts);
+
+        expect(opts).toEqual({
+          headers: {
+            authorization: 'token XXX',
+          },
+          hostType: 'github',
+          token: 'XXX',
+        });
+      });
+
+      it('github token for datasource using github api', () => {
+        const opts: GotOptions = {
+          headers: {},
+          token: 'ZZZZ',
+          hostType: 'github-releases',
+        };
+        applyAuthorization(opts);
+
+        expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
             "authorization": "token ZZZZ",
@@ -100,19 +103,21 @@ describe('util/http/auth', () => {
           "token": "ZZZZ",
         }
       `);
+      });
     });
 
-    it(`gitlab personal access token`, () => {
-      const opts: GotOptions = {
-        headers: {},
-        // Personal Access Token is exactly 20 characters long
-        token: '0123456789012345test',
-        hostType: 'gitlab',
-      };
+    describe('gitlab', () => {
+      it(`gitlab personal access token`, () => {
+        const opts: GotOptions = {
+          headers: {},
+          // Personal Access Token is exactly 20 characters long
+          token: '0123456789012345test',
+          hostType: 'gitlab',
+        };
 
-      applyAuthorization(opts);
+        applyAuthorization(opts);
 
-      expect(opts).toMatchInlineSnapshot(`
+        expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
             "Private-token": "0123456789012345test",
@@ -121,19 +126,19 @@ describe('util/http/auth', () => {
           "token": "0123456789012345test",
         }
       `);
-    });
+      });
 
-    it(`gitlab oauth token`, () => {
-      const opts: GotOptions = {
-        headers: {},
-        token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
-        hostType: 'gitlab',
-      };
+      it(`gitlab oauth token`, () => {
+        const opts: GotOptions = {
+          headers: {},
+          token:
+            'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
+          hostType: 'gitlab',
+        };
 
-      applyAuthorization(opts);
+        applyAuthorization(opts);
 
-      expect(opts).toMatchInlineSnapshot(`
+        expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
             "authorization": "Bearer a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test",
@@ -142,6 +147,81 @@ describe('util/http/auth', () => {
           "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test",
         }
       `);
+      });
+    });
+
+    describe('bitbucket', () => {
+      it(`bitbucket username + password`, () => {
+        const opts: GotOptions = {
+          headers: {},
+          username: 'user@org.com',
+          password: '0123456789012345test',
+          hostType: 'bitbucket',
+          url: 'https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests',
+        };
+
+        applyAuthorization(opts);
+
+        expect(opts).toMatchInlineSnapshot(`
+        {
+          "headers": {
+            "authorization": "Basic dXNlckBvcmcuY29tOjAxMjM0NTY3ODkwMTIzNDV0ZXN0",
+          },
+          "hostType": "bitbucket",
+          "password": "0123456789012345test",
+          "url": "https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests",
+          "username": "user@org.com",
+        }
+      `);
+      });
+
+      it(`bitbucket api token`, () => {
+        const opts: GotOptions = {
+          headers: {},
+          token: '0123456789012345test',
+          hostType: 'bitbucket',
+          url: 'https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests',
+        };
+
+        applyAuthorization(opts);
+
+        expect(opts).toMatchInlineSnapshot(`
+        {
+          "headers": {
+            "authorization": "Bearer 0123456789012345test",
+          },
+          "hostType": "bitbucket",
+          "token": "0123456789012345test",
+          "url": "https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests",
+        }
+      `);
+      });
+
+      it(`bitbucket mutli-auth use username+password for /issues`, () => {
+        const opts: GotOptions = {
+          headers: {},
+          username: 'user@org.com',
+          password: '0123456789012345test',
+          token: '0123456789012345test',
+          hostType: 'bitbucket',
+          url: 'https://api.bitbucket.com/2.0/repositories/foo/bar/issues',
+        };
+
+        applyAuthorization(opts);
+
+        expect(opts).toMatchInlineSnapshot(`
+        {
+          "headers": {
+            "authorization": "Basic dXNlckBvcmcuY29tOjAxMjM0NTY3ODkwMTIzNDV0ZXN0",
+          },
+          "hostType": "bitbucket",
+          "password": "0123456789012345test",
+          "token": "0123456789012345test",
+          "url": "https://api.bitbucket.com/2.0/repositories/foo/bar/issues",
+          "username": "user@org.com",
+        }
+      `);
+      });
     });
 
     it(`npm basic token`, () => {
