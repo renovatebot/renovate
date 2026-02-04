@@ -1,6 +1,7 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import type { Options } from 'got';
 import {
+  BITBUCKET_API_USING_HOST_TYPES,
   FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
@@ -17,7 +18,9 @@ export type AuthGotOptions = Pick<
   | 'token'
   | 'username'
   | 'password'
->;
+> & {
+  href?: string;
+};
 
 export function applyAuthorization<GotOptions extends AuthGotOptions>(
   inOptions: GotOptions,
@@ -65,6 +68,26 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
           );
         }
       }
+    } else if (
+      options.hostType &&
+      BITBUCKET_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
+      // Bitbucket Cloud /issues endpoint requires username+password authentication
+      // For other endpoints, prefer workspace access tokens which have higher rate-limits
+      const isIssuesEndpoint = options.href?.includes('/issues');
+      if (isIssuesEndpoint && options.password !== undefined) {
+        // Use username+password for /issues endpoint
+        const auth = Buffer.from(
+          `${options.username ?? ''}:${options.password}`,
+        ).toString('base64');
+        options.headers.authorization = `Basic ${auth}`;
+        delete options.username;
+        delete options.password;
+      } else {
+        // Use Bearer token for other endpoints
+        options.headers.authorization = `Bearer ${options.token}`;
+      }
+      delete options.token;
     } else if (
       options.hostType &&
       GITLAB_API_USING_HOST_TYPES.includes(options.hostType)
