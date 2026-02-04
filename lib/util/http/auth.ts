@@ -18,11 +18,10 @@ export type AuthGotOptions = Pick<
   | 'token'
   | 'username'
   | 'password'
-> & {
-  href?: string;
-};
+>;
 
 export function applyAuthorization<GotOptions extends AuthGotOptions>(
+  url: string,
   inOptions: GotOptions,
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
@@ -74,7 +73,8 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
     ) {
       // Bitbucket Cloud /issues endpoint requires username+password authentication
       // For other endpoints, prefer workspace access tokens which have higher rate-limits
-      const isIssuesEndpoint = options.href?.includes('/issues');
+      // Match Bitbucket API pattern: /2.0/repositories/{workspace}/{repo}/issues
+      const isIssuesEndpoint = /\/repositories\/[^/]+\/[^/]+\/issues/.test(url);
       if (isIssuesEndpoint && options.password !== undefined) {
         // Use username+password for /issues endpoint
         const auth = Buffer.from(

@@ -158,7 +158,7 @@ export abstract class HttpBase<
       logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
       throw new Error(HOST_DISABLED);
     }
-    options = applyAuthorization(options);
+    options = applyAuthorization(url, options);
     options.timeout ??= 60000;
 
     let cacheProvider: HttpCacheProvider | undefined;
@@ -673,7 +673,7 @@ export abstract class HttpBase<
     if (combinedOptions.enabled === false) {
       throw new Error(HOST_DISABLED);
     }
-    combinedOptions = applyAuthorization(combinedOptions);
+    combinedOptions = applyAuthorization(resolvedUrl, combinedOptions);
 
     return stream(resolvedUrl, combinedOptions);
   }
