@@ -162,17 +162,15 @@ describe('util/http/auth', () => {
 
         applyAuthorization(opts);
 
-        expect(opts).toMatchInlineSnapshot(`
-        {
-          "headers": {
-            "authorization": "Basic dXNlckBvcmcuY29tOjAxMjM0NTY3ODkwMTIzNDV0ZXN0",
+        expect(opts).toMatchObject({
+          headers: {
+            authorization: 'Basic dXNlckBvcmcuY29tOjAxMjM0NTY3ODkwMTIzNDV0ZXN0',
           },
-          "hostType": "bitbucket",
-          "password": "0123456789012345test",
-          "url": "https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests",
-          "username": "user@org.com",
-        }
-      `);
+          hostType: 'bitbucket',
+          password: '0123456789012345test',
+          url: 'https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests',
+          username: 'user@org.com',
+        });
       });
 
       it(`bitbucket api token`, () => {
@@ -185,16 +183,14 @@ describe('util/http/auth', () => {
 
         applyAuthorization(opts);
 
-        expect(opts).toMatchInlineSnapshot(`
-        {
-          "headers": {
-            "authorization": "Bearer 0123456789012345test",
+        expect(opts).toMatchObject({
+          headers: {
+            authorization: 'Bearer 0123456789012345test',
           },
-          "hostType": "bitbucket",
-          "token": "0123456789012345test",
-          "url": "https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests",
-        }
-      `);
+          hostType: 'bitbucket',
+          token: '0123456789012345test',
+          url: 'https://api.bitbucket.com/2.0/repositories/foo/bar/pullrequests',
+        });
       });
 
       it(`bitbucket mutli-auth use username+password for /issues`, () => {
@@ -209,18 +205,16 @@ describe('util/http/auth', () => {
 
         applyAuthorization(opts);
 
-        expect(opts).toMatchInlineSnapshot(`
-        {
-          "headers": {
-            "authorization": "Basic dXNlckBvcmcuY29tOjAxMjM0NTY3ODkwMTIzNDV0ZXN0",
+        expect(opts).toMatchObject({
+          headers: {
+            authorization: 'Basic dXNlckBvcmcuY29tOjAxMjM0NTY3ODkwMTIzNDV0ZXN0',
           },
-          "hostType": "bitbucket",
-          "password": "0123456789012345test",
-          "token": "0123456789012345test",
-          "url": "https://api.bitbucket.com/2.0/repositories/foo/bar/issues",
-          "username": "user@org.com",
-        }
-      `);
+          hostType: 'bitbucket',
+          password: '0123456789012345test',
+          token: '0123456789012345test',
+          url: 'https://api.bitbucket.com/2.0/repositories/foo/bar/issues',
+          username: 'user@org.com',
+        });
       });
     });
 
