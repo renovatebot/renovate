@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const kubernetesImagesFile = Fixtures.get('kubernetes.yaml');
 const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');

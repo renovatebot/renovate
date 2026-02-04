@@ -1,4 +1,4 @@
-import { PlatformCommitMigration } from './platform-commit-migration';
+import { PlatformCommitMigration } from './platform-commit-migration.ts';
 
 describe('config/migrations/custom/platform-commit-migration', () => {
   it('should migrate platformCommit=true to platformCommit=enabled', async () => {

@@ -1,6 +1,6 @@
 import { isInteger, isNumber, isUndefined } from '@sindresorhus/is';
-import { logger } from '../../logger';
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { logger } from '../../logger/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 
 export type Limit = 'Commits';
 interface LimitValue {

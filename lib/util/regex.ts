@@ -1,7 +1,7 @@
 import { isRegExp } from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { re2 } from '../expose.cjs';
-import { getEnv } from './env';
+import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
+import { re2 } from '../expose.ts';
+import { getEnv } from './env.ts';
 
 const cache = new Map<string, RegExp>();
 

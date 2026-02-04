@@ -1,6 +1,6 @@
-import { smartTruncate } from './pr-body';
-import { Fixtures } from '~test/fixtures';
-import { logger } from '~test/util';
+import { smartTruncate } from './pr-body.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 
 const prBody = Fixtures.get('pr-body.txt');
 

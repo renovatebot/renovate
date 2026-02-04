@@ -1,11 +1,11 @@
-import type { Category } from '../../../constants';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HexDatasource } from '../../datasource/hex';
+import type { Category } from '../../../constants/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HexDatasource } from '../../datasource/hex/index.ts';
 
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
-export { getRangeStrategy } from './range';
+export { extractPackageFile } from './extract.ts';
+export { updateArtifacts } from './artifacts.ts';
+export { getRangeStrategy } from './range.ts';
 
 export const url = 'https://hexdocs.pm/mix/Mix.html';
 export const categories: Category[] = ['elixir'];

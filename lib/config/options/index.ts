@@ -1,12 +1,13 @@
-import { AllManagersListLiteral } from '../../manager-list.generated';
-import { getManagers } from '../../modules/manager';
-import { getCustomManagers } from '../../modules/manager/custom';
-import { getPlatformList } from '../../modules/platform';
-import { getVersioningList } from '../../modules/versioning';
-import { supportedDatasources } from '../presets/internal/merge-confidence';
-import { type RenovateOptions, UpdateTypesOptions } from '../types';
+import { isArray, isObject } from '@sindresorhus/is';
+import { AllManagersListLiteral } from '../../manager-list.generated.ts';
+import { getCustomManagers } from '../../modules/manager/custom/index.ts';
+import { getManagers } from '../../modules/manager/index.ts';
+import { getPlatformList } from '../../modules/platform/index.ts';
+import { getVersioningList } from '../../modules/versioning/index.ts';
+import { supportedDatasources } from '../presets/internal/merge-confidence.ts';
+import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
-const options: RenovateOptions[] = [
+const options: Readonly<RenovateOptions>[] = [
   {
     name: 'mode',
     description: 'Mode of operation.',
@@ -107,6 +108,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     globalOnly: true,
+    cli: false,
   },
   {
     name: 'userAgent',
@@ -243,6 +245,7 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: null,
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -598,6 +601,8 @@ const options: RenovateOptions[] = [
     type: 'string',
     globalOnly: true,
     default: 'renovate_',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerCliOptions',
@@ -605,14 +610,18 @@ const options: RenovateOptions[] = [
       'Pass CLI flags to `docker run` command when `binarySource=docker`.',
     type: 'string',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerSidecarImage',
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.26.6',
+    default: 'ghcr.io/renovatebot/base-image:13.1.15',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerUser',
@@ -620,6 +629,9 @@ const options: RenovateOptions[] = [
       'Set the `UID` and `GID` for Docker-based binaries if you use `binarySource=docker`.',
     globalOnly: true,
     type: 'string',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
+    default: '12021',
   },
   {
     name: 'composerIgnorePlatformReqs',
@@ -979,7 +991,7 @@ const options: RenovateOptions[] = [
       'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
     globalOnly: true,
     type: 'boolean',
-    default: true,
+    default: false,
   },
   {
     name: 'allowCustomCrateRegistries',
@@ -3135,7 +3147,7 @@ const options: RenovateOptions[] = [
         which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
     type: 'array',
     subType: 'string',
-    default: ['gradleWrapper'],
+    default: [],
     allowedValues: ['goGenerate', 'gradleWrapper'],
     stage: 'repository',
     globalOnly: true,
@@ -3181,7 +3193,14 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+    ],
   },
   {
     name: 'userStrings',
@@ -3333,17 +3352,47 @@ const options: RenovateOptions[] = [
     default: false,
     globalOnly: true,
   },
+  {
+    name: 'toolSettings',
+    description:
+      'Tool specific configuration. Global self-hosted configuration takes precedence.',
+    type: 'object',
+    default: {
+      jvmMaxMemory: 512,
+      jvmMemory: 512,
+    },
+    cli: false,
+  },
+  {
+    name: 'jvmMaxMemory',
+    description:
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'jvmMemory',
+    description:
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    cli: false,
+    env: false,
+  },
 ];
 
-export function getOptions(): RenovateOptions[] {
+export function getOptions(): Readonly<RenovateOptions>[] {
   return options;
 }
 
 function loadManagerOptions(): void {
   const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
   for (const [name, config] of allManagers.entries()) {
+    // v8 ignore else -- TODO: add test #40625
     if (config.defaultConfig) {
-      const managerConfig: RenovateOptions = {
+      const managerConfig: Readonly<RenovateOptions> = {
         name,
         description: `Configuration object for the ${name} manager`,
         stage: 'package',
@@ -3358,4 +3407,27 @@ function loadManagerOptions(): void {
   }
 }
 
+function freeze(value: unknown): void {
+  if (isArray(value)) {
+    for (const v of value) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  } else if (isObject(value)) {
+    for (const v of Object.values(value)) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  }
+}
+
+function freezeConfigOptions(): void {
+  for (const option of options) {
+    freeze(option);
+  }
+}
+
 loadManagerOptions();
+freezeConfigOptions();

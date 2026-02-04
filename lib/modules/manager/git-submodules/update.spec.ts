@@ -4,13 +4,13 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as hostRules from '../../../util/host-rules';
-import type { Upgrade } from '../types';
-import { updateDependency } from '.';
-import { fs } from '~test/util';
-vi.mock('../../../util/fs');
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { Upgrade } from '../types.ts';
+import { updateDependency } from './index.ts';
+import { fs } from '~test/util.ts';
+vi.mock('../../../util/fs/index.ts');
 
 vi.mock('simple-git');
 const simpleGitFactoryMock = vi.mocked(simpleGit);
@@ -18,7 +18,7 @@ const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
-    GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
+    GlobalConfig.set({ localDir: `${import.meta.dirname}/__fixtures__` });
     // clear host rules
     hostRules.clear();
     // clear environment variables

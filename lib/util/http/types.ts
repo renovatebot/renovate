@@ -7,8 +7,8 @@ import type {
   RequestError,
 } from 'got';
 import type { ZodError } from 'zod';
-import type { HttpCacheProvider } from './cache/types';
-import type { EmptyResultError } from './errors';
+import type { HttpCacheProvider } from './cache/types.ts';
+import type { EmptyResultError } from './errors.ts';
 
 export type GotContextOptions = {
   authType?: string;

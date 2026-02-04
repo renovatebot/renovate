@@ -1,4 +1,4 @@
-import { getConfigFileNames, setUserConfigFileNames } from './app-strings';
+import { getConfigFileNames, setUserConfigFileNames } from './app-strings.ts';
 
 describe('config/app-strings', () => {
   it('adds user configured filenames to list', () => {

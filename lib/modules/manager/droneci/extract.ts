@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 
 export function extractPackageFile(
   content: string,

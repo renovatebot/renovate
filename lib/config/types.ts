@@ -1,19 +1,19 @@
-import type { Category, PlatformId } from '../constants';
-import type { LogLevelRemap } from '../logger/types';
-import type { ManagerName } from '../manager-list.generated';
-import type { CustomManager } from '../modules/manager/custom/types';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
+import type { Category, PlatformId } from '../constants/index.ts';
+import type { LogLevelRemap } from '../logger/types.ts';
+import type { ManagerName } from '../manager-list.generated.ts';
+import type { CustomManager } from '../modules/manager/custom/types.ts';
+import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
 import type {
   AutoMergeType,
   HostRule,
   Nullish,
   RangeStrategy,
   SkipReason,
-} from '../types';
-import type { StageName } from '../types/skip-reason';
-import type { GitNoVerifyOption } from '../util/git/types';
-import type { MergeConfidence } from '../util/merge-confidence/types';
-import type { Timestamp } from '../util/timestamp';
+} from '../types/index.ts';
+import type { StageName } from '../types/skip-reason.ts';
+import type { GitNoVerifyOption } from '../util/git/types.ts';
+import type { MergeConfidence } from '../util/merge-confidence/types.ts';
+import type { Timestamp } from '../util/timestamp.ts';
 
 export type RenovateConfigStage =
   | 'global'
@@ -165,6 +165,7 @@ export interface RenovateSharedConfig {
  */
 export interface GlobalInheritableConfig {
   configFileNames?: string[];
+  onboardingAutoCloseAge?: number;
 }
 
 // Config options used only within the global worker
@@ -253,6 +254,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  toolSettings?: ToolSettingsOptions;
 }
 
 /**
@@ -461,6 +463,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
+  toolSettings?: ToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -598,6 +601,7 @@ export type AllowedParents =
   | 'packageRules'
   | 'postUpgradeTasks'
   | 'vulnerabilityAlerts'
+  | 'toolSettings'
   | ManagerName
   | UpdateTypeOptions;
 export interface RenovateOptionBase {
@@ -801,4 +805,9 @@ export interface BumpVersionConfig {
   filePatterns: string[];
   matchStrings: string[];
   name?: string;
+}
+
+export interface ToolSettingsOptions {
+  jvmMaxMemory?: number;
+  jvmMemory?: number;
 }

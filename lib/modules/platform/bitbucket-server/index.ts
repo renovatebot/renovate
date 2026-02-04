@@ -3,32 +3,32 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
-import { GlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import type { FileData } from '../../../types/platform/bitbucket-server';
-import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { deleteBranch } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import type { FileData } from '../../../types/platform/bitbucket-server/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import { deleteBranch } from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import {
   BitbucketServerHttp,
   type BitbucketServerHttpOptions,
   setBaseUrl,
-} from '../../../util/http/bitbucket-server';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { HttpOptions, HttpResponse } from '../../../util/http/types';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { sampleSize } from '../../../util/sample';
-import { sanitize } from '../../../util/sanitize';
-import { isEmailAdress } from '../../../util/schema-utils';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url';
+} from '../../../util/http/bitbucket-server.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { sampleSize } from '../../../util/sample.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { isEmailAdress } from '../../../util/schema-utils/index.ts';
+import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -46,16 +46,17 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { getNewBranchName, repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import { BbsPrCache } from './pr-cache';
+} from '../types.ts';
+import { getNewBranchName, repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { BbsPrCache } from './pr-cache.ts';
 import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
-} from './schema';
-import { ReviewerGroups, User, Users } from './schema';
+  PullRequestMerge,
+} from './schema.ts';
+import { ReviewerGroups, User, Users } from './schema.ts';
 import type {
   BbsConfig,
   BbsPr,
@@ -63,9 +64,13 @@ import type {
   BbsRestPr,
   BbsRestRepo,
   BbsRestUserRef,
-} from './types';
-import * as utils from './utils';
-import { getExtraCloneOpts, parseModifier, splitEscapedSpaces } from './utils';
+} from './types.ts';
+import * as utils from './utils.ts';
+import {
+  getExtraCloneOpts,
+  parseModifier,
+  splitEscapedSpaces,
+} from './utils.ts';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -1076,6 +1081,10 @@ export async function createPr({
     pr,
   );
 
+  if (platformPrOptions?.usePlatformAutomerge) {
+    await tryPrAutomerge(pr.number, pr.version!);
+  }
+
   return pr;
 }
 
@@ -1216,6 +1225,38 @@ export async function mergePr({
 
   logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
+}
+
+/**
+ * Enables Bitbucket Server-native automerge for the given PR.
+ * https://confluence.atlassian.com/bitbucketserver094/merge-a-pull-request-1489802114.html#Mergeapullrequest-Auto-mergeapullrequest
+ */
+async function tryPrAutomerge(
+  prNumber: number,
+  prVersion: number,
+): Promise<void> {
+  logger.debug(`automergePr(${prNumber})`);
+
+  if (semver.lt(defaults.version, '8.15.0')) {
+    logger.debug(
+      { prNumber },
+      'Bitbucket Server-native automerge: not supported on this version of Bitbucket. Use 8.15.0 or newer.',
+    );
+    return;
+  }
+
+  try {
+    const body: PullRequestMerge = { autoMerge: true };
+    await bitbucketServerHttp.postJson(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNumber}/merge?version=${prVersion}`,
+      { body },
+    );
+
+    // enabling auto-merge doesn't increase PR version, so we omit updating the cache
+    logger.debug({ prNumber }, 'Bitbucket Server-native automerge: success');
+  } catch (err) {
+    logger.warn({ err, prNumber }, 'Bitbucket Server-native automerge: fail');
+  }
 }
 
 export async function expandGroupMembers(

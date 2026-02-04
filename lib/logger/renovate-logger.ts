@@ -1,9 +1,9 @@
 import { isString } from '@sindresorhus/is';
 import type * as bunyan from 'bunyan';
-import { once, reset as onceReset } from './once';
-import { getRemappedLevel } from './remap';
-import type { Logger } from './types';
-import { getMessage, toMeta, withSanitizer } from './utils';
+import { once, reset as onceReset } from './once.ts';
+import { getRemappedLevel } from './remap.ts';
+import type { Logger } from './types.ts';
+import { getMessage, toMeta, withSanitizer } from './utils.ts';
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
@@ -19,12 +19,18 @@ type LoggerFunction = (p1: string | Record<string, any>, p2?: string) => void;
 export class RenovateLogger implements Logger {
   readonly logger: Logger = { once: { reset: onceReset } } as any;
   readonly once = this.logger.once;
+  private readonly bunyanLogger: bunyan;
+  private context: string;
+  private meta: Record<string, unknown>;
 
   constructor(
-    private readonly bunyanLogger: bunyan,
-    private context: string,
-    private meta: Record<string, unknown>,
+    bunyanLogger: bunyan,
+    context: string,
+    meta: Record<string, unknown>,
   ) {
+    this.bunyanLogger = bunyanLogger;
+    this.context = context;
+    this.meta = meta;
     for (const level of loggerLevels) {
       this.logger[level] = this.logFactory(level) as never;
       this.logger.once[level] = this.logOnceFn(level);

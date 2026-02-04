@@ -1,4 +1,4 @@
-import redhat from '.';
+import redhat from './index.ts';
 
 describe('modules/versioning/redhat/index', () => {
   it.each`

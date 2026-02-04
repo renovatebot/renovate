@@ -1,12 +1,12 @@
 import { isObject, isString } from '@sindresorhus/is';
-import type { SkipReason } from '../../../types';
-import { DartDatasource } from '../../datasource/dart';
-import { DartVersionDatasource } from '../../datasource/dart-version';
-import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { Pubspec } from './schema';
-import { parsePubspec } from './utils';
+import type { SkipReason } from '../../../types/index.ts';
+import { DartDatasource } from '../../datasource/dart/index.ts';
+import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { Pubspec } from './schema.ts';
+import { parsePubspec } from './utils.ts';
 
 function extractFromSection(
   pubspec: Pubspec,

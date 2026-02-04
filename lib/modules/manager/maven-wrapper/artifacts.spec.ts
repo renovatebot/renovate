@@ -3,17 +3,17 @@ import os from 'node:os';
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import { resetPrefetchedImages } from '../../../util/exec/docker';
-import { getPkgReleases } from '../../datasource';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import * as httpMock from '~test/http-mock';
-import { env, fs, git, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
+import { getPkgReleases } from '../../datasource/index.ts';
+import { updateArtifacts } from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../../../util/exec/env');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -182,7 +182,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     GlobalConfig.set({
       localDir: './',
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const result = await updateArtifacts({
@@ -202,7 +202,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
         options: {},
       },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -212,7 +212,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           '-v "./":"./" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool java 17.0.0 ' +
           '&& ' +

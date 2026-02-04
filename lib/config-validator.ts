@@ -1,21 +1,38 @@
 #!/usr/bin/env node
 import { Command, CommanderError } from 'commander';
-import 'source-map-support/register';
+import 'source-map-support/register.js';
 import './punycode.cjs';
 import { dequal } from 'dequal';
-import { pathExists, readFile } from 'fs-extra';
-import { getConfigFileNames } from './config/app-strings';
-import { massageConfig } from './config/massage';
-import { migrateConfig } from './config/migration';
-import type { RenovateConfig } from './config/types';
-import { validateConfig } from './config/validation';
-import { pkg } from './expose.cjs';
-import { logger } from './logger';
-import { getEnv } from './util/env';
-import { getConfig as getFileConfig } from './workers/global/config/parse/file';
-import { getParsedContent } from './workers/global/config/parse/util';
+import fs from 'fs-extra';
+import { getConfigFileNames } from './config/app-strings.ts';
+import { GlobalConfig } from './config/global.ts';
+import { massageConfig } from './config/massage.ts';
+import { migrateConfig } from './config/migration.ts';
+import type { RenovateConfig } from './config/types.ts';
+import { validateConfig } from './config/validation.ts';
+import { pkg } from './expose.ts';
+import { logger } from './logger/index.ts';
+import { getEnv } from './util/env.ts';
+import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
+import { parseConfigs } from './workers/global/config/parse/index.ts';
+import { getParsedContent } from './workers/global/config/parse/util.ts';
+
+const { pathExists, readFile } = fs;
 
 let returnVal = 0;
+
+/**
+ * Make sure that we've resolved configuration from the different places that Renovate users would expect them to be specified
+ *
+ * This then allows a `configType=repo` config to i.e. be validated alongside a `config.js` or `env RENOVATE_ALLOWED_COMMANDS=...`
+ *
+ * Note that we intentionally don't fully initialize Renovate and its modules, as we're not fully running, and it would require a Platform to be configured
+ * */
+async function partiallyGlobalInitialize(): Promise<void> {
+  // NOTE that this doesn't allow command-line arguments
+  const globalConfig = await parseConfigs(getEnv(), []);
+  GlobalConfig.set(globalConfig);
+}
 
 async function validate(
   configType: 'global' | 'repo',
@@ -61,6 +78,8 @@ interface PackageJson {
 }
 
 (async () => {
+  await partiallyGlobalInitialize();
+
   const program = new Command('renovate-config-validator')
     .summary('Validate Renovate configuration files')
     .description(
@@ -70,19 +89,35 @@ interface PackageJson {
     .addHelpText(
       'after',
       `
+When specifying [config-files...], Renovate will treat them as global self-hosted configuration files. You can disable this behaviour with --no-global
+
 Examples:
 
   $ renovate-config-validator
   $ renovate-config-validator --strict
   $ renovate-config-validator first_config.json
   $ renovate-config-validator --strict config.js
-  $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator`,
+  $ renovate-config-validator --no-global renovate.json5
+  $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator
+
+Global configuration:
+
+If you have specified global self-hosted configuration (https://docs.renovatebot.com/self-hosted-configuration/) in environment variables or in a \`config.js\`, this will be detected:
+
+  $ env RENOVATE_ALLOWED_ENV='["GO*"]' renovate-config-validator
+  # if passing the filename, make sure it's not validating as a global config
+  $ env RENOVATE_ALLOWED_ENV='["GO*"]' renovate-config-validator --no-global renovate.json`,
     )
     .argument('[config-files...]')
     .version(pkg.version, '-v, --version')
     .option(
       '--strict',
       'Fail command if any configuration warnings, errors, or a migration is needed',
+    )
+    .option(
+      '--no-global',
+      'When specifying [config-files], do not treat them as global self-hosted configuration file(s)',
+      true,
     )
     // allow us to manage the exit code
     .exitOverride();
@@ -91,6 +126,11 @@ Examples:
     const strict = opts.strict ?? false;
 
     if (files.length) {
+      let isGlobalConfig = true;
+      if (opts.global === false) {
+        isGlobalConfig = false;
+      }
+      const configType = isGlobalConfig ? 'global' : 'repo';
       for (const file of files) {
         try {
           if (!(await pathExists(file))) {
@@ -100,8 +140,8 @@ Examples:
           }
           const parsedContent = await getParsedContent(file);
           try {
-            logger.info(`Validating ${file}`);
-            await validate('global', file, parsedContent, strict);
+            logger.info(`Validating ${file} as ${configType} config`);
+            await validate(configType, file, parsedContent, strict);
           } catch (err) {
             logger.warn({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;

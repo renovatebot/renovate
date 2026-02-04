@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   cachePathExists,
   cachePathIsFile,
@@ -37,9 +37,9 @@ import {
   statLocalFile,
   writeLocalFile,
   writeSystemFile,
-} from '.';
+} from './index.ts';
 
-vi.mock('../exec/env');
+vi.mock('../exec/env.ts');
 vi.mock('find-up');
 const findUp = vi.mocked(_findUp);
 

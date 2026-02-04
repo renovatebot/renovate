@@ -8,22 +8,22 @@ import {
 import { findPackages } from 'find-packages';
 import upath from 'upath';
 import type { z } from 'zod';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import { parseSingleYaml } from '../../../../util/yaml';
-import type { PackageFile, PackageFileContent } from '../../types';
-import type { PnpmDependency, PnpmLockFile } from '../post-update/types';
-import type { PnpmCatalogs } from '../schema';
-import { PnpmWorkspaceFile } from '../schema';
-import type { NpmManagerData } from '../types';
-import { extractCatalogDeps } from './common/catalogs';
-import type { Catalog, LockFile } from './types';
+} from '../../../../util/fs/index.ts';
+import { parseSingleYaml } from '../../../../util/yaml.ts';
+import type { PackageFile, PackageFileContent } from '../../types.ts';
+import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
+import type { PnpmCatalogs } from '../schema.ts';
+import { PnpmWorkspaceFile } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
+import { extractCatalogDeps } from './common/catalogs.ts';
+import type { Catalog, LockFile } from './types.ts';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return isPlainObject(obj) && 'lockfileVersion' in obj;

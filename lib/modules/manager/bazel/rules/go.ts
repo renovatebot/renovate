@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { regEx } from '../../../../util/regex';
-import { GoDatasource } from '../../../datasource/go';
-import type { PackageDependency } from '../../types';
+import { regEx } from '../../../../util/regex.ts';
+import { GoDatasource } from '../../../datasource/go/index.ts';
+import type { PackageDependency } from '../../types.ts';
 
 export const goRules = ['go_repository', '_go_repository'] as const;
 
