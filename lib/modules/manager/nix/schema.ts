@@ -40,15 +40,15 @@ export type NixInput = z.infer<typeof NixInput>;
 // https://github.com/NixOS/nix/blob/f7fc24c/src/libflake/include/nix/flake/lockfile.hh
 export const NixFlakeLock = Json.pipe(
   z.object({
-    nodes: z.union([
-      z.record(
-        z.literal('root'),
-        z.object({
-          inputs: z.record(z.string(), z.string()),
-        }),
-      ),
-      z.record(z.string(), NixInput),
-    ]),
+    nodes: z
+      .object({
+        root: z
+          .object({
+            inputs: z.record(z.string(), z.string()).optional(),
+          })
+          .optional(),
+      })
+      .catchall(NixInput),
     version: z.literal(7),
   }),
 );
