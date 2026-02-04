@@ -1,11 +1,11 @@
 import parseGithubUrl from 'github-url-from-git';
 import { z } from 'zod';
-import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
-import { isHttpUrl } from '../../../../util/url';
-import { GithubReleasesDatasource } from '../../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import type { PackageDependency } from '../../types';
+import { logger } from '../../../../logger/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { isHttpUrl } from '../../../../util/url.ts';
+import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
+import type { PackageDependency } from '../../types.ts';
 
 const githubUrlRegex = regEx(
   /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/,

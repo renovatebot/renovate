@@ -1,14 +1,14 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { logger } from '../../../logger';
-import { findGithubToken } from '../../../util/check-token';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { findGithubToken } from '../../../util/check-token.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts({
   packageFileName,

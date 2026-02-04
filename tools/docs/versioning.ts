@@ -1,16 +1,16 @@
 import { codeBlock } from 'common-tags';
-import { getVersioningList } from '../../lib/modules/versioning';
-import { readFile, updateFile } from '../utils';
+import { getVersioningList } from '../../lib/modules/versioning/index.ts';
+import { readFile, updateFile } from '../utils/index.ts';
 import {
   type OpenItems,
   generateFeatureAndBugMarkdown,
-} from './github-query-items';
+} from './github-query-items.ts';
 import {
   formatDescription,
   formatUrls,
   getModuleLink,
   replaceContent,
-} from './utils';
+} from './utils.ts';
 
 interface Versioning {
   id: string;

@@ -3,11 +3,11 @@ import {
   isNonEmptyStringAndNotWhitespace,
   isUrlInstance,
 } from '@sindresorhus/is';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -15,15 +15,15 @@ import {
   localPathExists,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { ensureLocalPath } from '../../../util/fs/util';
-import { getRepoStatus } from '../../../util/git';
-import { find } from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import { PypiDatasource } from '../../datasource/pypi';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { extractPackageFile } from './extract';
+} from '../../../util/fs/index.ts';
+import { ensureLocalPath } from '../../../util/fs/util.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { find } from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { extractPackageFile } from './extract.ts';
 
 export function getMatchingHostRule(url: string): HostRule | null {
   const parsedUrl = parseUrl(url);

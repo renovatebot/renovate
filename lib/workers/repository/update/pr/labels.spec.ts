@@ -3,8 +3,8 @@ import {
   getChangedLabels,
   prepareLabels,
   shouldUpdateLabels,
-} from './labels';
-import { platform } from '~test/util';
+} from './labels.ts';
+import { platform } from '~test/util.ts';
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {

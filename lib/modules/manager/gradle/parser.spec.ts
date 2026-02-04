@@ -1,22 +1,22 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import {
+  GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
+  REGISTRY_URLS,
+} from './parser/common.ts';
+import {
   parseGradle,
   parseJavaToolchainVersion,
   parseKotlinSource,
   parseProps,
-} from './parser';
-import {
-  GRADLE_PLUGINS,
-  GRADLE_TEST_SUITES,
-  REGISTRY_URLS,
-} from './parser/common';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+} from './parser.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
-function mockFs(files: Record<string, string>): void {
+function mockFs(): void {
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
       return existingFileNameWithPath
@@ -1022,14 +1022,14 @@ describe('modules/manager/gradle/parser', () => {
       ${''}                                         | ${'plugin("foo.bar", "foo").version("1.2.3")'}                  | ${{ depName: 'foo', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").versionRef("baz")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").version("${baz}")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}                            | ${'alias("foo.bar").to("foo", "bar").version("${baz}")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to(f, b).version(v)'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to(f + b, b + f).version(v)'}               | ${{ depName: 'foobar:barfoo', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to("${f}", "${b}").version("$v")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias(["foo.bar"]).to("foo", "bar").version("1.2.3")'}       | ${null}
     `('$def | $str', ({ def, str, output }) => {
       const input = [def, str].join('\n');
-      const { deps } = parseGradle(input);
+      const { deps } = parseGradle(`versionCatalogs { libs { ${input} } }`);
       expect(deps).toMatchObject([output].filter(isTruthy));
     });
   });
@@ -1282,7 +1282,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'base="foo"'}            | ${'apply(from = File(base, "bar.gradle"))'}               | ${validOutput}
       ${'base="foo"'}            | ${'apply(from = File("${base}", "bar.gradle"))'}          | ${validOutput}
     `('$def | $input', ({ def, input, output }) => {
-      mockFs(fileContents);
+      mockFs();
       const { vars } = parseGradle(
         [def, input].join('\n'),
         {},

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EmailAddress } from '../../../util/schema-utils';
+import { EmailAddress } from '../../../util/schema-utils/index.ts';
 
 export const User = z.object({
   displayName: z.string(),
@@ -18,6 +18,12 @@ export const Comment = z.object({
 });
 
 export type Comment = z.infer<typeof Comment>;
+
+export const PullRequestMerge = z.object({
+  autoMerge: z.boolean().optional(),
+});
+
+export type PullRequestMerge = z.infer<typeof PullRequestMerge>;
 
 export const PullRequestCommentActivity = z.object({
   action: z.literal('COMMENTED'),

@@ -1,8 +1,8 @@
-import * as memCache from '../../cache/memory';
-import { clone } from '../../clone';
-import type { HttpResponse } from '../types';
-import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import type { HttpCache } from './schema';
+import * as memCache from '../../cache/memory/index.ts';
+import { clone } from '../../clone.ts';
+import type { HttpResponse } from '../types.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
 export class MemoryHttpCacheProvider extends AbstractHttpCacheProvider {
   private cacheKey(method: string, url: string): string {

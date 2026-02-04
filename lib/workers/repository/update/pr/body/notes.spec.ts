@@ -1,7 +1,7 @@
-import * as _template from '../../../../../util/template';
-import { getPrExtraNotes, getPrNotes } from './notes';
+import * as _template from '../../../../../util/template/index.ts';
+import { getPrExtraNotes, getPrNotes } from './notes.ts';
 
-vi.mock('../../../../../util/template');
+vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/notes', () => {

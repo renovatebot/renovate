@@ -1,0 +1,85 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["import", "typescript"],
+  "categories": {},
+  "rules": {
+    "eqeqeq": "error",
+    "no-console": "error",
+    "no-param-reassign": "error",
+    "no-negated-condition": "error",
+    "no-template-curly-in-string": "error",
+    "curly": "error",
+    "radix": ["error", "as-needed"],
+    "sort-imports": [
+      "error",
+      {
+        "ignoreCase": false,
+        "ignoreDeclarationSort": true,
+        "ignoreMemberSort": false,
+        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+      }
+    ],
+    "import/extensions": ["error", "always", { "ignorePackages": true }],
+    "import/no-cycle": "error",
+    "import/default": "error",
+    "import/named": "error",
+    "import/namespace": "error",
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "disallowTypeAnnotations": false
+      }
+    ],
+    "no-unused-vars": "error",
+    "no-unassigned-vars": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.spec.ts", "test/**"],
+      "rules": {
+        "no-template-curly-in-string": "off"
+      }
+    },
+    {
+      "files": [
+        "*.config.cjs",
+        "*.config.cts",
+        "*.config.js",
+        "*.config.mjs",
+        "*.config.mts",
+        "*.config.ts",
+        "tools/**/*.cjs",
+        "tools/**/*.cts",
+        "tools/**/*.js",
+        "tools/**/*.mjs",
+        "tools/**/*.mts",
+        "tools/**/*.ts"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "**/node_modules",
+    "**/.pnpm-store",
+    "**/dist",
+    "**/coverage",
+    "**/__fixtures__/**/*",
+    "**/__mocks__/**/*",
+    "**/*.d.ts",
+    "config.js",
+    "**/.clinic/",
+    "**/.cache/",
+    "**/*.generated.ts",
+    "tools/dist",
+    "patches",
+    "**/tmp/",
+    "**/.venv/",
+    "tools/mkdocs/docs",
+    "tools/mkdocs/site",
+    ".github/workflows/**/*.js",
+    ".worktrees/**/*",
+    ".markdownlint-cli2.mjs"
+  ]
+}

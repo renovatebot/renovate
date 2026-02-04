@@ -1,7 +1,7 @@
-import type { Category } from '../../../constants';
-import { AzureBicepResourceDatasource } from '../../datasource/azure-bicep-resource';
+import type { Category } from '../../../constants/index.ts';
+import { AzureBicepResourceDatasource } from '../../datasource/azure-bicep-resource/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const url =
   'https://docs.microsoft.com/azure/azure-resource-manager/bicep/overview';

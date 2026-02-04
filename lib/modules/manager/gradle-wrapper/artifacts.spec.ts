@@ -2,24 +2,24 @@ import type { Stats } from 'node:fs';
 import os from 'node:os';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { resetPrefetchedImages } from '../../../util/exec/docker';
-import type { StatusResult } from '../../../util/git/types';
-import { getPkgReleases } from '../../datasource';
-import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
-import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
-import { updateBuildFile, updateLockFiles } from './artifacts';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { env, fs, git, logger, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { getPkgReleases } from '../../datasource/index.ts';
+import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
+import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
+import { gradleJvmArg, updateBuildFile, updateLockFiles } from './artifacts.ts';
+import { updateArtifacts } from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { env, fs, git, logger, partial } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../../../util/exec/env');
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('../gradle');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('../gradle/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -28,6 +28,9 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+
+  // although not enabled by default, let's assume it is
+  allowedUnsafeExecutions: ['gradleWrapper'],
 };
 
 const config: UpdateArtifactsConfig = {
@@ -48,6 +51,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     GlobalConfig.set(adminConfig);
     resetPrefetchedImages();
 
+    // remove any test-specific overrides
+    delete config.toolSettings;
+
     fs.readLocalFile.mockResolvedValue('test');
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
@@ -67,7 +73,56 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     });
   });
 
+  describe('gradleJvmArg()', () => {
+    it('takes the values given to it, and returns the JVM arguments', () => {
+      const result = gradleJvmArg({ jvmMemory: 256, jvmMaxMemory: 768 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx768m"');
+    });
+  });
+
   describe('updateArtifacts()', () => {
+    it('Custom Gradle Wrapper heap settings are populated', async () => {
+      const execSnapshots = mockExecAll();
+      httpMock
+        .scope('https://services.gradle.org')
+        .get('/distributions/gradle-6.3-bin.zip.sha256')
+        .reply(
+          200,
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+        );
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        }),
+      );
+      GlobalConfig.set({
+        ...adminConfig,
+        toolSettings: { jvmMaxMemory: 600 },
+      });
+
+      const result = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'test',
+            path: 'gradle/wrapper/gradle-wrapper.properties',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms600m -Xmx600m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+        },
+      ]);
+    });
+
     it('replaces existing value', async () => {
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValue(
@@ -104,10 +159,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
           options: {
             cwd: '/tmp/github/some/repo',
-            encoding: 'utf-8',
             env: {
               GRADLE_OPTS:
                 '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
@@ -115,6 +169,39 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('aborts if allowedUnsafeExecutions does not include `toolSettings`', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradlew',
+            'gradlew.bat',
+          ],
+        }),
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: Fixtures.get(
+          'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
+        ),
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(res).toBeNull();
+      expect(execSnapshots).toBeEmptyArray();
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
+      );
     });
 
     it('gradlew not found', async () => {
@@ -154,7 +241,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       expect(result).toBeEmptyArray();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew :wrapper --gradle-version 5.6.4',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-version 5.6.4',
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -177,7 +264,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
 
       const result = await updateArtifacts({
@@ -197,7 +284,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -207,11 +294,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar' +
+            'ghcr.io/renovatebot/base-image' +
             ' bash -l -c "' +
             'install-tool java 11.0.1' +
             ' && ' +
-            './gradlew :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
+            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
             '"',
           options: { cwd: '/tmp/github/some/repo' },
         },
@@ -253,7 +340,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -320,10 +407,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
           options: {
             cwd: '/tmp/github/some/repo/sub',
-            encoding: 'utf-8',
             env: {
               GRADLE_OPTS:
                 '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
@@ -452,7 +538,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       expect(res).toStrictEqual(updatedArtifacts);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew :wrapper --gradle-version 8.2',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-version 8.2',
         },
       ]);
     });

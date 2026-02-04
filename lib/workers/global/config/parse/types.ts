@@ -1,4 +1,4 @@
-import type { RenovateOptions } from '../../../../config/types';
+import type { RenovateOptions } from '../../../../config/types.ts';
 
 export type ParseConfigOptions = Partial<RenovateOptions> &
   Pick<RenovateOptions, 'name'>;

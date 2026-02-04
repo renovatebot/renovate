@@ -1,15 +1,15 @@
-import type { Category } from '../../../constants';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { PypiDatasource } from '../../datasource/pypi';
+import type { Category } from '../../../constants/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
-export { bumpPackageVersion } from '../pep621/update';
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
-export { updateLockedDependency } from './update-locked';
+export { bumpPackageVersion } from '../pep621/update.ts';
+export { extractPackageFile } from './extract.ts';
+export { updateArtifacts } from './artifacts.ts';
+export { updateLockedDependency } from './update-locked.ts';
 
 export const supersedesManagers = ['pep621'];
 export const supportsLockFileMaintenance = true;

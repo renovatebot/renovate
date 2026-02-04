@@ -1,5 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { toBase64 } from './string';
+import { toBase64 } from './string.ts';
 
 const globalSecrets = new Set<string>();
 const repoSecrets = new Set<string>();

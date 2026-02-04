@@ -1,8 +1,8 @@
 import type { PackageJson } from 'type-fest';
-import { logger } from '../../../../../../logger';
-import { regEx } from '../../../../../../util/regex';
-import { api as semver } from '../../../../../versioning/npm';
-import type { PackageLockOrEntry, ParentDependency } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import { regEx } from '../../../../../../util/regex.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
+import type { PackageLockOrEntry, ParentDependency } from './types.ts';
 
 // Finds all parent dependencies for a given depName@currentVersion
 export function findDepConstraints(

@@ -1,21 +1,21 @@
-import * as _packageCache from '../../../util/cache/package';
-import type { Timestamp } from '../../../util/timestamp';
-import type { GithubGraphqlResponse } from '../../http/github';
-import { GithubHttp } from '../../http/github';
-import { range } from '../../range';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import type { GithubGraphqlResponse } from '../../http/github.ts';
+import { GithubHttp } from '../../http/github.ts';
+import { range } from '../../range.ts';
 import {
   GithubGraphqlDatasourceFetcher as Datasource,
   GithubGraphqlDatasourceFetcher,
-} from './datasource-fetcher';
+} from './datasource-fetcher.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
-} from './types';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+} from './types.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 interface TestAdapterInput {

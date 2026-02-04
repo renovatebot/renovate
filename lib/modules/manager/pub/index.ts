@@ -1,10 +1,10 @@
-import type { Category } from '../../../constants';
-import { DartDatasource } from '../../datasource/dart';
-import { DartVersionDatasource } from '../../datasource/dart-version';
-import { FlutterVersionDatasource } from '../../datasource/flutter-version';
+import type { Category } from '../../../constants/index.ts';
+import { DartDatasource } from '../../datasource/dart/index.ts';
+import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
 
-export { updateArtifacts } from './artifacts';
-export { extractPackageFile } from './extract';
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 

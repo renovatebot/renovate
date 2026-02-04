@@ -1,17 +1,17 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { DependencyExtractor } from './base';
-import { resourceExtractors } from './extractors';
-import * as hcl from './hcl';
+} from '../types.ts';
+import type { DependencyExtractor } from './base.ts';
+import { resourceExtractors } from './extractors.ts';
+import * as hcl from './hcl/index.ts';
 import {
   checkFileContainsDependency,
   extractLocksForPackageFile,
-} from './util';
+} from './util.ts';
 
 export async function extractPackageFile(
   content: string,

@@ -23,10 +23,10 @@ import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import type { Platform } from '../types';
-import { getCodeCommitUrl } from './codecommit-client';
-import { git, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import type { Platform } from '../types.ts';
+import { getCodeCommitUrl } from './codecommit-client.ts';
+import { git, logger } from '~test/util.ts';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 

@@ -1,11 +1,11 @@
-import { GlobalConfig } from '../../../config/global';
-import { printRepositoryProblems } from '../../../workers/repository';
-import { initRepoCache } from './init';
-import type { RepoCacheConfig } from './types';
-import { getCache, isCacheModified, resetCache, saveCache } from '.';
-import { fs, logger } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import { printRepositoryProblems } from '../../../workers/repository/index.ts';
+import { getCache, isCacheModified, resetCache, saveCache } from './index.ts';
+import { initRepoCache } from './init.ts';
+import type { RepoCacheConfig } from './types.ts';
+import { fs, logger } from '~test/util.ts';
 
-vi.mock('../../fs');
+vi.mock('../../fs/index.ts');
 
 describe('util/cache/repository/index', () => {
   beforeEach(() => {

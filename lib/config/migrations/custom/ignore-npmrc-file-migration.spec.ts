@@ -1,4 +1,4 @@
-import { IgnoreNpmrcFileMigration } from './ignore-npmrc-file-migration';
+import { IgnoreNpmrcFileMigration } from './ignore-npmrc-file-migration.ts';
 
 describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
   it('should init npmrc field', async () => {

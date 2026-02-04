@@ -1,12 +1,15 @@
-import type { RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { RepoParams, RepoResult } from '../../../modules/platform';
-import { platform } from '../../../modules/platform';
-import { getDefaultConfigFileName } from '../onboarding/common';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type {
+  RepoParams,
+  RepoResult,
+} from '../../../modules/platform/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { getDefaultConfigFileName } from '../onboarding/common.ts';
 
 // TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &

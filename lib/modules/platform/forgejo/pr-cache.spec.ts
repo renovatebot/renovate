@@ -1,15 +1,15 @@
-import * as httpMock from '../../../../test/http-mock';
-import { reset as memCacheReset } from '../../../util/cache/memory';
+import * as httpMock from '../../../../test/http-mock.ts';
+import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
   getCache,
   resetCache as repoCacheReset,
-} from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo';
-import { ForgejoPrCache } from './pr-cache';
-import type { PR, Repo } from './types';
-import { toRenovatePR } from './utils';
-import { partial } from '~test/util';
+} from '../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
+import { ForgejoPrCache } from './pr-cache.ts';
+import type { PR, Repo } from './types.ts';
+import { toRenovatePR } from './utils.ts';
+import { partial } from '~test/util.ts';
 
 const http = new ForgejoHttp();
 const ignorePrAuthor = false;

@@ -1,6 +1,6 @@
 import { isNumber, isString } from '@sindresorhus/is';
-import { parse } from './parser';
-import type { Fragment, FragmentPath, FragmentUpdater } from './types';
+import { parse } from './parser.ts';
+import type { Fragment, FragmentPath, FragmentUpdater } from './types.ts';
 
 export function findCodeFragment(
   input: string,

@@ -4,17 +4,17 @@ import {
   isObject,
   isString,
 } from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { logger } from '../logger';
-import { getEnv } from '../util/env';
-import { regEx } from '../util/regex';
-import { addSecretForSanitizing } from '../util/sanitize';
-import { ensureTrailingSlash, parseUrl, trimSlashes } from '../util/url';
-import { tryDecryptBcPgp } from './decrypt/bcpgp';
-import { tryDecryptOpenPgp } from './decrypt/openpgp';
-import { GlobalConfig } from './global';
-import { DecryptedObject } from './schema';
-import type { AllConfig, RenovateConfig } from './types';
+import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
+import { logger } from '../logger/index.ts';
+import { getEnv } from '../util/env.ts';
+import { regEx } from '../util/regex.ts';
+import { addSecretForSanitizing } from '../util/sanitize.ts';
+import { ensureTrailingSlash, parseUrl, trimSlashes } from '../util/url.ts';
+import { tryDecryptBcPgp } from './decrypt/bcpgp.ts';
+import { tryDecryptOpenPgp } from './decrypt/openpgp.ts';
+import { GlobalConfig } from './global.ts';
+import { DecryptedObject } from './schema.ts';
+import type { AllConfig, RenovateConfig } from './types.ts';
 
 let privateKey: string | undefined;
 let privateKeyOld: string | undefined;
@@ -161,6 +161,7 @@ export async function decryptConfig<T extends RenovateConfig = AllConfig>(
             throw error;
           }
           logger.debug(`Decrypted ${eKey} in ${path}`);
+          // v8 ignore if -- TODO: add test #40625
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
             decryptedConfig[eKey] = token;

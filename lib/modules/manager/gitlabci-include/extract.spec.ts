@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { GlobalConfig } from '../../../config/global.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
 const yamlFileSingleConfig = Fixtures.get('gitlab-ci.2.yaml');

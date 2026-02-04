@@ -35,9 +35,9 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:42
-docker run --rm renovate/renovate:42.66
-docker run --rm renovate/renovate:42.66.11
+docker run --rm renovate/renovate:43
+docker run --rm renovate/renovate:43.0
+docker run --rm renovate/renovate:43.0.9
 ```
 
 <!-- prettier-ignore -->
@@ -73,7 +73,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:42.66.11
+              image: renovate/renovate:43.0.9
               args:
                 - user/repo
               # Environment Variables
@@ -132,7 +132,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:42.66.11
+            - image: renovate/renovate:43.0.9
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -378,7 +378,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:42.66.11
+              image: renovate/renovate:43.0.9
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

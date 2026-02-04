@@ -1,11 +1,11 @@
 // TODO #22198
-import type { RenovateConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
-import { coerceArray } from '../../util/array';
-import { emojify } from '../../util/emoji';
-import { regEx } from '../../util/regex';
-import type { DepWarnings } from '../types';
+import type { RenovateConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { PackageFile } from '../../modules/manager/types.ts';
+import { coerceArray } from '../../util/array.ts';
+import { emojify } from '../../util/emoji.ts';
+import { regEx } from '../../util/regex.ts';
+import type { DepWarnings } from '../types.ts';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {

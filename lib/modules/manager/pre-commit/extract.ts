@@ -20,8 +20,8 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
-} from './parsing';
-import type { PreCommitConfig } from './types';
+} from './parsing.ts';
+import type { PreCommitConfig } from './types.ts';
 
 /**
  * Determines the datasource(id) to be used for this dependency
@@ -222,6 +222,19 @@ function findDependencies(
             const dep = pep508ToPackageDependency('pre-commit-python', req);
             if (dep) {
               packageDependencies.push(dep);
+            }
+          });
+        } else if (hook.language === 'golang') {
+          hook.additional_dependencies?.map((req) => {
+            // Convert dependency into a gomod require line to use the gomod line parser
+            const requireLine = `require ${req.replace('@', ' ')}`;
+            const dep = parseLine(requireLine);
+            if (dep) {
+              const depType = 'pre-commit-golang';
+              packageDependencies.push({
+                ...dep,
+                depType,
+              });
             }
           });
         }

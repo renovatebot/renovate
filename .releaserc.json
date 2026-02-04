@@ -22,6 +22,12 @@
         "prepareCmd": "pnpm release:prepare --version=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead} --tries=3 --platform=linux/amd64,linux/arm64 --exit-on-error=true",
         "publishCmd": "pnpm release:publish --version=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead} --platform=linux/amd64,linux/arm64 --exit-on-error=true"
       }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "successCmd": "echo '::notice::Released Renovate ${nextRelease.version}' && echo '## Released Renovate ${nextRelease.version}' >> \"$GITHUB_STEP_SUMMARY\""
+      }
     ]
   ],
   "analyzeCommits": {

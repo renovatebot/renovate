@@ -1,22 +1,22 @@
 // TODO: types (#22198)
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { detectPlatform } from '../../../util/common';
-import * as hostRules from '../../../util/host-rules';
-import { Http } from '../../../util/http';
-import { regEx } from '../../../util/regex';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   parseUrl,
   trimLeadingSlash,
   trimTrailingSlash,
-} from '../../../util/url';
-import { BitbucketTagsDatasource } from '../bitbucket-tags';
-import { ForgejoTagsDatasource } from '../forgejo-tags';
-import { GitTagsDatasource } from '../git-tags';
-import { GiteaTagsDatasource } from '../gitea-tags';
-import { GithubTagsDatasource } from '../github-tags';
-import { GitlabTagsDatasource } from '../gitlab-tags';
-import type { DataSource } from './types';
+} from '../../../util/url.ts';
+import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
+import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
+import { GitTagsDatasource } from '../git-tags/index.ts';
+import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
+import { GithubTagsDatasource } from '../github-tags/index.ts';
+import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
+import type { DataSource } from './types.ts';
 
 // TODO: figure out class hierarchy (#10532)
 export class BaseGoDatasource {

@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import * as npmUpdater from '../..';
-import { updateYarnrcCatalogDependency } from './yarn';
-import { logger } from '~test/util';
+import * as npmUpdater from '../../index.ts';
+import { updateYarnrcCatalogDependency } from './yarn.ts';
+import { logger } from '~test/util.ts';
 
 describe('modules/manager/npm/update/dependency/yarn', () => {
   describe('updateYarnrcCatalogDependency', () => {

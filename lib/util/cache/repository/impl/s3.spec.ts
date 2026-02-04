@@ -10,15 +10,15 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { parseS3Url } from '../../../s3';
-import type { RepoCacheRecord } from '../schema';
-import { CacheFactory } from './cache-factory';
-import { RepoCacheS3 } from './s3';
-import { fs, partial } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { parseS3Url } from '../../../s3.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import { CacheFactory } from './cache-factory.ts';
+import { RepoCacheS3 } from './s3.ts';
+import { fs, partial } from '~test/util.ts';
 
-vi.mock('../../../fs');
+vi.mock('../../../fs/index.ts');
 
 function createGetObjectCommandInput(
   repository: string,

@@ -1,12 +1,12 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import type { PackageCacheNamespace } from '../../../cache/package/types';
+import type { PackageCacheNamespace } from '../../../cache/package/types.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheRecord,
   GithubGraphqlCacheStrategy,
-} from '../types';
-import { isDateExpired } from '../util';
+} from '../types.ts';
+import { isDateExpired } from '../util.ts';
 
 /**
  * Cache strategy handles the caching Github GraphQL items
@@ -51,11 +51,19 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     cacheRecord: GithubGraphqlCacheRecord<GithubItem>,
   ): Promise<void>;
 
+  protected readonly cacheNs: PackageCacheNamespace;
+  protected readonly cacheKey: string;
+  protected readonly skipStabilization: boolean;
+
   constructor(
-    protected readonly cacheNs: PackageCacheNamespace,
-    protected readonly cacheKey: string,
-    protected readonly skipStabilization = false,
-  ) {}
+    cacheNs: PackageCacheNamespace,
+    cacheKey: string,
+    skipStabilization = false,
+  ) {
+    this.cacheNs = cacheNs;
+    this.cacheKey = cacheKey;
+    this.skipStabilization = skipStabilization;
+  }
 
   /**
    * Load data previously persisted by this strategy

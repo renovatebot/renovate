@@ -1,5 +1,5 @@
 import { isBoolean } from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class ComposerIgnorePlatformReqsMigration extends AbstractMigration {
   override readonly propertyName = 'composerIgnorePlatformReqs';

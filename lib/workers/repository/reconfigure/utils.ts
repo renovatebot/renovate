@@ -1,12 +1,12 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import type { BranchStatus } from '../../../types';
-import { parseJson } from '../../../util/common';
-import { readLocalFile } from '../../../util/fs';
-import { detectConfigFile } from '../init/merge';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { detectConfigFile } from '../init/merge.ts';
 
 export function getReconfigureBranchName(prefix: string): string {
   return `${prefix}reconfigure`;
