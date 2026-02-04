@@ -19,10 +19,10 @@ export type AuthGotOptions = Pick<
   | 'token'
   | 'username'
   | 'password'
+  | 'url'
 >;
 
 export function applyAuthorization<GotOptions extends AuthGotOptions>(
-  url: string,
   inOptions: GotOptions,
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
@@ -75,6 +75,10 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       // Bitbucket Cloud /issues endpoint requires username+password authentication
       // For other endpoints, prefer workspace access tokens which have higher rate-limits
       // Match Bitbucket API pattern: /2.0/repositories/{workspace}/{repo}/issues
+      const url =
+        typeof options.url === 'string'
+          ? options.url
+          : (options.url?.href ?? '');
       const isIssuesEndpoint = regEx(
         /\/repositories\/[^/]+\/[^/]+\/issues/,
       ).test(url);
