@@ -1,9 +1,11 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
+import { codeBlock } from 'common-tags';
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global.ts';
+import * as withCacheModule from '../../../util/cache/package/with-cache.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts } from './index.ts';
@@ -493,13 +495,10 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   });
 
   describe('checksum updates', () => {
-    const propertiesWithChecksums = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-distributionSha256Sum=oldhash123
-wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
-wrapperSha256Sum=oldwrapperhash456`;
-
-    const propertiesWithDistributionChecksumOnly = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-distributionSha256Sum=oldhash123`;
+    const propertiesWithDistributionChecksumOnly = codeBlock`
+      distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+      distributionSha256Sum=oldhash123
+    `;
 
     it('should not delete wrapper jar when only maven distribution checksum is updated', async () => {
       httpMock
@@ -552,6 +551,37 @@ distributionSha256Sum=oldhash123`;
       expect(finalWrittenContent).not.toContain('oldhash123');
     });
 
+    it('should use cached distribution checksum when available', async () => {
+      mockMavenFileChangedInGit();
+      fs.readLocalFile.mockResolvedValueOnce(
+        propertiesWithDistributionChecksumOnly,
+      );
+      const withCacheSpy = vi
+        .spyOn(withCacheModule, 'withCache')
+        .mockResolvedValueOnce('cachedhash123');
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithDistributionChecksumOnly,
+        updatedDeps: [{ depName: 'maven' }],
+        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+      });
+
+      expect(withCacheSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          namespace: 'url-sha256',
+          key: 'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip',
+          ttlMinutes: 3 * 24 * 60,
+        }),
+        expect.any(Function),
+      );
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain(
+        'distributionSha256Sum=cachedhash123',
+      );
+    });
+
     it('should skip checksum update when current content is missing', async () => {
       mockMavenFileChangedInGit();
       fs.readLocalFile.mockResolvedValueOnce(null);
@@ -567,6 +597,13 @@ distributionSha256Sum=oldhash123`;
     });
 
     it('should update both checksums when wrapper version changes', async () => {
+      const propertiesWithChecksums = codeBlock`
+        distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+        distributionSha256Sum=oldhash123
+        wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+        wrapperSha256Sum=oldwrapperhash456
+      `;
+
       httpMock
         .scope('https://repo.maven.apache.org')
         .get(
@@ -649,8 +686,10 @@ distributionSha256Sum=oldhash123`;
     });
 
     it('should skip HTTP when no checksums in properties file', async () => {
-      const propertiesWithoutChecksums = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar`;
+      const propertiesWithoutChecksums = codeBlock`
+        distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+        wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+      `;
 
       mockMavenFileChangedInGit();
       mockExecAll({ stdout: '', stderr: '' });
@@ -681,9 +720,11 @@ wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-w
     });
 
     it('should construct wrapper URL from version when wrapperUrl is missing', async () => {
-      const propertiesWithWrapperVersion = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-wrapperVersion=3.3.2
-wrapperSha256Sum=oldwrapperhash456`;
+      const propertiesWithWrapperVersion = codeBlock`
+        distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+        wrapperVersion=3.3.2
+        wrapperSha256Sum=oldwrapperhash456
+      `;
 
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -725,8 +766,10 @@ wrapperSha256Sum=oldwrapperhash456`;
 
       await updateArtifacts({
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
-        newPackageFileContent: `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-distributionSha256Sum=oldhash123`,
+        newPackageFileContent: codeBlock`
+          distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+          distributionSha256Sum=oldhash123
+        `,
         updatedDeps: [{ depName: 'maven-wrapper' }],
         config: { currentValue: '3.3.1', newValue: '3.3.2' },
       });
@@ -739,8 +782,10 @@ distributionSha256Sum=oldhash123`,
     });
 
     it('should add wrapper checksum when it does not exist', async () => {
-      const propertiesWithoutWrapperChecksum = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar`;
+      const propertiesWithoutWrapperChecksum = codeBlock`
+        distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+        wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+      `;
 
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -755,9 +800,11 @@ wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-w
 
       await updateArtifacts({
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
-        newPackageFileContent: `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
-wrapperSha256Sum=oldwrapperhash456`,
+        newPackageFileContent: codeBlock`
+          distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+          wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+          wrapperSha256Sum=oldwrapperhash456
+        `,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
         config: { currentValue: '3.3.1', newValue: '3.3.2' },
       });
@@ -770,8 +817,10 @@ wrapperSha256Sum=oldwrapperhash456`,
     });
 
     it('should preserve wrapper checksum when fetch fails', async () => {
-      const propertiesWithWrapperChecksumOnly = `wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
-wrapperSha256Sum=oldwrapperhash456`;
+      const propertiesWithWrapperChecksumOnly = codeBlock`
+        wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+        wrapperSha256Sum=oldwrapperhash456
+      `;
 
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -799,8 +848,10 @@ wrapperSha256Sum=oldwrapperhash456`;
 
     it('should restore wrapper checksum when fetch fails after stripping', async () => {
       const propertiesWithoutWrapperChecksum = `wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar`;
-      const propertiesWithWrapperChecksumOnly = `wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
-wrapperSha256Sum=oldwrapperhash456`;
+      const propertiesWithWrapperChecksumOnly = codeBlock`
+        wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+        wrapperSha256Sum=oldwrapperhash456
+      `;
 
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -827,11 +878,13 @@ wrapperSha256Sum=oldwrapperhash456`;
     });
 
     it('should unescape distributionUrl, honor wrapperVersion, and keep distributionType', async () => {
-      const propertiesWithEscapedUrlsAndType = `distributionUrl=https\\://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-distributionSha256Sum=oldhash123
-distributionType=bin
-wrapperVersion=3.3.2
-wrapperSha256Sum=oldwrapperhash456`;
+      const propertiesWithEscapedUrlsAndType = codeBlock`
+        distributionUrl=https\\://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+        distributionSha256Sum=oldhash123
+        distributionType=bin
+        wrapperVersion=3.3.2
+        wrapperSha256Sum=oldwrapperhash456
+      `;
 
       httpMock
         .scope('https://repo.maven.apache.org')

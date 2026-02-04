@@ -4,6 +4,7 @@ import { isTruthy } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
 import {
@@ -15,7 +16,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
-import { hash } from '../../../util/hash.ts';
+import { hashStream } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import mavenVersioning from '../../versioning/maven/index.ts';
@@ -29,19 +30,27 @@ import type {
 const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
 
-async function getChecksumFromUrl(url: string): Promise<string> {
-  const { body } = await http.getBuffer(url);
-  return hash(body, 'sha256');
+function getChecksumFromUrl(url: string): Promise<string> {
+  return withCache(
+    {
+      namespace: 'url-sha256',
+      key: url,
+      ttlMinutes: 3 * 24 * 60, // 3 days
+    },
+    () => hashStream(http.stream(url), 'sha256'),
+  );
 }
 
 function getDistributionUrl(content: string): string | null {
-  const match = regEx(/^distributionUrl\s*=\s*(.+)$/m).exec(content);
-  return match ? match[1].replace(/\\:/g, ':').trim() : null;
+  const match = regEx(/^distributionUrl\s*=\s*(?<distributionUrl>.+)$/m).exec(
+    content,
+  );
+  return match?.groups?.distributionUrl?.replace(/\\:/g, ':').trim() ?? null;
 }
 
 function getWrapperUrl(content: string): string | null {
-  const match = regEx(/^wrapperUrl\s*=\s*(.+)$/m).exec(content);
-  return match ? match[1].replace(/\\:/g, ':').trim() : null;
+  const match = regEx(/^wrapperUrl\s*=\s*(?<wrapperUrl>.+)$/m).exec(content);
+  return match?.groups?.wrapperUrl?.replace(/\\:/g, ':').trim() ?? null;
 }
 
 function constructWrapperUrl(
@@ -52,17 +61,21 @@ function constructWrapperUrl(
 }
 
 function getWrapperVersion(content: string): string | null {
-  const match = regEx(/^wrapperVersion\s*=\s*(.+)$/m).exec(content);
-  return match ? match[1].trim() : null;
+  const match = regEx(/^wrapperVersion\s*=\s*(?<wrapperVersion>.+)$/m).exec(
+    content,
+  );
+  return match?.groups?.wrapperVersion?.trim() ?? null;
 }
 
 function getDistributionType(content: string): string | null {
-  const match = regEx(/^distributionType\s*=\s*(.+)$/m).exec(content);
-  return match ? match[1].trim() : null;
+  const match = regEx(/^distributionType\s*=\s*(?<distributionType>.+)$/m).exec(
+    content,
+  );
+  return match?.groups?.distributionType?.trim() ?? null;
 }
 
 function getChecksumValue(content: string, key: string): string | null {
-  const match = regEx(new RegExp(`^${key}\\s*=\\s*(.+)$`, 'm')).exec(content);
+  const match = regEx(`^${key}\\s*=\\s*(.+)$`, 'm').exec(content);
   return match ? match[1].trim() : null;
 }
 
