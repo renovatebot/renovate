@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { isString } from '@sindresorhus/is';
-import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type {
   GitPullRequest,
   GitVersionDescriptor,

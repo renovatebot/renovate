@@ -1,6 +1,6 @@
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchName } from './branch-name.ts';
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 
 describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
@@ -14,6 +14,40 @@ describe('workers/repository/updates/branch-name', () => {
       });
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('some-variable-name-grouptopic');
+    });
+
+    it('ignores grouping of replacement update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'grouptopic',
+        updateType: 'replacement',
+        depName: 'axios',
+        depNameSanitized: 'axios',
+        branchTopic: '{{depNameSanitized}}-replacement', // default for replacements
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('axios-replacement');
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+        { depName: 'axios' },
+        'Ignoring grouped branch name for replacement update',
+      );
+    });
+
+    it('ignores grouping of lockfile maintenance update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'grouptopic',
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        depNameSanitized: 'axios',
+        branchTopic: 'lock-file-maintenance', // default for lockFileMaintenance
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('lock-file-maintenance');
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+        { depName: 'axios' },
+        'Ignoring grouped branch name for lockFileMaintenance update',
+      );
     });
 
     it('uses groupName if no slug defined, ignores sharedVariableName', () => {

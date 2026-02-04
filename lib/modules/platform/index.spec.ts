@@ -25,7 +25,7 @@ describe('modules/platform/index', () => {
     const platforms = api;
 
     const loadedMgr = await loadModules(
-      __dirname,
+      import.meta.dirname,
       undefined,
       (m) => !['utils', 'git'].includes(m),
     );

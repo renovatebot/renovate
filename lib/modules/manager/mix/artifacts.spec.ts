@@ -143,7 +143,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
@@ -217,7 +217,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');

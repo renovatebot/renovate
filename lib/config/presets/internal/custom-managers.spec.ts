@@ -394,14 +394,17 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                    | expected
-        ${'Dockerfile'}         | ${true}
-        ${'foo/Dockerfile'}     | ${true}
-        ${'foo/bar/Dockerfile'} | ${true}
-        ${'Dockerfile-foo'}     | ${true}
-        ${'Dockerfilefoo'}      | ${true}
-        ${'foo/Dockerfile-foo'} | ${true}
-        ${'foo-Dockerfile'}     | ${false}
+        path                              | expected
+        ${'Dockerfile'}                   | ${true}
+        ${'foo/Dockerfile'}               | ${true}
+        ${'foo/bar/Dockerfile'}           | ${true}
+        ${'Dockerfile-foo'}               | ${true}
+        ${'Dockerfilefoo'}                | ${true}
+        ${'something.dockerfile'}         | ${true}
+        ${'something.containerfile'}      | ${true}
+        ${'foo/something.Dockerfile-foo'} | ${true}
+        ${'foo/Dockerfile-foo'}           | ${true}
+        ${'foo-Dockerfile'}               | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),

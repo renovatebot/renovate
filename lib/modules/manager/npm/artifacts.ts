@@ -157,7 +157,13 @@ async function updatePnpmWorkspace(
     return null;
   }
 
-  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap as string;
+  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap;
+  if (!isString(pnpmShrinkwrap)) {
+    logger.debug(
+      'No pnpm shrinkwrap found, not attempting to update pnpm-workspace.yaml',
+    );
+    return null;
+  }
   const lockFileDir = upath.dirname(pnpmShrinkwrap);
   const pnpmWorkspaceFilePath = upath.join(lockFileDir, 'pnpm-workspace.yaml');
 

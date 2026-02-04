@@ -3,8 +3,6 @@ import { join } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { getPkgReleases } from '../../../modules/datasource/index.ts';
-import * as allVersioning from '../../../modules/versioning/index.ts';
 import { newlineRegex, regEx } from '../../regex.ts';
 import { uniq } from '../../uniq.ts';
 import { rawExec } from '../common.ts';
@@ -19,7 +17,7 @@ const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');
 
-export const sideCarImage = 'sidecar';
+export const sideCarName = 'sidecar';
 
 export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (prefetchedImages.has(taggedImage)) {
@@ -72,65 +70,8 @@ function prepareVolumes(volumes: VolumeOption[]): string[] {
   return unique.map(([from, to]) => `-v "${from}":"${to}"`);
 }
 
-export async function getDockerTag(
-  packageName: string,
-  constraint: string,
-  versioning: string,
-): Promise<string> {
-  const versioningApi = allVersioning.get(versioning);
-
-  if (!versioningApi.isValid(constraint)) {
-    logger.warn(
-      { versioning, constraint },
-      `Invalid Docker image version constraint`,
-    );
-    return 'latest';
-  }
-
-  logger.debug(
-    { packageName, versioning, constraint },
-    `Found version constraint - checking for a compatible image to use`,
-  );
-  const imageReleases = await getPkgReleases({
-    datasource: 'docker',
-    packageName,
-    versioning,
-  });
-  if (imageReleases?.releases) {
-    let versions = imageReleases.releases.map((release) => release.version);
-    versions = versions.filter(
-      (version) =>
-        versioningApi.isVersion(version) &&
-        versioningApi.matches(version, constraint),
-    );
-    // Prefer stable versions over unstable, even if the range satisfies both types
-    if (!versions.every((version) => versioningApi.isStable(version))) {
-      logger.debug('Filtering out unstable versions');
-      versions = versions.filter((version) => versioningApi.isStable(version));
-    }
-    const version = versions
-      .sort(versioningApi.sortVersions.bind(versioningApi))
-      .pop();
-    if (version) {
-      logger.debug(
-        { packageName, versioning, constraint, version },
-        `Found compatible image version`,
-      );
-      return version;
-    }
-  } else {
-    logger.error({ packageName }, `Docker exec: no releases found`);
-    return 'latest';
-  }
-  logger.warn(
-    { packageName, constraint, versioning },
-    'Failed to find a tag satisfying constraint, using "latest" tag instead',
-  );
-  return 'latest';
-}
-
-function getContainerName(image: string, prefix?: string): string {
-  return `${prefix ?? 'renovate_'}${image}`.replace(regEx(/\//g), '_');
+function getContainerName(name: string, prefix?: string): string {
+  return `${prefix ?? 'renovate_'}${name}`.replace(regEx(/\//g), '_');
 }
 
 function getContainerLabel(prefix: string | undefined): string {
@@ -141,7 +82,7 @@ export async function removeDockerContainer(
   image: string,
   prefix: string,
 ): Promise<void> {
-  const containerName = getContainerName(image, prefix);
+  const containerName = getContainerName(sideCarName, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
     const res = await rawExec(cmd, {});
@@ -204,9 +145,9 @@ export async function generateDockerCommand(
   commands: (string | CommandWithOptions)[],
   preCommands: (string | CommandWithOptions)[],
   options: DockerOptions,
+  sideCarImage: string,
 ): Promise<string> {
   const { envVars, cwd } = options;
-  let image = sideCarImage;
   const volumes = options.volumes ?? [];
   const {
     localDir,
@@ -215,10 +156,9 @@ export async function generateDockerCommand(
     dockerUser,
     dockerChildPrefix,
     dockerCliOptions,
-    dockerSidecarImage,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
-  const containerName = getContainerName(image, dockerChildPrefix);
+  const containerName = getContainerName(sideCarName, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
   result.push(`--name=${containerName}`);
   result.push(`--label=${containerLabel}`);
@@ -256,18 +196,10 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  // TODO: #22198
-  image = dockerSidecarImage!;
+  logger.debug({ image: sideCarImage }, 'Resolved tag constraint');
 
-  // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
-  logger.debug(
-    { image /*, tagConstraint: sideCarImageVersion, tag */ },
-    'Resolved tag constraint',
-  );
-
-  const taggedImage = image; // TODO: tag ? `${image}:${tag}` : `${image}`;
-  await prefetchDockerImage(taggedImage);
-  result.push(taggedImage);
+  await prefetchDockerImage(sideCarImage);
+  result.push(sideCarImage);
 
   const bashCommandParts = [];
 

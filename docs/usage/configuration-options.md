@@ -1918,6 +1918,10 @@ For example, to group all non-major devDependencies updates together into a sing
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates and lock file maintenance will never be grouped.
+
 ## groupSlug
 
 By default, Renovate will "slugify" the groupName to determine the branch name.
@@ -3722,6 +3726,10 @@ Can be used in combination with `replacementVersion`.
 
 You can suggest a new community package rule by editing [the `replacements.json` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/data/replacements.json) and opening a pull request.
 
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates and lock file maintenance will never be grouped.
+
 ### replacementNameTemplate
 
 <!-- prettier-ignore -->
@@ -3879,7 +3887,7 @@ If you have enabled `automerge` and set `automergeType=pr` in the Renovate confi
 On GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure, Forgejo, Gitea, GitHub and GitLab.
+This option is available for Azure, Bitbucket Server, Forgejo, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
@@ -4681,6 +4689,36 @@ We recommend that you only configure the `timezone` option if _both_ of these ar
 - _and_ you want Renovate to evaluate the `schedule` in your timezone
 
 Please see the above link for valid timezone names.
+
+## toolSettings
+
+When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle-wrapper` manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
+
+The JVM heap size for the Java invocations is 512m by default.
+This can be overridden using the following options.
+
+This option can be used on the repository level and in the [Renovate configuration](./self-hosted-configuration.md) using the following options.
+
+<!-- prettier-ignore -->
+!!! note
+    The JVM memory settings specified in the global self-hosted configuration set by the administrator in [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md) limits the memory settings for all repositories.
+    The default limit for all repositories is 512m.
+
+<!-- prettier-ignore -->
+!!! note
+    The JVM memory settings are considered for the `gradle-wrapper` manager.
+
+### jvmMaxMemory
+
+Maximum heap size in MB for Java VMs.
+Defaults to `512` for both the repository level and self-hosted configuration.
+
+To allow repositories to use _more_ than 512m of heap during the Gradle Wrapper update, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
+
+### jvmMemory
+
+Initial heap size in MB for Java VMs. Must be less than or equal to `jvmMaxMemory`.
+Defaults to `jvmMaxMemory`.
 
 ## updateInternalDeps
 

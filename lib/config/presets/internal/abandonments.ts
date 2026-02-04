@@ -1,4 +1,4 @@
-import data from '../../../data/abandonments.json';
+import data from '../../../data/abandonments.json' with { type: 'json' };
 import type { PackageRule } from '../../types.ts';
 import type { Preset } from '../types.ts';
 

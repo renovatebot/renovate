@@ -1,19 +1,16 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import * as modulesDatasource from '../../../modules/datasource/index.ts';
 import type { VolumeOption } from '../types.ts';
 import {
   generateDockerCommand,
-  getDockerTag,
   prefetchDockerImage,
   removeDanglingContainers,
   removeDockerContainer,
   resetPrefetchedImages,
-  sideCarImage,
+  sideCarName,
 } from './index.ts';
 import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../../../modules/datasource/index.ts', () => ({
   getPkgReleases: vi.fn(),
@@ -46,65 +43,6 @@ describe('util/exec/docker/index', () => {
     });
   });
 
-  describe('getDockerTag', () => {
-    it('returns "latest" for invalid constraint', async () => {
-      const res = await getDockerTag('foo', '!@#$%', 'semver');
-      expect(res).toBe('latest');
-    });
-
-    it('returns "latest" for bad release results', async () => {
-      vi.spyOn(modulesDatasource, 'getPkgReleases')
-        .mockResolvedValueOnce(undefined as never)
-        .mockResolvedValueOnce(partial<modulesDatasource.ReleaseResult>())
-        .mockResolvedValueOnce(
-          partial<modulesDatasource.ReleaseResult>({ releases: [] }),
-        );
-      expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
-      expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
-      expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
-    });
-
-    it('returns tag for good release results', async () => {
-      const releases = [
-        { version: '1.0.0' },
-        { version: '1.0.1' },
-        { version: '1.0.2' },
-        { version: '1.2.0' },
-        { version: '1.2.1' },
-        { version: '1.2.2' },
-        { version: '1.2.3' },
-        { version: '1.2.4' },
-        { version: '1.9.0' },
-        { version: '1.9.1' },
-        { version: '1.9.2' },
-        { version: '1.9.9' },
-        { version: '2.0.0' },
-        { version: '2.0.1' },
-        { version: '2.0.2' },
-        { version: '2.1.0' },
-        { version: '2.1.1' },
-        { version: '2.1.2' },
-      ];
-      vi.spyOn(modulesDatasource, 'getPkgReleases').mockResolvedValueOnce(
-        partial<modulesDatasource.ReleaseResult>({ releases }),
-      );
-      expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
-    });
-
-    it('filters out node unstable', async () => {
-      const releases = [
-        { version: '12.0.0' },
-        { version: '13.0.1' },
-        { version: '14.0.2' },
-        { version: '15.0.2' },
-      ];
-      vi.spyOn(modulesDatasource, 'getPkgReleases').mockResolvedValueOnce(
-        partial<modulesDatasource.ReleaseResult>({ releases }),
-      );
-      expect(await getDockerTag('foo', '>=12', 'node')).toBe('14.0.2');
-    });
-  });
-
   describe('removeDockerContainer', () => {
     it('gracefully handles container list error', async () => {
       mockExecAll(new Error('unknown'));
@@ -128,7 +66,7 @@ describe('util/exec/docker/index', () => {
       ]);
       await removeDockerContainer('bar', 'foo_');
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker ps --filter name=foo_bar -aq' },
+        { cmd: 'docker ps --filter name=foo_sidecar -aq' },
         { cmd: 'docker rm -f 12345' },
       ]);
     });
@@ -205,7 +143,6 @@ describe('util/exec/docker/index', () => {
     const preCommands = [null as never, 'foo', undefined as never];
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
-    const image = sideCarImage;
     const dockerOptions = {
       cwd: '/tmp/foobar',
       envVars,
@@ -219,13 +156,13 @@ describe('util/exec/docker/index', () => {
       (opts ? `${opts} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `ghcr.io/containerbase/sidecar ` +
+      `ghcr.io/renovatebot/base-image ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
       GlobalConfig.set({
         dockerUser: 'some-user',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
     });
 
@@ -235,8 +172,9 @@ describe('util/exec/docker/index', () => {
         commands,
         preCommands,
         dockerOptions,
+        'ghcr.io/renovatebot/base-image',
       );
-      expect(res).toBe(command(image));
+      expect(res).toBe(command(sideCarName));
     });
 
     it('adds `|| true` if ignoreFailure is set on a pre-command', async () => {
@@ -255,15 +193,16 @@ describe('util/exec/docker/index', () => {
           'baz',
         ],
         dockerOptions,
+        'ghcr.io/renovatebot/base-image',
       );
       expect(res).toBe(
         `docker run --rm ` +
-          `--name=renovate_${image} ` +
+          `--name=renovate_${sideCarName} ` +
           `--label=renovate_child ` +
           `--user=some-user ` +
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
-          `ghcr.io/containerbase/sidecar ` +
+          `ghcr.io/renovatebot/base-image ` +
           `bash -l -c "foo && bar || true && bleh && baz && ls"`,
       );
     });
@@ -284,15 +223,16 @@ describe('util/exec/docker/index', () => {
         ],
         ['pre'],
         dockerOptions,
+        'ghcr.io/renovatebot/base-image',
       );
       expect(res).toBe(
         `docker run --rm ` +
-          `--name=renovate_${image} ` +
+          `--name=renovate_${sideCarName} ` +
           `--label=renovate_child ` +
           `--user=some-user ` +
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
-          `ghcr.io/containerbase/sidecar ` +
+          `ghcr.io/renovatebot/base-image ` +
           `bash -l -c "pre && foo && bar || true && bleh && baz"`,
       );
     });
@@ -304,13 +244,18 @@ describe('util/exec/docker/index', () => {
         ['/tmp/bar', `/tmp/bar`],
         ['/tmp/baz', `/home/baz`],
       ];
-      const res = await generateDockerCommand(commands, preCommands, {
-        ...dockerOptions,
-        volumes: [...volumes, ...volumes],
-      });
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        {
+          ...dockerOptions,
+          volumes: [...volumes, ...volumes],
+        },
+        'ghcr.io/renovatebot/base-image',
+      );
       expect(res).toBe(
         command(
-          image,
+          sideCarName,
           `-v "/tmp/foo":"/tmp/foo" -v "/tmp/bar":"/tmp/bar" -v "/tmp/baz":"/home/baz"`,
         ),
       );
@@ -322,16 +267,21 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/containerbase',
         dockerUser: 'some-user',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
-      const res = await generateDockerCommand(commands, preCommands, {
-        ...dockerOptions,
-        volumes: [...volumes, ...volumes],
-      });
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        {
+          ...dockerOptions,
+          volumes: [...volumes, ...volumes],
+        },
+        'ghcr.io/renovatebot/base-image',
+      );
       expect(res).toBe(
         command(
-          image,
+          sideCarName,
           `-v "/tmp/cache":"/tmp/cache" -v "/tmp/containerbase":"/tmp/containerbase" -v "/tmp/foo":"/tmp/foo"`,
         ),
       );
@@ -343,15 +293,23 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/cache/containerbase',
         dockerUser: 'some-user',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
-      const res = await generateDockerCommand(commands, preCommands, {
-        ...dockerOptions,
-        volumes: [...volumes, ...volumes],
-      });
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        {
+          ...dockerOptions,
+          volumes: [...volumes, ...volumes],
+        },
+        'ghcr.io/renovatebot/base-image',
+      );
       expect(res).toBe(
-        command(image, `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`),
+        command(
+          sideCarName,
+          `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`,
+        ),
       );
     });
 
@@ -360,12 +318,19 @@ describe('util/exec/docker/index', () => {
       GlobalConfig.set({
         dockerUser: 'some-user',
         dockerCliOptions: '--memory=4g --cpus=".5"',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
-      const res = await generateDockerCommand(commands, preCommands, {
-        ...dockerOptions,
-      });
-      expect(res).toBe(command(image, undefined, `--memory=4g --cpus=".5"`));
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        {
+          ...dockerOptions,
+        },
+        'ghcr.io/renovatebot/base-image',
+      );
+      expect(res).toBe(
+        command(sideCarName, undefined, `--memory=4g --cpus=".5"`),
+      );
     });
 
     // TODO: it('handles tag constraint', async () => {

@@ -14,6 +14,7 @@ export const presets: Record<string, Preset> = {
       ':pinDevDependencies',
       'abandonments:recommended',
       'security:minimumReleaseAgeNpm',
+      ':maintainLockFilesWeekly',
     ],
   },
   'js-app': {
@@ -43,7 +44,7 @@ export const presets: Record<string, Preset> = {
   },
   semverAllMonthly: {
     description:
-      'Preserve SemVer ranges and update everything together once a month.',
+      'Preserve SemVer ranges and update everything together once a month. (excluding replacements and lockfile maintenance)',
     extends: [
       ':preserveSemverRanges',
       'group:all',
@@ -52,13 +53,12 @@ export const presets: Record<string, Preset> = {
     ],
     lockFileMaintenance: {
       commitMessageAction: 'Update',
-      extends: ['group:all'],
     },
     separateMajorMinor: false,
   },
   semverAllWeekly: {
     description:
-      'Preserve SemVer ranges and update everything together once a week.',
+      'Preserve SemVer ranges and update everything together once a week (excluding replacements and lockfile maintenance).',
     extends: [
       ':preserveSemverRanges',
       'group:all',
@@ -67,7 +67,6 @@ export const presets: Record<string, Preset> = {
     ],
     lockFileMaintenance: {
       commitMessageAction: 'Update',
-      extends: ['group:all'],
     },
     separateMajorMinor: false,
   },
