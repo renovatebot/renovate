@@ -3352,6 +3352,35 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
     globalOnly: true,
   },
+  {
+    name: 'toolSettings',
+    description:
+      'Tool specific configuration. Global self-hosted configuration takes precedence.',
+    type: 'object',
+    default: {
+      jvmMaxMemory: 512,
+      jvmMemory: 512,
+    },
+    cli: false,
+  },
+  {
+    name: 'jvmMaxMemory',
+    description:
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'jvmMemory',
+    description:
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    cli: false,
+    env: false,
+  },
 ];
 
 export function getOptions(): Readonly<RenovateOptions>[] {
