@@ -12,52 +12,110 @@ export const datasource = 'java-version';
 
 export function parsePackage(packageName: string): PackageConfig {
   const u = new URL(packageName, defaultRegistryUrl);
+  const pathname = trimLeadingSlash(u.pathname);
+  const vendor = getVendor(pathname);
   const useSystem = u.searchParams.get('system') === 'true';
   return {
-    imageType: getImageType(trimLeadingSlash(u.pathname)),
+    vendor,
+    imageType: getImageType(pathname),
     architecture:
-      u.searchParams.get('architecture') ?? getSystemArchitecture(useSystem),
-    os: u.searchParams.get('os') ?? getSystemOs(useSystem),
+      u.searchParams.get('architecture') ??
+      getSystemArchitecture(useSystem, vendor),
+    os: u.searchParams.get('os') ?? getSystemOs(useSystem, vendor),
+    releaseType: u.searchParams.get('release-type') ?? undefined,
   };
 }
 
-function getImageType(name: string): string {
-  switch (name) {
-    case 'java-jre':
-      return 'jre';
-    default:
-      return 'jdk';
+function getVendor(name: string): 'adoptium' | 'oracle-graalvm' {
+  if (name.includes('oracle-graalvm')) {
+    return 'oracle-graalvm';
   }
+  return 'adoptium'; // Default for backwards compatibility
 }
 
-function getSystemArchitecture(useSystem: boolean): Nullish<string> {
+function getImageType(name: string): string {
+  if (name.includes('-jre') || name === 'java-jre') {
+    return 'jre';
+  }
+  return 'jdk';
+}
+
+function getSystemArchitecture(
+  useSystem: boolean,
+  vendor: 'adoptium' | 'oracle-graalvm',
+): Nullish<string> {
   if (!useSystem) {
     return null;
   }
+
+  if (vendor === 'oracle-graalvm') {
+    // GraalVM arch mapping
+    switch (process.arch) {
+      case 'ia32':
+        return 'i686';
+      case 'arm64':
+        return 'aarch64';
+      case 'arm':
+        return 'arm32';
+      case 'x64':
+        return 'x86_64';
+      default:
+        logger.warn(
+          { arch: process.arch, vendor },
+          'Unknown system architecture for GraalVM, defaulting to null',
+        );
+        return null;
+    }
+  }
+
+  // Adoptium arch mapping
   switch (process.arch) {
     case 'ia32':
       return 'x86';
     case 'arm64':
       return 'aarch64';
-
+    case 'x64':
+      return 'x64';
     case 'arm':
     case 'riscv64':
     case 's390x':
-    case 'x64':
       return process.arch;
     default:
       logger.warn(
-        { arch: process.arch },
-        'Unknown system architecture, defaulting to null',
+        { arch: process.arch, vendor },
+        'Unknown system architecture for Adoptium, defaulting to null',
       );
       return null;
   }
 }
 
-function getSystemOs(useSystem: boolean): Nullish<string> {
+function getSystemOs(
+  useSystem: boolean,
+  vendor: 'adoptium' | 'oracle-graalvm',
+): Nullish<string> {
   if (!useSystem) {
     return null;
   }
+
+  if (vendor === 'oracle-graalvm') {
+    // GraalVM OS mapping
+    switch (process.platform) {
+      case 'darwin':
+        return 'macosx';
+      case 'win32':
+        return 'windows';
+      case 'linux':
+        return 'linux';
+      default:
+        logger.warn(
+          { os: process.platform, vendor },
+          'Unknown system OS for GraalVM, defaulting to null',
+        );
+        return null;
+    }
+  }
+
+  // Adoptium OS mapping
   switch (process.platform) {
     case 'darwin':
       return 'mac';
@@ -68,8 +126,8 @@ function getSystemOs(useSystem: boolean): Nullish<string> {
       return process.platform;
     default:
       logger.warn(
-        { os: process.platform },
-        'Unknown system OS, defaulting to null',
+        { os: process.platform, vendor },
+        'Unknown system OS for Adoptium, defaulting to null',
       );
       return null;
   }

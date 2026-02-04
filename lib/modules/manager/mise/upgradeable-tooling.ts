@@ -1,7 +1,6 @@
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GraalvmVersionDatasource } from '../../datasource/graalvm-version/index.ts';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -125,7 +124,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
       ).exec(version)?.groups;
       if (oracleGraalvmJdkMatches) {
         return {
-          datasource: GraalvmVersionDatasource.id,
+          datasource: JavaVersionDatasource.id,
           packageName: 'oracle-graalvm-jdk?system=true',
           currentValue: oracleGraalvmJdkMatches.version,
         };

@@ -1,9 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/java-version/index > getReleases > pages 1`] = `
+exports[`modules/datasource/java-version/index > getReleases > Adoptium (Temurin) > pages 1`] = `
 {
   "homepage": "https://adoptium.net",
-  "registryUrl": "https://api.adoptium.net/",
+  "registryUrl": "https://api.adoptium.net",
   "releases": [
     {
       "version": "1.1.0",
@@ -159,10 +159,10 @@ exports[`modules/datasource/java-version/index > getReleases > pages 1`] = `
 }
 `;
 
-exports[`modules/datasource/java-version/index > getReleases > processes real data (jre) 1`] = `
+exports[`modules/datasource/java-version/index > getReleases > Adoptium (Temurin) > processes real data (jre) 1`] = `
 {
   "homepage": "https://adoptium.net",
-  "registryUrl": "https://api.adoptium.net/",
+  "registryUrl": "https://api.adoptium.net",
   "releases": [
     {
       "version": "8.0.302+8",
@@ -174,10 +174,10 @@ exports[`modules/datasource/java-version/index > getReleases > processes real da
 }
 `;
 
-exports[`modules/datasource/java-version/index > getReleases > processes real data 1`] = `
+exports[`modules/datasource/java-version/index > getReleases > Adoptium (Temurin) > processes real data 1`] = `
 {
   "homepage": "https://adoptium.net",
-  "registryUrl": "https://api.adoptium.net/",
+  "registryUrl": "https://api.adoptium.net",
   "releases": [
     {
       "version": "8.0.302+8",

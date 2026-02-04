@@ -900,7 +900,7 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'java',
             currentValue: '21.0.2',
-            datasource: 'graalvm-version',
+            datasource: 'java-version',
           },
         ],
       });
