@@ -7,6 +7,7 @@ import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../../constants/index.ts';
+import { regEx } from '../regex.ts';
 import type { GotOptions } from './types.ts';
 
 export type AuthGotOptions = Pick<
@@ -74,7 +75,9 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       // Bitbucket Cloud /issues endpoint requires username+password authentication
       // For other endpoints, prefer workspace access tokens which have higher rate-limits
       // Match Bitbucket API pattern: /2.0/repositories/{workspace}/{repo}/issues
-      const isIssuesEndpoint = /\/repositories\/[^/]+\/[^/]+\/issues/.test(url);
+      const isIssuesEndpoint = regEx(
+        /\/repositories\/[^/]+\/[^/]+\/issues/,
+      ).test(url);
       if (isIssuesEndpoint && options.password !== undefined) {
         // Use username+password for /issues endpoint
         const auth = Buffer.from(
