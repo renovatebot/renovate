@@ -82,10 +82,14 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       const isIssuesEndpoint = regEx(
         /\/repositories\/[^/]+\/[^/]+\/issues/,
       ).test(url);
-      if (isIssuesEndpoint && options.password !== undefined) {
+      if (
+        isIssuesEndpoint &&
+        options.username !== undefined &&
+        options.password !== undefined
+      ) {
         // Use username+password for /issues endpoint
         const auth = Buffer.from(
-          `${options.username ?? ''}:${options.password}`,
+          `${options.username}:${options.password}`,
         ).toString('base64');
         options.headers.authorization = `Basic ${auth}`;
         delete options.username;
