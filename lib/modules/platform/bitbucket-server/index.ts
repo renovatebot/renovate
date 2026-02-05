@@ -828,9 +828,7 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   }
 
   logger.debug(`All ${maxAttempts} retry attempts exhausted`);
-  // Can't be `undefined` here.
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
-  throw lastError;
+  throw lastError!;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
