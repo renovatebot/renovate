@@ -157,8 +157,12 @@ async function updatePnpmWorkspace(
     return null;
   }
 
-  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap;
-  if (!isString(pnpmShrinkwrap)) {
+  const pnpmShrinkwrap = upgrades
+    .map((upgrade) => upgrade.managerData?.pnpmShrinkwrap)
+    .find((shrinkwrap): shrinkwrap is string =>
+      isString(shrinkwrap) && Boolean(shrinkwrap.length),
+    );
+  if (!pnpmShrinkwrap) {
     logger.debug(
       'No pnpm shrinkwrap found, not attempting to update pnpm-workspace.yaml',
     );
