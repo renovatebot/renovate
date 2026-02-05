@@ -159,8 +159,9 @@ async function updatePnpmWorkspace(
 
   const pnpmShrinkwrap = upgrades
     .map((upgrade) => upgrade.managerData?.pnpmShrinkwrap)
-    .find((shrinkwrap): shrinkwrap is string =>
-      isString(shrinkwrap) && Boolean(shrinkwrap.length),
+    .find(
+      (shrinkwrap): shrinkwrap is string =>
+        isString(shrinkwrap) && Boolean(shrinkwrap.length),
     );
   if (!pnpmShrinkwrap) {
     logger.debug(
