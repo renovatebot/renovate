@@ -1230,7 +1230,7 @@ describe('util/exec/index', () => {
 
       it('in repo config', () => {
         GlobalConfig.set({
-          toolSettings: { jvmMemory: 900.2, jvmMaxMemory: 900.2 },
+          toolSettings: { jvmMemory: 1024, jvmMaxMemory: 1024 },
         });
 
         config.toolSettings = {
