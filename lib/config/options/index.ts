@@ -3366,7 +3366,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'jvmMaxMemory',
     description:
-      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
     type: 'integer',
     parents: ['toolSettings'],
     cli: false,
@@ -3375,7 +3375,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'jvmMemory',
     description:
-      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
     type: 'integer',
     parents: ['toolSettings'],
     cli: false,
