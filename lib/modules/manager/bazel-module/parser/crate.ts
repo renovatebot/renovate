@@ -48,7 +48,7 @@ export const RuleToCratePackageDep = ExtensionTagFragment.extend({
 
     const dep: PackageDependency<CargoManagerData> = {
       datasource: CrateDatasource.id,
-      versioning: 'semver',
+      versioning: CrateDatasource.id,
       depName: packageName.value,
       currentValue,
       depType: 'crate_spec',
