@@ -405,7 +405,7 @@ describe('modules/manager/bazel-module/extract', () => {
         deps: [
           {
             datasource: CrateDatasource.id,
-            versioning: 'semver',
+            versioning: 'crate',
             depType: 'crate_spec',
             depName: 'axum',
             currentValue: '0.8.4',
@@ -413,7 +413,7 @@ describe('modules/manager/bazel-module/extract', () => {
           },
           {
             datasource: CrateDatasource.id,
-            versioning: 'semver',
+            versioning: 'crate',
             depType: 'crate_spec',
             depName: 'tokio',
             currentValue: '1.45.1',
@@ -421,7 +421,7 @@ describe('modules/manager/bazel-module/extract', () => {
           },
           {
             datasource: 'github-tags',
-            versioning: 'semver',
+            versioning: 'crate',
             depType: 'crate_spec',
             depName: 'custom_crate',
             currentValue: 'v1.0.0',
@@ -431,7 +431,7 @@ describe('modules/manager/bazel-module/extract', () => {
           },
           {
             datasource: CrateDatasource.id,
-            versioning: 'semver',
+            versioning: 'crate',
             depType: 'crate_spec',
             depName: 'local_crate',
             currentValue: '',
@@ -447,7 +447,7 @@ describe('modules/manager/bazel-module/extract', () => {
               nestedVersion: false,
             },
             skipReason: 'invalid-dependency-specification',
-            versioning: 'semver',
+            versioning: 'crate',
           },
         ],
       });
