@@ -54,3 +54,7 @@ export function getPackageManagerVersion(
   }
   return null;
 }
+
+export function getNodeOptions(nodeMaxMemory: number): string {
+  return `--max-old-space-size=${nodeMaxMemory}`;
+}

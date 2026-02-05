@@ -4720,6 +4720,16 @@ To allow repositories to use _more_ than 512m of heap during the Gradle Wrapper 
 Initial heap size in MB for Java VMs. Must be less than or equal to `jvmMaxMemory`.
 Defaults to `jvmMaxMemory`.
 
+### nodeMaxMemory
+
+Maximum memory in MiB for Node child processes invoked by Renovate.
+
+<!-- prettier-ignore -->
+!!! note
+    This does not apply to _every_ Node process created by Renovate, only the managers noted above.
+
+If unset (as it is by default), the Node process will automagically determine the memory limit to use.
+
 ## updateInternalDeps
 
 Renovate defaults to skipping any internal package dependencies within monorepos.
