@@ -73,8 +73,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       BITBUCKET_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
       // Bitbucket Cloud /issues endpoint requires username+password authentication
-      // For other endpoints, prefer workspace access tokens which have higher rate-limits
-      // Match Bitbucket API pattern: /2.0/repositories/{workspace}/{repo}/issues
+      // Match Bitbucket API pattern: /repositories/{workspace}/{repo}/issues
       const url =
         typeof options.url === 'string'
           ? options.url
