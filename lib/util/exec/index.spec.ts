@@ -1360,8 +1360,8 @@ describe('util/exec/index', () => {
       });
 
       // to provide a bit more safety to users, so they can't specify too little memory for Gradle
-      describe('a minimum of 256M is enforced', () => {
-        it('when global settings are lower than 256M, they are overridden to 256M', () => {
+      describe('a minimum of 512M is enforced', () => {
+        it('when global settings are lower than 512M, they are overridden to 512M', () => {
           GlobalConfig.set({
             toolSettings: { jvmMemory: 100, jvmMaxMemory: 127 },
           });
@@ -1374,7 +1374,7 @@ describe('util/exec/index', () => {
           });
         });
 
-        it('when global settings are lower than 256M, a debug log is logged', () => {
+        it('when global settings are lower than 512M, a debug log is logged', () => {
           GlobalConfig.set({
             toolSettings: { jvmMemory: 200, jvmMaxMemory: 255 },
           });
@@ -1400,10 +1400,10 @@ describe('util/exec/index', () => {
           });
         });
 
-        it('when repo settings are lower than 256M, a debug log is logged', () => {
+        it('when repo settings are lower than 512M, a debug log is logged', () => {
           config.toolSettings = {
-            jvmMemory: 200,
-            jvmMaxMemory: 255,
+            jvmMemory: 500,
+            jvmMaxMemory: 511,
           };
 
           getToolSettingsOptions(config.toolSettings);
