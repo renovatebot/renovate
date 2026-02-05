@@ -337,7 +337,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE'],
+        pushOptions: ['notify=NONE', 'ready'],
       });
     });
 
@@ -378,7 +378,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
     });
 
@@ -427,7 +427,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main', // not new-main
-        pushOptions: ['notify=NONE'],
+        pushOptions: ['notify=NONE', 'ready'],
       });
     });
 
@@ -523,7 +523,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
     });
 
@@ -568,6 +568,7 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main',
         pushOptions: [
           'notify=NONE',
+          'ready',
           'label=Code-Review+2',
           'hashtag=hashtag1',
           'hashtag=hashtag2',
@@ -627,6 +628,7 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main',
         pushOptions: [
           'notify=NONE',
+          'ready',
           'label=Code-Review+2',
           'hashtag=hashtag1',
           'hashtag=hashtag2',
