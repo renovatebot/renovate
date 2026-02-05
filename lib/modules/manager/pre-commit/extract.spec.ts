@@ -37,7 +37,7 @@ const pinnedPrecommitConfig = codeBlock`
         - id: prettier
 
     - repo: https://github.com/crate-ci/typos
-      rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6 # frozen: v1.14.12
+      rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12
       hooks:
         - id: typos
 
@@ -229,6 +229,7 @@ describe('modules/manager/pre-commit/extract', () => {
             packageName: 'pre-commit/pre-commit-hooks',
           },
           {
+            autoReplaceStringTemplate: '{{newDigest}} # frozen: {{newValue}}',
             currentValue: 'v3.0.0-alpha.9-for-vscode',
             currentDigest: '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e',
             datasource: 'github-tags',
@@ -239,6 +240,7 @@ describe('modules/manager/pre-commit/extract', () => {
               '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode',
           },
           {
+            autoReplaceStringTemplate: '{{newDigest}}  # frozen: {{newValue}}',
             currentValue: 'v1.14.12',
             currentDigest: '20b36ca07fa1bfe124912287ac8502cf12f140e6',
             datasource: 'github-tags',
@@ -246,9 +248,10 @@ describe('modules/manager/pre-commit/extract', () => {
             depType: 'repository',
             packageName: 'crate-ci/typos',
             replaceString:
-              '20b36ca07fa1bfe124912287ac8502cf12f140e6 # frozen: v1.14.12',
+              '20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12',
           },
           {
+            autoReplaceStringTemplate: '{{newDigest}} # frozen: {{newValue}}',
             currentValue: '0.23.1',
             currentDigest: 'a00caac4f0cec045f7f67d222c3fcd0744285c51',
             datasource: 'github-tags',
