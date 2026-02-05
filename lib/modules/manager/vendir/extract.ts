@@ -56,7 +56,6 @@ export function extractGitSource(
     packageName: httpUrl,
     depType: 'GitSource',
     currentValue: gitSource.ref,
-    registryUrls: [httpUrl],
     datasource: GitRefsDatasource.id,
   };
 }
