@@ -365,7 +365,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0",
     "unified": "11.0.5",
-    "vite": "8.0.0-beta.8",
+    "vite": "8.0.0-beta.11",
     "vite-tsconfig-paths": "6.0.5",
     "vitest": "4.0.18",
     "vitest-mock-extended": "3.1.0"
@@ -395,7 +395,7 @@
     "overrides": {
       "@yarnpkg/core@4.5.0>tar": "7.5.7",
       "esbuild": "0.27.2",
-      "vite": "8.0.0-beta.8"
+      "vite": "8.0.0-beta.11"
     }
   }
 }
