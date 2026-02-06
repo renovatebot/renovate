@@ -1,11 +1,12 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import type { Http } from '../../../util/http/index.ts';
 import { range } from '../../../util/range.ts';
 import { getPkgReleases } from '../index.ts';
-import { adoptiumRegistryUrl } from './adoptium.ts';
+import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
 import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
-import { graalvmRegistryUrl } from './graalvm.ts';
+import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
 
 function getPath(page: number, imageType = 'jdk', args = ''): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC${args}&page=${page}`;
@@ -542,6 +543,44 @@ describe('modules/datasource/java-version/index', () => {
         });
         expect(graalvmRes?.releases).toHaveLength(3);
       });
+    });
+  });
+
+  describe('getAdoptiumReleases', () => {
+    it('re-throws non-HttpError', async () => {
+      const mockHttp = {
+        getJsonUnchecked: vi.fn().mockRejectedValue(new Error('unexpected')),
+      } as unknown as Http;
+
+      await expect(
+        getAdoptiumReleases(mockHttp, {
+          vendor: 'adoptium',
+          imageType: 'jdk',
+          architecture: null,
+          os: null,
+        }),
+      ).rejects.toThrow('unexpected');
+    });
+  });
+
+  describe('getGraalvmReleases', () => {
+    it('re-throws non-HttpError', async () => {
+      const mockHttp = {
+        getJsonUnchecked: vi.fn().mockRejectedValue(new Error('unexpected')),
+      } as unknown as Http;
+
+      await expect(
+        getGraalvmReleases(
+          mockHttp,
+          {
+            vendor: 'oracle-graalvm',
+            imageType: 'jdk',
+            architecture: 'x86_64',
+            os: 'linux',
+          },
+          graalvmRegistryUrl,
+        ),
+      ).rejects.toThrow('unexpected');
     });
   });
 });
