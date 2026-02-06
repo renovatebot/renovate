@@ -191,8 +191,8 @@ importers:
         specifier: 16.0.0
         version: 16.0.0
       execa:
-        specifier: 8.0.1
-        version: 8.0.1
+        specifier: 9.6.1
+        version: 9.6.1
       extract-zip:
         specifier: 2.0.1
         version: 2.0.1
