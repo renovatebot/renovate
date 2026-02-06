@@ -82,6 +82,11 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
+## `RENOVATE_X_GITLAB_MR_STATUS_CHECK`
+
+If set to `"true"`, Renovate will prefer posting status checks to the MR pipeline instead of the branch pipeline.
+If no MR pipeline is found, it falls back to the branch pipeline.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
