@@ -35,4 +35,14 @@ describe('modules/versioning/pep440/range', () => {
     );
     expect(logger.warn).not.toHaveBeenCalled();
   });
+
+  it('handles v-prefixed version as currentValue', () => {
+    const res = getNewValue({
+      currentValue: 'v0.7.15',
+      rangeStrategy: 'auto',
+      newVersion: '0.8.0',
+      currentVersion: '0.7.15',
+    });
+    expect(res).toBe('0.8.0');
+  });
 });

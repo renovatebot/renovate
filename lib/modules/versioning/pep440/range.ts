@@ -117,6 +117,13 @@ export function getNewValue({
     return newVersion;
   }
 
+  // If currentValue is a valid version (not a range), treat as pinned.
+  // This handles cases like "v0.7.15" where the version is valid but
+  // doesn't match currentVersion exactly due to normalization.
+  if (parseVersion(currentValue)) {
+    return newVersion;
+  }
+
   try {
     ranges = parseCurrentRange(currentValue);
     if (!ranges.length) {
