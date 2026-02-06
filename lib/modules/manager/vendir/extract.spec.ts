@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const validContents = Fixtures.get('valid-contents.yaml');
 const invalidContents = Fixtures.get('invalid-contents.yaml');

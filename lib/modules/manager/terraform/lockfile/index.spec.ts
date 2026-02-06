@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../../types.ts';
 import { updateArtifacts } from '../index.ts';
 import { TerraformProviderHash } from './hash.ts';
 import { getNewConstraint } from './index.ts';
-import { fs } from '~test/util.ts';
 
 // auto-mock fs
 vi.mock('../../../../util/fs/index.ts');

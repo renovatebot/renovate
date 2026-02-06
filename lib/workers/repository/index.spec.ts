@@ -1,9 +1,9 @@
 import { mock } from 'vitest-mock-extended';
+import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { renovateRepository } from './index.ts';
 import type { ExtractResult } from './process/extract-update.ts';
 import * as _process from './process/index.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 const process = vi.mocked(_process);
 

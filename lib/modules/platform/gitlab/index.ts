@@ -1,7 +1,7 @@
-import { setTimeout } from 'timers/promises';
 import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -75,6 +75,7 @@ import {
   getRepoUrl,
   prInfo,
 } from './utils.ts';
+
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {

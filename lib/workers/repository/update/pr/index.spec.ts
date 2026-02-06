@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -22,7 +23,6 @@ import { ensurePr } from './index.ts';
 import * as _participants from './participants.ts';
 import * as _prCache from './pr-cache.ts';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
-import { git, logger, partial, platform, scm } from '~test/util.ts';
 
 vi.mock('../../changelog/index.ts');
 

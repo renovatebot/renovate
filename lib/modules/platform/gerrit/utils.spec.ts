@@ -1,3 +1,4 @@
+import { hostRules, partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
@@ -12,7 +13,6 @@ import type {
 } from './types.ts';
 import * as utils from './utils.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
-import { hostRules, partial } from '~test/util.ts';
 
 vi.mock('../../../util/host-rules.ts');
 

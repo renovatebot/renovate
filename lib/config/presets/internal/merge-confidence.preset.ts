@@ -11,6 +11,17 @@ export const supportedDatasources = [
 ];
 
 export const presets: Record<string, Preset> = {
+  'age-confidence-badges': {
+    description:
+      'Show only the Age and Confidence Merge Confidence badges for pull requests.',
+    packageRules: [
+      {
+        matchDatasources: supportedDatasources,
+        matchUpdateTypes: ['patch', 'minor', 'major'],
+        prBodyColumns: ['Package', 'Change', 'Age', 'Confidence'],
+      },
+    ],
+  },
   'all-badges': {
     description: 'Show all Merge Confidence badges for pull requests.',
     packageRules: [
@@ -25,17 +36,6 @@ export const presets: Record<string, Preset> = {
           'Passing',
           'Confidence',
         ],
-      },
-    ],
-  },
-  'age-confidence-badges': {
-    description:
-      'Show only the Age and Confidence Merge Confidence badges for pull requests.',
-    packageRules: [
-      {
-        matchDatasources: supportedDatasources,
-        matchUpdateTypes: ['patch', 'minor', 'major'],
-        prBodyColumns: ['Package', 'Change', 'Age', 'Confidence'],
       },
     ],
   },

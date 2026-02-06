@@ -1,3 +1,5 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import type { PackageFile } from '../../modules/manager/types.ts';
 import {
   getDepWarningsDashboard,
@@ -6,8 +8,6 @@ import {
   getErrors,
   getWarnings,
 } from './errors-warnings.ts';
-import type { RenovateConfig } from '~test/util.ts';
-import { partial } from '~test/util.ts';
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {

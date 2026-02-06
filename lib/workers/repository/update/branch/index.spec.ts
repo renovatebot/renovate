@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import { fs, git, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
@@ -48,7 +49,6 @@ import * as _getUpdated from './get-updated.ts';
 import * as branchWorker from './index.ts';
 import * as _reuse from './reuse.ts';
 import * as _schedule from './schedule.ts';
-import { fs, git, partial, platform, scm } from '~test/util.ts';
 
 vi.mock('./get-updated.ts');
 vi.mock('./schedule.ts');

@@ -1,3 +1,5 @@
+import { mockExecAll } from '~test/exec-util.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import {
@@ -8,8 +10,6 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
