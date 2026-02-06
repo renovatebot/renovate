@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { readFile } from 'fs-extra';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 describe('modules/versioning/versioning-metadata', () => {
   const allVersioning = readdirSync('lib/modules/versioning', {
