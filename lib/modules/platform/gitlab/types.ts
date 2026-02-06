@@ -21,6 +21,7 @@ export interface GitLabUser {
 export interface GitlabPr extends Pr {
   headPipelineStatus?: string;
   headPipelineSha?: string;
+  headPipelineId?: number;
 }
 
 export interface UpdateMergeRequest {

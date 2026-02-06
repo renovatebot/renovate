@@ -972,6 +972,16 @@ export async function setBranchStatus({
 
   try {
     for (let attempt = 1; attempt <= retryTimes + 1; attempt += 1) {
+      // Prefer MR pipeline if experimental env var is set
+      if (env.RENOVATE_X_GITLAB_MR_STATUS_CHECK === 'true') {
+        const mr = await getBranchPr(branchName);
+        if (mr?.headPipelineId) {
+          options.pipeline_id = mr.headPipelineId;
+          break;
+        }
+      }
+
+      // Fall back to branch pipeline
       const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
       await gitlabApi
         .getJsonSafe(commitUrl, { memCache: false }, LastPipelineId)
