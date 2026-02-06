@@ -36,7 +36,7 @@ export class PypiDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The relase timestamp is determined from the `upload_time` field in the results.';
+    'The relase timestamp is determined from the `upload_time` field in the results. This field is not available when using the simple API.';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
