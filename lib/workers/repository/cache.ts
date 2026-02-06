@@ -95,6 +95,7 @@ async function generateBranchCache(
       const commitDate = await scm.getBranchUpdateDate(branchName);
       if (commitDate) {
         const iso = commitDate.toISO();
+        /* v8 ignore else -- should not happen */
         if (iso) {
           commitTimestamp = iso;
         }
