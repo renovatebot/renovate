@@ -618,7 +618,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.1.14',
+    default: 'ghcr.io/renovatebot/base-image:13.2.0',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -3366,18 +3366,20 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'jvmMaxMemory',
     description:
-      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
     type: 'integer',
     parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
     cli: false,
     env: false,
   },
   {
     name: 'jvmMemory',
     description:
-      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `manager.jvmMaxMemory`',
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
     type: 'integer',
     parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
     cli: false,
     env: false,
   },

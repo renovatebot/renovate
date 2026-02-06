@@ -202,7 +202,7 @@
     "commander": "14.0.2",
     "conventional-commits-detector": "1.0.3",
     "croner": "9.1.0",
-    "cronstrue": "3.9.0",
+    "cronstrue": "3.11.0",
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "7.0.2",
@@ -215,7 +215,7 @@
     "execa": "8.0.1",
     "extract-zip": "2.0.1",
     "find-packages": "10.0.4",
-    "find-up": "7.0.0",
+    "find-up": "8.0.0",
     "fs-extra": "11.3.3",
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
@@ -365,7 +365,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0",
     "unified": "11.0.5",
-    "vite": "8.0.0-beta.8",
+    "vite": "8.0.0-beta.11",
     "vite-tsconfig-paths": "6.0.5",
     "vitest": "4.0.18",
     "vitest-mock-extended": "3.1.0"
@@ -395,7 +395,7 @@
     "overrides": {
       "@yarnpkg/core@4.5.0>tar": "7.5.7",
       "esbuild": "0.27.2",
-      "vite": "8.0.0-beta.8"
+      "vite": "8.0.0-beta.11"
     }
   }
 }
