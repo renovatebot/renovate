@@ -1,5 +1,6 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
 import { hashBody } from '../pr-body.ts';
 import type {
@@ -89,7 +90,7 @@ describe('modules/platform/gerrit/utils', () => {
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
         },
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -137,7 +138,7 @@ describe('modules/platform/gerrit/utils', () => {
         branch: 'main',
         subject: 'Fix for',
         reviewers: {},
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -167,7 +168,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -185,7 +186,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -219,7 +220,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -256,7 +257,7 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with no footer', () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers: 'some message...',
@@ -268,7 +269,7 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with footer', () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
