@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -11,10 +13,8 @@ import { GithubReleasesDatasource } from '../../modules/datasource/github-releas
 import * as _repositoryCache from '../cache/repository/index.ts';
 import type { RepoCacheData } from '../cache/repository/types.ts';
 import * as hostRules from '../host-rules.ts';
-import { GithubHttp, setBaseUrl } from './github.ts';
 import type { GraphqlPageCache } from './github.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
+import { GithubHttp, setBaseUrl } from './github.ts';
 
 vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);

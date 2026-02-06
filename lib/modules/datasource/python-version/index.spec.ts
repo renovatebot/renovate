@@ -1,4 +1,6 @@
 import { satisfies } from '@renovatebot/pep440';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -6,8 +8,6 @@ import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
 import { getPkgReleases } from '../index.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { PythonVersionDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 describe('modules/datasource/python-version/index', () => {
   describe('dependent datasources', () => {

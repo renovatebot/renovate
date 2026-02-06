@@ -13,12 +13,12 @@ import type { ResultFragment } from './parser/fragments.ts';
 import { parse } from './parser/index.ts';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven.ts';
 import { RuleToDockerPackageDep } from './parser/oci.ts';
-import { transformRulesImgCalls } from './rules-img.ts';
+import * as rules from './rules.ts';
 import {
   GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
 } from './rules.ts';
-import * as rules from './rules.ts';
+import { transformRulesImgCalls } from './rules-img.ts';
 
 export async function extractPackageFile(
   content: string,

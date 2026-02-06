@@ -1,11 +1,11 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import { toSha256 } from '../../../../util/hash.ts';
 import * as _config from './config.ts';
 import { rebaseOnboardingBranch } from './rebase.ts';
-import { scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 const configModule = vi.mocked(_config);
 

@@ -1,6 +1,6 @@
+import * as httpMock from '~test/http-mock.ts';
 import { getPkgReleases } from '../index.ts';
 import { Unity3dPackagesDatasource } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 describe('modules/datasource/unity3d-packages/index', () => {
   it(`package with no versions`, async () => {

@@ -1,8 +1,8 @@
+import { partial } from '~test/util.ts';
 import { regEx } from '../../util/regex.ts';
 import type { GenericVersion } from './generic.ts';
 import { GenericVersioningApi } from './generic.ts';
 import type { NewValueConfig } from './types.ts';
-import { partial } from '~test/util.ts';
 
 describe('modules/versioning/generic', () => {
   const optionalFunctions = [
