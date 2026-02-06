@@ -590,6 +590,160 @@ describe('modules/datasource/hex/index', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null for missing signature when public key is available', async () => {
+      const v2Body = await makeV2Response(
+        {
+          name: 'my_package',
+          repository: 'custom',
+          releases: [
+            {
+              version: '1.0.0',
+              innerChecksum: new Uint8Array(),
+              dependencies: [],
+            },
+          ],
+        },
+        { signature: Buffer.alloc(0) },
+      );
+
+      mockPublicKey(customRegistryUrl, testPublicKey);
+
+      httpMock
+        .scope(customRegistryUrl)
+        .get('/packages/my_package')
+        .reply(200, v2Body);
+
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'my_package',
+        registryUrls: [customRegistryUrl],
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null for malformed public key when verification is enabled', async () => {
+      const v2Body = await makeV2Response({
+        name: 'my_package',
+        repository: 'custom',
+        releases: [
+          {
+            version: '1.0.0',
+            innerChecksum: new Uint8Array(),
+            dependencies: [],
+          },
+        ],
+      });
+
+      mockPublicKey(customRegistryUrl, 'not-a-valid-public-key');
+
+      httpMock
+        .scope(customRegistryUrl)
+        .get('/packages/my_package')
+        .reply(200, v2Body);
+
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'my_package',
+        registryUrls: [customRegistryUrl],
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('falls back to unsigned payload when public key response is empty', async () => {
+      const v2Body = await makeV2Response({
+        name: 'my_package',
+        repository: 'custom',
+        releases: [
+          {
+            version: '1.0.0',
+            innerChecksum: new Uint8Array(),
+            dependencies: [],
+          },
+        ],
+      });
+
+      mockPublicKey(customRegistryUrl, '    ');
+
+      httpMock
+        .scope(customRegistryUrl)
+        .get('/packages/my_package')
+        .reply(200, v2Body);
+
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'my_package',
+        registryUrls: [customRegistryUrl],
+      });
+
+      expect(result).toEqual({
+        registryUrl: customRegistryUrl,
+        releases: [{ version: '1.0.0' }],
+      });
+    });
+
+    it('uses pinned Hex public key for repo.hex.pm', async () => {
+      const defaultV2RegistryUrl = 'https://repo.hex.pm';
+      const v2Body = await makeV2Response({
+        name: 'my_package',
+        repository: 'hexpm',
+        releases: [
+          {
+            version: '1.0.0',
+            innerChecksum: new Uint8Array(),
+            dependencies: [],
+          },
+        ],
+      });
+
+      httpMock
+        .scope(defaultV2RegistryUrl)
+        .get('/packages/my_package')
+        .reply(200, v2Body);
+
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'my_package',
+        registryUrls: [defaultV2RegistryUrl],
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('maps repo.hex.pm host aliases to hexpm repository checks', async () => {
+      const hostAliasRegistryUrl = 'https://repo.hex.pm:443';
+      const v2Body = await makeV2Response({
+        name: 'my_package',
+        repository: 'hexpm',
+        releases: [
+          {
+            version: '1.0.0',
+            innerChecksum: new Uint8Array(),
+            dependencies: [],
+          },
+        ],
+      });
+
+      mockPublicKeyUnavailable(hostAliasRegistryUrl);
+
+      httpMock
+        .scope(hostAliasRegistryUrl)
+        .get('/packages/my_package')
+        .reply(200, v2Body);
+
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'my_package',
+        registryUrls: [hostAliasRegistryUrl],
+      });
+
+      expect(result).toEqual({
+        registryUrl: hostAliasRegistryUrl,
+        releases: [{ version: '1.0.0' }],
+      });
+    });
+
     it('caches public key responses for subsequent package lookups', async () => {
       const v2BodyOne = await makeV2Response(
         {
