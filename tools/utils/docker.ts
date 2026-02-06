@@ -40,7 +40,7 @@ export async function bake(
   }
 
   if (opts.channel) {
-    process.env.CHANNEL = opts.channel;
+    process.env.CHANNEL = opts.channel.replace('maint/', '');
   }
 
   const metadataFile = path.join(await tmp, 'metadata.json');

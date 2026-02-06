@@ -2,10 +2,11 @@ import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoGlobalConfig } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
+import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
 import { setCustomEnv } from '../env.ts';
 import * as dockerModule from './docker/index.ts';
 import { getHermitEnvs } from './hermit.ts';
-import { exec } from './index.ts';
+import { exec, getToolSettingsOptions } from './index.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
@@ -15,6 +16,7 @@ import type {
 } from './types.ts';
 import { asRawCommand } from './utils.ts';
 import { exec as cpExec, envMock } from '~test/exec-util.ts';
+import { logger } from '~test/util.ts';
 
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
@@ -1161,5 +1163,256 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+  });
+
+  describe('getToolSettingsOptions()', () => {
+    const config: UpdateArtifactsConfig = {
+      newValue: '5.6.4',
+    };
+
+    describe('for JVM settings', () => {
+      beforeEach(() => {
+        GlobalConfig.set({
+          toolSettings: { jvmMemory: 768, jvmMaxMemory: 800 },
+        });
+
+        // remove any test-specific overrides
+        delete config.toolSettings;
+      });
+
+      it('returns default values if no global or repo config', () => {
+        GlobalConfig.set({});
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          jvmMemory: 512,
+          jvmMaxMemory: 512,
+        });
+      });
+
+      it('returns default values if empty repo config', () => {
+        GlobalConfig.set({});
+
+        const res = getToolSettingsOptions({});
+
+        expect(res).toMatchObject({
+          jvmMemory: 512,
+          jvmMaxMemory: 512,
+        });
+      });
+
+      it('returns default values if empty global config', () => {
+        GlobalConfig.set({
+          toolSettings: {},
+        });
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          jvmMemory: 512,
+          jvmMaxMemory: 512,
+        });
+      });
+
+      describe('does not allow floating point numbers', () => {
+        it('in global config', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 512.5, jvmMaxMemory: 600.2 },
+          });
+
+          const res = getToolSettingsOptions(undefined);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('in repo config', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 1024, jvmMaxMemory: 1024 },
+          });
+
+          config.toolSettings = {
+            jvmMemory: 556.8,
+            jvmMaxMemory: 600.4,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 556,
+            jvmMaxMemory: 600,
+          });
+        });
+      });
+
+      describe('when using repo config to override memory limits', () => {
+        it('when below global settings, repo settings are used', () => {
+          config.toolSettings = {
+            jvmMemory: 512,
+            jvmMaxMemory: 700,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 700,
+          });
+        });
+
+        it('when repo settings are the same as global settings, they are used', () => {
+          config.toolSettings = {
+            jvmMemory: 512,
+            jvmMaxMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('when repo jvmMemory setting is higher than global setting, but lower than global jvmMaxMemory, the repo config is used', () => {
+          config.toolSettings = {
+            jvmMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 600,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is lower than global settings, it is applied', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 680,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMaxMemory: 680,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is lower than global jvmMemory, jvmMemory is set to the same value', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 600,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is lower than repo jvmMemory, jvmMemory is set to the same value', () => {
+          config.toolSettings = {
+            jvmMemory: 600,
+            jvmMaxMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 600,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is higher than global settings, they are ignored', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 768,
+            jvmMaxMemory: 800,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is higher than global settings, a debug log is logged', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'A higher jvmMaxMemory (8192) than the global configuration (800) is not permitted for Java VM invocations. Using global configuration instead',
+          );
+
+          expect(res).toMatchObject({
+            jvmMemory: 768,
+            jvmMaxMemory: 800,
+          });
+        });
+      });
+
+      // to provide a bit more safety to users, so they can't specify too little memory for Gradle
+      describe('a minimum of 512M is enforced', () => {
+        it('when global settings are lower than 512M, they are overridden to 512M', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 100, jvmMaxMemory: 127 },
+          });
+
+          const res = getToolSettingsOptions(undefined);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 512,
+          });
+        });
+
+        it('when global settings are lower than 512M, a debug log is logged', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 200, jvmMaxMemory: 255 },
+          });
+
+          getToolSettingsOptions(undefined);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'Overriding low memory settings for Java VM invocations to a minimum of 512M',
+          );
+        });
+
+        it('when repo settings are lower than 512M, they are overridden to 512M', () => {
+          config.toolSettings = {
+            jvmMemory: 500,
+            jvmMaxMemory: 511,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 512,
+          });
+        });
+
+        it('when repo settings are lower than 512M, a debug log is logged', () => {
+          config.toolSettings = {
+            jvmMemory: 500,
+            jvmMaxMemory: 511,
+          };
+
+          getToolSettingsOptions(config.toolSettings);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'Overriding low memory settings for Java VM invocations to a minimum of 512M',
+          );
+        });
+      });
+    });
   });
 });

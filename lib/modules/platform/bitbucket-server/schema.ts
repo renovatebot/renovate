@@ -19,6 +19,12 @@ export const Comment = z.object({
 
 export type Comment = z.infer<typeof Comment>;
 
+export const PullRequestMerge = z.object({
+  autoMerge: z.boolean().optional(),
+});
+
+export type PullRequestMerge = z.infer<typeof PullRequestMerge>;
+
 export const PullRequestCommentActivity = z.object({
   action: z.literal('COMMENTED'),
   commentAction: z.string(),
