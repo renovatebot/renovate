@@ -52,7 +52,8 @@
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
-      "replacements:zap"
+      "replacements:zap",
+      "replacements:express-mung-to-express-response-middleware"
     ],
     "ignoreDeps": []
   },
@@ -1168,6 +1169,18 @@
         ],
         "replacementName": "zaproxy/zap-bare",
         "replacementVersion": "2.14.0"
+      }
+    ]
+  },
+  "express-mung-to-express-response-middleware": {
+    "description": "Replace stale `express-mung` with a maintained fork: `express-response-middleware`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^0.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["express-mung"],
+        "replacementName": "express-response-middleware",
+        "replacementVersion": "1.0.0"
       }
     ]
   }
