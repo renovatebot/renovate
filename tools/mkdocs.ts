@@ -29,6 +29,10 @@ program
     const res = exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
+      env: {
+        ...process.env,
+        RENOVATE_VERSION: opts.version ?? '',
+      },
     });
     checkResult(res);
   });
