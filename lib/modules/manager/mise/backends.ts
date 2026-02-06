@@ -237,3 +237,41 @@ export function createUbiToolConfig(
     ...(isString(extractVersion) ? { extractVersion } : {}),
   };
 }
+
+/**
+ * Create a tooling config for github backend
+ */
+export function createGithubToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+
+  const hasVPrefix = version.startsWith('v');
+  const setsTagRegex = !hasVPrefix || isString(toolOptions.tag_regex);
+
+  if (setsTagRegex) {
+    // By default, use a regex that matches any tag
+    let tagRegex = '.+';
+    // Filter versions by tag_regex if it is specified
+    if (isString(toolOptions.tag_regex)) {
+      // Remove the leading '^' if it exists to avoid duplication
+      tagRegex = toolOptions.tag_regex.replace(/^\^/, '');
+      if (!hasVPrefix) {
+        // Remove the leading 'v?' if it exists to avoid duplication
+        tagRegex = tagRegex.replace(/^v\??/, '');
+      }
+    }
+
+    // Trim the 'v' prefix if the current version does not have it
+    extractVersion = `^${hasVPrefix ? '' : 'v?'}(?<version>${tagRegex})`;
+  }
+
+  return {
+    packageName: name,
+    datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(isString(extractVersion) ? { extractVersion } : {}),
+  };
+}

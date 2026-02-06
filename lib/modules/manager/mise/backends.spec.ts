@@ -3,6 +3,7 @@ import {
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -305,6 +306,90 @@ describe('modules/manager/mise/backends', () => {
         datasource: 'github-releases',
         currentValue: '1.10.17',
         extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+  });
+
+  describe('createGithubToolConfig()', () => {
+    it('should set extractVersion if version does not have leading v', () => {
+      expect(createGithubToolConfig('cli/cli', '2.64.0', {})).toStrictEqual({
+        packageName: 'cli/cli',
+        datasource: 'github-releases',
+        currentValue: '2.64.0',
+        extractVersion: '^v?(?<version>.+)',
+      });
+    });
+
+    it('should not set extractVersion if version has leading v', () => {
+      expect(
+        createGithubToolConfig('junegunn/fzf', 'v0.56.3', {}),
+      ).toStrictEqual({
+        packageName: 'junegunn/fzf',
+        datasource: 'github-releases',
+        currentValue: 'v0.56.3',
+      });
+    });
+
+    it('should support tag_regex option without v prefix in version', () => {
+      expect(
+        createGithubToolConfig('owner/repo', '1.0.0', {
+          tag_regex: '^\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'owner/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should support tag_regex option with v prefix in version', () => {
+      expect(
+        createGithubToolConfig('owner/repo', 'v1.0.0', {
+          tag_regex: '^\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'owner/repo',
+        datasource: 'github-releases',
+        currentValue: 'v1.0.0',
+        extractVersion: '^(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should trim leading ^ from tag_regex', () => {
+      expect(
+        createGithubToolConfig('owner/repo', '1.0.0', {
+          tag_regex: '^\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'owner/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should handle tag_regex with v? prefix when version lacks v', () => {
+      expect(
+        createGithubToolConfig('owner/repo', '1.0.0', {
+          tag_regex: '^v?\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'owner/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should handle empty options object', () => {
+      expect(
+        createGithubToolConfig('BurntSushi/ripgrep', '14.1.1', {}),
+      ).toStrictEqual({
+        packageName: 'BurntSushi/ripgrep',
+        datasource: 'github-releases',
+        currentValue: '14.1.1',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
   });
