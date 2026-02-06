@@ -36,7 +36,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>());
-      GlobalConfig.reset();
+      GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
     });
 
     it('returns if onboarded', async () => {
@@ -472,7 +472,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('dryrun of creates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: config.onboardingBranch,
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -484,7 +487,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('dryrun of updates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: config.onboardingBranch,
+      });
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',

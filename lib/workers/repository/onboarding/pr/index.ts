@@ -95,8 +95,9 @@ export async function ensureOnboardingPr(
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
   // TODO #22198
+  const onboardingBranch = getInheritedOrGlobal('onboardingBranch')!;
   const existingPr = await platform.getBranchPr(
-    config.onboardingBranch!,
+    onboardingBranch,
     config.defaultBranch,
   );
   if (existingPr) {
@@ -109,7 +110,7 @@ export async function ensureOnboardingPr(
     if (
       await isOnboardingBranchConflicted(
         config.defaultBranch!,
-        config.onboardingBranch!,
+        onboardingBranch,
       )
     ) {
       if (GlobalConfig.get('dryRun')) {
@@ -190,7 +191,7 @@ If you need any further assistance then you can also [request help here](${
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
-    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
+    logger.info(`DRY-RUN: Would check branch ${onboardingBranch}`);
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
@@ -248,7 +249,7 @@ If you need any further assistance then you can also [request help here](${
           ? getSemanticCommitPrTitle(config)
           : config.onboardingPrTitle!;
       const pr = await platform.createPr({
-        sourceBranch: config.onboardingBranch!,
+        sourceBranch: onboardingBranch,
         targetBranch: config.defaultBranch!,
         prTitle,
         prBody,
@@ -274,7 +275,7 @@ If you need any further assistance then you can also [request help here](${
       logger.warn(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
       );
-      await scm.deleteBranch(config.onboardingBranch!);
+      await scm.deleteBranch(onboardingBranch);
       return;
     }
     throw err;
@@ -296,7 +297,7 @@ async function getOnboardingConfigHashComment(
 ): Promise<string> {
   const configFile = getDefaultConfigFileName(config);
   const existingContents =
-    (await getFile(configFile, config.onboardingBranch)) ?? '';
+    (await getFile(configFile, getInheritedOrGlobal('onboardingBranch'))) ?? '';
   const hash = toSha256(existingContents);
 
   return `\n<!--renovate-config-hash:${hash}-->\n`;
