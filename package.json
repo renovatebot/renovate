@@ -246,7 +246,7 @@
     "p-queue": "9.1.0",
     "p-throttle": "8.1.0",
     "parse-link-header": "2.0.0",
-    "prettier": "3.6.2",
+    "prettier": "3.8.1",
     "protobufjs": "8.0.0",
     "punycode": "2.3.1",
     "redis": "5.10.0",
