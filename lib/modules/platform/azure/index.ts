@@ -1,4 +1,3 @@
-import { setTimeout } from 'timers/promises';
 import { isString } from '@sindresorhus/is';
 import type {
   GitItem,
@@ -13,6 +12,7 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { setTimeout } from 'timers/promises';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,

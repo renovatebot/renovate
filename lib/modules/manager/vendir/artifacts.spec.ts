@@ -1,5 +1,8 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -7,9 +10,6 @@ import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as vendir from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 process.env.CONTAINERBASE = 'true';
 

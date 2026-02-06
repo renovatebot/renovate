@@ -1,5 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.ts';
+import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig, UpdateType } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';

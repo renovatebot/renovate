@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as pnpmHelper from './pnpm.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/exec/env.ts');
 vi.mock('../../../../util/fs/index.ts');

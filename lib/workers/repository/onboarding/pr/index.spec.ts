@@ -1,5 +1,7 @@
 import type { RequestError, Response } from 'got';
 import { DateTime } from 'luxon';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { InheritConfig } from '../../../../config/inherit.ts';
@@ -11,8 +13,6 @@ import * as memCache from '../../../../util/cache/memory/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { OnboardingState } from '../common.ts';
 import { ensureOnboardingPr } from './index.ts';
-import { partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
@@ -377,6 +377,35 @@ describe('workers/repository/onboarding/pr/index', () => {
         config.baseBranch = 'some-branch';
         GlobalConfig.set({ onboardingAutoCloseAge: 2 });
         InheritConfig.set({ onboardingAutoCloseAge: 1 });
+
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('does not allow inherited onboardingAutoCloseAge to be higher than global config', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // PR was created 36 hours ago (1.5 days)
+        const createdAt = now.minus({ hour: 36 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        InheritConfig.set({ onboardingAutoCloseAge: 10 });
 
         platform.getBranchPr.mockResolvedValueOnce(
           partial<Pr>({

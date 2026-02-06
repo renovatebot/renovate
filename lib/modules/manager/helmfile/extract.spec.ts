@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, logger } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

@@ -1,9 +1,9 @@
+import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import type { RenovateConfig } from './types.ts';
 import * as configValidation from './validation.ts';
-import { partial } from '~test/util.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {

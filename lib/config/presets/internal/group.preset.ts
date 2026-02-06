@@ -1,9 +1,7 @@
 import type { Preset } from '../types.ts';
-import * as monorepos from './monorepos.ts';
+import * as monorepos from './monorepos.preset.ts';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
-
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const staticGroups = {
   all: {

@@ -1,10 +1,10 @@
+import { platform } from '~test/util.ts';
 import {
   areLabelsModified,
   getChangedLabels,
   prepareLabels,
   shouldUpdateLabels,
 } from './labels.ts';
-import { platform } from '~test/util.ts';
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {

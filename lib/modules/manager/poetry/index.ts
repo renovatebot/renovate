@@ -7,8 +7,8 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
 export { bumpPackageVersion } from '../pep621/update.ts';
-export { extractPackageFile } from './extract.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 export { updateLockedDependency } from './update-locked.ts';
 
 export const supersedesManagers = ['pep621'];

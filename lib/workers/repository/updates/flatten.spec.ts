@@ -1,7 +1,7 @@
 import { isNumber } from '@sindresorhus/is';
+import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { flattenUpdates, sanitizeDepName } from './flatten.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../../../util/git/semantic.ts');
 
