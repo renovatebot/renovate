@@ -238,7 +238,7 @@ export function getToolSettingsOptions(
   options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
 
   if (repoConfig !== undefined) {
-    if (repoConfig?.jvmMaxMemory) {
+    if (repoConfig.jvmMaxMemory) {
       if (repoConfig.jvmMaxMemory > options.jvmMaxMemory) {
         logger.once.debug(
           `A higher jvmMaxMemory (${repoConfig.jvmMaxMemory}) than the global configuration (${options.jvmMaxMemory}) is not permitted for Java VM invocations. Using global configuration instead`,
