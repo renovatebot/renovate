@@ -4,7 +4,7 @@ import { getCustomManagers } from '../../modules/manager/custom/index.ts';
 import { getManagers } from '../../modules/manager/index.ts';
 import { getPlatformList } from '../../modules/platform/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
-import { supportedDatasources } from '../presets/internal/merge-confidence.ts';
+import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
 const options: Readonly<RenovateOptions>[] = [

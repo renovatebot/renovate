@@ -1,7 +1,5 @@
 import type { Preset } from '../types.ts';
 
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
-
 const daily = ['* 0-3 * * *'];
 const earlyMondays = ['* 0-3 * * 1'];
 const monthly = ['* 0-3 1 * *'];
