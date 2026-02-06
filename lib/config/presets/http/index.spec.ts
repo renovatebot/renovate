@@ -1,8 +1,8 @@
+import { hostRules } from '~test/host-rules.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util.ts';
 import * as http from './index.ts';
-import { hostRules } from '~test/host-rules.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const host = 'https://my.server/';
 const filePath = '/test-preset.json';

@@ -2,9 +2,9 @@ import type { Category } from '../../../constants/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 
+export { getRangeStrategy, updateDependency } from '../npm/index.ts';
 export { updateArtifacts } from './artifacts.ts';
 export { extractAllPackageFiles } from './extract.ts';
-export { getRangeStrategy, updateDependency } from '../npm/index.ts';
 
 export const url = 'https://bun.sh/docs/cli/install';
 export const categories: Category[] = ['js'];

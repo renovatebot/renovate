@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'os';
-import { setTimeout } from 'timers/promises';
 import type { SemVer } from 'semver';
+import { setTimeout } from 'timers/promises';
 import { logger } from '../../lib/logger/index.ts';
 import { toMs } from '../../lib/util/pretty-time.ts';
 import { exec } from './exec.ts';

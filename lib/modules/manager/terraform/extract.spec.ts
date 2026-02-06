@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as hashicorp from '../../versioning/hashicorp/index.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 const modules = Fixtures.get('modules.tf');
 const bitbucketModules = Fixtures.get('bitbucketModules.tf');

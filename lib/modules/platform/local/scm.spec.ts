@@ -1,7 +1,7 @@
+import { partial } from '~test/util.ts';
 import { rawExec as _rawExec } from '../../../util/exec/common.ts';
 import type { ExecResult } from '../../../util/exec/types.ts';
 import { LocalFs } from './scm.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('glob', () => ({
   glob: vi.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),

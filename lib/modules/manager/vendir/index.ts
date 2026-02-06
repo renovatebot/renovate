@@ -1,7 +1,8 @@
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-export { extractPackageFile } from './extract.ts';
+
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 

@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
@@ -10,7 +11,6 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };

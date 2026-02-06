@@ -19,6 +19,7 @@ import {
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as aws4 from 'aws4';
+import { git, logger } from '~test/util.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
@@ -26,7 +27,6 @@ import {
 } from '../../../constants/error-messages.ts';
 import type { Platform } from '../types.ts';
 import { getCodeCommitUrl } from './codecommit-client.ts';
-import { git, logger } from '~test/util.ts';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 

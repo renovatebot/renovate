@@ -31,7 +31,7 @@ import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.ts';
+import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import type {
   AllConfig,
   AllowedParents,

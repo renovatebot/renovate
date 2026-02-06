@@ -1,10 +1,10 @@
+import { platform } from '~test/util.ts';
 import { GlobalConfig } from '../../global.ts';
 import * as _forgejo from '../forgejo/index.ts';
 import * as _gitea from '../gitea/index.ts';
 import * as _github from '../github/index.ts';
 import * as _gitlab from '../gitlab/index.ts';
 import * as local from './index.ts';
-import { platform } from '~test/util.ts';
 
 vi.mock('../forgejo/index.ts');
 vi.mock('../gitea/index.ts');

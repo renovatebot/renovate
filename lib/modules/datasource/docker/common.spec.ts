@@ -1,4 +1,6 @@
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
@@ -10,8 +12,6 @@ import {
   getRegistryRepository,
 } from './common.ts';
 import type { OciHelmConfig } from './schema.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const hostRules = vi.mocked(_hostRules);
 
