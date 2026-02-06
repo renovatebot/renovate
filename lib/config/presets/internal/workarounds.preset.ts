@@ -1,7 +1,5 @@
 import type { Preset } from '../types.ts';
 
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
-
 export const presets: Record<string, Preset> = {
   all: {
     description: [

@@ -58,6 +58,16 @@
       "rules": {
         "no-console": "off"
       }
+    },
+    {
+      "files": ["lib/config/presets/internal/*.preset.ts"],
+      "rules": {
+        "sort-keys": [
+          "error",
+          "asc",
+          { "caseSensitive": false, "natural": true }
+        ]
+      }
     }
   ],
   "ignorePatterns": [
