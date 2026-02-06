@@ -20,7 +20,7 @@ describe('util/git/set-branch-commit', () => {
   describe('setBranchCommit', () => {
     it('sets new branch in cache if it does not exist', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
-      setBranchNewCommit('branch_name', 'base_branch', 'SHA');
+      setBranchNewCommit('branch_name', 'base_branch', 'SHA', null);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setBranchCommit(): Branch cache not present',
@@ -56,7 +56,7 @@ describe('util/git/set-branch-commit', () => {
       };
       git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
       repositoryCache.getCache.mockReturnValue(repoCache);
-      setBranchNewCommit('branch_name', 'base_branch', 'SHA');
+      setBranchNewCommit('branch_name', 'base_branch', 'SHA', null);
       expect(repoCache.branches).toEqual([
         {
           branchName: 'branch_name',
