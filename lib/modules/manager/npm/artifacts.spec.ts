@@ -386,6 +386,51 @@ minimumReleaseAgeExclude:
       ]);
     });
 
+    it('updates pnpm workspace - handles missing initial pnpmShrinkwrap reference', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            currentValue: '4.17.20',
+            newVersion: '4.17.21',
+            managerData: {
+              pnpmShrinkwrap: undefined,
+            },
+            isVulnerabilityAlert: true,
+          },
+          {
+            ...validDepUpdate,
+            depName: 'left-pad',
+            currentValue: '1.3.0',
+            newVersion: '1.3.1',
+            managerData: {
+              pnpmShrinkwrap: 'pnpm-lock.yaml',
+            },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: lodash@4.17.21\n  - lodash@4.17.21\n  # Renovate security update: left-pad@1.3.1\n  - left-pad@1.3.1\n',
+          },
+        },
+      ]);
+    });
+
     it('updates pnpm workspace - appends new minimumReleaseAgeExclude setting', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
