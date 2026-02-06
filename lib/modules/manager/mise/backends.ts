@@ -1,4 +1,10 @@
-import { isString, isUndefined, isUrlString } from '@sindresorhus/is';
+import {
+  isEmptyString,
+  isNonEmptyString,
+  isString,
+  isUndefined,
+  isUrlString,
+} from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -107,6 +113,39 @@ export function createGemToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: RubygemsDatasource.id,
+  };
+}
+
+/**
+ * Create a tooling config for github backend
+ * @link https://mise.jdx.dev/dev-tools/backends/github.html
+ */
+export function createGithubToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const hasVPrefix = version.startsWith('v');
+  const prefix = toolOptions.version_prefix;
+
+  if (isNonEmptyString(prefix)) {
+    // Custom prefix - escape special regex chars
+    const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    extractVersion = `^${escapedPrefix}(?<version>.+)`;
+  } else if (isEmptyString(prefix) && !hasVPrefix) {
+    // Empty prefix - no extractVersion needed if version starts with 'v'
+    extractVersion = '^(?<version>.+)';
+  } else if (!hasVPrefix) {
+    // Default: strip 'v' prefix if current version doesn't have it
+    extractVersion = '^v?(?<version>.+)';
+  }
+
+  return {
+    packageName: name,
+    datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(isString(extractVersion) ? { extractVersion } : {}),
   };
 }
 
