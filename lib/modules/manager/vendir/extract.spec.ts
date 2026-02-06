@@ -75,7 +75,7 @@ describe('modules/manager/vendir/extract', () => {
           {
             currentValue: '7.10.1',
             depName: 'https://github.com/test/test',
-            packageName: 'https://github.com/test/test',
+            depType: 'GitSource',
             datasource: 'git-refs',
           },
           {
@@ -86,6 +86,8 @@ describe('modules/manager/vendir/extract', () => {
           },
         ],
       });
+      // git-refs datasource does not support custom registries
+      expect(result?.deps[4].registryUrls).toBeUndefined();
     });
   });
 });
