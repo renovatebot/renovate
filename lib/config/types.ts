@@ -164,6 +164,7 @@ export interface RenovateSharedConfig {
  * Contains all options with globalOnly=true && inheritConfigSupport=true
  */
 export interface GlobalInheritableConfig {
+  bbUseDevelopmentBranch?: boolean;
   configFileNames?: string[];
   onboardingAutoCloseAge?: number;
 }
