@@ -58,6 +58,7 @@ import type {
   CommitResult,
   LocalConfig,
   LongCommitSha,
+  MergeFlag,
   PushFilesConfig,
   StatusResult,
   StorageConfig,
@@ -993,7 +994,11 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
   }
 }
 
-export async function mergeBranch(branchName: string): Promise<void> {
+export async function mergeBranch(
+  branchName: string,
+  allowBehindBase: boolean,
+): Promise<void> {
+  const mergeFlag: MergeFlag = allowBehindBase ? '--ff' : '--ff-only';
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -1010,7 +1015,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await gitRetry(() => git.merge(['--ff-only', branchName]));
+    await gitRetry(() => git.merge([mergeFlag, branchName]));
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');
   } catch (err) {
