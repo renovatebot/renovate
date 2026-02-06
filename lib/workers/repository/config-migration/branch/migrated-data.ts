@@ -1,7 +1,7 @@
-import { weave } from '@felipecrs/jsonc-weaver';
 import { isNumber } from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
+import { weave } from 'jsonc-weaver';
 import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration.ts';

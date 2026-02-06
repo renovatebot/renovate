@@ -1,6 +1,6 @@
-import { parse as jsoncWeaverParse } from '@felipecrs/jsonc-weaver';
 import { isNumber } from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { parse as jsoncWeaverParse } from 'jsonc-weaver';
 import type { JsonValue } from 'type-fest';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig, NOT_PRESENT } from '../config/inherit.ts';
