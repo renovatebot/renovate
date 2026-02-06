@@ -96,6 +96,99 @@ describe('modules/manager/npm/post-update/yarn', () => {
     },
   );
 
+  describe.each([
+    ['1.22.0', '^1.10.0', 2],
+    ['2.1.0', '>= 2.0.0', 1],
+    ['2.2.0', '2.2.0', 1],
+    ['3.0.0', '3.0.0', 1],
+  ])(
+    'passes NODE_OPTIONS using yarn v%s',
+    (yarnVersion, yarnCompatibility, expectedFsCalls) => {
+      it('if nodeMaxMemory set on global config', async () => {
+        Fixtures.mock(
+          {
+            '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
+            'yarn.lock': 'package-lock-contents',
+          },
+          '/some-dir',
+        );
+        GlobalConfig.set({
+          localDir: '/',
+          cacheDir: '/tmp/cache',
+          toolSettings: {
+            nodeMaxMemory: 2345,
+          },
+        });
+        const execSnapshots = mockExecAll({
+          stdout: yarnVersion,
+          stderr: '',
+        });
+        const config = {
+          constraints: {
+            yarn: yarnCompatibility,
+          },
+          postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+        };
+        const res = await yarnHelper.generateLockFile(
+          'some-dir',
+          {
+            YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
+            YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
+          },
+          config,
+        );
+        expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+        expect(fs.remove).toHaveBeenCalledTimes(0);
+        expect(res.lockFile).toBe('package-lock-contents');
+        expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+        // there may be other command(s), but checking that at least 1 has it is sufficient
+        expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+          '--max-old-space-size=2345',
+        );
+      });
+
+      it('if nodeMaxMemory set on repo config', async () => {
+        Fixtures.mock(
+          {
+            '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
+            'yarn.lock': 'package-lock-contents',
+          },
+          '/some-dir',
+        );
+        GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
+        const execSnapshots = mockExecAll({
+          stdout: yarnVersion,
+          stderr: '',
+        });
+        const config = {
+          constraints: {
+            yarn: yarnCompatibility,
+          },
+          postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+          toolSettings: {
+            nodeMaxMemory: 2345,
+          },
+        };
+        const res = await yarnHelper.generateLockFile(
+          'some-dir',
+          {
+            YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
+            YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
+          },
+          config,
+        );
+        expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+        expect(fs.remove).toHaveBeenCalledTimes(0);
+        expect(res.lockFile).toBe('package-lock-contents');
+        expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+        // there may be other command(s), but checking that at least 1 has it is sufficient
+        expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+          '--max-old-space-size=2345',
+        );
+      });
+    },
+  );
+
   it('only skips build if skipInstalls is false', async () => {
     Fixtures.mock(
       {

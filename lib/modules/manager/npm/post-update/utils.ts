@@ -1,5 +1,6 @@
 import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
+import { ToolSettingsOptions } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { Lazy } from '../../../../util/lazy.ts';
 import type { PackageJson } from '../schema.ts';
@@ -53,4 +54,8 @@ export function getPackageManagerVersion(
     return version;
   }
   return null;
+}
+
+export function getNodeOptions(nodeMaxMemory: number): string {
+  return '--max-old-space-size=' + nodeMaxMemory;
 }
