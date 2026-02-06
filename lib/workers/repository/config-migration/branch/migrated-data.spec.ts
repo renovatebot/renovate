@@ -135,6 +135,18 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       );
     });
 
+    it('Uses JSON.stringify when raw is null', async () => {
+      platform.getRawFile.mockResolvedValueOnce(null);
+      MigratedDataFactory.reset();
+
+      const res = await MigratedDataFactory.getAsync();
+
+      expect(weave).not.toHaveBeenCalled();
+      expect(res?.content).toBe(
+        JSON.stringify(migratedConfigObj, undefined, 2) + '\n',
+      );
+    });
+
     it('Returns nothing due to detectRepoFileConfig throwing', async () => {
       const err = new Error('error-message');
       vi.mocked(detectRepoFileConfig).mockRejectedValueOnce(err);

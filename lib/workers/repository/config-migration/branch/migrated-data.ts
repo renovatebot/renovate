@@ -152,7 +152,7 @@ export class MigratedDataFactory {
       // indent defaults to 2 spaces
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
-      let content = '';
+      let content: string;
       if (filename.endsWith('.json5')) {
         content = JSON5.stringify(migratedConfig, undefined, indentSpace);
       } else if (raw) {
@@ -163,10 +163,9 @@ export class MigratedDataFactory {
             { err },
             'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
           );
+          content = JSON.stringify(migratedConfig, undefined, indentSpace);
         }
-      }
-
-      if (!content) {
+      } else {
         content = JSON.stringify(migratedConfig, undefined, indentSpace);
       }
 
