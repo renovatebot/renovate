@@ -3,15 +3,15 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
 export { extractAllPackageFiles } from './extract/index.ts';
+export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,
   updateDependency,
   updateLockedDependency,
 } from './update/index.ts';
-export { getRangeStrategy } from './range.ts';
-export { updateArtifacts } from './artifacts.ts';
 
 export const supportsLockFileMaintenance = true;
 

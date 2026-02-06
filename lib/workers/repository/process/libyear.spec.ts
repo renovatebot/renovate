@@ -1,9 +1,9 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { logger } from '~test/util.ts';
 import { addLibYears } from '../../../instrumentation/reporting.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { calculateLibYears } from './libyear.ts';
-import { logger } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../../../instrumentation/reporting.ts');
 

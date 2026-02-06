@@ -2,8 +2,8 @@ import type { Category } from '../../../constants/index.ts';
 import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
-export { extractPackageFile } from './extract.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 

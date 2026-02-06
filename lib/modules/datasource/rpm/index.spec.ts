@@ -1,6 +1,6 @@
 import { gzipSync } from 'node:zlib';
-import { RpmDatasource } from './index.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { RpmDatasource } from './index.ts';
 
 describe('modules/datasource/rpm/index', () => {
   describe('getPrimaryGzipUrl', () => {

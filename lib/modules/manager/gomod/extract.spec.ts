@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const gomod1 = Fixtures.get('1/go-mod');
 const gomod2 = Fixtures.get('2/go-mod');

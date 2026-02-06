@@ -1,4 +1,6 @@
 import { mock } from 'vitest-mock-extended';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, git, platform, scm } from '~test/util.ts';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -21,8 +23,6 @@ import * as _config from './config.ts';
 import { checkOnboardingBranch } from './index.ts';
 import * as _onboardingCache from './onboarding-branch-cache.ts';
 import * as _rebase from './rebase.ts';
-import { fs, git, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 const configModule: any = _config;
 

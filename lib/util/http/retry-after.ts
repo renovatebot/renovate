@@ -1,6 +1,6 @@
-import { setTimeout } from 'timers/promises';
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
+import { setTimeout } from 'timers/promises';
 import { logger } from '../../logger/index.ts';
 import { parseUrl } from '../url.ts';
 import type { Task } from './types.ts';

@@ -1,4 +1,6 @@
 import upath from 'upath';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
@@ -9,8 +11,6 @@ import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { depTypes } from '../utils.ts';
 import { PdmProcessor } from './pdm.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 vi.mock('../../../datasource/index.ts');

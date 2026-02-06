@@ -1,3 +1,4 @@
+import { hostRules, platform } from '~test/util.ts';
 import {
   getConfigFileNames,
   setUserConfigFileNames,
@@ -13,7 +14,6 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { mergeInheritedConfig } from './inherited.ts';
-import { hostRules, platform } from '~test/util.ts';
 
 vi.mock('../../../config/presets/index.ts');
 

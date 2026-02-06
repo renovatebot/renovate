@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import type { PushResult } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import tmp from 'tmp-promise';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   CONFIG_VALIDATION,
@@ -17,7 +18,6 @@ import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
-import { logger } from '~test/util.ts';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');

@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { logger, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/forgejo.ts';
 import { toBase64 } from '../../../util/string.ts';
@@ -46,8 +48,6 @@ import type {
   RepoContents,
   User,
 } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger, partial } from '~test/util.ts';
 
 describe('modules/platform/forgejo/forgejo-helper', () => {
   const forgejoApiHost = 'https://forgejo.renovatebot.com/';
