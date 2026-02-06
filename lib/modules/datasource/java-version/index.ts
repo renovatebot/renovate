@@ -1,7 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { HttpError } from '../../../util/http/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
@@ -44,16 +42,8 @@ export class JavaVersionDatasource extends Datasource {
       // Default to Adoptium
       return await getAdoptiumReleases(this.http, pkgConfig);
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
-        return null;
-      }
       this.handleGenericErrors(err);
     }
-
-    return null;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
