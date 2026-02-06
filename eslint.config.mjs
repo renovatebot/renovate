@@ -104,15 +104,7 @@ export default tseslint.config(
       'no-template-curly-in-string': 'error',
       radix: ['error', 'as-needed'], // on ES5+ the radix defaults to 10
 
-      'sort-imports': [
-        'error',
-        {
-          ignoreCase: false,
-          ignoreDeclarationSort: true,
-          ignoreMemberSort: false,
-          memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
-        },
-      ],
+      'sort-imports': 0,
 
       'import-x/no-unresolved': [
         'error',
@@ -121,14 +113,7 @@ export default tseslint.config(
         },
       ],
 
-      'import-x/order': [
-        'error',
-        {
-          alphabetize: {
-            order: 'asc',
-          },
-        },
-      ],
+      'import-x/order': 0,
 
       'import-x/no-restricted-paths': [
         2,

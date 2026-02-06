@@ -9,6 +9,18 @@
       }
     }
   },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "identifierOrder": "lexicographic"
+          }
+        }
+      }
+    }
+  },
   "files": {
     "includes": [
       "**",

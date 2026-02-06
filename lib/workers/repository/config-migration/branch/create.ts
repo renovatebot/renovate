@@ -7,11 +7,11 @@ import { readLocalFile } from '../../../../util/fs/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import { getMigrationBranchName } from '../common.ts';
 import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
+import type { MigratedData } from './migrated-data.ts';
 import {
   MigratedDataFactory,
   applyPrettierFormatting,
 } from './migrated-data.ts';
-import type { MigratedData } from './migrated-data.ts';
 
 export async function createConfigMigrationBranch(
   config: Partial<RenovateConfig>,

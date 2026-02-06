@@ -1,7 +1,7 @@
-import { setTimeout } from 'timers/promises';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import type { PartialDeep } from 'type-fest';
 import { GlobalConfig } from '../../../config/global.ts';
 import {

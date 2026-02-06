@@ -1,10 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/util.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { hostRules } from '~test/util.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 

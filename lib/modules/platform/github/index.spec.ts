@@ -1,6 +1,8 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -27,8 +29,6 @@ import type {
 import * as branch from './branch.ts';
 import * as github from './index.ts';
 import type { ApiPageCache, GhRestPr } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
 
 const githubApiHost = 'https://api.github.com';
 

@@ -1,10 +1,10 @@
 import { HTTPError } from 'got';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
 import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases/index.ts';
 import * as hostRules from '../host-rules.ts';
 import { GitlabHttp, setBaseUrl } from './gitlab.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
 
 hostRules.add({
   hostType: 'gitlab',

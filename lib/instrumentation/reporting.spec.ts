@@ -1,5 +1,7 @@
 import type { S3Client } from '@aws-sdk/client-s3';
 import { mock, mockDeep } from 'vitest-mock-extended';
+import { s3 } from '~test/s3.ts';
+import { fs, logger } from '~test/util.ts';
 import type { RenovateConfig } from '../config/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
@@ -13,8 +15,6 @@ import {
   resetReport,
 } from './reporting.ts';
 import type { Report } from './types.ts';
-import { s3 } from '~test/s3.ts';
-import { fs, logger } from '~test/util.ts';
 
 vi.mock('../util/fs/index.ts', () => mockDeep());
 vi.mock('../util/s3.ts', () => mockDeep());

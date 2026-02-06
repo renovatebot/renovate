@@ -1,4 +1,6 @@
 import { isString } from '@sindresorhus/is';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { addMeta } from '../../../logger/index.ts';
@@ -20,8 +22,6 @@ import {
   syncBranchState,
   writeUpdates,
 } from './write.ts';
-import { logger, partial, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../../../util/cache/repository/index.ts');
 vi.mock('./limits.ts');

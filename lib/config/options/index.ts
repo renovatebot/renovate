@@ -4,7 +4,7 @@ import { getCustomManagers } from '../../modules/manager/custom/index.ts';
 import { getManagers } from '../../modules/manager/index.ts';
 import { getPlatformList } from '../../modules/platform/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
-import { supportedDatasources } from '../presets/internal/merge-confidence.ts';
+import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
 const options: Readonly<RenovateOptions>[] = [
@@ -618,7 +618,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.1.12',
+    default: 'ghcr.io/renovatebot/base-image:13.2.0',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -3351,6 +3351,37 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+  },
+  {
+    name: 'toolSettings',
+    description:
+      'Tool specific configuration. Global self-hosted configuration takes precedence.',
+    type: 'object',
+    default: {
+      jvmMaxMemory: 512,
+      jvmMemory: 512,
+    },
+    cli: false,
+  },
+  {
+    name: 'jvmMaxMemory',
+    description:
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'jvmMemory',
+    description:
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
   },
 ];
 

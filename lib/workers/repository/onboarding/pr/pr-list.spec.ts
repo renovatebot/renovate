@@ -1,7 +1,7 @@
-import type { BranchConfig } from '../../../types.ts';
-import { getExpectedPrList } from './pr-list.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { getExpectedPrList } from './pr-list.ts';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getExpectedPrList()', () => {

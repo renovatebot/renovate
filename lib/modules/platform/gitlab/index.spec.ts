@@ -1,6 +1,8 @@
 // TODO fix mocks
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -18,8 +20,6 @@ import { toBase64 } from '../../../util/string.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
@@ -3634,6 +3634,26 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(logger.logger.debug).toHaveBeenLastCalledWith(
         'PR platform automerge re-attempted...prNo: 12345',
+      );
+    });
+
+    it('should skip retries when merge_when_pipeline_succeeds is already enabled', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'ci_must_pass',
+          merge_when_pipeline_succeeds: true,
+          pipeline: {
+            status: 'failed',
+          },
+        });
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
       );
     });
   });

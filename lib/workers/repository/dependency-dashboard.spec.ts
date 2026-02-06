@@ -3,6 +3,9 @@ import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type {
@@ -19,9 +22,6 @@ import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import * as dependencyDashboard from './dependency-dashboard.ts';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
 import { PackageFiles } from './package-files.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger, platform } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 vi.mock('./process/vulnerabilities.ts', () => {

@@ -24,9 +24,9 @@
     "lint-other": "vitest run --coverage false test/other/**.spec.ts",
     "oxlint": "oxlint --import-plugin",
     "oxlint-fix": "oxlint --import-plugin --fix",
-    "biome": "biome lint .",
-    "biome-ci": "biome lint --reporter=github .",
-    "biome-fix": "biome lint --write .",
+    "biome": "biome check --formatter-enabled=false .",
+    "biome-ci": "biome check --formatter-enabled=false --reporter=github .",
+    "biome-fix": "biome check --formatter-enabled=false --write .",
     "eslint": "NODE_OPTIONS=--max-old-space-size=8192 eslint . --cache --cache-location .cache/eslint",
     "eslint-fix": "NODE_OPTIONS=--max-old-space-size=8192 eslint --cache --cache-location .cache/eslint --fix .",
     "eslint-ci": "NODE_OPTIONS=--max-old-space-size=8192 eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha",
@@ -202,7 +202,7 @@
     "commander": "14.0.2",
     "conventional-commits-detector": "1.0.3",
     "croner": "9.1.0",
-    "cronstrue": "3.9.0",
+    "cronstrue": "3.11.0",
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "7.0.2",
@@ -215,7 +215,7 @@
     "execa": "8.0.1",
     "extract-zip": "2.0.1",
     "find-packages": "10.0.4",
-    "find-up": "7.0.0",
+    "find-up": "8.0.0",
     "fs-extra": "11.3.3",
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
@@ -275,7 +275,7 @@
   "optionalDependencies": {
     "better-sqlite3": "12.6.2",
     "openpgp": "6.3.0",
-    "re2": "1.23.1"
+    "re2": "1.23.2"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.13",
@@ -365,7 +365,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0",
     "unified": "11.0.5",
-    "vite": "8.0.0-beta.8",
+    "vite": "8.0.0-beta.11",
     "vite-tsconfig-paths": "6.0.5",
     "vitest": "4.0.18",
     "vitest-mock-extended": "3.1.0"
@@ -395,7 +395,7 @@
     "overrides": {
       "@yarnpkg/core@4.5.0>tar": "7.5.7",
       "esbuild": "0.27.2",
-      "vite": "8.0.0-beta.8"
+      "vite": "8.0.0-beta.11"
     }
   }
 }
