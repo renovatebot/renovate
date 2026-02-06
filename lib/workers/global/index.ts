@@ -46,9 +46,26 @@ export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
   repository: RenovateRepository,
 ): Promise<RenovateConfig> {
+  let repositoryConfig: RenovateRepository;
+  if (isString(repository)) {
+    repositoryConfig = { repository };
+  } else if (repository.extends?.length) {
+    // Resolve repository-level presets before merging with global config
+    const { config: resolvedRepoConfig } = await resolveConfigPresets(
+      repository,
+      globalConfig,
+    );
+    repositoryConfig = {
+      ...resolvedRepoConfig,
+      repository: repository.repository,
+    };
+  } else {
+    repositoryConfig = repository;
+  }
+
   const repoConfig = configParser.mergeChildConfig(
     globalConfig,
-    isString(repository) ? { repository } : repository,
+    repositoryConfig,
   );
   const repoParts = repoConfig.repository.split('/');
   repoParts.pop();
