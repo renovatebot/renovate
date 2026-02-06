@@ -1,3 +1,4 @@
+import type { LongCommitSha } from '../../../util/git/types.ts';
 import type { FindPRConfig } from '../types.ts';
 
 export interface GerritFindPRConfig extends FindPRConfig {
@@ -9,22 +10,18 @@ export interface GerritFindPRConfig extends FindPRConfig {
    */
   singleChange?: boolean;
   /**
-   * Whether to disable the automatic pagination handling or not.
-   * Useful when handling pagination manually.
-   */
-  noPagination?: boolean;
-  /**
    * How many changes to fetch per request/page.
    * Default is 50.
    * Useful when handling pagination manually.
    */
   pageLimit?: number;
   /**
-   * How many changes to skip from the beginning.
-   * Default is 0.
-   * Useful when handling pagination manually.
+   * Predicate function to determine if the next page should be fetched.
+   * Called after each page is fetched with the changes from that page.
+   * Return false to stop fetching more pages, true to continue.
+   * Useful for early termination when using cache reconciliation.
    */
-  startOffset?: number;
+  shouldFetchNextPage?: (changes: GerritChange[]) => boolean;
 }
 
 /**
@@ -69,6 +66,7 @@ export interface GerritChange {
   subject: string;
   status: GerritChangeStatus;
   created: string;
+  updated: string;
   hashtags: string[];
   /** Requires o=SUBMITTABLE. */
   submittable?: boolean;
@@ -82,7 +80,7 @@ export interface GerritChange {
   /** Requires o=MESSAGES. */
   messages?: GerritChangeMessageInfo[];
   /** Requires o=CURRENT_REVISION. */
-  current_revision?: string;
+  current_revision?: LongCommitSha;
   /**
    * All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
    * Requires o=CURRENT_REVISION.

@@ -1,5 +1,6 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
 import { hashBody } from '../pr-body.ts';
 import type {
@@ -85,11 +86,12 @@ describe('modules/platform/gerrit/utils', () => {
         branch: 'main',
         subject: 'Fix for',
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
         hashtags: ['hashtag1', 'hashtag2'],
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
         },
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -119,6 +121,7 @@ describe('modules/platform/gerrit/utils', () => {
         state: 'open',
         title: 'Fix for',
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         labels: ['hashtag1', 'hashtag2'],
@@ -137,7 +140,7 @@ describe('modules/platform/gerrit/utils', () => {
         branch: 'main',
         subject: 'Fix for',
         reviewers: {},
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -145,6 +148,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:35:00.000000000',
       });
       expect(utils.mapGerritChangeToPr(change)).toEqual({
         number: 123456,
@@ -157,6 +161,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody(''),
         },
+        updatedAt: '2025-04-14T16:35:00.000000000',
         createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
@@ -167,7 +172,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -185,7 +190,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -193,6 +198,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -210,6 +216,7 @@ describe('modules/platform/gerrit/utils', () => {
           hash: hashBody(''),
         },
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
       });
     });
 
@@ -219,7 +226,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -227,6 +234,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -244,6 +252,7 @@ describe('modules/platform/gerrit/utils', () => {
           hash: hashBody('PR Body'),
         },
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
       });
     });
   });
@@ -256,7 +265,7 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with no footer', () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers: 'some message...',
@@ -268,7 +277,7 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with footer', () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:

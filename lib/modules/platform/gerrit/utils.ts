@@ -1,7 +1,6 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
@@ -97,13 +96,14 @@ export function mapGerritChangeToPr(
     targetBranch: change.branch,
     title: change.subject,
     createdAt: change.created.replace(' ', 'T'),
+    updatedAt: change.updated.replace(' ', 'T'),
     labels: change.hashtags,
     reviewers:
       change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
     bodyStruct: {
       hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
     },
-    sha: change.current_revision as LongCommitSha,
+    sha: change.current_revision,
   };
 }
 
