@@ -3,7 +3,10 @@ import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { toSha256 } from '../../../../util/hash.ts';
-import { getDefaultConfigFileName } from '../common.ts';
+import {
+  getDefaultConfigFileName,
+  getSemanticCommitPrTitle,
+} from '../common.ts';
 import { OnboardingCommitMessageFactory } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
@@ -46,6 +49,11 @@ export async function rebaseOnboardingBranch(
   );
   const commitMessage = commitMessageFactory.create();
 
+  const prTitle =
+    config.semanticCommits === 'enabled'
+      ? getSemanticCommitPrTitle(config)
+      : config.onboardingPrTitle!;
+
   // TODO #22198
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
@@ -59,6 +67,7 @@ export async function rebaseOnboardingBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
-    labels: config.labels,
+    // Only needed by Gerrit platform
+    prTitle,
   });
 }
