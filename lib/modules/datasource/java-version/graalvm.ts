@@ -1,6 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { HttpError, type Http } from '../../../util/http/index.ts';
+import { type Http, HttpError } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { ReleaseResult } from '../types.ts';
 import type { MiseJavaRelease, PackageConfig } from './types.ts';
