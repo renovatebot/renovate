@@ -70,6 +70,14 @@ function checkResult(res: SpawnSyncReturns<string>): void {
   } else if (res.status && res.status !== 0) {
     logger.error(`Error occured:\n${res.stderr || res.stdout}`);
     process.exit(res.status);
+  } else if (res.error !== undefined) {
+    logger.error(`Error occured: ${res.error}`);
+    process.exit(-1);
+  } else if (res.status === null) {
+    logger.warn(
+      { res },
+      'No status code was returned, there may have been an issue running the build',
+    );
   } else {
     logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
   }
