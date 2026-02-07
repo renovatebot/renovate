@@ -16,6 +16,8 @@ export class CustomDatasource extends Datasource {
 
   override customRegistrySupport = true;
 
+  override readonly registryStrategy = 'merge';
+
   constructor() {
     super(CustomDatasource.id);
   }
