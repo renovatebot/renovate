@@ -117,10 +117,14 @@ export function getNewValue({
     return newVersion;
   }
 
-  // If currentValue is a valid version (not a range), treat as pinned.
-  // This handles cases like "v0.7.15" where the version is valid but
-  // doesn't match currentVersion exactly due to normalization.
+  // Handle bare versions (e.g., "v0.7.15") that don't strictly equal
+  // currentVersion due to normalization, treating them as pinned while
+  // preserving the v-prefix.
   if (parseVersion(currentValue)) {
+    const vPrefix = regEx(/^([vV])/).exec(currentValue);
+    if (vPrefix) {
+      return `${vPrefix[1]}${newVersion}`;
+    }
     return newVersion;
   }
 

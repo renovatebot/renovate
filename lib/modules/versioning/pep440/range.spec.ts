@@ -43,6 +43,6 @@ describe('modules/versioning/pep440/range', () => {
       newVersion: '0.8.0',
       currentVersion: '0.7.15',
     });
-    expect(res).toBe('0.8.0');
+    expect(res).toBe('v0.8.0');
   });
 });
