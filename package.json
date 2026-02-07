@@ -199,7 +199,7 @@
     "cacache": "20.0.3",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "14.0.2",
+    "commander": "14.0.3",
     "conventional-commits-detector": "1.0.3",
     "croner": "9.1.0",
     "cronstrue": "3.11.0",
