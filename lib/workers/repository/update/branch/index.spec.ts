@@ -108,9 +108,8 @@ describe('workers/repository/update/branch/index', () => {
 
     beforeEach(() => {
       scm.branchExists.mockResolvedValue(false);
-      reuse.shouldReuseExistingBranch.mockImplementation(
-        // eslint-disable-next-line require-await, @typescript-eslint/require-await
-        async (config) => config,
+      reuse.shouldReuseExistingBranch.mockImplementation((config) =>
+        Promise.resolve(config),
       );
       prWorker.ensurePr = vi.fn();
       prWorker.getPlatformPrOptions = vi.fn();

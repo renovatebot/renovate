@@ -31,31 +31,29 @@ describe('config/presets/local/index', () => {
       GlobalConfig.reset();
     });
 
-    it('throws for unsupported platform', async () => {
+    it('throws for unsupported platform', () => {
       GlobalConfig.set({
         // @ts-expect-error -- testing invalid platform
         platform: 'unsupported-platform',
       });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
-      await expect(async () => {
-        await local.getPreset({
+      expect(() =>
+        local.getPreset({
           repo: 'some/repo',
           presetName: 'default',
-        });
-      }).rejects.toThrow();
+        }),
+      ).toThrow();
     });
 
-    it('throws for missing platform', async () => {
+    it('throws for missing platform', () => {
       GlobalConfig.set({
         platform: undefined,
       });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
-      await expect(async () => {
-        await local.getPreset({
+      expect(() =>
+        local.getPreset({
           repo: 'some/repo',
           presetName: 'default',
-        });
-      }).rejects.toThrow();
+        }),
+      ).toThrow();
     });
 
     it('forwards to azure', async () => {

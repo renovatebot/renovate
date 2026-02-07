@@ -17,8 +17,7 @@ process.on('unhandledRejection', (err) => {
 
 bootstrap();
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async (): Promise<void> => {
+void (async (): Promise<void> => {
   process.exitCode = await instrument('run', () => start());
   await telemetryShutdown(); //gracefully shutdown OpenTelemetry
 
