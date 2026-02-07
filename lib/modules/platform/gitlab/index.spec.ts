@@ -3706,6 +3706,22 @@ These updates have all been created already. To force a retry/rebase of any, cli
       ).toBe('See the following MR: !123 for more details');
     });
 
+    it('replaces PR relative link with MR reference', () => {
+      expect(
+        gitlab.massageMarkdown(
+          'See the following PR: [abc](../pull/123) for more details',
+        ),
+      ).toBe('See the following MR: [abc](!123) for more details');
+    });
+
+    it('replaces issues relative link with issue reference', () => {
+      expect(
+        gitlab.massageMarkdown(
+          'Check the [Dependency Dashboard](../issues/123) for more information.',
+        ),
+      ).toBe('Check the [Dependency Dashboard](#123) for more information.');
+    });
+
     it('avoids false positives when replacing PR with MR', () => {
       const nothingToReplace = 'PROCESSING APPROPRIATE SUPPRESS NOPR';
       expect(gitlab.massageMarkdown(nothingToReplace)).toBe(nothingToReplace);
