@@ -115,15 +115,6 @@ const staticGroups = {
       },
     ],
   },
-  errorProne: {
-    description: 'Group Error Prone packages.',
-    packageRules: [
-      {
-        groupName: 'Error Prone',
-        matchPackageNames: ['com.google.errorprone:**'],
-      },
-    ],
-  },
   flyway: {
     description: 'Group Java Flyway packages.',
     packageRules: [
