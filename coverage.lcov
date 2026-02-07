@@ -1,0 +1,25 @@
+
+> renovate@0.0.0-semantic-release vitest /Users/nvgstaff/renovate
+> GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage run lib/modules/manager/npm/update/dependency/pnpm.spec.ts --coverage.enabled --coverage.include=lib/modules/manager/npm/update/dependency/pnpm.ts --coverage.reporter=text-lcov
+
+
+ RUN  v4.0.17 /Users/nvgstaff/renovate
+      Coverage enabled with v8
+
+ ✓ lib/modules/manager/terragrunt/util.spec.ts (4 tests) 2ms 18 MB heap used
+ ✓ lib/config/migrations/custom/dry-run-migration.spec.ts (2 tests) 246ms 20 MB heap used
+ ✓ lib/modules/manager/terragrunt-version/extract.spec.ts (1 test) 2ms 39 MB heap used
+ ✓ lib/modules/manager/terragrunt/modules.spec.ts (4 tests) 3ms 38 MB heap used
+ ✓ lib/modules/manager/runtime-version/extract.spec.ts (2 tests) 2ms 44 MB heap used
+ ❯ lib/workers/repository/finalize/prune.spec.ts (0 test)
+ ✓ lib/modules/datasource/github-runners/index.spec.ts (4 tests) 6ms 114 MB heap used
+ ✓ lib/modules/manager/terragrunt/artifacts.spec.ts (11 tests) 3ms 111 MB heap used
+ ✓ lib/modules/manager/terragrunt/extract.spec.ts (7 tests) 7ms 123 MB heap used
+ ✓ lib/modules/manager/npm/update/dependency/pnpm.spec.ts (36 tests) 18ms 136 MB heap used
+
+ Test Files  1 failed | 9 passed (10)
+      Tests  71 passed (71)
+   Start at  11:02:37
+   Duration  2.22s (transform 3.72s, setup 3.01s, import 8.19s, tests 289ms, environment 1ms)
+
+ ELIFECYCLE  Command failed with exit code 1.
