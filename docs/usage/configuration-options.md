@@ -706,7 +706,8 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 ## commitHourlyLimit
 
-This config option limits the maximum number of branches Renovate creates or rebases per hour.
+This config option limits the number of commits Renovate pushes in an hour.
+It includes commits pushed while creating a new branch or rebasing an existing one.
 
 Use `commitHourlyLimit` to strictly control the rate at which Renovate triggers CI runs.
 Both branch creation and rebasing trigger CI runs, so limiting these operations helps you control your CI load.

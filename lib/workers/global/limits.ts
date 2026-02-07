@@ -87,7 +87,7 @@ function handleConcurrentLimits(
     const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
     const hourlyCommitCount = getCount('HourlyCommits');
 
-    // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+    // if a limit is defined ( >0 ) and limit reached return true
     if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
       return true;
     }
