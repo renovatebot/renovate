@@ -253,17 +253,29 @@ export async function processBranch(
       };
     }
     if (
-      (isLimitReached('Commits') ||
-        (!branchConfig.rebaseRequested &&
-          isLimitReached('HourlyCommits', branchConfig))) &&
+      !branchConfig.rebaseRequested &&
+      isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
-      logger.debug('Reached commits limit - skipping branch');
+      logger.debug('Reached commits per run limit - skipping branch');
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: 'commit-limit-reached',
+        result: 'commit-per-run-limit-reached',
+      };
+    }
+    if (
+      !branchConfig.rebaseRequested &&
+      isLimitReached('HourlyCommits', branchConfig) &&
+      !dependencyDashboardCheck &&
+      !config.isVulnerabilityAlert
+    ) {
+      logger.debug('Reached hourly commits limit - skipping branch');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'commit-hourly-limit-reached',
       };
     }
     if (branchExists) {

@@ -498,7 +498,8 @@ export async function ensureDependencyDashboard(
     (branch) =>
       branch.result === 'branch-limit-reached' ||
       branch.result === 'pr-limit-reached' ||
-      branch.result === 'commit-limit-reached',
+      branch.result === 'commit-per-run-limit-reached' ||
+      branch.result === 'commit-hourly-limit-reached',
     'Rate-Limited',
     'The following updates are currently rate-limited. To force their creation now, click on a checkbox below.',
     'unlimit',
@@ -551,7 +552,8 @@ export async function ensureDependencyDashboard(
     'needs-pr-approval',
     'not-scheduled',
     'pr-limit-reached',
-    'commit-limit-reached',
+    'commit-per-run-limit-reached',
+    'commit-hourly-limit-reached',
     'branch-limit-reached',
     'already-existed',
     'error',
