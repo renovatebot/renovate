@@ -1,0 +1,60 @@
+version: v1
+
+labels:
+  - label: 'core:changelogs'
+    matcher:
+      title: '^\w+\(changelogs?\): .*'
+
+  - label: 'core:dashboard'
+    matcher:
+      title: '^\w+\(dashboard\): .*'
+      files: ['lib/workers/repository/dependency-dashboard*']
+
+  - label: 'core:docs'
+    matcher:
+      title: '^docs(\(\w+\))?: .*'
+
+  - label: 'platform:azure'
+    matcher:
+      title: '^\w+\(azure\): .*'
+      files: ['lib/modules/platform/azure/*']
+
+  - label: 'platform:bitbucket'
+    matcher:
+      title: '^\w+\(bitbucket\): .*'
+      files: ['lib/modules/platform/bitbucket/*']
+
+  - label: 'platform:bitbucket-server'
+    matcher:
+      title: '^\w+\(bitbucket-server\): .*'
+      files: ['lib/modules/platform/bitbucket-server/*']
+
+  - label: 'platform:codecommit'
+    matcher:
+      title: '^\w+\(codecommit\): .*'
+      files: ['lib/modules/platform/codecommit/*']
+
+  - label: 'platform:forgejo'
+    matcher:
+      title: '^\w+\(forgejo\): .*'
+      files: ['lib/modules/platform/forgejo/*']
+
+  - label: 'platform:gerrit'
+    matcher:
+      title: '^\w+\(gerrit\): .*'
+      files: ['lib/modules/platform/gerrit/*']
+
+  - label: 'platform:gitea'
+    matcher:
+      title: '^\w+\(gitea\): .*'
+      files: ['lib/modules/platform/gitea/*']
+
+  - label: 'platform:github'
+    matcher:
+      title: '^\w+\(github\): .*'
+      files: ['lib/modules/platform/github/*']
+
+  - label: 'platform:gitlab'
+    matcher:
+      title: '^\w+\(gitlab\): .*'
+      files: ['lib/modules/platform/gitlab/*']
