@@ -237,7 +237,7 @@ export async function processBranch(
     }
 
     logger.debug(
-      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}, Hourly Commit Count: ${getCount('HourlyCommits')}`,
     );
 
     if (
@@ -253,15 +253,29 @@ export async function processBranch(
       };
     }
     if (
+      !branchConfig.rebaseRequested &&
       isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
-      logger.debug('Reached commits limit - skipping branch');
+      logger.debug('Reached commits per run limit - skipping branch');
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: 'commit-limit-reached',
+        result: 'commit-per-run-limit-reached',
+      };
+    }
+    if (
+      !branchConfig.rebaseRequested &&
+      isLimitReached('HourlyCommits', branchConfig) &&
+      !dependencyDashboardCheck &&
+      !config.isVulnerabilityAlert
+    ) {
+      logger.debug('Reached hourly commits limit - skipping branch');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'commit-hourly-limit-reached',
       };
     }
     if (branchExists) {

@@ -22,6 +22,7 @@ import type {
 import { processBranch } from '../update/branch/index.ts';
 import { upgradeFingerprintFields } from './fingerprint-fields.ts';
 import {
+  getCommitsHourlyCount,
   getConcurrentBranchesCount,
   getConcurrentPrsCount,
   getPrHourlyCount,
@@ -114,6 +115,16 @@ export async function syncBranchState(
     delete branchState.isModified;
     delete branchState.commitFingerprint;
 
+    // Update commit timestamp when SHA changes
+    const commitDate = await scm.getBranchUpdateDate(branchName);
+    if (commitDate) {
+      const iso = commitDate.toISO();
+      /* v8 ignore else -- should not happen */
+      if (iso) {
+        branchState.commitTimestamp = iso;
+      }
+    }
+
     // update cached branchSha
     branchState.sha = branchSha;
     branchState.pristine = false;
@@ -144,6 +155,9 @@ export async function writeUpdates(
 
   const prsThisHourCount = await getPrHourlyCount(config);
   setCount('HourlyPRs', prsThisHourCount);
+
+  const commitsThisHourCount = await getCommitsHourlyCount(branches);
+  setCount('HourlyCommits', commitsThisHourCount);
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
@@ -183,7 +197,9 @@ export async function writeUpdates(
           : branchState.commitFingerprint;
 
         if (res?.commitSha) {
-          setBranchNewCommit(branchName, baseBranch, res.commitSha);
+          // Get the commit timestamp for the new commit
+          const commitDate = await scm.getBranchUpdateDate(branchName);
+          setBranchNewCommit(branchName, baseBranch, res.commitSha, commitDate);
         }
         if (
           branch.result === 'automerged' &&
