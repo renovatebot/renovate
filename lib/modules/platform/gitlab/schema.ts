@@ -35,6 +35,7 @@ export const GitLabMergeRequestSchema = z.object({
   sha: LongCommitShaSchema.nullish(),
   head_pipeline: z
     .object({
+      id: z.number(),
       status: z.string(),
       sha: LongCommitShaSchema,
     })
