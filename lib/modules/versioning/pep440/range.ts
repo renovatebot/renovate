@@ -121,9 +121,9 @@ export function getNewValue({
   // currentVersion due to normalization, treating them as pinned while
   // preserving the v-prefix.
   if (parseVersion(currentValue)) {
-    const vPrefix = regEx(/^([vV])/).exec(currentValue);
+    const vPrefix = regEx(/^(?<prefix>[vV])/).exec(currentValue);
     if (vPrefix) {
-      return `${vPrefix[1]}${newVersion}`;
+      return `${vPrefix.groups!.prefix}${newVersion}`;
     }
     return newVersion;
   }
