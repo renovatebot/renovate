@@ -1,10 +1,16 @@
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { ElmPackageDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 
-const body = Fixtures.getJson('elm-core.json');
+const body = {
+  '1.0.0': 1534771622,
+  '1.0.1': 1542199511,
+  '1.0.2': 1542317893,
+  '1.0.3': 1575566216,
+  '1.0.4': 1575998397,
+  '1.0.5': 1581794195,
+};
 
 const baseUrl = 'https://package.elm-lang.org';
 
