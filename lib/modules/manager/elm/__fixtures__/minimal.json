@@ -1,5 +1,0 @@
-{
-    "type": "application",
-    "elm-version": "0.19.1",
-    "source-directories": ["src"]
-}
