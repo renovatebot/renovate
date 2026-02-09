@@ -1025,7 +1025,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'test@test.com',
@@ -1054,7 +1054,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
       });
 
-      describe('getUserSlugsByEmail', () => {
+      describe('getUsernamesByEmail', () => {
         it('throws when lookup fails', async () => {
           const scope = await initRepo();
           scope
@@ -1070,7 +1070,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .reply(500, []);
 
           await expect(
-            bitbucket.getUserSlugsByEmail('e-mail@test.com'),
+            bitbucket.getUsernamesByEmail('e-mail@test.com'),
           ).rejects.toThrow('Response code 500 (Internal Server Error)');
         });
 
@@ -1088,7 +1088,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, []);
 
-          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('e-mail@test.com');
           expect(actual).toBeEmptyArray();
         });
 
@@ -1106,14 +1106,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: false,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
             ]);
 
-          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('e-mail@test.com');
           expect(actual).toBeEmptyArray();
         });
 
@@ -1131,20 +1131,20 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
               {
-                slug: 'usernamefoundbyemailtoo',
+                name: 'usernamefoundbyemailtoo',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
             ]);
 
-          const actual = await bitbucket.getUserSlugsByEmail('mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('mail@test.com');
           expect(actual).toBeEmptyArray();
         });
 
@@ -1162,23 +1162,23 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
               {
-                slug: 'usernamefoundbyemailtoo',
+                name: 'e-mail@test.com',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
             ]);
 
-          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('e-mail@test.com');
           expect(actual).toStrictEqual([
             'usernamefoundbyemail',
-            'usernamefoundbyemailtoo',
+            'e-mail@test.com',
           ]);
         });
       });
@@ -2977,19 +2977,19 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'alice',
+                      name: 'alice',
                       active: true,
                       emailAddress: 'alice@alice.com',
                       displayName: 'alice',
                     },
                     {
-                      slug: 'bob',
+                      name: 'bob',
                       active: false,
                       emailAddress: 'bob@bob.com',
                       displayName: 'bob',
                     },
                     {
-                      slug: 'carol',
+                      name: 'carol',
                       active: true,
                       emailAddress: 'carol@carol.com',
                       displayName: 'carol',
@@ -3061,12 +3061,12 @@ Followed by some information.
                   name: 'my-reviewer-group',
                   users: [
                     {
-                      slug: 'user1',
+                      name: 'user1',
                       active: false,
                       displayName: 'user1',
                     },
                     {
-                      slug: 'user2',
+                      name: 'user2',
                       active: false,
                       displayName: 'user2',
                     },
@@ -3097,7 +3097,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'jane',
+                      name: 'jane',
                       active: true,
                       emailAddress: 'jane@project.com',
                       displayName: 'jane',
@@ -3111,7 +3111,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'zoe',
+                      name: 'zoe',
                       active: true,
                       emailAddress: 'zoe@repo.com',
                       displayName: 'zoe',
@@ -3144,7 +3144,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'jane',
+                      name: 'jane',
                       active: true,
                       emailAddress: 'jane@project.com',
                       displayName: 'jane',
@@ -3191,19 +3191,19 @@ Followed by some information.
 
           const userArray = [
             {
-              slug: 'zoe',
+              name: 'zoe',
               active: true,
               emailAddress: 'zoe@zoe.com',
               displayName: 'zoe',
             },
             {
-              slug: 'user1',
+              name: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
               displayName: 'user1',
             },
             {
-              slug: 'user2',
+              name: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
               displayName: 'user2',
@@ -3231,25 +3231,25 @@ Followed by some information.
             '@reviewer-group/my-reviewer-group:random',
           ]);
           expect(users).toHaveLength(1);
-          expect(userArray.map((u) => u.slug)).toContain(users[0]);
+          expect(userArray.map((u) => u.name)).toContain(users[0]);
         });
         it('handles random with number correctly', async () => {
           const scope = await initRepo();
           const userArray = [
             {
-              slug: 'zoe',
+              name: 'zoe',
               active: true,
               emailAddress: 'zoe@zoe.com',
               displayName: 'zoe',
             },
             {
-              slug: 'user1',
+              name: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
               displayName: 'user1',
             },
             {
-              slug: 'user2',
+              name: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
               displayName: 'user2',
@@ -3278,7 +3278,7 @@ Followed by some information.
           ]);
           expect(users).toHaveLength(2);
           users.forEach((user) => {
-            expect(userArray.map((u) => u.slug)).toContain(user);
+            expect(userArray.map((u) => u.name)).toContain(user);
           });
         });
 
@@ -3286,19 +3286,19 @@ Followed by some information.
           const scope = await initRepo();
           const userArray = [
             {
-              slug: 'zoe',
+              name: 'zoe',
               active: true,
               emailAddress: 'zoe@zoe.com',
               displayName: 'zoe',
             },
             {
-              slug: 'user1',
+              name: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
               displayName: 'user1',
             },
             {
-              slug: 'user2',
+              name: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
               displayName: 'user2',
@@ -3327,7 +3327,7 @@ Followed by some information.
           ]);
           expect(users).toHaveLength(3);
           users.forEach((user) => {
-            expect(userArray.map((u) => u.slug)).toContain(user);
+            expect(userArray.map((u) => u.name)).toContain(user);
           });
         });
 
@@ -3348,7 +3348,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'nope',
+                      name: 'nope',
                       active: true,
                       emailAddress: 'nope@nope.com',
                       displayName: 'nope',
@@ -3372,13 +3372,13 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'alice',
+                      name: 'alice',
                       active: true,
                       emailAddress: 'alice@alice.com',
                       displayName: 'alice',
                     },
                     {
-                      slug: 'bob',
+                      name: 'bob',
                       active: true,
                       emailAddress: 'bob@bob.com',
                       displayName: 'bob',
