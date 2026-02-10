@@ -196,7 +196,10 @@ export const presets: Record<string, Preset> = {
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
       },
     ],
   },
