@@ -2,7 +2,7 @@ import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
-import type { infer as Infer } from 'zod';
+import type { z } from 'zod';
 import { ZodType } from 'zod';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -422,17 +422,17 @@ export abstract class HttpBase<
   async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     options: Opts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getYaml<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>> {
+  ): Promise<HttpResponse<z.infer<Schema>>> {
     const url = arg1;
     let schema: Schema;
     let httpOptions: Opts | undefined;
@@ -456,7 +456,7 @@ export abstract class HttpBase<
   getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
+  >(url: string, schema: Schema): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
@@ -464,7 +464,7 @@ export abstract class HttpBase<
     url: string,
     options: Opts,
     schema: Schema,
-  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  ): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
@@ -520,19 +520,19 @@ export abstract class HttpBase<
   getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   getJson<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>> {
-    const args = this.resolveArgs<Infer<Schema>>(arg1, arg2, arg3);
-    return this.requestJson<Infer<Schema>>('get', args);
+  ): Promise<HttpResponse<z.infer<Schema>>> {
+    const args = this.resolveArgs<z.infer<Schema>>(arg1, arg2, arg3);
+    return this.requestJson<z.infer<Schema>>('get', args);
   }
 
   /**
@@ -545,12 +545,12 @@ export abstract class HttpBase<
   getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     url: string,
     schema: Schema,
-  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  ): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  ): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -573,12 +573,12 @@ export abstract class HttpBase<
   postJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   postJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   postJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -592,12 +592,12 @@ export abstract class HttpBase<
   putJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   putJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   putJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -611,12 +611,12 @@ export abstract class HttpBase<
   patchJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   patchJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   patchJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -630,12 +630,12 @@ export abstract class HttpBase<
   deleteJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   deleteJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   deleteJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -681,18 +681,18 @@ export abstract class HttpBase<
   async getToml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getToml<Schema extends ZodType<any, any, any>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getToml<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>> {
-    const { url, schema, httpOptions } = this.resolveArgs<Infer<Schema>>(
+  ): Promise<HttpResponse<z.infer<Schema>>> {
+    const { url, schema, httpOptions } = this.resolveArgs<z.infer<Schema>>(
       arg1,
       arg2,
       arg3,
@@ -711,7 +711,7 @@ export abstract class HttpBase<
     if (schema) {
       res.body = await Toml.pipe(schema).parseAsync(res.body);
     } else {
-      res.body = (await Toml.parseAsync(res.body)) as Infer<Schema>;
+      res.body = (await Toml.parseAsync(res.body)) as z.infer<Schema>;
     }
 
     return res;
