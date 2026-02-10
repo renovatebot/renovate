@@ -18,6 +18,7 @@ export async function runCommand(
     signal: processManager.abortController.signal,
     all: true,
     reject: false,
+    extendEnv: false,
   });
   processManager.subprocesses.add(subprocess);
 

@@ -1,17 +1,25 @@
-import { execSync } from 'child_process';
+import { execaSync } from 'execa';
 
 function testRe2() {
-  execSync(
-    `node -e "try{require('re2')('.*').exec('test')}catch(e){console.error(e);if(e.code === 'ERR_DLOPEN_FAILED' && e.message.includes('NODE_MODULE_VERSION')) process.exit(1); else process.exit(-1)}"`,
-    { stdio: 'inherit' },
+  execaSync(
+    'node',
+    [
+      '-e',
+      `try{require('re2')('.*').exec('test')}catch(e){console.error(e);if(e.code === 'ERR_DLOPEN_FAILED' && e.message.includes('NODE_MODULE_VERSION')) process.exit(1); else process.exit(-1)}`,
+    ],
+    { stdio: 'inherit', extendEnv: false },
   );
   console.log(`Ok.`);
 }
 
 function testSqlite() {
-  execSync(
-    `node -e "try{new require('better-sqlite3')(':memory:')}catch(e){console.error(e);if(e.code === 'ERR_DLOPEN_FAILED' && e.message.includes('NODE_MODULE_VERSION')) process.exit(1); else process.exit(-1)}"`,
-    { stdio: 'inherit' },
+  execaSync(
+    'node',
+    [
+      '-e',
+      `try{new require('better-sqlite3')(':memory:')}catch(e){console.error(e);if(e.code === 'ERR_DLOPEN_FAILED' && e.message.includes('NODE_MODULE_VERSION')) process.exit(1); else process.exit(-1)}`,
+    ],
+    { stdio: 'inherit', extendEnv: false },
   );
   console.log(`Ok.`);
 }
@@ -23,10 +31,11 @@ function testSqlite() {
   } catch (e) {
     console.error(`Failed.\n${e}`);
     try {
-      if (e.status === 1) {
+      if (e.exitCode === 1) {
         console.log(`Retry re2 install ...`);
-        execSync('pnpm rb re2', {
+        execaSync('pnpm', ['rb', 're2'], {
           stdio: 'inherit',
+          extendEnv: false,
         });
         testRe2();
         return;
@@ -46,10 +55,11 @@ function testSqlite() {
   } catch (e) {
     console.error(`Failed.\n${e}`);
     try {
-      if (e.status === 1) {
+      if (e.exitCode === 1) {
         console.log(`Retry better-sqlite3 install ...`);
-        execSync('pnpm rb better-sqlite3', {
+        execaSync('pnpm', ['rb', 'better-sqlite3'], {
           stdio: 'inherit',
+          extendEnv: false,
         });
         testSqlite();
         return;

@@ -2,7 +2,7 @@ import { execa } from 'execa';
 
 async function getGitFiles(args: string[]): Promise<string[]> {
   try {
-    const result = await execa('git', args);
+    const result = await execa('git', args, { extendEnv: false });
     return result.stdout
       .trim()
       .split('\n')
@@ -14,7 +14,9 @@ async function getGitFiles(args: string[]): Promise<string[]> {
 
 async function getMergeBase(base: string): Promise<string> {
   try {
-    const result = await execa('git', ['merge-base', base, 'HEAD']);
+    const result = await execa('git', ['merge-base', base, 'HEAD'], {
+      extendEnv: false,
+    });
     return result.stdout.trim();
   } catch {
     return base;
