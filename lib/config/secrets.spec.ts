@@ -3,6 +3,7 @@ import {
   CONFIG_VALIDATION,
   CONFIG_VARIABLES_INVALID,
 } from '../constants/error-messages.ts';
+import { setCustomEnv, setUserEnv } from '../util/env.ts';
 import { getConfig } from './defaults.ts';
 import {
   applySecretsAndVariablesToConfig,
@@ -55,6 +56,11 @@ describe('config/secrets', () => {
   });
 
   describe('applySecretsAndVariablesToConfig(config)', () => {
+    afterEach(() => {
+      setCustomEnv({});
+      setUserEnv({});
+    });
+
     it('replaces both secrets and variables', () => {
       const config = {
         secrets: { TOKEN: 'secret123' },
@@ -126,6 +132,46 @@ describe('config/secrets', () => {
     it('throws if variable is missing', () => {
       const config = {
         hostRules: [{ hostType: '{{ variables.MISSING_VAR }}' }],
+      };
+      expect(() => applySecretsAndVariablesToConfig({ config })).toThrow(
+        CONFIG_VALIDATION,
+      );
+    });
+
+    it('replaces {{ env.X }} with customEnvVariables values in hostRules', () => {
+      setCustomEnv({ MY_TOKEN: 'custom-token-value' });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'example.com',
+            username: '{{ env.MY_TOKEN }}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result.hostRules).toEqual([
+        { matchHost: 'example.com', username: 'custom-token-value' },
+      ]);
+    });
+
+    it('replaces {{ env.X }} in nested config fields', () => {
+      setCustomEnv({ MY_URL: 'https://registry.example.com' });
+
+      const config = {
+        registryAliases: {
+          myRegistry: '{{ env.MY_URL }}',
+        },
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result.registryAliases).toEqual({
+        myRegistry: 'https://registry.example.com',
+      });
+    });
+
+    it('throws if env variable in {{ env.X }} is not found', () => {
+      const config = {
+        hostRules: [{ token: '{{ env.MISSING_VAR }}' }],
       };
       expect(() => applySecretsAndVariablesToConfig({ config })).toThrow(
         CONFIG_VALIDATION,

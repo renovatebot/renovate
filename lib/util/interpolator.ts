@@ -9,7 +9,7 @@ import { logger } from '../logger/index.ts';
 import { capitalize } from './string.ts';
 
 export interface InterpolatorOptions {
-  name: 'secrets' | 'variables';
+  name: 'secrets' | 'variables' | 'env';
   templateRegex: RegExp;
   nameRegex: RegExp;
 }
@@ -65,13 +65,17 @@ function replaceInterpolatedValuesInString(
     return value;
   }
 
-  const disallowedPrefixes = ['branch', 'commit', 'group', 'pr', 'semantic'];
-  if (disallowedPrefixes.some((prefix) => key.startsWith(prefix))) {
-    const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = 'config';
-    error.validationError = `Disallowed ${name} substitution`;
-    error.validationMessage = `The field \`${key}\` may not use ${name} substitution`;
-    throw error;
+  // env substitution is allowed everywhere since {{ env.X }} already works
+  // in all template fields via template.compile()
+  if (name !== 'env') {
+    const disallowedPrefixes = ['branch', 'commit', 'group', 'pr', 'semantic'];
+    if (disallowedPrefixes.some((prefix) => key.startsWith(prefix))) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'config';
+      error.validationError = `Disallowed ${name} substitution`;
+      error.validationMessage = `The field \`${key}\` may not use ${name} substitution`;
+      throw error;
+    }
   }
   return value.replace(templateRegex, (_, key) => {
     if (input?.[key]) {
@@ -80,9 +84,10 @@ function replaceInterpolatedValuesInString(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'config';
     error.validationError = `Unknown ${name} name`;
-    error.validationMessage = `The following ${name} name was not found in config: ${String(
-      key,
-    )}`;
+    error.validationMessage =
+      name === 'env'
+        ? `The env variable \`${String(key)}\` was not found. Make sure it is set in customEnvVariables or exposed via exposeAllEnv.`
+        : `The following ${name} name was not found in config: ${String(key)}`;
     throw error;
   });
 }
