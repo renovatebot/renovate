@@ -1467,12 +1467,28 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  it('returns null when no valid nodes in root', async () => {
+  it('returns null when root input is not a string', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1757068644,
+            "narHash": "sha256-NOrUtIhTkIIumj1E/Rsv1J37Yi3xGStISEo8tZm3KW4=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "8eb28adfa3dc4de28e792e3bf49fcf9007ca8ac9",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
         "root": {
           "inputs": {
-            "nixpkgs": "nixpkgs"
+            "nixpkgs": ["nixpkgs"]
           }
         }
       },
