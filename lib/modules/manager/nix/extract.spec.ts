@@ -1466,4 +1466,20 @@ describe('modules/manager/nix/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
+
+  it('returns null when no valid nodes in root', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
 });
