@@ -43,9 +43,25 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes.root.inputs;
+  const rootInputs = flakeLock.nodes[flakeLock.root].inputs;
+
+  if (!rootInputs) {
+    logger.debug(
+      { flakeLockFile },
+      `root node in flake.lock does not contain inputs, skipping`,
+    );
+    return null;
+  }
 
   for (const [depName, nodeName] of Object.entries(rootInputs)) {
+    if (typeof nodeName !== 'string') {
+      logger.debug(
+        { flakeLockFile, nodeName },
+        `input node name is not a string, skipping`,
+      );
+      continue;
+    }
+
     if (!Object.hasOwn(flakeLock.nodes, nodeName)) {
       logger.debug(
         { flakeLockFile, nodeName },
