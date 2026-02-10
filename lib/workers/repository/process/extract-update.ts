@@ -247,10 +247,11 @@ export async function lookup(
 export async function update(
   config: RenovateConfig,
   branches: BranchConfig[],
-): Promise<WriteUpdateResult> {
+): Promise<WriteUpdateResult | undefined> {
+  let res: WriteUpdateResult | undefined;
   if (config.repoIsOnboarded) {
-    return await writeUpdates(config, branches);
+    res = await writeUpdates(config, branches);
   }
-  // Non-onboarded repos: processing completed, just no updates to write
-  return 'done';
+
+  return res;
 }
