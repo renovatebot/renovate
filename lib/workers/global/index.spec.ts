@@ -107,22 +107,20 @@ describe('workers/global/index', () => {
       // 1. Global config packageRules
       // 2. Preset packageRules (from :approveMajorUpdates)
       // 3. Repository packageRules
-      expect(repoConfig.packageRules).toBeDefined();
-      expect(repoConfig.packageRules?.length).toBe(3);
-
-      // Verify the order: global -> preset -> repository
-      expect(repoConfig.packageRules?.[0]).toMatchObject({
-        description: 'global rule',
-        matchManagers: ['npm'],
-      });
-      expect(repoConfig.packageRules?.[1]).toMatchObject({
-        dependencyDashboardApproval: true,
-        matchUpdateTypes: ['major'],
-      });
-      expect(repoConfig.packageRules?.[2]).toMatchObject({
-        description: 'repo rule',
-        matchPackageNames: ['lodash'],
-      });
+      expect(repoConfig.packageRules).toMatchObject([
+        {
+          description: 'global rule',
+          matchManagers: ['npm'],
+        },
+        {
+          dependencyDashboardApproval: true,
+          matchUpdateTypes: ['major'],
+        },
+        {
+          description: 'repo rule',
+          matchPackageNames: ['lodash'],
+        },
+      ]);
     });
   });
 
