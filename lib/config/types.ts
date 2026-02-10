@@ -305,11 +305,9 @@ export type UpdateConfig<
 
 export type RenovateRepository =
   | string
-  | {
+  | (RenovateConfig & {
       repository: string;
-      secrets?: Record<string, string>;
-      variables?: Record<string, string>;
-    };
+    });
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
