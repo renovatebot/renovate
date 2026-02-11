@@ -1,13 +1,9 @@
 diff --git a/lib/publish.js b/lib/publish.js
-index 838c654d247f23f0c9de4f1594d877e6b4db8c43..cdc485acbf45578eac0b124604d3b5e155c92667 100644
+index 838c654d247f23f0c9de4f1594d877e6b4db8c43..3f18ec78b8df4049547e6990eebebd90dfb35c5f 100644
 --- a/lib/publish.js
 +++ b/lib/publish.js
-@@ -53,9 +53,10 @@ export default async function publish(pluginConfig, context, { Octokit }) {
-     name: template(releaseNameTemplate)(context),
-     body: template(releaseBodyTemplate)(context),
-     prerelease: isPrerelease(branch),
--    make_latest: isLatestRelease(branch),
-+    make_latest: 'legacy', // isLatestRelease(branch),
+@@ -56,6 +56,7 @@ export default async function publish(pluginConfig, context, { Octokit }) {
+     make_latest: isLatestRelease(branch),
    };
  
 +  debug("branch object: %O", branch);
