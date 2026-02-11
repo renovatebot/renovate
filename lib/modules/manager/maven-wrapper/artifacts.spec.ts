@@ -10,7 +10,7 @@ import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import {
   add as addHostRule,
   clear as clearHostRules,
-} from '../../../util/host-rules';
+} from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts } from './index.ts';
 
