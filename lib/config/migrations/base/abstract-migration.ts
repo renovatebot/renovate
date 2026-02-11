@@ -1,6 +1,6 @@
 import { isNullOrUndefined, isString } from '@sindresorhus/is';
-import type { AllConfig, RenovateConfig } from '../../types';
-import type { MigratableConfig, Migration } from '../types';
+import type { AllConfig, RenovateConfig } from '../../types.ts';
+import type { MigratableConfig, Migration } from '../types.ts';
 
 export abstract class AbstractMigration<T extends RenovateConfig = AllConfig>
   implements Migration

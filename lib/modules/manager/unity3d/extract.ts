@@ -1,6 +1,6 @@
-import { regEx } from '../../../util/regex';
-import { Unity3dDatasource } from '../../datasource/unity3d';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { Unity3dDatasource } from '../../datasource/unity3d/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const supportedKeys = ['m_EditorVersion', 'm_EditorVersionWithRevision'];
 

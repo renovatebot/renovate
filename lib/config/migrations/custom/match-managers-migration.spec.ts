@@ -1,4 +1,4 @@
-import { MatchManagersMigration } from './match-managers-migration';
+import { MatchManagersMigration } from './match-managers-migration.ts';
 
 describe('config/migrations/custom/match-managers-migration', () => {
   it('migrates old custom manager syntax to new one', async () => {

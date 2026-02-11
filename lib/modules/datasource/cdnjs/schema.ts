@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Release } from '../types';
+import type { Release } from '../types.ts';
 
 export const Homepage = z.string().optional().catch(undefined);
 

@@ -1,5 +1,5 @@
-import type { RangeConfig } from '../types';
-import { getRangeStrategy } from '.';
+import type { RangeConfig } from '../types.ts';
+import { getRangeStrategy } from './index.ts';
 
 describe('modules/manager/circleci/range', () => {
   it('returns same if not auto', () => {

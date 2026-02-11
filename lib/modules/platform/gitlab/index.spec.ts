@@ -1,8 +1,9 @@
 // TODO fix mocks
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
-import type { RepoParams } from '..';
-import { GlobalConfig } from '../../../config/global';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -10,21 +11,20 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
-} from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
-import * as memCache from '../../../util/cache/memory';
-import * as repoCache from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import { toBase64 } from '../../../util/string';
-import * as prBodyModule from '../utils/pr-body';
-import * as gitlab from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { toBase64 } from '../../../util/string.ts';
+import type { RepoParams } from '../index.ts';
+import * as prBodyModule from '../utils/pr-body.ts';
+import * as gitlab from './index.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/git', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/git/index.ts', () => mockDeep());
 vi.mock('timers/promises');
-vi.mock('../utils/pr-body', { spy: true });
+vi.mock('../utils/pr-body.ts', { spy: true });
 
 const timers = vi.mocked(_timers);
 
@@ -3634,6 +3634,26 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(logger.logger.debug).toHaveBeenLastCalledWith(
         'PR platform automerge re-attempted...prNo: 12345',
+      );
+    });
+
+    it('should skip retries when merge_when_pipeline_succeeds is already enabled', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'ci_must_pass',
+          merge_when_pipeline_succeeds: true,
+          pipeline: {
+            status: 'failed',
+          },
+        });
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
       );
     });
   });

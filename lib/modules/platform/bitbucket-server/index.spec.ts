@@ -1,19 +1,20 @@
 import { isTruthy } from '@sindresorhus/is';
+import semver from 'semver';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import * as repoCache from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as bitbucket from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as bitbucket from './index.ts';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -1024,7 +1025,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'test@test.com',
@@ -1053,7 +1054,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
       });
 
-      describe('getUserSlugsByEmail', () => {
+      describe('getUsernamesByEmail', () => {
         it('throws when lookup fails', async () => {
           const scope = await initRepo();
           scope
@@ -1069,7 +1070,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .reply(500, []);
 
           await expect(
-            bitbucket.getUserSlugsByEmail('e-mail@test.com'),
+            bitbucket.getUsernamesByEmail('e-mail@test.com'),
           ).rejects.toThrow('Response code 500 (Internal Server Error)');
         });
 
@@ -1087,7 +1088,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, []);
 
-          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('e-mail@test.com');
           expect(actual).toBeEmptyArray();
         });
 
@@ -1105,14 +1106,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: false,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
             ]);
 
-          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('e-mail@test.com');
           expect(actual).toBeEmptyArray();
         });
 
@@ -1130,20 +1131,20 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
               {
-                slug: 'usernamefoundbyemailtoo',
+                name: 'usernamefoundbyemailtoo',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
             ]);
 
-          const actual = await bitbucket.getUserSlugsByEmail('mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('mail@test.com');
           expect(actual).toBeEmptyArray();
         });
 
@@ -1161,23 +1162,23 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, [
               {
-                slug: 'usernamefoundbyemail',
+                name: 'usernamefoundbyemail',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
               {
-                slug: 'usernamefoundbyemailtoo',
+                name: 'e-mail@test.com',
                 active: true,
                 displayName: 'Not relevant',
                 emailAddress: 'e-mail@test.com',
               },
             ]);
 
-          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          const actual = await bitbucket.getUsernamesByEmail('e-mail@test.com');
           expect(actual).toStrictEqual([
             'usernamefoundbyemail',
-            'usernamefoundbyemailtoo',
+            'e-mail@test.com',
           ]);
         });
       });
@@ -1858,6 +1859,117 @@ describe('modules/platform/bitbucket-server/index', () => {
             },
           });
           expect(pr?.number).toBe(5);
+        });
+
+        it('should use platform automerge', async () => {
+          const scope = await initRepo();
+          scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
+            )
+            .reply(200);
+
+          // Simulate version >= 8.15.0
+          vi.spyOn(semver, 'lt').mockReturnValue(false);
+
+          const pr = await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+          expect(pr?.number).toBe(5);
+
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            { prNumber: 5 },
+            expect.stringContaining('automerge: success'),
+          );
+        });
+
+        it('platform-native automerge returns early if Bitbucket Server <= 8.15.0 is used', async () => {
+          const scope = await initRepo();
+          scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
+          // Assert version < 8.15.0
+          vi.spyOn(semver, 'lt').mockReturnValue(true);
+
+          await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            { prNumber: 5 },
+            expect.stringContaining('automerge: not supported'),
+          );
+        });
+
+        it('platform-native automerge catches errors gracefully', async () => {
+          const scope = await initRepo();
+          scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
+            )
+            .reply(404);
+
+          // Simulate version >= 8.15.0
+          vi.spyOn(semver, 'lt').mockReturnValue(false);
+
+          await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+
+          expect(logger.logger.warn).toHaveBeenCalledWith(
+            { err: expect.any(Error), prNumber: 5 },
+            expect.stringContaining('automerge: fail'),
+          );
         });
       });
 
@@ -2865,19 +2977,19 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'alice',
+                      name: 'alice',
                       active: true,
                       emailAddress: 'alice@alice.com',
                       displayName: 'alice',
                     },
                     {
-                      slug: 'bob',
+                      name: 'bob',
                       active: false,
                       emailAddress: 'bob@bob.com',
                       displayName: 'bob',
                     },
                     {
-                      slug: 'carol',
+                      name: 'carol',
                       active: true,
                       emailAddress: 'carol@carol.com',
                       displayName: 'carol',
@@ -2949,12 +3061,12 @@ Followed by some information.
                   name: 'my-reviewer-group',
                   users: [
                     {
-                      slug: 'user1',
+                      name: 'user1',
                       active: false,
                       displayName: 'user1',
                     },
                     {
-                      slug: 'user2',
+                      name: 'user2',
                       active: false,
                       displayName: 'user2',
                     },
@@ -2985,7 +3097,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'jane',
+                      name: 'jane',
                       active: true,
                       emailAddress: 'jane@project.com',
                       displayName: 'jane',
@@ -2999,7 +3111,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'zoe',
+                      name: 'zoe',
                       active: true,
                       emailAddress: 'zoe@repo.com',
                       displayName: 'zoe',
@@ -3032,7 +3144,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'jane',
+                      name: 'jane',
                       active: true,
                       emailAddress: 'jane@project.com',
                       displayName: 'jane',
@@ -3079,19 +3191,19 @@ Followed by some information.
 
           const userArray = [
             {
-              slug: 'zoe',
+              name: 'zoe',
               active: true,
               emailAddress: 'zoe@zoe.com',
               displayName: 'zoe',
             },
             {
-              slug: 'user1',
+              name: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
               displayName: 'user1',
             },
             {
-              slug: 'user2',
+              name: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
               displayName: 'user2',
@@ -3119,25 +3231,25 @@ Followed by some information.
             '@reviewer-group/my-reviewer-group:random',
           ]);
           expect(users).toHaveLength(1);
-          expect(userArray.map((u) => u.slug)).toContain(users[0]);
+          expect(userArray.map((u) => u.name)).toContain(users[0]);
         });
         it('handles random with number correctly', async () => {
           const scope = await initRepo();
           const userArray = [
             {
-              slug: 'zoe',
+              name: 'zoe',
               active: true,
               emailAddress: 'zoe@zoe.com',
               displayName: 'zoe',
             },
             {
-              slug: 'user1',
+              name: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
               displayName: 'user1',
             },
             {
-              slug: 'user2',
+              name: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
               displayName: 'user2',
@@ -3166,7 +3278,7 @@ Followed by some information.
           ]);
           expect(users).toHaveLength(2);
           users.forEach((user) => {
-            expect(userArray.map((u) => u.slug)).toContain(user);
+            expect(userArray.map((u) => u.name)).toContain(user);
           });
         });
 
@@ -3174,19 +3286,19 @@ Followed by some information.
           const scope = await initRepo();
           const userArray = [
             {
-              slug: 'zoe',
+              name: 'zoe',
               active: true,
               emailAddress: 'zoe@zoe.com',
               displayName: 'zoe',
             },
             {
-              slug: 'user1',
+              name: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
               displayName: 'user1',
             },
             {
-              slug: 'user2',
+              name: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
               displayName: 'user2',
@@ -3215,7 +3327,7 @@ Followed by some information.
           ]);
           expect(users).toHaveLength(3);
           users.forEach((user) => {
-            expect(userArray.map((u) => u.slug)).toContain(user);
+            expect(userArray.map((u) => u.name)).toContain(user);
           });
         });
 
@@ -3236,7 +3348,7 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'nope',
+                      name: 'nope',
                       active: true,
                       emailAddress: 'nope@nope.com',
                       displayName: 'nope',
@@ -3260,13 +3372,13 @@ Followed by some information.
                   },
                   users: [
                     {
-                      slug: 'alice',
+                      name: 'alice',
                       active: true,
                       emailAddress: 'alice@alice.com',
                       displayName: 'alice',
                     },
                     {
-                      slug: 'bob',
+                      name: 'bob',
                       active: true,
                       emailAddress: 'bob@bob.com',
                       displayName: 'bob',

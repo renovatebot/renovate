@@ -1,4 +1,4 @@
-import { SuppressNotificationsMigration } from './suppress-notifications-migration';
+import { SuppressNotificationsMigration } from './suppress-notifications-migration.ts';
 
 describe('config/migrations/custom/suppress-notifications-migration', () => {
   it('should remomve prEditNotification from array', async () => {

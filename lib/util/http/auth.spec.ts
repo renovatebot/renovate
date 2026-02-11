@@ -1,7 +1,7 @@
 import type { NormalizedOptions } from 'got';
-import { applyAuthorization, removeAuthorization } from './auth';
-import type { GotOptions } from './types';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
+import { applyAuthorization, removeAuthorization } from './auth.ts';
+import type { GotOptions } from './types.ts';
 
 describe('util/http/auth', () => {
   describe('applyAuthorization', () => {

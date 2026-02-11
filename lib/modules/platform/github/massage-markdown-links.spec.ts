@@ -1,4 +1,4 @@
-import { massageMarkdownLinks } from './massage-markdown-links';
+import { massageMarkdownLinks } from './massage-markdown-links.ts';
 
 describe('modules/platform/github/massage-markdown-links', () => {
   it('performs multiple replacements', () => {

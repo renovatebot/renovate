@@ -1,8 +1,7 @@
-import URL from 'node:url';
-import { setTimeout } from 'timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
+import { setTimeout } from 'timers/promises';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -19,33 +18,36 @@ import {
   REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
-import { coerceToNull } from '../../../util/coerce';
-import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types/index.ts';
+import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
+import { coerceToNull } from '../../../util/coerce.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import {
+  listCommitTree,
+  pushCommitToRenovateRef,
+} from '../../../util/git/index.ts';
 import type {
   CommitFilesConfig,
   CommitResult,
   LongCommitSha,
-} from '../../../util/git/types';
-import * as hostRules from '../../../util/host-rules';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
-import * as githubHttp from '../../../util/http/github';
-import type { GithubHttpOptions } from '../../../util/http/github';
-import type { HttpResponse } from '../../../util/http/types';
-import { coerceObject } from '../../../util/object';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
-import { fromBase64, looseEquals } from '../../../util/string';
-import { ensureTrailingSlash } from '../../../util/url';
-import { incLimitedValue } from '../../../workers/global/limits';
+} from '../../../util/git/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type { GithubHttpOptions } from '../../../util/http/github.ts';
+import * as githubHttp from '../../../util/http/github.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { fromBase64, looseEquals } from '../../../util/string.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { incLimitedValue } from '../../../workers/global/limits.ts';
 import type {
   AggregatedVulnerabilities,
   AutodiscoverConfig,
@@ -65,25 +67,25 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
-import { normalizeNamePerEcosystem } from '../utils/github-alerts';
-import { smartTruncate } from '../utils/pr-body';
-import { remoteBranchExists } from './branch';
-import { coerceRestPr, githubApi, mapMergeStartegy } from './common';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
+import { normalizeNamePerEcosystem } from '../utils/github-alerts.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { remoteBranchExists } from './branch.ts';
+import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
   repoInfoQuery,
-} from './graphql';
-import { GithubIssueCache, GithubIssue as Issue } from './issue';
-import { massageMarkdownLinks } from './massage-markdown-links';
-import { getPrCache, updatePrCache } from './pr';
+} from './graphql.ts';
+import { GithubIssueCache, GithubIssue as Issue } from './issue.ts';
+import { massageMarkdownLinks } from './massage-markdown-links.ts';
+import { getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubVulnerabilityAlert,
-} from './schema';
+} from './schema.ts';
 import type {
   CombinedBranchStatus,
   Comment,
@@ -95,8 +97,8 @@ import type {
   GhRestRepo,
   LocalRepoConfig,
   PlatformConfig,
-} from './types';
-import { getAppDetails, getUserDetails, getUserEmail } from './user';
+} from './types.ts';
+import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
 
 export const id = 'github';
 
@@ -126,7 +128,7 @@ export function isGHApp(): boolean {
 
 export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
-    URL.parse(platformConfig.endpoint).host !== 'api.github.com';
+    new URL(platformConfig.endpoint).host !== 'api.github.com';
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -196,7 +198,7 @@ export async function initPlatform({
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
       const ghHostname = platformConfig.isGhe
-        ? URL.parse(platformConfig.endpoint).hostname
+        ? new URL(platformConfig.endpoint).hostname
         : 'github.com';
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
@@ -710,28 +712,33 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = URL.parse(platformConfig.endpoint);
+  const parsedEndpoint = new URL(platformConfig.endpoint);
+  let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = coerceToNull(config.forkToken);
+    authToken = coerceToNull(config.forkToken);
   } /* v8 ignore next */ else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.auth = opts.token ?? null;
+    authToken = opts.token ?? null;
   }
-  // TODO: null checks (#22198)
-  parsedEndpoint.host = parsedEndpoint.host!.replace(
+  if (authToken) {
+    const [username, password] = authToken.split(':');
+    parsedEndpoint.username = username;
+    parsedEndpoint.password = password ?? '';
+  }
+  parsedEndpoint.host = parsedEndpoint.host.replace(
     'api.github.com',
     'github.com',
   );
   parsedEndpoint.pathname = `${config.repository}.git`;
-  const url = URL.format(parsedEndpoint);
+  const url = parsedEndpoint.href;
   let upstreamUrl = undefined;
   if (forkCreation && config.parentRepo) {
     parsedEndpoint.pathname = config.parentRepo + '.git';
-    upstreamUrl = URL.format(parsedEndpoint);
+    upstreamUrl = parsedEndpoint.href;
   }
   await git.initRepo({
     ...config,

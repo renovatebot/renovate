@@ -1,9 +1,13 @@
 import { z } from 'zod';
-import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { PackageDependency } from '../types';
-import { depTypes, pep508ToPackageDependency } from './utils';
+import {
+  LooseArray,
+  LooseRecord,
+  Toml,
+} from '../../../util/schema-utils/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
 type Pep508Dependency = z.ZodType<PackageDependency<Record<string, any>>>;
 

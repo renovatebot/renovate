@@ -1,10 +1,10 @@
-import type { PlatformId } from '../../constants';
-import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
-import { loadModules } from '../../util/modules';
-import api from './api';
-import type { Platform } from './types';
-import * as platform from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import type { PlatformId } from '../../constants/index.ts';
+import { loadModules } from '../../util/modules.ts';
+import api from './api.ts';
+import * as platform from './index.ts';
+import type { Platform } from './types.ts';
 
 vi.unmock('.');
 vi.unmock('./scm');
@@ -25,7 +25,7 @@ describe('modules/platform/index', () => {
     const platforms = api;
 
     const loadedMgr = await loadModules(
-      __dirname,
+      import.meta.dirname,
       undefined,
       (m) => !['utils', 'git'].includes(m),
     );

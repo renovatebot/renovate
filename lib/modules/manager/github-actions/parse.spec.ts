@@ -4,7 +4,7 @@ import {
   parseComment,
   parseQuote,
   parseUsesLine,
-} from './parse';
+} from './parse.ts';
 
 describe('modules/manager/github-actions/parse', () => {
   describe('parseActionReference', () => {

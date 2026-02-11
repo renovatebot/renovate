@@ -1,4 +1,5 @@
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { logger, partial } from '~test/util.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import {
   calcLimit,
   hasMultipleLimits,
@@ -8,8 +9,7 @@ import {
   resetAllLimits,
   setCount,
   setMaxLimit,
-} from './limits';
-import { logger, partial } from '~test/util';
+} from './limits.ts';
 
 describe('workers/global/limits', () => {
   beforeEach(() => {

@@ -1,5 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from './types';
+import type { NewValueConfig, VersioningApi } from './types.ts';
 
 export interface GenericVersion {
   release: number[];
