@@ -3,9 +3,13 @@ body:
     id: how-are-you-running-renovate
     attributes:
       label: How are you running Renovate?
+      description: |
+        Note that if you're using the Mend Renovate Self-Hosted Community/Enterprise Edition (aka "Renovate CE"/"Renovate EE"), please raise an issue on the [mend/renovate-ce-ee issue tracker](https://github.com/mend/renovate-ce-ee/issues/new?template=request-help.yml).
+
+        If it happens to be a Renovate CLI issue, we can continue to support it over there.
       options:
         - 'A Mend.io-hosted app'
-        - 'Self-hosted Renovate'
+        - 'Self-hosted Renovate CLI'
 
   - type: dropdown
     id: self-hosted-platform
