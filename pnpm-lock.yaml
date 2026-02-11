@@ -11,7 +11,7 @@ overrides:
 
 patchedDependencies:
   '@semantic-release/github':
-    hash: 4ec7a23b0ea41bc0b831ff1cb4952e95309f4fba5d71182ddea1f885d9838075
+    hash: 52441cf894b1a1cbce4fd26db025093959005c4d686a31e1b26ef01b53c2c288
     path: patches/@semantic-release__github.patch
 
 importers:
@@ -9051,7 +9051,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@semantic-release/github@12.0.5(patch_hash=4ec7a23b0ea41bc0b831ff1cb4952e95309f4fba5d71182ddea1f885d9838075)(semantic-release@25.0.3(typescript@5.9.3))':
+  '@semantic-release/github@12.0.5(patch_hash=52441cf894b1a1cbce4fd26db025093959005c4d686a31e1b26ef01b53c2c288)(semantic-release@25.0.3(typescript@5.9.3))':
     dependencies:
       '@octokit/core': 7.0.6
       '@octokit/plugin-paginate-rest': 14.0.0(@octokit/core@7.0.6)
@@ -13639,7 +13639,7 @@ snapshots:
     dependencies:
       '@semantic-release/commit-analyzer': 13.0.1(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/error': 4.0.0
-      '@semantic-release/github': 12.0.5(patch_hash=4ec7a23b0ea41bc0b831ff1cb4952e95309f4fba5d71182ddea1f885d9838075)(semantic-release@25.0.3(typescript@5.9.3))
+      '@semantic-release/github': 12.0.5(patch_hash=52441cf894b1a1cbce4fd26db025093959005c4d686a31e1b26ef01b53c2c288)(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/npm': 13.1.4(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/release-notes-generator': 14.1.0(semantic-release@25.0.3(typescript@5.9.3))
       aggregate-error: 5.0.0
