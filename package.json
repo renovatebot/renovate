@@ -396,6 +396,9 @@
       "@yarnpkg/core@4.5.0>tar": "7.5.7",
       "esbuild": "0.27.2",
       "vite": "8.0.0-beta.8"
+    },
+    "patchedDependencies": {
+      "@semantic-release/github": "patches/@semantic-release__github.patch"
     }
   }
 }

@@ -9,6 +9,11 @@ overrides:
   esbuild: 0.27.2
   vite: 8.0.0-beta.8
 
+patchedDependencies:
+  '@semantic-release/github':
+    hash: 1a126c0d79b7cf94ddfbd967515194897c6acb203beb85b921911420d3ba9103
+    path: patches/@semantic-release__github.patch
+
 importers:
 
   .:
@@ -9046,7 +9051,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@semantic-release/github@12.0.5(semantic-release@25.0.3(typescript@5.9.3))':
+  '@semantic-release/github@12.0.5(patch_hash=1a126c0d79b7cf94ddfbd967515194897c6acb203beb85b921911420d3ba9103)(semantic-release@25.0.3(typescript@5.9.3))':
     dependencies:
       '@octokit/core': 7.0.6
       '@octokit/plugin-paginate-rest': 14.0.0(@octokit/core@7.0.6)
@@ -13634,7 +13639,7 @@ snapshots:
     dependencies:
       '@semantic-release/commit-analyzer': 13.0.1(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/error': 4.0.0
-      '@semantic-release/github': 12.0.5(semantic-release@25.0.3(typescript@5.9.3))
+      '@semantic-release/github': 12.0.5(patch_hash=1a126c0d79b7cf94ddfbd967515194897c6acb203beb85b921911420d3ba9103)(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/npm': 13.1.4(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/release-notes-generator': 14.1.0(semantic-release@25.0.3(typescript@5.9.3))
       aggregate-error: 5.0.0
