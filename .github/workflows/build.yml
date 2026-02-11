@@ -827,6 +827,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
+          DEBUG: semantic-release:github
 
       - run: df -h
 
