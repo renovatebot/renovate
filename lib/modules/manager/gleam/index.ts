@@ -1,8 +1,8 @@
 import { HexDatasource } from '../../datasource/hex/index.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 
-export { extractPackageFile } from './extract.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 export { getRangeStrategy } from './range.ts';
 
 export const url = 'https://gleam.run/documentation';

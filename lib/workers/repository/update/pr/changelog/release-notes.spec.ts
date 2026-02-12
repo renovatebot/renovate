@@ -1,5 +1,8 @@
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { hostRules, partial } from '~test/util.ts';
 import { clone } from '../../../../../util/clone.ts';
 import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
 import type { GithubReleaseItem } from '../../../../../util/github/graphql/types.ts';
@@ -21,9 +24,6 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { hostRules, partial } from '~test/util.ts';
 
 vi.mock('../../../../../util/host-rules.ts', () => mockDeep());
 

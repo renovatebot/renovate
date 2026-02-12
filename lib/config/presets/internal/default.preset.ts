@@ -1,6 +1,5 @@
 import type { Preset } from '../types.ts';
 
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
   approveMajorUpdates: {
     description: 'Require Dependency Dashboard approval for `major` updates.',
@@ -587,7 +586,7 @@ See [Docker - Disable digest pinning](./docker.md#disable-digest-pinning) for mo
           'project.dependencies',
           'project.optional-dependencies',
         ],
-        matchManagers: ['pep621'],
+        matchManagers: ['pep621', 'poetry'],
         semanticCommitType: 'fix',
       },
       {

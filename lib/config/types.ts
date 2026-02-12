@@ -31,8 +31,7 @@ export type RenovateSplit =
   | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type RepositoryCacheType = 'local' | string;
+export type RepositoryCacheType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -306,11 +305,9 @@ export type UpdateConfig<
 
 export type RenovateRepository =
   | string
-  | {
+  | (RenovateConfig & {
       repository: string;
-      secrets?: Record<string, string>;
-      variables?: Record<string, string>;
-    };
+    });
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';

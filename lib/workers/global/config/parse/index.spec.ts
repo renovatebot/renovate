@@ -1,4 +1,5 @@
 import upath from 'upath';
+import * as httpMock from '~test/http-mock.ts';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
 import * as _decrypt from '../../../../config/decrypt.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
@@ -7,7 +8,6 @@ import { getParentDir, readSystemFile } from '../../../../util/fs/index.ts';
 import getArgv from './__fixtures__/argv.ts';
 import * as _fileConfigParser from './file.ts';
 import * as _hostRulesFromEnv from './host-rules-from-env.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('../../../../modules/datasource/npm.ts');
 vi.mock('../../../../util/fs/index.ts');

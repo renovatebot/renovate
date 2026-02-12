@@ -8,7 +8,6 @@ import { addPresets } from './auto-generate-replacements.ts';
 
 const { $schema: _, ...replacementPresets } = replacementGroupsJson;
 
-/* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = replacementPresets;
 
 const muiReplacement: Replacement[] = [

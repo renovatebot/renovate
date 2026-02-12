@@ -5,8 +5,8 @@ import type { Preset } from '../types.ts';
 function loadAbandonmentPresets(): Record<string, Preset> {
   const packageRules: PackageRule[] = [
     {
-      matchPackageNames: ['*'],
       abandonmentThreshold: '1 year',
+      matchPackageNames: ['*'],
     },
   ];
 
@@ -20,9 +20,9 @@ function loadAbandonmentPresets(): Record<string, Preset> {
     )) {
       const abandonmentThreshold = threshold === 'eternal' ? null : threshold;
       packageRules.push({
+        abandonmentThreshold,
         matchDatasources: [datasource],
         matchPackageNames: [packageName],
-        abandonmentThreshold,
       });
     }
   }

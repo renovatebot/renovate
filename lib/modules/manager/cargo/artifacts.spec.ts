@@ -1,5 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -8,8 +10,6 @@ import * as _hostRules from '../../../util/host-rules.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as cargo from './index.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, git } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/host-rules.ts', () => mockDeep());

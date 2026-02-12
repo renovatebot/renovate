@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -11,8 +13,6 @@ import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as _artifactsExtra from './artifacts-extra.ts';
 import * as gomod from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 type FS = typeof import('../../../util/fs/index.ts');
 

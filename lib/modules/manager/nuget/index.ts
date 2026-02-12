@@ -3,8 +3,8 @@ import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 
-export { extractPackageFile } from './extract.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 export { bumpPackageVersion } from './update.ts';
 
 export const displayName = 'NuGet';

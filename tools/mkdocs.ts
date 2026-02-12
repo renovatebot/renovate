@@ -16,6 +16,7 @@ const program = new Command('pnpm mkdocs').description('Run mkdocs');
 program
   .command('build', { isDefault: true })
   .description('Build mkdocs')
+  .option('--version <version>', 'the current version of the Renovate CLI')
   .option('--no-build', 'do not build docs from source')
   .option('--no-strict', 'do not build in strict mode')
   .action(async (opts) => {
@@ -28,6 +29,10 @@ program
     const res = exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
+      env: {
+        ...process.env,
+        RENOVATE_VERSION: opts.version ?? '',
+      },
     });
     checkResult(res);
   });
@@ -56,7 +61,7 @@ async function prepareDocs(opts: any): Promise<void> {
   logger.info('Building docs');
   if (opts.build) {
     logger.info('* generate docs');
-    await generateDocs('tools/mkdocs', false);
+    await generateDocs('tools/mkdocs', false, opts.version);
   } else {
     logger.info('* using prebuild docs from build step');
     await fs.copy('tmp/docs', 'tools/mkdocs/docs');

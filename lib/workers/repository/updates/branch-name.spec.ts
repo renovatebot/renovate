@@ -1,6 +1,6 @@
+import { logger, partial } from '~test/util.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchName } from './branch-name.ts';
-import { logger, partial } from '~test/util.ts';
 
 describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
