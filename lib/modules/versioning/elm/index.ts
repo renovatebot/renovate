@@ -23,6 +23,7 @@ const {
   patch: getPatch,
   valid,
   gt: isGreaterThan,
+  gte: isGreaterThanOrEqual,
   eq: equals,
 } = semver;
 
@@ -91,10 +92,7 @@ function matches(version: string, range: string): boolean {
   }
   const { lower, upper } = parsed;
   // version >= lower && version < upper
-  return (
-    (isGreaterThan(version, lower) || equals(version, lower)) &&
-    isGreaterThan(upper, version)
-  );
+  return isGreaterThanOrEqual(version, lower) && isGreaterThan(upper, version);
 }
 
 /**
@@ -214,10 +212,9 @@ function getNewValue({
         return currentValue;
       }
       // Extend upper bound if newVersion is greater than or equal to upper
-      const newUpper =
-        isGreaterThan(newVersion, upper) || equals(newVersion, upper)
-          ? nextMajor(newVersion)
-          : upper;
+      const newUpper = isGreaterThanOrEqual(newVersion, upper)
+        ? nextMajor(newVersion)
+        : upper;
       return `${lower} <= v < ${newUpper}`;
     }
 
