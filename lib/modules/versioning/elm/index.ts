@@ -167,12 +167,7 @@ function isCompatible(version: string): boolean {
  * Calculate the next major version (e.g., "1.2.3" -> "2.0.0")
  */
 function nextMajor(version: string): string {
-  const major = getMajor(version);
-  /* v8 ignore next 3 -- defensive check, version is validated earlier */
-  if (major === null) {
-    return version;
-  }
-  return `${major + 1}.0.0`;
+  return `${getMajor(version) + 1}.0.0`;
 }
 
 /**
