@@ -1489,7 +1489,7 @@ None detected
             'These dependencies are either deprecated or have replacements available',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser)  | ![Unavailable]',
+            '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             'npm | [express-handlebars](https://redirect.github.com/express-handlebars/express-handlebars) | ![Available]',
