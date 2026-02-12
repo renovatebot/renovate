@@ -334,7 +334,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.27.2",
+    "esbuild": "0.27.3",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
@@ -394,7 +394,7 @@
     ],
     "overrides": {
       "@yarnpkg/core@4.5.0>tar": "7.5.7",
-      "esbuild": "0.27.2",
+      "esbuild": "0.27.3",
       "vite": "8.0.0-beta.11"
     }
   }
