@@ -283,6 +283,7 @@ export interface ManagerApi extends ModuleApi {
 
   categories?: Category[];
   supportsLockFileMaintenance?: boolean;
+  lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
 
