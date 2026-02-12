@@ -1,7 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { isTruthy } from '@sindresorhus/is';
-import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
@@ -13,6 +12,7 @@ import {
   statLocalFile,
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
