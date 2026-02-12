@@ -1,4 +1,3 @@
-import semver from 'semver';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { api as npm } from '../npm/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
@@ -15,10 +14,8 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-const { validRange } = semver;
-
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): boolean => {
+export function isValid(input: string): boolean {
   // Allow "latest" as a valid version
   // https://github.com/denoland/deno_semver/blob/fe7c48e72e09116d17a64f9e58e6b28d1669b8e5/src/npm.rs#L1486
   if (input === 'latest') {
@@ -27,8 +24,8 @@ export const isValid = (input: string): boolean => {
   // the other, see the following test cases
   // https://github.com/denoland/deno_semver/blob/fe7c48e72e09116d17a64f9e58e6b28d1669b8e5/src/npm.rs#L621
 
-  return !!validRange(input);
-};
+  return npm.isValid(input);
+}
 
 export function getNewValue({
   currentValue,
