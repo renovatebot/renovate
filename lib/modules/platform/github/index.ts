@@ -99,6 +99,7 @@ import type {
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
+import { warnIfDefaultGitAuthorEmail } from './utils.ts';
 
 export const id = 'github';
 
@@ -222,6 +223,9 @@ export async function initPlatform({
     renovateUsername,
     token,
   };
+
+  warnIfDefaultGitAuthorEmail(platformResult.gitAuthor, platformConfig.isGhe);
+
   if (
     getEnv().RENOVATE_X_GITHUB_HOST_RULES &&
     platformResult.endpoint === 'https://api.github.com/'
