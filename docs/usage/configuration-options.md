@@ -2590,30 +2590,8 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-| Manager           | Lockfile                                           |
-| ----------------- | -------------------------------------------------- |
-| `bun`             | `bun.lockb`, `bun.lock`                            |
-| `bundler`         | `Gemfile.lock`                                     |
-| `cargo`           | `Cargo.lock`                                       |
-| `composer`        | `composer.lock`                                    |
-| `conan`           | `conan.lock`                                       |
-| `devbox`          | `devbox.lock`                                      |
-| `gleam`           | `manifest.toml`                                    |
-| `gradle`          | `gradle.lockfile`                                  |
-| `helmv3`          | `Chart.lock`                                       |
-| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
-| `mix`             | `mix.lock`                                         |
-| `nix`             | `flake.lock`                                       |
-| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
-| `nuget`           | `packages.lock.json`                               |
-| `pep621`          | `pdm.lock`, `uv.lock`                              |
-| `pip-compile`     | `requirements.txt`                                 |
-| `pipenv`          | `Pipfile.lock`                                     |
-| `pixi`            | `pixi.lock`                                        |
-| `poetry`          | `poetry.lock`                                      |
-| `pub`             | `pubspec.lock`                                     |
-| `terraform`       | `.terraform.lock.hcl`                              |
-| `uv`              | `uv.lock`                                          |
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
+<!-- Autogenerate end -->
 
 Support for new lock files may be added via feature request.
 
