@@ -31,7 +31,9 @@ const {
  * - Lower bound is inclusive (<=)
  * - Upper bound is exclusive (<)
  */
-const elmRangeRegex = regEx(/^(\d+\.\d+\.\d+)\s*<=\s*v\s*<\s*(\d+\.\d+\.\d+)$/);
+const elmRangeRegex = regEx(
+  /^(?<lower>\d+\.\d+\.\d+)\s*<=\s*v\s*<\s*(?<upper>\d+\.\d+\.\d+)$/,
+);
 
 /**
  * Parse Elm range constraint into lower and upper bounds
@@ -42,8 +44,7 @@ function parseElmRange(input: string): { lower: string; upper: string } | null {
   if (!match) {
     return null;
   }
-  const lower = match[1];
-  const upper = match[2];
+  const { lower, upper } = match.groups!;
   if (isGreaterThan(lower, upper)) {
     return null;
   }
