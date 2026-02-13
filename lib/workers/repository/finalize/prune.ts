@@ -27,9 +27,9 @@ async function cleanUpBranches(
 
   for (const branchName of remainingBranches) {
     try {
-      // get base branch from branch name if base branches are configured
-      // use default branch if no base branches are configured
-      // use defaul branch name if no match (can happen when base branches are configured later)
+      // try to extract base branch from branch name (for multiple base branches)
+      // fall back to the configured base branch, then the repository default
+      // (extraction can fail for branches created before baseBranches was configured)
       const baseBranch =
         baseBranchRe?.exec(branchName)?.[1] ??
         config.baseBranches?.[0] ??
