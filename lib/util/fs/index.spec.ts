@@ -136,17 +136,32 @@ describe('util/fs/index', () => {
   });
 
   describe('deleteLocalFile', () => {
-    it('throws if platform is local', async () => {
-      GlobalConfig.set({ platform: 'local' });
-      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
-    });
-
     it('deletes file', async () => {
       const filePath = `${localDir}/foo/bar/file.txt`;
       await fs.outputFile(filePath, 'foobar');
 
       expect(await fs.pathExists(filePath)).toBeTrue();
       await deleteLocalFile('foo/bar/file.txt');
+      expect(await fs.pathExists(filePath)).toBeFalse();
+    });
+
+    it('throws if platform is local and dryRun is set', async () => {
+      GlobalConfig.set({ platform: 'local', dryRun: 'full', localDir });
+      const filePath = `${localDir}/foo/bar/file.txt`;
+      await fs.outputFile(filePath, 'foobar');
+
+      expect(await fs.pathExists(filePath)).toBeTrue();
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+    });
+
+    it('deletes file if platform is local and dryRun is null', async () => {
+      GlobalConfig.set({ platform: 'local', localDir });
+      const filePath = `${localDir}/test-delete.txt`;
+      await fs.outputFile(filePath, 'content');
+      expect(await fs.pathExists(filePath)).toBeTrue();
+
+      await deleteLocalFile('test-delete.txt');
+
       expect(await fs.pathExists(filePath)).toBeFalse();
     });
   });
