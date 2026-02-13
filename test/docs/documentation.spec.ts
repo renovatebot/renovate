@@ -203,7 +203,7 @@ describe('docs/documentation', () => {
 
         for (const key in table) {
           const val = table[key];
-          md += `| ${key} | ${val} |\n`;
+          md += `| \`${key}\` | ${val} |\n`;
         }
 
         return md;
