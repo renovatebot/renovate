@@ -12,13 +12,17 @@ You can store your Renovate configuration file in one of these locations:
 
 1. `renovate.json`
 1. `renovate.json5`
+1. `renovate.jsonc`
 1. `.github/renovate.json`
 1. `.github/renovate.json5`
+1. `.github/renovate.jsonc`
 1. `.gitlab/renovate.json`
 1. `.gitlab/renovate.json5`
+1. `.gitlab/renovate.jsonc`
 1. `.renovaterc`
 1. `.renovaterc.json`
 1. `.renovaterc.json5`
+1. `.renovaterc.jsonc`
 1. `package.json` _(within a `"renovate"` section)_
 
 Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
@@ -30,8 +34,8 @@ The bot first checks all the files in the `configFileNames` array before checkin
 
 <!-- prettier-ignore -->
 !!! note
-     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
-     We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
+     Renovate supports `JSONC` for `.json` and `.jsonc` files and any config files without file extension (e.g. `.renovaterc`).
+     We also recommend you prefer using `JSONC` within a `.json` or `.jsonc` file to using a `.json5` file if you want to add comments.
 
 When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
 Renovate stops the search after it finds the first match.
