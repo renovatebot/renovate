@@ -1,4 +1,4 @@
-import { api as semver } from './index.ts';
+import { api } from './index.ts';
 
 describe('modules/versioning/deno/index', () => {
   it.each`
@@ -24,7 +24,7 @@ describe('modules/versioning/deno/index', () => {
     ${'renovatebot/renovate#main'}                   | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
   `('isValid("$version") === $isValid', ({ version, isValid }) => {
-    const res = semver.isValid(version);
+    const res = api.isValid(version);
     expect(res).toBe(isValid);
   });
 
@@ -40,7 +40,7 @@ describe('modules/versioning/deno/index', () => {
   `(
     'getSatisfyingVersion("$versions","$range") === $maxSatisfying',
     ({ versions, range, maxSatisfying }) => {
-      expect(semver.getSatisfyingVersion(versions, range)).toBe(maxSatisfying);
+      expect(api.getSatisfyingVersion(versions, range)).toBe(maxSatisfying);
     },
   );
 
@@ -51,7 +51,7 @@ describe('modules/versioning/deno/index', () => {
     ${'1.x'}           | ${false}
     ${'latest'}        | ${false}
   `('isSingleVersion("$version") === $isSingle', ({ version, isSingle }) => {
-    const res = !!semver.isSingleVersion(version);
+    const res = !!api.isSingleVersion(version);
     expect(res).toBe(isSingle);
   });
 
@@ -66,7 +66,7 @@ describe('modules/versioning/deno/index', () => {
     ${'~1.0.0'} | ${'~0.9.0'} | ${false}
     ${'^1.0.0'} | ${'^0.9.0'} | ${false}
   `('subset("$a", "$b") === $expected', ({ a, b, expected }) => {
-    expect(semver.subset!(a, b)).toBe(expected);
+    expect(api.subset!(a, b)).toBe(expected);
   });
 
   it.each`
@@ -136,7 +136,7 @@ describe('modules/versioning/deno/index', () => {
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      const res = semver.getNewValue({
+      const res = api.getNewValue({
         currentValue,
         rangeStrategy,
         currentVersion,
