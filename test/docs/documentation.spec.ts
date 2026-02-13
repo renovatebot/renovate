@@ -213,10 +213,10 @@ describe('docs/documentation', () => {
         const table = getSupportedLockFilesTable('configuration-options.md');
         expect(Object.keys(table).length).toBeGreaterThan(0);
 
-        const expected = getExpectedSupportedLockFilesTableMarkdown(table);
-        const actual = getExpectedSupportedLockFilesTableMarkdown(
+        const expected = getExpectedSupportedLockFilesTableMarkdown(
           getExpectedSupportedLockFilesTable(),
         );
+        const actual = getExpectedSupportedLockFilesTableMarkdown(table);
 
         try {
           expect(
