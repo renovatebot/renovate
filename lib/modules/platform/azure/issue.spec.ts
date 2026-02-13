@@ -561,6 +561,53 @@ describe('modules/platform/azure/issue', () => {
       // The method always returns 'updated' for open issues, even if content is same
       expect(result).toEqual('updated');
     });
+
+    it('should return null when trying to reopen issue without number', async () => {
+      const mockClosedIssueWithoutNumber = {
+        title: '[repo] Test Issue',
+        state: 'closed',
+        body: 'Old content',
+        // number is undefined
+      };
+
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        mockClosedIssueWithoutNumber,
+      ]);
+
+      const result = await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New content',
+        shouldReOpen: true,
+      });
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Cannot reopen issue without number',
+      );
+    });
+
+    it('should return null when trying to update issue without number', async () => {
+      const mockOpenIssueWithoutNumber = {
+        title: '[repo] Old Title',
+        state: 'open',
+        body: 'Old content',
+        // number is undefined
+      };
+
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        mockOpenIssueWithoutNumber,
+      ]);
+
+      const result = await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New content',
+      });
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Cannot update issue without number',
+      );
+    });
   });
 
   describe('integration with main azure Platform', () => {
