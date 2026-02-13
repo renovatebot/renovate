@@ -161,6 +161,7 @@ export interface EnsureIssueConfig {
   once?: boolean;
   shouldReOpen?: boolean;
   confidential?: boolean;
+  isPinned?: boolean;
 }
 export interface BranchStatusConfig {
   branchName: string;

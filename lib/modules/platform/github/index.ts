@@ -76,6 +76,7 @@ import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
+  pinIssueMutation,
   repoInfoQuery,
 } from './graphql.ts';
 import { GithubIssueCache, GithubIssue as Issue } from './issue.ts';
@@ -1374,6 +1375,14 @@ async function closeIssue(issueNumber: number): Promise<void> {
   GithubIssueCache.updateIssue(closedIssue);
 }
 
+async function pinIssue(issueId: string): Promise<void> {
+  logger.debug(`pinIssue(${issueId})`);
+  await githubApi.requestGraphql(pinIssueMutation, {
+    variables: { issueId },
+  });
+  logger.debug('Issue pinned');
+}
+
 export async function ensureIssue({
   title,
   reuseTitle,
@@ -1381,6 +1390,7 @@ export async function ensureIssue({
   labels,
   once = false,
   shouldReOpen = true,
+  isPinned = false,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
   /* v8 ignore next */
@@ -1449,6 +1459,9 @@ export async function ensureIssue({
         );
         GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
+        if (isPinned && updatedIssue.node_id) {
+          await pinIssue(updatedIssue.node_id);
+        }
         return 'updated';
       }
     }
@@ -1466,6 +1479,9 @@ export async function ensureIssue({
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
+    if (isPinned && createdIssue.node_id) {
+      await pinIssue(createdIssue.node_id);
+    }
     return 'created';
   } catch (err) /* v8 ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
