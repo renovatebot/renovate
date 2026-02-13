@@ -462,7 +462,7 @@ export async function ensureDependencyDashboard(
       const deps = deprecatedPackages[manager];
       for (const depName of Object.keys(deps).sort()) {
         const { hasReplacement, sourceUrl } = deps[depName];
-        const packageName = formatAsMarkdownLink(name(depName, sourceUrl);
+        const packageName = formatAsMarkdownLink(depName, sourceUrl);
 
         issueBody += `| ${manager} | ${packageName} | ${
           hasReplacement
@@ -724,7 +724,7 @@ export function getAbandonedPackagesMd(
       const formattedDate = mostRecentTimestamp
         ? DateTime.fromISO(mostRecentTimestamp).toFormat('yyyy-MM-dd')
         : 'unknown';
-      const packageName = formatAsMarkdownLink(name(depName, sourceUrl);
+      const packageName = formatAsMarkdownLink(depName, sourceUrl);
       abandonedMd += `| ${manager} | ${packageName} | \`${formattedDate}\` |\n`;
     }
   }
