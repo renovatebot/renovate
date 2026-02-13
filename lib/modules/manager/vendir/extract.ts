@@ -53,10 +53,8 @@ export function extractGitSource(
   const httpUrl = getHttpUrl(gitSource.url);
   return {
     depName: httpUrl,
-    packageName: httpUrl,
     depType: 'GitSource',
     currentValue: gitSource.ref,
-    registryUrls: [httpUrl],
     datasource: GitRefsDatasource.id,
   };
 }

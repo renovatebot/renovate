@@ -155,6 +155,184 @@ describe('modules/platform/github/index', () => {
       ).toMatchSnapshot();
     });
 
+    describe('when using the default gitAuthor', () => {
+      describe('when gitAuthor is not set', () => {
+        describe('when no email access', () => {
+          it('if on GitHub.com, a warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).toHaveBeenCalledWith(
+              {
+                documentationUrl:
+                  'https://github.com/renovatebot/renovate/discussions/39309',
+              },
+              'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+            );
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+
+        describe('when email access', () => {
+          it('no warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+      });
+
+      describe('when explicitly set to only email address', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'renovate@whitesourcesoftware.com',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when explicitly set to RFC-RFC5322 format', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
+    });
+
     it('should support default endpoint with email', async () => {
       httpMock
         .scope(githubApiHost)

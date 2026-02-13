@@ -283,6 +283,9 @@
     "docusaurus": "https://github.com/facebook/docusaurus",
     "dot-swashbuckle": "https://github.com/Havunen/DotSwashbuckle",
     "dotnet": [
+      "https://asp.net/",
+      "https://docs.microsoft.com/ef/core/",
+      "https://dot.net/",
       "https://github.com/dotnet/aspnetcore",
       "https://github.com/dotnet/dotnet",
       "https://github.com/dotnet/efcore",
@@ -518,6 +521,7 @@
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
+    "orpc": "https://github.com/middleapi/orpc",
     "oxlint": [
       "https://github.com/oxc-project/oxc",
       "https://github.com/oxc-project/eslint-plugin-oxlint"

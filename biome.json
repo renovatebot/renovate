@@ -25,6 +25,7 @@
     "includes": [
       "**",
       "!**/node_modules",
+      "!.worktrees/**/*",
       "!**/dist",
       "!**/coverage",
       "!**/__fixtures__/**",

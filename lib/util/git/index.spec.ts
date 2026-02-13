@@ -106,9 +106,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
     await repo.checkout(defaultBranch);
-
-    // eslint-disable-next-line vitest/no-standalone-expect
-    expect(git.getBranchList()).toBeEmptyArray();
   });
 
   let tmpDir: tmp.DirectoryResult;

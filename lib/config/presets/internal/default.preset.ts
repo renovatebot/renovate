@@ -587,7 +587,7 @@ See [Docker - Disable digest pinning](./docker.md#disable-digest-pinning) for mo
           'project.dependencies',
           'project.optional-dependencies',
         ],
-        matchManagers: ['pep621'],
+        matchManagers: ['pep621', 'poetry'],
         semanticCommitType: 'fix',
       },
       {

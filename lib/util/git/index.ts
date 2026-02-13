@@ -114,9 +114,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
     round++;
   }
 
-  // Can't be `undefined` here.
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
-  throw lastError;
+  throw lastError!;
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
