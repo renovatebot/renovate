@@ -133,7 +133,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: '1.0.0',
-        extractVersion: '^release-(?<version>.+)',
+        extractVersion: '^release\\-(?<version>.+)',
       });
     });
 
@@ -146,7 +146,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: 'v1.0.0',
-        extractVersion: '^version-(?<version>.+)',
+        extractVersion: '^version\\-(?<version>.+)',
       });
     });
 

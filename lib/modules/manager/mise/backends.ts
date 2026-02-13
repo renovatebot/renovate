@@ -4,7 +4,7 @@ import {
   isUndefined,
   isUrlString,
 } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -128,16 +128,14 @@ export function createGithubToolConfig(
   const prefix = toolOptions.version_prefix;
 
   if (isNonEmptyString(prefix)) {
-    // Custom prefix - escape special regex chars
-    const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    extractVersion = `^${escapedPrefix}(?<version>.+)`;
+    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
   }
 
   return {
     packageName: name,
     datasource: GithubReleasesDatasource.id,
     currentValue: version,
-    ...(isString(extractVersion) ? { extractVersion } : {}),
+    ...(extractVersion && { extractVersion }),
   };
 }
 

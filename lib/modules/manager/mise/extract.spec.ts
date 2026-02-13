@@ -712,7 +712,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '1.0.0',
             packageName: 'some/repo',
             datasource: 'github-releases',
-            extractVersion: '^release-(?<version>.+)',
+            extractVersion: '^release\\-(?<version>.+)',
           },
           {
             depName: 'github:other/repo',
