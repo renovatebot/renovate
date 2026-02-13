@@ -4922,7 +4922,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 
 <!-- prettier-ignore -->
 !!! note
-    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, `commitHourlyLimit`, or `schedule`.
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
     This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
     In short: vulnerability alerts "skip the line".
 

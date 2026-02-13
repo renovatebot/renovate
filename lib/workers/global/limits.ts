@@ -89,6 +89,10 @@ function handleConcurrentLimits(
 
     // if a limit is defined ( >0 ) and limit reached return true
     if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
+      logger.debug(
+        { hourlyCommitCount, hourlyCommitLimit },
+        'Hourly commits limit reached',
+      );
       return true;
     }
 
