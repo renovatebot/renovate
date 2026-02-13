@@ -6,6 +6,20 @@ export const PnpmCatalogs = z.object({
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
 
+export const PnpmConfigDependencies = z.object({
+  configDependencies: z.optional(
+    z.record(
+      z.union([
+        z.string(),
+        z.object({
+          integrity: z.string(),
+          tarball: z.string(),
+        }),
+      ]),
+    ),
+  ),
+});
+
 export const YarnCatalogs = z.object({
   catalog: z.optional(z.record(z.string())),
   catalogs: z.optional(z.record(z.record(z.string()))).catch(undefined),
@@ -34,7 +48,8 @@ export const PnpmWorkspaceFile = z
     minimumReleaseAge: z.number().nullish(),
     minimumReleaseAgeExclude: z.array(z.string()).optional(),
   })
-  .and(PnpmCatalogs);
+  .and(PnpmCatalogs)
+  .and(PnpmConfigDependencies);
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
 export const PackageManager = z
