@@ -607,6 +607,12 @@ export interface RenovateOptionBase {
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
   globalOnly?: boolean;
+  /**
+   * If true, the option needs to appear in both docs/usage/configuration-options.md
+   * and docs/usage/self-hosted-configuration.md.
+   * This is purely a documentation validation option, no runtime implications.
+   */
+  docAlsoGlobal?: boolean;
 
   inheritConfigSupport?: boolean;
 
