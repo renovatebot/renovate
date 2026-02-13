@@ -39,6 +39,18 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 }
 ```
 
+### Non-semver refs (branches and feature tags)
+
+Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
+
+**Routing logic:**
+
+- `actions/checkout@v4.2.0` → `github-tags` datasource (version updates)
+- `actions/checkout@v4` → `github-tags` datasource (version updates)
+- `some-action@main` → `github-digest` datasource (digest updates only)
+
+When the action reference doesn't look like a version number (i.e., doesn't match `/^v?\d+/`), Renovate routes to the `github-digest` datasource which fetches both tags and branches. Since these refs have no version ordering, only digest pinning updates are supported.
+
 ### Non-support of Variables
 
 Renovate ignores any GitHub runners which are configured in variables.
