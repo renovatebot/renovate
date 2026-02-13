@@ -972,6 +972,70 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('retries setting branch status checks after PR creation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 5 }),
+      });
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      await branchWorker.processBranch({
+        ...config,
+        stabilityStatus: 'green',
+        statusCheckNames: {
+          minimumReleaseAge: 'renovate/stability-days',
+          mergeConfidence: null,
+          configValidation: null,
+          artifactError: null,
+        },
+      });
+      // Called twice: once before ensurePr, once after PR creation
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry setting branch status checks when PR is not created', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+      });
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      await branchWorker.processBranch({
+        ...config,
+        stabilityStatus: 'green',
+        statusCheckNames: {
+          minimumReleaseAge: 'renovate/stability-days',
+          mergeConfidence: null,
+          configValidation: null,
+          artifactError: null,
+        },
+      });
+      // Called only once before ensurePr
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+    });
+
     it('returns if branch exists but updated', async () => {
       expect.assertions(3);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(

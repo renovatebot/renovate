@@ -1135,14 +1135,6 @@ describe('modules/platform/gitlab/index', () => {
     it('should log message that failed to retrieve commit pipeline', async () => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
-        .reply(200, {})
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
-        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
@@ -1164,45 +1156,36 @@ describe('modules/platform/gitlab/index', () => {
       );
     });
 
-    it.each(states)('sets branch status %s', async (state) => {
-      const scope = await initRepo();
-      scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
-        .reply(200, {})
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
-        .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
-        .times(3)
-        .reply(200, {});
+    it.each(states)(
+      'skips setting branch status %s when no pipeline is found',
+      async (state) => {
+        const scope = await initRepo();
+        scope
+          .get(
+            '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          )
+          .times(3)
+          .reply(200, {});
 
-      await expect(
-        gitlab.setBranchStatus({
-          branchName: 'some-branch',
-          context: 'some-context',
-          description: 'some-description',
-          state,
-          url: 'some-url',
-        }),
-      ).toResolve();
-    });
+        await expect(
+          gitlab.setBranchStatus({
+            branchName: 'some-branch',
+            context: 'some-context',
+            description: 'some-description',
+            state,
+            url: 'some-url',
+          }),
+        ).toResolve();
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Skipping branch status update because no pipeline was found',
+        );
+      },
+    );
 
     it('waits for 1000ms by default', async () => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
-        .reply(200, {})
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
-        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
@@ -1263,14 +1246,6 @@ describe('modules/platform/gitlab/index', () => {
 
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
-        .reply(200, {})
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
-        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
@@ -1308,14 +1283,6 @@ describe('modules/platform/gitlab/index', () => {
 
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
-        .reply(200, {})
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
-        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
