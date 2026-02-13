@@ -210,8 +210,8 @@ export async function readDashboardBody(
   Object.assign(config, dashboardChecks);
 }
 
-function formatPackageName(depName: string, sourceUrl?: string | null): string {
-  return sourceUrl ? `[${depName}](${sourceUrl})` : `\`${depName}\``;
+function formatAsMarkdownLink(name: string, url?: string | null): string {
+  return url ? `[${name}](${url})` : `\`${name}\``;
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
@@ -462,7 +462,7 @@ export async function ensureDependencyDashboard(
       const deps = deprecatedPackages[manager];
       for (const depName of Object.keys(deps).sort()) {
         const { hasReplacement, sourceUrl } = deps[depName];
-        const packageName = formatPackageName(depName, sourceUrl);
+        const packageName = formatAsMarkdownLink(name(depName, sourceUrl);
 
         issueBody += `| ${manager} | ${packageName} | ${
           hasReplacement
@@ -724,7 +724,7 @@ export function getAbandonedPackagesMd(
       const formattedDate = mostRecentTimestamp
         ? DateTime.fromISO(mostRecentTimestamp).toFormat('yyyy-MM-dd')
         : 'unknown';
-      const packageName = formatPackageName(depName, sourceUrl);
+      const packageName = formatAsMarkdownLink(name(depName, sourceUrl);
       abandonedMd += `| ${manager} | ${packageName} | \`${formattedDate}\` |\n`;
     }
   }
