@@ -62,6 +62,7 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`asdf`](https://mise.jdx.dev/dev-tools/backends/asdf.html)
 - [`aqua`](https://mise.jdx.dev/dev-tools/backends/aqua.html)
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
+- [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
