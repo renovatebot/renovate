@@ -1,9 +1,7 @@
-import { getConfig } from '../../../../config/defaults.ts';
-import { GlobalConfig } from '../../../../config/global.ts';
-import { createOnboardingBranch } from './create.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { createOnboardingBranch } from './create.ts';
 
 vi.mock('./config.ts', () => ({
