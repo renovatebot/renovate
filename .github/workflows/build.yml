@@ -879,6 +879,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      # Per https://github.com/renovatebot/helm-charts/issues/3752, when we migrated the docs site from renovatebot/renovatebot.github.io to renovatebot/renovate, the `/helm-charts/` repository would no longer work as a subdomain, due to a known GitHub Pages limitation
+      - name: Mirror helm-charts/index.yaml from helm-charts' GitHub Pages site
+        run: |
+          mkdir tools/mkdocs/site/helm-charts
+          curl --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
