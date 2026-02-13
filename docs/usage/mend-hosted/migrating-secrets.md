@@ -78,6 +78,10 @@ When you migrate a secret from a repository, make sure you are adding the secret
 4. Wait for the confirmation dialog: **“Successfully stored secret”**.
    ![Successfully stored secret](../assets/images/app-settings/stored-secret-plaintext.png)
 
+### Using the API
+
+The [Mend Developer Platform has an API](https://api-docs.mend.io/developer-platform/1.0), allowing programmatic management of repo secrets and org secrets.
+
 ## Troubleshooting
 
 ### Secret is stored successfully, but it doesn't work when used in the app
@@ -90,3 +94,4 @@ The secret might be wrong. Try uploading the secret again.
 ## Related links
 
 - [Using Secrets with Mend Cloud Apps](credentials.md)
+- [Mend Developer Platform API (1.0)](https://api-docs.mend.io/developer-platform/1.0)

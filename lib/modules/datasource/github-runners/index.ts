@@ -1,6 +1,6 @@
-import { id as dockerVersioningId } from '../../versioning/docker';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 
 export class GithubRunnersDatasource extends Datasource {
   static readonly id = 'github-runners';
@@ -27,9 +27,11 @@ export class GithubRunnersDatasource extends Datasource {
       { version: '16.04', isDeprecated: true },
     ],
     macos: [
-      { version: '15', isStable: false },
-      { version: '15-large', isStable: false },
-      { version: '15-xlarge', isStable: false },
+      { version: '26', isStable: false },
+      { version: '26-xlarge', isStable: false },
+      { version: '15' },
+      { version: '15-large' },
+      { version: '15-xlarge' },
       { version: '14' },
       { version: '14-large' },
       { version: '14-xlarge' },

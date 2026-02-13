@@ -57,7 +57,7 @@ Failure to disclose this is first and foremost rude to the human operators on th
 
 Please be respectful to maintainers and disclose AI assistance.
 
-_The above AI Assitance Notice is largely copy/pasted from the Ghostty project with thanks to `@mitchellh`_.
+_The above AI Assistance Notice is largely copy/pasted from the Ghostty project with thanks to `@mitchellh`_.
 
 ### Tests
 
@@ -93,6 +93,16 @@ And some options:
 
 - `--verbose=false` to avoid the test list
 - `--coverage=false` to avoid collecting coverage, faster for the part you need the test to pass
+
+### Quick Local CI Check
+
+For a local check that mirrors CI:
+
+```bash
+pnpm check
+```
+
+This runs all checks in parallel: auto-fixes, lint, type-check, and only the test shards affected by your changes.
 
 ## Do not force push to your pull request branch
 

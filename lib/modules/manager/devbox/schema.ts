@@ -1,14 +1,15 @@
 import { z } from 'zod';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   Jsonc,
   LooseArray,
   LooseRecord,
   withDebugMessage,
-} from '../../../util/schema-utils';
-import { DevboxDatasource } from '../../datasource/devbox';
-import { api as devboxVersioning } from '../../versioning/devbox';
-import type { PackageDependency } from '../types';
+} from '../../../util/schema-utils/index.ts';
+import { DevboxDatasource } from '../../datasource/devbox/index.ts';
+import { api } from '../../versioning/devbox/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { devboxToolVersioning } from './tool-versioning.ts';
 
 const DevboxEntry = z
   .array(z.string())
@@ -30,7 +31,15 @@ const DevboxEntry = z
 
     dep.currentValue = currentValue;
 
-    if (!devboxVersioning.isValid(currentValue)) {
+    const versioning = devboxToolVersioning[depName];
+    if (versioning) {
+      dep.versioning = versioning.id;
+    }
+
+    if (
+      !(versioning?.api ?? api).isValid(currentValue) ||
+      !(versioning?.api ?? api).isSingleVersion(currentValue)
+    ) {
       logger.debug(
         { depName },
         'Devbox: skipping invalid devbox dependency in devbox JSON file.',

@@ -1,11 +1,12 @@
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import type { BranchStatus } from '../../../../types';
-import { isActiveConfidenceLevel } from '../../../../util/merge-confidence';
-import type { MergeConfidence } from '../../../../util/merge-confidence/types';
-import { coerceString } from '../../../../util/string';
-import { joinUrlParts } from '../../../../util/url';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import type { BranchStatus } from '../../../../types/index.ts';
+import { isActiveConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
+import { coerceString } from '../../../../util/string.ts';
+import { joinUrlParts } from '../../../../util/url.ts';
 
 export async function resolveBranchStatus(
   branchName: string,
@@ -44,6 +45,12 @@ async function setStatusCheck(
   if (existingState === state) {
     logger.debug(`Status check ${context} is already up-to-date`);
   } else {
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        `DRY-RUN: Would update ${context} status check state to ${state}`,
+      );
+      return;
+    }
     logger.debug(`Updating ${context} status check state to ${state}`);
     await platform.setBranchStatus({
       branchName,

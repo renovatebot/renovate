@@ -7,14 +7,14 @@ import {
   GitPullRequestMergeStrategy,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { MergeStrategy } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { HostRule, PrState } from '../../../types';
-import type { GitOptions } from '../../../types/git';
-import { addSecretForSanitizing } from '../../../util/sanitize';
-import { toBase64 } from '../../../util/string';
-import { getPrBodyStruct } from '../pr-body';
-import type { AzurePr } from './types';
+import type { MergeStrategy } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { GitOptions } from '../../../types/git.ts';
+import type { HostRule, PrState } from '../../../types/index.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
+import { toBase64 } from '../../../util/string.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { AzurePr } from './types.ts';
 
 export function getGitStatusContextCombinedName(
   context: GitStatusContext | null | undefined,

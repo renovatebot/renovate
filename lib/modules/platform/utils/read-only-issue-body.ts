@@ -1,21 +1,13 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 export function readOnlyIssueBody(body: string): string {
-  return (
-    body
-      .replace(regEx(/ To.*?, click on a checkbox below\./g), '')
-      .replace(regEx(/\[ ] <!-- \w*-branch.*-->/g), '')
-      .replace(regEx(/- \[ ] <!-- rebase-all-open-prs -->.*/g), '')
-      .replace(regEx(/ - \[ ] <!-- create-all-rate-limited-prs -->.*/g), '')
-      // Remove config migration checkbox and related text
-      .replace(regEx(/ - \[ ] <!-- create-config-migration-pr -->.*/g), '')
-      .replace(
-        regEx(
-          / - \[ ]\s+Select this checkbox to let Renovate create an automated Config Migration PR\./g,
-        ),
-        '',
-      )
-  );
+  return body
+    .replace(regEx(/ To.*?, click on a checkbox below\./g), '')
+    .replace(regEx(/\[ ] <!-- \w*-branch.*-->/g), '')
+    .replace(regEx(/ - \[ ] <!-- create-config-migration-pr -->.*/g), '')
+    .replace(regEx(/ - \[ ] <!-- approve-all-[\w-]*-prs -->.*/g), '')
+    .replace(regEx(/ - \[ ] <!-- create-all-[\w-]*-prs -->.*/g), '')
+    .replace(regEx(/ - \[ ] <!-- rebase-all-[\w-]*-prs -->.*/g), '');
 }
 
 export default readOnlyIssueBody;

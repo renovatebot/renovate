@@ -1,11 +1,11 @@
-import { addLibYears } from '../../../instrumentation/reporting';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { Timestamp } from '../../../util/timestamp';
-import { calculateLibYears } from './libyear';
-import { logger } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger } from '~test/util.ts';
+import { addLibYears } from '../../../instrumentation/reporting.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { calculateLibYears } from './libyear.ts';
 
-vi.mock('../../../instrumentation/reporting');
+vi.mock('../../../instrumentation/reporting.ts');
 
 describe('workers/repository/process/libyear', () => {
   const config: RenovateConfig = {};
@@ -94,15 +94,19 @@ describe('workers/repository/process/libyear', () => {
         ],
       };
       calculateLibYears(config, packageFiles);
+
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for some/image',
       );
+
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No releaseTimestamp for dep1 update to 3.0.0',
       );
+
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for dep3',
       );
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           libYears: {
@@ -120,7 +124,7 @@ describe('workers/repository/process/libyear', () => {
         },
         'Repository libYears',
       );
-      expect(addLibYears).toHaveBeenCalledWith(config, {
+      expect(addLibYears).toHaveBeenCalledExactlyOnceWith(config, {
         libYears: {
           managers: {
             bundler: 0.5027322404371585,
@@ -196,6 +200,7 @@ describe('workers/repository/process/libyear', () => {
         ],
       };
       calculateLibYears(config, packageFiles);
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           libYears: {

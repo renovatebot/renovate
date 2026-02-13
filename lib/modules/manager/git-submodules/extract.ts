@@ -1,18 +1,15 @@
-import URL from 'node:url';
 import type { SimpleGit } from 'simple-git';
-import Git from 'simple-git';
+import { simpleGit } from 'simple-git';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { getChildEnv } from '../../../util/exec/utils';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { simpleGitConfig } from '../../../util/git/config';
-import { getHttpUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import * as semVerVersioning from '../../versioning/semver';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import type { GitModule } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { simpleGitConfig } from '../../../util/git/config.ts';
+import { getHttpUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import * as semVerVersioning from '../../versioning/semver/index.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import type { GitModule } from './types.ts';
 
 async function getUrl(
   git: SimpleGit,
@@ -20,7 +17,7 @@ async function getUrl(
   submoduleName: string,
 ): Promise<string> {
   const path = (
-    await Git(simpleGitConfig()).raw([
+    await simpleGit(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -34,31 +31,16 @@ async function getUrl(
   const remoteUrl = (
     await git.raw(['config', '--get', 'remote.origin.url'])
   ).trim();
-  return URL.resolve(`${remoteUrl}/`, path);
-}
-
-const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
-
-async function getDefaultBranch(subModuleUrl: string): Promise<string> {
-  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
-    'git-tags',
-    'git-refs',
-  ]);
-  const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
-  const val = await Git(simpleGitConfig())
-    .env(gitEnv)
-    .listRemote(['--symref', subModuleUrl, 'HEAD']);
-  return headRefRe.exec(val)?.groups?.branch ?? 'master';
+  return new URL(path, `${remoteUrl}/`).href;
 }
 
 async function getBranch(
   git: SimpleGit,
   gitModulesPath: string,
   submoduleName: string,
-  subModuleUrl: string,
-): Promise<string> {
+): Promise<string | null> {
   const branchFromConfig = (
-    await Git(simpleGitConfig()).raw([
+    await simpleGit(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -69,7 +51,7 @@ async function getBranch(
 
   return branchFromConfig === '.'
     ? (await git.branch(['--list'])).current.trim()
-    : branchFromConfig || (await getDefaultBranch(subModuleUrl)).trim();
+    : branchFromConfig || null;
 }
 
 async function getModules(
@@ -107,7 +89,7 @@ export default async function extractPackageFile(
   _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const localDir = GlobalConfig.get('localDir');
-  const git = Git(localDir, simpleGitConfig());
+  const git = simpleGit(localDir, simpleGitConfig());
   const gitModulesPath = upath.join(localDir, packageFile);
 
   const depNames = await getModules(git, gitModulesPath);
@@ -127,18 +109,14 @@ export default async function extractPackageFile(
         .split(regEx(/\s/));
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
       const httpSubModuleUrl = getHttpUrl(subModuleUrl);
-      const currentValue = await getBranch(
-        git,
-        gitModulesPath,
-        name,
-        httpSubModuleUrl,
-      );
+      const branch = await getBranch(git, gitModulesPath, name);
       deps.push({
         depName: path,
         packageName: httpSubModuleUrl,
-        currentValue,
+        sourceUrl: httpSubModuleUrl,
+        currentValue: branch ?? undefined,
         currentDigest,
-        ...(semVerVersioning.api.isVersion(currentValue)
+        ...(semVerVersioning.api.isVersion(branch)
           ? { versioning: semVerVersioning.id }
           : {}),
       });

@@ -1,10 +1,10 @@
-import * as renovateWorker from './workers/global';
+import * as renovateWorker from './workers/global/index.ts';
 
-Object.defineProperty(renovateWorker, 'start', { value: vi.fn() });
+vi.mock('./workers/global/index.ts');
 
 describe('renovate', () => {
   it('starts', async () => {
-    await vi.importActual('./renovate');
+    await vi.importActual('./renovate.ts');
     expect(renovateWorker.start).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,5 +1,5 @@
-import { getPkgReleases } from '..';
-import { GithubRunnersDatasource } from '.';
+import { getPkgReleases } from '../index.ts';
+import { GithubRunnersDatasource } from './index.ts';
 
 describe('modules/datasource/github-runners/index', () => {
   describe('getReleases', () => {
@@ -41,9 +41,11 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '14-xlarge' },
           { version: '14-large' },
           { version: '14' },
-          { version: '15-xlarge', isStable: false },
-          { version: '15-large', isStable: false },
-          { version: '15', isStable: false },
+          { version: '15-xlarge' },
+          { version: '15-large' },
+          { version: '15' },
+          { version: '26-xlarge', isStable: false },
+          { version: '26', isStable: false },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });

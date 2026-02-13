@@ -1,12 +1,14 @@
 import { isTruthy } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { parseJson } from '../../../util/common';
-import * as git from '../../../util/git';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import semver from 'semver';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -24,21 +26,22 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
 
-import { smartTruncate } from '../utils/pr-body';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import { client } from './client';
-import { configureScm } from './scm';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
+import { client } from './client.ts';
+import { configureScm } from './scm.ts';
+import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
 import {
+  MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
-} from './utils';
+} from './utils.ts';
 
 export const id = 'gerrit';
 
@@ -60,7 +63,7 @@ export function writeToConfig(newConfig: typeof config): void {
   config = { ...config, ...newConfig };
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -77,10 +80,40 @@ export function initPlatform({
   config.gerritUsername = username;
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
+
+  let gerritVersion: string;
+  try {
+    const env = getEnv();
+    /* v8 ignore if: experimental feature */
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      gerritVersion = await client.getGerritVersion({
+        username,
+        password,
+      });
+    }
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Gerrit. Check your credentials',
+    );
+    throw new Error('Init: Authentication failure');
+  }
+
+  logger.debug('Gerrit version is: ' + gerritVersion);
+  // Example: 3.13.0-rc3-148-gb478dbbb57
+  const parsed = semver.parse(gerritVersion);
+  if (!parsed) {
+    throw new Error(`Unable to parse Gerrit version: ${gerritVersion}`);
+  }
+  gerritVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
+  client.setGerritVersion(gerritVersion);
+
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  return platformConfig;
 }
 
 /**
@@ -97,6 +130,8 @@ export async function getRepos(): Promise<string[]> {
  */
 export async function initRepo({
   repository,
+  cloneSubmodules,
+  cloneSubmodulesFilter,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo(${repository}, ${gitUrl})`);
@@ -113,7 +148,7 @@ export async function initRepo({
   const baseUrl = defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
   configureScm(repository, config.gerritUsername!);
-  await git.initRepo({ url });
+  await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
   //abandon "open" and "rejected" changes at startup
   const rejectedChanges = await client.findChanges(config.repository!, {
@@ -142,7 +177,7 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
   const change = (
     await client.findChanges(config.repository!, {
       ...findPRConfig,
-      limit: 1,
+      singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
@@ -153,16 +188,9 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
     : null;
 }
 
-export async function getPr(
-  number: number,
-  refreshCache?: boolean,
-): Promise<Pr | null> {
+export async function getPr(number: number): Promise<Pr | null> {
   try {
-    const change = await client.getChange(
-      number,
-      refreshCache,
-      REQUEST_DETAILS_FOR_PRS,
-    );
+    const change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
     return mapGerritChangeToPr(change);
   } catch (err) {
     if (err.statusCode === 404) {
@@ -174,12 +202,16 @@ export async function getPr(
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
+  // prConfig.prBody will only be set if the body has changed
   if (prConfig.prBody) {
-    await client.addMessageIfNotAlreadyExists(
+    await client.addMessage(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
     );
+  }
+  if (prConfig.targetBranch) {
+    await client.moveChange(prConfig.number, prConfig.targetBranch);
   }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
@@ -197,8 +229,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       branchName: prConfig.sourceBranch,
       targetBranch: prConfig.targetBranch,
       state: 'open',
-      limit: 1,
-      refreshCache: true,
+      singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
@@ -214,11 +245,10 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
     );
   }
-  await client.addMessageIfNotAlreadyExists(
+  await client.addMessage(
     change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
-    change.messages,
   );
   return mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,
@@ -230,25 +260,18 @@ export async function getBranchPr(
   branchName: string,
   targetBranch?: string,
 ): Promise<Pr | null> {
-  const change = (
-    await client.findChanges(config.repository!, {
-      branchName,
-      state: 'open',
-      targetBranch,
-      limit: 1,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
+  const change = await client.getBranchChange(config.repository!, {
+    branchName,
+    state: 'open',
+    targetBranch,
+    requestDetails: REQUEST_DETAILS_FOR_PRS,
+  });
+
   return change
     ? mapGerritChangeToPr(change, {
         sourceBranch: branchName,
       })
     : null;
-}
-
-export async function refreshPr(number: number): Promise<void> {
-  // refresh cache
-  await getPr(number, true);
 }
 
 export async function getPrList(): Promise<Pr[]> {
@@ -290,8 +313,7 @@ export async function getBranchStatus(
     await client.findChanges(config.repository!, {
       state: 'open',
       branchName,
-      limit: 1,
-      refreshCache: true,
+      singleChange: true,
       requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
     })
   ).pop();
@@ -329,8 +351,7 @@ export async function getBranchStatusCheck(
       await client.findChanges(config.repository!, {
         branchName,
         state: 'open',
-        limit: 1,
-        refreshCache: true,
+        singleChange: true,
         requestDetails: ['LABELS'],
       })
     ).pop();
@@ -366,7 +387,7 @@ export async function setBranchStatus(
       await client.findChanges(config.repository!, {
         branchName: branchStatusConfig.branchName,
         state: 'open',
-        limit: 1,
+        singleChange: true,
         requestDetails: ['LABELS'],
       })
     ).pop();
@@ -478,7 +499,7 @@ export function massageMarkdown(prBody: string, rebaseLabel: string): string {
 }
 
 export function maxBodyLength(): number {
-  return 16384; //TODO: check the real gerrit limit (max. chars)
+  return MAX_GERRIT_COMMENT_SIZE;
 }
 
 export async function deleteLabel(
@@ -489,24 +510,24 @@ export async function deleteLabel(
 }
 
 export function ensureCommentRemoval(
-  ensureCommentRemoval:
+  _ensureCommentRemoval:
     | EnsureCommentRemovalConfigByTopic
     | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   return Promise.resolve();
 }
 
-export function ensureIssueClosing(title: string): Promise<void> {
+export function ensureIssueClosing(_title: string): Promise<void> {
   return Promise.resolve();
 }
 
 export function ensureIssue(
-  issueConfig: EnsureIssueConfig,
+  _issueConfig: EnsureIssueConfig,
 ): Promise<EnsureIssueResult | null> {
   return Promise.resolve(null);
 }
 
-export function findIssue(title: string): Promise<Issue | null> {
+export function findIssue(_title: string): Promise<Issue | null> {
   return Promise.resolve(null);
 }
 

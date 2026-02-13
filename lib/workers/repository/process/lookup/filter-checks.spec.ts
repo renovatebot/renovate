@@ -1,28 +1,28 @@
+import * as _datasourceCommon from '../../../../modules/datasource/common.ts';
+import { Datasource } from '../../../../modules/datasource/datasource.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
   Release,
   ReleaseResult,
-} from '../../../../modules/datasource';
-import * as _datasourceCommon from '../../../../modules/datasource/common';
-import { Datasource } from '../../../../modules/datasource/datasource';
-import * as allVersioning from '../../../../modules/versioning';
-import { clone } from '../../../../util/clone';
-import * as _dateUtil from '../../../../util/date';
-import * as _mergeConfidence from '../../../../util/merge-confidence';
-import { toMs } from '../../../../util/pretty-time';
-import type { Timestamp } from '../../../../util/timestamp';
-import { filterInternalChecks } from './filter-checks';
-import type { LookupUpdateConfig, UpdateResult } from './types';
+} from '../../../../modules/datasource/index.ts';
+import * as allVersioning from '../../../../modules/versioning/index.ts';
+import { clone } from '../../../../util/clone.ts';
+import * as _dateUtil from '../../../../util/date.ts';
+import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import { filterInternalChecks } from './filter-checks.ts';
+import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
-vi.mock('../../../../util/date');
+vi.mock('../../../../util/date.ts');
 const dateUtil = vi.mocked(_dateUtil);
 
-vi.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/merge-confidence/index.ts');
 const mergeConfidence = vi.mocked(_mergeConfidence);
 
-vi.mock('../../../../modules/datasource/common');
+vi.mock('../../../../modules/datasource/common.ts');
 const { getDatasourceFor } = vi.mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {
@@ -79,7 +79,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -128,7 +127,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -143,7 +141,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeTrue();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -158,14 +155,13 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release?.version).toBe('1.0.2');
     });
 
     it('returns non-latest release if internalChecksFilter=flexible and some pass checks', async () => {
-      config.internalChecksFilter = 'strict';
+      config.internalChecksFilter = 'flexible';
       config.minimumReleaseAge = '6 days';
       const res = await filterInternalChecks(
         config,
@@ -173,13 +169,12 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release?.version).toBe('1.0.2');
     });
 
-    it('picks up minimumReleaseAge settings from hostRules', async () => {
+    it('picks up minimumReleaseAge settings from packageRules', async () => {
       config.internalChecksFilter = 'strict';
       config.minimumReleaseAge = '6 days';
       config.packageRules = [
@@ -191,7 +186,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -206,10 +200,122 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(1);
       expect(res.release?.version).toBe('1.0.3');
+    });
+
+    describe('if internalChecksFilter=strict, minimumReleaseAge is specified, and the latest release does not have a releaseTimestamp', () => {
+      beforeEach(() => {
+        // NOTE that we need to reset the existing test set up to make sure that we call `getElapsedMs` in the right order
+        dateUtil.getElapsedMs.mockReset();
+        // NOTE that we do NOT want to return 3 days, as we want the first release that has a timestamp (1.0.3) to be within the `minimumReleaseAge=4 days`
+        dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
+        dateUtil.getElapsedMs.mockReturnValueOnce(toMs('7 days') ?? 0);
+        dateUtil.getElapsedMs.mockReturnValueOnce(toMs('9 days') ?? 0);
+      });
+
+      it('does not return the latest release, if minimumReleaseAgeBehaviour=timestamp-required', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.4',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '4 days';
+        config.minimumReleaseAgeBehaviour = 'timestamp-required';
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'patch',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(1);
+        expect(res.release?.version).toBe('1.0.3');
+      });
+
+      it('returns the latest release, if minimumReleaseAgeBehaviour=timestamp-optional', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.4',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '100 days';
+        config.minimumReleaseAgeBehaviour = 'timestamp-optional';
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'patch',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+        expect(res.release?.version).toBe('1.0.4');
+      });
+
+      it('returns latest release, if minimumReleaseAgeBehaviour=timestamp-required but minimumReleaseAge=0 days', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.4',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '0 days';
+        config.minimumReleaseAgeBehaviour = 'timestamp-required';
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'patch',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+        expect(res.release?.version).toBe('1.0.4');
+      });
     });
 
     it('picks up minimumConfidence settings from updateType', async () => {
@@ -226,7 +332,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');

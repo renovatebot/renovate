@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type * as bunyan from 'bunyan';
-import { once, reset as onceReset } from './once';
-import { getRemappedLevel } from './remap';
-import type { Logger } from './types';
-import { getMessage, toMeta, withSanitizer } from './utils';
+import { once, reset as onceReset } from './once.ts';
+import { getRemappedLevel } from './remap.ts';
+import type { Logger } from './types.ts';
+import { getMessage, toMeta, withSanitizer } from './utils.ts';
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
@@ -19,12 +19,18 @@ type LoggerFunction = (p1: string | Record<string, any>, p2?: string) => void;
 export class RenovateLogger implements Logger {
   readonly logger: Logger = { once: { reset: onceReset } } as any;
   readonly once = this.logger.once;
+  private readonly bunyanLogger: bunyan;
+  private context: string;
+  private meta: Record<string, unknown>;
 
   constructor(
-    private readonly bunyanLogger: bunyan,
-    private context: string,
-    private meta: Record<string, unknown>,
+    bunyanLogger: bunyan,
+    context: string,
+    meta: Record<string, unknown>,
   ) {
+    this.bunyanLogger = bunyanLogger;
+    this.context = context;
+    this.meta = meta;
     for (const level of loggerLevels) {
       this.logger[level] = this.logFactory(level) as never;
       this.logger.once[level] = this.logOnceFn(level);
@@ -65,6 +71,10 @@ export class RenovateLogger implements Logger {
   fatal(p1: Record<string, any>, p2?: string): void;
   fatal(p1: string | Record<string, any>, p2?: string): void {
     this.log('fatal', p1, p2);
+  }
+
+  addSerializers(serializers: bunyan.Serializers): void {
+    this.bunyanLogger.addSerializers(serializers);
   }
 
   addStream(stream: bunyan.Stream): void {
@@ -113,7 +123,7 @@ export class RenovateLogger implements Logger {
       const msg = getMessage(p1, p2);
       let level = _level;
 
-      if (is.string(msg)) {
+      if (isString(msg)) {
         const remappedLevel = getRemappedLevel(msg);
         /* v8 ignore next 4 -- not easily testable */
         if (remappedLevel) {
@@ -131,7 +141,7 @@ export class RenovateLogger implements Logger {
     const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
       once(() => {
         const logFn = this[level].bind(this); // bind to the instance.
-        if (is.string(p1)) {
+        if (isString(p1)) {
           logFn(p1);
         } else {
           logFn(p1, p2);
@@ -147,7 +157,7 @@ export class RenovateLogger implements Logger {
     p2?: string,
   ): void {
     const logFn = this.logger[level];
-    if (is.string(p1)) {
+    if (isString(p1)) {
       logFn(p1);
     } else {
       logFn(p1, p2);

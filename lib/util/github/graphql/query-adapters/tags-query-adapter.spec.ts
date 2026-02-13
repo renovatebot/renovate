@@ -1,5 +1,5 @@
-import type { Timestamp } from '../../../../util/timestamp';
-import { adapter } from './tags-query-adapter';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import { adapter } from './tags-query-adapter.ts';
 
 describe('util/github/graphql/query-adapters/tags-query-adapter', () => {
   it('transforms Commit type', () => {

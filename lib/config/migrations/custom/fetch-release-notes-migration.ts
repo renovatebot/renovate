@@ -1,6 +1,6 @@
-import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../types';
-import { RenamePropertyMigration } from '../base/rename-property-migration';
+import { isBoolean } from '@sindresorhus/is';
+import type { RenovateConfig } from '../../types.ts';
+import { RenamePropertyMigration } from '../base/rename-property-migration.ts';
 
 export class FetchReleaseNotesMigration extends RenamePropertyMigration {
   constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
@@ -15,7 +15,7 @@ export class FetchReleaseNotesMigration extends RenamePropertyMigration {
   override run(value: unknown): void {
     let newValue: unknown = value;
 
-    if (is.boolean(value)) {
+    if (isBoolean(value)) {
       newValue = value ? 'pr' : 'off';
     }
 

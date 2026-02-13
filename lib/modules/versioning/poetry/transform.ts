@@ -1,6 +1,6 @@
 import semver from 'semver';
-import { regEx } from '../../../util/regex';
-import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns';
+import { regEx } from '../../../util/regex.ts';
+import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns.ts';
 
 interface LetterTag {
   letter: string;

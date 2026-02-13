@@ -1,13 +1,16 @@
-import { get as memGet, set as memSet } from '../../cache/memory';
-import { getCache } from '../../cache/repository';
-import type { HttpResponse } from '../types';
-import { copyResponse } from '../util';
-import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import { HttpCache } from './schema';
+import { get as memGet, set as memSet } from '../../cache/memory/index.ts';
+import { getCache } from '../../cache/repository/index.ts';
+import type { HttpResponse } from '../types.ts';
+import { copyResponse } from '../util.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
-  constructor(private aggressive = false) {
+  private aggressive: boolean;
+
+  constructor(aggressive = false) {
     super();
+    this.aggressive = aggressive;
   }
 
   override load(method: string, url: string): Promise<unknown> {
@@ -58,9 +61,9 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
     return !!flags[`${method}:${url}`];
   }
 
-  private markSynced(method: string, url: string): void {
+  markSynced(method: string, url: string, value = true): void {
     const flags = this.getSyncFlags();
-    flags[`${method}:${url}`] = true;
+    flags[`${method}:${url}`] = value;
   }
 
   override wrapServerResponse<T>(
@@ -82,12 +85,14 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
       return null;
     }
 
-    const cache = await this.load(method, url);
-    const httpCache = HttpCache.parse(cache);
+    const httpCache = await this.get(method, url);
     if (!httpCache) {
       return null;
     }
 
+    // Deep copy is needed because the underlying storage for repository cache is the plain object.
+    // This object gets persisted at the end of the run.
+    // However, during the run, we don't want to accidentally return the same response objects.
     return copyResponse(httpCache.httpResponse as HttpResponse<T>, true);
   }
 }

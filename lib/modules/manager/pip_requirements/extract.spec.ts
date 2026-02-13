@@ -1,6 +1,6 @@
-import { GlobalConfig } from '../../../config/global';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { extractPackageFile } from './index.ts';
 
 const requirements1 = Fixtures.get('requirements1.txt');
 const requirements2 = Fixtures.get('requirements2.txt');
@@ -179,6 +179,20 @@ some-package==0.3.1`;
       const res = extractPackageFile(requirements8);
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
+    });
+
+    it('should handle package with extras and no version specifiers', () => {
+      const res = extractPackageFile('Django[argon2]');
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: undefined,
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+        ],
+      });
     });
 
     it('should handle dependency and ignore env markers', () => {

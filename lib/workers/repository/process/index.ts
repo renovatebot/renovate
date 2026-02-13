@@ -1,26 +1,28 @@
 // TODO #22198
-import { mergeChildConfig } from '../../../config';
-import { GlobalConfig } from '../../../config/global';
-import { migrateAndValidate } from '../../../config/migrate-validate';
-import { resolveConfigPresets } from '../../../config/presets';
-import type { RenovateConfig } from '../../../config/types';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { addMeta, logger, removeMeta } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
-import { getBranchList } from '../../../util/git';
-import { addSplit } from '../../../util/split';
-import { getRegexPredicate } from '../../../util/string-match';
-import type { BranchConfig } from '../../types';
-import { readDashboardBody } from '../dependency-dashboard';
-import type { ExtractResult } from './extract-update';
-import { extract, lookup, update } from './extract-update';
-import type { WriteUpdateResult } from './write';
+import { GlobalConfig } from '../../../config/global.ts';
+import { mergeChildConfig } from '../../../config/index.ts';
+import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import { resolveConfigPresets } from '../../../config/presets/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { instrument } from '../../../instrumentation/index.ts';
+import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types.ts';
+import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { clone } from '../../../util/clone.ts';
+import { getBranchList } from '../../../util/git/index.ts';
+import { addSplit } from '../../../util/split.ts';
+import { getRegexPredicate } from '../../../util/string-match.ts';
+import type { BranchConfig } from '../../types.ts';
+import { readDashboardBody } from '../dependency-dashboard.ts';
+import type { ExtractResult } from './extract-update.ts';
+import { extract, lookup, update } from './extract-update.ts';
+import type { WriteUpdateResult } from './write.ts';
 
-async function getBaseBranchConfig(
+export async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig,
 ): Promise<RenovateConfig> {
@@ -73,7 +75,10 @@ async function getBaseBranchConfig(
       throw error;
     }
 
-    baseBranchConfig = await resolveConfigPresets(baseBranchConfig, config);
+    ({ config: baseBranchConfig } = await resolveConfigPresets(
+      baseBranchConfig,
+      config,
+    ));
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
 
     // istanbul ignore if
@@ -86,9 +91,10 @@ async function getBaseBranchConfig(
 
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
+    baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  if (config.baseBranchPatterns!.length > 1) {
+  if (isMultiBaseBranch(config)) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
@@ -124,6 +130,17 @@ function unfoldBaseBranches(
   return [...new Set(unfoldedList)];
 }
 
+function isMultiBaseBranch(config: RenovateConfig): boolean {
+  if (!config.baseBranchPatterns?.length) {
+    return false;
+  }
+
+  return (
+    config.baseBranchPatterns.length > 1 ||
+    config.baseBranchPatterns[0].startsWith('/')
+  );
+}
+
 export async function extractDependencies(
   config: RenovateConfig,
   overwriteCache = true,
@@ -138,51 +155,99 @@ export async function extractDependencies(
     GlobalConfig.get('platform') !== 'local' &&
     config.baseBranchPatterns?.length
   ) {
-    config.baseBranchPatterns = unfoldBaseBranches(
+    config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,
       config.baseBranchPatterns,
     );
-    logger.debug({ baseBranches: config.baseBranchPatterns }, 'baseBranches');
+    logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
-    for (const baseBranch of config.baseBranchPatterns) {
-      addMeta({ baseBranch });
+    await instrument(
+      'extract',
+      async () => {
+        for (const baseBranch of config.baseBranches!) {
+          addMeta({ baseBranch });
 
-      if (scm.syncForkWithUpstream) {
-        await scm.syncForkWithUpstream(baseBranch);
-      }
-      if (await scm.branchExists(baseBranch)) {
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        extracted[baseBranch] = await extract(baseBranchConfig, overwriteCache);
-      } else {
-        logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
-      }
-    }
-    addSplit('extract');
-    for (const baseBranch of config.baseBranchPatterns) {
-      if (await scm.branchExists(baseBranch)) {
-        addMeta({ baseBranch });
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        const packageFiles = extracted[baseBranch];
-        const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-        res.branches = res.branches.concat(baseBranchRes?.branches);
-        res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-        if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
-          // Use the first branch
-          res.packageFiles = baseBranchRes?.packageFiles;
+          if (scm.syncForkWithUpstream) {
+            await scm.syncForkWithUpstream(baseBranch);
+          }
+          if (await scm.branchExists(baseBranch)) {
+            const baseBranchConfig = await getBaseBranchConfig(
+              baseBranch,
+              config,
+            );
+            extracted[baseBranch] = await extract(
+              baseBranchConfig,
+              overwriteCache,
+            );
+          } else {
+            logger.warn(
+              { baseBranch },
+              'Base branch does not exist - skipping',
+            );
+          }
         }
-      }
-    }
+      },
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'extract',
+        },
+      },
+    );
+    addSplit('extract');
+    await instrument(
+      'lookup',
+      async () => {
+        for (const baseBranch of config.baseBranches!) {
+          if (await scm.branchExists(baseBranch)) {
+            addMeta({ baseBranch });
+            const baseBranchConfig = await getBaseBranchConfig(
+              baseBranch,
+              config,
+            );
+            const packageFiles = extracted[baseBranch];
+            const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
+            res.branches = res.branches.concat(baseBranchRes?.branches);
+            res.branchList = res.branchList.concat(baseBranchRes?.branchList);
+            if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
+              // Use the first branch
+              res.packageFiles = baseBranchRes?.packageFiles;
+            }
+          }
+        }
+      },
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'lookup',
+        },
+      },
+    );
     removeMeta(['baseBranch']);
   } else {
     logger.debug('No baseBranches');
-    const packageFiles = await extract(config, overwriteCache);
+    const packageFiles = await instrument(
+      'extract',
+      async () => await extract(config, overwriteCache),
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'extract',
+        },
+      },
+    );
     addSplit('extract');
     if (GlobalConfig.get('dryRun') === 'extract') {
       res.packageFiles = packageFiles;
       logger.info({ packageFiles }, 'Extracted dependencies');
       return res;
     }
-    res = await lookup(config, packageFiles);
+    res = await instrument(
+      'lookup',
+      async () => await lookup(config, packageFiles),
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'lookup',
+        },
+      },
+    );
   }
   addSplit('lookup');
   return res;

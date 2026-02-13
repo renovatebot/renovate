@@ -1,6 +1,6 @@
-import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './index.ts';
 
 const defaultTo = '1.2.3';
 const newUnixWrapperContent = `Unix wrapper script for ${defaultTo}`;

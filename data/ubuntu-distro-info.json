@@ -322,5 +322,15 @@
     "created": "2025-04-17",
     "release": "2025-10-09",
     "eol": "2026-07-09"
+  },
+  "v26.04": {
+    "codename": "Resolute Raccoon",
+    "series": "resolute",
+    "created": "2025-10-09",
+    "release": "2026-04-23",
+    "eol": "2031-05-29",
+    "eol_server": "2031-05-29",
+    "eol_esm": "2036-04-23",
+    "eol_legacy": "2038-04-27"
   }
 }

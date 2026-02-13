@@ -3,16 +3,16 @@ import os from 'node:os';
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import { resetPrefetchedImages } from '../../../util/exec/docker';
-import { getPkgReleases } from '../../datasource';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, git, partial } from '~test/util';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
+import { getPkgReleases } from '../../datasource/index.ts';
+import { updateArtifacts } from './index.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../../../util/exec/env');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -93,7 +93,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots[2].cmd).toContain('java 8.0.1');
     expect(updatedDeps).toEqual(expected);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('Should update when it is maven wrapper', async () => {
@@ -121,7 +121,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -133,10 +132,13 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
@@ -154,7 +156,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -166,10 +167,13 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('updates with docker', async () => {
@@ -177,7 +181,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     GlobalConfig.set({
       localDir: './',
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const result = await updateArtifacts({
@@ -197,8 +201,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        options: { encoding: 'utf-8' },
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
+        options: {},
       },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
@@ -207,14 +211,13 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           '-v "./":"./" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool java 17.0.0 ' +
           '&& ' +
           './mvnw wrapper:wrapper"',
         options: {
           cwd: '../..',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -226,10 +229,13 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('Should return null when cmd is not found', async () => {
@@ -287,7 +293,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -299,6 +304,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -312,7 +320,49 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('updates with binarySource install after detecting wrapper version from mvnw script', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'install',
+    });
+    const updatedDeps = await updateArtifacts({
+      packageFileName: './mvnw',
+      newPackageFileContent: '',
+      updatedDeps: [{ depName: 'maven-wrapper' }],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 17.0.0' },
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
+        },
+      },
+    ]);
+
+    expect(updatedDeps).toEqual([]);
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory', async () => {
@@ -336,7 +386,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -349,10 +398,13 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('should run not include MVNW_REPOURL when run with default maven repo url', async () => {
@@ -376,7 +428,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -388,11 +439,14 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
     expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_REPOURL');
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('should run not include MVNW_REPOURL when run with a malformed replaceString', async () => {
@@ -415,7 +469,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -427,11 +480,14 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
 
     expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_REPOURL');
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 });

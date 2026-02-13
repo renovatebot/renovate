@@ -1,25 +1,25 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
-import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
-import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
-import * as _bundler from '../../../../modules/manager/bundler';
-import * as _composer from '../../../../modules/manager/composer';
-import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
-import * as _gomod from '../../../../modules/manager/gomod';
-import * as _helmv3 from '../../../../modules/manager/helmv3';
-import * as _npm from '../../../../modules/manager/npm';
-import * as _pep621 from '../../../../modules/manager/pep621';
-import * as _pipCompile from '../../../../modules/manager/pip-compile';
-import * as _poetry from '../../../../modules/manager/poetry';
+import { git } from '~test/util.ts';
+import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
+import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
+import * as _bundler from '../../../../modules/manager/bundler/index.ts';
+import * as _composer from '../../../../modules/manager/composer/index.ts';
+import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
+import * as _gomod from '../../../../modules/manager/gomod/index.ts';
+import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
+import * as _npm from '../../../../modules/manager/npm/index.ts';
+import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
+import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
+import * as _poetry from '../../../../modules/manager/poetry/index.ts';
 import type {
   LookupUpdate,
   PackageFile,
   UpdateArtifact,
-} from '../../../../modules/manager/types';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import * as _autoReplace from './auto-replace';
-import { getUpdatedPackageFiles } from './get-updated';
-import { git } from '~test/util';
+} from '../../../../modules/manager/types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import * as _autoReplace from './auto-replace.ts';
+import { getUpdatedPackageFiles } from './get-updated.ts';
 
 const bundler = vi.mocked(_bundler);
 const composer = vi.mocked(_composer);
@@ -33,17 +33,17 @@ const pep621 = vi.mocked(_pep621);
 const pipCompile = vi.mocked(_pipCompile);
 const poetry = vi.mocked(_poetry);
 
-vi.mock('../../../../modules/manager/bundler');
-vi.mock('../../../../modules/manager/composer');
-vi.mock('../../../../modules/manager/helmv3');
-vi.mock('../../../../modules/manager/npm');
-vi.mock('../../../../modules/manager/git-submodules');
-vi.mock('../../../../modules/manager/gomod', () => mockDeep());
-vi.mock('../../../../modules/manager/batect-wrapper');
-vi.mock('../../../../modules/manager/pep621');
-vi.mock('../../../../modules/manager/pip-compile');
-vi.mock('../../../../modules/manager/poetry');
-vi.mock('./auto-replace');
+vi.mock('../../../../modules/manager/bundler/index.ts');
+vi.mock('../../../../modules/manager/composer/index.ts');
+vi.mock('../../../../modules/manager/helmv3/index.ts');
+vi.mock('../../../../modules/manager/npm/index.ts');
+vi.mock('../../../../modules/manager/git-submodules/index.ts');
+vi.mock('../../../../modules/manager/gomod/index.ts', () => mockDeep());
+vi.mock('../../../../modules/manager/batect-wrapper/index.ts');
+vi.mock('../../../../modules/manager/pep621/index.ts');
+vi.mock('../../../../modules/manager/pip-compile/index.ts');
+vi.mock('../../../../modules/manager/poetry/index.ts');
+vi.mock('./auto-replace.ts');
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
@@ -293,7 +293,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       await getUpdatedPackageFiles(config);
-      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+      expect(composer.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           config: expect.objectContaining({
             lockFiles: ['composer.lock'],
@@ -332,7 +332,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       await getUpdatedPackageFiles(config);
-      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+      expect(composer.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           config: expect.objectContaining({
             lockFiles: ['composer.lock'],
@@ -368,7 +368,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       await getUpdatedPackageFiles(config);
-      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+      expect(composer.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           config: expect.objectContaining({
             lockFiles: ['composer.lock'],
@@ -625,7 +625,7 @@ describe('workers/repository/update/branch/get-updated', () => {
               const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
               return (
                 updateArtifact?.packageFileName === expectedPackageFileName &&
-                is.array(updateArtifactLockfiles) &&
+                isArray(updateArtifactLockfiles) &&
                 updateArtifactLockfiles?.length === 1 &&
                 updateArtifactLockfiles?.[0] === expectedLockFileName
               );
@@ -1009,8 +1009,34 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       await getUpdatedPackageFiles(config);
 
-      expect(pep621.updateArtifacts).toHaveBeenCalledOnce();
-      expect(poetry.updateArtifacts).toHaveBeenCalledOnce();
+      expect(pep621.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: 'my-new-dep:1.0.0',
+          config: expect.objectContaining({
+            upgrades: expect.arrayContaining([
+              expect.objectContaining({
+                packageFile: 'pyproject.toml',
+                manager: 'pep621',
+              }),
+            ]),
+          }),
+        }),
+      );
+      expect(poetry.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: 'my-new-dep:1.0.0',
+          config: expect.objectContaining({
+            upgrades: expect.arrayContaining([
+              expect.objectContaining({
+                packageFile: 'pyproject.toml',
+                manager: 'poetry',
+              }),
+            ]),
+          }),
+        }),
+      );
     });
 
     describe('when some artifacts have changed and others have not', () => {
@@ -1049,8 +1075,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUnsupported();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
@@ -1065,8 +1090,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUpdated();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
@@ -1084,8 +1108,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           autoReplace.doAutoReplace.mockResolvedValueOnce(newContent);
           mockUnsupported();
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: newContent }),
           );
         });
@@ -1103,8 +1126,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           autoReplace.doAutoReplace.mockResolvedValueOnce(newContent);
           mockUnsupported();
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: newContent }),
           );
         });
@@ -1124,8 +1146,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUnsupported();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
@@ -1145,8 +1166,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUpdated();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });

@@ -1,22 +1,22 @@
-import type { AllConfig } from '../../../config/types';
-import { getEnv } from '../../env';
-import { PackageCacheStats } from '../../stats';
-import * as memCache from '../memory';
-import * as fileCache from './file';
-import { getCombinedKey } from './key';
-import * as redisCache from './redis';
-import { SqlitePackageCache } from './sqlite';
-import { getTtlOverride } from './ttl';
-import type { PackageCache, PackageCacheNamespace } from './types';
+import type { AllConfig } from '../../../config/types.ts';
+import { getEnv } from '../../env.ts';
+import { PackageCacheStats } from '../../stats.ts';
+import * as memCache from '../memory/index.ts';
+import * as fileCache from './file.ts';
+import { getCombinedKey } from './key.ts';
+import * as redisCache from './redis.ts';
+import { SqlitePackageCache } from './sqlite.ts';
+import { getTtlOverride } from './ttl.ts';
+import type { PackageCache, PackageCacheNamespace } from './types.ts';
 
 let cacheProxy: PackageCache | undefined;
 
 let cacheType: 'redis' | 'sqlite' | 'memory' | 'file' | undefined;
 
-/* v8 ignore start -- not important */
+/* v8 ignore next -- not important */
 export function getCacheType(): typeof cacheType {
   return cacheType;
-} /* v8 ignore stop */
+}
 
 export async function get<T = any>(
   namespace: PackageCacheNamespace,
@@ -39,31 +39,35 @@ export async function get<T = any>(
   return result;
 }
 
+/**
+ * Set cache value with user-defined TTL overrides.
+ */
 export async function set(
   namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
-  minutes: number,
+  hardTtlMinutes: number,
 ): Promise<void> {
-  const rawTtl = getTtlOverride(namespace) ?? minutes;
+  const rawTtl = getTtlOverride(namespace) ?? hardTtlMinutes;
   await setWithRawTtl(namespace, key, value, rawTtl);
 }
 
 /**
+ * Set cache value ignoring user-defined TTL overrides.
  * This MUST NOT be used outside of cache implementation
  */
 export async function setWithRawTtl(
   namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
-  minutes: number,
+  hardTtlMinutes: number,
 ): Promise<void> {
   if (!cacheProxy) {
     return;
   }
 
   await PackageCacheStats.wrapSet(() =>
-    cacheProxy!.set(namespace, key, value, minutes),
+    cacheProxy!.set(namespace, key, value, hardTtlMinutes),
   );
 
   const combinedKey = getCombinedKey(namespace, key);
@@ -90,6 +94,7 @@ export async function init(config: AllConfig): Promise<void> {
     return;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (config.cacheDir) {
     fileCache.init(config.cacheDir);
     cacheProxy = {

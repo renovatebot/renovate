@@ -1,21 +1,21 @@
-import * as _packageCache from '../../../util/cache/package';
-import type { Timestamp } from '../../../util/timestamp';
-import type { GithubGraphqlResponse } from '../../http/github';
-import { GithubHttp } from '../../http/github';
-import { range } from '../../range';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import type { GithubGraphqlResponse } from '../../http/github.ts';
+import { GithubHttp } from '../../http/github.ts';
+import { range } from '../../range.ts';
 import {
   GithubGraphqlDatasourceFetcher as Datasource,
   GithubGraphqlDatasourceFetcher,
-} from './datasource-fetcher';
+} from './datasource-fetcher.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
-} from './types';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+} from './types.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 interface TestAdapterInput {
@@ -436,6 +436,50 @@ describe('util/github/graphql/datasource-fetcher', () => {
           expect(instance).toHaveProperty('isPersistent', isPersistent);
         },
       );
+    });
+
+    describe('maxItems limit', () => {
+      const adapterWithMaxItems: GithubGraphqlDatasourceAdapter<
+        TestAdapterInput,
+        TestAdapterOutput
+      > = {
+        ...adapter,
+        maxItems: 2,
+      };
+
+      it('stops pagination after maxItems', async () => {
+        // Set up 3 pages but only 2 items should be fetched due to maxItems: 2
+        httpMock
+          .scope('https://api.github.com/')
+          .post('/graphql')
+          .reply(
+            200,
+            resp(
+              false,
+              [{ version: v1, releaseTimestamp: t1, foo: '1' }],
+              'page-2',
+            ),
+          )
+          .post('/graphql')
+          .reply(
+            200,
+            resp(
+              false,
+              [{ version: v2, releaseTimestamp: t2, foo: '2' }],
+              'page-3',
+            ),
+          );
+
+        const res = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapterWithMaxItems,
+        );
+
+        // Should only have 2 items due to maxItems: 2
+        expect(res).toHaveLength(2);
+        expect(httpMock.getTrace()).toHaveLength(2);
+      });
     });
   });
 });

@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from './types';
+import { isNonEmptyString } from '@sindresorhus/is';
+import type { NewValueConfig, VersioningApi } from './types.ts';
 
 export interface GenericVersion {
   release: number[];
@@ -43,8 +43,8 @@ export abstract class GenericVersioningApi<
     }
 
     if (
-      is.nonEmptyString(left.prerelease) &&
-      is.nonEmptyString(right.prerelease)
+      isNonEmptyString(left.prerelease) &&
+      isNonEmptyString(right.prerelease)
     ) {
       const pre = left.prerelease.localeCompare(right.prerelease, undefined, {
         numeric: true,
@@ -53,9 +53,9 @@ export abstract class GenericVersioningApi<
       if (pre !== 0) {
         return pre;
       }
-    } else if (is.nonEmptyString(left.prerelease)) {
+    } else if (isNonEmptyString(left.prerelease)) {
       return -1;
-    } else if (is.nonEmptyString(right.prerelease)) {
+    } else if (isNonEmptyString(right.prerelease)) {
       return 1;
     }
 

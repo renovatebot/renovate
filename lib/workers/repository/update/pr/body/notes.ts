@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { emojify } from '../../../../../util/emoji';
-import * as template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
+import { isNonEmptyArray } from '@sindresorhus/is';
+import { logger } from '../../../../../logger/index.ts';
+import { emojify } from '../../../../../util/emoji.ts';
+import * as template from '../../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../../types.ts';
 
 export function getPrNotes(config: BranchConfig): string {
   const notes = [];
   for (const upgrade of config.upgrades) {
-    if (is.nonEmptyArray(upgrade.prBodyNotes)) {
+    if (isNonEmptyArray(upgrade.prBodyNotes)) {
       for (const note of upgrade.prBodyNotes) {
         try {
           const res = template.compile(note, upgrade).trim();

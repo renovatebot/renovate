@@ -1,17 +1,17 @@
 import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
-import type { MigratedData } from '../branch/migrated-data';
-import { ensureConfigMigrationPr } from '.';
-import { Fixtures } from '~test/fixtures';
-import { partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
+import type { MigratedData } from '../branch/migrated-data.ts';
+import { ensureConfigMigrationPr } from './index.ts';
 
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = platform.massageMarkdown;
@@ -30,9 +30,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    GlobalConfig.set({
-      dryRun: null,
-    });
+    GlobalConfig.reset();
 
     config = {
       ...getConfig(),
@@ -108,6 +106,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
+
       expect(logger.debug).toHaveBeenCalledWith('Found open migration PR');
       expect(logger.debug).not.toHaveBeenLastCalledWith(
         `does not need updating`,
@@ -194,7 +193,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'Migrate renovate config',
+        'Migrate Renovate config',
       );
     });
 
@@ -212,7 +211,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'chore(config): migrate renovate config',
+        'chore(config): migrate Renovate config',
       );
     });
 
@@ -263,6 +262,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       };
       platform.createPr.mockRejectedValue(err);
       await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
+
       expect(logger.warn).toHaveBeenCalledWith(
         { err },
         'Migration PR already exists but cannot find it. It was probably created by a different user.',

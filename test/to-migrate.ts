@@ -1,18 +1,19 @@
 import type {
+  MigratableConfig,
   Migration,
   MigrationConstructor,
-} from '../lib/config/migrations/types';
-import type { RenovateConfig } from '../lib/config/types';
+} from '../lib/config/migrations/types.ts';
+import type { RenovateConfig } from '../lib/config/types.ts';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       toMigrate(
-        originalConfig: RenovateConfig,
-        expectedConfig: RenovateConfig,
+        originalConfig: MigratableConfig | Record<string, unknown>,
+        expectedConfig: MigratableConfig | Record<string, unknown>,
         isMigrated?: boolean,
-      ): R;
+      ): Promise<R>;
     }
   }
 }

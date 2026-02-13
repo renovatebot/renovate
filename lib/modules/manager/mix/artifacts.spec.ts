@@ -1,17 +1,17 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, hostRules } from '~test/util';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, hostRules } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { updateArtifacts } from './index.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
@@ -143,7 +143,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
@@ -217,7 +217,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
@@ -561,6 +561,9 @@ describe('modules/manager/mix/artifacts', () => {
     ).toBeNull();
 
     expect(execSnapshots).toHaveLength(0);
-    expect(fs.writeLocalFile).toHaveBeenCalledWith('mix.exs', 'New mix.exs');
+    expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
+      'mix.exs',
+      'New mix.exs',
+    );
   });
 });

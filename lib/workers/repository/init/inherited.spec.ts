@@ -1,17 +1,21 @@
-import * as decrypt from '../../../config/decrypt';
-import * as presets_ from '../../../config/presets';
-import type { RenovateConfig } from '../../../config/types';
-import * as validation from '../../../config/validation';
+import { hostRules, platform } from '~test/util.ts';
+import {
+  getConfigFileNames,
+  setUserConfigFileNames,
+} from '../../../config/app-strings.ts';
+import * as decrypt from '../../../config/decrypt.ts';
+import * as presets_ from '../../../config/presets/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import * as validation from '../../../config/validation.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
   CONFIG_VALIDATION,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { mergeInheritedConfig } from './inherited';
-import { hostRules, platform } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { mergeInheritedConfig } from './inherited.ts';
 
-vi.mock('../../../config/presets');
+vi.mock('../../../config/presets/index.ts');
 
 const presets = vi.mocked(presets_);
 
@@ -79,7 +83,7 @@ describe('workers/repository/init/inherited', () => {
   it('should warn if validateConfig returns warnings', async () => {
     platform.getRawFile.mockResolvedValue('{"binarySource": "docker"}');
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -178,14 +182,20 @@ describe('workers/repository/init/inherited', () => {
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
     presets.resolveConfigPresets.mockResolvedValue({
-      onboarding: false,
-      labels: ['test'],
-      automerge: true,
+      config: {
+        onboarding: false,
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(res.onboarding).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Resolving presets found in inherited config',
     );
@@ -210,12 +220,18 @@ describe('workers/repository/init/inherited', () => {
         errors: [],
       });
     presets.resolveConfigPresets.mockResolvedValue({
-      onboarding: false,
-      labels: ['test'],
-      automerge: true,
+      config: {
+        onboarding: false,
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
+
     expect(logger.warn).toHaveBeenCalledWith(
       {
         warnings: [
@@ -248,12 +264,18 @@ describe('workers/repository/init/inherited', () => {
         ],
       });
     presets.resolveConfigPresets.mockResolvedValue({
-      labels: ['test'],
-      automerge: true,
+      config: {
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_VALIDATION,
     );
+
     expect(logger.warn).toHaveBeenCalledWith(
       {
         errors: [
@@ -276,13 +298,19 @@ describe('workers/repository/init/inherited', () => {
       errors: [],
     });
     presets.resolveConfigPresets.mockResolvedValue({
-      labels: ['test'],
-      automerge: true,
-      binarySource: 'docker', // global config option: should not be here
+      config: {
+        labels: ['test'],
+        automerge: true,
+        binarySource: 'docker', // global config option: should not be here
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(logger.warn).not.toHaveBeenCalled();
+
     expect(logger.debug).toHaveBeenCalledWith(
       {
         inheritedConfig: {
@@ -297,5 +325,31 @@ describe('workers/repository/init/inherited', () => {
       },
       'Removed global config from inherited config presets.',
     );
+  });
+
+  it('overwrites configFileNames set by admin config', async () => {
+    config.inheritConfigFileName = 'some-other-file.json';
+    // imitate setting of configFileNames by admin config
+    setUserConfigFileNames(['some-file.json']);
+    platform.getRawFile.mockResolvedValue(
+      '{"onboarding":false,"labels":["test"],"configFileNames":["some-other-file.json"]}',
+    );
+    const res = await mergeInheritedConfig(config);
+    expect(res.labels).toEqual(['test']);
+    expect(res.onboarding).toBeFalse();
+    expect(getConfigFileNames()[0]).toBe('some-other-file.json');
+  });
+
+  it('does not modify configFileNames set by admin config if configFileNames is not present in inherited config', async () => {
+    config.inheritConfigFileName = 'some-other-file.json';
+    // imitate setting of configFileNames by admin config
+    setUserConfigFileNames(['some-file.json']);
+    platform.getRawFile.mockResolvedValue(
+      '{"onboarding":false,"labels":["test"]}',
+    );
+    const res = await mergeInheritedConfig(config);
+    expect(res.labels).toEqual(['test']);
+    expect(res.onboarding).toBeFalse();
+    expect(getConfigFileNames()[0]).toBe('some-file.json');
   });
 });

@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import * as packageCache from '../../cache/package';
-import { resolveTtlValues } from '../../cache/package/ttl';
-import type { PackageCacheNamespace } from '../../cache/package/types';
-import { regEx } from '../../regex';
-import { HttpCacheStats } from '../../stats';
-import type { HttpResponse } from '../types';
-import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import type { HttpCache } from './schema';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as packageCache from '../../cache/package/index.ts';
+import { resolveTtlValues } from '../../cache/package/ttl.ts';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
+import { regEx } from '../../regex.ts';
+import { HttpCacheStats } from '../../stats.ts';
+import type { HttpResponse } from '../types.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
@@ -34,9 +34,9 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttl.softTtlMinutes;
-    this.hardTtlMinutes = ttl.hardTtlMinutes;
+    const ttlValues = resolveTtlValues(this.namespace, softTtlMinutes);
+    this.softTtlMinutes = ttlValues.softTtlMinutes;
+    this.hardTtlMinutes = ttlValues.hardTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
@@ -98,7 +98,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
     if (
       this.checkCacheControlHeader &&
-      is.string(resp.headers['cache-control'])
+      isString(resp.headers['cache-control'])
     ) {
       const isPublic = resp.headers['cache-control']
         .toLocaleLowerCase()

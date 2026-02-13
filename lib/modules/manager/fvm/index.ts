@@ -1,7 +1,7 @@
-import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import * as semverVersioning from '../../versioning/semver';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'FVM';
 export const url = 'https://fvm.app';

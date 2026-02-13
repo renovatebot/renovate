@@ -4,7 +4,7 @@ import {
   looseEquals,
   replaceAt,
   stripTemplates,
-} from './string';
+} from './string.ts';
 
 describe('util/string', () => {
   describe('replaceAt', () => {

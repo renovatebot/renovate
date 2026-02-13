@@ -1,22 +1,22 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { getEnv } from '../../../util/env';
-import { filterMap } from '../../../util/filter-map';
-import { HttpError } from '../../../util/http';
-import * as p from '../../../util/promises';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import goVersioning from '../../versioning/go-mod-directive';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { BaseGoDatasource } from './base';
-import { getSourceUrl } from './common';
-import { parseGoproxy, parseNoproxy } from './goproxy-parser';
-import { GoDirectDatasource } from './releases-direct';
-import type { VersionInfo } from './types';
+import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { getEnv } from '../../../util/env.ts';
+import { filterMap } from '../../../util/filter-map.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import * as p from '../../../util/promises.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import goVersioning from '../../versioning/go-mod-directive/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { BaseGoDatasource } from './base.ts';
+import { getSourceUrl } from './common.ts';
+import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
+import { GoDirectDatasource } from './releases-direct.ts';
+import type { VersionInfo } from './types.ts';
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
@@ -52,11 +52,9 @@ export class GoProxyDatasource extends Datasource {
 
   readonly direct = new GoDirectDatasource();
 
-  @cache({
-    namespace: `datasource-${GoProxyDatasource.id}`,
-    key: (config: GetReleasesConfig) => GoProxyDatasource.getCacheKey(config),
-  })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
     const goproxy = getEnv().GOPROXY ?? 'https://proxy.golang.org,direct';
@@ -119,6 +117,17 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GoProxyDatasource.id}`,
+        key: GoProxyDatasource.getCacheKey(config),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   /**
    * Avoid ambiguity when serving from case-insensitive file systems.
    *
@@ -137,7 +146,7 @@ export class GoProxyDatasource extends Datasource {
     );
     const { body } = await this.http.getText(url);
     return filterMap(body.split(newlineRegex), (str) => {
-      if (!is.nonEmptyStringAndNotWhitespace(str)) {
+      if (!isNonEmptyStringAndNotWhitespace(str)) {
         return null;
       }
 
@@ -227,7 +236,7 @@ export class GoProxyDatasource extends Datasource {
           }
 
           return (
-            version.split(regEx(/[^\d]+/)).find(is.truthy) === major.toString()
+            version.split(regEx(/[^\d]+/)).find(isTruthy) === major.toString()
           );
         });
 

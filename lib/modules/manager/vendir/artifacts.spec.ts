@@ -1,29 +1,29 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { ExecError } from '../../../util/exec/exec-error';
-import type { StatusResult } from '../../../util/git/types';
-import type { UpdateArtifactsConfig } from '../types';
-import * as vendir from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs, git, partial } from '~test/util';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, git, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as vendir from './index.ts';
 
 process.env.CONTAINERBASE = 'true';
 
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('../../../util/exec/env', () => mockDeep());
-vi.mock('../../../util/http', () => mockDeep());
-vi.mock('../../../util/fs', () => mockDeep());
-vi.mock('../../../util/git', () => mockDeep());
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('../../../util/exec/env.ts', () => mockDeep());
+vi.mock('../../../util/http/index.ts', () => mockDeep());
+vi.mock('../../../util/fs/index.ts', () => mockDeep());
+vi.mock('../../../util/git/index.ts', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -192,7 +192,7 @@ describe('modules/manager/vendir/artifacts', () => {
       cmd: '',
       stdout: '',
       stderr: '',
-      options: { encoding: 'utf8' },
+      options: {},
     });
     const updatedDeps = [{ depName: 'dep1' }];
     mockExecAll(execError);
@@ -488,7 +488,7 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -498,7 +498,7 @@ describe('modules/manager/vendir/artifacts', () => {
             '-v "/tmp/cache/containerbase":"/tmp/cache/containerbase" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar' +
+            'ghcr.io/renovatebot/base-image' +
             ' bash -l -c "' +
             'install-tool vendir 0.35.0' +
             ' && ' +

@@ -1,9 +1,9 @@
 import { Command } from 'commander';
-import { logger } from '../lib/logger';
-import { generateDocs } from './docs';
-import { parseVersion } from './utils';
-import { bake } from './utils/docker';
-import { exec } from './utils/exec';
+import { logger } from '../lib/logger/index.ts';
+import { generateDocs } from './docs/index.ts';
+import { bake } from './utils/docker.ts';
+import { exec } from './utils/exec.ts';
+import { parseVersion } from './utils/index.ts';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
@@ -30,9 +30,9 @@ const program = new Command('pnpm release:prepare')
 void (async () => {
   await program.parseAsync();
   const opts = program.opts();
-  logger.info(`Preparing v${opts.version} ...`);
+  logger.info(`Preparing v${opts.version?.toString()} ...`);
   build();
-  await generateDocs();
+  await generateDocs(undefined, undefined, opts.version?.toString());
   await bake('build', opts);
 })();
 

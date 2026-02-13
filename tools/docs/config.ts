@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
-import { getOptions } from '../../lib/config/options';
-import { allManagersList } from '../../lib/modules/manager';
-import { getCliName } from '../../lib/workers/global/config/parse/cli';
-import { getEnvName } from '../../lib/workers/global/config/parse/env';
-import { readFile, updateFile } from '../utils';
+import { getOptions } from '../../lib/config/options/index.ts';
+import { allManagersList } from '../../lib/modules/manager/index.ts';
+import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
+import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
+import { readFile, updateFile } from '../utils/index.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -120,10 +120,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       ) {
         el[1] = `<code>${el[1]}</code>`;
       }
-      // objects and arrays should be printed in JSON notation
       if (
-        (type === 'object' || type === 'array') &&
-        (el[0] === 'default' || el[0] === 'additionalProperties')
+        // objects and arrays should be printed in JSON notation
+        ((type === 'object' || type === 'array') &&
+          (el[0] === 'default' || el[0] === 'additionalProperties')) ||
+        // enum values for `allowedValues` should be printed in JSON notation
+        el[0] === 'allowedValues'
       ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
@@ -135,8 +137,8 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     }
   });
 
-  if (type === 'list') {
-    data.push(['default', '`[]`']);
+  if (type === 'array') {
+    data.push(['default', '<code>[]</code>']);
   }
   if (type === 'string' && def === undefined) {
     data.push(['default', '<code>null</code>']);
@@ -151,7 +153,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
 }
 
 function stringifyArrays(el: Record<string, any>): void {
-  const ignoredKeys = ['default', 'experimentalIssues'];
+  const ignoredKeys = ['allowedValues', 'default', 'experimentalIssues'];
 
   for (const [key, value] of Object.entries(el)) {
     if (!ignoredKeys.includes(key) && Array.isArray(value)) {

@@ -1,13 +1,14 @@
-import { configFileNames } from '../../../config/app-strings';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
+import { getConfigFileNames } from '../../../config/app-strings.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {
   return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;
 }
 
 export function getDefaultConfigFileName(config: RenovateConfig): string {
+  const configFileNames = getConfigFileNames();
   return configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : configFileNames[0];

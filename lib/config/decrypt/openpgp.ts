@@ -1,6 +1,6 @@
-import { openpgp } from '../../expose.cjs';
-import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { openpgp } from '../../expose.ts';
+import { logger } from '../../logger/index.ts';
+import { regEx } from '../../util/regex.ts';
 
 let pgp: typeof import('openpgp') | null | undefined = undefined;
 
@@ -8,13 +8,9 @@ export async function tryDecryptOpenPgp(
   privateKey: string,
   encryptedStr: string,
 ): Promise<string | null> {
-  if (encryptedStr.length < 500) {
-    // optimization during transition of public key -> pgp
-    return null;
-  }
   if (pgp === undefined) {
     try {
-      pgp = openpgp();
+      pgp = await openpgp();
     } catch (err) {
       logger.warn({ err }, 'Could load openpgp');
       pgp = null;
@@ -34,9 +30,11 @@ export async function tryDecryptOpenPgp(
     const startBlock = '-----BEGIN PGP MESSAGE-----\n\n';
     const endBlock = '\n-----END PGP MESSAGE-----';
     let armoredMessage = encryptedStr.trim();
+    // v8 ignore else -- TODO: add test #40625
     if (!armoredMessage.startsWith(startBlock)) {
       armoredMessage = `${startBlock}${armoredMessage}`;
     }
+    // v8 ignore else -- TODO: add test #40625
     if (!armoredMessage.endsWith(endBlock)) {
       armoredMessage = `${armoredMessage}${endBlock}`;
     }
