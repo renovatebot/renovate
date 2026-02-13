@@ -90,6 +90,7 @@ exports[`config/presets/index > resolveConfigPresets > migrates automerge in pre
       ],
       "matchManagers": [
         "pep621",
+        "poetry",
       ],
       "semanticCommitType": "fix",
     },

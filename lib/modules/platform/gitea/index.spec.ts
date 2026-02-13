@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
@@ -27,8 +29,6 @@ import type {
   RepoPermission,
   User,
 } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger, partial } from '~test/util.ts';
 
 /**
  * latest tested gitea version.

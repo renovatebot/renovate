@@ -3,8 +3,8 @@
 // TODO: fix, should only allow `Error` type
 
 import { z } from 'zod';
-import { AsyncResult, Result } from './result.ts';
 import { logger } from '~test/util.ts';
+import { AsyncResult, Result } from './result.ts';
 
 describe('util/result', () => {
   describe('Result', () => {

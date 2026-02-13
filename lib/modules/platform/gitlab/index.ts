@@ -1,7 +1,7 @@
-import { setTimeout } from 'timers/promises';
 import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -75,6 +75,7 @@ import {
   getRepoUrl,
   prInfo,
 } from './utils.ts';
+
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
@@ -601,12 +602,21 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJsonUnchecked<{
           merge_status: string;
           detailed_merge_status?: string;
+          merge_when_pipeline_succeeds?: boolean;
           pipeline: {
             status: string;
           };
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+
+        // Exit early if merge_when_pipeline_succeeds is already set
+        if (body.merge_when_pipeline_succeeds === true) {
+          logger.debug(
+            'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+          );
+          return;
+        }
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =

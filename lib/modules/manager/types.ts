@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
 } from '../../config/types.ts';
@@ -48,6 +49,7 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
+  toolSettings?: ToolSettingsOptions;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -281,6 +283,7 @@ export interface ManagerApi extends ModuleApi {
 
   categories?: Category[];
   supportsLockFileMaintenance?: boolean;
+  lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
 

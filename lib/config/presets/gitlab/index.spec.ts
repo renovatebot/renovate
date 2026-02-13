@@ -1,7 +1,7 @@
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { PRESET_DEP_NOT_FOUND } from '../util.ts';
 import * as gitlab from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const gitlabApiHost = 'https://gitlab.com';
 const projectPath = '/api/v4/projects/some%2Frepo';

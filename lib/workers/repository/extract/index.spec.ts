@@ -1,10 +1,10 @@
+import { partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { extractAllDependencies } from './index.ts';
 import * as _managerFiles from './manager-files.ts';
-import { partial, scm } from '~test/util.ts';
 
 vi.mock('./manager-files.ts');
 

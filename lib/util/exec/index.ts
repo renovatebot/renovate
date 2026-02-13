@@ -1,6 +1,7 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
+import type { ToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
@@ -220,4 +221,55 @@ export async function exec(
   }
 
   return res;
+}
+
+export function getToolSettingsOptions(
+  repoConfig?: ToolSettingsOptions,
+): ToolSettingsOptions {
+  let defaults = GlobalConfig.get('toolSettings');
+  defaults ??= {
+    jvmMaxMemory: 512,
+    jvmMemory: 512,
+  };
+
+  const options: ToolSettingsOptions = {};
+
+  options.jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
+  options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
+
+  if (repoConfig !== undefined) {
+    if (repoConfig.jvmMaxMemory) {
+      if (repoConfig.jvmMaxMemory > options.jvmMaxMemory) {
+        logger.once.debug(
+          `A higher jvmMaxMemory (${repoConfig.jvmMaxMemory}) than the global configuration (${options.jvmMaxMemory}) is not permitted for Java VM invocations. Using global configuration instead`,
+        );
+      }
+
+      options.jvmMaxMemory = Math.min(
+        options.jvmMaxMemory,
+        repoConfig.jvmMaxMemory,
+      );
+    }
+
+    if (repoConfig.jvmMemory) {
+      options.jvmMemory = repoConfig.jvmMemory;
+    }
+  }
+
+  options.jvmMaxMemory = Math.floor(options.jvmMaxMemory);
+  options.jvmMemory = Math.floor(options.jvmMemory);
+
+  // make sure that the starting memory can't be more than the max memory
+  options.jvmMemory = Math.min(options.jvmMemory, options.jvmMaxMemory);
+
+  if (options.jvmMaxMemory < 512 || options.jvmMemory < 512) {
+    options.jvmMaxMemory = Math.max(options.jvmMaxMemory, 512);
+
+    logger.once.debug(
+      'Overriding low memory settings for Java VM invocations to a minimum of 512M',
+    );
+    options.jvmMemory = Math.max(options.jvmMemory, 512);
+  }
+
+  return options;
 }

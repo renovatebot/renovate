@@ -176,9 +176,10 @@ The below is a non-exhaustive list of public registries which support release ti
 | Datasource           | Registry URL                                       | Supported | Notes                                                            |
 | -------------------- | -------------------------------------------------- | --------- | ---------------------------------------------------------------- |
 | `crate`              | `https://crates.io`                                | ✅        |                                                                  |
-| `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `rubygems`           | `https://rubygems.org`                             | ✅        |                                                                  |
 | `docker`             | `https://index.docker.io`                          | ✅        |                                                                  |
+| `docker`             | (not Docker Hub)                                   | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38656)    |
+| `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
 | `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
 | `terraform-provider` | `https://registry.terraform.io`                    | ✅        | Not always returned                                              |

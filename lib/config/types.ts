@@ -31,8 +31,7 @@ export type RenovateSplit =
   | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type RepositoryCacheType = 'local' | string;
+export type RepositoryCacheType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -255,6 +254,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  toolSettings?: ToolSettingsOptions;
 }
 
 /**
@@ -306,11 +306,9 @@ export type UpdateConfig<
 
 export type RenovateRepository =
   | string
-  | {
+  | (RenovateConfig & {
       repository: string;
-      secrets?: Record<string, string>;
-      variables?: Record<string, string>;
-    };
+    });
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -463,6 +461,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
+  toolSettings?: ToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -600,6 +599,7 @@ export type AllowedParents =
   | 'packageRules'
   | 'postUpgradeTasks'
   | 'vulnerabilityAlerts'
+  | 'toolSettings'
   | ManagerName
   | UpdateTypeOptions;
 export interface RenovateOptionBase {
@@ -803,4 +803,9 @@ export interface BumpVersionConfig {
   filePatterns: string[];
   matchStrings: string[];
   name?: string;
+}
+
+export interface ToolSettingsOptions {
+  jvmMaxMemory?: number;
+  jvmMemory?: number;
 }

@@ -1,12 +1,12 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import type { PlatformResult, RepoParams } from '../types.ts';
 import * as bitbucket from './index.ts';
 import type { PrTask } from './schema.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
 
 vi.mock('../../../util/host-rules.ts');
 

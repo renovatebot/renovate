@@ -44,6 +44,7 @@ export class GlobalConfig {
     'presetCachePersistence',
     's3Endpoint',
     's3PathStyle',
+    'toolSettings',
     'userAgent',
   ];
 
