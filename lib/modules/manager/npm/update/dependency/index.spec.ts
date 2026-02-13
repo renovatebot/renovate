@@ -445,5 +445,103 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(expected);
     });
+
+    describe('removes old dep when replacement exists', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: '@material-ui/core',
+        newName: '@mui/material',
+        newValue: '^5.0.0',
+      };
+
+      it('first item', () => {
+        const input = JSON.stringify(
+          {
+            dependencies: {
+              '@material-ui/core': '^4.9.13',
+              '@mui/material': '^6.1.7',
+            },
+          },
+          null,
+          2,
+        );
+        const res = npmUpdater.updateDependency({
+          fileContent: input,
+          upgrade,
+        });
+        expect(JSON.parse(res!)?.dependencies).toEqual({
+          '@mui/material': '^6.1.7',
+        });
+      });
+
+      it('last item', () => {
+        const input = JSON.stringify(
+          {
+            dependencies: {
+              '@mui/material': '^6.1.7',
+              '@material-ui/core': '^4.9.13',
+            },
+          },
+          null,
+          2,
+        );
+        const res = npmUpdater.updateDependency({
+          fileContent: input,
+          upgrade,
+        });
+        expect(JSON.parse(res!)?.dependencies).toEqual({
+          '@mui/material': '^6.1.7',
+        });
+      });
+
+      it('middle item', () => {
+        const input = JSON.stringify(
+          {
+            dependencies: {
+              pkg1: '1.0.0',
+              '@material-ui/core': '^4.9.13',
+              '@mui/material': '^6.1.7',
+            },
+          },
+          null,
+          2,
+        );
+        const res = npmUpdater.updateDependency({
+          fileContent: input,
+          upgrade,
+        });
+        expect(JSON.parse(res!)?.dependencies).toEqual({
+          pkg1: '1.0.0',
+          '@mui/material': '^6.1.7',
+        });
+      });
+
+      it('only from target depType', () => {
+        const input = JSON.stringify(
+          {
+            devDependencies: {
+              '@material-ui/core': '^4.9.13',
+            },
+            dependencies: {
+              '@material-ui/core': '^4.9.13',
+              '@mui/material': '^6.1.7',
+            },
+          },
+          null,
+          2,
+        );
+        const res = npmUpdater.updateDependency({
+          fileContent: input,
+          upgrade,
+        });
+        const parsed = JSON.parse(res!);
+        expect(parsed.devDependencies).toEqual({
+          '@material-ui/core': '^4.9.13',
+        });
+        expect(parsed.dependencies).toEqual({
+          '@mui/material': '^6.1.7',
+        });
+      });
+    });
   });
 });
