@@ -2590,6 +2590,8 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
+<!-- supported-lock-files-begin -->
+
 | Manager           | Lockfile                                           |
 | ----------------- | -------------------------------------------------- |
 | `bun`             | `bun.lockb`, `bun.lock`                            |
@@ -2614,6 +2616,8 @@ Supported lock files:
 | `pub`             | `pubspec.lock`                                     |
 | `terraform`       | `.terraform.lock.hcl`                              |
 | `uv`              | `uv.lock`                                          |
+
+<!-- supported-lock-files-end -->
 
 Support for new lock files may be added via feature request.
 

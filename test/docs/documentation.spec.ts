@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../../lib/config/options/index.ts';
+import { getManagers } from '../../lib/modules/manager/index.ts';
 import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
 import { regEx } from '../../lib/util/regex.ts';
 import { templateHelperNames } from '../../lib/util/template/index.ts';
@@ -135,6 +136,101 @@ describe('docs/documentation', () => {
           );
         },
       );
+
+      function getSupportedLockFilesTable(
+        file: string,
+      ): Record<string, string> {
+        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+        const beginMarker = '<!-- supported-lock-files-begin -->';
+        const endMarker = '<!-- supported-lock-files-end -->';
+
+        const beginIndex = content.indexOf(beginMarker);
+        const endIndex = content.indexOf(endMarker);
+
+        if (beginIndex === -1 || endIndex === -1) {
+          return {};
+        }
+
+        const tableSection = content.substring(
+          beginIndex + beginMarker.length,
+          endIndex,
+        );
+
+        const result: Record<string, string> = {};
+        const lines = tableSection.trim().split('\n');
+
+        // Skip header and separator rows (first 2 lines)
+        for (let i = 2; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line.startsWith('|')) {
+            continue;
+          }
+
+          const parts = line.split('|').map((part) => part.trim());
+          // parts[0] is empty (before first |), parts[1] is manager, parts[2] is lockfile
+          if (parts.length >= 3 && parts[1] && parts[2]) {
+            const manager = parts[1].replace(/`/g, '');
+            const lockfile = parts[2];
+            result[manager] = lockfile;
+          }
+        }
+
+        return result;
+      }
+
+      function getExpectedSupportedLockFilesTable(): Record<string, string> {
+        const result: Record<string, string> = {};
+
+        const managersWithLockfiles = [...getManagers()].filter(
+          ([_manager, definition]) =>
+            definition.supportsLockFileMaintenance &&
+            definition.lockFileNames?.length,
+        ); // TODO #41152
+
+        for (const [manager, definition] of managersWithLockfiles) {
+          result[manager] = definition
+            .lockFileNames!.map((name) => `\`${name}\``)
+            .join(', ');
+        }
+
+        return result;
+      }
+
+      function getExpectedSupportedLockFilesTableMarkdown(
+        table: Record<string, string>,
+      ): string {
+        let md = '';
+
+        for (const key in table) {
+          const val = table[key];
+          md += `| ${key} | ${val} |\n`;
+        }
+
+        return md;
+      }
+
+      it('has supported lock files table', () => {
+        const table = getSupportedLockFilesTable('configuration-options.md');
+        expect(Object.keys(table).length).toBeGreaterThan(0);
+
+        const expected = getExpectedSupportedLockFilesTableMarkdown(table);
+        const actual = getExpectedSupportedLockFilesTableMarkdown(
+          getExpectedSupportedLockFilesTable(),
+        );
+
+        try {
+          expect(
+            expected,
+            'See logs above for a copy-paste version of the table',
+          ).toEqual(actual);
+        } catch (e) {
+          console.error(
+            `Expected the 'Supported lock files' table to be up-to-date, but it was not. It should be:\n\n${expected}`,
+          );
+
+          throw e;
+        }
+      });
     });
 
     describe('docs/usage/self-hosted-configuration.md', () => {
