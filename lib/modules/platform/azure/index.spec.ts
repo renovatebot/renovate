@@ -2536,7 +2536,7 @@ describe('modules/platform/azure/index', () => {
     );
   });
 
-  it('ensureIssueClosing  handles Azure API error ', async () => {
+  it('ensureIssueClosing handles Azure API error', async () => {
     await initRepo({ repository: 'some/repo' });
 
     const updateWorkItemMock = vi

@@ -1,12 +1,17 @@
-import { logger } from '../../../logger';
-import { sanitize } from '../../../util/sanitize';
-import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types';
-import * as azureApi from './azure-got-wrapper';
-import type { Config } from './types';
-import { getWorkItemTitle } from './util';
+import type { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
+import { logger } from '../../../logger/index.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types.ts';
+import * as azureApi from './azure-got-wrapper.ts';
+import type { Config } from './types.ts';
+import { getWorkItemTitle } from './util.ts';
 
 export class IssueService {
-  constructor(private config: Config) {}
+  private config: Config;
+
+  constructor(config: Config) {
+    this.config = config;
+  }
 
   async findIssue(title: string): Promise<Issue | null> {
     logger.debug(`findIssue(${title})`);
@@ -44,7 +49,7 @@ export class IssueService {
         return [];
       }
 
-      const workItemIds = result.workItems.map((wi) => wi.id!);
+      const workItemIds = result.workItems.map((wi: WorkItem) => wi.id!);
       const workItems = await azureApiWit.getWorkItems(workItemIds, [
         'System.Id',
         'System.Title',
@@ -52,7 +57,7 @@ export class IssueService {
         'System.Description',
       ]);
 
-      return workItems.map((wi) => ({
+      return workItems.map((wi: WorkItem) => ({
         number: wi.id!,
         title: wi.fields!['System.Title'],
         state:
@@ -73,7 +78,7 @@ export class IssueService {
     logger.debug(`ensureIssueClosing(${title})`);
     try {
       const issue = await this.findIssue(title);
-      if (issue && issue.state === 'open' && issue.number) {
+      if (issue?.state === 'open' && issue.number) {
         const azureApiWit = await azureApi.workItemTrackingApi();
         await azureApiWit.updateWorkItem(
           undefined,
@@ -133,6 +138,10 @@ export class IssueService {
           return null;
         } else if (existingIssue.state === 'closed' && shouldReOpen) {
           // Reopen and update work item
+          if (!existingIssue.number) {
+            logger.warn('Cannot reopen issue without number');
+            return null;
+          }
           await azureApiWit.updateWorkItem(
             undefined,
             [
@@ -153,7 +162,7 @@ export class IssueService {
                 value: 'Markdown',
               },
             ],
-            existingIssue.number!,
+            existingIssue.number,
             this.config.project,
           );
           logger.debug(`Reopened issue #${existingIssue.number}`);
@@ -164,6 +173,10 @@ export class IssueService {
             existingIssue.title !== finalTitle ||
             existingIssue.body !== body
           ) {
+            if (!existingIssue.number) {
+              logger.warn('Cannot update issue without number');
+              return null;
+            }
             await azureApiWit.updateWorkItem(
               undefined,
               [
@@ -183,7 +196,7 @@ export class IssueService {
                   value: 'Markdown',
                 },
               ],
-              existingIssue.number!,
+              existingIssue.number,
               this.config.project,
             );
             logger.debug(`Updated issue #${existingIssue.number}`);

@@ -46,10 +46,10 @@ import type {
 } from '../types.ts';
 import { getNewBranchName, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import * as azureHelper from './azure-helper.ts';
-import { IssueService } from './issue';
+import { IssueService } from './issue.ts';
 import type { AzurePr, Config } from './types.ts';
 import { AzurePrVote } from './types.ts';
 import {

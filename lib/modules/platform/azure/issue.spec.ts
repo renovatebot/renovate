@@ -1,11 +1,11 @@
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import type { logger as _logger } from '../../../logger';
-import type * as _hostRules from '../../../util/host-rules';
-import type { Platform } from '../types';
-import { IssueService } from './issue';
-import type { Config } from './types';
+import type { logger as _logger } from '../../../logger/index.ts';
+import type * as _hostRules from '../../../util/host-rules.ts';
+import type { Platform } from '../types.ts';
+import { IssueService } from './issue.ts';
+import type { Config } from './types.ts';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
 vi.mock('./azure-helper', () => mockDeep());
@@ -20,7 +20,7 @@ vi.mock('./util', () => ({
 describe('modules/platform/azure/issue', () => {
   let hostRules: Mocked<typeof _hostRules>;
   let azure: Platform;
-  let azureApi: Mocked<typeof import('./azure-got-wrapper')>;
+  let azureApi: Mocked<typeof import('./azure-got-wrapper.ts')>;
   let logger: MockedObject<typeof _logger>;
   let config: Config;
   let issueService: IssueService;
@@ -28,11 +28,13 @@ describe('modules/platform/azure/issue', () => {
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    hostRules = await vi.importMock('../../../util/host-rules');
-    azure = await vi.importActual('.');
-    azureApi = await vi.importMock('./azure-got-wrapper');
+    hostRules = await vi.importMock('../../../util/host-rules.ts');
+    azure = await vi.importActual('./index.ts');
+    azureApi = await vi.importMock('./azure-got-wrapper.ts');
     logger = (
-      await vi.importMock<typeof import('../../../logger')>('../../../logger')
+      await vi.importMock<typeof import('../../../logger/index.ts')>(
+        '../../../logger/index.ts',
+      )
     ).logger;
     hostRules.find.mockReturnValue({
       token: 'token',
