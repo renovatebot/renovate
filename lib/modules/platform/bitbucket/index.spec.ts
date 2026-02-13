@@ -1,7 +1,7 @@
-import { GlobalConfig } from '../../../config/global.ts';
-import { InheritConfig } from '../../../config/inherit.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { git, hostRules, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { InheritConfig } from '../../../config/inherit.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import type { PlatformResult, RepoParams } from '../types.ts';
