@@ -519,6 +519,46 @@ describe('modules/platform/azure/issue', () => {
       );
     });
 
+    it('should skip duplicate issues without number', async () => {
+      const mockOpenIssues = [
+        {
+          number: 1,
+          title: '[Renovate] Test Issue',
+          state: 'open',
+          body: 'Description 1',
+        },
+        {
+          title: '[Renovate] Test Issue',
+          state: 'open',
+          body: 'Description 2',
+          // number is undefined
+        },
+      ];
+
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue(mockOpenIssues);
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockImplementation(
+        () =>
+          ({
+            updateWorkItem: updateWorkItemMock,
+          }) as any,
+      );
+
+      await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'Updated body content',
+      });
+
+      // Should not attempt to close duplicate without number
+      expect(updateWorkItemMock).not.toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Closed' }],
+        undefined,
+        'testProject',
+      );
+    });
+
     it('should handle errors gracefully', async () => {
       vi.spyOn(issueService, 'getIssueList').mockRejectedValue(
         new Error('API Error'),
@@ -538,7 +578,7 @@ describe('modules/platform/azure/issue', () => {
     it('should not update issue if content is same', async () => {
       const mockOpenIssue = {
         number: 1,
-        title: '[repo] Test Issue',
+        title: '[Renovate] Test Issue',
         state: 'open',
         body: 'Same content',
       };
@@ -558,8 +598,11 @@ describe('modules/platform/azure/issue', () => {
         body: 'Same content',
       });
 
-      // The method always returns 'updated' for open issues, even if content is same
       expect(result).toEqual('updated');
+      expect(updateWorkItemMock).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Issue #1 is already up-to-date',
+      );
     });
 
     it('should return null when trying to reopen issue without number', async () => {
@@ -607,6 +650,37 @@ describe('modules/platform/azure/issue', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         'Cannot update issue without number',
       );
+    });
+
+    it('should not reopen closed issue when shouldReOpen is false', async () => {
+      const mockClosedIssue = {
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'closed',
+        body: 'Old description',
+      };
+
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        mockClosedIssue,
+      ]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockImplementation(
+        () =>
+          ({
+            createWorkItem: createWorkItemMock,
+          }) as any,
+      );
+
+      const result = await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New body content',
+        shouldReOpen: false,
+      });
+
+      // Should fall through and create a new issue
+      expect(createWorkItemMock).toHaveBeenCalled();
+      expect(result).toBe('created');
     });
   });
 
