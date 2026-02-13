@@ -684,6 +684,47 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts github backend tools', () => {
+      const content = codeBlock`
+      [tools]
+      "github:BurntSushi/ripgrep" = "14.1.1"
+      "github:cli/cli" = "v2.64.0"
+      "github:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "github:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'github:BurntSushi/ripgrep',
+            currentValue: '14.1.1',
+            packageName: 'BurntSushi/ripgrep',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:cli/cli',
+            currentValue: 'v2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'github-releases',
+            extractVersion: '^release\\-(?<version>.+)',
+          },
+          {
+            depName: 'github:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'github-releases',
+            extractVersion: '^v(?<version>.+)',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', () => {
       const content = codeBlock`
       [tools]
