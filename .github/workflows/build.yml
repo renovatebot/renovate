@@ -793,7 +793,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@2aaca85525a2a8850a9314071c81e9e5bdeadf6f # v4.0.7
+        uses: containerbase/internal-tools@dff12516229cac81a6f2611f8971a0df5376176e # v4.1.4
         with:
           command: docker-config
 
@@ -829,6 +829,69 @@ jobs:
           LOG_LEVEL: debug
 
       - run: df -h
+
+  build-deploy-docs-site:
+    if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}
+    needs: release
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: false
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
+        with:
+          python-version-file: .python-version
+          version: ${{ env.PDM_VERSION }}
+          cache: true
+
+      - name: Install pdm dependencies
+        run: pdm install
+
+      - name: Determine latest release tag (whether we've released as part of this build or not)
+        id: latest_release
+        run: |
+          latest_release=$(gh release view --json tagName -q .tagName)
+          echo "release_tag=$latest_release" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # Rebuild the docs site to make sure that we have the version specified in the JSON Schema and page footer
+      - name: Build mkdocs for Renovate ${{ steps.latest_release.outputs.release_tag }}
+        run: pnpm mkdocs build --version ${{ steps.latest_release.outputs.release_tag }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # Per https://github.com/renovatebot/helm-charts/issues/3752, when we migrated the docs site from renovatebot/renovatebot.github.io to renovatebot/renovate, the `/helm-charts/` repository would no longer work as a subdomain, due to a known GitHub Pages limitation
+      - name: Mirror helm-charts/index.yaml from helm-charts' GitHub Pages site
+        run: |
+          mkdir tools/mkdocs/site/helm-charts
+          curl --retry 5 --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        with:
+          path: tools/mkdocs/site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
   notify-release-failure:
     runs-on: ubuntu-latest

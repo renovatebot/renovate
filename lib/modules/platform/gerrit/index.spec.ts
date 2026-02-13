@@ -1,11 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import { git, hostRules, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { repoFingerprint } from '../util.ts';
 import { client as _client } from './client.ts';
-import { writeToConfig } from './index.ts';
 import * as gerrit from './index.ts';
+import { writeToConfig } from './index.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -19,7 +20,6 @@ import {
   TAG_PULL_REQUEST_BODY,
   mapGerritChangeToPr,
 } from './utils.ts';
-import { git, hostRules, partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 

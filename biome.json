@@ -9,10 +9,23 @@
       }
     }
   },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "identifierOrder": "lexicographic"
+          }
+        }
+      }
+    }
+  },
   "files": {
     "includes": [
       "**",
       "!**/node_modules",
+      "!.worktrees/**/*",
       "!**/dist",
       "!**/coverage",
       "!**/__fixtures__/**",
