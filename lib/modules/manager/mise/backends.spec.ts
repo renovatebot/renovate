@@ -113,7 +113,6 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'BurntSushi/ripgrep',
         datasource: 'github-releases',
         currentValue: '14.1.1',
-        extractVersion: '^v?(?<version>.+)',
       });
     });
 
@@ -158,7 +157,6 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: '1.0.0',
-        extractVersion: '^(?<version>.+)',
       });
     });
 

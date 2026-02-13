@@ -700,7 +700,6 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '14.1.1',
             packageName: 'BurntSushi/ripgrep',
             datasource: 'github-releases',
-            extractVersion: '^v?(?<version>.+)',
           },
           {
             depName: 'github:cli/cli',
