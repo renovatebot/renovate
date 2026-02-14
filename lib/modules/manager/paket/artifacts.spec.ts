@@ -1,10 +1,10 @@
 import { beforeEach, describe } from 'vitest';
 import { fs, git } from '~test/util.ts';
 import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
 import * as tool from './tool.ts';
-import { updateArtifacts } from './update.ts';
 
-describe('modules/manager/paket/update', () => {
+describe('modules/manager/paket/artifacts', () => {
   const packageFileName = '/app/test/paket.dependencies';
 
   function initializeMock() {
