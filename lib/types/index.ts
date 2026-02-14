@@ -1,3 +1,21 @@
+export type {
+  MergeStrategy,
+  RenovateSplit,
+  UpdateType,
+  ValidationMessage,
+} from '../config/types.ts';
+export type { BunyanRecord } from '../logger/types.ts';
+export type {
+  BranchCache,
+  BranchUpgradeCache,
+} from '../util/cache/repository/types.ts';
+export type { MergeConfidence } from '../util/merge-confidence/types.ts';
+export type {
+  ProcessResult,
+  ProcessStatus,
+  RepositoryResult,
+} from '../workers/repository/result.ts';
+export type { BranchResult, PrBlockedBy } from '../workers/types.ts';
 export type { ModuleApi, RenovatePackageJson } from './base.ts';
 export type { BranchStatus } from './branch-status.ts';
 export type { CommitMessageJSON } from './commit-message-json.ts';
