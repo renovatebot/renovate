@@ -27,19 +27,3 @@ export async function runPaketUpdate(command: UpdatePackage): Promise<void> {
     execOptions,
   );
 }
-
-/**
- * Call the paket cli to update dependencies by refreshing the lock file.
- * The packages will be downloaded (normally not committed on git), and the lock file will be updated.
- * Other versioned files are not affected.
- * https://fsprojects.github.io/Paket/paket-update.html
- *
- * @param filePath - The path to Paket dependencies file. Allows you to know the directory where to execute the paket command.
- * @param group - The dependency group name. If not specified, then it updates all groups.
- */
-export async function runPaketUpdateForAllPackages(
-  filePath: string,
-  group?: string,
-): Promise<void> {
-  await runPaketUpdate({ filePath, group });
-}

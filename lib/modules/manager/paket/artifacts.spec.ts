@@ -31,7 +31,7 @@ describe('modules/manager/paket/artifacts', () => {
     const lockFileName = '/app/test/paket.lock';
 
     it('update all packages', async () => {
-      const toolSpy = vi.spyOn(tool, 'runPaketUpdateForAllPackages');
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
 
       git.getFiles.mockResolvedValueOnce({
@@ -44,7 +44,7 @@ describe('modules/manager/paket/artifacts', () => {
 
       const result = await updateArtifacts(updateArtifact);
 
-      expect(toolSpy.mock.calls).toEqual([[lockFileName]]);
+      expect(toolSpy.mock.calls).toEqual([[{ filePath: lockFileName }]]);
       expect(result).toEqual([
         {
           file: {
@@ -57,7 +57,7 @@ describe('modules/manager/paket/artifacts', () => {
     });
 
     it('return null if no changes', async () => {
-      const toolSpy = vi.spyOn(tool, 'runPaketUpdateForAllPackages');
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
 
       const contentLockFile = 'Fake lock file content';
