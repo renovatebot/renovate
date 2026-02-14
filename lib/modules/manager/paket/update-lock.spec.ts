@@ -4,11 +4,12 @@ import type { UpdateLockedConfig } from '../types.ts';
 import * as tool from './tool.ts';
 import { updateLockedDependency } from './update-lock.ts';
 
+vi.mock('../../../util/fs');
+
 describe('modules/manager/paket/update-lock', () => {
   const packageFileName = '/app/test/paket.dependencies';
 
   function initializeMock() {
-    vi.mock('../../../util/fs');
     fs.getSiblingFileName.mockImplementation(
       (fileName: string, siblingName: string) => {
         expect(fileName).equals(packageFileName);
