@@ -150,7 +150,7 @@
   },
   "volta": {
     "node": "24.13.1",
-    "pnpm": "10.28.2"
+    "pnpm": "10.29.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.980.0",
@@ -234,7 +234,7 @@
     "jsonc-parser": "3.3.1",
     "klona": "2.0.6",
     "luxon": "3.7.2",
-    "markdown-it": "14.1.0",
+    "markdown-it": "14.1.1",
     "markdown-table": "3.0.4",
     "minimatch": "10.1.2",
     "moo": "0.5.2",
@@ -255,7 +255,7 @@
     "remark-github": "12.0.0",
     "safe-stable-stringify": "2.5.0",
     "sax": "1.4.4",
-    "semver": "7.7.3",
+    "semver": "7.7.4",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "3.0.0",
@@ -315,7 +315,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "24.10.10",
+    "@types/node": "24.10.11",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
@@ -334,7 +334,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.27.2",
+    "esbuild": "0.27.3",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
@@ -359,18 +359,18 @@
     "semantic-release": "25.0.3",
     "tar": "7.5.7",
     "tmp-promise": "3.0.3",
-    "tsdown": "0.20.2",
+    "tsdown": "0.20.3",
     "tsx": "4.21.0",
     "type-fest": "5.4.3",
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0",
     "unified": "11.0.5",
-    "vite": "8.0.0-beta.11",
-    "vite-tsconfig-paths": "6.0.5",
+    "vite": "8.0.0-beta.13",
+    "vite-tsconfig-paths": "6.1.0",
     "vitest": "4.0.18",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.28.2",
+  "packageManager": "pnpm@10.29.1",
   "files": [
     "dist",
     "renovate-schema.json"
@@ -394,8 +394,8 @@
     ],
     "overrides": {
       "@yarnpkg/core@4.5.0>tar": "7.5.7",
-      "esbuild": "0.27.2",
-      "vite": "8.0.0-beta.11"
+      "esbuild": "0.27.3",
+      "vite": "8.0.0-beta.13"
     }
   }
 }

@@ -278,11 +278,12 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
-export interface ManagerApi extends ModuleApi {
+interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
   supportsLockFileMaintenance?: boolean;
+  lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
 
@@ -320,6 +321,12 @@ export interface ManagerApi extends ModuleApi {
     config: UpdateLockedConfig,
   ): MaybePromise<UpdateLockedResult>;
 }
+
+export type ManagerApi = ManagerApiBase &
+  // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
+  (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
+    | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
+  );
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig<T = Record<string, any>>

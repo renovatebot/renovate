@@ -13,6 +13,7 @@ export { updateLockedDependency } from './update-locked.ts';
 
 export const supersedesManagers = ['pep621'];
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['poetry.lock'];
 
 export const url = 'https://python-poetry.org/docs';
 export const categories: Category[] = ['python'];
