@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { logger } from '../../../logger';
-import { getLocalFiles, getSiblingFileName } from '../../../util/fs';
-import { getFiles } from '../../../util/git';
-import { NugetDatasource } from '../../datasource/nuget';
+import type { Category } from '../../../constants/index.ts';
+import { logger } from '../../../logger/index.ts';
+import { getLocalFiles, getSiblingFileName } from '../../../util/fs/index.ts';
+import { getFiles } from '../../../util/git/index.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -11,11 +11,11 @@ import type {
   UpdateArtifactsResult,
   UpdateLockedConfig,
   UpdateLockedResult,
-} from '../types';
-import { parse as parseDependenciesFile } from './parsers/dependencies-file';
-import { parse as parseLockFile } from './parsers/lock-file';
-import { updateAllPackages, updatePackage } from './tool';
-import type { PaketPackage } from './types';
+} from '../types.ts';
+import { parse as parseDependenciesFile } from './parsers/dependencies-file.ts';
+import { parse as parseLockFile } from './parsers/lock-file.ts';
+import { updateAllPackages, updatePackage } from './tool.ts';
+import type { PaketPackage } from './types.ts';
 
 export const displayName = 'Paket';
 export const url = 'https://fsprojects.github.io/Paket/';

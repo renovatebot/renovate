@@ -1,4 +1,4 @@
-import { parse } from './dependencies-file';
+import { parse } from './dependencies-file.ts';
 
 describe('modules/manager/paket/parsers/dependencies-file', () => {
   describe('parse()', () => {

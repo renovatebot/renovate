@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import type { LockFileDependency, LockFileSourceType } from '../types';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import type { LockFileDependency, LockFileSourceType } from '../types.ts';
 
 interface Line {
   text: string;
