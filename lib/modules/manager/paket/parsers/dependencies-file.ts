@@ -40,9 +40,7 @@ export function parse(content: string): DependenciesFile {
     result = analyzeLine(result, item);
   }
 
-  if (result.currentGroup) {
-    result.groups.push(result.currentGroup);
-  }
+  result.groups.push(result.currentGroup);
 
   return {
     groups: result.groups,

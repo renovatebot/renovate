@@ -63,6 +63,22 @@ NUGET
       ]);
     });
 
+    it('should ignore other package line', () => {
+      const result = parse(`
+RESTRICTION: == net8.0
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    comment: impossible case normally
+    dotnet-fable (2.0.11) - clitool: true
+      Dotnet.ProjInfo (>= 0.20)
+      FSharp.Core (>= 4.5.2)
+  remote: https://example.com/v3/index.json
+    FSharp.Core (9.0.300)
+`);
+
+      expect(result.length).toEqual<number>(2);
+    });
+
     it('should return all nuget sources of all groups', () => {
       const result = parse(`
 RESTRICTION: == net8.0
