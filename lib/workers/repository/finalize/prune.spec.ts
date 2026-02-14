@@ -209,6 +209,48 @@ describe('workers/repository/finalize/prune', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
+    it('falls back to baseBranches when base branch cannot be extracted from branch name', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.baseBranches = ['develop'];
+      config.defaultBranch = 'main';
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c']),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(scm.isBranchModified).toHaveBeenCalledTimes(1);
+      expect(scm.isBranchModified).toHaveBeenCalledWith(
+        'renovate/c',
+        'develop',
+      );
+      expect(scm.deleteBranch).toHaveBeenCalledExactlyOnceWith('renovate/c');
+    });
+
+    it('extracts base branch from branch name when baseBranches is set without baseBranchPatterns', async () => {
+      config.branchList = ['renovate/develop-a'];
+      config.baseBranches = ['develop', 'staging'];
+      config.defaultBranch = 'main';
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/develop-b', 'renovate/staging-a']),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(scm.isBranchModified).toHaveBeenCalledTimes(2);
+
+      expect(scm.isBranchModified).toHaveBeenCalledWith(
+        'renovate/develop-b',
+        'develop',
+      );
+
+      expect(scm.isBranchModified).toHaveBeenCalledWith(
+        'renovate/staging-a',
+        'staging',
+      );
+    });
+
     it('does not delete modified orphan branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
