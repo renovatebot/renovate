@@ -4,7 +4,7 @@ import { exec } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import type { CommandWithOptions } from '../../../util/exec/types.ts';
-import { runPaketUpdate, runPaketUpdateForAllPackages } from './tool.ts';
+import { runPaketUpdate } from './tool.ts';
 import type { UpdatePackage } from './types.ts';
 
 const defaultExecResult = { stdout: '', stderr: '' };
@@ -137,25 +137,6 @@ describe('modules/manager/paket/tool', () => {
       expect(execSnapshots).toEqual([
         `paket update --group 'Group A'  --version '1 2 3'  'FSharp Core' `,
       ]);
-    });
-  });
-
-  describe('runPaketUpdateForAllPackages()', () => {
-    it('update all packages if no parameters', async () => {
-      const execSnapshots = mockExecAll();
-      GlobalConfig.set(adminConfig);
-
-      await runPaketUpdateForAllPackages(packageFilePath);
-
-      expect(execSnapshots).toEqual(['paket update']);
-    });
-    it('can specify group', async () => {
-      const execSnapshots = mockExecAll();
-      GlobalConfig.set(adminConfig);
-
-      await runPaketUpdateForAllPackages(packageFilePath, 'GroupA');
-
-      expect(execSnapshots).toEqual(['paket update --group GroupA ']);
     });
   });
 });
