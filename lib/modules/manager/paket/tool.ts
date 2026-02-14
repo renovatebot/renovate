@@ -9,7 +9,7 @@ import type { UpdatePackage } from './types.ts';
  *
  * @param command - parameters of paket cli
  */
-export async function updatePackage(command: UpdatePackage): Promise<void> {
+export async function runPaketUpdate(command: UpdatePackage): Promise<void> {
   const execOptions: ExecOptions = {
     cwdFile: command.filePath,
   };
@@ -33,9 +33,9 @@ export async function updatePackage(command: UpdatePackage): Promise<void> {
  * @param filePath - The path to Paket dependencies file. Allows you to know the directory where to execute the paket command.
  * @param group - The dependency group name. If not specified, then it updates all groups.
  */
-export async function updateAllPackages(
+export async function runPaketUpdateForAllPackages(
   filePath: string,
   group?: string,
 ): Promise<void> {
-  await updatePackage({ filePath, group });
+  await runPaketUpdate({ filePath, group });
 }

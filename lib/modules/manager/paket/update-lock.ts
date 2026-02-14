@@ -2,7 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import { getLocalFiles } from '../../../util/fs/index.ts';
 import { getFiles } from '../../../util/git/index.ts';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
-import { updatePackage } from './tool.ts';
+import { runPaketUpdate } from './tool.ts';
 
 export async function updateLockedDependency(
   config: UpdateLockedConfig,
@@ -11,7 +11,7 @@ export async function updateLockedDependency(
 
   const existingLockFileContentMap = await getFiles([config.lockFile]);
 
-  await updatePackage({
+  await runPaketUpdate({
     filePath: config.lockFile,
     packageName: config.depName,
     version: config.newVersion,

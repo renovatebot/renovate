@@ -4,7 +4,7 @@ import { exec } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import type { CommandWithOptions } from '../../../util/exec/types.ts';
-import { updateAllPackages, updatePackage } from './tool.ts';
+import { runPaketUpdate, runPaketUpdateForAllPackages } from './tool.ts';
 import type { UpdatePackage } from './types.ts';
 
 const defaultExecResult = { stdout: '', stderr: '' };
@@ -28,7 +28,7 @@ const adminConfig: RepoGlobalConfig = {
 const packageFilePath = './paket.dependencies';
 
 describe('modules/manager/paket/tool', () => {
-  describe('updatePackage()', () => {
+  describe('runPaketUpdate()', () => {
     it('update all packages if no parameters', async () => {
       const execSnapshots = mockExecAll({
         stderr: '',
@@ -74,7 +74,7 @@ describe('modules/manager/paket/tool', () => {
       });
       GlobalConfig.set(adminConfig);
 
-      await updatePackage({ filePath: packageFilePath });
+      await runPaketUpdate({ filePath: packageFilePath });
 
       expect(execSnapshots).toEqual(['paket update']);
     });
@@ -118,7 +118,7 @@ describe('modules/manager/paket/tool', () => {
         const execSnapshots = mockExecAll();
         GlobalConfig.set(adminConfig);
 
-        await updatePackage(command);
+        await runPaketUpdate(command);
 
         expect(execSnapshots).toEqual([expected]);
       },
@@ -127,7 +127,7 @@ describe('modules/manager/paket/tool', () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
 
-      await updatePackage({
+      await runPaketUpdate({
         filePath: packageFilePath,
         packageName: 'FSharp Core',
         group: 'Group A',
@@ -140,12 +140,12 @@ describe('modules/manager/paket/tool', () => {
     });
   });
 
-  describe('updateAllPackages()', () => {
+  describe('runPaketUpdateForAllPackages()', () => {
     it('update all packages if no parameters', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
 
-      await updateAllPackages(packageFilePath);
+      await runPaketUpdateForAllPackages(packageFilePath);
 
       expect(execSnapshots).toEqual(['paket update']);
     });
@@ -153,7 +153,7 @@ describe('modules/manager/paket/tool', () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
 
-      await updateAllPackages(packageFilePath, 'GroupA');
+      await runPaketUpdateForAllPackages(packageFilePath, 'GroupA');
 
       expect(execSnapshots).toEqual(['paket update --group GroupA ']);
     });
