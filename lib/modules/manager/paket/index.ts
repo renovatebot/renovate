@@ -21,6 +21,7 @@ export const displayName = 'Paket';
 export const url = 'https://fsprojects.github.io/Paket/';
 export const categories: Category[] = ['dotnet'];
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['paket.lock'];
 
 export const defaultConfig = {
   managerFilePatterns: ['**paket.dependencies'],
