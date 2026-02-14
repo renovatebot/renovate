@@ -165,6 +165,7 @@ export interface RenovateSharedConfig {
 export interface GlobalInheritableConfig {
   configFileNames?: string[];
   onboardingAutoCloseAge?: number;
+  onboardingBranch?: string;
 }
 
 // Config options used only within the global worker
