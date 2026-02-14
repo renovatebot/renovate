@@ -1,8 +1,8 @@
 import type { Category } from '../../../constants/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
-export { updateArtifacts } from './update.ts';
 export { updateLockedDependency } from './update-lock.ts';
 
 export const displayName = 'Paket';
