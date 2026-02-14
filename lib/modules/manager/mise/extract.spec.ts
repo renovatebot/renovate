@@ -727,6 +727,22 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('provides skipReason for kafka without apache prefix', () => {
+      const content = codeBlock`
+      [tools]
+      kafka = "3.9.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'kafka',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', () => {
       const content = codeBlock`
       [tools]
