@@ -5,6 +5,8 @@ import type { UpdatePackage } from './types.ts';
 
 /**
  * Call the paket cli to update dependencies by refreshing the lock file.
+ * The packages will be downloaded (normally not committed on git), and the lock file will be updated.
+ * Other versioned files are not affected.
  * https://fsprojects.github.io/Paket/paket-update.html
  *
  * @param command - parameters of paket cli
@@ -28,6 +30,8 @@ export async function runPaketUpdate(command: UpdatePackage): Promise<void> {
 
 /**
  * Call the paket cli to update dependencies by refreshing the lock file.
+ * The packages will be downloaded (normally not committed on git), and the lock file will be updated.
+ * Other versioned files are not affected.
  * https://fsprojects.github.io/Paket/paket-update.html
  *
  * @param filePath - The path to Paket dependencies file. Allows you to know the directory where to execute the paket command.
