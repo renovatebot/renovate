@@ -1,6 +1,7 @@
 import detectIndent from 'detect-indent';
+import { weave } from 'jsonc-weaver';
 import { Fixtures } from '~test/fixtures.ts';
-import { scm } from '~test/util.ts';
+import { platform, scm } from '~test/util.ts';
 import { migrateConfig } from '../../../../config/migration.ts';
 import { logger } from '../../../../logger/index.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
@@ -16,10 +17,18 @@ vi.mock('../../../../util/fs/index.ts');
 vi.mock('../../../../util/json-writer/index.ts');
 vi.mock('../../init/merge.ts');
 vi.mock('detect-indent');
+vi.mock('jsonc-weaver', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('jsonc-weaver')>();
+  return {
+    ...actual,
+    weave: vi.fn(actual.weave),
+  };
+});
 
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
-const migratedConfigObj = Fixtures.getJson('./migrated.json');
+const migratedConfigObj = Fixtures.getJsonc('./migrated.json');
+const renovateJson = Fixtures.get('./renovate.json');
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
 );
@@ -39,6 +48,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         isMigrated: true,
         migratedConfig: migratedConfigObj,
       });
+      platform.getRawFile.mockResolvedValue(renovateJson);
     });
 
     it('Calls getAsync a first when migration not needed', async () => {
@@ -104,6 +114,36 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
         migratedDataJson5,
+      );
+    });
+
+    it('Falls back to JSON.stringify when weave fails', async () => {
+      const err = new Error('weave error');
+      vi.mocked(weave).mockImplementationOnce(() => {
+        throw err;
+      });
+      MigratedDataFactory.reset();
+
+      const res = await MigratedDataFactory.getAsync();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err },
+        'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
+      );
+      expect(res?.content).toBe(
+        JSON.stringify(migratedConfigObj, undefined, 2) + '\n',
+      );
+    });
+
+    it('Uses JSON.stringify when raw is null', async () => {
+      platform.getRawFile.mockResolvedValueOnce(null);
+      MigratedDataFactory.reset();
+
+      const res = await MigratedDataFactory.getAsync();
+
+      expect(weave).not.toHaveBeenCalled();
+      expect(res?.content).toBe(
+        JSON.stringify(migratedConfigObj, undefined, 2) + '\n',
       );
     });
 
