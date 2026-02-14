@@ -6,7 +6,7 @@ import { EndoflifeDateDatasource } from '../endoflife-date/index.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl, githubBaseUrl } from './common.ts';
-import { PythonRelease } from './schema.ts';
+import { parseFtpListing } from './schema.ts';
 
 export class PythonVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -68,11 +68,11 @@ export class PythonVersionDatasource extends Datasource {
       releases: [],
     };
     try {
-      const response = await this.http.getJson(registryUrl, PythonRelease);
+      const response = await this.http.getText(registryUrl);
       result.releases.push(
-        ...response.body
-          .filter((release) => release.isStable)
-          .filter((release) => pythonPrebuildVersions.has(release.version)),
+        ...parseFtpListing(response.body).filter((release) =>
+          pythonPrebuildVersions.has(release.version),
+        ),
       );
     } catch (err) {
       this.handleGenericErrors(err);

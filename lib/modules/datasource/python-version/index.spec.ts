@@ -61,7 +61,7 @@ describe('modules/datasource/python-version/index', () => {
     });
 
     it('throws for 500', async () => {
-      httpMock.scope(defaultRegistryUrl).get('').reply(500);
+      httpMock.scope(defaultRegistryUrl).get('/').reply(500);
       await expect(
         getPkgReleases({
           datasource,
@@ -71,7 +71,7 @@ describe('modules/datasource/python-version/index', () => {
     });
 
     it('returns null for error', async () => {
-      httpMock.scope(defaultRegistryUrl).get('').replyWithError('error');
+      httpMock.scope(defaultRegistryUrl).get('/').replyWithError('error');
       expect(
         await getPkgReleases({
           datasource,
@@ -81,7 +81,10 @@ describe('modules/datasource/python-version/index', () => {
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(defaultRegistryUrl).get('').reply(200, []);
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get('/')
+        .reply(200, '<html><body><pre></pre></body></html>');
       expect(
         await getPkgReleases({
           datasource,
@@ -94,8 +97,8 @@ describe('modules/datasource/python-version/index', () => {
       beforeEach(() => {
         httpMock
           .scope(defaultRegistryUrl)
-          .get('')
-          .reply(200, Fixtures.get('release.json'));
+          .get('/')
+          .reply(200, Fixtures.get('ftp-listing.html'));
       });
 
       it('returns the correct data', async () => {
@@ -103,10 +106,10 @@ describe('modules/datasource/python-version/index', () => {
           datasource,
           packageName: 'python',
         });
-        expect(res?.releases[0]).toEqual({
+        expect(res?.releases.find((r) => r.version === '3.7.8')).toEqual({
           isDeprecated: true,
           isStable: true,
-          releaseTimestamp: '2020-06-27T12:55:01.000Z' as Timestamp,
+          releaseTimestamp: '2020-06-27T12:55:00.000Z' as Timestamp,
           version: '3.7.8',
         });
       });
@@ -116,7 +119,7 @@ describe('modules/datasource/python-version/index', () => {
           datasource,
           packageName: 'python',
         });
-        expect(res?.releases).toHaveLength(2);
+        expect(res?.releases).toHaveLength(3);
         for (const release of res?.releases ?? []) {
           expect(release.isStable).toBeTrue();
         }
@@ -139,7 +142,7 @@ describe('modules/datasource/python-version/index', () => {
           datasource,
           packageName: 'python',
         });
-        expect(res?.releases).toHaveLength(2);
+        expect(res?.releases).toHaveLength(3);
         for (const release of res?.releases ?? []) {
           expect(release.isDeprecated).toBeBoolean();
         }

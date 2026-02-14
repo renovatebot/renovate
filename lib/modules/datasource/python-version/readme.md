@@ -1,4 +1,4 @@
-This datasource returns Python releases from the [python.org API](https://www.python.org/api/v2/downloads/release/).
+This datasource returns Python releases from the [python.org FTP listing](https://www.python.org/ftp/python/).
 
 It also fetches deprecated versions from the [Endoflife Date datasource](../endoflife-date/index.md).
 
