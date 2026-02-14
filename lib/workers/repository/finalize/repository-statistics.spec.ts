@@ -67,7 +67,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(true);
 
-      runBranchSummary(config);
+      runBranchSummary(config, []);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -128,7 +128,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 
-      runBranchSummary(config);
+      runBranchSummary(config, []);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -181,9 +181,86 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 
-      runBranchSummary(config);
+      runBranchSummary(config, []);
 
       expect(logger.debug).toHaveBeenCalledTimes(2);
+    });
+
+    it('includes prState in branches info extended when PR exists', () => {
+      const defaultBranch = 'main';
+      const config: RenovateConfig = { defaultBranch };
+      const branchCache = partial<BranchCache>({
+        branchName: 'renovate/dep-1.x',
+        prNo: 123,
+        prTitle: 'Update dep to v1.2.3',
+        result: 'done',
+        upgrades: [],
+      });
+      const branches: BranchCache[] = [branchCache];
+      const cache = partial<RepoCacheData>({ branches });
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockReturnValueOnce(false);
+
+      const prList = [
+        partial<import('../../../modules/platform/index.ts').Pr>({
+          number: 123,
+          state: 'open',
+        }),
+      ];
+
+      runBranchSummary(config, prList);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          branchesInformation: [
+            {
+              branchName: 'renovate/dep-1.x',
+              prNo: 123,
+              prState: 'open',
+              prTitle: 'Update dep to v1.2.3',
+              result: 'done',
+              prBlockedBy: undefined,
+              upgrades: [],
+            },
+          ],
+        },
+        'branches info extended',
+      );
+    });
+
+    it('has undefined prState when prNo is null', () => {
+      const defaultBranch = 'main';
+      const config: RenovateConfig = { defaultBranch };
+      const branchCache = partial<BranchCache>({
+        branchName: 'renovate/dep-1.x',
+        prNo: undefined,
+        prTitle: 'Update dep to v1.2.3',
+        result: 'pending',
+        upgrades: [],
+      });
+      const branches: BranchCache[] = [branchCache];
+      const cache = partial<RepoCacheData>({ branches });
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockReturnValueOnce(false);
+
+      runBranchSummary(config, []);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          branchesInformation: [
+            {
+              branchName: 'renovate/dep-1.x',
+              prNo: undefined,
+              prState: undefined,
+              prTitle: 'Update dep to v1.2.3',
+              result: 'pending',
+              prBlockedBy: undefined,
+              upgrades: [],
+            },
+          ],
+        },
+        'branches info extended',
+      );
     });
   });
 });
