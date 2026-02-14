@@ -32,7 +32,7 @@ describe('modules/manager/paket/update-lock', () => {
     };
 
     it('update all packages', async () => {
-      const toolSpy = vi.spyOn(tool, 'updatePackage');
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
 
       git.getFiles.mockResolvedValueOnce({
@@ -61,7 +61,7 @@ describe('modules/manager/paket/update-lock', () => {
     });
 
     it('return null if no changes', async () => {
-      const toolSpy = vi.spyOn(tool, 'updatePackage');
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
 
       const contentLockFile = 'Fake lock file content';

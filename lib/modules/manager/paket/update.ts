@@ -2,7 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import { getLocalFiles, getSiblingFileName } from '../../../util/fs/index.ts';
 import { getFiles } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { updateAllPackages } from './tool.ts';
+import { runPaketUpdateForAllPackages } from './tool.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -15,7 +15,7 @@ export async function updateArtifacts(
   );
   const existingLockFileContentMap = await getFiles([lockFileName]);
 
-  await updateAllPackages(lockFileName);
+  await runPaketUpdateForAllPackages(lockFileName);
 
   const newLockFileContentMap = await getLocalFiles([lockFileName]);
 
