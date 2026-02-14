@@ -81,7 +81,8 @@ If you're an advanced user, you may use the [`dependabot-core` repository](https
 
 Renovate shows four _Merge Confidence_ badges in its PRs:
 
-- **Age**: The age of the package
+- **Lib Years**: The age of the current package version
+- **Age**: The age of the update package version
 - **Adoption**: The percentage of this package's users (within Renovate) which are using this release
 - **Passing**: The percentage of updates which have passing tests for this package
 - **Confidence**: The confidence level for this update
