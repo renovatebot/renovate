@@ -1,5 +1,7 @@
 import * as httpMock from '~test/http-mock.ts';
 import { git, hostRules, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { InheritConfig } from '../../../config/inherit.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import type { PlatformResult, RepoParams } from '../types.ts';
@@ -34,6 +36,8 @@ describe('modules/platform/bitbucket/index', () => {
 
     setBaseUrl(baseUrl);
     memCache.init();
+    GlobalConfig.reset();
+    InheritConfig.reset();
   });
 
   async function initRepoMock(
@@ -262,6 +266,9 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: false,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -273,13 +280,18 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: false,
       });
 
       expect(res.defaultBranch).toBe('master');
     });
 
     it('enabled: uses development branch when development branch exists', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: false,
+      });
+      InheritConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -295,13 +307,15 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('develop');
     });
 
     it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -317,7 +331,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('master');

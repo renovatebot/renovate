@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
-import { parseJson } from '../../../util/common.ts';
+import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { BitbucketHttpOptions } from '../../../util/http/bitbucket.ts';
@@ -193,7 +193,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -215,7 +214,7 @@ export async function initRepo({
 
     mainBranch = info.mainbranch;
 
-    if (bbUseDevelopmentBranch) {
+    if (getInheritedOrGlobal('bbUseDevelopmentBranch')) {
       // Fetch Bitbucket development branch
       const developmentBranch = (
         await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
