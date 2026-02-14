@@ -4,11 +4,12 @@ import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 import * as tool from './tool.ts';
 
+vi.mock('../../../util/fs');
+
 describe('modules/manager/paket/artifacts', () => {
   const packageFileName = '/app/test/paket.dependencies';
 
   function initializeMock() {
-    vi.mock('../../../util/fs');
     fs.getSiblingFileName.mockImplementation(
       (fileName: string, siblingName: string) => {
         expect(fileName).equals(packageFileName);

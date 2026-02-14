@@ -4,11 +4,12 @@ import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './extract.ts';
 
+vi.mock('../../../util/fs');
+
 describe('modules/manager/paket/extract', () => {
   const packageFileName = '/app/test/paket.dependencies';
 
   function initializeMock() {
-    vi.mock('../../../util/fs');
     fs.getSiblingFileName.mockImplementation(
       (fileName: string, siblingName: string) => {
         expect(fileName).equals(packageFileName);
