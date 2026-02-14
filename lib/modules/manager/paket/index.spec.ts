@@ -1,17 +1,17 @@
 import { beforeEach, describe } from 'vitest';
-import { NugetDatasource } from '../../datasource/nuget';
+import { fs, git } from '~test/util.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type {
   ExtractConfig,
   UpdateArtifact,
   UpdateLockedConfig,
-} from '../types';
-import * as tool from './tool';
+} from '../types.ts';
 import {
   extractPackageFile,
   updateArtifacts,
   updateLockedDependency,
-} from './index';
-import { fs, git } from '~test/util';
+} from './index.ts';
+import * as tool from './tool.ts';
 
 describe('modules/manager/paket/index', () => {
   const packageFileName = '/app/test/paket.dependencies';

@@ -1,16 +1,17 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { updateAllPackages, updatePackage } from './tool';
-import type { UpdatePackage } from './types';
-import type { ExecResult } from '~test/exec-util';
-import { exec } from '~test/exec-util';
+import type { ExecResult } from '~test/exec-util.ts';
+import { exec } from '~test/exec-util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type { CommandWithOptions } from '../../../util/exec/types.ts';
+import { updateAllPackages, updatePackage } from './tool.ts';
+import type { UpdatePackage } from './types.ts';
 
 const defaultExecResult = { stdout: '', stderr: '' };
 export function mockExecAll(
   execResult: ExecResult = defaultExecResult,
-): string[] {
-  const snapshots: string[] = [];
+): (string | CommandWithOptions)[] {
+  const snapshots: (string | CommandWithOptions)[] = [];
   exec.mockImplementation((cmd) => {
     snapshots.push(cmd);
     if (execResult instanceof Error) {

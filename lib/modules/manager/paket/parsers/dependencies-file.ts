@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { newlineRegex } from '../../../../util/regex';
-import type { DependenciesFile, DependenciesFileGroup } from '../types';
+import { newlineRegex } from '../../../../util/regex.ts';
+import type { DependenciesFile, DependenciesFileGroup } from '../types.ts';
 
 interface ReduceState {
   groups: DependenciesFileGroup[];

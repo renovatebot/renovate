@@ -1,5 +1,5 @@
-import type { LockFileDependency } from '../types';
-import { parse } from './lock-file';
+import type { LockFileDependency } from '../types.ts';
+import { parse } from './lock-file.ts';
 
 describe('modules/manager/paket/parsers/lock-file', () => {
   describe('parse()', () => {
