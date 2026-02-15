@@ -43,13 +43,10 @@ export class DebianVersioningApi extends GenericVersioningApi {
   override isStable(version: string): boolean {
     if (isDatedCodeName(version, this._distroInfo)) {
       const codename = getDatedContainerImageCodename(version)!;
+      const versionByCodename = this._distroInfo.getVersionByCodename(codename);
       return (
-        this._distroInfo.isReleased(
-          this._distroInfo.getVersionByCodename(codename),
-        ) &&
-        !this._distroInfo.isEolLts(
-          this._distroInfo.getVersionByCodename(codename),
-        )
+        this._distroInfo.isReleased(versionByCodename) &&
+        !this._distroInfo.isEolLts(versionByCodename)
       );
     }
     let ver: string;
