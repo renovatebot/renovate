@@ -40,6 +40,7 @@ export class GlobalConfig {
     'localDir',
     'migratePresets',
     'onboardingAutoCloseAge',
+    'onboardingBranch',
     'platform',
     'presetCachePersistence',
     's3Endpoint',

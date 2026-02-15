@@ -2,6 +2,7 @@ import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import * as repositoryCache from '../../../util/cache/repository/index.ts';
+import { getInheritedOrGlobal } from '../../../util/common.ts';
 import { clearRenovateRefs } from '../../../util/git/index.ts';
 import { PackageFiles } from '../package-files.ts';
 import { checkReconfigureBranch } from '../reconfigure/index.ts';
@@ -30,7 +31,7 @@ export async function finalizeRepo(
         pr.state === 'merged' &&
         pr.title !== 'Configure Renovate' &&
         pr.title !== config.onboardingPrTitle &&
-        pr.sourceBranch !== config.onboardingBranch,
+        pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch'),
     )
   ) {
     logger.debug('Repo is activated');
