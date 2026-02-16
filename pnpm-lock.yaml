@@ -185,11 +185,11 @@ importers:
         specifier: 10.6.0
         version: 10.6.0
       emojibase:
-        specifier: 16.0.0
-        version: 16.0.0
+        specifier: 17.0.0
+        version: 17.0.0
       emojibase-regex:
-        specifier: 16.0.0
-        version: 16.0.0
+        specifier: 17.0.0
+        version: 17.0.0
       execa:
         specifier: 8.0.1
         version: 8.0.1
@@ -531,8 +531,8 @@ importers:
         specifier: 9.1.0
         version: 9.1.0
       emojibase-data:
-        specifier: 16.0.3
-        version: 16.0.3(emojibase@16.0.0)
+        specifier: 17.0.0
+        version: 17.0.0(emojibase@17.0.0)
       esbuild:
         specifier: 0.27.3
         version: 0.27.3
@@ -3402,16 +3402,16 @@ packages:
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
-  emojibase-data@16.0.3:
-    resolution: {integrity: sha512-MopInVCDZeXvqBMPJxnvYUyKw9ImJZqIDr2sABo6acVSPev5IDYX+mf+0tsu96JJyc3INNvgIf06Eso7bdTX2Q==}
+  emojibase-data@17.0.0:
+    resolution: {integrity: sha512-Yvgb5AWoHViHV/gq1qr5ZAarcBip+B27/ZLRsUJkbgAEaLlZ/fof9g882LTpmEpyhBNEC0m2SEmItljHsTygjA==}
     peerDependencies:
       emojibase: '*'
 
-  emojibase-regex@16.0.0:
-    resolution: {integrity: sha512-ZMp31BkzBWNW+T73of6NURL6nXQa5GkfKneOkr3cEwBDVllbW/2nuva7NO0J3RjaQ07+SZQNgPTGZ4JlIhmM2Q==}
+  emojibase-regex@17.0.0:
+    resolution: {integrity: sha512-iWlqiz2l2zNf2lDqgN/7qjqKHVUX6H4D+8F5vDZkgjyWyRFXcA5K4rxkoTl7AJmyjHnoytw0m/do2SrGByui+g==}
 
-  emojibase@16.0.0:
-    resolution: {integrity: sha512-Nw2m7JLIO4Ou2X/yZPRNscHQXVbbr6SErjkJ7EooG7MbR3yDZszCv9KTizsXFc7yZl0n3WF+qUKIC/Lw6H9xaQ==}
+  emojibase@17.0.0:
+    resolution: {integrity: sha512-bXdpf4HPY3p41zK5swVKZdC/VynsMZ4LoLxdYDE+GucqkFwzcM1GVc4ODfYAlwoKaf2U2oNNUoOO78N96ovpBA==}
     engines: {node: '>=18.12.0'}
 
   emojilib@2.4.0:
@@ -10402,13 +10402,13 @@ snapshots:
 
   emoji-regex@9.2.2: {}
 
-  emojibase-data@16.0.3(emojibase@16.0.0):
+  emojibase-data@17.0.0(emojibase@17.0.0):
     dependencies:
-      emojibase: 16.0.0
+      emojibase: 17.0.0
 
-  emojibase-regex@16.0.0: {}
+  emojibase-regex@17.0.0: {}
 
-  emojibase@16.0.0: {}
+  emojibase@17.0.0: {}
 
   emojilib@2.4.0: {}
 
