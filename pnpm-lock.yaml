@@ -614,9 +614,6 @@ importers:
       tsdown:
         specifier: 0.20.3
         version: 0.20.3(typescript@5.9.3)
-      tsx:
-        specifier: 4.21.0
-        version: 4.21.0
       type-fest:
         specifier: 5.4.4
         version: 5.4.4
@@ -13892,6 +13889,7 @@ snapshots:
       get-tsconfig: 4.13.6
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   tunnel-agent@0.6.0:
     dependencies:
