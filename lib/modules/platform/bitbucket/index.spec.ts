@@ -1,12 +1,14 @@
-import * as memCache from '../../../util/cache/memory';
-import { setBaseUrl } from '../../../util/http/bitbucket';
-import type { PlatformResult, RepoParams } from '../types';
-import type { PrTask } from './schema';
-import * as bitbucket from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger } from '~test/util';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { InheritConfig } from '../../../config/inherit.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { setBaseUrl } from '../../../util/http/bitbucket.ts';
+import type { PlatformResult, RepoParams } from '../types.ts';
+import * as bitbucket from './index.ts';
+import type { PrTask } from './schema.ts';
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules.ts');
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -34,6 +36,8 @@ describe('modules/platform/bitbucket/index', () => {
 
     setBaseUrl(baseUrl);
     memCache.init();
+    GlobalConfig.reset();
+    InheritConfig.reset();
   });
 
   async function initRepoMock(
@@ -262,6 +266,9 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: false,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -273,13 +280,18 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: false,
       });
 
       expect(res.defaultBranch).toBe('master');
     });
 
     it('enabled: uses development branch when development branch exists', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: false,
+      });
+      InheritConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -295,13 +307,15 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('develop');
     });
 
     it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -317,7 +331,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('master');
@@ -1669,28 +1682,25 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
 
-    it('updates abandoned dependencies heading and place note inside', () => {
-      const prBody =
-        '> ℹ **Note**\n>\n' +
-        'These dependencies have not received updates for an extended period and may be unmaintained:\n\n' +
+    it('dependency dashboard: updates abandoned dependencies heading and place note inside', () => {
+      const dashboardBody =
+        '## Abandoned Dependencies\n' +
         '<details>\n<summary>View abandoned dependencies (6)</summary>\n\n' +
         '| Datasource | Name | Last Updated |\n' +
         '|------------|------|-------------|\n' +
         '| npm | node | unknown |\n' +
         '\n</details>\n\n';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Abandoned Dependencies\n' +
-          '> ℹ **Note**\n>\n' +
-          'These dependencies have not received updates for an extended period and may be unmaintained:\n\n\n\n' +
           '| Datasource | Name | Last Updated |\n' +
           '|------------|------|-------------|\n' +
           '| npm | node | unknown |\n\n\n\n',
       );
     });
 
-    it('updates vulnerabilities section to block quote with nested list', () => {
-      const prBody =
+    it('dependency dashboard: updates vulnerabilities section with multiple collapsible details sections to nested list', () => {
+      const dashboardBody =
         '## Vulnerabilities\n\n' +
         '`2`/`2` CVEs have Renovate fixes.\n' +
         '<details><summary>maven</summary>\n<blockquote>\n\n' +
@@ -1702,7 +1712,7 @@ describe('modules/platform/bitbucket/index', () => {
         '<blockquote>\n\n- [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n</blockquote>\n' +
         '</details>\n\n</blockquote>\n</details>\n\n</blockquote>\n</details>\n\n';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Vulnerabilities\n\n' +
           '`2`/`2` CVEs have Renovate fixes.\n' +
           ' - **maven**\n\n\n' +
@@ -1714,9 +1724,9 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates detected dependencies section to block quote with nested list', () => {
-      const prBody =
-        '## Detected dependencies\n\n' +
+    it('dependency dashboard: updates detected dependencies section with multiple collapsible details sections to nested list', () => {
+      const dashboardBody =
+        '## Detected Dependencies\n\n' +
         '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
         '<details><summary>app1/Dockerfile</summary>\n - `node:24`\n - `temurin:27`\n</details>\n\n' +
         '<details><summary>app2/Dockerfile</summary>\n - `node:20`\n - `python:3:14`\n</details>\n\n' +
@@ -1725,8 +1735,8 @@ describe('modules/platform/bitbucket/index', () => {
         '<details><summary>package.json</summary>\n - `@biomejs/biome:2.0.0`</details>\n\n' +
         '</blockquote>\n</details>';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
-        '## Detected dependencies\n\n' +
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
+        '## Detected Dependencies\n\n' +
           ' - **dockerfile**\n\n\n' +
           '\t - `app1/Dockerfile`\n' +
           '\t\t - `node:24`\n' +
@@ -1737,6 +1747,66 @@ describe('modules/platform/bitbucket/index', () => {
           ' - **npm**\n\n\n' +
           '\t - `package.json`\n' +
           '\t\t - `@biomejs/biome:2.0.0`\n\n\n',
+      );
+    });
+
+    it('updates release notes section', () => {
+      const prBody =
+        '## Release Notes\n\n' +
+        '<details><summary>biomejs/biome (@&#8203;biomejs/biome)</summary>\n\n\n' +
+        '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
+        '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n' +
+        '- [#&#8203;8583](https://github.com/biomejs/biome/pull/8583) [`83be210`](https://github.com/biomejs/biome/commit/83be2101cb14969e3affda260773e33e50874df0) Thanks [@&#8203;dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidTemplateRoot`](https://biomejs.dev/linter/rules/use-vue-valid-template-root/).' +
+        '</details>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Release Notes\n\n' +
+          '**biomejs/biome (@&#8203;biomejs/biome)**\n\n\n' +
+          '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
+          '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n' +
+          '- [#&#8203;8583](https://github.com/biomejs/biome/pull/8583) [`83be210`](https://github.com/biomejs/biome/commit/83be2101cb14969e3affda260773e33e50874df0) Thanks [@&#8203;dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidTemplateRoot`](https://biomejs.dev/linter/rules/use-vue-valid-template-root/).',
+      );
+    });
+
+    it('updates codeblocks to correct indentation level', () => {
+      const prBody =
+        '  Examples:\n' +
+        '  ```vue\n' +
+        '  <template src="./foo.html">content</template>\n' +
+        '  ```\n' +
+        '  ```vue\n' +
+        '  <template></template>\n' +
+        '  ```';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '  Examples:\n' +
+          '```vue\n' +
+          '<template src="./foo.html">content</template>\n' +
+          '```\n' +
+          '```vue\n' +
+          '<template></template>\n' +
+          '```',
+      );
+    });
+
+    it('updates codeblocks to drop extra language data', () => {
+      const prBody =
+        '  Examples:\n' +
+        '  ```vue,expect_diagnostic\n' +
+        '  <template src="./foo.html">content</template>\n' +
+        '  ```\n' +
+        '  ```vue\n' +
+        '  <template></template>\n' +
+        '  ```';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '  Examples:\n' +
+          '```vue\n' +
+          '<template src="./foo.html">content</template>\n' +
+          '```\n' +
+          '```vue\n' +
+          '<template></template>\n' +
+          '```',
       );
     });
   });

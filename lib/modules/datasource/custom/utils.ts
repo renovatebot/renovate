@@ -1,8 +1,8 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
-import type { CustomDatasourceConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import * as template from '../../../util/template';
-import type { GetReleasesConfig } from '../types';
+import type { CustomDatasourceConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import * as template from '../../../util/template/index.ts';
+import type { GetReleasesConfig } from '../types.ts';
 
 export function massageCustomDatasourceConfig(
   customDatasourceName: string,

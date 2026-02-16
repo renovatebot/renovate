@@ -1,9 +1,12 @@
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { GlobalConfig } from '../../../config/global';
-import { outputCacheFile } from '../../../util/fs';
-import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { outputCacheFile } from '../../../util/fs/index.ts';
+import {
+  computeFileChecksum,
+  parseChecksumsFromInRelease,
+} from './checksum.ts';
 
 const fixtureInRelease = Fixtures.getBinary(`InRelease`).toString();
 

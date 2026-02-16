@@ -1,9 +1,10 @@
-import { getConfig } from '../../../../config/defaults';
-import { createOnboardingBranch } from './create';
-import type { RenovateConfig } from '~test/util';
-import { scm } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { scm } from '~test/util.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { createOnboardingBranch } from './create.ts';
 
-vi.mock('./config', () => ({
+vi.mock('./config.ts', () => ({
   getOnboardingConfigContents: () =>
     JSON.stringify({
       foo: 'bar',
@@ -15,6 +16,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
   beforeEach(() => {
     config = getConfig();
+    GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
   });
 
   describe('createOnboardingBranch', () => {

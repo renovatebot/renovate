@@ -1,11 +1,11 @@
-import { getOptions } from '../../lib/config/options';
+import { getOptions } from '../../lib/config/options/index.ts';
 import type {
   RenovateOptions,
   RenovateRequiredOption,
-} from '../../lib/config/types';
-import { pkg } from '../../lib/expose.cjs';
-import { hasKey } from '../../lib/util/object';
-import { updateFile } from '../utils';
+} from '../../lib/config/types.ts';
+import { pkg } from '../../lib/expose.ts';
+import { hasKey } from '../../lib/util/object.ts';
+import { updateFile } from '../utils/index.ts';
 
 type JsonSchemaBasicType =
   | 'string'
@@ -170,6 +170,7 @@ function createSchemaForChildConfigs(
 interface GenerateSchemaOpts {
   filename?: string;
   version?: string;
+  isInherit?: boolean;
   isGlobal?: boolean;
 }
 
@@ -178,34 +179,78 @@ export async function generateSchema(
   {
     filename = 'renovate-schema.json',
     version = pkg.version,
+    isInherit = false,
     isGlobal = false,
   }: GenerateSchemaOpts = {},
 ): Promise<void> {
+  if (isInherit && isGlobal) {
+    throw new Error(
+      'Generating schema for both `isInherit` and `isGlobal` is not supported. Only use one',
+    );
+  }
+
   const schema = {
-    title: isGlobal
-      ? `JSON schema for Renovate ${version} global self-hosting configuration (https://renovatebot.com/)`
-      : `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
+    // may be overridden based on `isGlobal` and `isInherit`
+    title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
     $schema: 'http://json-schema.org/draft-07/schema#',
     'x-renovate-version': `${version}`,
     allowComments: true,
     type: 'object',
     properties: {},
+
+    /* any configuration items that should not be set - only used in inherited or repo config */
+    not: undefined as
+      | {
+          /* we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded */
+          anyOf: {
+            required: string[];
+          }[];
+        }
+      | undefined,
   };
-  const configurationOptions = getOptions();
 
-  if (!isGlobal) {
-    configurationOptions.map((v) => {
-      // TODO #38728 remove any global-only options in the repository configuration schema
-      if (v.globalOnly) {
-        // NOTE that the JSON Schema version we're using does not have support for deprecating, so we need to use the `description` field
-        v.description =
-          "Deprecated: This configuration option is only intended to be used with 'global' configuration when self-hosting, not used in a repository configuration file. Renovate likely won't use the configuration, and these fields will be removed from the repository configuration documentation in Renovate v43 (https://github.com/renovatebot/renovate/issues/38728)\n\n" +
-          v.description;
-      }
-
-      return v;
-    });
+  if (isGlobal) {
+    schema.title = `JSON schema for Renovate ${version} global self-hosting configuration (https://renovatebot.com/)`;
+  } else if (isInherit) {
+    schema.title = `JSON schema for Renovate ${version} config files (with Inherit Config options) (https://renovatebot.com/)`;
   }
+
+  const configurationOptions = getOptions().filter((o) => {
+    // always allow non-global options
+    if (!o.globalOnly) {
+      return true;
+    }
+
+    if (o.globalOnly && o.inheritConfigSupport) {
+      const allowed = isInherit || isGlobal;
+      if (!allowed) {
+        schema.not ??= {
+          anyOf: [],
+        };
+        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+        schema.not.anyOf.push({
+          required: [o.name],
+        });
+      }
+      return isInherit || isGlobal;
+    }
+
+    if (o.globalOnly) {
+      if (!isGlobal) {
+        schema.not ??= {
+          anyOf: [],
+        };
+        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+        schema.not.anyOf.push({
+          required: [o.name],
+        });
+      }
+      return isGlobal;
+    }
+
+    // we don't currently have any config options that are hitting this, but to be safe, let's throw an error if we ever hit this
+    throw new Error(`Unhandled case for \`${o.name}\``);
+  });
 
   configurationOptions.sort((a, b) => {
     if (a.name < b.name) {

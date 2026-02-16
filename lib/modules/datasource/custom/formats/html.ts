@@ -1,9 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
-import { readLocalFile } from '../../../../util/fs';
-import { parse } from '../../../../util/html';
-import type { Http } from '../../../../util/http';
-import type { ReleaseResult } from '../../types';
-import type { CustomDatasourceFetcher } from './types';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { parse } from '../../../../util/html.ts';
+import type { Http } from '../../../../util/http/index.ts';
+import type { ReleaseResult } from '../../types.ts';
+import type { CustomDatasourceFetcher } from './types.ts';
 
 function extractLinks(content: string): ReleaseResult {
   const body = parse(content);

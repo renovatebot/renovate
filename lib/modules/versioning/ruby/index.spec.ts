@@ -1,4 +1,4 @@
-import { api as semverRuby } from '.';
+import { api as semverRuby } from './index.ts';
 
 describe('modules/versioning/ruby/index', () => {
   it.each`

@@ -1,4 +1,4 @@
-import { assignKeys } from './assign-keys';
+import { assignKeys } from './assign-keys.ts';
 
 describe('util/assign-keys', () => {
   it('should assign values from right to left for specified keys', () => {

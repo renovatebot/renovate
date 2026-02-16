@@ -1,22 +1,23 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
-} from '../../config/types';
-import type { Category } from '../../constants';
+} from '../../config/types.ts';
+import type { Category } from '../../constants/index.ts';
 import type {
   MaybePromise,
   ModuleApi,
   RangeStrategy,
   SkipReason,
   StageName,
-} from '../../types';
-import type { FileChange } from '../../util/git/types';
-import type { MergeConfidence } from '../../util/merge-confidence/types';
-import type { Timestamp } from '../../util/timestamp';
-import type { RegistryStrategy } from '../datasource';
-import type { CustomExtractConfig } from './custom/types';
+} from '../../types/index.ts';
+import type { FileChange } from '../../util/git/types.ts';
+import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
+import type { Timestamp } from '../../util/timestamp.ts';
+import type { RegistryStrategy } from '../datasource/index.ts';
+import type { CustomExtractConfig } from './custom/types.ts';
 
 export interface ManagerData<T> {
   managerData?: T;
@@ -48,6 +49,7 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
+  toolSettings?: ToolSettingsOptions;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -276,11 +278,12 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
-export interface ManagerApi extends ModuleApi {
+interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
   supportsLockFileMaintenance?: boolean;
+  lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
 
@@ -318,6 +321,12 @@ export interface ManagerApi extends ModuleApi {
     config: UpdateLockedConfig,
   ): MaybePromise<UpdateLockedResult>;
 }
+
+export type ManagerApi = ManagerApiBase &
+  // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
+  (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
+    | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
+  );
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig<T = Record<string, any>>

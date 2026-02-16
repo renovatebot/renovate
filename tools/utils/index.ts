@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { SemVer } from 'semver';
-import { logger } from '../../lib/logger';
+import { logger } from '../../lib/logger/index.ts';
 
 export const newFiles = new Set();
 

@@ -1,6 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { codeBlock } from 'common-tags';
+import { fs, partial } from '~test/util.ts';
 import {
   extractGradleVersion,
   getJavaConstraint,
@@ -8,11 +9,10 @@ import {
   getJvmConfiguration,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from './utils';
-import { fs, partial } from '~test/util';
+} from './utils.ts';
 
 const platform = vi.spyOn(os, 'platform');
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaConstraint()', () => {

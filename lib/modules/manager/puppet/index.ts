@@ -1,9 +1,9 @@
-import type { Category } from '../../../constants';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
+import type { Category } from '../../../constants/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { PuppetForgeDatasource } from '../../datasource/puppet-forge/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://www.puppet.com/docs/index.html';
 export const categories: Category[] = ['iac', 'ruby'];

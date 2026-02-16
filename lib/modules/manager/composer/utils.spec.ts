@@ -1,15 +1,15 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import * as hostRules from '../../../util/host-rules';
-import { Lockfile, PackageFile } from './schema';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { Lockfile, PackageFile } from './schema.ts';
 import {
   extractConstraints,
   getComposerArguments,
   getComposerUpdateArguments,
   requireComposerDependencyInstallation,
-} from './utils';
+} from './utils.ts';
 
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 describe('modules/manager/composer/utils', () => {
   beforeEach(() => {

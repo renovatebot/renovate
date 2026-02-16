@@ -1,6 +1,6 @@
-import { GlobalConfig } from '../../../config/global';
-import { getTtlOverride, resolveTtlValues } from './ttl';
-import type { PackageCacheNamespace } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { getTtlOverride, resolveTtlValues } from './ttl.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 describe('util/cache/package/ttl', () => {
   beforeEach(() => {

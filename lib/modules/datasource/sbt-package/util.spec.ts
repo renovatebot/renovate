@@ -1,4 +1,4 @@
-import { getLatestVersion } from './util';
+import { getLatestVersion } from './util.ts';
 
 describe('modules/datasource/sbt-package/util', () => {
   it('gets latest version', () => {

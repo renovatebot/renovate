@@ -1,9 +1,9 @@
 import moo from 'moo';
-import type { Category } from '../../../constants';
-import { regEx } from '../../../util/regex';
-import { isHttpUrl } from '../../../util/url';
-import { NugetDatasource } from '../../datasource/nuget';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type { Category } from '../../../constants/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isHttpUrl } from '../../../util/url.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export const url = 'https://cakebuild.net/docs';
 export const categories: Category[] = ['dotnet'];

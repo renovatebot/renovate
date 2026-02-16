@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import type { PackageDependency } from '../types';
-import { extractPackageFile } from '.';
+import type { PackageDependency } from '../types.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/buildkite/extract', () => {
   describe('extractPackageFile()', () => {

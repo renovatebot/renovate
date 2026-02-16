@@ -2,8 +2,8 @@ import type {
   MigratableConfig,
   Migration,
   MigrationConstructor,
-} from '../lib/config/migrations/types';
-import type { RenovateConfig } from '../lib/config/types';
+} from '../lib/config/migrations/types.ts';
+import type { RenovateConfig } from '../lib/config/types.ts';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

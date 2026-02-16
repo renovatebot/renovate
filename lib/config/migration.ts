@@ -7,19 +7,19 @@ import {
   isString,
 } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { logger } from '../logger';
-import { clone } from '../util/clone';
-import { regEx } from '../util/regex';
-import { MigrationsService } from './migrations';
-import { getOptions } from './options';
+import { logger } from '../logger/index.ts';
+import { clone } from '../util/clone.ts';
+import { regEx } from '../util/regex.ts';
+import { MigrationsService } from './migrations/index.ts';
+import { getOptions } from './options/index.ts';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
   PackageRule,
   RenovateConfig,
   RenovateOptions,
-} from './types';
-import { mergeChildConfig } from './utils';
+} from './types.ts';
+import { mergeChildConfig } from './utils.ts';
 
 const options = getOptions();
 export function fixShortHours(input: string): string {
@@ -87,6 +87,7 @@ export function migrateConfig(
         migratedConfig[key] = String(val[0]);
       } else if (isArray(val)) {
         // @ts-expect-error -- TODO: fix me
+        // v8 ignore else -- TODO: add test #40625
         if (isArray(migratedConfig?.[key])) {
           const newArray = [];
           // @ts-expect-error -- TODO: fix me
@@ -209,6 +210,7 @@ export function migrateConfig(
       // @ts-expect-error -- TODO: fix me
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
         // @ts-expect-error -- TODO: fix me
+        // v8 ignore else -- TODO: add test #40625
         if (!migratedConfig.matchManagers.includes('gradle')) {
           // @ts-expect-error -- TODO: fix me
           migratedConfig.matchManagers.push('gradle');

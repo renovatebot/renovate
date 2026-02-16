@@ -3,27 +3,28 @@ import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../config/defaults';
-import { GlobalConfig } from '../../config/global';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, platform } from '~test/util.ts';
+import { getConfig } from '../../config/defaults.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../modules/manager/types';
-import type { Platform } from '../../modules/platform';
-import { massageMarkdown } from '../../modules/platform/github';
-import { clone } from '../../util/clone';
-import { regEx } from '../../util/regex';
-import { asTimestamp } from '../../util/timestamp';
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import * as dependencyDashboard from './dependency-dashboard';
-import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
-import { PackageFiles } from './package-files';
-import { Fixtures } from '~test/fixtures';
-import { logger, platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../modules/manager/types.ts';
+import { massageMarkdown } from '../../modules/platform/github/index.ts';
+import type { Platform } from '../../modules/platform/index.ts';
+import { clone } from '../../util/clone.ts';
+import { emojify } from '../../util/emoji.ts';
+import { regEx } from '../../util/regex.ts';
+import { asTimestamp } from '../../util/timestamp.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
+import * as dependencyDashboard from './dependency-dashboard.ts';
+import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
+import { PackageFiles } from './package-files.ts';
 
 const createVulnerabilitiesMock = vi.fn();
-vi.mock('./process/vulnerabilities', () => {
+vi.mock('./process/vulnerabilities.ts', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -1682,8 +1683,9 @@ None detected
       });
 
       describe('PackageFiles.getDashboardMarkdown()', () => {
-        const note =
-          '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
+        const note = emojify(
+          `> :information_source: **Note**\n> \n> Detected dependencies section has been truncated\n\n`,
+        );
         const title = `## Detected Dependencies\n\n`;
 
         beforeEach(() => {
@@ -1831,11 +1833,14 @@ None detected
         },
         packageFiles,
       );
-      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
-\`1\`/\`2\` CVEs have Renovate fixes.
+      const heading =
+        '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
+        '> `1`/`2` CVEs have Renovate fixes.\n\n';
 
-<details><summary>npm</summary>
+      expect(result.trimEnd()).toBe(
+        heading +
+          codeBlock`<details><summary>npm</summary>
 <blockquote>
 
 <details><summary>undefined</summary>
@@ -1859,7 +1864,8 @@ None detected
 </details>
 
 </blockquote>
-</details>`);
+</details>`,
+      );
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
@@ -1891,6 +1897,12 @@ None detected
           },
         },
       ]);
+
+      const heading =
+        '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
+        '> `1`/`2` CVEs have possible Renovate fixes.\n' +
+        '> See [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
+
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
@@ -1898,12 +1910,9 @@ None detected
         },
         packageFiles,
       );
-      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
-
-\`1\`/\`2\` CVEs have possible Renovate fixes.
-See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
-
-<details><summary>npm</summary>
+      expect(result.trimEnd()).toBe(
+        heading +
+          codeBlock`<details><summary>npm</summary>
 <blockquote>
 
 <details><summary>undefined</summary>
@@ -1920,7 +1929,8 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 </details>
 
 </blockquote>
-</details>`);
+</details>`,
+      );
     });
   });
 
@@ -1960,7 +1970,7 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
-      expect(result).toContain('> ℹ **Note**');
+      expect(result).toContain('> ℹ️ **Note**');
       expect(result).toContain('| Datasource | Name | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');

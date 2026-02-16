@@ -1,9 +1,9 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { GithubReleasesDatasource } from '../../../../datasource/github-releases';
-import * as hashicorp from '../../../../versioning/hashicorp';
-import type { PackageDependency } from '../../../types';
-import { DependencyExtractor } from '../../base';
-import type { TerraformDefinitionFile } from '../../hcl/types';
+import { GithubReleasesDatasource } from '../../../../datasource/github-releases/index.ts';
+import * as hashicorp from '../../../../versioning/hashicorp/index.ts';
+import type { PackageDependency } from '../../../types.ts';
+import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 
 export class TerraformVersionExtractor extends DependencyExtractor {
   getCheckList(): string[] {
