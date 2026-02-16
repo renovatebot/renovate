@@ -417,8 +417,8 @@ importers:
         specifier: 1.8.11
         version: 1.8.11
       '@types/cacache':
-        specifier: 20.0.0
-        version: 20.0.0
+        specifier: 20.0.1
+        version: 20.0.1
       '@types/callsite':
         specifier: 1.0.34
         version: 1.0.34
@@ -2290,8 +2290,8 @@ packages:
   '@types/bunyan@1.8.11':
     resolution: {integrity: sha512-758fRH7umIMk5qt5ELmRMff4mLDlN+xyYzC+dkPTdKwbSkJFvz6xwyScrytPU0QIBbRRwbiE8/BIg8bpajerNQ==}
 
-  '@types/cacache@20.0.0':
-    resolution: {integrity: sha512-/x8RJB3vyZrK02TBtV2cAItcr9IWinYzxX9nJY2kpM5af5BLaCPwXFaHCUpVD/141QjpzQtk1tdTsb7WFIh80Q==}
+  '@types/cacache@20.0.1':
+    resolution: {integrity: sha512-QlKW3AFoFr/hvPHwFHMIVUH/ZCYeetBNou3PCmxu5LaNDvrtBlPJtIA6uhmU9JRt9oxj7IYoqoLcpxtzpPiTcw==}
 
   '@types/cacheable-request@6.0.3':
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
@@ -9286,7 +9286,7 @@ snapshots:
     dependencies:
       '@types/node': 24.10.12
 
-  '@types/cacache@20.0.0':
+  '@types/cacache@20.0.1':
     dependencies:
       '@types/node': 24.10.12
       minipass: 7.1.2
