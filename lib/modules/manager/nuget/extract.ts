@@ -13,8 +13,8 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest.ts';
-import type { DotnetToolsManifest, NugetPackageDependency } from './types.ts';
 import { extractPackagesFromSingleCsharpFile } from './extract/single-csharp-file.ts';
+import type { DotnetToolsManifest, NugetPackageDependency } from './types.ts';
 import {
   applyRegistries,
   findVersion,
