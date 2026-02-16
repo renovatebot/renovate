@@ -349,7 +349,8 @@ export interface RenovateInternalConfig {
  * This is a superset of any configuration that a Renovate user (not self-hosted administrator) can set.
  */
 export interface RenovateConfig
-  extends LegacyAdminConfig,
+  extends
+    LegacyAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
@@ -483,9 +484,7 @@ export interface CustomDatasourceConfig {
  *
  */
 export interface AllConfig
-  extends RenovateConfig,
-    GlobalOnlyConfigLegacy,
-    RepoGlobalConfig {
+  extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
   password?: string;
   token?: string;
   username?: string;
@@ -549,9 +548,7 @@ export type AllowedUnsafeExecution = 'goGenerate' | 'gradleWrapper';
 
 // TODO: Proper typings
 export interface PackageRule
-  extends RenovateSharedConfig,
-    RenovateInternalConfig,
-    UpdateConfig {
+  extends RenovateSharedConfig, RenovateInternalConfig, UpdateConfig {
   allowedVersions?: string;
   description?: string | string[];
   matchBaseBranches?: string[];
