@@ -31,14 +31,14 @@ void (async () => {
   await program.parseAsync();
   const opts = program.opts();
   logger.info(`Preparing v${opts.version?.toString()} ...`);
-  build();
+  await build();
   await generateDocs(undefined, undefined, opts.version?.toString());
   await bake('build', opts);
 })();
 
-function build(): void {
+async function build(): Promise<void> {
   logger.info('Building ...');
-  const res = exec('pnpm', ['build']);
+  const res = await exec('pnpm', ['build']);
 
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);

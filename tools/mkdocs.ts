@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import type { ExecaSyncReturnValue } from 'execa';
+import type { ExecaReturnValue } from 'execa';
 import fs from 'fs-extra';
 import { logger } from '../lib/logger/index.ts';
 import { generateDocs } from './docs/index.ts';
@@ -26,7 +26,7 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
+    const res = await exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
       env: {
@@ -50,7 +50,7 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
+    const res = await exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
     });
@@ -68,7 +68,7 @@ async function prepareDocs(opts: any): Promise<void> {
   }
 }
 
-function checkResult(res: ExecaSyncReturnValue<string>): void {
+function checkResult(res: ExecaReturnValue<string>): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);

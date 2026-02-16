@@ -66,7 +66,7 @@ export async function bake(
   args.push(target);
 
   for (let tries = opts.tries ?? 0; tries >= 0; tries--) {
-    const result = exec(`docker`, args);
+    const result = await exec(`docker`, args);
     if (result.signal) {
       logger.error(`Signal received: ${result.signal}`);
       process.exit(-1);
@@ -97,15 +97,15 @@ export async function bake(
   return meta;
 }
 
-export function sign(
+export async function sign(
   image: string,
   opts: {
     args?: string[];
     exitOnError?: boolean;
   },
-): void {
+): Promise<void> {
   logger.info(`Signing ${image} ...`);
-  const result = exec('cosign', ['sign', '--yes', image]);
+  const result = await exec('cosign', ['sign', '--yes', image]);
   if (result.signal) {
     logger.error(`Signal received: ${result.signal}`);
     process.exit(-1);
