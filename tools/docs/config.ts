@@ -141,18 +141,21 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     }
   });
 
-  if (type === 'array') {
-    data.push(['default', '<code>[]</code>']);
+  if (data.find((k) => k[0] === 'default') === undefined) {
+    if (type === 'array') {
+      data.push(['default', '<code>[]</code>']);
+    }
+    if (type === 'string' && def === undefined) {
+      data.push(['default', '<code>null</code>']);
+    }
+    if (type === 'boolean' && def === undefined) {
+      data.push(['default', '<code>true</code>']);
+    }
+    if (type === 'boolean' && def === null) {
+      data.push(['default', '<code>null</code>']);
+    }
   }
-  if (type === 'string' && def === undefined) {
-    data.push(['default', '<code>null</code>']);
-  }
-  if (type === 'boolean' && def === undefined) {
-    data.push(['default', '<code>true</code>']);
-  }
-  if (type === 'boolean' && def === null) {
-    data.push(['default', '<code>null</code>']);
-  }
+
   return buildHtmlTable(data);
 }
 
