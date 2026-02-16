@@ -1368,6 +1368,12 @@ Set this to `"enabled"` to have Renovate maintain a JSON file cache per-reposito
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
+## repositoryCacheForceLocal
+
+If set to `true`, Renovate will persist repository cache locally after uploading to S3.
+
+This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
+
 ## repositoryCacheType
 
 ```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
