@@ -1,8 +1,8 @@
-import { regEx } from '../../../../util/regex';
-import { NugetDatasource } from '../../../datasource/nuget';
-import type { PackageDependency, PackageFileContent } from '../../types';
-import type { NugetPackageDependency, Registry } from '../types';
-import { applyRegistries } from '../util';
+import { regEx } from '../../../../util/regex.ts';
+import { NugetDatasource } from '../../../datasource/nuget/index.ts';
+import type { PackageDependency, PackageFileContent } from '../../types.ts';
+import type { NugetPackageDependency, Registry } from '../types.ts';
+import { applyRegistries } from '../util.ts';
 
 // regex for finding
 // #:package Name@Version
