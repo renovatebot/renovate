@@ -4,7 +4,7 @@
 # For example, if the repository added a "type:task" type label, then add "-label:type:task" to the TYPE_LABELS_FILTER.
 
 PRIORITY_LABELS_FILTER='-label:priority-1-critical -label:priority-2-high -label:priority-3-medium -label:priority-4-low'
-ISSUE_TYPE_FILTER='-type:Bug -type:Feature -type:Task'
+ISSUE_TYPE_FILTER='-type:Bug -type:Feature -type:Task -type:Docs -type:Epic'
 
 HAS_ISSUES_MISSING_LABELS=false
 HAS_ISSUES_MISSING_ISSUE_TYPE=false
