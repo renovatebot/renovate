@@ -19,15 +19,15 @@ ISSUE_TITLE="Issues with missing labels"
 LABEL_TYPE=$(echo "$PRIORITY_LABELS_FILTER" | cut -d ':' -f 2 | cut -d '-' -f 1)
 
 # Fetch issues that match the filter
-ISSUES_MISSING_LABEL=$(gh issue list --repo $REPO --limit 100000 -s open -S "$PRIORITY_LABELS_FILTER" --json "number,title") || { echo "Failed to fetch issues without $LABEL_TYPE labels"; exit 1; }
+ISSUES_MISSING_LABEL=$(gh issue list --repo $REPO --limit 100000 -s open -S "$PRIORITY_LABELS_FILTER" --json "number,title,author") || { echo "Failed to fetch issues without $LABEL_TYPE labels"; exit 1; }
 # Ignore the Issue from the "Find issues with missing labels" Action
 ISSUES_MISSING_LABEL=$(echo "$ISSUES_MISSING_LABEL" | jq --arg title "$ISSUE_TITLE" 'map(select(.title != $title))')
 
 if [ "$ISSUES_MISSING_LABEL" != "[]" ]; then
     HAS_ISSUES_MISSING_LABELS=true
 
-    # Create a list of issue numbers
-    FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_LABEL" | jq -r '.[].number' | sed 's/^/- https:\/\/redirect.github.com\/renovatebot\/renovate\/issues\//')
+    # Create a list of issue numbers with authors
+    FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_LABEL" | jq -r '.[] | "- https://redirect.github.com/renovatebot/renovate/issues/\(.number) (by `\(.author.login)`)"')
 
     # Count the issues and decide if the output should be singular or plural
     ISSUE_COUNT=$(echo "$ISSUES_MISSING_LABEL" | jq '. | length')
@@ -41,15 +41,15 @@ fi
 LABEL_TYPE=$(echo "$ISSUE_TYPE_FILTER" | cut -d ':' -f 2)
 
 # Fetch issues that match the filter
-ISSUES_MISSING_TYPE=$(gh issue list --repo $REPO --limit 100000 -s open -S "$ISSUE_TYPE_FILTER" --json "number,title") || { echo "Failed to fetch issues without $LABEL_TYPE"; exit 1; }
+ISSUES_MISSING_TYPE=$(gh issue list --repo $REPO --limit 100000 -s open -S "$ISSUE_TYPE_FILTER" --json "number,title,author") || { echo "Failed to fetch issues without $LABEL_TYPE"; exit 1; }
 # Ignore the Issue from the "Find issues with missing labels" Action
 ISSUES_MISSING_TYPE=$(echo "$ISSUES_MISSING_TYPE" | jq --arg title "$ISSUE_TITLE" 'map(select(.title != $title))')
 
 if [ "$ISSUES_MISSING_TYPE" != "[]" ]; then
     HAS_ISSUES_MISSING_ISSUE_TYPE=true
 
-    # Create a list of issue numbers
-    FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_TYPE" | jq -r '.[].number' | sed 's/^/- https:\/\/redirect.github.com\/renovatebot\/renovate\/issues\//')
+    # Create a list of issue numbers with authors
+    FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_TYPE" | jq -r '.[] | "- https://redirect.github.com/renovatebot/renovate/issues/\(.number) (by `\(.author.login)`)"')
 
     # Count the issues and decide if the output should be singular or plural
     ISSUE_COUNT=$(echo "$ISSUES_MISSING_TYPE" | jq '. | length')
