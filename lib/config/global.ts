@@ -43,6 +43,7 @@ export class GlobalConfig {
     'onboardingBranch',
     'platform',
     'presetCachePersistence',
+    'repositoryCacheForceLocal',
     's3Endpoint',
     's3PathStyle',
     'toolSettings',
