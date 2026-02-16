@@ -14,7 +14,7 @@ name: renovate-otel-demo
 services:
   # Jaeger for storing traces
   jaeger:
-    image: jaegertracing/jaeger:2.14.1
+    image: jaegertracing/jaeger:2.15.1
     ports:
       - '16686:16686' # Web UI
       - '4317' # OTLP gRPC
