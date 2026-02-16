@@ -275,7 +275,7 @@
   "optionalDependencies": {
     "better-sqlite3": "12.6.2",
     "openpgp": "6.3.0",
-    "re2": "1.23.2"
+    "re2": "1.23.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.14",
