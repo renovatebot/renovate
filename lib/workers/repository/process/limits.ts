@@ -5,6 +5,7 @@ import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
+import { getInheritedOrGlobal } from '../../../util/common.ts';
 import type { BranchConfig } from '../../types.ts';
 
 export async function getPrHourlyCount(
@@ -18,7 +19,7 @@ export async function getPrHourlyCount(
     );
     const soFarThisHour = prList.filter(
       (pr) =>
-        pr.sourceBranch !== config.onboardingBranch &&
+        pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch') &&
         pr.sourceBranch.startsWith(config.branchPrefix!) &&
         DateTime.fromISO(pr.createdAt!, { zone: 'utc' }) > currentHourStart,
     );
@@ -46,7 +47,7 @@ export async function getConcurrentPrsCount(
       const pr = await platform.getBranchPr(branchName, config.baseBranch);
       if (
         pr &&
-        pr.sourceBranch !== config.onboardingBranch &&
+        pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch') &&
         pr.state === 'open'
       ) {
         openPrCount++;

@@ -1,5 +1,10 @@
-import { isString, isUndefined, isUrlString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex.ts';
+import {
+  isNonEmptyString,
+  isString,
+  isUndefined,
+  isUrlString,
+} from '@sindresorhus/is';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -107,6 +112,30 @@ export function createGemToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: RubygemsDatasource.id,
+  };
+}
+
+/**
+ * Create a tooling config for github backend
+ * @link https://mise.jdx.dev/dev-tools/backends/github.html
+ */
+export function createGithubToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const prefix = toolOptions.version_prefix;
+
+  if (isNonEmptyString(prefix)) {
+    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+  }
+
+  return {
+    packageName: name,
+    datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(extractVersion && { extractVersion }),
   };
 }
 
