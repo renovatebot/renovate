@@ -231,6 +231,12 @@ export interface FileOwnerRule {
 }
 
 export interface Platform {
+  /**
+   * Whether this is an experimental Platform.
+   *
+   * Experimental features might be changed or even removed at any time.
+   */
+  experimental?: true;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;

@@ -51,6 +51,7 @@ interface Config {
 }
 
 export const id = 'codecommit';
+export const experimental = true;
 
 const platformConfig = {
   endpoint: 'https://git-codecommit.us-east-1.amazonaws.com',

@@ -44,6 +44,7 @@ import {
 } from './utils.ts';
 
 export const id = 'gerrit';
+export const experimental = true;
 
 const defaults: {
   endpoint?: string;
