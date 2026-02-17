@@ -525,9 +525,7 @@ describe('workers/repository/process/write', () => {
           },
         ],
       };
-      const commitDate = DateTime.fromISO('2023-05-20T14:25:30.123Z', {
-        zone: 'utc',
-      });
+      const commitDate = DateTime.fromISO('2023-05-20T14:25:30.123Z').toUTC();
       repoCache.getCache.mockReturnValue(repoCacheObj);
       scm.getBranchCommit.mockResolvedValueOnce('new_sha' as LongCommitSha);
       scm.getBranchCommit.mockResolvedValueOnce('base_sha' as LongCommitSha);

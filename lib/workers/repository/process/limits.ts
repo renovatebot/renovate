@@ -13,7 +13,7 @@ export async function getPrHourlyCount(
 ): Promise<number> {
   try {
     const prList = await platform.getPrList();
-    const currentHourStart = DateTime.local().setZone('utc').startOf('hour');
+    const currentHourStart = DateTime.utc().startOf('hour');
     logger.debug(
       `Calculating PRs created so far in this hour currentHourStart=${String(currentHourStart)}`,
     );
@@ -21,7 +21,7 @@ export async function getPrHourlyCount(
       (pr) =>
         pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch') &&
         pr.sourceBranch.startsWith(config.branchPrefix!) &&
-        DateTime.fromISO(pr.createdAt!, { zone: 'utc' }) > currentHourStart,
+        DateTime.fromISO(pr.createdAt!).toUTC() > currentHourStart,
     );
     logger.debug(
       `${soFarThisHour.length} PRs have been created so far in this hour.`,
@@ -70,7 +70,7 @@ export async function getCommitsHourlyCount(
   branches: BranchConfig[],
 ): Promise<number> {
   try {
-    const currentHourStart = DateTime.local().setZone('utc').startOf('hour');
+    const currentHourStart = DateTime.utc().startOf('hour');
     logger.debug(
       `Calculating commits so far in this hour currentHourStart=${String(currentHourStart)}`,
     );
@@ -86,9 +86,9 @@ export async function getCommitsHourlyCount(
       );
 
       if (branchCache?.commitTimestamp) {
-        const commitTime = DateTime.fromISO(branchCache.commitTimestamp, {
-          zone: 'utc',
-        });
+        const commitTime = DateTime.fromISO(
+          branchCache.commitTimestamp,
+        ).toUTC();
         if (commitTime > currentHourStart) {
           soFarThisHour++;
         }

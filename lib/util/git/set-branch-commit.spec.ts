@@ -82,9 +82,7 @@ describe('util/git/set-branch-commit', () => {
           }),
         ],
       };
-      const commitDate = DateTime.fromISO('2023-05-20T14:25:30.123Z', {
-        zone: 'utc',
-      });
+      const commitDate = DateTime.fromISO('2023-05-20T14:25:30.123Z').toUTC();
       git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
       repositoryCache.getCache.mockReturnValue(repoCache);
       setBranchNewCommit('branch_name', 'base_branch', 'new_SHA', commitDate);

@@ -1048,8 +1048,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
 
 async function getCommitDate(ref: LongCommitSha | string): Promise<DateTime> {
   const output = await git.show(['-s', '--format=%cI', ref]);
-  // output is in strict ISO format like "2025-05-29T01:28:16+00:00"
-  return DateTime.fromISO(output.trim());
+  return DateTime.fromISO(output.trim()).toUTC();
 }
 
 export async function getBranchLastCommitTime(

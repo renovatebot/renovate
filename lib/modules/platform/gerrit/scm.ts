@@ -64,7 +64,7 @@ export class GerritScm extends DefaultGitScm {
       const date = convertGerritDateToISO(
         change.revisions![change.current_revision!].created,
       );
-      return DateTime.fromISO(date, { zone: 'utc' });
+      return DateTime.fromISO(date).toUTC();
     }
     return git.getBranchUpdateDate(branchName);
   }
