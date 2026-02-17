@@ -25,6 +25,7 @@ export type GotStreamOptions = Options & GotExtraOptions;
 export interface GotExtraOptions {
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
+  timeout?: number;
   token?: string;
   hostType?: string;
   enabled?: boolean;
