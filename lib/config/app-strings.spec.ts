@@ -25,4 +25,18 @@ describe('config/app-strings', () => {
       getConfigFileNames('github').includes('.github/renovate.json'),
     ).toBeTrue();
   });
+
+  it('does not allow the local platform to have an associated filename', () => {
+    const filenames = getConfigFileNames('local');
+
+    expect(filenames.includes('.local/renovate.json')).toBeFalse();
+    expect(filenames).toEqual([
+      'renovate.json',
+      'renovate.json5',
+      '.renovaterc',
+      '.renovaterc.json',
+      '.renovaterc.json5',
+      'package.json',
+    ]);
+  });
 });
