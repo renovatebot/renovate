@@ -48,7 +48,9 @@ The [`config:best-practices` preset](./presets-config.md#configbest-practices) h
     "helpers:pinGitHubActionDigests",
     ":configMigration",
     ":pinDevDependencies",
-    "abandonments:recommended"
+    "abandonments:recommended",
+    "security:minimumReleaseAgeNpm",
+    ":maintainLockFilesWeekly"
   ]
 }
 ```
