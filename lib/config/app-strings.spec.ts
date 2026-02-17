@@ -1,6 +1,10 @@
 import { getConfigFileNames, setUserConfigFileNames } from './app-strings.ts';
 
 describe('config/app-strings', () => {
+  beforeEach(() => {
+    setUserConfigFileNames([]);
+  });
+
   it('adds user configured filenames to list', () => {
     let filenames = getConfigFileNames();
     expect(filenames.includes('abc')).toBeFalse();
