@@ -66,7 +66,7 @@ describe('workers/repository/process/limits', () => {
     });
 
     it('uses cache when available and falls back to SCM when missing', async () => {
-      const currentTime = DateTime.local().setZone('utc');
+      const currentTime = DateTime.utc();
       const oldTime = currentTime.minus({ hours: 2 });
 
       // Mock cache with mixed data: some cached, some missing
@@ -74,11 +74,11 @@ describe('workers/repository/process/limits', () => {
         branches: [
           {
             branchName: 'foo/test-1',
-            commitTimestamp: currentTime.toISO()!,
+            commitTimestamp: currentTime.toISO(),
           },
           {
             branchName: 'foo/test-2',
-            commitTimestamp: oldTime.toISO()!,
+            commitTimestamp: oldTime.toISO(),
           },
           {
             branchName: 'foo/test-3',
