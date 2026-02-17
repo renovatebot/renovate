@@ -2592,8 +2592,8 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-<!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->
+<!-- lock-file-maintenance-table-start -->
+<!-- lock-file-maintenance-table-end -->
 
 Support for new lock files may be added via feature request.
 

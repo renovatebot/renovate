@@ -301,7 +301,10 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   let content = configOptionsRaw.join('\n');
 
   if (!bot) {
-    content = replaceContent(content, generateLockFileTable());
+    content = replaceContent(content, generateLockFileTable(), {
+      replaceStart: '<!-- lock-file-maintenance-table-start -->',
+      replaceStop: '<!-- lock-file-maintenance-table-end -->',
+    });
   }
 
   await updateFile(`${dist}/${configFile}`, content);
