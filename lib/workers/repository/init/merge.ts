@@ -20,6 +20,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
+import { resolveNpmrc } from '../../../modules/manager/npm/npmrc.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -266,7 +267,14 @@ export async function mergeRenovateConfig(
       'Ignoring any .npmrc files in repository due to configured npmrc',
     );
     npmApi.setNpmrc(resolvedConfig.npmrc);
+  } else {
+    const { npmrc } = await resolveNpmrc('.', config);
+    if (npmrc) {
+      resolvedConfig.npmrc = npmrc;
+      npmApi.setNpmrc(resolvedConfig.npmrc);
+    }
   }
+
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
     secrets: mergeChildConfig(

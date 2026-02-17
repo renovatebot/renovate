@@ -95,6 +95,7 @@ export async function extractPackageFile(
     );
   }
 
+  // TODO deprecated: now performed in mergeRenovateConfig() in lib/workers/repository/init/merge.ts
   const { npmrc, npmrcFileName } = await resolveNpmrc(packageFile, config);
 
   const yarnrcYmlFileName = await findLocalSiblingOrParent(
