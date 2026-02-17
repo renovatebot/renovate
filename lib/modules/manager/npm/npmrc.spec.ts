@@ -76,6 +76,23 @@ describe('modules/manager/npm/npmrc', () => {
       );
     });
 
+    it('uses config.npmrc if no .npmrc file is found', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+        }),
+      );
+
+      const res = await resolveNpmrc('package.json', {
+        npmrc: 'config-npmrc',
+      });
+      expect(res.npmrc).toBe('config-npmrc');
+    });
+
     it('merges config.npmrc and repo .npmrc when npmrcMerge=true', async () => {
       fs.findLocalSiblingOrParent.mockImplementation(
         (packageFile, configFile): Promise<string | null> => {
@@ -99,6 +116,39 @@ describe('modules/manager/npm/npmrc', () => {
         npmrc: `config-npmrc\nrepo-npmrc\n`,
         npmrcFileName: '.npmrc',
       });
+    });
+
+    it('does not add a newline between config.npmrc and repo .npmrc when npmrcMerge is true, if a newline already exists', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, configFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && configFile === '.npmrc') {
+            return Promise.resolve('.npmrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.npmrc') {
+          return Promise.resolve('repo-setting=value\n');
+        }
+        if (fileName === 'package.json') {
+          return Promise.resolve(
+            JSON.stringify({
+              name: 'test',
+              version: '0.0.1',
+              dependencies: { dep1: '1.0.0' },
+            }),
+          );
+        }
+        return Promise.resolve(null);
+      });
+
+      const res = await resolveNpmrc('package.json', {
+        npmrc: 'config-setting=value\n',
+        npmrcMerge: true,
+      });
+      expect(res.npmrc).toBe('config-setting=value\nrepo-setting=value\n');
     });
 
     it('finds and filters .npmrc with variables', async () => {
