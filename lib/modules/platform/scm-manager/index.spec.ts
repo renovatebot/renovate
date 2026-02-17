@@ -121,7 +121,6 @@ describe('modules/platform/scm-manager/index', () => {
       expect(
         await scmPlatform.initRepo({
           repository: `${repo.namespace}/${repo.name}`,
-          ignorePrAuthor: expectedIgnorePrAuthor,
         }),
       ).toEqual({
         defaultBranch: expectedDefaultBranch,

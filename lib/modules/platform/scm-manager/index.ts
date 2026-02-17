@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import * as git from '../../../util/git/index.ts';
@@ -80,7 +81,6 @@ export async function initPlatform({
 export async function initRepo({
   repository,
   gitUrl,
-  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   const repo = await getRepo(repository);
   const defaultBranch = await getDefaultBranch(repo);
@@ -89,7 +89,7 @@ export async function initRepo({
   config = {} as any;
   config.repository = repository;
   config.defaultBranch = defaultBranch;
-  config.ignorePrAuthor = !!ignorePrAuthor;
+  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
 
   await git.initRepo({
     ...config,
