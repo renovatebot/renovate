@@ -41,11 +41,11 @@ const elmRangeRegex = regEx(
  * Returns null if the range is invalid or malformed (e.g., lower > upper)
  */
 function parseElmRange(input: string): { lower: string; upper: string } | null {
-  const match = elmRangeRegex.exec(input.trim());
-  if (!match) {
+  const groups = elmRangeRegex.exec(input.trim())?.groups;
+  if (!groups) {
     return null;
   }
-  const { lower, upper } = match.groups!;
+  const { lower, upper } = groups;
   if (isGreaterThan(lower, upper)) {
     return null;
   }
