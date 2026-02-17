@@ -1921,6 +1921,8 @@ For example, to group all non-major devDependencies updates together into a sing
 <!-- prettier-ignore -->
 !!! note
     Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
 
 ## groupSlug
 
@@ -3707,6 +3709,8 @@ You can suggest a new community package rule by editing [the `replacements.json`
 <!-- prettier-ignore -->
 !!! note
     Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
 
 ### replacementNameTemplate
 
