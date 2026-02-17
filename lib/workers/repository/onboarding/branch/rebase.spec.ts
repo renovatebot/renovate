@@ -1,15 +1,15 @@
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import * as memCache from '../../../../util/cache/memory';
-import { toSha256 } from '../../../../util/hash';
-import * as _config from './config';
-import { rebaseOnboardingBranch } from './rebase';
-import { scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
+import { toSha256 } from '../../../../util/hash.ts';
+import * as _config from './config.ts';
+import { rebaseOnboardingBranch } from './rebase.ts';
 
 const configModule = vi.mocked(_config);
 
-vi.mock('./config');
+vi.mock('./config.ts');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   beforeAll(() => {
@@ -101,7 +101,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('dryRun=full', async () => {
       GlobalConfig.set({ localDir: '', dryRun: 'full', platform: 'github' });
       await rebaseOnboardingBranch(config, hash);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would rebase files in onboarding branch',
       );
@@ -120,7 +120,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       const res = await rebaseOnboardingBranch(config, hash);
       expect(res).toBeNull();
       expect(scm.commitAndPush).not.toHaveBeenCalled();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         `Skipping rebase as ${platform} does not support html comments`,
       );

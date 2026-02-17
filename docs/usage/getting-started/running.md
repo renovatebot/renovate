@@ -57,6 +57,10 @@ We recommend this default image for most users.
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
+<!-- prettier-ignore -->
+!!! warning
+    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
 Read the [`binarySource` config option docs](../self-hosted-configuration.md#binarysource) for more information.
@@ -215,11 +219,11 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [GitLab](../modules/platform/gitlab/index.md)
 - [SCM-Manager](../modules/platform/scm-manager/index.md)
 
-### GitHub.com token for changelogs
+### GitHub.com token for changelogs (and tools)
 
 If you are running on any platform except github.com, you should also set the environment variable `RENOVATE_GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can be _any_ account on GitHub, and needs only `read-only` access.
-It's used when fetching changelogs for repositories in order to increase the hourly API limit.
+It's used when fetching changelogs for repositories, as well as some Renovate-specific tools at runtime, in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
 <!-- prettier-ignore -->

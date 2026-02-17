@@ -1,8 +1,8 @@
-import type { PackageDependency } from '../types';
+import type { PackageDependency } from '../types.ts';
 import type {
   TerragruntDependencyTypes,
   TerragruntResourceTypes,
-} from './common';
+} from './common.ts';
 
 export interface ExtractionResult {
   lineNumber: number;

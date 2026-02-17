@@ -1,31 +1,36 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNullOrUndefined,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import {
   CONFIG_VALIDATION,
   PLATFORM_RATE_LIMIT_EXCEEDED,
-} from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../../util/cache/memory';
-import * as packageCache from '../../util/cache/package';
-import { clone } from '../../util/clone';
-import { regEx } from '../../util/regex';
-import * as template from '../../util/template';
-import { GlobalConfig } from '../global';
-import * as massage from '../massage';
-import * as migration from '../migration';
-import type { AllConfig, RenovateConfig } from '../types';
-import { mergeChildConfig } from '../utils';
-import { removedPresets } from './common';
-import * as forgejo from './forgejo';
-import * as gitea from './gitea';
-import * as github from './github';
-import * as gitlab from './gitlab';
-import * as http from './http';
-import * as internal from './internal';
-import * as local from './local';
-import * as npm from './npm';
-import { parsePreset } from './parse';
-import type { Preset, PresetApi } from './types';
+} from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
+import * as packageCache from '../../util/cache/package/index.ts';
+import { clone } from '../../util/clone.ts';
+import { regEx } from '../../util/regex.ts';
+import * as template from '../../util/template/index.ts';
+import { GlobalConfig } from '../global.ts';
+import * as massage from '../massage.ts';
+import * as migration from '../migration.ts';
+import type { AllConfig, RenovateConfig } from '../types.ts';
+import { mergeChildConfig } from '../utils.ts';
+import { removedPresets } from './common.ts';
+import * as forgejo from './forgejo/index.ts';
+import * as gitea from './gitea/index.ts';
+import * as github from './github/index.ts';
+import * as gitlab from './gitlab/index.ts';
+import * as http from './http/index.ts';
+import * as internal from './internal/index.ts';
+import * as local from './local/index.ts';
+import * as npm from './npm/index.ts';
+import { parsePreset } from './parse.ts';
+import type { Preset, PresetApi } from './types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -33,7 +38,7 @@ import {
   PRESET_NOT_FOUND,
   PRESET_PROHIBITED_SUBPRESET,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
-} from './util';
+} from './util.ts';
 
 const presetSources: Record<string, PresetApi> = {
   forgejo,
@@ -75,7 +80,7 @@ export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>,
 ): any {
-  if (is.string(obj)) {
+  if (isString(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
       const re = regEx(`{{${arg}}}`, 'g', false);
@@ -83,14 +88,14 @@ export function replaceArgs(
     }
     return returnStr;
   }
-  if (is.array(obj)) {
+  if (isArray(obj)) {
     const returnArray = [];
     for (const item of obj) {
       returnArray.push(replaceArgs(item, argMapping));
     }
     return returnArray;
   }
-  if (is.object(obj)) {
+  if (isObject(obj)) {
     const returnObj: Record<string, any> = {};
     for (const [key, val] of Object.entries(obj)) {
       returnObj[key] = replaceArgs(val, argMapping);
@@ -129,7 +134,7 @@ export async function getPreset(
     presetConfig = memCache.get(cacheKey);
   }
 
-  if (is.nullOrUndefined(presetConfig)) {
+  if (isNullOrUndefined(presetConfig)) {
     presetConfig = await presetSources[presetSource].getPreset({
       repo,
       presetPath,
@@ -174,12 +179,25 @@ export async function getPreset(
   return massage.massageConfig(migratedConfig);
 }
 
+export interface ResolveConfigPresetsResult {
+  config: AllConfig;
+  /** when resolving the given configuration, which internal/shared presets were discovered */
+  visitedPresets: {
+    /** which internal/shared presets were merged into the final config */
+    merged: string[];
+  };
+}
+
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
-): Promise<AllConfig> {
+): Promise<ResolveConfigPresetsResult> {
+  const allVisitedPresets = {
+    merged: new Set<string>(),
+  };
+
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets ?? [];
@@ -204,16 +222,22 @@ export async function resolveConfigPresets(
           inputConfig,
           existingPresets,
         );
-        const presetConfig = await resolveConfigPresets(
-          fetchedPreset,
-          baseConfig ?? inputConfig,
-          ignorePresets,
-          existingPresets.concat([preset]),
-        );
+        const { config: presetConfig, visitedPresets } =
+          await resolveConfigPresets(
+            fetchedPreset,
+            baseConfig ?? inputConfig,
+            ignorePresets,
+            existingPresets.concat([preset]),
+          );
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
         config = mergeChildConfig(config, presetConfig);
+        allVisitedPresets.merged.add(preset);
+        // then also make sure we've noted any nested presets we've merged
+        for (const mergedPreset of visitedPresets.merged) {
+          allVisitedPresets.merged.add(mergedPreset);
+        }
       }
     }
   }
@@ -223,39 +247,61 @@ export async function resolveConfigPresets(
   delete config.extends;
   delete config.ignorePresets;
   logger.trace({ config }, `Post-merge resolve config`);
-  for (const [key, val] of Object.entries(config)) {
+  for (const [key, val] of Object.entries(config) as [
+    keyof AllConfig,
+    unknown,
+  ][]) {
     const ignoredKeys = ['content', 'onboardingConfig'];
-    if (is.array(val)) {
+    if (isArray(val)) {
       // Resolve nested objects inside arrays
-      config[key] = [];
+      config[key] = [] as never; // type can't be narrowed
       for (const element of val) {
-        if (is.object(element)) {
-          (config[key] as RenovateConfig[]).push(
+        if (isObject(element)) {
+          const { config: presetConfig, visitedPresets: visited } =
             await resolveConfigPresets(
               element as RenovateConfig,
               baseConfig,
               ignorePresets,
               existingPresets,
-            ),
-          );
+            );
+          (config[key] as RenovateConfig[]).push(presetConfig);
+
+          for (const mergedPreset of visited.merged) {
+            allVisitedPresets.merged.add(mergedPreset);
+          }
         } else {
           (config[key] as unknown[]).push(element);
         }
       }
-    } else if (is.object(val) && !ignoredKeys.includes(key)) {
+    } else if (isObject(val) && !ignoredKeys.includes(key)) {
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
-      config[key] = await resolveConfigPresets(
-        val as RenovateConfig,
-        baseConfig,
-        ignorePresets,
-        existingPresets,
-      );
+      const { config: presetConfig, visitedPresets: visited } =
+        await resolveConfigPresets(
+          val as RenovateConfig,
+          baseConfig,
+          ignorePresets,
+          existingPresets,
+        );
+      config[key] = presetConfig as never; // type can't be narrowed
+
+      for (const mergedPreset of visited.merged) {
+        allVisitedPresets.merged.add(mergedPreset);
+      }
     }
   }
   logger.trace({ config: inputConfig }, 'Input config');
-  logger.trace({ config }, 'Resolved config');
-  return config;
+  logger.trace(
+    { config, visitedPresets: allVisitedPresets },
+    'Resolved config',
+  );
+
+  return {
+    config,
+    visitedPresets: {
+      merged: Array.from(allVisitedPresets.merged),
+    },
+  };
 }
 
 async function fetchPreset(

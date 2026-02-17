@@ -1,33 +1,35 @@
-import is from '@sindresorhus/is';
-import { lang, query as q } from 'good-enough-parser';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
+import { isTruthy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ToolSettingsOptions } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec, getToolSettingsOptions } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   localPathExists,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import type { StatusResult } from '../../../util/git/types';
-import { Http } from '../../../util/http';
-import { newlineRegex } from '../../../util/regex';
-import { replaceAt } from '../../../util/string';
-import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { Http } from '../../../util/http/index.ts';
+import { newlineRegex } from '../../../util/regex.ts';
+import { replaceAt } from '../../../util/string.ts';
+import { isGradleExecutionAllowed } from '../gradle/artifacts.ts';
+import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
+} from '../types.ts';
 import {
   extraEnv,
   getJavaConstraint,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from './utils';
+} from './utils.ts';
 
 const http = new Http('gradle-wrapper');
 const groovy = lang.createLang('groovy');
@@ -130,6 +132,10 @@ export async function updateLockFiles(
   });
 }
 
+export function gradleJvmArg(config: ToolSettingsOptions): string {
+  return ` -Dorg.gradle.jvmargs="-Xms${config.jvmMemory}m -Xmx${config.jvmMaxMemory}m"`;
+}
+
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -146,6 +152,18 @@ export async function updateArtifacts({
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
     }
+
+    if (!isGradleExecutionAllowed(gradlewFile)) {
+      logger.trace(
+        'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
+      );
+
+      return null;
+    }
+
+    // Limit the Gradle daemon Java heap memory size to prevent OOM errors
+    // leading to Renovate kernel-OOMs and timeouts. See #39558
+    cmd += gradleJvmArg(getToolSettingsOptions(config.toolSettings));
     cmd += ' :wrapper';
 
     let checksum: string | null = null;
@@ -190,7 +208,7 @@ export async function updateArtifacts({
       }
       logger.warn(
         { err },
-        'Error executing gradle wrapper update command. It can be not a critical one though.',
+        'Error executing gradle wrapper update command. This may not necessarily be a blocker to the update, so please verify with the gradle wrapper output logs.',
       );
     }
 
@@ -215,7 +233,7 @@ export async function updateArtifacts({
           addIfUpdated(status, fileProjectPath),
         ),
       )
-    ).filter(is.truthy);
+    ).filter(isTruthy);
     if (lockFiles) {
       updateArtifactsResult.push(...lockFiles);
     }

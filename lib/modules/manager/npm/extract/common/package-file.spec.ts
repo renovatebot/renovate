@@ -1,11 +1,13 @@
-import { GlobalConfig } from '../../../../../config/global';
-import { logger } from '../../../../../logger';
-import { hasPackageManager } from './package-file';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../../../config/global.ts';
+import { logger } from '../../../../../logger/index.ts';
+import { hasPackageManager } from './package-file.ts';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+    await vi.importActual<typeof import('~test/fixtures.js')>(
+      '~test/fixtures.js',
+    )
   ).fsExtra(),
 );
 
@@ -21,7 +23,6 @@ describe('modules/manager/npm/extract/common/package-file', () => {
     });
     await expect(hasPackageManager('/repo')).resolves.toBe(true);
 
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.trace).toHaveBeenCalledWith(
       'npm.hasPackageManager from package.json',
     );

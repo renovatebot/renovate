@@ -1,12 +1,12 @@
-import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isBoolean } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class RenovateForkMigration extends AbstractMigration {
   override readonly deprecated = true;
   override readonly propertyName = 'renovateFork';
 
   override run(value: unknown): void {
-    if (is.boolean(value)) {
+    if (isBoolean(value)) {
       this.setSafely('forkProcessing', value ? 'enabled' : 'disabled');
     }
   }

@@ -1,11 +1,11 @@
 import upath from 'upath';
-import { loadModules } from '../../util/modules';
-import { getDatasourceList } from '../datasource';
-import * as customManager from './custom';
-import type { ManagerApi } from './types';
-import * as manager from '.';
+import { loadModules } from '../../util/modules.ts';
+import { getDatasourceList } from '../datasource/index.ts';
+import * as customManager from './custom/index.ts';
+import * as manager from './index.ts';
+import type { ManagerApi } from './types.ts';
 
-vi.mock('../../util/fs');
+vi.mock('../../util/fs/index.ts');
 
 const datasources = getDatasourceList();
 
@@ -21,6 +21,16 @@ describe('modules/manager/index', () => {
           expect(datasources.includes(d)).toBeTrue();
         });
       });
+    }
+  });
+
+  describe('lockFileNames', () => {
+    for (const [name, mgr] of manager.getManagers()) {
+      if (mgr.supportsLockFileMaintenance) {
+        it(`has lockFileNames for ${name}`, () => {
+          expect(mgr.lockFileNames).toBeNonEmptyArray();
+        });
+      }
     }
   });
 
@@ -76,8 +86,11 @@ describe('modules/manager/index', () => {
     const customMgrs = customManager.getCustomManagers();
 
     const loadedMgr = {
-      ...(await loadModules(__dirname, validate)), // validate built-in managers
-      ...(await loadModules(upath.join(__dirname, 'custom'), validate)), // validate custom managers
+      ...(await loadModules(import.meta.dirname, validate)), // validate built-in managers
+      ...(await loadModules(
+        upath.join(import.meta.dirname, 'custom'),
+        validate,
+      )), // validate custom managers
     };
     delete loadedMgr.custom;
 

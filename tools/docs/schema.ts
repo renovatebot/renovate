@@ -1,11 +1,11 @@
-import { getOptions } from '../../lib/config/options';
+import { getOptions } from '../../lib/config/options/index.ts';
 import type {
   RenovateOptions,
   RenovateRequiredOption,
-} from '../../lib/config/types';
-import { pkg } from '../../lib/expose.cjs';
-import { hasKey } from '../../lib/util/object';
-import { updateFile } from '../utils';
+} from '../../lib/config/types.ts';
+import { pkg } from '../../lib/expose.ts';
+import { hasKey } from '../../lib/util/object.ts';
+import { updateFile } from '../utils/index.ts';
 
 type JsonSchemaBasicType =
   | 'string'
@@ -167,20 +167,92 @@ function createSchemaForChildConfigs(
   }
 }
 
+interface GenerateSchemaOpts {
+  filename?: string;
+  version?: string;
+  isInherit?: boolean;
+  isGlobal?: boolean;
+}
+
 export async function generateSchema(
   dist: string,
-  version: string = pkg.version,
+  {
+    filename = 'renovate-schema.json',
+    version = pkg.version,
+    isInherit = false,
+    isGlobal = false,
+  }: GenerateSchemaOpts = {},
 ): Promise<void> {
+  if (isInherit && isGlobal) {
+    throw new Error(
+      'Generating schema for both `isInherit` and `isGlobal` is not supported. Only use one',
+    );
+  }
+
   const schema = {
+    // may be overridden based on `isGlobal` and `isInherit`
     title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
-    $schema: 'http://json-schema.org/draft-04/schema#',
+    $schema: 'http://json-schema.org/draft-07/schema#',
     'x-renovate-version': `${version}`,
     allowComments: true,
     type: 'object',
     properties: {},
+
+    /* any configuration items that should not be set - only used in inherited or repo config */
+    not: undefined as
+      | {
+          /* we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded */
+          anyOf: {
+            required: string[];
+          }[];
+        }
+      | undefined,
   };
-  const options = getOptions();
-  options.sort((a, b) => {
+
+  if (isGlobal) {
+    schema.title = `JSON schema for Renovate ${version} global self-hosting configuration (https://renovatebot.com/)`;
+  } else if (isInherit) {
+    schema.title = `JSON schema for Renovate ${version} config files (with Inherit Config options) (https://renovatebot.com/)`;
+  }
+
+  const configurationOptions = getOptions().filter((o) => {
+    // always allow non-global options
+    if (!o.globalOnly) {
+      return true;
+    }
+
+    if (o.globalOnly && o.inheritConfigSupport) {
+      const allowed = isInherit || isGlobal;
+      if (!allowed) {
+        schema.not ??= {
+          anyOf: [],
+        };
+        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+        schema.not.anyOf.push({
+          required: [o.name],
+        });
+      }
+      return isInherit || isGlobal;
+    }
+
+    if (o.globalOnly) {
+      if (!isGlobal) {
+        schema.not ??= {
+          anyOf: [],
+        };
+        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+        schema.not.anyOf.push({
+          required: [o.name],
+        });
+      }
+      return isGlobal;
+    }
+
+    // we don't currently have any config options that are hitting this, but to be safe, let's throw an error if we ever hit this
+    throw new Error(`Unhandled case for \`${o.name}\``);
+  });
+
+  configurationOptions.sort((a, b) => {
     if (a.name < b.name) {
       return -1;
     }
@@ -191,11 +263,11 @@ export async function generateSchema(
   });
   const properties = schema.properties as Record<string, any>;
 
-  createSchemaForParentConfigs(options, properties);
-  addChildrenArrayInParents(options, properties);
-  createSchemaForChildConfigs(options, properties);
+  createSchemaForParentConfigs(configurationOptions, properties);
+  addChildrenArrayInParents(configurationOptions, properties);
+  createSchemaForChildConfigs(configurationOptions, properties);
   await updateFile(
-    `${dist}/renovate-schema.json`,
+    `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,
   );
 }

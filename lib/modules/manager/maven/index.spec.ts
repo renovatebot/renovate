@@ -1,15 +1,16 @@
 // TODO #22198
-import type { PackageDependency, PackageFileContent } from '../types';
+
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   extractAllPackageFiles,
   extractPackage,
   resolveParents,
-} from './extract';
-import { updateDependency } from './update';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+} from './extract.ts';
+import { updateDependency } from './update.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const parentPomContent = Fixtures.get('parent.pom.xml');

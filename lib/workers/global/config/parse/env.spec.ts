@@ -1,8 +1,8 @@
 import type { MockInstance } from 'vitest';
-import type { RequiredConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import * as env from './env';
-import type { ParseConfigOptions } from './types';
+import type { RequiredConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as env from './env.ts';
+import type { ParseConfigOptions } from './types.ts';
 
 describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
@@ -314,6 +314,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
         RENOVATE_X_S3_ENDPOINT: 'endpoint',
         RENOVATE_X_S3_PATH_STYLE: 'true',
+        RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'true',
       };
       const config = await env.getConfig(envParam);
       expect(config).toMatchObject({
@@ -325,6 +326,7 @@ describe('workers/global/config/parse/env', () => {
         deleteConfigFile: true,
         s3Endpoint: 'endpoint',
         s3PathStyle: true,
+        repositoryCacheForceLocal: true,
       });
     });
 

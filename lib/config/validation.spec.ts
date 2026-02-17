@@ -1,21 +1,47 @@
-import { getConfigFileNames } from './app-strings';
-import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
-import * as configValidation from './validation';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
+import type { HostRule } from '../types/index.ts';
+import { getConfigFileNames } from './app-strings.ts';
+import { GlobalConfig } from './global.ts';
+import type { RenovateConfig } from './types.ts';
+import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
-    it('returns deprecation warnings', async () => {
-      const config = {
-        prTitle: 'something',
+    it.each(['branchName', 'commitMessage', 'prTitle'])(
+      `returns custom deprecation warnings for %s`,
+      async (option: string) => {
+        const config = {
+          [option]: 'something',
+        };
+        const { warnings } = await configValidation.validateConfig(
+          'repo',
+          config,
+        );
+        expect(warnings).toHaveLength(1);
+        expect(warnings).toMatchSnapshot();
+      },
+    );
+
+    // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
+    it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
+      const config: RenovateConfig = {
+        hostRules: [
+          {
+            dnsCache: true,
+          } as HostRule,
+        ],
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { errors, warnings } = await configValidation.validateConfig(
         'repo',
         config,
       );
-      expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchSnapshot();
+      expect(errors).toHaveLength(0);
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Deprecation Warning',
+          message: `The 'dnsCache' option is deprecated: This option is deprecated and will be removed in a future release.`,
+        },
+      ]);
     });
 
     it('allow enabled field in vulnerabilityAlerts', async () => {
@@ -40,6 +66,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- invalid config
         config,
       );
       expect(warnings).toHaveLength(3);
@@ -63,6 +90,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'inherit',
+        // @ts-expect-error -- invalid config
         config,
       );
       expect(warnings).toHaveLength(2);
@@ -110,6 +138,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- TODO: What is `platformConfig` type?
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -119,6 +148,7 @@ describe('config/validation', () => {
       const config = {
         platformConfig: 'invalid',
       };
+      // @ts-expect-error -- TODO: What is `platformConfig` type?
       const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toHaveLength(1);
     });
@@ -419,6 +449,7 @@ describe('config/validation', () => {
           },
         ],
         lockFileMaintenance: {
+          // @ts-expect-error -- testing
           bar: 2,
         },
         major: null,
@@ -491,6 +522,7 @@ describe('config/validation', () => {
 
     it('errors for all types', async () => {
       const config: RenovateConfig = {
+        // @ts-expect-error - only allowed in package rules
         allowedVersions: 'foo',
         enabled: 1 as any,
         enabledManagers: ['npm'],
@@ -545,6 +577,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfig
         config,
       );
       expect(warnings).toHaveLength(4);
@@ -583,6 +616,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfig
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1076,6 +1110,7 @@ describe('config/validation', () => {
     it('errors if managerFilePatterns has wrong parent', async () => {
       const config: RenovateConfig = {
         managerFilePatterns: ['foo'],
+        // @ts-expect-error: -- TODO: managers, datasources and versionings are not defined on RenovateConfig
         npm: {
           managerFilePatterns: ['package\\.json'],
           minor: {
@@ -1141,6 +1176,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(errors).toHaveLength(0);
@@ -1213,12 +1249,64 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
     });
 
+    it('does not error on use of `global:` presets in `globalExtends`', async () => {
+      const config = {
+        globalExtends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('does not error on use of `global:` presets in global `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('errors on use of `global:` presets in inherit `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'inherit',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('errors on use of `global:` presets in repo `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
+
     // adding this test explicitly because we used to validate the customEnvVariables inside repo config previously
     it('warns if customEnvVariables are found in repo config', async () => {
       const config = {
         customEnvVariables: {
           example1: 'abc',
-          example2: 123,
+          example2: '123',
         },
       };
       const { warnings } = await configValidation.validateConfig(
@@ -1502,6 +1590,80 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
     });
+
+    it('errors if no bumpVersion filePattern is provided', async () => {
+      // @ts-expect-error -- TODO: fix test
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          bumpType: 'patch',
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+              bumpType: 'patch',
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('errors if no matchStrings are provided for bumpVersion', async () => {
+      // @ts-expect-error -- TODO: fix test
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('allow bumpVersion', async () => {
+      // @ts-expect-error -- TODO: fix test
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
   });
 
   describe('validateConfig() -> globaOnly options', () => {
@@ -1512,6 +1674,7 @@ describe('config/validation', () => {
       };
       const { errors } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(errors).toMatchObject([
@@ -1585,6 +1748,33 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
+    it('handles prefixed onboardingConfigFileName', async () => {
+      const config = {
+        platform: 'forgejo',
+        onboardingConfigFileName: '.forgejo/renovate.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: not sure why
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('allows unique onboardingConfigFileName if it is set in configFileNames', async () => {
+      const config = {
+        onboardingConfigFileName: '.forgejo/renovate.json',
+        configFileNames: ['.forgejo/renovate.json'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('errors if env object is defined but allowedEnv is empty or undefined', async () => {
       const config = {
         env: {
@@ -1602,6 +1792,21 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    it('validates env against the allowedEnv regex', async () => {
+      const config = {
+        env: {
+          SOME_VAR: 'SOME_VALUE',
+        },
+        allowedEnv: ['/^SOME.*/'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
     });
 
     it('validates options with different type but defaultValue=null', async () => {
@@ -1639,6 +1844,24 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
+    // TODO #40742 #40747
+    it('binarySource=docker is deprecated', async () => {
+      const config: GlobalConfig = {
+        binarySource: 'docker',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Deprecation Warning',
+          message:
+            'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
+        },
+      ]);
+    });
+
     it('binarySource', async () => {
       const config = {
         binarySource: 'invalid' as never,
@@ -1815,6 +2038,7 @@ describe('config/validation', () => {
         };
         const { warnings } = await configValidation.validateConfig(
           'global',
+          // @ts-expect-error: contains invalid values
           config,
         );
         expect(warnings).toEqual([
@@ -1834,6 +2058,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(warnings).toMatchObject([
@@ -1853,6 +2078,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(warnings).toMatchObject([
@@ -1952,6 +2178,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error -- testing
         config,
       );
       expect(warnings).toMatchObject([
@@ -2086,77 +2313,6 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
-    });
-
-    it('errors if no bumpVersion filePattern is provided', async () => {
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-          bumpType: 'patch',
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-              bumpType: 'patch',
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
-    it('errors if no matchStrings are provided for bumpVersion', async () => {
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
-    it('allow bumpVersion', async () => {
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
     });
   });
 });

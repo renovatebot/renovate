@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Ini } from '../../../util/schema-utils';
+import { Ini } from '../../../util/schema-utils/index.ts';
 
 export const QuadletFile = Ini.pipe(
   z.object({

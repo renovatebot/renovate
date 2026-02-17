@@ -1,7 +1,7 @@
 import later from '@breejs/later';
-import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isArray, isString } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 const shortHoursRegex = regEx(/( \d?\d)((a|p)m)/g);
 const afterBeforeRegex = regEx(
@@ -16,10 +16,10 @@ export class ScheduleMigration extends AbstractMigration {
     if (value) {
       // massage to array first
       let schedules: string[] = [];
-      if (is.string(value)) {
+      if (isString(value)) {
         schedules = [value];
       }
-      if (is.array<string>(value)) {
+      if (isArray<string>(value)) {
         schedules = [...value];
       }
       // split 'and'
@@ -73,7 +73,7 @@ export class ScheduleMigration extends AbstractMigration {
           schedules[i] = schedules[i].replace('days', 'day');
         }
       }
-      if (is.string(value) && schedules.length === 1) {
+      if (isString(value) && schedules.length === 1) {
         this.rewrite(schedules[0]);
       } else {
         this.rewrite(schedules);

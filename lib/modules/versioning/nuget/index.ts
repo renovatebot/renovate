@@ -1,18 +1,18 @@
-import type { NewValueConfig, VersioningApi } from '../types';
-import { parseRange, parseVersion } from './parser';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { parseRange, parseVersion } from './parser.ts';
 import {
   coerceFloatingComponent,
   getFloatingRangeLowerBound,
   matches,
   rangeToString,
   tryBump,
-} from './range';
+} from './range.ts';
 import type {
   NugetBracketRange,
   NugetFloatingRange,
   NugetVersion,
-} from './types';
-import { compare, versionToString } from './version';
+} from './types.ts';
+import { compare, versionToString } from './version.ts';
 
 export const id = 'nuget';
 export const displayName = 'NuGet';
@@ -21,7 +21,7 @@ export const urls = [
   'https://nugettools.azurewebsites.net/',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['pin', 'bump'];
+export const supportedRangeStrategies = ['bump'];
 
 class NugetVersioningApi implements VersioningApi {
   isCompatible(version: string, _current?: string): boolean {
@@ -44,7 +44,7 @@ class NugetVersioningApi implements VersioningApi {
     }
 
     const r = parseRange(version);
-    if (!r || r.type !== 'nuget-exact-range') {
+    if (r?.type !== 'nuget-exact-range') {
       return false;
     }
 
@@ -262,19 +262,18 @@ class NugetVersioningApi implements VersioningApi {
     return null;
   }
 
-  getNewValue({
-    currentValue,
-    rangeStrategy,
-    currentVersion,
-    newVersion,
-  }: NewValueConfig): string | null {
+  getPinnedValue(newVersion: string): string {
+    const v = parseVersion(newVersion);
+    if (!v) {
+      return '';
+    }
+    return rangeToString({ type: 'nuget-exact-range', version: v });
+  }
+
+  getNewValue({ currentValue, newVersion }: NewValueConfig): string | null {
     const v = parseVersion(newVersion);
     if (!v) {
       return null;
-    }
-
-    if (rangeStrategy === 'pin') {
-      return rangeToString({ type: 'nuget-exact-range', version: v });
     }
 
     if (this.isVersion(currentValue)) {

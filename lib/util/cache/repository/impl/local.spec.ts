@@ -1,15 +1,15 @@
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { compressToBase64 } from '../../../compress';
-import { hash } from '../../../hash';
-import { CACHE_REVISION } from '../common';
-import type { RepoCacheRecord } from '../schema';
-import type { RepoCacheData } from '../types';
-import { CacheFactory } from './cache-factory';
-import { RepoCacheLocal } from './local';
-import { fs } from '~test/util';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { compressToBase64 } from '../../../compress.ts';
+import { hash } from '../../../hash.ts';
+import { CACHE_REVISION } from '../common.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import type { RepoCacheData } from '../types.ts';
+import { CacheFactory } from './cache-factory.ts';
+import { RepoCacheLocal } from './local.ts';
 
-vi.mock('../../../fs');
+vi.mock('../../../fs/index.ts');
 
 async function createCacheRecord(
   data: RepoCacheData,
@@ -55,7 +55,7 @@ describe('util/cache/repository/impl/local', () => {
       'local',
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping",
     );
@@ -70,7 +70,7 @@ describe('util/cache/repository/impl/local', () => {
       'local',
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'RepoCacheBase.load() - cache file is empty - skipping',
     );
@@ -199,7 +199,7 @@ describe('util/cache/repository/impl/local', () => {
     });
     expect(localRepoCache instanceof RepoCacheLocal).toBeTrue();
     expect(localRepoCache.isModified()).toBeTrue();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       { cacheType },
       `Repository cache type not supported using type "local" instead`,

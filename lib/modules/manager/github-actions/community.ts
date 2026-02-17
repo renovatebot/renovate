@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
-import type { SkipReason, StageName } from '../../../types';
-import { escapeRegExp, regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { NpmDatasource } from '../../datasource/npm';
-import { PypiDatasource } from '../../datasource/pypi';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as condaVersioning from '../../versioning/conda';
-import * as npmVersioning from '../../versioning/npm';
-import * as pep440versioning from '../../versioning/pep440';
-import * as rubyVersioning from '../../versioning/ruby';
-import type { PackageDependency } from '../types';
+import type { SkipReason, StageName } from '../../../types/index.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import * as condaVersioning from '../../versioning/conda/index.ts';
+import * as npmVersioning from '../../versioning/npm/index.ts';
+import * as pep440versioning from '../../versioning/pep440/index.ts';
+import * as rubyVersioning from '../../versioning/ruby/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 function matchAction(action: string): z.Schema {
   return z
@@ -212,6 +212,34 @@ const SetupPixi = z
     };
   });
 
+const SetupHatch = z
+  .object({
+    // https://github.com/pypa/hatch/tree/install
+    uses: matchAction('pypa/hatch'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: GithubReleasesDatasource.id,
+      depName: 'pypa/hatch',
+      packageName: 'pypa/hatch',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+      // Strip hatch- prefix from release tags
+      extractVersion: '^hatch-(?<version>.+)$',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -227,4 +255,5 @@ export const CommunityActions = z.union([
   SetupBun,
   SetupDeno,
   SetupRuby,
+  SetupHatch,
 ]);

@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isEmptyObject } from '@sindresorhus/is';
 import { z } from 'zod';
-import { filterMap } from '../../../util/filter-map';
-import { newlineRegex } from '../../../util/regex';
-import { LooseArray } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import { filterMap } from '../../../util/filter-map.ts';
+import { newlineRegex } from '../../../util/regex.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release } from '../types.ts';
 
 export const MarshalledVersionInfo = LooseArray(
   z
@@ -12,7 +12,7 @@ export const MarshalledVersionInfo = LooseArray(
     .transform(({ number: version }): Release => ({ version })),
 )
   .refine(
-    (value) => !is.emptyArray(value),
+    (value) => !isEmptyArray(value),
     'Empty response from `/v1/dependencies` endpoint',
   )
   .transform((releases) => ({ releases }));
@@ -72,7 +72,7 @@ export const GemVersions = LooseArray(
           constraints.rubygems = [rubygemsVersion];
         }
 
-        if (!is.emptyObject(constraints)) {
+        if (!isEmptyObject(constraints)) {
           result.constraints = constraints;
         }
 
@@ -89,7 +89,7 @@ export const GemVersions = LooseArray(
     ),
 )
   .refine(
-    (value) => !is.emptyArray(value),
+    (value) => !isEmptyArray(value),
     'Empty response from `/v1/gems` endpoint',
   )
   .transform((releases) => ({ releases }));
@@ -104,7 +104,7 @@ export const GemInfo = z
     }).map((version): Release => ({ version })),
   )
   .refine(
-    (value) => !is.emptyArray(value),
+    (value) => !isEmptyArray(value),
     'Empty response from `/info` endpoint',
   )
   .transform((releases) => ({ releases }));

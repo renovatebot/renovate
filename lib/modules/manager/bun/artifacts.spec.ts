@@ -1,13 +1,13 @@
 import _fs from 'fs-extra';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { exec as _exec } from '../../../util/exec';
-import { ExecError } from '../../../util/exec/exec-error';
-import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from './artifacts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import { exec as _exec } from '../../../util/exec/index.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
 
-vi.mock('../../../util/exec');
+vi.mock('../../../util/exec/index.ts');
 vi.mock('fs-extra');
 
 const exec = vi.mocked(_exec);
@@ -79,10 +79,64 @@ describe('modules/manager/bun/artifacts', () => {
         ]);
       });
 
+      it('updates lock file when workspace package is updated', async () => {
+        updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+
+        const result = await updateArtifacts(updateArtifact);
+
+        expect(result).toEqual([
+          {
+            file: {
+              path: 'bun.lockb',
+              type: 'addition',
+              contents: newLock,
+            },
+          },
+        ]);
+
+        expect(exec).toHaveBeenCalledWith('bun install --ignore-scripts', {
+          cwdFile: 'bun.lockb',
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'bun',
+            },
+          ],
+        });
+      });
+
       it('supports lockFileMaintenance', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
+        updateArtifact.config.isLockFileMaintenance = true;
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        // npmrc
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+        expect(await updateArtifacts(updateArtifact)).toEqual([
+          {
+            file: {
+              path: 'bun.lockb',
+              type: 'addition',
+              contents: newLock,
+            },
+          },
+        ]);
+      });
+
+      it('supports lockFileMaintenance (without updated deps)', async () => {
+        updateArtifact.config.lockFiles = ['bun.lockb'];
         updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
         fs.readFile.mockResolvedValueOnce(oldLock as never);
@@ -106,7 +160,7 @@ describe('modules/manager/bun/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -124,7 +178,7 @@ describe('modules/manager/bun/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -199,12 +253,32 @@ describe('modules/manager/bun/artifacts', () => {
         ]);
       });
 
+      it('supports lockFileMaintenance (without updated deps)', async () => {
+        updateArtifact.config.lockFiles = ['bun.lock'];
+        updateArtifact.config.isLockFileMaintenance = true;
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        // npmrc
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+        expect(await updateArtifacts(updateArtifact)).toEqual([
+          {
+            file: {
+              path: 'bun.lock',
+              type: 'addition',
+              contents: newLock,
+            },
+          },
+        ]);
+      });
+
       it('handles temporary error', async () => {
         const execError = new ExecError(TEMPORARY_ERROR, {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },
@@ -222,7 +296,7 @@ describe('modules/manager/bun/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },
@@ -309,7 +383,7 @@ describe('modules/manager/bun/artifacts', () => {
           await updateArtifacts(updateArtifact);
 
           expect(exec).toHaveBeenCalledExactlyOnceWith(testCase.expectedCmd, {
-            cwdFile: '',
+            cwdFile: lockFile,
             docker: {},
             toolConstraints: [
               {

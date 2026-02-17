@@ -1,6 +1,10 @@
-import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
+import type { MergeStrategy } from '../../config/types.ts';
+import type {
+  BranchStatus,
+  HostRule,
+  VulnerabilityAlert,
+} from '../../types/index.ts';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -39,7 +43,6 @@ export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
   repository: string;
-  endpoint?: string;
   gitUrl?: GitUrlOption;
   forkCreation?: boolean;
   forkOrg?: string;
@@ -48,9 +51,6 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
-  ignorePrAuthor?: boolean;
-  bbUseDevelopmentBranch?: boolean;
-  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
@@ -206,7 +206,9 @@ export type EnsureIssueResult = 'updated' | 'created';
 export type RepoSortMethod =
   | 'alpha'
   | 'created'
+  | 'created_at'
   | 'updated'
+  | 'updated_at'
   | 'size'
   | 'id'
   | null;
@@ -288,6 +290,21 @@ export interface Platform {
     branchName: string,
     internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
+
+  /**
+   * Get the PR for a given branch.
+   *
+   * @param branchName The source branch name
+   * @param targetBranch Optional target branch to prioritize when multiple PRs exist for the
+   *   same source branch.
+   *
+   *   This does not restrict results to PRs targeting this branch. Instead, if
+   *   more than one PR matches the given source branch, the one whose target
+   *   branch matches `targetBranch` will be preferred.
+   *
+   *   Only used by Azure and Gerrit platforms currently.
+   * @returns The PR object if found, otherwise null.
+   */
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   tryReuseAutoclosedPr?(pr: Pr, newTitle: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;

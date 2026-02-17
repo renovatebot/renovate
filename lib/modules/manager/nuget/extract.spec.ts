@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
-import type { ExtractConfig } from '../types';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
+import type { ExtractConfig } from '../types.ts';
+import { extractPackageFile } from './index.ts';
 
 const config: ExtractConfig = {};
 
@@ -33,7 +33,6 @@ describe('modules/manager/nuget/extract', () => {
         ),
       ).toBeNull();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.anything(),
         'Failed to parse XML',
@@ -52,7 +51,7 @@ describe('modules/manager/nuget/extract', () => {
           config,
         ),
       ).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'NuGet: Skipping versions.props as it is not XML',
       );

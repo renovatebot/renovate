@@ -1,7 +1,9 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
@@ -10,38 +12,37 @@ import {
   REPOSITORY_FORK_MISSING,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
-} from '../../../constants/error-messages';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as repository from '../../../util/cache/repository';
-import * as _git from '../../../util/git';
-import type { LongCommitSha } from '../../../util/git/types';
-import * as _hostRules from '../../../util/host-rules';
-import { setBaseUrl } from '../../../util/http/github';
-import { toBase64 } from '../../../util/string';
-import { hashBody } from '../pr-body';
+} from '../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as repository from '../../../util/cache/repository/index.ts';
+import * as _git from '../../../util/git/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { setBaseUrl } from '../../../util/http/github.ts';
+import { toBase64 } from '../../../util/string.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   CreatePRConfig,
   ReattemptPlatformAutomergeConfig,
   UpdatePrConfig,
-} from '../types';
-import * as branch from './branch';
-import type { ApiPageCache, GhRestPr } from './types';
-import * as github from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../types.ts';
+import * as branch from './branch.ts';
+import * as github from './index.ts';
+import type { ApiPageCache, GhRestPr } from './types.ts';
 
 const githubApiHost = 'https://api.github.com';
 
 vi.mock('timers/promises');
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http/queue');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/queue.ts');
 const hostRules = vi.mocked(_hostRules);
 
 const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -152,6 +153,184 @@ describe('modules/platform/github/index', () => {
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
       ).toMatchSnapshot();
+    });
+
+    describe('when using the default gitAuthor', () => {
+      describe('when gitAuthor is not set', () => {
+        describe('when no email access', () => {
+          it('if on GitHub.com, a warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).toHaveBeenCalledWith(
+              {
+                documentationUrl:
+                  'https://github.com/renovatebot/renovate/discussions/39309',
+              },
+              'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+            );
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+
+        describe('when email access', () => {
+          it('no warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+      });
+
+      describe('when explicitly set to only email address', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'renovate@whitesourcesoftware.com',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when explicitly set to RFC-RFC5322 format', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
     });
 
     it('should support default endpoint with email', async () => {
@@ -539,6 +718,24 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    // for coverage
+    it('no token', async () => {
+      hostRules.find.mockReturnValue({});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
+    // for coverage
+    it('app token', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'x-access-token:123test',
+      });
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
     it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
@@ -551,7 +748,7 @@ describe('modules/platform/github/index', () => {
       });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'true',
+        forkToken: 'token',
         forkCreation: true,
       });
       expect(config).toMatchSnapshot();
@@ -1346,10 +1543,10 @@ describe('modules/platform/github/index', () => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo');
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ ignorePrAuthor: true });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
-          ignorePrAuthor: true,
         });
 
         const res = await github.getPrList();
@@ -1910,7 +2107,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getIssue(1);
       expect(res).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Issue #1 has been deleted',
       );
@@ -3279,7 +3476,6 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({ repository: 'some/repo' });
         await github.createPr(prConfig);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { prNumber: 123 },
           'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
@@ -3327,7 +3523,6 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({ repository: 'some/repo' });
         await github.createPr(prConfig);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'GitHub-native automerge: success...PrNo: 123',
         );
@@ -3444,7 +3639,7 @@ describe('modules/platform/github/index', () => {
           milestone: 1,
         });
         expect(pr?.number).toBe(123);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: {
@@ -3754,11 +3949,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Adding labels 'new_label' to #1234`,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Deleting label old_label from #1234`,
       );
@@ -3771,7 +3966,7 @@ describe('modules/platform/github/index', () => {
           message: 'Failed to add labels',
         });
         await expect(github.addLabels(2, ['fail'])).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: expect.any(Object),
@@ -3899,7 +4094,6 @@ describe('modules/platform/github/index', () => {
 
       await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           err: new ExternalHostError(expect.any(RequestError), 'github'),
@@ -4020,7 +4214,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
       );
@@ -4039,7 +4233,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           options: {
@@ -4322,7 +4516,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
         'GitHub vulnerability details',

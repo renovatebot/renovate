@@ -1,11 +1,11 @@
+import { logger } from '~test/util.ts';
 import {
   decryptConfig,
   getAzureCollection,
   validateDecryptedValue,
-} from './decrypt';
-import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
-import { logger } from '~test/util';
+} from './decrypt.ts';
+import { GlobalConfig } from './global.ts';
+import type { RenovateConfig } from './types.ts';
 
 const repository = 'abc/def';
 
@@ -32,9 +32,9 @@ describe('config/decrypt', () => {
 
       const res = await decryptConfig(config, repository);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.once.warn).toHaveBeenCalledWith('text');
       expect(res.encrypted).toBeUndefined();
+      // @ts-expect-error -- invalid option
       expect(res.a).toBeUndefined();
     });
 

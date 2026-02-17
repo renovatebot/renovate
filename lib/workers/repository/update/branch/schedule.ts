@@ -1,11 +1,11 @@
 import later from '@breejs/later';
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import { Cron, CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
-import { fixShortHours } from '../../../../config/migration';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
+import { fixShortHours } from '../../../../config/migration.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 5am on the first day of the month',
@@ -145,7 +145,7 @@ export function isScheduledNow(
     logger.debug('No schedule defined');
     return true;
   }
-  if (!is.array(configSchedule)) {
+  if (!isArray(configSchedule)) {
     logger.warn(
       { schedule: configSchedule },
       'config schedule is not an array',

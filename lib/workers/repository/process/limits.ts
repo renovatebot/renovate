@@ -1,10 +1,11 @@
 import { DateTime } from 'luxon';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { BranchConfig } from '../../types';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { getInheritedOrGlobal } from '../../../util/common.ts';
+import type { BranchConfig } from '../../types.ts';
 
 export async function getPrHourlyCount(
   config: RenovateConfig,
@@ -17,7 +18,7 @@ export async function getPrHourlyCount(
     );
     const soFarThisHour = prList.filter(
       (pr) =>
-        pr.sourceBranch !== config.onboardingBranch &&
+        pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch') &&
         pr.sourceBranch.startsWith(config.branchPrefix!) &&
         DateTime.fromISO(pr.createdAt!) > currentHourStart,
     );
@@ -45,7 +46,7 @@ export async function getConcurrentPrsCount(
       const pr = await platform.getBranchPr(branchName, config.baseBranch);
       if (
         pr &&
-        pr.sourceBranch !== config.onboardingBranch &&
+        pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch') &&
         pr.state === 'open'
       ) {
         openPrCount++;

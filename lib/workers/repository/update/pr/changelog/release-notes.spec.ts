@@ -1,30 +1,31 @@
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { clone } from '../../../../../util/clone';
-import * as githubGraphql from '../../../../../util/github/graphql';
-import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
-import { toBase64 } from '../../../../../util/string';
-import type { Timestamp } from '../../../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../../../types';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { hostRules, partial } from '~test/util.ts';
+import { clone } from '../../../../../util/clone.ts';
+import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
+import type { GithubReleaseItem } from '../../../../../util/github/graphql/types.ts';
+import { toBase64 } from '../../../../../util/string.ts';
+import type { Timestamp } from '../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
 import {
   addReleaseNotes,
   getReleaseList,
   getReleaseNotes,
   getReleaseNotesMd,
+  massageBody,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
-} from './release-notes';
+} from './release-notes.ts';
 import type {
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
-} from './types';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { hostRules, partial } from '~test/util';
+} from './types.ts';
 
-vi.mock('../../../../../util/host-rules', () => mockDeep());
+vi.mock('../../../../../util/host-rules.ts', () => mockDeep());
 
 const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');
@@ -1628,6 +1629,27 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       it('should continue for other repository', () => {
         expect(shouldSkipChangelogMd('some/repo')).toBeFalse();
       });
+    });
+  });
+
+  describe('massageBody()', () => {
+    it('does not modify # inside codeblocks', () => {
+      const str =
+        '  # Version 3.2.0' +
+        '\n' +
+        '* [Chore]: always publish build scans on CI. Optionally publish them locally.' +
+        '\n' +
+        '\n' +
+        'To publish build scans, add the following, as indicated:' +
+        '```' +
+        '\n' +
+        '# ~/.gradle/gradle.properties' +
+        '\n' +
+        'dependency.analysis.scans.publish=true' +
+        '```';
+      expect(massageBody(str, 'https://github.com/foo/bar/')).toBe(
+        str.replace('  # Version 3.2.0', '### Version 3.2.0'),
+      );
     });
   });
 });

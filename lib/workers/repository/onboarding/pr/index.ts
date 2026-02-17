@@ -1,34 +1,85 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { emojify } from '../../../../util/emoji';
-import { getFile } from '../../../../util/git';
-import { toSha256 } from '../../../../util/hash';
-import * as template from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
+import { isNumber, isString } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import { toSha256 } from '../../../../util/hash.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 import {
   getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
-} from '../../errors-warnings';
-import { getPlatformPrOptions } from '../../update/pr';
-import { prepareLabels } from '../../update/pr/labels';
-import { addParticipants } from '../../update/pr/participants';
-import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
+} from '../../errors-warnings.ts';
+import { getPlatformPrOptions } from '../../update/pr/index.ts';
+import { prepareLabels } from '../../update/pr/labels.ts';
+import { addParticipants } from '../../update/pr/participants.ts';
+import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.ts';
 import {
   OnboardingState,
   getDefaultConfigFileName,
   getSemanticCommitPrTitle,
-} from '../common';
-import { getBaseBranchDesc } from './base-branch';
-import { getConfigDesc } from './config-description';
-import { getExpectedPrList } from './pr-list';
+} from '../common.ts';
+import { getBaseBranchDesc } from './base-branch.ts';
+import { getConfigDesc } from './config-description.ts';
+import { getExpectedPrList } from './pr-list.ts';
+
+/**
+ * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.
+ *
+ * Returns true if the PR was closed.
+ */
+async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
+  // check if the existing pr crosses the onboarding autoclose age
+  const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!, false);
+  const onboardingAutoCloseAge = getInheritedOrGlobal('onboardingAutoCloseAge');
+  if (onboardingAutoCloseAge) {
+    logger.debug(
+      {
+        onboardingAutoCloseAge,
+        createdAt: existingPr.createdAt!,
+        ageOfOnboardingPr,
+      },
+      `Determining that the onboarding PR created at \`${existingPr.createdAt!}\` was created ${ageOfOnboardingPr.toFixed(2)} days ago`,
+    );
+  }
+  if (
+    isNumber(onboardingAutoCloseAge) &&
+    ageOfOnboardingPr > onboardingAutoCloseAge
+  ) {
+    // close the pr
+    await platform.updatePr({
+      number: existingPr.number,
+      state: 'closed',
+      prTitle: existingPr.title,
+    });
+    // ensure comment
+    await ensureComment({
+      number: existingPr.number,
+      topic: `Renovate is disabled`,
+      content: `Renovate is disabled because the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
+    });
+    logger.debug(
+      {
+        ageOfOnboardingPr,
+        onboardingAutoCloseAge,
+      },
+      `Renovate is being disabled for this repository as the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days`,
+    );
+    return true;
+  }
+  return false;
+}
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
@@ -37,7 +88,6 @@ export async function ensureOnboardingPr(
 ): Promise<void> {
   if (
     config.repoIsOnboarded === true ||
-    OnboardingState.onboardingCacheValid ||
     (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
   ) {
     return;
@@ -45,16 +95,22 @@ export async function ensureOnboardingPr(
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
   // TODO #22198
+  const onboardingBranch = getInheritedOrGlobal('onboardingBranch')!;
   const existingPr = await platform.getBranchPr(
-    config.onboardingBranch!,
+    onboardingBranch,
     config.defaultBranch,
   );
   if (existingPr) {
+    const wasClosed = await ensureOnboardingAutoCloseAge(existingPr);
+    if (wasClosed) {
+      throw new Error(REPOSITORY_CLOSED_ONBOARDING);
+    }
+
     // skip pr-update if branch is conflicted
     if (
       await isOnboardingBranchConflicted(
         config.defaultBranch!,
-        config.onboardingBranch!,
+        onboardingBranch,
       )
     ) {
       if (GlobalConfig.get('dryRun')) {
@@ -73,6 +129,11 @@ export async function ensureOnboardingPr(
       return;
     }
   }
+
+  if (OnboardingState.onboardingCacheValid) {
+    return;
+  }
+
   const onboardingConfigHashComment =
     await getOnboardingConfigHashComment(config);
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
@@ -130,7 +191,7 @@ If you need any further assistance then you can also [request help here](${
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
-    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
+    logger.info(`DRY-RUN: Would check branch ${onboardingBranch}`);
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
@@ -142,10 +203,10 @@ If you need any further assistance then you can also [request help here](${
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
-  if (is.string(config.prHeader)) {
+  if (isString(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
-  if (is.string(config.prFooter)) {
+  if (isString(config.prFooter)) {
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
 
@@ -188,7 +249,7 @@ If you need any further assistance then you can also [request help here](${
           ? getSemanticCommitPrTitle(config)
           : config.onboardingPrTitle!;
       const pr = await platform.createPr({
-        sourceBranch: config.onboardingBranch!,
+        sourceBranch: onboardingBranch,
         targetBranch: config.defaultBranch!,
         prTitle,
         prBody,
@@ -214,7 +275,7 @@ If you need any further assistance then you can also [request help here](${
       logger.warn(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
       );
-      await scm.deleteBranch(config.onboardingBranch!);
+      await scm.deleteBranch(onboardingBranch);
       return;
     }
     throw err;
@@ -236,7 +297,7 @@ async function getOnboardingConfigHashComment(
 ): Promise<string> {
   const configFile = getDefaultConfigFileName(config);
   const existingContents =
-    (await getFile(configFile, config.onboardingBranch)) ?? '';
+    (await getFile(configFile, getInheritedOrGlobal('onboardingBranch'))) ?? '';
   const hash = toSha256(existingContents);
 
   return `\n<!--renovate-config-hash:${hash}-->\n`;

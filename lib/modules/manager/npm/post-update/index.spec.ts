@@ -1,27 +1,27 @@
 // TODO: add tests
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import type { FileChange } from '../../../../util/git/types';
-import type { PostUpdateConfig } from '../../types';
-import * as npm from './npm';
-import * as pnpm from './pnpm';
-import * as rules from './rules';
-import type { AdditionalPackageFiles } from './types';
-import * as yarn from './yarn';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, git, logger, partial, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import type { PostUpdateConfig } from '../../types.ts';
 import {
   determineLockFileDirs,
   getAdditionalFiles,
   updateYarnBinary,
   writeExistingFiles,
   writeUpdatedPackageFiles,
-} from './';
-import { Fixtures } from '~test/fixtures';
-import { fs, git, logger, partial, scm } from '~test/util';
+} from './index.ts';
+import * as npm from './npm.ts';
+import * as pnpm from './pnpm.ts';
+import * as rules from './rules.ts';
+import type { AdditionalPackageFiles } from './types.ts';
+import * as yarn from './yarn.ts';
 
-vi.mock('../../../../util/fs');
-vi.mock('./npm');
-vi.mock('./yarn');
-vi.mock('./pnpm');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./npm.ts');
+vi.mock('./yarn.ts');
+vi.mock('./pnpm.ts');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -419,9 +419,8 @@ describe('modules/manager/npm/post-update/index', () => {
         ],
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['randomFolder/.npmrc'],
@@ -578,7 +577,7 @@ describe('modules/manager/npm/post-update/index', () => {
         updatedArtifacts: [],
       });
       expect(spyNpm).not.toHaveBeenCalled();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping lock file generation',
       );
@@ -707,7 +706,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         );
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
@@ -746,7 +745,6 @@ describe('modules/manager/npm/post-update/index', () => {
           ),
         ).rejects.toThrow();
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'Error appending .yarnrc.yml content',

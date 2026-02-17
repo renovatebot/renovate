@@ -1,7 +1,7 @@
-import type { PackageFile } from '../../../types';
-import { detectMonorepos } from './monorepo';
+import type { PackageFile } from '../../../types.ts';
+import { detectMonorepos } from './monorepo.ts';
 
-vi.mock('../pnpm');
+vi.mock('../pnpm.ts');
 
 describe('modules/manager/npm/extract/post/monorepo', () => {
   describe('.extractPackageFile()', () => {

@@ -1,33 +1,36 @@
 import { mock } from 'vitest-mock-extended';
-import { getConfigFileNames } from '../../../../config/app-strings';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, git, platform, scm } from '~test/util.ts';
+import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import * as memCache from '../../../../util/cache/memory';
-import * as _cache from '../../../../util/cache/repository';
-import type { RepoCacheData } from '../../../../util/cache/repository/types';
-import type { FileAddition, LongCommitSha } from '../../../../util/git/types';
-import { OnboardingState } from '../common';
-import * as _config from './config';
-import * as _onboardingCache from './onboarding-branch-cache';
-import * as _rebase from './rebase';
-import { checkOnboardingBranch } from '.';
-import { fs, git, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
+import * as _cache from '../../../../util/cache/repository/index.ts';
+import type { RepoCacheData } from '../../../../util/cache/repository/types.ts';
+import type {
+  FileAddition,
+  LongCommitSha,
+} from '../../../../util/git/types.ts';
+import { OnboardingState } from '../common.ts';
+import * as _config from './config.ts';
+import { checkOnboardingBranch } from './index.ts';
+import * as _onboardingCache from './onboarding-branch-cache.ts';
+import * as _rebase from './rebase.ts';
 
 const configModule: any = _config;
 
-vi.mock('../../../../util/cache/repository');
-vi.mock('../../../../util/fs');
-vi.mock('./config');
-vi.mock('./rebase');
-vi.mock('./onboarding-branch-cache');
+vi.mock('../../../../util/cache/repository/index.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./config.ts');
+vi.mock('./rebase.ts');
+vi.mock('./onboarding-branch-cache.ts');
 
 const cache = vi.mocked(_cache);
 const rebase = vi.mocked(_rebase);
@@ -41,6 +44,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       memCache.init();
       config = getConfig();
       config.repository = 'some/repo';
+      GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
       OnboardingState.prUpdateRequested = false;
       scm.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
@@ -205,15 +209,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Checking cached config file name',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing config file confirmed',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: '.renovaterc',
@@ -229,15 +233,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Checking cached config file name',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing config file confirmed',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: 'package.json',
@@ -303,7 +307,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(logger.debug).not.toHaveBeenCalledExactlyOnceWith(
         'Skip processing since the onboarding branch is up to date and default branch has not changed',
       ); // onboarding cache no longer valid
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         {
           branch: config.onboardingBranch,
@@ -315,7 +319,10 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('skips processing onboarding branch when main/onboarding SHAs have not changed', async () => {
-      GlobalConfig.set({ platform: 'github' });
+      GlobalConfig.set({
+        platform: 'github',
+        onboardingBranch: config.onboardingBranch,
+      });
       const dummyCache = {
         onboardingBranchCache: {
           defaultBranchSha: 'default-sha',
@@ -425,7 +432,10 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     describe('tests onboarding rebase/retry checkbox handling', () => {
       beforeEach(() => {
-        GlobalConfig.set({ platform: 'github' });
+        GlobalConfig.set({
+          platform: 'github',
+          onboardingBranch: config.onboardingBranch,
+        });
         config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
         scm.getFileList.mockResolvedValueOnce(['package.json']);
@@ -435,12 +445,14 @@ describe('workers/repository/onboarding/branch/index', () => {
 
       it('detects unsupported platfom', async () => {
         const pl = 'bitbucket';
-        GlobalConfig.set({ platform: pl });
+        GlobalConfig.set({
+          platform: pl,
+          onboardingBranch: config.onboardingBranch,
+        });
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({}));
 
         await checkOnboardingBranch(config);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.trace).toHaveBeenCalledWith(
           `Platform '${pl}' does not support extended markdown`,
         );
@@ -457,7 +469,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.debug).toHaveBeenCalledWith(
           `No rebase checkbox was found in the onboarding PR`,
         );
@@ -474,7 +485,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.debug).toHaveBeenCalledWith(
           `Manual onboarding PR update requested`,
         );
