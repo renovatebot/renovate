@@ -218,51 +218,51 @@ export async function updatePr({
   logger.debug(`Updated PR #${number} with title ${prTitle}`);
 }
 
-export function mergePr(config: MergePRConfig): Promise<boolean> {
+export function mergePr(_config: MergePRConfig): Promise<boolean> {
   logger.debug('Not implemented mergePr');
   return Promise.resolve(false);
 }
 
 export function getBranchStatus(
-  branchName: string,
-  internalChecksAsSuccess: boolean,
+  _branchName: string,
+  _internalChecksAsSuccess: boolean,
 ): Promise<BranchStatus> {
   logger.debug('Not implemented getBranchStatus');
   return Promise.resolve('red');
 }
 
 export function setBranchStatus(
-  branchStatusConfig: BranchStatusConfig,
+  _branchStatusConfig: BranchStatusConfig,
 ): Promise<void> {
   logger.debug('Not implemented setBranchStatus');
   return Promise.resolve();
 }
 
 export function getBranchStatusCheck(
-  branchName: string,
-  context: string | null | undefined,
+  _branchName: string,
+  _context: string | null | undefined,
 ): Promise<BranchStatus | null> {
   logger.debug('Not implemented setBranchStatus');
   return Promise.resolve(null);
 }
 
 export function addReviewers(
-  number: number,
-  reviewers: string[],
+  _number: number,
+  _reviewers: string[],
 ): Promise<void> {
   logger.debug('Not implemented addReviewers');
   return Promise.resolve();
 }
 
 export function addAssignees(
-  number: number,
-  assignees: string[],
+  _number: number,
+  _assignees: string[],
 ): Promise<void> {
   logger.debug('Not implemented addAssignees');
   return Promise.resolve();
 }
 
-export function deleteLabel(number: number, label: string): Promise<void> {
+export function deleteLabel(_number: number, _label: string): Promise<void> {
   logger.debug('Not implemented deleteLabel');
   return Promise.resolve();
 }
@@ -272,30 +272,30 @@ export function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
 }
 
-export function findIssue(title: string): Promise<Issue | null> {
+export function findIssue(_title: string): Promise<Issue | null> {
   logger.debug('Not implemented findIssue');
   return Promise.resolve(null);
 }
 
 export function ensureIssue(
-  config: EnsureIssueConfig,
+  _config: EnsureIssueConfig,
 ): Promise<'updated' | 'created' | null> {
   logger.debug('Not implemented ensureIssue');
   return Promise.resolve(null);
 }
 
-export function ensureIssueClosing(title: string): Promise<void> {
+export function ensureIssueClosing(_title: string): Promise<void> {
   logger.debug('Not implemented ensureIssueClosing');
   return Promise.resolve();
 }
 
-export function ensureComment(config: EnsureCommentConfig): Promise<boolean> {
+export function ensureComment(_config: EnsureCommentConfig): Promise<boolean> {
   logger.debug('Not implemented ensureComment');
   return Promise.resolve(false);
 }
 
 export function ensureCommentRemoval(
-  ensureCommentRemoval:
+  _ensureCommentRemoval:
     | EnsureCommentRemovalConfigByTopic
     | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
@@ -312,18 +312,18 @@ export function getRepoForceRebase(): Promise<boolean> {
 }
 
 export function getRawFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
+  _fileName: string,
+  _repoName?: string,
+  _branchOrTag?: string,
 ): Promise<string | null> {
   logger.debug('Not implemented getRawFile');
   return Promise.resolve(null);
 }
 
 export function getJsonFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
+  _fileName: string,
+  _repoName?: string,
+  _branchOrTag?: string,
 ): Promise<any> {
   logger.debug('Not implemented getJsonFile');
   return Promise.resolve(null);

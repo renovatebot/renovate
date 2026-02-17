@@ -1,5 +1,6 @@
 import { git } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Pr } from '../types.ts';
 import * as util from '../util.ts';
@@ -65,6 +66,7 @@ const renovatePr = mapPrFromScmToRenovate(pullRequest);
 
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     vi.resetAllMocks();
     hostRules.add({ token, username: user.name });
     scmPlatform.invalidatePrCache();
@@ -105,7 +107,7 @@ describe('modules/platform/scm-manager/index', () => {
       const repository = `${repo.namespace}/${repo.name}`;
       const expectedFingerprint = 'expectedFingerprint';
       const expectedDefaultBranch = 'expectedDefaultBranch';
-      const expectedIgnorePrAuthor = true;
+      GlobalConfig.set({ ignorePrAuthor: true });
 
       httpMock
         .scope(endpoint)
@@ -132,7 +134,7 @@ describe('modules/platform/scm-manager/index', () => {
         url: `https://${user.name}:${token}@localhost:8080/scm/default/repo`,
         repository,
         defaultBranch: expectedDefaultBranch,
-        ignorePrAuthor: expectedIgnorePrAuthor,
+        ignorePrAuthor: true,
       });
     });
   });
