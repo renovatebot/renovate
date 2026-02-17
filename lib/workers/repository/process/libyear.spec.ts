@@ -300,5 +300,48 @@ describe('workers/repository/process/libyear', () => {
         'Repository libYears',
       );
     });
+
+    it('ignores disabled dependencies without currentVersionTimestamp', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'disabled-dep',
+                datasource: 'npm',
+                currentVersion: '1.0.0',
+                enabled: false,
+                updates: [
+                  {
+                    newVersion: '2.0.0',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      calculateLibYears(config, packageFiles);
+
+      expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+        'No currentVersionTimestamp for disabled-dep',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          libYears: {
+            managers: {},
+            total: 0,
+          },
+          dependencyStatus: {
+            outdated: 0,
+            total: 0,
+          },
+        },
+        'Repository libYears',
+      );
+    });
   });
 });
