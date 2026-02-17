@@ -583,13 +583,13 @@ describe('modules/manager/nuget/extract', () => {
       it('reads sdk and package directives', async () => {
         const packageFile = 'single-csharp-file/singlefile.cs';
         const contents = codeBlock`
-        #:sdk Some.Sdk@6.0.0
-        #:package Some.NuGet.Package@3.0.1
+          #:sdk Some.Sdk@6.0.0
+          #:package Some.NuGet.Package@3.0.1
 
-        // https://devblogs.microsoft.com/dotnet/announcing-dotnet-run-app/
+          // https://devblogs.microsoft.com/dotnet/announcing-dotnet-run-app/
 
-        Console.WriteLine("Hello World!");
-        `;
+          Console.WriteLine("Hello World!");
+          `;
         expect(await extractPackageFile(contents, packageFile, config)).toEqual(
           {
             deps: [
@@ -615,13 +615,13 @@ describe('modules/manager/nuget/extract', () => {
       it('calls applyRegistries to honor nuget.config files if present', async () => {
         const packageFile = 'single-csharp-file-nuget/singlefile.cs';
         const contents = codeBlock`
-        #:sdk Some.Sdk@6.0.0
-        #:package Some.NuGet.Package@3.0.1
+          #:sdk Some.Sdk@6.0.0
+          #:package Some.NuGet.Package@3.0.1
 
-        // https://devblogs.microsoft.com/dotnet/announcing-dotnet-run-app/
+          // https://devblogs.microsoft.com/dotnet/announcing-dotnet-run-app/
 
-        Console.WriteLine("Hello World!");
-        `;
+          Console.WriteLine("Hello World!");
+          `;
 
         const applyRegistriesSpy = vi
           .spyOn(nugetExtractUtil, 'applyRegistries')
