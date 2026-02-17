@@ -159,7 +159,8 @@ export abstract class HttpBase<
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
-    options.timeout ??= 60000;
+    const timeout = options.timeout ?? 60000;
+    options.timeout = timeout;
 
     let cacheProvider: HttpCacheProvider | undefined;
     if (isReadMethod && options.cacheProvider) {
@@ -205,6 +206,7 @@ export abstract class HttpBase<
           releaseLock = await acquireLock(
             `${options.method} ${url}`,
             'http-mutex',
+            timeout * 2,
           );
         }
         try {
