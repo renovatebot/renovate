@@ -60,6 +60,32 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('lock-file-maintenance');
     });
 
+    it('separates lockFileMaintenance from non-lockFileMaintenance with same groupName', () => {
+      const groupConfig = {
+        branchName: '{{groupSlug}}-{{branchTopic}}',
+        branchTopic: 'grouptopic',
+      };
+      const lockFileUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'lockFileMaintenance',
+        depName: 'lock-file',
+        group: groupConfig,
+      });
+      const regularUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'minor',
+        depName: 'axios',
+        group: groupConfig,
+      });
+      generateBranchName(lockFileUpdate);
+      generateBranchName(regularUpdate);
+      expect(lockFileUpdate.branchName).toBe(
+        'lock-file-maintenance-all-grouptopic',
+      );
+      expect(regularUpdate.branchName).toBe('all-grouptopic');
+      expect(lockFileUpdate.branchName).not.toBe(regularUpdate.branchName);
+    });
+
     it('uses groupName if no slug defined, ignores sharedVariableName', () => {
       const upgrade = partial<BranchUpgradeConfig>({
         groupName: 'some group name',
