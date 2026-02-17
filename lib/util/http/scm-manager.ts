@@ -1,5 +1,5 @@
-import { ensureTrailingSlash } from '../url';
-import { HttpBase } from './http';
+import { ensureTrailingSlash } from '../url.ts';
+import { HttpBase } from './http.ts';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {

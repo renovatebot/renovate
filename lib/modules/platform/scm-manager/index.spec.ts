@@ -1,12 +1,12 @@
-import * as httpMock from '../../../../test/http-mock';
-import * as hostRules from '../../../util/host-rules';
-import type { Pr } from '../types';
-import * as util from '../util';
-import { mapPrFromScmToRenovate } from './mapper';
-import type { PullRequest, Repo, User } from './schema';
-import type { PrFilterByState } from './types';
-import * as scmPlatform from '.';
-import { git } from '~test/util';
+import { git } from '~test/util.ts';
+import * as httpMock from '../../../../test/http-mock.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { Pr } from '../types.ts';
+import * as util from '../util.ts';
+import * as scmPlatform from './index.ts';
+import { mapPrFromScmToRenovate } from './mapper.ts';
+import type { PullRequest, Repo, User } from './schema.ts';
+import type { PrFilterByState } from './types.ts';
 
 vi.mock('../util');
 vi.mock('../../../util/git');

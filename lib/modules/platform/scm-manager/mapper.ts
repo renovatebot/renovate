@@ -1,5 +1,5 @@
-import type { Pr } from '../types';
-import type { PullRequest } from './schema';
+import type { Pr } from '../types.ts';
+import type { PullRequest } from './schema.ts';
 
 export function mapPrFromScmToRenovate(pr: PullRequest): Pr {
   return {

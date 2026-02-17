@@ -1,11 +1,11 @@
-import type { MergeStrategy } from '../../../config/types';
-import { logger } from '../../../logger';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import type { GitUrlOption, Pr } from '../types';
-import type { PrMergeMethod, Repo } from './schema';
-import type { PrFilterByState } from './types';
+import type { MergeStrategy } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import type { GitUrlOption, Pr } from '../types.ts';
+import type { PrMergeMethod, Repo } from './schema.ts';
+import type { PrFilterByState } from './types.ts';
 
 export function mapPrState(
   state: 'open' | 'closed' | undefined,

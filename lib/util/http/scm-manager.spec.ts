@@ -1,5 +1,5 @@
-import * as httpMock from '../../../test/http-mock';
-import { ScmManagerHttp, setBaseUrl } from './scm-manager';
+import * as httpMock from '../../../test/http-mock.ts';
+import { ScmManagerHttp, setBaseUrl } from './scm-manager.ts';
 
 describe('util/http/scm-manager', () => {
   const baseUrl = 'http://localhost:8080/scm/api/v2';

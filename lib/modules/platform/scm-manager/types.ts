@@ -1,4 +1,4 @@
-import type { PrState } from './schema';
+import type { PrState } from './schema.ts';
 
 export interface PullRequestCreateParams extends PullRequestUpdateParams {
   source: string;

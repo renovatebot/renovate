@@ -1,10 +1,15 @@
-import type { MergeStrategy } from '../../../config/types';
-import * as hostRules from '../../../util/host-rules';
-import type { GitUrlOption, Pr } from '../types';
-import type { Repo } from './schema';
-import type { PrFilterByState } from './types';
-import { getMergeMethod, getRepoUrl, matchPrState, smartLinks } from './utils';
-import { invalidatePrCache } from './index';
+import type { MergeStrategy } from '../../../config/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { GitUrlOption, Pr } from '../types.ts';
+import { invalidatePrCache } from './index.ts';
+import type { Repo } from './schema.ts';
+import type { PrFilterByState } from './types.ts';
+import {
+  getMergeMethod,
+  getRepoUrl,
+  matchPrState,
+  smartLinks,
+} from './utils.ts';
 
 describe('modules/platform/scm-manager/utils', () => {
   describe(getMergeMethod, () => {

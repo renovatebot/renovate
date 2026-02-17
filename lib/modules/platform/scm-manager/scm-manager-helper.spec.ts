@@ -1,5 +1,6 @@
-import { setBaseUrl } from '../../../util/http/scm-manager';
-import type { PullRequest, Repo, User } from './schema';
+import * as httpMock from '~test/http-mock.ts';
+import { setBaseUrl } from '../../../util/http/scm-manager.ts';
+import type { PullRequest, Repo, User } from './schema.ts';
 import {
   createScmPr,
   getAllRepoPrs,
@@ -9,9 +10,11 @@ import {
   getRepo,
   getRepoPr,
   updateScmPr,
-} from './scm-manager-helper';
-import type { PullRequestCreateParams, PullRequestUpdateParams } from './types';
-import * as httpMock from '~test/http-mock';
+} from './scm-manager-helper.ts';
+import type {
+  PullRequestCreateParams,
+  PullRequestUpdateParams,
+} from './types.ts';
 
 describe('modules/platform/scm-manager/scm-manager-helper', () => {
   const endpoint = 'http://localhost:8080/scm/api/v2';

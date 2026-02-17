@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import * as git from '../../../util/git';
-import { getBaseUrl, setBaseUrl } from '../../../util/http/scm-manager';
-import { sanitize } from '../../../util/sanitize';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import * as git from '../../../util/git/index.ts';
+import { getBaseUrl, setBaseUrl } from '../../../util/http/scm-manager.ts';
+import { sanitize } from '../../../util/sanitize.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -19,10 +19,10 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import { mapPrFromScmToRenovate } from './mapper';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { mapPrFromScmToRenovate } from './mapper.ts';
 import {
   createScmPr,
   getAllRepoPrs,
@@ -32,8 +32,8 @@ import {
   getRepo,
   getRepoPr,
   updateScmPr,
-} from './scm-manager-helper';
-import { getRepoUrl, mapPrState, matchPrState, smartLinks } from './utils';
+} from './scm-manager-helper.ts';
+import { getRepoUrl, mapPrState, matchPrState, smartLinks } from './utils.ts';
 
 interface SCMMRepoConfig {
   repository: string;

@@ -1,4 +1,5 @@
-import { ScmManagerHttp } from '../../../util/http/scm-manager';
+import { ScmManagerHttp } from '../../../util/http/scm-manager.ts';
+import type { Link, PullRequest, Repo } from './schema.ts';
 import {
   DefaultBranchSchema,
   PagedPullRequestSchema,
@@ -6,9 +7,11 @@ import {
   PullRequestSchema,
   RepoSchema,
   User,
-} from './schema';
-import type { Link, PullRequest, Repo } from './schema';
-import type { PullRequestCreateParams, PullRequestUpdateParams } from './types';
+} from './schema.ts';
+import type {
+  PullRequestCreateParams,
+  PullRequestUpdateParams,
+} from './types.ts';
 
 export const scmManagerHttp = new ScmManagerHttp();
 
