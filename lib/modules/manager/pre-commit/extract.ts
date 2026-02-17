@@ -111,7 +111,7 @@ function extractWithRegex(content: string): Map<string, RegexDep> {
         currentDigest,
         currentValue,
         replaceString,
-        commentWhiteSpaces = ' ',
+        commentWhiteSpaces,
       } = match.groups;
 
       // Store by digest to correlate with YAML-extracted deps later
