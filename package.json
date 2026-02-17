@@ -275,7 +275,7 @@
   "optionalDependencies": {
     "better-sqlite3": "12.6.2",
     "openpgp": "6.3.0",
-    "re2": "1.23.2"
+    "re2": "1.23.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.14",
@@ -325,7 +325,7 @@
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
     "@vitest/coverage-v8": "4.0.18",
-    "@vitest/eslint-plugin": "1.6.6",
+    "@vitest/eslint-plugin": "1.6.7",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
     "aws-sdk-client-mock": "4.1.0",
@@ -361,7 +361,7 @@
     "tsdown": "0.20.3",
     "type-fest": "5.4.4",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.54.0",
+    "typescript-eslint": "8.55.0",
     "unified": "11.0.5",
     "vite": "8.0.0-beta.13",
     "vite-tsconfig-paths": "6.1.0",
