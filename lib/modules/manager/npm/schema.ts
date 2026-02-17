@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { Json, LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
 
 export const PnpmCatalogs = z.object({

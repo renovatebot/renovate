@@ -6,7 +6,7 @@ import type {
   OptionsOfTextResponseBody,
   RequestError,
 } from 'got';
-import type { ZodError } from 'zod';
+import type { ZodError } from 'zod/v3';
 import type { HttpCacheProvider } from './cache/types.ts';
 import type { EmptyResultError } from './errors.ts';
 
