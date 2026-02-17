@@ -42,7 +42,7 @@ export const presets: Record<string, Preset> = {
   },
   semverAllMonthly: {
     description:
-      'Preserve SemVer ranges and update everything together once a month. (excluding replacements and lockfile maintenance)',
+      'Preserve SemVer ranges and update everything together once a month. (excluding replacements)',
     extends: [
       ':preserveSemverRanges',
       'group:all',
@@ -56,7 +56,7 @@ export const presets: Record<string, Preset> = {
   },
   semverAllWeekly: {
     description:
-      'Preserve SemVer ranges and update everything together once a week (excluding replacements and lockfile maintenance).',
+      'Preserve SemVer ranges and update everything together once a week (excluding replacements).',
     extends: [
       ':preserveSemverRanges',
       'group:all',
