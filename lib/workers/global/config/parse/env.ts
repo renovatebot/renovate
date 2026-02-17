@@ -98,6 +98,7 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_S3_PATH_STYLE',
   'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
   'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+  'RENOVATE_X_REPO_CACHE_FORCE_LOCAL',
 ];
 
 /**
@@ -111,7 +112,13 @@ function massageConvertedExperimentalVars(
   const result = { ...env };
   for (const key of convertedExperimentalEnvVars) {
     if (env[key] !== undefined) {
-      const newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
+      let newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
+
+      // special case to use a more consistent prefix with other `repositoryCache` options
+      if (key === 'RENOVATE_X_REPO_CACHE_FORCE_LOCAL') {
+        newKey = 'RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL';
+      }
+
       result[newKey] = env[key];
       delete result[key];
     }

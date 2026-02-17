@@ -163,8 +163,10 @@ export interface RenovateSharedConfig {
  * Contains all options with globalOnly=true && inheritConfigSupport=true
  */
 export interface GlobalInheritableConfig {
+  bbUseDevelopmentBranch?: boolean;
   configFileNames?: string[];
   onboardingAutoCloseAge?: number;
+  onboardingBranch?: string;
 }
 
 // Config options used only within the global worker
@@ -249,6 +251,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  repositoryCacheForceLocal?: boolean;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];

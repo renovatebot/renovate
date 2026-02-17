@@ -130,7 +130,7 @@ Allowed options:
 
 | Option          | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
-| `goGenerate`    | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update.     |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
 ## autodiscover
@@ -1367,6 +1367,12 @@ Example:
 Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+
+## repositoryCacheForceLocal
+
+If set to `true`, Renovate will persist repository cache locally after uploading to S3.
+
+This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
 
 ## repositoryCacheType
 
