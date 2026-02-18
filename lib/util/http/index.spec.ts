@@ -70,6 +70,24 @@ describe('util/http/index', () => {
     expect(httpMock.allUsed()).toBeTrue();
   });
 
+  it('does not pass auth on redirects', async () => {
+    hostRules.add({ matchHost: 'renovate.com', token: 'secret' });
+
+    httpMock
+      .scope(baseUrl, { reqheaders: { authorization: 'Bearer secret' } })
+      .get('/test')
+      .reply(302, undefined, {
+        location: 'http://renovate.test/redirected?X-Amz-Algorithm=xxx',
+      });
+
+    httpMock
+      .scope('http://renovate.test', { badheaders: ['authorization'] })
+      .get('/redirected?X-Amz-Algorithm=xxx')
+      .reply(200);
+
+    await expect(http.get('http://renovate.com/test')).resolves.toBeDefined();
+  });
+
   it('getJson', async () => {
     httpMock
       .scope(baseUrl, {
