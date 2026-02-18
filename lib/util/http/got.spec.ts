@@ -3,6 +3,7 @@ import { logger } from '~test/util.ts';
 import { configureRejectUnauth } from './got.ts';
 
 describe('util/http/got', () => {
+  // silence codeql warnings about unhandled promise rejections in got tests
   const rejectUnauth = 'NODE_TLS_REJECT_UNAUTHORIZED';
 
   beforeEach(() => {
