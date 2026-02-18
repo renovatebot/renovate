@@ -14,17 +14,14 @@ import { stripTemplates } from './string.ts';
 export interface YamlOptions<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
-> extends ParseOptions,
-    DocumentOptions,
-    SchemaOptions {
+>
+  extends ParseOptions, DocumentOptions, SchemaOptions {
   customSchema?: Schema;
   removeTemplates?: boolean;
 }
 
 interface YamlParseDocumentOptions
-  extends ParseOptions,
-    DocumentOptions,
-    SchemaOptions {
+  extends ParseOptions, DocumentOptions, SchemaOptions {
   removeTemplates?: boolean;
 }
 
