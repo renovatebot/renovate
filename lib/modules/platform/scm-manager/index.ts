@@ -44,6 +44,7 @@ interface SCMMRepoConfig {
 }
 
 export const id = 'scm-manager';
+export const experimental = true;
 
 let config: SCMMRepoConfig = {} as any;
 

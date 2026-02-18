@@ -30,7 +30,7 @@ Supports over [90 different package managers](https://docs.renovatebot.com/modul
 
 ### Platforms
 
-Renovate updates code repositories on the following platforms: GitHub, GitLab, Bitbucket, Azure DevOps, AWS Code Commit, Gitea, Forgejo, Gerrit (experimental), SCM-Manager
+Renovate updates code repositories on the following platforms: GitHub, GitLab, Bitbucket, Azure DevOps, AWS Code Commit (experimental), Gitea, Forgejo, Gerrit (experimental), SCM-Manager (experimental)
 
 ## Ways to run Renovate
 
