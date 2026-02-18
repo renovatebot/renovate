@@ -832,7 +832,9 @@ jobs:
 
   build-deploy-docs-site:
     if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}
-    needs: release
+    needs:
+      - setup-build
+      - release
 
     permissions:
       pages: write
