@@ -28,13 +28,14 @@ jobs:
               pull_number: context.payload.pull_request.number,
             });
 
-            // Check each commit message for "Closes #"
+            // Check each commit message for closing keywords
             const violatingCommits = [];
-            const closesPattern = /closes\s+#\d+/i;
+            // Matches: closes #123, fixes #123, resolves #123, etc.
+            const closingPattern = /(closes|fixes|resolves|fixed|closed|resolved)\s+#\d+/i;
 
             for (const commit of commits) {
               const message = commit.commit.message;
-              if (closesPattern.test(message)) {
+              if (closingPattern.test(message)) {
                 const shortSha = commit.sha.substring(0, 7);
                 const firstLine = message.split('\n')[0];
                 violatingCommits.push({ sha: shortSha, message: firstLine });
@@ -43,12 +44,12 @@ jobs:
 
             // Report results
             if (violatingCommits.length > 0) {
-              let errorMessage = `Found ${violatingCommits.length} commit(s) with 'Closes #' pattern:\n\n`;
+              let errorMessage = `Found ${violatingCommits.length} commit(s) with issue closing keywords:\n\n`;
               for (const commit of violatingCommits) {
                 errorMessage += `- ${commit.sha}: ${commit.message}\n`;
               }
-              errorMessage += `\nCommit messages should not contain 'Closes #'. Use the PR description instead.`;
+              errorMessage += `\nCommit messages should not contain closing keywords (closes, fixes, resolves, etc.). Use the PR description instead.`;
               core.setFailed(errorMessage);
             } else {
-              core.info('✓ No commits with "Closes #" pattern found');
+              core.info('✓ No commits with issue closing keywords found');
             }
