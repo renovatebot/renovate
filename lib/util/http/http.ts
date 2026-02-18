@@ -251,7 +251,7 @@ export abstract class HttpBase<
 
       return resCopy;
     } catch (err) {
-      const { abortOnError, abortIgnoreStatusCodes } = options;
+      const { abortOnError, abortIgnoreStatusCodes } = options.context;
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
         throw new ExternalHostError(err);
       }

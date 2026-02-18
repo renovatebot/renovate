@@ -29,8 +29,6 @@ export type HostRulesGotOptions = Pick<
   | 'password'
   | 'context'
   | 'enabled'
-  | 'abortOnError'
-  | 'abortIgnoreStatusCodes'
   | 'timeout'
   | 'lookup'
   | 'agent'
@@ -196,11 +194,17 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   }
   // Apply optional params
   if (hostRule.abortOnError) {
-    options.abortOnError = hostRule.abortOnError;
+    options.context = {
+      ...options.context,
+      abortOnError: hostRule.abortOnError,
+    };
   }
 
   if (hostRule.abortIgnoreStatusCodes) {
-    options.abortIgnoreStatusCodes = hostRule.abortIgnoreStatusCodes;
+    options.context = {
+      ...options.context,
+      abortIgnoreStatusCodes: hostRule.abortIgnoreStatusCodes,
+    };
   }
 
   if (hostRule.timeout) {

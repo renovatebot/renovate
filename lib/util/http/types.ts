@@ -11,7 +11,10 @@ import type { HttpCacheProvider } from './cache/types.ts';
 import type { EmptyResultError } from './errors.ts';
 
 export type GotContextOptions = {
+  abortOnError?: boolean;
+  abortIgnoreStatusCodes?: number[];
   authType?: string;
+  hostType?: string;
 } & Record<string, unknown>;
 
 // TODO: Move options to context
@@ -23,8 +26,6 @@ export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
 export type GotStreamOptions = Options & GotExtraOptions;
 
 export interface GotExtraOptions {
-  abortOnError?: boolean;
-  abortIgnoreStatusCodes?: number[];
   timeout?: number;
   token?: string;
   hostType?: string;
