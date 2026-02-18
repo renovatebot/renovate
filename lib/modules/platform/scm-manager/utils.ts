@@ -44,7 +44,7 @@ export function matchPrState(pr: Pr, state: PrFilterByState): boolean {
 }
 
 export function smartLinks(body: string): string {
-  return body.replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
+  return body.replace(regEx(/]\(\.\.\/pull\//g), '](pulls/');
 }
 
 export function getRepoUrl(
