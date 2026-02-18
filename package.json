@@ -347,7 +347,7 @@
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
     "lint-staged": "16.2.7",
-    "markdownlint-cli2": "0.20.0",
+    "markdownlint-cli2": "0.21.0",
     "markdownlint-cli2-formatter-template": "0.0.4",
     "memfs": "4.55.0",
     "nock": "14.0.11",
