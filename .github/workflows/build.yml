@@ -377,7 +377,7 @@ jobs:
       - name: Check workflow files
         uses: docker://rhysd/actionlint:1.7.11@sha256:6f03470d0152251d7f07f7c4dc019dbe7024c72cd952f839544c7798843efa8f
         with:
-          args: -color
+          args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
   test:
     needs: [setup, prefetch]
