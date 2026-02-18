@@ -17,5 +17,6 @@ export async function exec(
     ...opts,
     maxBuffer,
     encoding: 'utf8',
+    reject: false,
   });
 }
