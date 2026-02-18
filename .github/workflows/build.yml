@@ -590,6 +590,19 @@ jobs:
           needs.coverage-threshold.result == 'skipped'
         run: exit 1
 
+      - name: Fail for failed or cancelled Actions linting
+        if: |
+          needs.lint-actions.result == 'failure' ||
+          needs.lint-actions.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped Actions linting when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.lint-actions.result == 'skipped'
+        run: exit 1
+
   build:
     needs:
       - setup-build
