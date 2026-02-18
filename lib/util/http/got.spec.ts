@@ -3,12 +3,14 @@ import { logger } from '~test/util.ts';
 import { configureRejectUnauth } from './got.ts';
 
 describe('util/http/got', () => {
+  const rejectUnauth = 'NODE_TLS_REJECT_UNAUTHORIZED';
+
   beforeEach(() => {
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    delete process.env[rejectUnauth];
   });
 
   it('configures rejectUnauthorized when forced', () => {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    process.env[rejectUnauth] = '0';
     const opts = {};
     configureRejectUnauth(opts);
     expect(opts).toEqual({ https: { rejectUnauthorized: false } });
