@@ -871,7 +871,7 @@ jobs:
         id: latest_release
         run: |
           latest_release=$(gh release view --json tagName -q .tagName)
-          echo "release_tag=$latest_release" >> $GITHUB_OUTPUT
+          echo "release_tag=$latest_release" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
