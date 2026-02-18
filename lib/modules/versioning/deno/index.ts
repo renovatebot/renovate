@@ -35,9 +35,6 @@ export function getNewValue({
   isReplacement,
 }: NewValueConfig): string | null {
   if (currentValue === 'latest') {
-    if (rangeStrategy === 'bump' || rangeStrategy === 'widen') {
-      return null;
-    }
     if (rangeStrategy === 'replace' || rangeStrategy === 'pin') {
       return newVersion;
     }
