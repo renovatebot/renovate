@@ -127,7 +127,7 @@ jobs:
           FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
-          echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          pnpm -s schedule-test-shards >> "$GITHUB_OUTPUT"
 
   setup-build:
     runs-on: ubuntu-latest
@@ -871,7 +871,7 @@ jobs:
         id: latest_release
         run: |
           latest_release=$(gh release view --json tagName -q .tagName)
-          echo "release_tag=$latest_release" >> $GITHUB_OUTPUT
+          echo "release_tag=$latest_release" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -893,6 +893,7 @@ jobs:
           path: tools/mkdocs/site
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
   notify-release-failure:
