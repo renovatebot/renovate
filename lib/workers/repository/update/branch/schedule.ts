@@ -96,7 +96,7 @@ export function cronMatches(
 ): boolean {
   const parsedCron: Cron = new Cron(cron, {
     ...(timezone && { timezone }),
-    legacyMode: false,
+    domAndDow: true,
   });
   // it will always parse because it is checked beforehand
   // istanbul ignore if
