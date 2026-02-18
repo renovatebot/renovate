@@ -1,4 +1,4 @@
-import { ZodError, z } from 'zod';
+import { ZodError, z } from 'zod/v3';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import {
@@ -68,6 +68,24 @@ describe('util/http/index', () => {
       'Response code 404 (Not Found)',
     );
     expect(httpMock.allUsed()).toBeTrue();
+  });
+
+  it('does not pass auth on redirects', async () => {
+    hostRules.add({ matchHost: 'renovate.com', token: 'secret' });
+
+    httpMock
+      .scope(baseUrl, { reqheaders: { authorization: 'Bearer secret' } })
+      .get('/test')
+      .reply(302, undefined, {
+        location: 'http://renovate.test/redirected?X-Amz-Algorithm=xxx',
+      });
+
+    httpMock
+      .scope('http://renovate.test', { badheaders: ['authorization'] })
+      .get('/redirected?X-Amz-Algorithm=xxx')
+      .reply(200);
+
+    await expect(http.get('http://renovate.com/test')).resolves.toBeDefined();
   });
 
   it('getJson', async () => {

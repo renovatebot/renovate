@@ -1,15 +1,22 @@
 // TODO: refactor code to remove this (#9651)
 import './legacy.ts';
 
+import { isNumber } from '@sindresorhus/is';
 import type { Options } from 'got';
 import _got, { RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
 import { logger } from '../../logger/index.ts';
+import { clone } from '../clone.ts';
 import { coerceNumber } from '../number.ts';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats.ts';
 import { coerceString } from '../string.ts';
 import { hooks } from './hooks.ts';
-import type { GotBufferOptions, GotOptions, HttpResponse } from './types.ts';
+import {
+  type GotBufferOptions,
+  GotExtraOptionKeys,
+  type GotOptions,
+  type HttpResponse,
+} from './types.ts';
 
 export { RequestError } from 'got';
 
@@ -64,4 +71,30 @@ export function stream(
   options: Omit<Options, 'isStream'>,
 ): NodeJS.ReadableStream {
   return got.stream(url, options);
+}
+
+/**
+ * Removes non-got options and normalizes some options to match got's expected format.
+ * @param options options to normalize
+ * @returns normalized got options
+ */
+export function normalize<T extends Options = Options>(
+  options: T,
+  keysToRemove: readonly string[],
+): T {
+  const opts = clone(options);
+
+  for (const key of [...GotExtraOptionKeys, ...keysToRemove]) {
+    // @ts-expect-error -- delete extra options before passing to got
+    delete opts[key];
+  }
+
+  // optimize options for got v12+
+  const normalizedOptions = opts as unknown as T;
+
+  if (isNumber(opts.timeout)) {
+    normalizedOptions.timeout = { request: opts.timeout };
+  }
+
+  return normalizedOptions;
 }

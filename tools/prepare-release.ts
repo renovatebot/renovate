@@ -43,9 +43,9 @@ function build(): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);
-  } else if (res.status && res.status !== 0) {
+  } else if (res.exitCode) {
     logger.error(`Error occured:\n${res.stderr || res.stdout}`);
-    process.exit(res.status);
+    process.exit(res.exitCode);
   } else {
     logger.debug(`Build succeeded:\n${res.stdout || res.stderr}`);
   }

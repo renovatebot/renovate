@@ -89,6 +89,7 @@
     "baset": "https://github.com/igmat/baset",
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
+    "bull-board": "https://github.com/felixmosh/bull-board",
     "cake": "https://github.com/cake-build/cake",
     "cake-issues": "https://github.com/cake-contrib/Cake.Issues",
     "capacitor": "https://github.com/ionic-team/capacitor",
@@ -733,6 +734,7 @@
     ],
     "yarn": "https://github.com/yarnpkg/berry",
     "zag-js": "https://github.com/chakra-ui/zag",
+    "zxcvbn-ts": "https://github.com/zxcvbn-ts/zxcvbn",
     "zxing-net": "https://github.com/micjahn/ZXing.Net"
   },
   "orgGroups": {

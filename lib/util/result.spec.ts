@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/only-throw-error */
 // TODO: fix, should only allow `Error` type
 
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '~test/util.ts';
 import { AsyncResult, Result } from './result.ts';
 
