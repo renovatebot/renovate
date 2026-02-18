@@ -20,7 +20,7 @@ import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization, removeAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
-import { fetch, stream } from './got.ts';
+import { fetch, normalize, stream } from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
 
 import { getQueue } from './queue.ts';
@@ -102,6 +102,7 @@ export abstract class HttpBase<
       { isMergeableObject: isPlainObject },
     );
   }
+
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
@@ -219,7 +220,9 @@ export abstract class HttpBase<
           }
 
           const queueMs = Date.now() - startTime;
-          return fetch(url, options, { queueMs });
+          return fetch(url, this._normalizeOptions(options), {
+            queueMs,
+          });
         } finally {
           releaseLock?.();
         }
@@ -271,6 +274,18 @@ export abstract class HttpBase<
 
       this.handleError(requestUrl, httpOptions, err);
     }
+  }
+
+  private _normalizeOptions<T extends Options>(options: T): T {
+    return normalize(options, this.extraOptions());
+  }
+
+  /**
+   * Returns Renovate extra options which needs to be removed before passing to got.
+   * @returns extra Renovate options.
+   */
+  protected extraOptions(): readonly string[] {
+    return ['baseUrl', 'cacheProvider', 'readOnly'] as (keyof HttpOptions)[];
   }
 
   protected processOptions(_url: URL, _options: InternalHttpOptions): void {
@@ -677,7 +692,7 @@ export abstract class HttpBase<
     }
     combinedOptions = applyAuthorization(combinedOptions);
 
-    return stream(resolvedUrl, combinedOptions);
+    return stream(resolvedUrl, this._normalizeOptions(combinedOptions));
   }
 
   async getToml<Schema extends ZodType<any, any, any>>(
