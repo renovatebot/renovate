@@ -322,6 +322,17 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     super(hostType, options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat([
+        'pageLimit',
+        'paginate',
+        'paginationField',
+        'repository',
+      ] as (keyof GithubHttpOptions)[]);
+  }
+
   protected override processOptions(
     url: URL,
     opts: InternalHttpOptions & GithubBaseHttpOptions,
