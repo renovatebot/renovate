@@ -220,7 +220,7 @@
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
     "glob": "13.0.2",
-    "global-agent": "3.0.0",
+    "global-agent": "4.1.2",
     "google-auth-library": "10.5.0",
     "got": "12.6.1",
     "graph-data-structure": "4.5.0",
