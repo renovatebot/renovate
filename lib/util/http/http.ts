@@ -18,7 +18,7 @@ import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
-import { applyAuthorization, removeAuthorization } from './auth.ts';
+import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
 import { fetch, normalize, stream } from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
@@ -142,10 +142,6 @@ export abstract class HttpBase<
     const isReadMethod = ['head', 'get'].includes(method);
 
     logger.trace(`HTTP request: ${method.toUpperCase()} ${url}`);
-
-    options.hooks = {
-      beforeRedirect: [removeAuthorization],
-    };
 
     applyDefaultHeaders(options);
 
