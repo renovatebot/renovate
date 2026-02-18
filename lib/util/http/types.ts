@@ -1,6 +1,6 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import type {
-  Options,
+  OptionsInit,
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
   OptionsOfTextResponseBody,
@@ -20,7 +20,7 @@ export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
 export type GotTextOptions = OptionsOfTextResponseBody & GotExtraOptions;
 export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
 
-export type GotStreamOptions = Options & GotExtraOptions;
+export type GotStreamOptions = OptionsInit & GotExtraOptions;
 
 /**
  * Renovate extra options.
