@@ -361,6 +361,24 @@ jobs:
       - name: Lint other
         run: pnpm lint-other
 
+  lint-actions:
+    needs:
+      - setup-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: false
+          sparse-checkout: .github/workflows
+
+      - name: Check workflow files
+        uses: docker://rhysd/actionlint:1.7.11@sha256:6f03470d0152251d7f07f7c4dc019dbe7024c72cd952f839544c7798843efa8f
+        with:
+          args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+
   test:
     needs: [setup, prefetch]
 
@@ -528,6 +546,7 @@ jobs:
       - test
       - codecov
       - coverage-threshold
+      - lint-actions
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -569,6 +588,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.coverage-threshold.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled Actions linting
+        if: |
+          needs.lint-actions.result == 'failure' ||
+          needs.lint-actions.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped Actions linting when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.lint-actions.result == 'skipped'
         run: exit 1
 
   build:
