@@ -25,7 +25,7 @@ RUN install-tool node 24.13.1
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.29.2
+RUN install-tool pnpm 10.29.3
 
 WORKDIR /usr/local/renovate
 
