@@ -912,3 +912,23 @@ jobs:
                 text:
                   type: "mrkdwn"
                   text: "*Release from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+
+  notify-docs-failure:
+    runs-on: ubuntu-latest
+    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.build-deploy-docs-site.result == 'failure' || needs.build-deploy-docs-site.result == 'timed_out') }}
+    needs:
+      - build-deploy-docs-site
+    steps:
+      - name: Post to Slack
+        id: slack
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
