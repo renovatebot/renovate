@@ -60,12 +60,13 @@ export async function initPlatform({
     throw new Error('Init: SCM-Manager API token not configured');
   }
 
-  setBaseUrl(endpoint);
+  const baseUrl = `${endpoint}/scm/api/v2`;
+  setBaseUrl(baseUrl);
 
   try {
     const me = await getCurrentUser(token);
     const gitAuthor = `${me.displayName} <${me.mail}>`;
-    const result = { endpoint, gitAuthor };
+    const result = { endpoint: baseUrl, gitAuthor };
 
     logger.debug({ result }, 'Platform result');
 

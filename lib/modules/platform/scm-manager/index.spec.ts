@@ -12,7 +12,8 @@ import type { PrFilterByState } from './types.ts';
 vi.mock('../util');
 vi.mock('../../../util/git');
 
-const endpoint = 'https://localhost:8080/scm/api/v2';
+const endpoint = 'https://localhost:8080';
+const baseUrl = `${endpoint}/scm/api/v2`;
 const token = 'TEST_TOKEN';
 
 const user: User = {
@@ -86,7 +87,7 @@ describe('modules/platform/scm-manager/index', () => {
     });
 
     it('should throw error, when token is invalid', async () => {
-      httpMock.scope(endpoint).get(`/me`).reply(401);
+      httpMock.scope(baseUrl).get(`/me`).reply(401);
 
       await expect(
         scmPlatform.initPlatform({ endpoint, token: 'invalid' }),
@@ -94,9 +95,9 @@ describe('modules/platform/scm-manager/index', () => {
     });
 
     it('should init platform', async () => {
-      httpMock.scope(endpoint).get('/me').reply(200, user);
+      httpMock.scope(baseUrl).get('/me').reply(200, user);
       expect(await scmPlatform.initPlatform({ endpoint, token })).toEqual({
-        endpoint,
+        endpoint: baseUrl,
         gitAuthor: 'Test User <test@user.de>',
       });
     });
@@ -110,11 +111,11 @@ describe('modules/platform/scm-manager/index', () => {
       GlobalConfig.set({ ignorePrAuthor: true });
 
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(`/repositories/${repository}`)
         .reply(200, repo);
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(`/config/git/${repository}/default-branch`)
         .reply(200, { defaultBranch: expectedDefaultBranch });
 
@@ -142,7 +143,7 @@ describe('modules/platform/scm-manager/index', () => {
   describe(scmPlatform.getRepos, () => {
     it('should return all available repos', async () => {
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(`/repositories?pageSize=1000000`)
         .reply(200, {
           page: 0,
@@ -167,7 +168,7 @@ describe('modules/platform/scm-manager/index', () => {
   describe(scmPlatform.getPrList, () => {
     it('should return empty array, because no PR could be found', async () => {
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -184,7 +185,7 @@ describe('modules/platform/scm-manager/index', () => {
 
     it('should return empty array, because API request failed', async () => {
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -210,7 +211,7 @@ describe('modules/platform/scm-manager/index', () => {
       ];
 
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -232,7 +233,7 @@ describe('modules/platform/scm-manager/index', () => {
   describe(scmPlatform.findPr, () => {
     it('search in Pull Request without explicitly setting the state as argument', async () => {
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -279,7 +280,7 @@ describe('modules/platform/scm-manager/index', () => {
         result: Pr | null;
       }) => {
         httpMock
-          .scope(endpoint)
+          .scope(baseUrl)
           .get(
             `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
           )
@@ -320,7 +321,7 @@ describe('modules/platform/scm-manager/index', () => {
         result: Pr | null;
       }) => {
         httpMock
-          .scope(endpoint)
+          .scope(baseUrl)
           .get(
             `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
           )
@@ -340,7 +341,7 @@ describe('modules/platform/scm-manager/index', () => {
   describe(scmPlatform.getPr, () => {
     it('should return null, because PR was not found', async () => {
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -353,7 +354,7 @@ describe('modules/platform/scm-manager/index', () => {
         });
 
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(404);
 
@@ -362,7 +363,7 @@ describe('modules/platform/scm-manager/index', () => {
 
     it('should return PR from cache', async () => {
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -381,7 +382,7 @@ describe('modules/platform/scm-manager/index', () => {
 
     it('should return fetched pr', async () => {
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -394,7 +395,7 @@ describe('modules/platform/scm-manager/index', () => {
         });
 
       httpMock
-        .scope(endpoint)
+        .scope(baseUrl)
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(200, pullRequest);
 
@@ -422,14 +423,14 @@ describe('modules/platform/scm-manager/index', () => {
         expectedIsDraft: boolean;
       }) => {
         httpMock
-          .scope(endpoint)
+          .scope(baseUrl)
           .post(`/pull-requests/${repo.namespace}/${repo.name}`)
           .reply(201, undefined, {
-            location: `${endpoint}/pull-requests/${repo.namespace}/${repo.name}/1337`,
+            location: `${baseUrl}/pull-requests/${repo.namespace}/${repo.name}/1337`,
           });
 
         httpMock
-          .scope(endpoint)
+          .scope(baseUrl)
           .get(`/pull-requests/${repo.namespace}/${repo.name}/1337`)
           .reply(200, {
             id: '1337',
@@ -491,14 +492,14 @@ describe('modules/platform/scm-manager/index', () => {
         body: string | undefined;
       }) => {
         httpMock
-          .scope(endpoint)
+          .scope(baseUrl)
           .get(
             `/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`,
           )
           .reply(200, pullRequest);
 
         httpMock
-          .scope(endpoint)
+          .scope(baseUrl)
           .put(`/pull-requests/${repo.namespace}/${repo.name}/1`)
           .reply(204);
 
