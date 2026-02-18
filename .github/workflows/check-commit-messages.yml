@@ -30,8 +30,8 @@ jobs:
 
             // Check each commit message for closing keywords
             const violatingCommits = [];
-            // Matches: closes #123, fixes #123, resolves #123, etc.
-            const closingPattern = /(closes|fixes|resolves|fixed|closed|resolved)\s+#\d+/i;
+            // Matches: closes #123, fixes #123, closes: #123, etc.
+            const closingPattern = /(closes|fixes|resolves|fixed|closed|resolved):?\s+#\d+/i;
 
             for (const commit of commits) {
               const message = commit.commit.message;
