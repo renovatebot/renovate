@@ -32,7 +32,9 @@ describe('modules/datasource/rpm/index', () => {
 
       await expect(
         rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow(`Response code 404 (Not Found)`);
+      ).rejects.toThrow(
+        `Request failed with status code 404 (Not Found): GET https://example.com/repo/repodata/repomd.xml`,
+      );
     });
 
     it('throws an error if http.getText fails', async () => {
@@ -192,7 +194,9 @@ describe('modules/datasource/rpm/index', () => {
 
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
-      ).rejects.toThrow(`Response code 404 (Not Found)`);
+      ).rejects.toThrow(
+        `Request failed with status code 404 (Not Found): GET https://example.com/repo/repodata/somesha256-primary.xml.gz`,
+      );
     });
 
     it('throws an error if response.body is empty', async () => {
