@@ -603,8 +603,8 @@ importers:
         specifier: 25.0.3
         version: 25.0.3(typescript@5.9.3)
       tar:
-        specifier: 7.5.7
-        version: 7.5.7
+        specifier: 7.5.8
+        version: 7.5.8
       tmp-promise:
         specifier: 3.0.3
         version: 3.0.3
@@ -12761,7 +12761,7 @@ snapshots:
       nopt: 9.0.0
       proc-log: 6.1.0
       semver: 7.7.4
-      tar: 7.5.7
+      tar: 7.5.8
       tinyglobby: 0.2.15
       which: 6.0.0
     transitivePeerDependencies:
