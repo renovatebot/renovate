@@ -2,8 +2,8 @@
 import './legacy.ts';
 
 import { isNumber } from '@sindresorhus/is';
-import type { Options } from 'got';
-import _got, { RequestError } from 'got';
+import type { OptionsInit } from 'got';
+import { RequestError, got } from 'got';
 import type { SetRequired } from 'type-fest';
 import { logger } from '../../logger/index.ts';
 import { clone } from '../clone.ts';
@@ -19,8 +19,6 @@ import {
 } from './types.ts';
 
 export { RequestError } from 'got';
-
-const got = _got as unknown as typeof _got.default;
 
 type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
 
@@ -68,7 +66,7 @@ export async function fetch(
 
 export function stream(
   url: string,
-  options: Omit<Options, 'isStream'>,
+  options: Omit<OptionsInit, 'isStream'>,
 ): NodeJS.ReadableStream {
   return got.stream(url, options);
 }
@@ -78,7 +76,7 @@ export function stream(
  * @param options options to normalize
  * @returns normalized got options
  */
-export function normalize<T extends Options = Options>(
+export function normalize<T extends OptionsInit = OptionsInit>(
   options: T,
   keysToRemove: readonly string[],
 ): T {

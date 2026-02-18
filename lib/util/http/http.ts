@@ -1,6 +1,6 @@
 import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
-import type { Options, RetryObject } from 'got';
+import type { Options, OptionsInit, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
 import type { z } from 'zod/v3';
 import { ZodType } from 'zod/v3';
@@ -62,7 +62,7 @@ export interface InternalHttpOptions extends HttpOptions {
   parseJson?: Options['parseJson'];
 }
 
-export function applyDefaultHeaders(options: Options): void {
+export function applyDefaultHeaders(options: OptionsInit): void {
   const renovateVersion = pkg.version;
   options.headers = {
     ...options.headers,
@@ -272,7 +272,7 @@ export abstract class HttpBase<
     }
   }
 
-  private _normalizeOptions<T extends Options>(options: T): T {
+  private _normalizeOptions<T extends OptionsInit>(options: T): T {
     return normalize(options, this.extraOptions());
   }
 

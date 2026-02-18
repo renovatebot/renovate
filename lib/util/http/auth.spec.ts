@@ -6,8 +6,7 @@ describe('util/http/auth', () => {
     it('does nothing', () => {
       const opts: GotOptions = {
         headers: { authorization: 'token' },
-        hostname: 'amazon.com',
-        href: 'https://amazon.com',
+        url: 'https://amazon.com',
       };
 
       applyAuthorization(opts);
@@ -17,8 +16,7 @@ describe('util/http/auth', () => {
           "headers": {
             "authorization": "token",
           },
-          "hostname": "amazon.com",
-          "href": "https://amazon.com",
+          "url": "https://amazon.com",
         }
       `);
     });
