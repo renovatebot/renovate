@@ -1,4 +1,4 @@
-import { ZodError, z } from 'zod';
+import { ZodError, z } from 'zod/v3';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import {
