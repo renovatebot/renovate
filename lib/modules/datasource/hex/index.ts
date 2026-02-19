@@ -123,7 +123,7 @@ export class HexDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore if -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -157,7 +157,7 @@ export class HexDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore if -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -278,7 +278,7 @@ export class HexDatasource extends Datasource {
     const isDefault = HexDatasource.isDefaultRegistry(config.registryUrl);
     const key = isDefault
       ? config.packageName
-      : `${config.registryUrl}/${config.packageName}`;
+      : `${config.registryUrl}:${config.packageName}`;
 
     return withCache(
       {
