@@ -124,6 +124,7 @@ export class GerritScm extends DefaultGitScm {
       typeof commit.message === 'string' ? [commit.message] : commit.message;
 
     // In Gerrit, the change subject/title is the first line of the commit message
+    // v8 ignore else -- TODO: add test #40625
     if (commit.prTitle) {
       const firstMessageLines = message[0].split('\n');
       firstMessageLines[0] = commit.prTitle;
@@ -166,6 +167,7 @@ export class GerritScm extends DefaultGitScm {
           files: commit.files,
           pushOptions,
         });
+        // v8 ignore else -- TODO: add test #40625
         if (pushResult) {
           return commitSha;
         }

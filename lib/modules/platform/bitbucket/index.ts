@@ -557,13 +557,14 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
       filters.push(`reporter.uuid="${renovateUserUuid}"`);
     }
     const filter = encodeURIComponent(filters.join(' AND '));
+    // v8 ignore next -- TODO: add test #40625
     return (
       (
         await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
           { cacheProvider: aggressiveRepoCacheProvider },
         )
-      ).body.values /* v8 ignore next */ || []
+      ).body.values || []
     );
   } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error finding issues');

@@ -53,7 +53,6 @@ export const GithubVulnerabilityAlert = LooseArray(
     }),
   }),
   {
-    /* v8 ignore next */
     onError: ({ error }) => {
       logger.debug(
         { error },

@@ -127,6 +127,7 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
     const re = regEx(/^Renovate-Branch: (.+)$/m);
     const currentRevision = change.revisions![change.current_revision];
     const message = currentRevision.commit_with_footers;
+    // v8 ignore else -- TODO: add test #40625
     if (message) {
       sourceBranch = re.exec(message)?.[1];
     }
