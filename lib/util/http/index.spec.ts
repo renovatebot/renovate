@@ -40,7 +40,7 @@ describe('util/http/index', () => {
   it('returns 429 error', async () => {
     httpMock.scope(baseUrl).get('/test').reply(429);
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      'Response code 429 (Too Many Requests)',
+      'Request failed with status code 429 (Too Many Requests): GET http://renovate.com/test',
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -65,7 +65,7 @@ describe('util/http/index', () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      'Response code 404 (Not Found)',
+      'Request failed with status code 404 (Not Found): GET http://renovate.com/test',
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
