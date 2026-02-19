@@ -74,4 +74,25 @@ describe('modules/manager/cake/index', () => {
       ],
     });
   });
+
+  it('skips invalid entries in InstallTools', () => {
+    const content = codeBlock`
+    #:sdk Cake.Sdk
+
+    // One invalid and one valid tool entry
+    InstallTools(
+      "dotnet:bad uri",
+      "dotnet:?package=Good.Tool&version=1.2.3"
+    );
+    `;
+    expect(extractPackageFile(content)).toMatchObject({
+      deps: [
+        {
+          depName: 'Good.Tool',
+          currentValue: '1.2.3',
+          datasource: 'nuget',
+        },
+      ],
+    });
+  });
 });
