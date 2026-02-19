@@ -26,10 +26,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
-
 env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
@@ -48,6 +44,10 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
@@ -132,6 +132,10 @@ jobs:
   setup-build:
     runs-on: ubuntu-latest
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     outputs:
       node-version: ${{ steps.setup-outputs.outputs.node-version }}
 
@@ -157,6 +161,10 @@ jobs:
 
   prefetch:
     needs: [setup]
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
 
     # We can't check `needs.setup.outputs.os-matrix-is-full` here,
     # as it will lead to further complications that aren't solvable
@@ -200,6 +208,10 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout code
@@ -245,6 +257,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -287,6 +303,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -319,6 +339,10 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout code
@@ -367,6 +391,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -381,6 +409,10 @@ jobs:
 
   test:
     needs: [setup, prefetch]
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
 
     if: |
       !(github.event.pull_request.draft == true &&
@@ -471,6 +503,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     permissions:
       id-token: write # required for codecov OIDC
 
@@ -504,6 +541,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: success() && github.event.pull_request.draft != true
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -550,6 +592,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Fail for failed or cancelled tests
         if: |
@@ -609,6 +656,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: github.event.pull_request.draft != true
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -637,6 +689,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - run: df -h
 
@@ -687,6 +744,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event.pull_request.draft != true
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -735,6 +797,10 @@ jobs:
     timeout-minutes: 7
 
     if: github.event.pull_request.draft != true
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout code
@@ -868,6 +934,10 @@ jobs:
       - setup-build
       - release
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     permissions:
       pages: write
       id-token: write
@@ -933,6 +1003,11 @@ jobs:
     if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.release.result == 'failure' || needs.release.result == 'timed_out') }}
     needs:
       - release
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Post to Slack
         id: slack
@@ -953,6 +1028,11 @@ jobs:
     if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.build-deploy-docs-site.result == 'failure' || needs.build-deploy-docs-site.result == 'timed_out') }}
     needs:
       - build-deploy-docs-site
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Post to Slack
         id: slack
