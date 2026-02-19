@@ -22,12 +22,22 @@ export { RequestError } from 'got';
 
 type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
 
+export function configureRejectUnauth(options: OptionsInit): void {
+  if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+    logger.once.warn(
+      'NODE_TLS_REJECT_UNAUTHORIZED=0 found, this is strongly discouraged.',
+    );
+    options.https = { ...options.https, rejectUnauthorized: false };
+  }
+}
+
 export async function fetch(
   url: string,
   options: SetRequired<GotOptions, 'method'>,
   queueStats: QueueStatsData,
 ): Promise<HttpResponse<unknown>> {
   logger.trace({ url, options }, 'got request');
+  configureRejectUnauth(options);
 
   let duration = 0;
   let statusCode = 0;
@@ -68,6 +78,7 @@ export function stream(
   url: string,
   options: Omit<OptionsInit, 'isStream'>,
 ): NodeJS.ReadableStream {
+  configureRejectUnauth(options);
   return got.stream(url, options);
 }
 
