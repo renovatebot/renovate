@@ -25,7 +25,7 @@ type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
 export function configureRejectUnauth(options: OptionsInit): void {
   if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
     logger.once.warn(
-      'NODE_TLS_REJECT_UNAUTHORIZED=0 found, this is strongly discuraged.',
+      'NODE_TLS_REJECT_UNAUTHORIZED=0 found, this is strongly discouraged.',
     );
     options.https = { ...options.https, rejectUnauthorized: false };
   }
