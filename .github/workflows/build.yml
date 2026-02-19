@@ -127,7 +127,7 @@ jobs:
           FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
-          echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          pnpm -s schedule-test-shards >> "$GITHUB_OUTPUT"
 
   setup-build:
     runs-on: ubuntu-latest
@@ -361,6 +361,24 @@ jobs:
       - name: Lint other
         run: pnpm lint-other
 
+  lint-actions:
+    needs:
+      - setup-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: false
+          sparse-checkout: .github/workflows
+
+      - name: Check workflow files
+        uses: docker://rhysd/actionlint:1.7.11@sha256:6f03470d0152251d7f07f7c4dc019dbe7024c72cd952f839544c7798843efa8f
+        with:
+          args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+
   test:
     needs: [setup, prefetch]
 
@@ -516,10 +534,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --statements 99.86 \
-            --branches 97.53 \
-            --functions 99.94 \
-            --lines 99.85 \
+            --statements 99.88 \
+            --branches 97.84 \
+            --functions 99.96 \
+            --lines 99.87 \
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -528,6 +546,7 @@ jobs:
       - test
       - codecov
       - coverage-threshold
+      - lint-actions
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -569,6 +588,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.coverage-threshold.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled Actions linting
+        if: |
+          needs.lint-actions.result == 'failure' ||
+          needs.lint-actions.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped Actions linting when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.lint-actions.result == 'skipped'
         run: exit 1
 
   build:
@@ -832,7 +864,9 @@ jobs:
 
   build-deploy-docs-site:
     if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}
-    needs: release
+    needs:
+      - setup-build
+      - release
 
     permissions:
       pages: write
@@ -869,7 +903,7 @@ jobs:
         id: latest_release
         run: |
           latest_release=$(gh release view --json tagName -q .tagName)
-          echo "release_tag=$latest_release" >> $GITHUB_OUTPUT
+          echo "release_tag=$latest_release" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -891,6 +925,7 @@ jobs:
           path: tools/mkdocs/site
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
   notify-release-failure:
@@ -912,3 +947,23 @@ jobs:
                 text:
                   type: "mrkdwn"
                   text: "*Release from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+
+  notify-docs-failure:
+    runs-on: ubuntu-latest
+    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.build-deploy-docs-site.result == 'failure' || needs.build-deploy-docs-site.result == 'timed_out') }}
+    needs:
+      - build-deploy-docs-site
+    steps:
+      - name: Post to Slack
+        id: slack
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"

@@ -100,6 +100,19 @@ describe('logger/once', () => {
       expect(debug).toHaveBeenNthCalledWith(3, 'baz');
     });
 
+    it('only the line number is taken into account when de-duplicating calls', () => {
+      const debug = vi.spyOn(logger, 'debug');
+
+      function doSomething(s: string) {
+        // the `once` call is only based on what file+line the function is called from, so this will only be called the first time, regardless of parameters
+        logger.once.debug({ param: s }, s);
+      }
+
+      doSomething('foo');
+      doSomething('bar');
+      expect(debug).toHaveBeenCalledExactlyOnceWith({ param: 'foo' }, 'foo');
+    });
+
     it('allows mixing single-time and regular logging', () => {
       const debug = vi.spyOn(logger, 'debug');
 

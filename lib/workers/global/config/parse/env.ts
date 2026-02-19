@@ -1,4 +1,4 @@
-import { isArray } from '@sindresorhus/is';
+import { isArray, isNonEmptyString } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
@@ -117,6 +117,9 @@ function massageConvertedExperimentalVars(
       // special case to use a more consistent prefix with other `repositoryCache` options
       if (key === 'RENOVATE_X_REPO_CACHE_FORCE_LOCAL') {
         newKey = 'RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL';
+        if (isNonEmptyString(env[key])) {
+          env[key] = 'true';
+        }
       }
 
       result[newKey] = env[key];
@@ -167,8 +170,13 @@ export async function getConfig(
       }
     } else {
       const coerce = coersions[option.type];
-      // @ts-expect-error -- type can't be narrowed
-      config[option.name] = coerce(envVal);
+      try {
+        // @ts-expect-error -- type can't be narrowed
+        config[option.name] = coerce(envVal);
+      } catch (e) {
+        throw new Error(`${envName} was invalid: ${e}`);
+      }
+
       if (option.name === 'dryRun') {
         if ((config[option.name] as string) === 'true') {
           logger.warn('env config dryRun property has been changed to full');

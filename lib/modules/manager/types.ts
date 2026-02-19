@@ -60,8 +60,9 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy?: RangeStrategy;
 }
 
-export interface PackageFileContent<T = Record<string, any>>
-  extends ManagerData<T> {
+export interface PackageFileContent<
+  T = Record<string, any>,
+> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
@@ -77,8 +78,9 @@ export interface PackageFileContent<T = Record<string, any>>
   fileFormat?: string;
 }
 
-export interface PackageFile<T = Record<string, any>>
-  extends PackageFileContent<T> {
+export interface PackageFile<
+  T = Record<string, any>,
+> extends PackageFileContent<T> {
   packageFile: string;
 }
 
@@ -129,8 +131,9 @@ export interface LookupUpdate {
  * @property {string} depName - Display name of the package. See #16012
  * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
  */
-export interface PackageDependency<T = Record<string, any>>
-  extends ManagerData<T> {
+export interface PackageDependency<
+  T = Record<string, any>,
+> extends ManagerData<T> {
   currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
@@ -330,8 +333,7 @@ export type ManagerApi = ManagerApiBase &
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig<T = Record<string, any>>
-  extends Record<string, any>,
-    ManagerData<T> {
+  extends Record<string, any>, ManagerData<T> {
   // TODO: remove null
   constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
