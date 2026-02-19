@@ -1,4 +1,4 @@
-import { isArray } from '@sindresorhus/is';
+import { isArray, isNonEmptyString } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
@@ -117,6 +117,9 @@ function massageConvertedExperimentalVars(
       // special case to use a more consistent prefix with other `repositoryCache` options
       if (key === 'RENOVATE_X_REPO_CACHE_FORCE_LOCAL') {
         newKey = 'RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL';
+        if (isNonEmptyString(env[key])) {
+          env[key] = 'true';
+        }
       }
 
       result[newKey] = env[key];

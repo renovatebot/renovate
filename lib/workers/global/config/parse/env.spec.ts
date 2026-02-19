@@ -314,7 +314,8 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
         RENOVATE_X_S3_ENDPOINT: 'endpoint',
         RENOVATE_X_S3_PATH_STYLE: 'true',
-        RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'true',
+        // NOTE that a non-empty string is treated as `true`
+        RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'enabled',
       };
       const config = await env.getConfig(envParam);
       expect(config).toMatchObject({
