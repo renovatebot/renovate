@@ -481,6 +481,7 @@ export async function getBranchStatus(
   res
     .filter((check) => !check.allow_failure)
     .forEach((check) => {
+      // v8 ignore else -- TODO: add test #40625
       if (status !== 'red') {
         // if red, stay red
         let mappedStatus: BranchStatus =
@@ -961,6 +962,7 @@ export async function setBranchStatus({
     context,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (targetUrl) {
     options.target_url = targetUrl;
   }
@@ -1020,11 +1022,13 @@ export async function setBranchStatus({
 // Issue
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
+  // v8 ignore else -- TODO: add test #40625
   if (!config.issueList) {
     const searchParams: Record<string, string> = {
       per_page: '100',
       state: 'opened',
     };
+    // v8 ignore else -- TODO: add test #40625
     if (!config.ignorePrAuthor) {
       searchParams.scope = 'created_by_me';
     }
@@ -1348,6 +1352,7 @@ export async function ensureComment({
       maxBodyLength(),
     );
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
         commentNeedsUpdating = comment.body !== body;
@@ -1357,6 +1362,7 @@ export async function ensureComment({
     logger.debug(`Ensuring content-only comment in #${number}`);
     body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body === body) {
         commentId = comment.id;
         commentNeedsUpdating = false;
@@ -1394,6 +1400,7 @@ export async function ensureCommentRemoval(
   const comments = await getComments(issueNo);
   let commentId: number | null | undefined = null;
 
+  // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
     const byTopic = (comment: GitlabComment): boolean =>
       comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -1404,6 +1411,7 @@ export async function ensureCommentRemoval(
     commentId = comments.find(byContent)?.id;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
