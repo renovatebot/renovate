@@ -1,7 +1,7 @@
-import { createClient, createCluster } from 'redis';
+import { createClient, createCluster } from '@redis/client';
 import { init, normalizeRedisUrl } from './redis.ts';
 
-vi.mock('redis');
+vi.mock('@redis/client');
 
 describe('util/cache/package/redis', () => {
   describe('normalizeRedisUrl', () => {

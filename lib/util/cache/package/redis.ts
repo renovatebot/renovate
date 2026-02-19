@@ -1,6 +1,6 @@
+import type { RedisClusterOptions } from '@redis/client';
+import { createClient, createCluster } from '@redis/client';
 import { DateTime } from 'luxon';
-import type { RedisClusterOptions } from 'redis';
-import { createClient, createCluster } from 'redis';
 import { logger } from '../../../logger/index.ts';
 import { compressToBase64, decompressFromBase64 } from '../../compress.ts';
 import { regEx } from '../../regex.ts';
