@@ -1,3 +1,4 @@
+import type { DateTime } from 'luxon';
 import type { MergeStrategy } from '../../config/types.ts';
 import type {
   BranchStatus,
@@ -329,6 +330,7 @@ export interface PlatformScm {
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
+  getBranchUpdateDate(branchName: string): Promise<DateTime | null>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;

@@ -1,4 +1,5 @@
 import { glob } from 'glob';
+import type { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { rawExec } from '../../../util/exec/common.ts';
 import type {
@@ -25,6 +26,9 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve(true);
   }
   getBranchCommit(_branchName: string): Promise<LongCommitSha | null> {
+    return Promise.resolve(null);
+  }
+  getBranchUpdateDate(_branchName: string): Promise<DateTime | null> {
     return Promise.resolve(null);
   }
   deleteBranch(_branchName: string): Promise<void> {
