@@ -1,4 +1,5 @@
 import { isPlainObject } from '@sindresorhus/is';
+import { getChildEnv } from '../util/exec/utils.ts';
 import type { InterpolatorOptions } from '../util/interpolator.ts';
 import {
   replaceInterpolatedValuesInObject,
@@ -12,8 +13,12 @@ const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);
 const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`, 'g');
 const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`, 'g');
+const envTemplateRegex = regEx(`{{ env\\.(${namePattern}) }}`, 'g');
 
-export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
+export const options: Record<
+  'secrets' | 'variables' | 'env',
+  InterpolatorOptions
+> = {
   secrets: {
     name: 'secrets',
     nameRegex,
@@ -23,6 +28,11 @@ export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
     name: 'variables',
     nameRegex,
     templateRegex: variableTemplateRegex,
+  },
+  env: {
+    name: 'env',
+    nameRegex,
+    templateRegex: envTemplateRegex,
   },
 };
 
@@ -79,10 +89,19 @@ export function applySecretsAndVariablesToConfig(
     deleteVariables,
   );
 
-  return replaceInterpolatedValuesInObject(
+  const configWithSecrets = replaceInterpolatedValuesInObject(
     configWithVars,
     secrets ?? {},
     options.secrets,
     deleteSecrets,
+  );
+
+  // Also resolve {{ env.X }} patterns using the merged environment
+  // (process.env filtered + customEnvVariables + userEnv)
+  return replaceInterpolatedValuesInObject(
+    configWithSecrets,
+    getChildEnv({}),
+    options.env,
+    false,
   );
 }
