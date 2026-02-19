@@ -30,7 +30,7 @@ import type {
   Vulnerability,
 } from './types.ts';
 
-const { fromVector } = _aeCvss as unknown as typeof _aeCvss.default;
+const { fromVector } = (_aeCvss as any).default;
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
