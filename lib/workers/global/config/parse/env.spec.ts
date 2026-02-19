@@ -28,7 +28,7 @@ describe('workers/global/config/parse/env', () => {
       };
       await expect(env.getConfig(envParam)).rejects.toThrow(
         Error(
-          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'",
+          "RENOVATE_CONFIG_MIGRATION was invalid: Error: Invalid boolean value: expected 'true' or 'false', but got 'badvalue'",
         ),
       );
     });

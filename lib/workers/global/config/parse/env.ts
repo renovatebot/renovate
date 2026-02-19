@@ -167,8 +167,13 @@ export async function getConfig(
       }
     } else {
       const coerce = coersions[option.type];
-      // @ts-expect-error -- type can't be narrowed
-      config[option.name] = coerce(envVal);
+      try {
+        // @ts-expect-error -- type can't be narrowed
+        config[option.name] = coerce(envVal);
+      } catch (e) {
+        throw new Error(`${envName} was invalid: ${e}`);
+      }
+
       if (option.name === 'dryRun') {
         if ((config[option.name] as string) === 'true') {
           logger.warn('env config dryRun property has been changed to full');
