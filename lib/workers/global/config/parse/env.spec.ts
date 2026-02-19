@@ -331,6 +331,14 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
+    it('does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_X_REPO_CACHE_FORCE_LOCAL: '',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.repositoryCacheForceLocal).toBeUndefined();
+    });
+
     describe('RENOVATE_CONFIG tests', () => {
       let processExit: MockInstance<(code?: number | string | null) => never>;
 
