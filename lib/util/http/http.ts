@@ -314,6 +314,7 @@ export abstract class HttpBase<
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !isHttpUrl(parsedUrl)) {
+    } else if (!parsedUrl) {
       logger.error(
         { url: requestUrl, baseUrl, resolvedUrl: url },
         'Request Error: cannot parse url',
