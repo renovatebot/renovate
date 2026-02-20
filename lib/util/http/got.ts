@@ -6,7 +6,6 @@ import type { OptionsInit } from 'got';
 import { RequestError, got } from 'got';
 import type { SetRequired } from 'type-fest';
 import { logger } from '../../logger/index.ts';
-import { clone } from '../clone.ts';
 import { coerceNumber } from '../number.ts';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats.ts';
 import { coerceString } from '../string.ts';
@@ -91,7 +90,8 @@ export function normalize<T extends OptionsInit = OptionsInit>(
   options: T,
   keysToRemove: readonly string[],
 ): T {
-  const opts = clone(options);
+  // flat copy to void mutating the original options object
+  const opts = { ...options };
 
   for (const key of [...GotExtraOptionKeys, ...keysToRemove]) {
     // @ts-expect-error -- delete extra options before passing to got
@@ -99,11 +99,9 @@ export function normalize<T extends OptionsInit = OptionsInit>(
   }
 
   // optimize options for got v12+
-  const normalizedOptions = opts as unknown as T;
-
   if (isNumber(opts.timeout)) {
-    normalizedOptions.timeout = { request: opts.timeout };
+    opts.timeout = { request: opts.timeout };
   }
 
-  return normalizedOptions;
+  return opts;
 }
