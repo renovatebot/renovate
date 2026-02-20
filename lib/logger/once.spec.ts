@@ -13,7 +13,7 @@ describe('logger/once', () => {
       const innerFn = vi.fn();
 
       function outerFn() {
-        once(innerFn);
+        once(innerFn, undefined, '');
       }
 
       outerFn();
@@ -27,8 +27,8 @@ describe('logger/once', () => {
       const innerFn2 = vi.fn();
 
       function outerFn() {
-        once(innerFn1);
-        once(innerFn2);
+        once(innerFn1, undefined, '');
+        once(innerFn2, undefined, '');
       }
 
       outerFn();
@@ -42,7 +42,7 @@ describe('logger/once', () => {
       const innerFn = vi.fn();
 
       function outerFn() {
-        once(innerFn);
+        once(innerFn, undefined, '');
       }
 
       outerFn();
@@ -100,17 +100,23 @@ describe('logger/once', () => {
       expect(debug).toHaveBeenNthCalledWith(3, 'baz');
     });
 
-    it('only the line number is taken into account when de-duplicating calls', () => {
+    it('parameters are taken into account when de-duplicating calls', () => {
       const debug = vi.spyOn(logger, 'debug');
 
       function doSomething(s: string) {
         // the `once` call is only based on what file+line the function is called from, so this will only be called the first time, regardless of parameters
         logger.once.debug({ param: s }, s);
+        logger.once.debug(s);
       }
 
       doSomething('foo');
       doSomething('bar');
-      expect(debug).toHaveBeenCalledExactlyOnceWith({ param: 'foo' }, 'foo');
+      doSomething('bar');
+      expect(debug).toHaveBeenNthCalledWith(1, { param: 'foo' }, 'foo');
+      expect(debug).toHaveBeenNthCalledWith(2, 'foo');
+      expect(debug).toHaveBeenNthCalledWith(3, { param: 'bar' }, 'bar');
+      expect(debug).toHaveBeenNthCalledWith(4, 'bar');
+      expect(debug).toHaveBeenLastCalledWith('bar');
     });
 
     it('allows mixing single-time and regular logging', () => {
