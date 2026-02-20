@@ -6,13 +6,14 @@ import {
 } from 'emojibase';
 import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
-import { z } from 'zod';
-import type { RenovateConfig } from '../config/types';
-import dataFiles from '../data-files.generated';
-import { logger } from '../logger';
-import { regEx } from './regex';
-import { Result } from './result';
-import { Json } from './schema-utils';
+import { z } from 'zod/v3';
+import type { RenovateConfig } from '../config/types.ts';
+import dataFiles from '../data-files.generated.ts';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
+import { Result } from './result.ts';
+import { Json } from './schema-utils/index.ts';
+import { coerceString } from './string.ts';
 
 let unicodeEmoji = true;
 
@@ -30,6 +31,7 @@ type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodes>;
 
 const patchedEmojis: EmojiShortcodeMapping = {
   '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
+  '2139-FE0F': ['information_source'], // Colorful info (ℹ️) instead of black and white (ℹ)
 };
 
 function initMapping(mapping: EmojiShortcodeMapping): void {
@@ -70,7 +72,10 @@ export function setEmojiConfig(config: RenovateConfig): void {
   unicodeEmoji = !!config.unicodeEmoji;
 }
 
-const shortCodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
+const shortCodeRegex = regEx(
+  (SHORTCODE_REGEX as unknown as RegExp).source,
+  'g',
+);
 
 export function emojify(text: string): string {
   if (!unicodeEmoji) {
@@ -86,7 +91,7 @@ export function emojify(text: string): string {
 }
 
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
-  ({ source }) => source,
+  (r) => (r as RegExp).source,
 );
 const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12875 cannot figure it out
 const excludedModifiers = new Set([
@@ -120,7 +125,7 @@ export function unemojify(text: string): string {
   return text.replace(emojiRegex, (emoji) => {
     const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
     const shortCode = shortCodesByHex.get(hexCode);
-    return shortCode ?? /* istanbul ignore next */ '�';
+    return coerceString(shortCode, '�');
   });
 }
 

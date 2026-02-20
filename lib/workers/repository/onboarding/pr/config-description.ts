@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import { emojify } from '../../../../util/emoji';
-import { getDefaultConfigFileName } from '../common';
+import { isArray, isString } from '@sindresorhus/is';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { getDefaultConfigFileName } from '../common.ts';
 
 export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
@@ -23,15 +23,14 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
 function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
-  const desc = is.array(config.description, is.string)
-    ? config.description
-    : [];
+  const desc = isArray(config.description, isString) ? config.description : [];
   return desc.concat(getScheduleDesc(config));
 }
 
 export function getConfigDesc(
   config: RenovateConfig,
-  packageFiles?: Record<string, PackageFile[]>,
+  // TODO: remove unused parameter
+  _packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
   const configFile = getDefaultConfigFileName(config);

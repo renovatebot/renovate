@@ -1,9 +1,9 @@
-import type { lexer, parser } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
-import { qApplyFrom } from './apply-from';
-import { qAssignments } from './assignments';
+import type { lexer, parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
+import { qApplyFrom } from './apply-from.ts';
+import { qAssignments } from './assignments.ts';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
@@ -13,9 +13,9 @@ import {
   qVersion,
   storeInTokenMap,
   storeVarToken,
-} from './common';
-import { handleRegistryContent, handleRegistryUrl } from './handlers';
-import { qPlugins } from './plugins';
+} from './common.ts';
+import { handleRegistryContent, handleRegistryUrl } from './handlers.ts';
+import { qPlugins } from './plugins.ts';
 
 const cleanupTmpContentSpec = (ctx: Ctx): Ctx => {
   ctx.tmpRegistryContent = [];

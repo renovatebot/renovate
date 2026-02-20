@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { isSemVerXRange } from '../semver/common';
-import type { NewValueConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isSemVerXRange } from '../semver/common.ts';
+import type { NewValueConfig } from '../types.ts';
 
 const {
   inc: increment,
@@ -152,7 +152,7 @@ export function getNewValue({
       return semverUtils
         .parseRange(currentValue)
         .map((x) => x.semver)
-        .filter(is.string)
+        .filter(isString)
         .map((subRange) => {
           const bumpedSubRange = getNewValue({
             currentValue: subRange,

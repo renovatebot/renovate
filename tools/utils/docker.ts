@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'os';
-import { setTimeout } from 'timers/promises';
 import type { SemVer } from 'semver';
-import { logger } from '../../lib/logger';
-import { toMs } from '../../lib/util/pretty-time';
-import { exec } from './exec';
+import { setTimeout } from 'timers/promises';
+import { logger } from '../../lib/logger/index.ts';
+import { toMs } from '../../lib/util/pretty-time.ts';
+import { exec } from './exec.ts';
 
 const file = 'tools/docker/bake.hcl';
 const tmp = fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));
@@ -40,7 +40,7 @@ export async function bake(
   }
 
   if (opts.channel) {
-    process.env.CHANNEL = opts.channel;
+    process.env.CHANNEL = opts.channel.replace('maint/', '');
   }
 
   const metadataFile = path.join(await tmp, 'metadata.json');
@@ -70,7 +70,7 @@ export async function bake(
     if (result.signal) {
       logger.error(`Signal received: ${result.signal}`);
       process.exit(-1);
-    } else if (result.status && result.status !== 0) {
+    } else if (result.exitCode) {
       if (tries > 0) {
         logger.debug(`Error occured:\n ${result.stderr}`);
         const delay = opts.delay ? toMs(opts.delay) : null;
@@ -81,7 +81,7 @@ export async function bake(
       } else {
         logger.error(`Error occured:\n${result.stderr}`);
         if (opts.exitOnError !== false) {
-          process.exit(result.status);
+          process.exit(result.exitCode);
         }
         return null;
       }
@@ -109,10 +109,10 @@ export function sign(
   if (result.signal) {
     logger.error(`Signal received: ${result.signal}`);
     process.exit(-1);
-  } else if (result.status && result.status !== 0) {
+  } else if (result.exitCode) {
     logger.error(`Error occured:\n${result.stderr}`);
     if (opts.exitOnError !== false) {
-      process.exit(result.status);
+      process.exit(result.exitCode);
     }
   } else {
     logger.debug(`Succeeded:\n${result.stdout || result.stderr}`);

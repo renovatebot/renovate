@@ -1,7 +1,7 @@
-import type { PackageFile } from '../../../../modules/manager/types';
-import { getConfigDesc } from './config-description';
-import type { RenovateConfig } from '~test/util';
-import { partial } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { getConfigDesc } from './config-description.ts';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {
@@ -35,7 +35,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
 
     it('assignees, labels and schedule', () => {
       delete config.description;
-      config.packageFiles = [];
       config.assignees = ['someone', '@someone-else'];
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];

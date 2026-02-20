@@ -1,7 +1,7 @@
-import type { MaybePromise, RangeStrategy } from '../../types';
-import managers from './api';
-import { customManagerList, isCustomManager } from './custom';
-import customManagers from './custom/api';
+import type { MaybePromise, RangeStrategy } from '../../types/index.ts';
+import managers from './api.ts';
+import customManagers from './custom/api.ts';
+import { customManagerList, isCustomManager } from './custom/index.ts';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
@@ -9,8 +9,9 @@ import type {
   PackageFile,
   PackageFileContent,
   RangeConfig,
-} from './types';
-export { hashMap } from './fingerprint.generated';
+} from './types.ts';
+
+export { hashMap } from './fingerprint.generated.ts';
 
 const managerList = Array.from(managers.keys()); // does not include custom managers
 export const getManagerList = (): string[] => managerList;
@@ -100,7 +101,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return 'update-lockfile';
   }
 
-  return config.rangeStrategy;
+  return config.rangeStrategy!;
 }
 
 export function isKnownManager(mgr: string): boolean {

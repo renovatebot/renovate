@@ -1,13 +1,13 @@
-import * as versionings from '../../../modules/versioning';
-import { matchRegexOrGlob } from '../../../util/string-match';
-import { presets } from './workarounds';
+import * as versionings from '../../../modules/versioning/index.ts';
+import { matchRegexOrGlob } from '../../../util/string-match.ts';
+import { presets } from './workarounds.preset.ts';
 
 describe('config/presets/internal/workarounds', () => {
   describe('bitnamiDockerImageVersioning', () => {
     const preset = presets.bitnamiDockerImageVersioning;
     const packageRule = preset.packageRules![0];
 
-    const versioning = versionings.get(packageRule.versioning as string);
+    const versioning = versionings.get(packageRule.versioning);
     const matchCurrentValue = packageRule.matchCurrentValue!;
 
     it.each`
@@ -41,13 +41,39 @@ describe('config/presets/internal/workarounds', () => {
     });
   });
 
+  describe('clamavDockerImageVersioning', () => {
+    const preset = presets.clamavDockerImageVersioning;
+    const packageRule = preset.packageRules![0];
+    const versioning = versionings.get(packageRule.versioning);
+
+    it.each`
+      input              | expected
+      ${'latest'}        | ${false}
+      ${'latest_base'}   | ${false}
+      ${'stable'}        | ${false}
+      ${'stable_base'}   | ${false}
+      ${'unstable'}      | ${false}
+      ${'unstable_base'} | ${false}
+      ${'20'}            | ${false}
+      ${'20_base'}       | ${false}
+      ${'1.24'}          | ${true}
+      ${'1.24_base'}     | ${true}
+      ${'1.24.0'}        | ${true}
+      ${'1.24.0_base'}   | ${true}
+      ${'1.5.1-17'}      | ${true}
+      ${'1.5.1-17_base'} | ${true}
+    `('versioning("$input") == "$expected"', ({ input, expected }) => {
+      expect(versioning.isValid(input)).toEqual(expected);
+    });
+  });
+
   describe('libericaJdkDockerVersioning', () => {
     const preset = presets.libericaJdkDockerVersioning;
 
     describe('Liberica JDK Lite', () => {
       const packageRule = preset.packageRules![0];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -85,7 +111,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('Liberica JDK', () => {
       const packageRule = preset.packageRules![1];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -123,7 +149,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('Liberica JRE', () => {
       const packageRule = preset.packageRules![2];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -165,7 +191,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('bellsoft/liberica-runtime-container', () => {
       const packageRule = preset.packageRules![2];
 
-      const allowedVersions = packageRule.allowedVersions as string;
+      const allowedVersions = packageRule.allowedVersions!;
 
       it.each`
         input                           | expected

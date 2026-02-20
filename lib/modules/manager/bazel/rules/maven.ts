@@ -1,8 +1,8 @@
-import is from '@sindresorhus/is';
-import { z } from 'zod';
-import { MavenDatasource } from '../../../datasource/maven';
-import { id as versioning } from '../../../versioning/gradle';
-import type { PackageDependency } from '../../types';
+import { isString } from '@sindresorhus/is';
+import { z } from 'zod/v3';
+import { MavenDatasource } from '../../../datasource/maven/index.ts';
+import { id as versioning } from '../../../versioning/gradle/index.ts';
+import type { PackageDependency } from '../../types.ts';
 
 export const mavenRules = ['maven_install', '_maven_install'] as const;
 
@@ -31,7 +31,7 @@ export const MavenTarget = z
       .transform((xs) => {
         const result: ArtifactSpec[] = [];
         for (const x of xs) {
-          if (is.string(x)) {
+          if (isString(x)) {
             const [group, artifact, version] = x.split(':');
             if (group && artifact && version) {
               result.push({ group, artifact, version });

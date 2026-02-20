@@ -1,16 +1,16 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../../../util/fs/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -20,7 +20,7 @@ export async function updateArtifacts(
   logger.debug(`gleam.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated gleam deps - returning null');
     return null;
   }
@@ -53,7 +53,7 @@ export async function updateArtifacts(
     // `gleam deps update` with no packages rebuilds the lock file
     const packagesToUpdate = isLockFileMaintenance
       ? []
-      : updatedDeps.map((dep) => dep.depName).filter(is.string);
+      : updatedDeps.map((dep) => dep.depName).filter(isString);
 
     const updateCommand = [
       'gleam deps update',

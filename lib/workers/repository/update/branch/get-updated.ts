@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import is from '@sindresorhus/is';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { get } from '../../../../modules/manager';
+import { isNonEmptyArray } from '@sindresorhus/is';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { get } from '../../../../modules/manager/index.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
@@ -11,12 +10,12 @@ import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../../../../modules/manager/types';
-import { getFile } from '../../../../util/git';
-import type { FileAddition, FileChange } from '../../../../util/git/types';
-import { coerceString } from '../../../../util/string';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
+} from '../../../../modules/manager/types.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
+import { coerceString } from '../../../../util/string.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { doAutoReplace } from './auto-replace.ts';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -108,7 +107,7 @@ export async function getUpdatedPackageFiles(
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
-    const manager = upgrade.manager!;
+    const manager = upgrade.manager;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
     // TODO: fix types, can be undefined (#22198)
@@ -318,7 +317,7 @@ export async function getUpdatedPackageFiles(
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
-  if (is.nonEmptyArray(updatedPackageFiles)) {
+  if (isNonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
     const updatedPackageFileManagers = getManagersForPackageFiles(
       updatedPackageFiles,
@@ -359,7 +358,7 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: nonUpdatedFileContents[name],
   }));
-  if (is.nonEmptyArray(nonUpdatedPackageFiles)) {
+  if (isNonEmptyArray(nonUpdatedPackageFiles)) {
     logger.debug('updateArtifacts for nonUpdatedPackageFiles');
     const nonUpdatedPackageFileManagers = getManagersForPackageFiles(
       nonUpdatedPackageFiles,
@@ -390,7 +389,7 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (is.nonEmptyArray(results)) {
+        if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
       }
@@ -402,7 +401,7 @@ export async function getUpdatedPackageFiles(
         path: name,
       }));
     // Only perform lock file maintenance if it's a fresh commit
-    if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
+    if (isNonEmptyArray(lockFileMaintenanceFiles)) {
       logger.debug('updateArtifacts for lockFileMaintenanceFiles');
       const lockFileMaintenanceManagers = getManagersForPackageFiles(
         lockFileMaintenancePackageFiles,
@@ -454,14 +453,15 @@ function patchConfigForArtifactsUpdate(
   packageFileName: string,
 ): UpdateArtifactsConfig {
   // drop any lockFiles that happen to be defined on the branch config
-  const { lockFiles, ...updatedConfig } = config;
-  if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
+  const updatedConfig = { ...config };
+  delete updatedConfig.lockFiles;
+  if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );
-    if (packageFile && is.nonEmptyArray(packageFile.lockFiles)) {
+    if (packageFile && isNonEmptyArray(packageFile.lockFiles)) {
       updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }
@@ -494,7 +494,7 @@ function processUpdateArtifactResults(
   artifactErrors: ArtifactError[],
   artifactNotices: ArtifactNotice[],
 ): void {
-  if (is.nonEmptyArray(results)) {
+  if (isNonEmptyArray(results)) {
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {

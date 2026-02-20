@@ -1,20 +1,28 @@
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus, PrState } from '../../../types';
-import type { LongCommitSha } from '../../../util/git/types';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { joinUrlParts, parseUrl } from '../../../util/url';
-import { hashBody } from '../pr-body';
-import type { Pr } from '../types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus, PrState } from '../../../types/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { hashBody } from '../pr-body.ts';
+import type { Pr } from '../types.ts';
 import type {
   GerritChange,
   GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRequestDetail,
-} from './types';
+} from './types.ts';
+
+export const MIN_GERRIT_VERSION = '3.0.0';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
+
+/**
+ * Max comment size in Gerrit (16kiB by default)
+ * https://gerrit-review.googlesource.com/Documentation/config-gerrit.html#change:~:text=change.commentSizeLimit
+ */
+export const MAX_GERRIT_COMMENT_SIZE = 16 * 1024;
 
 export const REQUEST_DETAILS_FOR_PRS: GerritRequestDetail[] = [
   'MESSAGES', // to get the pr body
@@ -88,7 +96,7 @@ export function mapGerritChangeToPr(
     sourceBranch,
     targetBranch: change.branch,
     title: change.subject,
-    createdAt: change.created?.replace(' ', 'T'),
+    createdAt: convertGerritDateToISO(change.created),
     labels: change.hashtags,
     reviewers:
       change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
@@ -119,6 +127,7 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
     const re = regEx(/^Renovate-Branch: (.+)$/m);
     const currentRevision = change.revisions![change.current_revision];
     const message = currentRevision.commit_with_footers;
+    // v8 ignore else -- TODO: add test #40625
     if (message) {
       sourceBranch = re.exec(message)?.[1];
     }
@@ -132,7 +141,8 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
     .reverse()
     .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {
-    return msg.message.replace(/^Patch Set \d+:\n\n/, ''); //TODO: check how to get rid of the auto-added prefix?
+    // Gerrit adds a "Patch Set X:" prefix to comments
+    return msg.message.replace(/^Patch Set \d+:\n\n/, '');
   }
   return undefined;
 }
@@ -151,4 +161,9 @@ export function mapBranchStatusToLabel(
   }
   /* v8 ignore next */
   return label.default_value;
+}
+
+// Convert Gerrit date format to ISO format
+export function convertGerritDateToISO(date: string): string {
+  return date.replace(' ', 'T');
 }

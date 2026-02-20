@@ -1,6 +1,6 @@
-import { getDigest, getPkgReleases } from '..';
-import { GiteaReleasesDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { GiteaReleasesDatasource } from './index.ts';
 
 const datasource = GiteaReleasesDatasource.id;
 

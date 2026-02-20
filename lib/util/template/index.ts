@@ -1,10 +1,16 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNumber,
+  isPlainObject,
+  isPrimitive,
+  isString,
+} from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { toArray } from '../array';
-import { getChildEnv } from '../exec/utils';
-import { regEx } from '../regex';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import { toArray } from '../array.ts';
+import { getChildEnv } from '../exec/utils.ts';
+import { regEx } from '../regex.ts';
 
 // Missing in handlebars
 type Options = HelperOptions & {
@@ -45,13 +51,13 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
   containsString: (str, subStr) => str?.includes(subStr),
   equals: (arg1, arg2) => arg1 === arg2,
   includes: (arg1: string[], arg2: string) => {
-    if (is.array(arg1, is.string) && is.string(arg2)) {
+    if (isArray(arg1, isString) && isString(arg2)) {
       return arg1.includes(arg2);
     }
     return false;
   },
   split: (str: unknown, separator: unknown): string[] => {
-    if (is.string(str) && is.string(separator)) {
+    if (isString(str) && isString(separator)) {
       return str.split(separator);
     }
     return [];
@@ -91,6 +97,13 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
       return true;
     });
   },
+  add: (a, b) => {
+    if (isNumber(a) && isNumber(b)) {
+      return a + b;
+    }
+
+    throw new Error('add: inputs are not valid');
+  },
 };
 
 // Register all helpers from the single source of truth
@@ -104,6 +117,7 @@ export const templateHelperNames = Object.keys(helpers) as readonly string[];
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
+  'allowedVersions',
   'branchName',
   'branchPrefix',
   'branchTopic',
@@ -189,6 +203,12 @@ export const allowedFields = {
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   newVersionAgeInDays: 'The age of the new version in days',
+  major:
+    'The major version of the current version. e.g. "3" if the current version is "3.1.0"',
+  minor:
+    'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
+  patch:
+    'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',
@@ -227,7 +247,7 @@ export const allowedFields = {
     'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
-type CompileInput = Record<string, unknown>;
+type CompileInput<T = Record<string, unknown>> = T;
 
 const allowedTemplateFields = new Set([
   ...Object.keys(allowedFields),
@@ -235,7 +255,11 @@ const allowedTemplateFields = new Set([
 ]);
 
 class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
-  constructor(private warnVariables: Set<string>) {}
+  private warnVariables: Set<string>;
+
+  constructor(warnVariables: Set<string>) {
+    this.warnVariables = warnVariables;
+  }
 
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {
@@ -254,15 +278,15 @@ class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
       return value;
     }
 
-    if (is.array(value)) {
+    if (isArray(value)) {
       return value.map((element) =>
-        is.primitive(element)
+        isPrimitive(element)
           ? element
           : proxyCompileInput(element as CompileInput, this.warnVariables),
       );
     }
 
-    if (is.plainObject(value)) {
+    if (isPlainObject(value)) {
       return proxyCompileInput(value, this.warnVariables);
     }
 
@@ -280,9 +304,9 @@ export function proxyCompileInput(
   );
 }
 
-export function compile(
+export function compile<T>(
   template: string,
-  input: CompileInput,
+  input: CompileInput<T>,
   filterFields = true,
 ): string {
   const env = getChildEnv({});
@@ -305,9 +329,9 @@ export function compile(
   return result;
 }
 
-export function safeCompile(
+export function safeCompile<T>(
   template: string,
-  input: CompileInput,
+  input: CompileInput<T>,
   filterFields = true,
 ): string {
   try {

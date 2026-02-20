@@ -1,8 +1,8 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { SemVer } from 'semver';
 import semver from 'semver';
-import { regEx } from '../../../util/regex';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver-partial';
 export const displayName = 'Partial Semantic Versioning';
@@ -136,7 +136,7 @@ function matches(version: string, range: string): boolean {
     return false;
   }
 
-  if (is.undefined(r.minor)) {
+  if (isUndefined(r.minor)) {
     return true;
   }
 
@@ -181,7 +181,7 @@ function isLessThanRange(version: string, range: string): boolean {
     return v.major < r.major;
   }
 
-  if (is.undefined(r.minor)) {
+  if (isUndefined(r.minor)) {
     return false;
   }
 
@@ -195,7 +195,6 @@ function isLessThanRange(version: string, range: string): boolean {
 function getNewValue({
   currentValue,
   rangeStrategy,
-  currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
   if (rangeStrategy === 'pin') {
@@ -225,7 +224,7 @@ function getNewValue({
 
   const [prefix] = currentValue.split(massageValue(currentValue));
 
-  if (is.undefined(range.minor)) {
+  if (isUndefined(range.minor)) {
     return `${prefix}${newParsed.major}`;
   }
 

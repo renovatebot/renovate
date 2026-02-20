@@ -1,23 +1,24 @@
 // TODO #22198
-import is from '@sindresorhus/is';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultConfig } from '../../../modules/datasource';
-import { getDefaultVersioning } from '../../../modules/datasource/common';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { instrument } from '../../../instrumentation/index.ts';
+import { logger } from '../../../logger/index.ts';
+import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
+import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../../modules/manager/types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { clone } from '../../../util/clone';
-import { applyPackageRules } from '../../../util/package-rules';
-import * as p from '../../../util/promises';
-import { Result } from '../../../util/result';
-import { LookupStats } from '../../../util/stats';
-import { PackageFiles } from '../package-files';
-import { lookupUpdates } from './lookup';
-import type { LookupUpdateConfig, UpdateResult } from './lookup/types';
+} from '../../../modules/manager/types.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { clone } from '../../../util/clone.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import * as p from '../../../util/promises.ts';
+import { Result } from '../../../util/result.ts';
+import { LookupStats } from '../../../util/stats.ts';
+import { PackageFiles } from '../package-files.ts';
+import { lookupUpdates } from './lookup/index.ts';
+import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
 
 type LookupResult = Result<PackageDependency, Error>;
 
@@ -29,7 +30,7 @@ async function lookup(
 
   dep.updates = [];
 
-  if (is.string(dep.depName)) {
+  if (isString(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
 
@@ -39,7 +40,7 @@ async function lookup(
     return Result.ok(dep);
   }
 
-  if (!is.nonEmptyString(dep.packageName)) {
+  if (!isNonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
     return Result.ok(dep);
   }
@@ -172,7 +173,9 @@ export async function fetchUpdates(
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
   const allManagerJobs = managers.map((manager) =>
-    fetchManagerUpdates(config, packageFiles, manager),
+    instrument(manager, () =>
+      fetchManagerUpdates(config, packageFiles, manager),
+    ),
   );
   await Promise.all(allManagerJobs);
   PackageFiles.add(config.baseBranch!, { ...packageFiles });

@@ -19,14 +19,14 @@ import {
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as aws4 from 'aws4';
+import { git, logger } from '~test/util.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import type { Platform } from '../types';
-import { getCodeCommitUrl } from './codecommit-client';
-import { git, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import type { Platform } from '../types.ts';
+import { getCodeCommitUrl } from './codecommit-client.ts';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
@@ -64,13 +64,33 @@ describe('modules/platform/codecommit/index', () => {
     vi.useRealTimers();
   });
 
-  it('validates massageMarkdown functionality', () => {
-    const newStr = codeCommit.massageMarkdown(
-      '<details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123-->',
-    );
-    expect(newStr).toBe(
-      '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)',
-    );
+  describe('massageMarkdown', () => {
+    it('validates massageMarkdown functionality', () => {
+      const newStr = codeCommit.massageMarkdown(
+        '<details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123-->',
+      );
+      expect(newStr).toBe(
+        '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)',
+      );
+    });
+
+    it('replaces pr links', () => {
+      const body =
+        '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
+
+      expect(codeCommit.massageMarkdown(body)).toBe(
+        '[#123](../../pull-requests/123) [#124](../../pull-requests/124) [#125](../../pull-requests/125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(codeCommit.massageMarkdown(body)).toBe(
+        '[#123](#123) [#124](#124) [#125](#125)',
+      );
+    });
   });
 
   it('maxBodyLength', () => {
@@ -175,7 +195,7 @@ describe('modules/platform/codecommit/index', () => {
         codeCommit.initRepo({ repository: 'repositoryName' }),
       ).resolves.toEqual({
         repoFingerprint:
-          'f0bcfd81abefcdf9ae5e5de58d1a868317503ea76422309bc212d1ef25a1e67789d0bfa752a7e2abd4510f4f3e4f60cdaf6202a42883fb97bb7110ab3600785e',
+          '1b375a58e9961e5c2c8cdc497c5975beb287d538b4692918a3306b92db181cd125c5bd0b1bf8e399cf31cd5f1d24b6dad5a80bdf061f6003cf1c33790525f9c6',
         defaultBranch: 'main',
         isFork: false,
       });
@@ -877,144 +897,6 @@ describe('modules/platform/codecommit/index', () => {
       ).toResolve();
     });
   });
-
-  // eslint-disable-next-line vitest/no-commented-out-tests
-  // describe('mergePr()', () => {
-  // eslint-disable-next-line vitest/no-commented-out-tests
-  //   it('checks that rebase is not supported', async () => {
-  //     expect(
-  //       await codeCommit.mergePr({
-  //         branchName: 'branch',
-  //         id: 1,
-  //         strategy: 'rebase',
-  //       })
-  //     ).toBeFalse();
-  //   });
-
-  // eslint-disable-next-line vitest/no-commented-out-tests
-  //   it('posts Merge with auto', async () => {
-  //     const prRes = {
-  //       pullRequest: {
-  //         title: 'someTitle',
-  //         pullRequestStatus: 'OPEN',
-  //         pullRequestTargets: [
-  //           {
-  //             sourceReference: 'refs/heads/sourceBranch',
-  //             destinationReference: 'refs/heads/targetBranch',
-  //           },
-  //         ],
-  //       },
-  //     };
-  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-  //     codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
-  //
-  //     const updateStatusRes = {
-  //       pullRequest: {
-  //         pullRequestStatus: 'OPEN',
-  //       },
-  //     };
-  //     codeCommitClient
-  //       .on(UpdatePullRequestStatusCommand)
-  //       .resolvesOnce(updateStatusRes);
-  //     expect(
-  //       await codeCommit.mergePr({
-  //         branchName: 'branch',
-  //         id: 1,
-  //         strategy: 'auto',
-  //       })
-  //     ).toBeTrue();
-  //   });
-  //
-  // eslint-disable-next-line vitest/no-commented-out-tests
-  //   it('posts Merge with squash', async () => {
-  //     const prRes = {
-  //       pullRequest: {
-  //         title: 'someTitle',
-  //         pullRequestStatus: 'OPEN',
-  //         pullRequestTargets: [
-  //           {
-  //             sourceReference: 'refs/heads/sourceBranch',
-  //             destinationReference: 'refs/heads/targetBranch',
-  //           },
-  //         ],
-  //       },
-  //     };
-  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-  //     codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
-  //     const updateStatusRes = {
-  //       pullRequest: {
-  //         pullRequestStatus: 'OPEN',
-  //       },
-  //     };
-  //     codeCommitClient
-  //       .on(UpdatePullRequestStatusCommand)
-  //       .resolvesOnce(updateStatusRes);
-  //     expect(
-  //       await codeCommit.mergePr({
-  //         branchName: 'branch',
-  //         id: 5,
-  //         strategy: 'squash',
-  //       })
-  //     ).toBeTrue();
-  //   });
-
-  // eslint-disable-next-line vitest/no-commented-out-tests
-  //   it('posts Merge with fast-forward', async () => {
-  //     const prRes = {
-  //       pullRequest: {
-  //         title: 'someTitle',
-  //         pullRequestStatus: 'OPEN',
-  //         pullRequestTargets: [
-  //           {
-  //             sourceReference: 'refs/heads/sourceBranch',
-  //             destinationReference: 'refs/heads/targetBranch',
-  //           },
-  //         ],
-  //       },
-  //     };
-  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-  //     codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
-  //     const updateStatusRes = {
-  //       pullRequest: {
-  //         pullRequestStatus: 'OPEN',
-  //       },
-  //     };
-  //     codeCommitClient
-  //       .on(UpdatePullRequestStatusCommand)
-  //       .resolvesOnce(updateStatusRes);
-  //     expect(
-  //       await codeCommit.mergePr({
-  //         branchName: 'branch',
-  //         id: 1,
-  //         strategy: 'fast-forward',
-  //       })
-  //     ).toBeTrue();
-  //   });
-
-  // eslint-disable-next-line vitest/no-commented-out-tests
-  //   it('checks that merge-commit is not supported', async () => {
-  //     const prRes = {
-  //       pullRequest: {
-  //         title: 'someTitle',
-  //         pullRequestStatus: 'OPEN',
-  //         pullRequestTargets: [
-  //           {
-  //             sourceReference: 'refs/heads/sourceBranch',
-  //             destinationReference: 'refs/heads/targetBranch',
-  //           },
-  //         ],
-  //       },
-  //     };
-  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-  //     expect(
-  //       await codeCommit.mergePr({
-  //         branchName: 'branch',
-  //         id: 1,
-  //         strategy: 'merge-commit',
-  //       })
-  //     ).toBeFalse();
-  //   });
-  // });
 
   describe('ensureComment', () => {
     beforeEach(async () => {

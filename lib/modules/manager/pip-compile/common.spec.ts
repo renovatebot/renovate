@@ -1,16 +1,16 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { logger } from '../../../logger';
+import { hostRules } from '~test/util.ts';
+import { logger } from '../../../logger/index.ts';
 import {
   allowedOptions,
   extractHeaderCommand,
   extractPythonVersion,
   getRegistryCredVarsFromPackageFiles,
   matchManager,
-} from './common';
-import { inferCommandExecDir } from './utils';
-import { hostRules } from '~test/util';
+} from './common.ts';
+import { inferCommandExecDir } from './utils.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#
@@ -39,6 +39,35 @@ describe('modules/manager/pip-compile/common', () => {
       expect(
         extractHeaderCommand(
           getCommandInHeader(`pip-compile ${argument} reqs.in`),
+          'reqs.txt',
+        ),
+      ).toBeObject();
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it.each([
+      '-v',
+      '--all-extras',
+      '--generate-hashes',
+      '--output-file=reqs.txt',
+      '--extra-index-url=https://pypi.org/simple',
+      // uv-specific options
+      `--no-strip-extras`,
+      '--universal',
+      '--constraints=constraints.txt',
+      '--python-version=3.13',
+      '--no-emit-package=cffi',
+      '--prerelease=if-necessary',
+      '--format=pylock.toml',
+      '--resolution=lowest',
+      '--fork-strategy=fewest',
+      '--exclude-newer=2025-11-01',
+      '--exclude-newer-package="tqdm=2022-04-04T00:00:00Z"',
+      '--group=docs',
+    ])('returns object on correct uv options', (argument: string) => {
+      expect(
+        extractHeaderCommand(
+          getCommandInHeader(`uv pip compile ${argument} reqs.in`),
           'reqs.txt',
         ),
       ).toBeObject();

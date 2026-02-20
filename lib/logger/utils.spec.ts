@@ -1,11 +1,11 @@
 import { TimeoutError } from 'got';
-import { z } from 'zod';
-import { ExecError } from '../util/exec/exec-error';
+import { z } from 'zod/v3';
+import { ExecError } from '../util/exec/exec-error.ts';
 import prepareError, {
   prepareZodIssues,
   sanitizeValue,
   validateLogLevel,
-} from './utils';
+} from './utils.ts';
 
 describe('logger/utils', () => {
   afterEach(() => {
@@ -241,11 +241,11 @@ describe('logger/utils', () => {
         cmd: '',
         stdout: '',
         stderr: '',
-        options: { encoding: 'utf8', env: { key: 'val' } },
+        options: { env: { key: 'val' } },
       });
 
       expect(prepareError(execError)).toMatchObject({
-        options: { encoding: 'utf8', env: ['key'] },
+        options: { env: ['key'] },
       });
     });
 

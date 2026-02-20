@@ -1,35 +1,40 @@
-import is from '@sindresorhus/is';
+import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
 import {
   findGithubToken,
   takePersonalAccessTokenIfPossible,
-} from '../../../util/check-token';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+} from '../../../util/check-token.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type {
+  CommandWithOptions,
+  ExecOptions,
+  ToolConstraint,
+} from '../../../util/exec/types.ts';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { Json } from '../../../util/schema-utils';
-import { coerceString } from '../../../util/string';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { PackagistDatasource } from '../../datasource/packagist';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { Lockfile, PackageFile } from './schema';
-import type { AuthJson } from './types';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
+import { coerceString } from '../../../util/string.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { PackagistDatasource } from '../../datasource/packagist/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { Lockfile, PackageFile } from './schema.ts';
+import type { AuthJson } from './types.ts';
 import {
   extractConstraints,
   getComposerArguments,
@@ -37,7 +42,7 @@ import {
   getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
-} from './utils';
+} from './utils.ts';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
@@ -101,7 +106,7 @@ function getAuthJson(): string | null {
     }
   }
 
-  return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
+  return isEmptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
 export async function updateArtifacts({
@@ -159,7 +164,7 @@ export async function updateArtifacts({
       docker: {},
     };
 
-    const commands: string[] = [];
+    const commands: (string | CommandWithOptions)[] = [];
 
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(lockfile)) {
@@ -169,7 +174,14 @@ export async function updateArtifacts({
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);
-      commands.push('git stash pop || true');
+      commands.push({ command: ['git', 'stash', 'pop'], ignoreFailure: true });
+    }
+
+    if (config.isLockFileMaintenance) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
+      );
+      await deleteLocalFile(lockFileName);
     }
 
     const cmd = 'composer';
@@ -186,7 +198,7 @@ export async function updateArtifacts({
                 ? quote(`${dep.depName}:${dep.newVersion}`)
                 : quote(dep.depName!),
             )
-            .filter(is.string)
+            .filter(isString)
             .map((dep) => quote(dep))
             .join(' ')
         ).trim() +

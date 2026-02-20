@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile, getRangeStrategy } from '.';
+import { extractPackageFile, getRangeStrategy } from './index.ts';
 
 const minimalCabalFile = codeBlock`
 cabal-version: 3.4

@@ -1,14 +1,14 @@
-import crypto from 'crypto';
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyArray } from '@sindresorhus/is';
+import crypto from 'crypto';
 import upath from 'upath';
-import { mergeChildConfig } from '../../../../config';
-import { GlobalConfig } from '../../../../config/global';
-import { addMeta, logger } from '../../../../logger';
-import type { ArtifactError } from '../../../../modules/manager/types';
-import { coerceArray } from '../../../../util/array';
-import { exec } from '../../../../util/exec';
-import type { ExecOptions } from '../../../../util/exec/types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { mergeChildConfig } from '../../../../config/index.ts';
+import { addMeta, logger } from '../../../../logger/index.ts';
+import type { ArtifactError } from '../../../../modules/manager/types.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { exec } from '../../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../../util/exec/types.ts';
 import {
   ensureLocalDir,
   localPathIsFile,
@@ -16,15 +16,15 @@ import {
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
-} from '../../../../util/fs';
-import { getRepoStatus } from '../../../../util/git';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth';
-import type { FileChange } from '../../../../util/git/types';
-import { minimatch } from '../../../../util/minimatch';
-import { regEx } from '../../../../util/regex';
-import { sanitize } from '../../../../util/sanitize';
-import { compile } from '../../../../util/template';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+} from '../../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { getRepoStatus } from '../../../../util/git/index.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import { minimatch } from '../../../../util/minimatch.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { sanitize } from '../../../../util/sanitize.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 
 export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
@@ -51,7 +51,7 @@ export async function postUpgradeCommandsExecutor(
     const commands = upgrade.postUpgradeTasks?.commands;
     const dataFileTemplate = upgrade.postUpgradeTasks?.dataFileTemplate;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
-    if (is.nonEmptyArray(commands)) {
+    if (isNonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       const previouslyModifiedFiles =
         config.updatedPackageFiles!.concat(updatedArtifacts);
@@ -101,13 +101,13 @@ export async function postUpgradeCommandsExecutor(
       }
 
       const workingDirTemplate = upgrade.postUpgradeTasks?.workingDirTemplate;
-      let workingDir: string | null = null;
+      let workingDir = GlobalConfig.get('localDir');
 
       if (workingDirTemplate) {
         workingDir = sanitize(
           compile(workingDirTemplate, mergeChildConfig(config, upgrade)),
         );
-        await ensureLocalDir(workingDir);
+        workingDir = await ensureLocalDir(workingDir);
         logger.trace(
           { workingDirTemplate },
           'Processed post-upgrade commands working directory template.',
@@ -129,9 +129,14 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              cwd: is.nonEmptyString(workingDir)
-                ? workingDir
-                : GlobalConfig.get('localDir'),
+              // WARNING to self-hosted administrators: always run post-upgrade commands with `shell` mode on, which has the risk of arbitrary environment variable access or additional command execution
+              // It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`), as there may be special characters included in the given commands that can be leveraged here
+              shell: GlobalConfig.get(
+                'allowShellExecutorForPostUpgradeCommands',
+                false,
+              ),
+
+              cwd: workingDir,
               extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
@@ -198,6 +203,7 @@ export async function postUpgradeCommandsExecutor(
         (ua) => ua.type === 'deletion',
       );
       for (const previouslyDeletedFile of previouslyDeletedFiles) {
+        /* v8 ignore if -- TODO: needs test */
         if (!changedFiles.includes(previouslyDeletedFile.path)) {
           logger.debug(
             { file: previouslyDeletedFile.path },
@@ -217,7 +223,20 @@ export async function postUpgradeCommandsExecutor(
         `Checking ${addedOrModifiedFiles.length} added or modified files for post-upgrade changes`,
       );
 
+      const fileExcludes: string[] = [];
+      if (config.npmrc) {
+        fileExcludes.push('.npmrc');
+      }
+
       for (const relativePath of addedOrModifiedFiles) {
+        if (
+          fileExcludes.some((pattern) =>
+            minimatch(pattern, { dot: true }).match(relativePath),
+          )
+        ) {
+          continue;
+        }
+
         let fileMatched = false;
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
@@ -286,9 +305,9 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (is.array(config.updatedPackageFiles) &&
+    (isArray(config.updatedPackageFiles) &&
       config.updatedPackageFiles.length > 0) ||
-    (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
+    (isArray(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
 
   if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */
@@ -305,7 +324,6 @@ export default async function executePostUpgradeCommands(
         config.postUpgradeTasks!.executionMode === 'branch'
           ? config.postUpgradeTasks
           : undefined,
-      fileFilters: config.fileFilters,
     },
   ];
 

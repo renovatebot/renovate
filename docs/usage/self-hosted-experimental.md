@@ -102,10 +102,10 @@ Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
 
 <!-- prettier-ignore -->
 !!! note
-    `wasm-java` will block a proper NodeJS exit. It needs NodeJS v24+ to properly clean up the WASM runtime.
-    `js-java` is not recommended due to performance reasons.
+    `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
+    Incompatible with `RENOVATE_X_USE_OPENPGP`.
 
-Default: `wasm-dotnet`.
+Default: `wasm-java`.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
@@ -122,10 +122,6 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
-## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
-
-If set, Renovate will persist repository cache locally after uploading to S3.
-
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.
@@ -135,17 +131,23 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
 
+<!-- prettier-ignore -->
 !!! warning
-If the file is missing or contains invalid configuration, the scan will be aborted.
+    If the file is missing or contains invalid configuration, the scan will be aborted.
 
+<!-- prettier-ignore -->
 !!! note
-You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
+    You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
+
+<!-- prettier-ignore -->
+!!! note
+    Incompatible with `RENOVATE_X_PGP_RUNTIME`.
 
 Use `openpgp` instead of [Bouncy Castle](https://www.bouncycastle.org/) for `PGP` decryption.
 

@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { findUp as _findUp } from 'find-up';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
-import type { RawExecOptions } from './types';
-import { mockExecAll } from '~test/exec-util';
-import { partial } from '~test/util';
+import { mockExecAll } from '~test/exec-util.ts';
+import { partial } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
+import { findHermitCwd, getHermitEnvs, isHermit } from './hermit.ts';
+import type { RawExecOptions } from './types.ts';
 
 vi.mock('find-up');
 const findUp = vi.mocked(_findUp);

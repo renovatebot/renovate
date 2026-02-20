@@ -21,6 +21,25 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # Per #41288 and #41289, make sure that we fail if the values are provided as an empty string
+    - name: Make sure that required parameters aren't an empty string
+      shell: bash
+      run: |
+        error=0
+        if [[ -z "${{ inputs.node-version }}" ]]; then
+          >&2 echo 'Error: `node-version` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ -z "${{ inputs.os }}" ]]; then
+          >&2 echo 'Error: `os` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ $error -ne 0 ]]; then
+          exit 1
+        fi
+
     - name: Calculate `CACHE_KEY`
       shell: bash
       run: |
@@ -34,7 +53,7 @@ runs:
 
     - name: Restore `node_modules`
       id: node-modules-restore
-      uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -53,7 +72,7 @@ runs:
         standalone: true
 
     - name: Setup Node
-      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version: ${{ inputs.node-version }}
 
@@ -64,7 +83,7 @@ runs:
 
     - name: Cache and restore `pnpm store`
       if: env.CACHE_HIT != 'true'
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ env.PNPM_STORE }}
         key: |
@@ -87,7 +106,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}

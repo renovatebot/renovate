@@ -1,22 +1,22 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../constants/error-messages';
-import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
-import * as _repositoryCache from '../cache/repository';
-import type { RepoCacheData } from '../cache/repository/types';
-import * as hostRules from '../host-rules';
-import { GithubHttp, setBaseUrl } from './github';
-import type { GraphqlPageCache } from './github';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../../constants/error-messages.ts';
+import { GithubReleasesDatasource } from '../../modules/datasource/github-releases/index.ts';
+import * as _repositoryCache from '../cache/repository/index.ts';
+import type { RepoCacheData } from '../cache/repository/types.ts';
+import * as hostRules from '../host-rules.ts';
+import type { GraphqlPageCache } from './github.ts';
+import { GithubHttp, setBaseUrl } from './github.ts';
 
-vi.mock('../cache/repository');
+vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
@@ -310,7 +310,9 @@ describe('util/http/github', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(
           fail(401, { message: 'Some unauthorized' }),
-        ).rejects.toThrow('Response code 401 (Some unauthorized)');
+        ).rejects.toThrow(
+          'Request failed with status code 401 (Some unauthorized): GET https://api.github.com/some-url',
+        );
         expect(logger.logger.once.warn).toHaveBeenCalled();
       });
       async function fail(
@@ -347,7 +349,7 @@ describe('util/http/github', () => {
 
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
-          'Response code 404 (Not Found)',
+          'Request failed with status code 404 (Not Found): GET https://api.github.com/some-url',
         );
       });
 
@@ -355,7 +357,7 @@ describe('util/http/github', () => {
         await expect(
           fail(410, { message: 'Issues are disabled for this repo' }),
         ).rejects.toThrow(
-          'Response code 410 (Issues are disabled for this repo)',
+          'Request failed with status code 410 (Issues are disabled for this repo): GET https://api.github.com/some-url',
         );
       });
 
@@ -366,6 +368,82 @@ describe('util/http/github', () => {
               'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
           }),
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+      });
+
+      it('when the rate limit is exceeded, and host rules are set for GitHub.com, a warn is logged', async () => {
+        hostRules.add({
+          matchHost: 'api.github.com',
+          token: 'x-access-token:123test',
+        });
+
+        await expect(
+          fail(403, {
+            message:
+              'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'Rate limit exceeded for api.github.com, even though we are authenticated',
+        );
+      });
+
+      it('when the rate limit is exceeded, but no host rules are set for GitHub.com, a warn is logged', async () => {
+        hostRules.clear();
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          {
+            documentationUrl:
+              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
+        );
+      });
+
+      it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
+        async function fail(
+          code: number,
+          body: any = undefined,
+          headers: httpMock.ReplyHeaders = {},
+        ) {
+          const url = '/some-url';
+          httpMock
+            .scope('https://github.enterprise.example.com') // using our Enterprise URL
+            .get(url)
+            .reply(
+              code,
+              function reply() {
+                // https://github.com/nock/nock/issues/1979
+                if (typeof body === 'object' && 'message' in body) {
+                  (this.req as any).response.statusMessage = body?.message;
+                }
+                return body;
+              },
+              headers,
+            );
+          await githubApi.getJsonUnchecked(url);
+        }
+
+        hostRules.clear();
+        setBaseUrl('https://github.enterprise.example.com');
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'Rate limit exceeded for github.enterprise.example.com, as no hostRules set for this host',
+        );
       });
 
       it('should throw secondary rate limit exceeded', async () => {
@@ -629,7 +707,9 @@ describe('util/http/github', () => {
         githubApi.queryRepoField(graphqlQuery, 'someItem', {
           paginate: false,
         }),
-      ).rejects.toThrow("Response code 418 (I'm a Teapot)");
+      ).rejects.toThrow(
+        "Request failed with status code 418 (I'm a Teapot): POST https://api.github.com/graphql",
+      );
     });
 
     it('halves node count and retries request', async () => {

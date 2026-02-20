@@ -1,21 +1,21 @@
 import { Readable } from 'node:stream';
-import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { MockedObject } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
 
-vi.mock('./azure-got-wrapper', () => mockDeep());
+vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 
 describe('modules/platform/azure/azure-helper', () => {
-  let azureHelper: typeof import('./azure-helper');
-  let azureApi: MockedObject<typeof import('./azure-got-wrapper')>;
+  let azureHelper: typeof import('./azure-helper.ts');
+  let azureApi: MockedObject<typeof import('./azure-got-wrapper.ts')>;
 
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    azureHelper = await vi.importActual('./azure-helper');
+    azureHelper = await vi.importActual('./azure-helper.ts');
     azureApi = await vi.importMock('./azure-got-wrapper');
   });
 
