@@ -101,7 +101,6 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
       const res = azure.azureObj();
 
-      // With azureAuthType=bearer, even a 52-char token should produce a Bearer handler
       expect(res.authHandler).toHaveProperty('token', 'a'.repeat(52));
       expect(res.authHandler.constructor.name).toBe('BearerCredentialHandler');
     });
@@ -117,7 +116,6 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
       const res = azure.azureObj();
 
-      // With azureAuthType=pat, even a non-52-char token should produce a PAT handler
       expect(res.authHandler).toHaveProperty('token', 'short-jwt-like-token');
       expect(res.authHandler.constructor.name).toBe(
         'PersonalAccessTokenCredentialHandler',
@@ -135,7 +133,6 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
       const res = azure.azureObj();
 
-      // Non-52-char token with auto → library heuristic → BearerCredentialHandler
       expect(res.authHandler).toHaveProperty('token', 'shorttoken');
       expect(res.authHandler.constructor.name).toBe('BearerCredentialHandler');
     });
