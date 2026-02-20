@@ -35,6 +35,7 @@ export const presets: Record<string, Preset> = {
       'mergeConfidence:age-confidence-badges',
       'replacements:all',
       'workarounds:all',
+      'helpers:giteaDigestChangelogs',
       'helpers:githubDigestChangelogs',
       'helpers:goXPackagesChangelogLink',
       'helpers:goXPackagesNameLink',

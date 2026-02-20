@@ -19,6 +19,23 @@ export const presets: Record<string, Preset> = {
     description: 'Keep `typescript` version in sync with the `rc` tag.',
     extends: [':followTag(typescript, rc)'],
   },
+  giteaDigestChangelogs: {
+    description:
+      'Ensure that every dependency pinned by digest and sourced from gitea.com contains a link to the commit-to-commit diff',
+    packageRules: [
+      {
+        changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchDatasources: [
+          'git-refs',
+          'git-tags',
+          'gitea-releases',
+          'gitea-tags',
+        ],
+        matchSourceUrls: ['https://gitea.com/**'],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
   githubDigestChangelogs: {
     description:
       'Ensure that every dependency pinned by digest and sourced from GitHub.com contains a link to the commit-to-commit diff',
