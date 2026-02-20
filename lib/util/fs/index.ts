@@ -65,9 +65,8 @@ export async function writeLocalFile(
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  // This a failsafe and hopefully will never be triggered
-  if (GlobalConfig.get('platform') === 'local') {
-    throw new Error('Cannot delete file when platform=local');
+  if (GlobalConfig.get('platform') === 'local' && GlobalConfig.get('dryRun')) {
+    throw new Error('Cannot delete file when platform=local in dry-run mode');
   }
   const localDir = GlobalConfig.get('localDir');
   if (localDir) {
