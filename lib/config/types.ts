@@ -216,6 +216,7 @@ export interface GlobalOnlyConfigLegacy {
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
+  azureAuthType?: 'pat' | 'bearer' | 'auto';
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;

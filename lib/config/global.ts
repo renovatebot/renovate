@@ -13,6 +13,7 @@ export class GlobalConfig {
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'azureAuthType',
     'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',

@@ -7,6 +7,7 @@ import {
   GitPullRequestMergeStrategy,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { GlobalConfig } from '../../../config/global.ts';
 import type { MergeStrategy } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import type { GitOptions } from '../../../types/git.ts';
@@ -122,12 +123,19 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   if (!config.token && config.username && config.password) {
     authType = 'basic';
     authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (config.token?.length === 52) {
-    authType = 'basic';
-    authValue = toBase64(`:${config.token}`);
   } else {
-    authType = 'bearer';
-    authValue = config.token!;
+    const azAuthType = GlobalConfig.get('azureAuthType', 'auto');
+    if (
+      azAuthType === 'pat' ||
+      (azAuthType === 'auto' && config.token?.length === 52)
+    ) {
+      authType = 'basic';
+      authValue = toBase64(`:${config.token}`);
+    } else {
+      // 'bearer' or 'auto' with non-52-char token
+      authType = 'bearer';
+      authValue = config.token!;
+    }
   }
   addSecretForSanitizing(authValue, 'global');
   return {

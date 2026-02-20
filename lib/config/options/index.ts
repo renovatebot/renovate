@@ -1353,6 +1353,16 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'azureAuthType',
+    description:
+      'Authentication type for the Azure DevOps platform. Use `"pat"` for Personal Access Tokens, `"bearer"` for Microsoft Entra ID (AAD) OAuth tokens, or `"auto"` for heuristic detection based on token format.',
+    type: 'string',
+    allowedValues: ['pat', 'bearer', 'auto'],
+    default: 'auto',
+    supportedPlatforms: ['azure'],
+    globalOnly: true,
+  },
+  {
     name: 'azureWorkItemId',
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
