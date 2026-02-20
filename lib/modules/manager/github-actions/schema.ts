@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import {
   LooseArray,
   LooseRecord,
   Yaml,
   withDebugMessage,
-} from '../../../util/schema-utils';
+} from '../../../util/schema-utils/index.ts';
 
 const Steps = z.object({
   uses: z.string(),

@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isString } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class UnpublishSafeMigration extends AbstractMigration {
   private static readonly SUPPORTED_VALUES = [
@@ -17,7 +17,7 @@ export class UnpublishSafeMigration extends AbstractMigration {
     const newExtendsValue = Array.isArray(extendsValue) ? extendsValue : [];
 
     if (value === true) {
-      if (is.string(extendsValue)) {
+      if (isString(extendsValue)) {
         newExtendsValue.push(extendsValue);
       }
 

@@ -1,9 +1,9 @@
-import { setTimeout } from 'timers/promises';
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
-import { logger } from '../../logger';
-import { parseUrl } from '../url';
-import type { Task } from './types';
+import { setTimeout } from 'timers/promises';
+import { logger } from '../../logger/index.ts';
+import { parseUrl } from '../url.ts';
+import type { Task } from './types.ts';
 
 const hostDelays = new Map<string, Promise<unknown>>();
 
@@ -56,10 +56,9 @@ export async function wrapWithRetry<T>(
         `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
-      const delay = Promise.all([
-        hostDelays.get(key) ?? Promise.resolve(),
-        setTimeout(1000 * delaySeconds),
-      ]);
+      let hostDelay = hostDelays.get(key);
+      hostDelay ??= Promise.resolve();
+      const delay = Promise.all([hostDelay, setTimeout(1000 * delaySeconds)]);
       hostDelays.set(key, delay);
       retries += 1;
     }

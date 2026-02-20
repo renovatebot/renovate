@@ -1,15 +1,15 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { isSkipComment } from '../../../util/ignore';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { extractPackageFileFlags } from './common';
-import type { PipRequirementsManagerData } from './types';
+import { isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { isSkipComment } from '../../../util/ignore.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { extractPackageFileFlags } from './common.ts';
+import type { PipRequirementsManagerData } from './types.ts';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -24,7 +24,7 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
   '?:',
 )}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
-export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
+export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})?`;
 
 export function extractPackageFile(
   content: string,
@@ -91,7 +91,7 @@ export function extractPackageFile(
       }
       return dep;
     })
-    .filter(is.truthy);
+    .filter(isTruthy);
 
   const res = extractPackageFileFlags(content);
   res.deps = deps;

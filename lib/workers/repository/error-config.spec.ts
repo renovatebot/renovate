@@ -1,14 +1,14 @@
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../config/global';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import type { Pr } from '../../modules/platform';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
+import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import type { Pr } from '../../modules/platform/index.ts';
 import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
-} from './error-config';
-import { partial, platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './error-config.ts';
 
 let config: RenovateConfig;
 
@@ -36,7 +36,7 @@ describe('workers/repository/error-config', () => {
       );
 
       expect(res).toBeUndefined();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config warning issues are not created, updated or closed when mode=silent',
       );
@@ -58,7 +58,7 @@ Message: some-message
       const res = await raiseCredentialsWarningIssue(config, error);
 
       expect(res).toBeUndefined();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         { configError: error, res: 'created' },
         'Configuration Warning',
@@ -78,7 +78,7 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         { configError: error },
         'DRY-RUN: Would ensure configuration error issue',
@@ -118,7 +118,7 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would update PR #${pr.number}`,
       );
@@ -139,7 +139,7 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         { notificationName },
         'Configuration failure, issues will be suppressed',

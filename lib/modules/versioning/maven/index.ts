@@ -1,6 +1,6 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import { coerceString } from '../../../util/string';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { coerceString } from '../../../util/string.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   EXCLUDING_POINT,
   QualifierTypes,
@@ -14,7 +14,7 @@ import {
   parseRange,
   qualifierType,
   tokenize,
-} from './compare';
+} from './compare.ts';
 
 export const id = 'maven';
 export const displayName = 'Maven';
@@ -85,7 +85,7 @@ const getMinor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
-    if (minorToken && minorToken.type === TYPE_NUMBER) {
+    if (minorToken?.type === TYPE_NUMBER) {
       return +minorToken.val;
     }
     return 0;

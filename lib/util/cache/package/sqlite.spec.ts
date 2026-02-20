@@ -1,6 +1,6 @@
 import { withDir } from 'tmp-promise';
-import { GlobalConfig } from '../../../config/global';
-import { SqlitePackageCache } from './sqlite';
+import { GlobalConfig } from '../../../config/global.ts';
+import { SqlitePackageCache } from './sqlite.ts';
 
 function withSqlite<T>(
   fn: (sqlite: SqlitePackageCache) => Promise<T>,

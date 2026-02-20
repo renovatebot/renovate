@@ -1,18 +1,18 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
-import { GlobalConfig } from '../../config/global';
-import { DockerDatasource } from '../../modules/datasource/docker';
-import * as platform from '../../modules/platform';
-import * as secrets from '../../util/sanitize';
-import * as repositoryWorker from '../repository';
-import * as configParser from './config/parse';
-import * as limits from './limits';
-import * as globalWorker from '.';
-import { logger } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
+import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
+import * as platform from '../../modules/platform/index.ts';
+import * as secrets from '../../util/sanitize.ts';
+import * as repositoryWorker from '../repository/index.ts';
+import * as configParser from './config/parse/index.ts';
+import * as globalWorker from './index.ts';
+import * as limits from './limits.ts';
 
-vi.mock('../repository');
-vi.mock('../../util/fs');
+vi.mock('../repository/index.ts');
+vi.mock('../../util/fs/index.ts');
 
 vi.mock('fs-extra', async () => {
   const realFs = await vi.importActual<typeof fs>('fs-extra');
@@ -74,11 +74,60 @@ describe('workers/global/index', () => {
       expect(repoConfig.parentOrg).toBe('a');
       expect(repoConfig.repository).toBe('a/b');
     });
+
+    it('should resolve repository-level presets before merging with global config', async () => {
+      const globalConfigWithPackageRules: RenovateConfig = {
+        baseDir: '/tmp/base',
+        packageRules: [
+          {
+            description: 'global rule',
+            matchManagers: ['npm'],
+            enabled: false,
+          },
+        ],
+      };
+      const repository = {
+        repository: 'test/repo',
+        // :approveMajorUpdates has packageRules with dependencyDashboardApproval
+        extends: [':approveMajorUpdates'],
+        packageRules: [
+          {
+            description: 'repo rule',
+            matchPackageNames: ['lodash'],
+            enabled: true,
+          },
+        ],
+      };
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        globalConfigWithPackageRules,
+        repository,
+      );
+
+      // Verify packageRules exist and have the correct merge order:
+      // 1. Global config packageRules
+      // 2. Preset packageRules (from :approveMajorUpdates)
+      // 3. Repository packageRules
+      expect(repoConfig.packageRules).toMatchObject([
+        {
+          description: 'global rule',
+          matchManagers: ['npm'],
+        },
+        {
+          dependencyDashboardApproval: true,
+          matchUpdateTypes: ['major'],
+        },
+        {
+          description: 'repo rule',
+          matchPackageNames: ['lodash'],
+        },
+      ]);
+    });
   });
 
   it('handles config warnings and errors', async () => {
     parseConfigs.mockResolvedValueOnce({
       repositories: [],
+      // @ts-expect-error -- testing
       maintainYarnLock: true,
       foo: 1,
     });

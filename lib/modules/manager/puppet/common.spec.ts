@@ -1,7 +1,7 @@
 import {
   RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT,
   parseGitOwnerRepo,
-} from './common';
+} from './common.ts';
 
 describe('modules/manager/puppet/common', () => {
   describe('RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT', () => {

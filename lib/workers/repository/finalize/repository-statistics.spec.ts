@@ -1,22 +1,22 @@
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import * as cache from '../../../util/cache/repository';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import * as cache from '../../../util/cache/repository/index.ts';
 import type {
   BaseBranchCache,
   BranchCache,
   BranchUpgradeCache,
   RepoCacheData,
-} from '../../../util/cache/repository/types';
+} from '../../../util/cache/repository/types.ts';
 import {
   runBranchSummary,
   runRenovateRepoStats,
-} from './repository-statistics';
-import { Fixtures } from '~test/fixtures';
-import { partial } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './repository-statistics.ts';
 
-vi.mock('../../../modules/platform/github/pr');
-vi.mock('../../../util/http/github');
+vi.mock('../../../modules/platform/github/pr.ts');
+vi.mock('../../../util/http/github.ts');
 
 const prJson = Fixtures.getJson('./pr-list.json');
 const result = Object.keys(prJson).map((key) => {
@@ -39,7 +39,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
     it('Calls runRenovateRepoStats', () => {
       runRenovateRepoStats(config, result);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           stats: {
@@ -70,7 +69,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
       runBranchSummary(config);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           cacheModified: true,
@@ -132,7 +130,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
       runBranchSummary(config);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           baseBranches: [
@@ -161,6 +158,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
+        // @ts-expect-error -- TODO: should we remove this test?
         branchSummaryExtended: true,
       };
       const branchCache = partial<BranchCache>({

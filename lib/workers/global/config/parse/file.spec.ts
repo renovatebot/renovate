@@ -4,10 +4,9 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { expect } from 'vitest';
-import { getConfigFileNames } from '../../../../config/app-strings';
-import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/config';
-import * as file from './file';
+import { logger } from '../../../../logger/index.ts';
+import customConfig from './__fixtures__/config.cjs';
+import * as file from './file.ts';
 
 describe('workers/global/config/parse/file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');
@@ -44,14 +43,21 @@ describe('workers/global/config/parse/file', () => {
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
     ])('parses %s > %s', async (_fileType, filePath) => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/',
+        filePath,
+      );
       expect(
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
       ).toEqual(customConfig);
     });
 
     it('migrates', async () => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/config2.js',
+      );
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
@@ -113,7 +119,7 @@ describe('workers/global/config/parse/file', () => {
 
       // TODO this should be called exactly once, but is called twice
       // expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -121,7 +127,7 @@ describe('workers/global/config/parse/file', () => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
 
       const configFile = upath.resolve(
-        __dirname,
+        import.meta.dirname,
         './__fixtures__/config-ref-error.js-invalid',
       );
       const tmpDir = tmp.path;
@@ -132,7 +138,6 @@ describe('workers/global/config/parse/file', () => {
 
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.fatal).toHaveBeenCalledWith(
         `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`,
       );
@@ -148,7 +153,7 @@ describe('workers/global/config/parse/file', () => {
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
@@ -202,23 +207,6 @@ describe('workers/global/config/parse/file', () => {
       fs.unlinkSync(configFile);
       delete process.env.SOME_KEY;
       delete process.env.valid_Key;
-    });
-
-    it('appends files from configFileNames to config filenames list', async () => {
-      const configFile = upath.resolve(tmp.path, 'config4.js');
-      const fileContent1 = `module.exports = {
-        "configFileNames": ["myrenovate.json"]
-      }`;
-      fs.writeFileSync(configFile, fileContent1, {
-        encoding: 'utf8',
-      });
-      const fileConfig = await file.getConfig({
-        RENOVATE_CONFIG_FILE: configFile,
-      });
-
-      expect(fileConfig.configFileNames).toBeUndefined();
-      expect(getConfigFileNames()[0]).toBe('myrenovate.json');
-      fs.unlinkSync(configFile);
     });
   });
 
@@ -280,7 +268,7 @@ describe('workers/global/config/parse/file', () => {
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
       expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.trace).toHaveBeenCalledWith(
         expect.anything(),
         'config file successfully deleted',
@@ -303,7 +291,7 @@ describe('workers/global/config/parse/file', () => {
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
       expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         expect.anything(),
         'error deleting config file',

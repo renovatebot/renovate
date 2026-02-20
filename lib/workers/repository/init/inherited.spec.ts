@@ -1,21 +1,21 @@
+import { hostRules, platform } from '~test/util.ts';
 import {
   getConfigFileNames,
   setUserConfigFileNames,
-} from '../../../config/app-strings';
-import * as decrypt from '../../../config/decrypt';
-import * as presets_ from '../../../config/presets';
-import type { RenovateConfig } from '../../../config/types';
-import * as validation from '../../../config/validation';
+} from '../../../config/app-strings.ts';
+import * as decrypt from '../../../config/decrypt.ts';
+import * as presets_ from '../../../config/presets/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import * as validation from '../../../config/validation.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
   CONFIG_VALIDATION,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { mergeInheritedConfig } from './inherited';
-import { hostRules, platform } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { mergeInheritedConfig } from './inherited.ts';
 
-vi.mock('../../../config/presets');
+vi.mock('../../../config/presets/index.ts');
 
 const presets = vi.mocked(presets_);
 
@@ -83,7 +83,7 @@ describe('workers/repository/init/inherited', () => {
   it('should warn if validateConfig returns warnings', async () => {
     platform.getRawFile.mockResolvedValue('{"binarySource": "docker"}');
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -182,15 +182,20 @@ describe('workers/repository/init/inherited', () => {
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
     presets.resolveConfigPresets.mockResolvedValue({
-      onboarding: false,
-      labels: ['test'],
-      automerge: true,
+      config: {
+        onboarding: false,
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(res.onboarding).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Resolving presets found in inherited config',
     );
@@ -215,13 +220,18 @@ describe('workers/repository/init/inherited', () => {
         errors: [],
       });
     presets.resolveConfigPresets.mockResolvedValue({
-      onboarding: false,
-      labels: ['test'],
-      automerge: true,
+      config: {
+        onboarding: false,
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+    expect(res).not.toContainKey('binarySource');
+
     expect(logger.warn).toHaveBeenCalledWith(
       {
         warnings: [
@@ -254,13 +264,18 @@ describe('workers/repository/init/inherited', () => {
         ],
       });
     presets.resolveConfigPresets.mockResolvedValue({
-      labels: ['test'],
-      automerge: true,
+      config: {
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_VALIDATION,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       {
         errors: [
@@ -283,14 +298,19 @@ describe('workers/repository/init/inherited', () => {
       errors: [],
     });
     presets.resolveConfigPresets.mockResolvedValue({
-      labels: ['test'],
-      automerge: true,
-      binarySource: 'docker', // global config option: should not be here
+      config: {
+        labels: ['test'],
+        automerge: true,
+        binarySource: 'docker', // global config option: should not be here
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(logger.warn).not.toHaveBeenCalled();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       {
         inheritedConfig: {

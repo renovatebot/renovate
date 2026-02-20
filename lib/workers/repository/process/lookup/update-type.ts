@@ -1,5 +1,5 @@
-import type { UpdateType } from '../../../../config/types';
-import type * as allVersioning from '../../../../modules/versioning';
+import type { UpdateType } from '../../../../config/types.ts';
+import type * as allVersioning from '../../../../modules/versioning/index.ts';
 
 export interface UpdateTypeConfig {
   separateMajorMinor?: boolean;

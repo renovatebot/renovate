@@ -1,47 +1,47 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
+import { git, logger, partial, platform, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
-import * as _comment from '../../../../modules/platform/comment';
-import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
-import type { Pr } from '../../../../modules/platform/types';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import type { PrCache } from '../../../../util/cache/repository/types';
-import { fingerprint } from '../../../../util/fingerprint';
-import { toBase64 } from '../../../../util/string';
-import * as _limits from '../../../global/limits';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import * as _statusChecks from '../branch/status-checks';
-import * as _prBody from './body';
-import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
-import * as _participants from './participants';
-import * as _prCache from './pr-cache';
-import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
-import { ensurePr } from '.';
-import { git, logger, partial, platform, scm } from '~test/util';
+} from '../../../../constants/error-messages.ts';
+import * as _comment from '../../../../modules/platform/comment.ts';
+import { getPrBodyStruct } from '../../../../modules/platform/pr-body.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import type { PrCache } from '../../../../util/cache/repository/types.ts';
+import { fingerprint } from '../../../../util/fingerprint.ts';
+import { toBase64 } from '../../../../util/string.ts';
+import * as _limits from '../../../global/limits.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { embedChangelogs } from '../../changelog/index.ts';
+import * as _statusChecks from '../branch/status-checks.ts';
+import * as _prBody from './body/index.ts';
+import type { ChangeLogChange, ChangeLogRelease } from './changelog/types.ts';
+import { ensurePr } from './index.ts';
+import * as _participants from './participants.ts';
+import * as _prCache from './pr-cache.ts';
+import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
 
-vi.mock('../../changelog');
+vi.mock('../../changelog/index.ts');
 
-vi.mock('../../../global/limits');
+vi.mock('../../../global/limits.ts');
 const limits = vi.mocked(_limits);
 
-vi.mock('../branch/status-checks');
+vi.mock('../branch/status-checks.ts');
 const checks = vi.mocked(_statusChecks);
 
-vi.mock('./body');
+vi.mock('./body/index.ts');
 const prBody = vi.mocked(_prBody);
 
-vi.mock('./participants');
+vi.mock('./participants.ts');
 const participants = vi.mocked(_participants);
 
-vi.mock('../../../../modules/platform/comment');
+vi.mock('../../../../modules/platform/comment.ts');
 const comment = vi.mocked(_comment);
 
-vi.mock('./pr-cache');
+vi.mock('./pr-cache.ts');
 const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
@@ -87,7 +87,7 @@ describe('workers/repository/update/pr/index', () => {
           'ConcurrentPRs',
         );
         expect(limits.incCountValue).toHaveBeenNthCalledWith(2, 'HourlyPRs');
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
           'PR created',
@@ -127,7 +127,7 @@ describe('workers/repository/update/pr/index', () => {
         const res = await ensurePr({ ...config, updateType: 'rollback' });
 
         expect(res).toEqual({ type: 'with-pr', pr });
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.info).toHaveBeenCalledWith('Creating Rollback PR');
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -247,7 +247,7 @@ describe('workers/repository/update/pr/index', () => {
           const res = await ensurePr(config);
 
           expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'Error' });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.warn).toHaveBeenCalledWith(
             'A pull requests already exists',
           );
@@ -313,7 +313,7 @@ describe('workers/repository/update/pr/index', () => {
         });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
             branchName: 'renovate-branch',
@@ -396,7 +396,7 @@ describe('workers/repository/update/pr/index', () => {
           },
           `PR labels have changed`,
         );
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { prInitialLabels: ['old_label'], prCurrentLabels: [] },
           'PR labels have been modified by user, skipping labels update',
@@ -413,7 +413,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr }); // we redo the prTitle as per config
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: changedPr.number, prTitle },
           `PR updated`,
@@ -434,7 +434,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: changedPr.number, prTitle },
           `PR updated`,
@@ -449,12 +449,12 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
           `PR updated`,
         );
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
             branchName: 'renovate-branch',
@@ -486,7 +486,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Pull Request #123 does not need updating',
         );
@@ -509,7 +509,7 @@ describe('workers/repository/update/pr/index', () => {
         });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.info).toHaveBeenCalledWith(
           `DRY-RUN: Would create PR: ${prTitle}`,
         );
@@ -524,7 +524,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.info).toHaveBeenCalledWith(
           `DRY-RUN: Would update PR #${pr.number}`,
         );
@@ -686,7 +686,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
         vi.spyOn(platform, 'massageMarkdown').mockImplementation(
-          (prBody) => 'markdown content',
+          () => 'markdown content',
         );
         await ensurePr({
           ...config,
@@ -740,7 +740,6 @@ describe('workers/repository/update/pr/index', () => {
           assignAutomerge: false,
         });
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err, prTitle },
           'Failed to ensure PR',
@@ -1057,7 +1056,7 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [
                 {
                   prBodyNotes: [
-                    `> :exclamation: **Warning**
+                    `> :stop_sign: **Caution**
 >
 > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
 > Verify that release 2.3.4 was published by the expected author.
@@ -1087,7 +1086,7 @@ describe('workers/repository/update/pr/index', () => {
           type: 'with-pr',
           pr: existingPr,
         });
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Pull Request #123 does not need updating',
         );
@@ -1106,11 +1105,11 @@ describe('workers/repository/update/pr/index', () => {
           type: 'with-pr',
           pr: existingPr,
         });
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Pull Request #123 does not need updating',
         );
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR cache matches but it has been edited in the past 24hrs, so processing PR',
         );
@@ -1133,7 +1132,7 @@ describe('workers/repository/update/pr/index', () => {
           type: 'with-pr',
           pr: existingPr,
         });
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR fingerprints mismatch, processing PR',
         );
@@ -1158,7 +1157,7 @@ describe('workers/repository/update/pr/index', () => {
           type: 'with-pr',
           pr: existingPr,
         });
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
         );
@@ -1199,7 +1198,7 @@ describe('workers/repository/update/pr/index', () => {
             targetBranch: 'base',
           },
         });
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR rebase requested, so skipping cache check',
         );
@@ -1214,7 +1213,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         prCache.getPrCache.mockReturnValueOnce(null);
         await ensurePr(config);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith('PR cache not found');
       });
 

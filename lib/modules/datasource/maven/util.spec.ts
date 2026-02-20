@@ -1,17 +1,16 @@
-import type Request from 'got/dist/source/core';
 import { vi } from 'vitest';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
-import { Http, HttpError } from '../../../util/http';
-import { MAVEN_REPO } from './common';
-import type { MavenFetchError } from './types';
+import { logger, partial } from '~test/util.ts';
+import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { Http, HttpError } from '../../../util/http/index.ts';
+import { MAVEN_REPO } from './common.ts';
+import type { MavenFetchError } from './types.ts';
 import {
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
-} from './util';
-import { logger, partial } from '~test/util';
+} from './util.ts';
 
 const http = new Http('test');
 
@@ -25,7 +24,7 @@ function httpError({
   name?: string;
   message?: string;
   code?: HttpError['code'];
-  request?: Partial<Request>;
+  request?: Record<string, unknown>;
   response?: Partial<Response>;
 }): HttpError {
   type Writeable<T> = { -readonly [P in keyof T]: T[P] };
@@ -119,7 +118,7 @@ describe('modules/datasource/maven/util', () => {
         ok: false,
         err: { type: 'temporary-error' } satisfies MavenFetchError,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Temporary error',
@@ -147,7 +146,7 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
           'Maven Central rate limiting detected despite Redis caching.',
@@ -168,7 +167,7 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
           'Maven Central rate limiting detected. Persistent caching required.',
@@ -182,7 +181,7 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path', err: expect.any(HttpError) },
           'Temporary error',

@@ -1,44 +1,53 @@
-import type { RenovateConfig, RepoGlobalConfig } from './types';
+import type { RenovateConfig, RepoGlobalConfig } from './types.ts';
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
-  private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
-    'allowedCommands',
-    'allowedEnv',
+  static OPTIONS: readonly (keyof RepoGlobalConfig)[] = [
     'allowCustomCrateRegistries',
-    'allowedHeaders',
     'allowPlugins',
     'allowScripts',
+    'allowShellExecutorForPostUpgradeCommands',
+    'allowedCommands',
+    'allowedEnv',
+    'allowedHeaders',
+    'allowedUnsafeExecutions',
+    'autodiscoverRepoOrder',
+    'autodiscoverRepoSort',
+    'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
+    'cachePrivatePackages',
     'cacheTtlOverride',
+    'configFileNames',
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
     'dockerCliOptions',
+    'dockerMaxPages',
     'dockerSidecarImage',
     'dockerUser',
     'dryRun',
     'encryptedWarning',
-    'exposeAllEnv',
+    'endpoint',
     'executionTimeout',
+    'exposeAllEnv',
+    'gitTimeout',
     'githubTokenWarn',
+    'httpCacheTtlDays',
+    'ignorePrAuthor',
+    'includeMirrors',
     'localDir',
     'migratePresets',
-    'presetCachePersistence',
-    'gitTimeout',
+    'onboardingAutoCloseAge',
+    'onboardingBranch',
     'platform',
-    'endpoint',
-    'httpCacheTtlDays',
-    'autodiscoverRepoSort',
-    'autodiscoverRepoOrder',
-    'userAgent',
-    'dockerMaxPages',
+    'presetCachePersistence',
+    'repositoryCacheForceLocal',
     's3Endpoint',
     's3PathStyle',
-    'cachePrivatePackages',
-    'ignorePrAuthor',
+    'toolSettings',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};
@@ -60,7 +69,7 @@ export class GlobalConfig {
       : GlobalConfig.config;
   }
 
-  static set(config: RenovateConfig | RepoGlobalConfig): RenovateConfig {
+  static set(config: RenovateConfig & RepoGlobalConfig): RenovateConfig {
     GlobalConfig.reset();
 
     const result = { ...config };

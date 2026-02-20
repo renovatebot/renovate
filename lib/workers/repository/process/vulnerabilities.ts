@@ -1,29 +1,36 @@
 // TODO #22198
 import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
 import { OsvOffline } from '@renovatebot/osv-offline';
-import is from '@sindresorhus/is';
+import {
+  isEmptyArray,
+  isNonEmptyString,
+  isNullOrUndefined,
+  isTruthy,
+} from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import { fromVector } from 'ae-cvss-calculator';
-import { z } from 'zod';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { PackageRule, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultVersioning } from '../../../modules/datasource/common';
+import * as _aeCvss from 'ae-cvss-calculator';
+import { z } from 'zod/v3';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../../modules/manager/types';
-import type { VersioningApi } from '../../../modules/versioning';
-import { get as getVersioning } from '../../../modules/versioning';
-import { sanitizeMarkdown } from '../../../util/markdown';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { titleCase } from '../../../util/string';
+} from '../../../modules/manager/types.ts';
+import type { VersioningApi } from '../../../modules/versioning/index.ts';
+import { get as getVersioning } from '../../../modules/versioning/index.ts';
+import { sanitizeMarkdown } from '../../../util/markdown.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { titleCase } from '../../../util/string.ts';
 import type {
   DependencyVulnerabilities,
   SeverityDetails,
   Vulnerability,
-} from './types';
+} from './types.ts';
+
+const { fromVector } = _aeCvss as unknown as typeof _aeCvss.default;
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
@@ -75,7 +82,7 @@ export class Vulnerabilities {
       const groupPackageRules: PackageRule[] = [];
       for (const vulnerability of vulnerabilities) {
         const rule = this.vulnerabilityToPackageRules(vulnerability);
-        if (is.nullOrUndefined(rule)) {
+        if (isNullOrUndefined(rule)) {
           continue;
         }
         groupPackageRules.push(rule);
@@ -149,7 +156,7 @@ export class Vulnerabilities {
       'fetchManagerPackageFileVulnerabilities finished',
     );
 
-    return result.filter(is.truthy);
+    return result.filter(isTruthy);
   }
 
   private async fetchDependencyVulnerability(
@@ -174,8 +181,8 @@ export class Vulnerabilities {
         packageName,
       );
       if (
-        is.nullOrUndefined(osvVulnerabilities) ||
-        is.emptyArray(osvVulnerabilities)
+        isNullOrUndefined(osvVulnerabilities) ||
+        isEmptyArray(osvVulnerabilities)
       ) {
         logger.trace(
           `No vulnerabilities found in OSV database for ${packageName}`,
@@ -255,13 +262,13 @@ export class Vulnerabilities {
   ): void {
     const versionsCleaned: Record<string, string> = {};
     for (const rule of packageRules) {
-      const version = rule.allowedVersions as string;
+      const version = rule.allowedVersions!;
       versionsCleaned[version] = version.replace(regEx(/[(),=> ]+/g), '');
     }
     packageRules.sort((a, b) =>
       versioningApi.sortVersions(
-        versionsCleaned[a.allowedVersions as string],
-        versionsCleaned[b.allowedVersions as string],
+        versionsCleaned[a.allowedVersions!],
+        versionsCleaned[b.allowedVersions!],
       ),
     );
   }
@@ -327,18 +334,18 @@ export class Vulnerabilities {
       let vulnerable = false;
       for (const event of this.sortEvents(range.events, versioningApi)) {
         if (
-          is.nonEmptyString(event.introduced) &&
+          isNonEmptyString(event.introduced) &&
           (event.introduced === '0' ||
             this.isVersionGtOrEq(depVersion, event.introduced, versioningApi))
         ) {
           vulnerable = true;
         } else if (
-          is.nonEmptyString(event.fixed) &&
+          isNonEmptyString(event.fixed) &&
           this.isVersionGtOrEq(depVersion, event.fixed, versioningApi)
         ) {
           vulnerable = false;
         } else if (
-          is.nonEmptyString(event.last_affected) &&
+          isNonEmptyString(event.last_affected) &&
           this.isVersionGt(depVersion, event.last_affected, versioningApi)
         ) {
           vulnerable = false;
@@ -384,12 +391,12 @@ export class Vulnerabilities {
 
       for (const event of range.events) {
         if (
-          is.nonEmptyString(event.fixed) &&
+          isNonEmptyString(event.fixed) &&
           versioningApi.isVersion(event.fixed)
         ) {
           fixedVersions.push(event.fixed);
         } else if (
-          is.nonEmptyString(event.last_affected) &&
+          isNonEmptyString(event.last_affected) &&
           versioningApi.isVersion(event.last_affected)
         ) {
           lastAffectedVersions.push(event.last_affected);
@@ -475,7 +482,7 @@ export class Vulnerabilities {
       datasource,
       packageFileConfig,
     } = vul;
-    if (is.nullOrUndefined(fixedVersion)) {
+    if (isNullOrUndefined(fixedVersion)) {
       logger.debug(
         `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
       );

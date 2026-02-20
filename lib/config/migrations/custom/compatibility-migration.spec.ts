@@ -1,4 +1,4 @@
-import { CompatibilityMigration } from './compatibility-migration';
+import { CompatibilityMigration } from './compatibility-migration.ts';
 
 describe('config/migrations/custom/compatibility-migration', () => {
   it('should migrate object', async () => {

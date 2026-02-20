@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type { ReleaseType } from 'semver';
 import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { replaceAt } from '../../../util/string';
+import { logger } from '../../../logger/index.ts';
+import { replaceAt } from '../../../util/string.ts';
 import type {
   BumpPackageVersionResult,
   UpdateDependencyConfig,
   Upgrade,
-} from '../types';
+} from '../types.ts';
 
 export function updateAtPosition(
   fileContent: string,
@@ -192,7 +192,7 @@ export function bumpPackageVersion(
 
 function isSnapshot(prerelease: readonly (string | number)[] | null): boolean {
   const lastPart = prerelease?.at(-1);
-  return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
+  return isString(lastPart) && lastPart.endsWith('SNAPSHOT');
 }
 
 function updateValue(

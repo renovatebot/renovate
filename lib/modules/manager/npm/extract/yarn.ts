@@ -1,17 +1,17 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
-import { logger } from '../../../../logger';
+import { logger } from '../../../../logger/index.ts';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import type { PackageFileContent } from '../../types';
-import type { YarnCatalogs } from '../schema';
-import type { NpmManagerData } from '../types';
-import { extractCatalogDeps } from './common/catalogs';
-import type { Catalog, LockFile } from './types';
+} from '../../../../util/fs/index.ts';
+import type { PackageFileContent } from '../../types.ts';
+import type { YarnCatalogs } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
+import { extractCatalogDeps } from './common/catalogs.ts';
+import type { Catalog, LockFile } from './types.ts';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -70,10 +70,10 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml); /* v8 ignore start -- needs test */
+    conf = parseSyml(yarnrcYml); /* v8 ignore next -- needs test */
   } catch (err) {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
-  } /* v8 ignore stop -- needs test */
+  }
   const paths = [
     conf?.cacheFolder ?? './.yarn/cache',
     '.pnp.cjs',
@@ -91,7 +91,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
-  if (is.string(yarnrcYml)) {
+  if (isString(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {
       if (await localPathExists(getSiblingFileName(yarnrcYmlPath, p))) {
@@ -127,7 +127,7 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
 }
 
 export async function extractYarnCatalogs(
-  catalogs: YarnCatalogs | undefined,
+  catalogs: YarnCatalogs,
   packageFile: string,
   hasPackageManager: boolean,
 ): Promise<PackageFileContent<NpmManagerData>> {
@@ -153,26 +153,25 @@ export async function extractYarnCatalogs(
   };
 }
 
-function yarnCatalogsToArray(catalogs: YarnCatalogs | undefined): Catalog[] {
+function yarnCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: YarnCatalogs): Catalog[] {
   const result: Catalog[] = [];
 
-  if (catalogs?.list !== undefined) {
-    for (const [
-      depNameOrCatalogName,
-      depsVersionOrNamedCatalog,
-    ] of Object.entries(catalogs.list)) {
-      if (is.object(depsVersionOrNamedCatalog)) {
-        result.push({
-          name: depNameOrCatalogName,
-          dependencies: depsVersionOrNamedCatalog,
-        });
-      } else {
-        result.push({
-          name: 'default',
-          dependencies: { [depNameOrCatalogName]: depsVersionOrNamedCatalog },
-        });
-      }
-    }
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
+  }
+
+  if (!namedCatalogs) {
+    return result;
+  }
+
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({
+      name,
+      dependencies,
+    });
   }
 
   return result;

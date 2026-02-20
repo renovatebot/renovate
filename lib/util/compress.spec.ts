@@ -1,4 +1,4 @@
-import { compressToBase64, decompressFromBase64 } from './compress';
+import { compressToBase64, decompressFromBase64 } from './compress.ts';
 
 describe('util/compress', () => {
   it('compresses strings', async () => {

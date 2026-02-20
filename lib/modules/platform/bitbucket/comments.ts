@@ -1,7 +1,10 @@
-import { logger } from '../../../logger';
-import { BitbucketHttp } from '../../../util/http/bitbucket';
-import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
-import type { Account, Config, PagedResult } from './types';
+import { logger } from '../../../logger/index.ts';
+import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
+import type {
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+} from '../types.ts';
+import type { Account, Config, PagedResult } from './types.ts';
 
 export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
 
@@ -88,6 +91,7 @@ export async function ensureComment({
       logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
       body = `### ${topic}\n\n${content}`;
       comments.forEach((comment) => {
+        // v8 ignore else -- TODO: add test #40625
         if (comment.content.raw.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.content.raw !== body;
@@ -97,6 +101,7 @@ export async function ensureComment({
       logger.debug(`Ensuring content-only comment in #${prNo}`);
       body = `${content}`;
       comments.forEach((comment) => {
+        // v8 ignore else -- TODO: add test #40625
         if (comment.content.raw === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -120,10 +125,10 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function reopenComments(
@@ -154,6 +159,7 @@ export async function ensureCommentRemoval(
 
     let commentId: number | undefined = undefined;
 
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       const byTopic = (comment: Comment): boolean =>
         comment.content.raw.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -167,9 +173,9 @@ export async function ensureCommentRemoval(
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error ensuring comment removal');
-  } /* v8 ignore stop */
+  }
 }
 
 function sanitizeCommentBody(body: string): string {

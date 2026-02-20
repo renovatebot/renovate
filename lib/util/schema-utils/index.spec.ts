@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { z } from 'zod';
+import { z } from 'zod/v3';
+import { logger } from '~test/util.ts';
 import {
   Ini,
   Json,
@@ -15,8 +16,7 @@ import {
   multidocYaml,
   withDebugMessage,
   withTraceMessage,
-} from '.';
-import { logger } from '~test/util';
+} from './index.ts';
 
 describe('util/schema-utils/index', () => {
   describe('LooseArray', () => {
@@ -561,7 +561,7 @@ describe('util/schema-utils/index', () => {
       const result = Schema.parse(42);
 
       expect(result).toBe('default string');
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { err: expect.any(z.ZodError) },
         'Debug message',
@@ -576,7 +576,7 @@ describe('util/schema-utils/index', () => {
       const result = Schema.parse(42);
 
       expect(result).toBe('default string');
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         { err: expect.any(z.ZodError) },
         'Trace message',

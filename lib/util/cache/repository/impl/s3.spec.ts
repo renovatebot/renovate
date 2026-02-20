@@ -10,15 +10,15 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { parseS3Url } from '../../../s3';
-import type { RepoCacheRecord } from '../schema';
-import { CacheFactory } from './cache-factory';
-import { RepoCacheS3 } from './s3';
-import { fs, partial } from '~test/util';
+import { fs, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { parseS3Url } from '../../../s3.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import { CacheFactory } from './cache-factory.ts';
+import { RepoCacheS3 } from './s3.ts';
 
-vi.mock('../../../fs');
+vi.mock('../../../fs/index.ts');
 
 function createGetObjectCommandInput(
   repository: string,
@@ -79,7 +79,7 @@ describe('util/cache/repository/impl/s3', () => {
       .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
   });
 
@@ -100,7 +100,7 @@ describe('util/cache/repository/impl/s3', () => {
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.error).toHaveBeenCalledTimes(0);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
   });
 
@@ -119,10 +119,10 @@ describe('util/cache/repository/impl/s3', () => {
       )
       .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       { pathname },
       'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname',
@@ -132,7 +132,7 @@ describe('util/cache/repository/impl/s3', () => {
   it('gets an unexpected response from s3', async () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
     await expect(s3Cache.read()).resolves.toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       { returnType: 'undefined' },
       'RepoCacheS3.read() - failure - got unexpected return type',
@@ -147,7 +147,7 @@ describe('util/cache/repository/impl/s3', () => {
       .rejectsOnce(NoSuchKeyErr);
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledTimes(0);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       `RepoCacheS3.read() - No cached file found`,
     );
@@ -156,7 +156,7 @@ describe('util/cache/repository/impl/s3', () => {
   it('fails to read from s3', async () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).rejectsOnce(err);
     await expect(s3Cache.read()).resolves.toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       { err },
       'RepoCacheS3.read() - failure',
@@ -198,7 +198,7 @@ describe('util/cache/repository/impl/s3', () => {
   it('fails to write to s3', async () => {
     s3Mock.on(PutObjectCommand, putObjectCommandInput).rejectsOnce(err);
     await expect(s3Cache.write(repoCache)).toResolve();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       { err },
       'RepoCacheS3.write() - failure',
@@ -211,7 +211,7 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('should persists data locally after uploading to s3', async () => {
-    process.env.RENOVATE_X_REPO_CACHE_FORCE_LOCAL = 'true';
+    GlobalConfig.set({ repositoryCacheForceLocal: true });
     const putObjectCommandOutput: PutObjectCommandOutput = {
       $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
     };

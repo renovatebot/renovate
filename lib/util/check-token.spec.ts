@@ -1,9 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../config/global';
-import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
-import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFileContent } from '../modules/manager/types';
-import * as memCache from '../util/cache/memory';
+import { hostRules, logger } from '~test/util.ts';
+import { GlobalConfig } from '../config/global.ts';
+import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
+import type { PackageFileContent } from '../modules/manager/types.ts';
+import * as memCache from '../util/cache/memory/index.ts';
 import {
   checkGithubToken,
   findGithubToken,
@@ -11,10 +12,9 @@ import {
   isGithubPersonalAccessToken,
   isGithubServerToServerToken,
   takePersonalAccessTokenIfPossible,
-} from './check-token';
-import { hostRules, logger } from '~test/util';
+} from './check-token.ts';
 
-vi.mock('./host-rules', () => mockDeep());
+vi.mock('./host-rules.ts', () => mockDeep());
 
 describe('util/check-token', () => {
   describe('checkGithubToken', () => {
@@ -37,7 +37,7 @@ describe('util/check-token', () => {
         hostType: 'github',
         url: 'https://api.github.com',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -50,7 +50,7 @@ describe('util/check-token', () => {
         hostType: 'github',
         url: 'https://api.github.com',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'GitHub token warning is disabled',
       );
@@ -118,7 +118,7 @@ describe('util/check-token', () => {
         ],
       };
       checkGithubToken(packageFiles);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           githubDeps: ['foo/foo', 'bar/bar'],

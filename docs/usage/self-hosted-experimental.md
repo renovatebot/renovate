@@ -95,6 +95,18 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
 
+## `RENOVATE_X_PGP_RUNTIME`
+
+Specify which PGP runtime to use for decrypting Renovate config.
+Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
+
+<!-- prettier-ignore -->
+!!! note
+    `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
+    Incompatible with `RENOVATE_X_USE_OPENPGP`.
+
+Default: `wasm-java`.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 Specify this string for Renovate to skip API checks and provide Bitbucket server, Forgejo or GitLab version directly.
@@ -110,10 +122,6 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
-## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
-
-If set, Renovate will persist repository cache locally after uploading to S3.
-
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.
@@ -123,11 +131,13 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
 
+<!-- prettier-ignore -->
 !!! warning
-If the file is missing or contains invalid configuration, the scan will be aborted.
+    If the file is missing or contains invalid configuration, the scan will be aborted.
 
+<!-- prettier-ignore -->
 !!! note
-You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
+    You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
@@ -135,7 +145,11 @@ Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
 
-Use `openpgp` instead of `kbpgp` for `PGP` decryption.
+<!-- prettier-ignore -->
+!!! note
+    Incompatible with `RENOVATE_X_PGP_RUNTIME`.
+
+Use `openpgp` instead of [Bouncy Castle](https://www.bouncycastle.org/) for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 

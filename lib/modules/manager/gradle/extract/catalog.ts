@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
+import { isPlainObject, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
-import type { SkipReason } from '../../../../types';
-import { hasKey } from '../../../../util/object';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { massage, parse as parseToml } from '../../../../util/toml';
-import type { PackageDependency } from '../../types';
+import type { SkipReason } from '../../../../types/index.ts';
+import { hasKey } from '../../../../util/object.ts';
+import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { massage, parse as parseToml } from '../../../../util/toml.ts';
+import type { PackageDependency } from '../../types.ts';
 import type {
   GradleCatalog,
   GradleCatalogArtifactDescriptor,
@@ -13,7 +13,7 @@ import type {
   GradleVersionCatalogVersion,
   GradleVersionPointerTarget,
   VersionPointer,
-} from '../types';
+} from '../types.ts';
 
 function findVersionIndex(
   content: string,
@@ -127,11 +127,11 @@ function extractLiteralVersion({
 }): VersionExtract {
   if (!version) {
     return { skipReason: 'unspecified-version' };
-  } else if (is.string(version)) {
+  } else if (isString(version)) {
     const fileReplacePosition =
       depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
     return { currentValue: version, fileReplacePosition };
-  } else if (is.plainObject(version)) {
+  } else if (isPlainObject(version)) {
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
     // https://docs.gradle.org/current/userguide/rich_versions.html
     // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
@@ -187,7 +187,7 @@ function extractDependency({
   versionStartIndex: number;
   versionSubContent: string;
 }): PackageDependency<GradleManagerData> {
-  if (is.string(descriptor)) {
+  if (isString(descriptor)) {
     const [group, name, currentValue] = descriptor.split(':');
     if (!currentValue) {
       return {
@@ -273,7 +273,7 @@ export function parseCatalog(
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {
     const pluginDescriptor = plugins[pluginName];
-    const [depName, version] = is.string(pluginDescriptor)
+    const [depName, version] = isString(pluginDescriptor)
       ? pluginDescriptor.split(':')
       : [pluginDescriptor.id, pluginDescriptor.version];
     const { currentValue, fileReplacePosition, skipReason } = extractVersion({

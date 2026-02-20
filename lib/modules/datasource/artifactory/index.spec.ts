@@ -1,10 +1,10 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { joinUrlParts } from '../../../util/url';
-import { ArtifactoryDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { getPkgReleases } from '../index.ts';
+import { ArtifactoryDatasource } from './index.ts';
 
 const datasource = ArtifactoryDatasource.id;
 
@@ -83,7 +83,7 @@ describe('modules/datasource/artifactory/index', () => {
         packageName: testLookupName,
       });
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         { packageName: 'project' },
         'artifactory datasource requires custom registryUrl. Skipping datasource',
@@ -115,7 +115,7 @@ describe('modules/datasource/artifactory/index', () => {
         }),
       ).toBeNull();
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         {
           packageName: 'project',

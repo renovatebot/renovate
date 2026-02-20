@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { regEx } from '../../../../../util/regex';
-import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags';
-import { GitTagsDatasource } from '../../../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../../../datasource/github-tags';
-import { TerraformModuleDatasource } from '../../../../datasource/terraform-module';
-import type { PackageDependency } from '../../../types';
-import { DependencyExtractor } from '../../base';
-import type { TerraformDefinitionFile } from '../../hcl/types';
+import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
+import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags/index.ts';
+import { GitTagsDatasource } from '../../../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.ts';
+import { TerraformModuleDatasource } from '../../../../datasource/terraform-module/index.ts';
+import type { PackageDependency } from '../../../types.ts';
+import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
@@ -32,12 +32,12 @@ export class ModuleExtractor extends DependencyExtractor {
 
   extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
     const modules = hclRoot.module;
-    if (is.nullOrUndefined(modules)) {
+    if (isNullOrUndefined(modules)) {
       return [];
     }
 
     /* v8 ignore next 4 -- needs test */
-    if (!is.plainObject(modules)) {
+    if (!isPlainObject(modules)) {
       logger.debug({ modules }, 'Terraform: unexpected `modules` value');
       return [];
     }

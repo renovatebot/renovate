@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages.ts';
+import { extractPackageFile } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const localDir = '/tmp/github/some/repo';
 
@@ -550,7 +550,7 @@ describe('modules/manager/helmfile/extract', () => {
             version: 0.4.0
       `;
       const result = await extractPackageFile(content, 'helmfile.yaml', {});
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           repo: {
