@@ -104,7 +104,6 @@ describe('logger/once', () => {
       const debug = vi.spyOn(logger, 'debug');
 
       function doSomething(s: string) {
-        // the `once` call is only based on what file+line the function is called from, so this will only be called the first time, regardless of parameters
         logger.once.debug({ param: s }, s);
         logger.once.debug(s);
       }
