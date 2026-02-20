@@ -16,6 +16,7 @@ import {
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
+import { DateTime } from 'luxon';
 import { ZodError } from 'zod/v3';
 import { ExecError } from '../util/exec/exec-error.ts';
 import { regEx } from '../util/regex.ts';
@@ -204,6 +205,10 @@ export function sanitizeValue(
 
   if (isDate(value)) {
     return value;
+  }
+
+  if (DateTime.isDateTime(value)) {
+    return value.toISO();
   }
 
   if (isFunction(value)) {
