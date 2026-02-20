@@ -364,7 +364,8 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         {
           artifactError: {
             lockFile: 'gradle/wrapper/gradle-wrapper.properties',
-            stderr: 'Response code 404 (Not Found)',
+            stderr:
+              'Request failed with status code 404 (Not Found): GET https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
           },
         },
       ]);

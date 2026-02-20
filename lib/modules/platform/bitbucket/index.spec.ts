@@ -1328,7 +1328,9 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow('Response code 401 (Unauthorized)');
+      ).rejects.toThrow(
+        'Request failed with status code 401 (Unauthorized): GET https://api.bitbucket.org/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
+      );
     });
 
     it('removes reviewer if they are also the author of the pr', async () => {
@@ -1422,7 +1424,9 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow('Response code 400 (Bad Request)');
+      ).rejects.toThrow(
+        'Request failed with status code 400 (Bad Request): POST https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests',
+      );
     });
 
     it('rethrows exception when PR create error not due to reviewers field', async () => {
@@ -1461,7 +1465,9 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow('Response code 400 (Bad Request)');
+      ).rejects.toThrow(
+        'Request failed with status code 400 (Bad Request): POST https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests',
+      );
     });
 
     it('lists PR tasks and resolves the unresolved tasks', async () => {
@@ -1984,7 +1990,9 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(401);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow('Response code 401 (Unauthorized)');
+      ).rejects.toThrow(
+        'Request failed with status code 401 (Unauthorized): GET https://api.bitbucket.org/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
+      );
     });
 
     it('rethrows exception when PR update error due to unknown reviewers error', async () => {
@@ -2034,7 +2042,9 @@ describe('modules/platform/bitbucket/index', () => {
         });
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow('Response code 400 (Bad Request)');
+      ).rejects.toThrow(
+        'Request failed with status code 400 (Bad Request): PUT https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5',
+      );
     });
 
     it('throws an error on failure to get current list of reviewers', async () => {

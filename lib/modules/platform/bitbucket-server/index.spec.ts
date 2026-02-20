@@ -1071,7 +1071,9 @@ describe('modules/platform/bitbucket-server/index', () => {
 
           await expect(
             bitbucket.getUsernamesByEmail('e-mail@test.com'),
-          ).rejects.toThrow('Response code 500 (Internal Server Error)');
+          ).rejects.toThrow(
+            /^Request failed with status code 500 \(Internal Server Error\):/,
+          );
         });
 
         it('return empty array when no results found', async () => {

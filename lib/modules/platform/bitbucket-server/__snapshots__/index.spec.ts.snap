@@ -4,7 +4,7 @@ exports[`modules/platform/bitbucket-server/index > endpoint with no path > addAs
 
 exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > throws 1`] = `[HTTPError: Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5]`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with no path > deleteLAbel() > does not throw 1`] = `undefined`;
 
@@ -201,13 +201,13 @@ Followed by some information.
 "
 `;
 
-exports[`modules/platform/bitbucket-server/index > endpoint with no path > updatePr() > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > updatePr() > throws 1`] = `[HTTPError: Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5]`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with path > addAssignees() > does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > throws 1`] = `[HTTPError: Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5]`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with path > deleteLAbel() > does not throw 1`] = `undefined`;
 
@@ -404,4 +404,4 @@ Followed by some information.
 "
 `;
 
-exports[`modules/platform/bitbucket-server/index > endpoint with path > updatePr() > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > updatePr() > throws 1`] = `[HTTPError: Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5]`;
