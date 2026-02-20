@@ -94,6 +94,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('nested message');
 
+    await repo.checkout(['-b', 'renovate/hidden-unicode', defaultBranch]);
+    await fs.writeFile(base.path + '/Dockerfile', 'FROM scratch\u00A0');
+    await repo.add(['Dockerfile']);
+    await repo.commit('hidden Unicode');
+
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
     await repo.checkoutBranch(
@@ -603,6 +608,15 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('returns null for 404', async () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
+    });
+
+    it('logs a warning if hidden Unciode characters are found', async () => {
+      await git.getFile('Dockerfile', 'renovate/hidden-unicode');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'Dockerfile', hiddenCharacters: '\\u00A0' },
+        'Hidden Unicode characters have been discovered in the file `Dockerfile`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
     });
   });
 

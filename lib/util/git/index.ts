@@ -31,6 +31,7 @@ import { getEnv } from '../env.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
+import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
 import {
@@ -1106,6 +1107,9 @@ export async function getFile(
     const content = await git.show([
       'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
     ]);
+
+    logWarningIfUnicodeHiddenCharactersInPackageFile(filePath, content);
+
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);

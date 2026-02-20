@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
 import upath from 'upath';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   cachePathExists,
@@ -122,6 +123,17 @@ describe('util/fs/index', () => {
 
     it('returns null if file is not found', async () => {
       expect(await readLocalFile('foobar')).toBeNull();
+    });
+
+    it('logs a warning if hidden Unciode characters are found', async () => {
+      await fs.outputFile(`${localDir}/file.txt`, 'some\u00A0content\u200Dfoo');
+      await readLocalFile('file.txt', 'utf8');
+
+      // NOTE that we cannot test that this is called once across multiple `readLocalFile` as we're mocking the logger, so we're testing that it's called, not validating the nubmer of times
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'file.txt', hiddenCharacters: '\\u00A0\\u200D' },
+        'Hidden Unicode characters have been discovered in the file `file.txt`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
     });
   });
 
