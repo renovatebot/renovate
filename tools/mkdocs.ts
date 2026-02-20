@@ -11,18 +11,18 @@ process.on('unhandledRejection', (err) => {
   process.exit(-1);
 });
 
-const program = new Command('pnpm mkdocs').description('Run mkdocs');
+const program = new Command('pnpm mkdocs').description('Run zensical');
 
 program
   .command('build', { isDefault: true })
-  .description('Build mkdocs')
+  .description('Build zensical')
   .option('--version <version>', 'the current version of the Renovate CLI')
   .option('--no-build', 'do not build docs from source')
   .option('--no-strict', 'do not build in strict mode')
   .action(async (opts) => {
     await prepareDocs(opts);
-    logger.info('* running mkdocs build');
-    const args = ['run', 'mkdocs', 'build'];
+    logger.info('* running zensical build');
+    const args = ['run', 'zensical', 'build'];
     if (opts.strict) {
       args.push('--strict');
     }
@@ -39,14 +39,14 @@ program
 
 program
   .command('serve')
-  .description('serve mkdocs')
+  .description('serve zensical')
   .option('--no-build', 'do not build docs from source')
   .option('--no-strict', 'do not build in strict mode')
   .action(async (opts) => {
     await prepareDocs(opts);
     logger.info('serving docs');
-    logger.info('* running mkdocs serve');
-    const args = ['run', 'mkdocs', 'serve'];
+    logger.info('* running zensical serve');
+    const args = ['run', 'zensical', 'serve'];
     if (opts.strict) {
       args.push('--strict');
     }

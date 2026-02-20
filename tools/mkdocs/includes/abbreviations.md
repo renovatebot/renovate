@@ -1,5 +1,5 @@
-<!-- Material for MkDocs shows a tooltip when you hover over any abbreviation in this list. -->
-<!-- https://squidfunk.github.io/mkdocs-material/reference/tooltips/#adding-a-glossary -->
+<!-- Zensical shows a tooltip when you hover over any abbreviation in this list. -->
+<!-- https://zensical.org/docs/authoring/tooltips/ -->
 
 <!-- Please keep this list sorted from A-Z. -->
 

@@ -1,0 +1,43 @@
+[project]
+site_name = "Renovate Docs"
+site_url = "https://docs.renovatebot.com"
+site_description = "Renovate documentation."
+repo_name = "renovatebot/renovate"
+repo_url = "https://github.com/renovatebot/renovate"
+edit_uri = "edit/main/docs/usage"
+extra_css = ["assets/css/style.css"]
+
+[project.theme]
+custom_dir = "overrides"
+favicon = "assets/images/logo.png"
+logo = "assets/images/logo.png"
+features = [
+  "announce.dismiss",
+  "content.action.edit",
+  "content.code.copy",
+  "navigation.footer",
+  "navigation.instant",
+  "navigation.prune",
+  "navigation.top",
+  "toc.follow",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to system preference"
+
+[project.markdown_extensions.pymdownx.snippets]
+auto_append = ["includes/abbreviations.md"]
