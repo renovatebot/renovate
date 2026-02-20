@@ -206,7 +206,7 @@ To get real-time oxlint diagnostics, install the extension for your editor:
 
 ## Documentation
 
-We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
+We use [Zensical](https://zensical.org/) to generate the documentation.
 To install the required dependency, use `pdm install`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.

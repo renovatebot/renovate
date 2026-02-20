@@ -724,7 +724,7 @@ jobs:
           name: docs
           path: tmp/docs/
 
-      - name: Build mkdocs
+      - name: Build docs site
         run: pnpm mkdocs build --no-build
 
   test-e2e:
@@ -908,7 +908,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       # Rebuild the docs site to make sure that we have the version specified in the JSON Schema and page footer
-      - name: Build mkdocs for Renovate ${{ steps.latest_release.outputs.release_tag }}
+      - name: Build docs site for Renovate ${{ steps.latest_release.outputs.release_tag }}
         run: pnpm mkdocs build --version ${{ steps.latest_release.outputs.release_tag }}
         env:
           GITHUB_TOKEN: ${{ github.token }}

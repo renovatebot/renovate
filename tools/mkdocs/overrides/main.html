@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 <!-- This file has the content for our announcement bar. -->
-<!-- https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-header/#announcement-bar -->
-<!-- https://squidfunk.github.io/mkdocs-material/customization/#overriding-blocks -->
+<!-- https://zensical.org/docs/setup/header/#announcement-bar -->
+<!-- https://zensical.org/docs/customization/#extending-the-theme -->
 
 <!-- To disable the announcement bar: -->
-<!-- 1. Open the tools/mkdocs/mkdocs.yml file. -->
-<!-- 2. Comment out the `theme.custom_dir` entry. -->
+<!-- 1. Open the tools/mkdocs/zensical.toml file. -->
+<!-- 2. Remove "announce.dismiss" from the theme.features list. -->
 
 <!-- To enable the announcement bar: -->
-<!-- 1. Open the tools/mkdocs/mkdocs.yml file. -->
-<!-- 2. Make sure the `theme.custom_dir` entry is plain code. -->
+<!-- 1. Open the tools/mkdocs/zensical.toml file. -->
+<!-- 2. Add "announce.dismiss" to the theme.features list. -->
 
 
 {% block announce %}
