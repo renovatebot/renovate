@@ -60,6 +60,16 @@ export function init(): void {
     return;
   }
 
+  // v8 ignore if -- TODO add tests
+  if (process.env.OTEL_LOG_LEVEL) {
+    api.diag.setLogger(
+      new api.DiagConsoleLogger(),
+      api.DiagLogLevel[
+        process.env.OTEL_LOG_LEVEL.toUpperCase() as keyof typeof api.DiagLogLevel
+      ],
+    );
+  }
+
   const spanProcessors: SpanProcessor[] = [];
   // add processors
   if (isTraceDebuggingEnabled()) {
