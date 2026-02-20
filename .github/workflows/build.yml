@@ -845,6 +845,16 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
+        with:
+          python-version-file: .python-version
+          version: ${{ env.PDM_VERSION }}
+          cache: true
+
+      - name: Install pdm dependencies
+        run: pdm install
+
       - name: Check dry run
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
@@ -860,9 +870,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
 
+      - name: Build mkdocs site for deployment (when no release)
+        if: github.ref_name == 'main'
+        run: |
+          # If there wasn't a release, we won't have executed `tools/prepare-release.ts`, and the mkdocs site won't be built, but we do want it built regardless, so we can update the docs site
+          if [[ ! -f tmp/mkdocs-site.tgz ]]; then
+            latest_tag=$(gh release view --json tagName -q .tagName)
+            pnpm mkdocs build --version "$latest_tag"
+            mkdir -p tmp
+            tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload docs artifact for deployment
+        if: github.ref_name == 'main'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: mkdocs-site
+          path: tmp/mkdocs-site.tgz
+          retention-days: 1
+
       - run: df -h
 
-  build-deploy-docs-site:
+  deploy-docs-site:
     if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}
     needs:
       - setup-build
@@ -878,40 +909,16 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download mkdocs site from release
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          show-progress: false
+          name: mkdocs-site
+          path: tmp
 
-      - name: Setup Node.js
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ needs.setup-build.outputs.node-version }}
-          os: ${{ runner.os }}
-
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
-        with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
-
-      - name: Install pdm dependencies
-        run: pdm install
-
-      - name: Determine latest release tag (whether we've released as part of this build or not)
-        id: latest_release
+      - name: Extract docs site
         run: |
-          latest_release=$(gh release view --json tagName -q .tagName)
-          echo "release_tag=$latest_release" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      # Rebuild the docs site to make sure that we have the version specified in the JSON Schema and page footer
-      - name: Build mkdocs for Renovate ${{ steps.latest_release.outputs.release_tag }}
-        run: pnpm mkdocs build --version ${{ steps.latest_release.outputs.release_tag }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          mkdir -p tools/mkdocs/site
+          tar -xzf tmp/mkdocs-site.tgz -C tools/mkdocs/site
 
       # Per https://github.com/renovatebot/helm-charts/issues/3752, when we migrated the docs site from renovatebot/renovatebot.github.io to renovatebot/renovate, the `/helm-charts/` repository would no longer work as a subdomain, due to a known GitHub Pages limitation
       - name: Mirror helm-charts/index.yaml from helm-charts' GitHub Pages site
@@ -950,9 +957,9 @@ jobs:
 
   notify-docs-failure:
     runs-on: ubuntu-latest
-    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.build-deploy-docs-site.result == 'failure' || needs.build-deploy-docs-site.result == 'timed_out') }}
+    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.deploy-docs-site.result == 'failure' || needs.deploy-docs-site.result == 'timed_out') }}
     needs:
-      - build-deploy-docs-site
+      - deploy-docs-site
     steps:
       - name: Post to Slack
         id: slack
