@@ -44,7 +44,8 @@ Some features made a lot of people happy, and efficient!
 - [@RahulGautamSingh](https://github.com/RahulGautamSingh) refactored a lot of code and worked on performance improvements like reduced cloning during updates and onboarding
 - [@Gabriel-Ladzaretti](https://github.com/Gabriel-Ladzaretti) S3 repo cache, child process refactoring, others
 - [@not7cd](https://github.com/not7cd) improved the `pip-compile` manager
-- [@squidfunk](https://github.com/squidfunk) for creating and maintaining the [Zensical](https://zensical.org/) framework, that we use to build our docs, and for helping us with problems with the framework, or our docs
+- [@squidfunk](https://github.com/squidfunk) for creating and maintaining the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and [Zensical](https://zensical.org/) frameworks, that we use to build our docs, and for helping us with problems with the frameworks, or our docs
+- [The MkDocs project](https://www.mkdocs.org/) for making the static site generator, that we used to build our docs
 - [The Zensical project](https://zensical.org/) for making the static site generator, that we use to build our docs
 
 ## Renovate development
