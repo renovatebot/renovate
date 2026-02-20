@@ -197,6 +197,7 @@ export interface CommentData {
   ratchetExclude?: boolean;
   matchedString?: string;
   index?: number;
+  pinRef?: boolean;
 }
 
 // Matches version strings with optional prefixes, e.g.:
@@ -207,6 +208,9 @@ export interface CommentData {
 const pinnedVersionRe = regEx(
   /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+))?@?(?<version>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)/,
 );
+
+const refEqualsRe = regEx(/^\s*ref=(?<version>[^\s]+)/);
+const refMarkerRe = regEx(/^\s*ref\s*$/);
 
 export function parseComment(commentBody: string): CommentData {
   const trimmed = commentBody.trim();
@@ -222,6 +226,20 @@ export function parseComment(commentBody: string): CommentData {
       matchedString: match[0],
       index: match.index,
     };
+  }
+
+  const refMatch = refEqualsRe.exec(commentBody);
+  if (refMatch?.groups?.version) {
+    return {
+      pinnedVersion: refMatch.groups.version,
+      matchedString: refMatch[0],
+      index: refMatch.index,
+      pinRef: true,
+    };
+  }
+
+  if (refMarkerRe.test(commentBody)) {
+    return { pinRef: true };
   }
 
   return {};
@@ -290,7 +308,7 @@ export function parseUsesLine(line: string): ParsedUsesLine | null {
   );
 
   const { value, quote } = parseQuote(rawValuePart);
-  // commentPart always starts with '#' since we found ' #' and sliced after the space
+  // commentPart always starts with '#' (see commentIndex search above)
   const cleanCommentBody = commentPart.slice(1);
 
   return {
