@@ -1,7 +1,7 @@
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { ElmPackageDatasource } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const body = {
   '1.0.0': 1534771622,
