@@ -124,6 +124,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 }
 
 export async function start(): Promise<number> {
+  logger.info({ renovateVersion: pkg.version }, 'Renovate started');
   // istanbul ignore next
   if (regexEngineStatus.type === 'available') {
     logger.debug('Using RE2 regex engine');
