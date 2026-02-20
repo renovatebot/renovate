@@ -626,7 +626,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.10.3',
+    default: 'ghcr.io/renovatebot/base-image:13.10.5',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -2100,6 +2100,12 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Timeout in hours for when `prCreation=not-pending`.',
     type: 'integer',
     default: 25,
+  },
+  {
+    name: 'commitHourlyLimit',
+    description: 'Rate limit commits to maximum x per hour. 0 means no limit.',
+    type: 'integer',
+    default: 0,
   },
   {
     name: 'prHourlyLimit',
