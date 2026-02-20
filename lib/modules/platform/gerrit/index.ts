@@ -43,6 +43,7 @@ import {
 } from './utils.ts';
 
 export const id = 'gerrit';
+export const experimental = true;
 
 const defaults: {
   endpoint?: string;
@@ -351,6 +352,7 @@ export async function getBranchStatus(
     if (hasBlockingLabels) {
       return 'red';
     }
+    // v8 ignore else -- TODO: add test #40625
     if (change.submittable) {
       return 'green';
     }
@@ -378,13 +380,16 @@ export async function getBranchStatusCheck(
         requestDetails: ['LABELS'],
       })
     ).pop();
+    // v8 ignore else -- TODO: add test #40625
     if (change) {
       const label = change.labels![context];
+      // v8 ignore else -- TODO: add test #40625
       if (label) {
         // Check for rejected or blocking first, as a label could have both rejected and approved
         if (label.rejected || label.blocking) {
           return 'red';
         }
+        // v8 ignore else -- TODO: add test #40625
         if (label.approved) {
           return 'green';
         }
@@ -434,6 +439,7 @@ export async function getRawFile(
     logger.debug('No repo so cannot getRawFile');
     return null;
   }
+  // v8 ignore next -- TODO: add test #40625
   const branch =
     branchOrTag ??
     (repo === config.repository ? (config.head ?? 'HEAD') : 'HEAD');
@@ -464,7 +470,9 @@ export async function addAssignees(
   number: number,
   assignees: string[],
 ): Promise<void> {
+  // v8 ignore else -- TODO: add test #40625
   if (assignees.length) {
+    // v8 ignore else -- TODO: add test #40625
     if (assignees.length > 1) {
       logger.debug(
         `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`,

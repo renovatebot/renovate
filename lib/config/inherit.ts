@@ -4,8 +4,10 @@ export const NOT_PRESENT = Symbol('not-present');
 
 export class InheritConfig {
   static OPTIONS: readonly (keyof GlobalInheritableConfig)[] = [
+    'bbUseDevelopmentBranch',
     'configFileNames',
     'onboardingAutoCloseAge',
+    'onboardingBranch',
   ];
 
   private static config: GlobalInheritableConfig = {};
@@ -25,7 +27,9 @@ export class InheritConfig {
 
     const result = { ...config };
     for (const option of InheritConfig.OPTIONS) {
-      InheritConfig.config[option] = config[option] as never;
+      if (option in config) {
+        InheritConfig.config[option] = config[option] as never;
+      }
       delete result[option];
     }
 

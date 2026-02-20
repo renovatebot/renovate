@@ -193,6 +193,7 @@ export const presets: Record<string, Preset> = {
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },
   disableRateLimiting: {
+    commitHourlyLimit: 0,
     description: 'Remove hourly and concurrent rate limits.',
     prConcurrentLimit: 0,
     prHourlyLimit: 0,
@@ -586,7 +587,7 @@ See [Docker - Disable digest pinning](./docker.md#disable-digest-pinning) for mo
           'project.dependencies',
           'project.optional-dependencies',
         ],
-        matchManagers: ['pep621'],
+        matchManagers: ['pep621', 'poetry'],
         semanticCommitType: 'fix',
       },
       {

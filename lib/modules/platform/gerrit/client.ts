@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { GerritHttp } from '../../../util/http/gerrit.ts';

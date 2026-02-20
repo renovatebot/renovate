@@ -146,6 +146,7 @@ export async function initPlatform({
     }
     logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
 
+    // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
       defaults.version = bitbucketServerVersion;
     }
@@ -377,7 +378,7 @@ export async function getPr(
   return pr;
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
@@ -389,7 +390,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 function isRelevantPr(
   branchName: string,
@@ -402,7 +403,7 @@ function isRelevantPr(
     matchesState(p.state, state);
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   return await BbsPrCache.getPrs(
@@ -414,7 +415,7 @@ export async function getPrList(): Promise<Pr[]> {
   );
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 export async function findPr({
   branchName,
@@ -696,21 +697,21 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
-  const reviewerSlugs = new Set<string>();
+  const reviewerNames = new Set<string>();
 
   for (const entry of reviewers) {
-    // If entry is an email-address, resolve userslugs
+    // If entry is an email address, resolve username
     if (isEmailAdress(entry)) {
-      const slugs = await getUserSlugsByEmail(entry);
-      for (const slug of slugs) {
-        reviewerSlugs.add(slug);
+      const names = await getUsernamesByEmail(entry);
+      for (const name of names) {
+        reviewerNames.add(name);
       }
     } else {
-      reviewerSlugs.add(entry);
+      reviewerNames.add(entry);
     }
   }
 
-  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerSlugs)], 3, [
+  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerNames)], 3, [
     REPOSITORY_CHANGED,
   ]);
 }
@@ -719,10 +720,10 @@ export async function addReviewers(
  * Resolves Bitbucket users by email address,
  * restricted to users who have REPO_READ permission on the target repository.
  *
- * @param emailAddress - A string that could be the user's email-address.
- * @returns List of user slugs for active, matched users.
+ * @param emailAddress - A string that could be the user's email address.
+ * @returns List of usernames for active, matched users.
  */
-export async function getUserSlugsByEmail(
+export async function getUsernamesByEmail(
   emailAddress: string,
 ): Promise<string[]> {
   try {
@@ -741,12 +742,12 @@ export async function getUserSlugsByEmail(
     if (users.body.length) {
       return users.body
         .filter((u) => u.active && u.emailAddress === emailAddress)
-        .map((u) => u.slug);
+        .map((u) => u.name);
     }
   } catch (err) {
     logger.warn(
       { err, emailAddress },
-      `Failed to resolve email address to user slug`,
+      `Failed to resolve email address to username`,
     );
     throw err;
   }
@@ -764,7 +765,7 @@ async function updatePRAndAddReviewers(
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    // TODO: can `reviewers` be undefined? (#22198)
+    // TODO: can `reviewers` be undefined? (#40625)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
@@ -828,9 +829,7 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   }
 
   logger.debug(`All ${maxAttempts} retry attempts exhausted`);
-  // Can't be `undefined` here.
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
-  throw lastError;
+  throw lastError!;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
@@ -977,6 +976,7 @@ export async function ensureCommentRemoval(
     const comments = await getComments(prNo);
 
     let commentId: number | null | undefined = null;
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       const byTopic = (comment: Comment): boolean =>
         comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -1346,7 +1346,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (repoGroup) {
     return repoGroup.users
       .filter((user) => user.active)
-      .map((user) => user.slug);
+      .map((user) => user.name);
   }
 
   // If no repo-level group, fall back to project-level group
@@ -1357,7 +1357,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (projectGroup) {
     return projectGroup.users
       .filter((user) => user.active)
-      .map((user) => user.slug);
+      .map((user) => user.name);
   }
 
   // Group not found at either level

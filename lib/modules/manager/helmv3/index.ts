@@ -7,6 +7,7 @@ export { extractPackageFile } from './extract.ts';
 export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Chart.lock'];
 
 export const displayName = 'Helm v3';
 export const url = 'https://helm.sh/docs';

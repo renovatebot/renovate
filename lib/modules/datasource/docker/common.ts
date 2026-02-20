@@ -6,7 +6,6 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import type { HostRule } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
@@ -91,10 +90,12 @@ export async function getAuthHeaders(
       apiCheckResponse.headers['www-authenticate'],
     );
 
-    const opts: HostRule & HttpOptions = hostRules.find({
+    const rule = hostRules.find({
       hostType: dockerDatasourceId,
       url: apiCheckUrl,
     });
+    const opts: HttpOptions = {};
+
     if (ecrRegex.test(registryHost)) {
       logger.once.debug(`hostRules: ecr auth for ${registryHost}`);
       logger.trace(
@@ -102,15 +103,15 @@ export async function getAuthHeaders(
         `Using ecr auth for Docker registry`,
       );
       const [, region] = coerceArray(ecrRegex.exec(registryHost));
-      const auth = await getECRAuthToken(region, opts);
+      const auth = await getECRAuthToken(region, rule);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
       }
     } else if (
       googleRegex.test(registryHost) &&
-      typeof opts.username === 'undefined' &&
-      typeof opts.password === 'undefined' &&
-      typeof opts.token === 'undefined'
+      typeof rule.username === 'undefined' &&
+      typeof rule.password === 'undefined' &&
+      typeof rule.token === 'undefined'
     ) {
       logger.once.debug(`hostRules: google auth for ${registryHost}`);
       logger.trace(
@@ -126,18 +127,18 @@ export async function getAuthHeaders(
           'Could not get Google access token, using no auth',
         );
       }
-    } else if (opts.username && opts.password) {
+    } else if (rule.username && rule.password) {
       logger.once.debug(`hostRules: basic auth for ${registryHost}`);
       logger.trace(
         { registryHost, dockerRepository },
         `Using basic auth for Docker registry`,
       );
-      const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
+      const auth = Buffer.from(`${rule.username}:${rule.password}`).toString(
         'base64',
       );
       opts.headers = { authorization: `Basic ${auth}` };
-    } else if (opts.token) {
-      const authType = opts.authType ?? 'Bearer';
+    } else if (rule.token) {
+      const authType = rule.authType ?? 'Bearer';
       logger.once.debug(
         `hostRules: ${authType} token auth for ${registryHost}`,
       );
@@ -145,11 +146,8 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using ${authType} token for Docker registry`,
       );
-      opts.headers = { authorization: `${authType} ${opts.token}` };
+      opts.headers = { authorization: `${authType} ${rule.token}` };
     }
-    delete opts.username;
-    delete opts.password;
-    delete opts.token;
 
     // If realm isn't an url, we should directly use auth header
     // Can happen when we get a Basic auth or some other auth type

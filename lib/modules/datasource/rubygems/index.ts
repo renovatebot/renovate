@@ -1,5 +1,5 @@
 import { Marshal } from '@qnighy/marshal';
-import type { ZodError } from 'zod';
+import type { ZodError } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';

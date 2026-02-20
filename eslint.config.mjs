@@ -29,6 +29,7 @@ export default tseslint.config(
       'patches',
       '**/tmp/',
       '**/.venv/',
+      'tools/mkdocs/.cache',
       'tools/mkdocs/docs',
       'tools/mkdocs/site',
       '.github/workflows/**/*.js',

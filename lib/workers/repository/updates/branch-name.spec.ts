@@ -33,21 +33,57 @@ describe('workers/repository/updates/branch-name', () => {
       );
     });
 
-    it('ignores grouping of lockfile maintenance update', () => {
+    it('applies grouping for lockfile maintenance update', () => {
       const upgrade = partial<BranchUpgradeConfig>({
-        groupName: 'grouptopic',
+        groupName: 'my lockfiles',
         updateType: 'lockFileMaintenance',
         depName: 'axios',
-        depNameSanitized: 'axios',
-        branchTopic: 'lock-file-maintenance', // default for lockFileMaintenance
-        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'lock-file-maintenance-my-lockfiles-grouptopic',
+      );
+    });
+
+    it('uses default branch name for lockfile maintenance without groupName', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        branchTopic: 'lock-file-maintenance',
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}',
       });
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('lock-file-maintenance');
-      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
-        { depName: 'axios' },
-        'Ignoring grouped branch name for lockFileMaintenance update',
+    });
+
+    it('separates lockFileMaintenance from non-lockFileMaintenance with same groupName', () => {
+      const groupConfig = {
+        branchName: '{{groupSlug}}-{{branchTopic}}',
+        branchTopic: 'grouptopic',
+      };
+      const lockFileUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'lockFileMaintenance',
+        depName: 'lock-file',
+        group: groupConfig,
+      });
+      const regularUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'minor',
+        depName: 'axios',
+        group: groupConfig,
+      });
+      generateBranchName(lockFileUpdate);
+      generateBranchName(regularUpdate);
+      expect(lockFileUpdate.branchName).toBe(
+        'lock-file-maintenance-all-grouptopic',
       );
+      expect(regularUpdate.branchName).toBe('all-grouptopic');
+      expect(lockFileUpdate.branchName).not.toBe(regularUpdate.branchName);
     });
 
     it('uses groupName if no slug defined, ignores sharedVariableName', () => {
