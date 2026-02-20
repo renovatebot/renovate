@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import type { ReleaseResult } from '../types.ts';
 
