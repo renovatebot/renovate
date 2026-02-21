@@ -146,7 +146,7 @@ describe('docs/documentation', () => {
 
       function getRequiredSelfHostedOptions(): string[] {
         return options
-          .filter((option) => option.globalOnly)
+          .filter((option) => option.globalOnly ?? option.docAlsoGlobal)
           .map((option) => option.name)
           .sort();
       }
