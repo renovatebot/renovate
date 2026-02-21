@@ -1,6 +1,7 @@
 import type { WriteStream } from 'node:fs';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import { partial } from '~test/util.ts';
 import { add } from '../util/host-rules.ts';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
@@ -472,6 +473,8 @@ describe('logger/index', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someDate: DateTime.fromISO('2020-02-29'),
+      someDateTime: DateTime.fromISO('2020-02-29T01:40:21.345+00:00'),
       someFn: () => 'secret"password',
       someObject: new SomeClass('secret"password'),
     });
@@ -487,6 +490,8 @@ describe('logger/index', () => {
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe(prBody);
     expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someDate).toBe('2020-02-29T00:00:00.000+00:00');
+    expect(logged.someDateTime).toBe('2020-02-29T01:40:21.345+00:00');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');
   });
