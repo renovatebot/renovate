@@ -4,7 +4,10 @@ import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { compile } from '../../../../util/template/index.ts';
-import { getDefaultConfigFileName } from '../common.ts';
+import {
+  getDefaultConfigFileName,
+  getSemanticCommitPrTitle,
+} from '../common.ts';
 import { OnboardingCommitMessageFactory } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
@@ -39,6 +42,11 @@ export async function createOnboardingBranch(
     return null;
   }
 
+  const prTitle =
+    config.semanticCommits === 'enabled'
+      ? getSemanticCommitPrTitle(config)
+      : config.onboardingPrTitle!;
+
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: getInheritedOrGlobal('onboardingBranch')!,
@@ -53,6 +61,7 @@ export async function createOnboardingBranch(
     message: commitMessage,
     platformCommit: config.platformCommit,
     force: true,
-    labels: config.labels,
+    // Only needed by Gerrit platform
+    prTitle,
   });
 }
