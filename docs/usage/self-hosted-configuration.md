@@ -477,6 +477,7 @@ Other valid cache namespaces are as follows:
 - `datasource-rpm`
 - `datasource-ruby-version`
 - `datasource-rubygems`
+- `datasource-rust-version`
 - `datasource-sbt-package`
 - `datasource-terraform-module`
 - `datasource-terraform-provider`
