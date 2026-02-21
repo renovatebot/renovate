@@ -122,10 +122,6 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
-## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
-
-If set, Renovate will persist repository cache locally after uploading to S3.
-
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.

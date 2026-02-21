@@ -163,8 +163,10 @@ export interface RenovateSharedConfig {
  * Contains all options with globalOnly=true && inheritConfigSupport=true
  */
 export interface GlobalInheritableConfig {
+  bbUseDevelopmentBranch?: boolean;
   configFileNames?: string[];
   onboardingAutoCloseAge?: number;
+  onboardingBranch?: string;
 }
 
 // Config options used only within the global worker
@@ -249,6 +251,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  repositoryCacheForceLocal?: boolean;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
@@ -349,7 +352,8 @@ export interface RenovateInternalConfig {
  * This is a superset of any configuration that a Renovate user (not self-hosted administrator) can set.
  */
 export interface RenovateConfig
-  extends LegacyAdminConfig,
+  extends
+    LegacyAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
@@ -405,6 +409,7 @@ export interface RenovateConfig
   branchConcurrentLimit?: number | null;
   parentOrg?: string;
   prConcurrentLimit?: number;
+  commitHourlyLimit?: number;
   prHourlyLimit?: number;
 
   printConfig?: boolean;
@@ -483,9 +488,7 @@ export interface CustomDatasourceConfig {
  *
  */
 export interface AllConfig
-  extends RenovateConfig,
-    GlobalOnlyConfigLegacy,
-    RepoGlobalConfig {
+  extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
   password?: string;
   token?: string;
   username?: string;
@@ -549,9 +552,7 @@ export type AllowedUnsafeExecution = 'goGenerate' | 'gradleWrapper';
 
 // TODO: Proper typings
 export interface PackageRule
-  extends RenovateSharedConfig,
-    RenovateInternalConfig,
-    UpdateConfig {
+  extends RenovateSharedConfig, RenovateInternalConfig, UpdateConfig {
   allowedVersions?: string;
   description?: string | string[];
   matchBaseBranches?: string[];

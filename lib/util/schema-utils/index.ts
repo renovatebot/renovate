@@ -8,7 +8,7 @@ import {
   type ZodType,
   type ZodTypeDef,
   z,
-} from 'zod';
+} from 'zod/v3';
 import { logger } from '../../logger/index.ts';
 import type { PackageDependency } from '../../modules/manager/types.ts';
 import { parseJsonc } from '../common.ts';

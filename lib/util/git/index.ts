@@ -1,6 +1,7 @@
 import URL from 'node:url';
 import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import semver from 'semver';
 import type { Options, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
@@ -24,12 +25,13 @@ import { withInstrumenting } from '../../instrumentation/with-instrumenting.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { GitProtocol } from '../../types/git.ts';
-import { incLimitedValue } from '../../workers/global/limits.ts';
+import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
+import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
 import {
@@ -570,6 +572,22 @@ export function getBranchCommit(branchName: string): LongCommitSha | null {
   return config.branchCommits?.[branchName] || null;
 }
 
+// Return the date of the latest commit for a branch
+export async function getBranchUpdateDate(
+  branchName: string,
+): Promise<DateTime | null> {
+  const branchSha = config.branchCommits[branchName];
+  if (!branchSha) {
+    return null;
+  }
+  try {
+    return await getCommitDate(branchSha);
+  } catch (err) {
+    logger.debug({ err, branchName }, 'Error getting branch update date');
+    return null;
+  }
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   // v8 ignore else -- TODO: add test #40625
@@ -604,11 +622,15 @@ export async function checkoutBranch(
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])
     ).trim() as LongCommitSha;
-    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    const latestCommitDate = await getCommitDate(config.currentBranchSha);
     // v8 ignore else -- TODO: add test #40625
     if (latestCommitDate) {
       logger.debug(
-        { branchName, latestCommitDate, sha: config.currentBranchSha },
+        {
+          branchName,
+          latestCommitDate: latestCommitDate.toISO(),
+          sha: config.currentBranchSha,
+        },
         'latest commit',
       );
     }
@@ -1029,13 +1051,18 @@ export async function mergeBranch(branchName: string): Promise<void> {
   }
 }
 
+async function getCommitDate(ref: LongCommitSha | string): Promise<DateTime> {
+  const output = await git.show(['-s', '--format=%cI', ref]);
+  return DateTime.fromISO(output.trim()).toUTC();
+}
+
 export async function getBranchLastCommitTime(
   branchName: string,
 ): Promise<Date> {
   await syncGit();
   try {
-    const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
-    return new Date(Date.parse(time));
+    const time = await getCommitDate('origin/' + branchName);
+    return time.toJSDate();
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     /* v8 ignore next 3 -- TODO: add test */
@@ -1084,6 +1111,9 @@ export async function getFile(
     const content = await git.show([
       'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
     ]);
+
+    logWarningIfUnicodeHiddenCharactersInPackageFile(filePath, content);
+
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
@@ -1297,6 +1327,7 @@ export async function pushCommit({
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
+    incCountValue('HourlyCommits');
     result = true;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     handleCommitError(err, sourceRef, files);

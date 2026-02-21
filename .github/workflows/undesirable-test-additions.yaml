@@ -34,8 +34,8 @@ jobs:
           git diff $BASE_BRANCH_REF -- '*.spec.ts' > diff_spec_ts.txt
 
           echo "### Counting additions and deletions of snapshots..."
-          ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
-          DELETED=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
+          ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -c -E '\.toMatch(Snapshot|InlineSnapshot)\(' || true)
+          DELETED=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -c -E '\.toMatch(Snapshot|InlineSnapshot)\(' || true)
 
           if [ "$ADDED" -gt "$DELETED" ]; then
               echo "❌ Error: Snapshots have been added in this PR. Use toMatch instead."
@@ -49,14 +49,14 @@ jobs:
 
           echo "### Processing added files in '__fixtures__' directories..."
           ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
-          NUM_ADDED_FIXTURES=$(echo "$ADDED_FIXTURES" | grep -c . || true)
+          NUM_ADDED_FIXTURES=$(echo "$ADDED_FIXTURES" | grep -c . || echo 0)
           echo "Added files in '__fixtures__':"
           echo "$ADDED_FIXTURES"
           echo "Total number of added files in '__fixtures__': $NUM_ADDED_FIXTURES"
 
           echo "### Processing deleted files in '__fixtures__' directories..."
           DELETED_FIXTURES=$(grep '^D' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
-          NUM_DELETED_FIXTURES=$(echo "$DELETED_FIXTURES" | grep -c . || true)
+          NUM_DELETED_FIXTURES=$(echo "$DELETED_FIXTURES" | grep -c . || echo 0)
           echo "Deleted files in '__fixtures__':"
           echo "$DELETED_FIXTURES"
           echo "Total number of deleted files in '__fixtures__': $NUM_DELETED_FIXTURES"
@@ -69,7 +69,6 @@ jobs:
               if [ -z "$line" ]; then
                   continue
               fi
-              STATUS=$(echo "$line" | awk '{print $1}')
               OLD_PATH=$(echo "$line" | awk '{print $2}')
               NEW_PATH=$(echo "$line" | awk '{print $3}')
 

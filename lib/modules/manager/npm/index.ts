@@ -14,6 +14,11 @@ export {
 } from './update/index.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = [
+  'package-lock.json',
+  'pnpm-lock.yaml',
+  'yarn.lock',
+];
 
 export const displayName = 'npm';
 export const url = 'https://docs.npmjs.com';

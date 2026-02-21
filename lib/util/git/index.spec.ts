@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import tmp from 'tmp-promise';
@@ -62,9 +63,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await fs.writeFile(base.path + '/master_file', defaultBranch);
     await fs.writeFile(base.path + '/file_to_delete', 'bye');
     await repo.add(['master_file', 'file_to_delete']);
-    await repo.commit('master message', [
-      '--date=' + masterCommitDate.toISOString(),
-    ]);
+    process.env.GIT_COMMITTER_DATE = masterCommitDate.toISOString();
+    await repo.commit('master message');
+    delete process.env.GIT_COMMITTER_DATE;
 
     await repo.checkout(['-b', 'renovate/future_branch', defaultBranch]);
     await fs.writeFile(base.path + '/future_file', 'future');
@@ -92,6 +93,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.add(['root', 'bin/nested']);
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('nested message');
+
+    await repo.checkout(['-b', 'renovate/hidden-unicode', defaultBranch]);
+    await fs.writeFile(base.path + '/Dockerfile', 'FROM scratch\u00A0');
+    await repo.add(['Dockerfile']);
+    await repo.commit('hidden Unicode');
 
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
@@ -425,6 +431,52 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
+  describe('getBranchUpdateDate(branchName)', () => {
+    it('should return same value for equal refs', async () => {
+      await git.checkoutBranchFromRemote('renovate/equal_branch', 'origin');
+      await git.fetchBranch(defaultBranch);
+      const date = await git.getBranchUpdateDate('renovate/equal_branch');
+      const defaultDate = await git.getBranchUpdateDate(defaultBranch);
+      expect(date!.toISO()).toBe(defaultDate!.toISO());
+      expect(date).toBeInstanceOf(DateTime);
+    });
+
+    it('should return null when branch does not exist', async () => {
+      expect(await git.getBranchUpdateDate('not_found')).toBeNull();
+    });
+
+    it('should return null and log error when git show fails', async () => {
+      // Create a valid branch first
+      const branchName = 'renovate/test_error_branch';
+      await git.commitFiles({
+        branchName,
+        files: [
+          {
+            type: 'addition',
+            path: 'error-test-file',
+            contents: 'test content',
+          },
+        ],
+        message: 'Test commit',
+      });
+
+      // Spy on DateTime.fromISO to simulate an error in getCommitDate
+      const fromISOSpy = vi
+        .spyOn(DateTime, 'fromISO')
+        .mockImplementationOnce(() => {
+          throw new Error('simulated git show error');
+        });
+
+      const result = await git.getBranchUpdateDate(branchName);
+
+      expect(result).toBeNull();
+      expect(fromISOSpy).toHaveBeenCalled();
+
+      // Restore original implementation
+      fromISOSpy.mockRestore();
+    });
+  });
+
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
       const file: FileChange = {
@@ -556,6 +608,15 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('returns null for 404', async () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
+    });
+
+    it('logs a warning if hidden Unciode characters are found', async () => {
+      await git.getFile('Dockerfile', 'renovate/hidden-unicode');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'Dockerfile', hiddenCharacters: '\\u00A0' },
+        'Hidden Unicode characters have been discovered in the file `Dockerfile`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
     });
   });
 

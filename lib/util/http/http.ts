@@ -1,9 +1,9 @@
 import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
-import type { Options, RetryObject } from 'got';
+import type { Options, OptionsInit, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
-import type { z } from 'zod';
-import { ZodType } from 'zod';
+import type { z } from 'zod/v3';
+import { ZodType } from 'zod/v3';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.ts';
@@ -18,9 +18,9 @@ import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
-import { applyAuthorization, removeAuthorization } from './auth.ts';
+import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
-import { fetch, stream } from './got.ts';
+import { fetch, normalize, stream } from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
 
 import { getQueue } from './queue.ts';
@@ -62,7 +62,7 @@ export interface InternalHttpOptions extends HttpOptions {
   parseJson?: Options['parseJson'];
 }
 
-export function applyDefaultHeaders(options: Options): void {
+export function applyDefaultHeaders(options: OptionsInit): void {
   const renovateVersion = pkg.version;
   options.headers = {
     ...options.headers,
@@ -102,6 +102,7 @@ export abstract class HttpBase<
       { isMergeableObject: isPlainObject },
     );
   }
+
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
@@ -142,10 +143,6 @@ export abstract class HttpBase<
 
     logger.trace(`HTTP request: ${method.toUpperCase()} ${url}`);
 
-    options.hooks = {
-      beforeRedirect: [removeAuthorization],
-    };
-
     applyDefaultHeaders(options);
 
     if (isUndefined(options.readOnly) && isReadMethod) {
@@ -159,7 +156,8 @@ export abstract class HttpBase<
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
-    options.timeout ??= 60000;
+    const timeout = options.timeout ?? 60000;
+    options.timeout = timeout;
 
     let cacheProvider: HttpCacheProvider | undefined;
     if (isReadMethod && options.cacheProvider) {
@@ -205,6 +203,7 @@ export abstract class HttpBase<
           releaseLock = await acquireLock(
             `${options.method} ${url}`,
             'http-mutex',
+            timeout * 2,
           );
         }
         try {
@@ -217,7 +216,9 @@ export abstract class HttpBase<
           }
 
           const queueMs = Date.now() - startTime;
-          return fetch(url, options, { queueMs });
+          return fetch(url, this._normalizeOptions(options), {
+            queueMs,
+          });
         } finally {
           releaseLock?.();
         }
@@ -269,6 +270,18 @@ export abstract class HttpBase<
 
       this.handleError(requestUrl, httpOptions, err);
     }
+  }
+
+  private _normalizeOptions<T extends OptionsInit>(options: T): T {
+    return normalize(options, this.extraOptions());
+  }
+
+  /**
+   * Returns Renovate extra options which needs to be removed before passing to got.
+   * @returns extra Renovate options.
+   */
+  protected extraOptions(): readonly string[] {
+    return ['baseUrl', 'cacheProvider', 'readOnly'] as (keyof HttpOptions)[];
   }
 
   protected processOptions(_url: URL, _options: InternalHttpOptions): void {
@@ -675,7 +688,7 @@ export abstract class HttpBase<
     }
     combinedOptions = applyAuthorization(combinedOptions);
 
-    return stream(resolvedUrl, combinedOptions);
+    return stream(resolvedUrl, this._normalizeOptions(combinedOptions));
   }
 
   async getToml<Schema extends ZodType<any, any, any>>(

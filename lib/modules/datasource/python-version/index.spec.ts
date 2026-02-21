@@ -80,6 +80,39 @@ describe('modules/datasource/python-version/index', () => {
       ).toBeNull();
     });
 
+    it('falls back to prebuild releases on 429', async () => {
+      httpMock.scope(defaultRegistryUrl).get('').reply(429);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'python',
+      });
+      expect(res?.releases).toHaveLength(3);
+      const versions = res?.releases.map((r) => r.version);
+      expect(versions).toContain('3.12.1');
+      expect(versions).toContain('3.12.0');
+      expect(versions).toContain('3.7.8');
+      expect(
+        res?.releases.find((r) => r.version === '3.7.8')?.isDeprecated,
+      ).toBeTrue();
+      expect(
+        res?.releases.find((r) => r.version === '3.12.1')?.isDeprecated,
+      ).toBeFalse();
+    });
+
+    it('returns null on 429 when prebuild releases are unavailable', async () => {
+      vi.spyOn(
+        PythonVersionDatasource.prototype,
+        'getPrebuildReleases',
+      ).mockResolvedValueOnce(null);
+      httpMock.scope(defaultRegistryUrl).get('').reply(429);
+      expect(
+        await getPkgReleases({
+          datasource,
+          packageName: 'python',
+        }),
+      ).toBeNull();
+    });
+
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(defaultRegistryUrl).get('').reply(200, []);
       expect(

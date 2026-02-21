@@ -704,6 +704,33 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 ## commitBodyTable
 
+## commitHourlyLimit
+
+This config option limits the number of commits Renovate pushes in an hour.
+It includes commits pushed while creating a new branch or rebasing an existing one.
+
+Use `commitHourlyLimit` to strictly control the rate at which Renovate triggers CI runs.
+Both branch creation and rebasing trigger CI runs, so limiting these operations helps you control your CI load.
+
+For example, with `commitHourlyLimit: 2`, in a given hour Renovate might:
+
+- Create 2 new branches (triggering 2 CI runs), then stop until the next hour, or
+- Create 1 new branch and rebase 1 existing branch (2 CI runs total), then stop
+
+This limit is enforced on a per-repository basis and per hourly period (`:00` through `:59`).
+
+This setting differs from `prHourlyLimit` in an important way:
+
+- `prHourlyLimit` only limits PR _creation_. Renovate can still rebase existing branches, which triggers additional CI runs
+- `commitHourlyLimit` limits both branch creation _and_ automatic rebasing, giving you stricter control over CI usage
+
+If you want strict control over CI load, use `commitHourlyLimit`.
+If you only want to limit the rate of _new_ PRs, use [prHourlyLimit](#prhourlylimit).
+
+<!-- prettier-ignore -->
+!!! tip
+    Manual rebases (requested via checkbox, Dependency Dashboard, or rebase label) always bypass this limit.
+
 ## commitMessage
 
 ## commitMessageAction
@@ -1920,7 +1947,9 @@ For example, to group all non-major devDependencies updates together into a sing
 
 <!-- prettier-ignore -->
 !!! note
-    Replacement updates and lock file maintenance will never be grouped.
+    Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
 
 ## groupSlug
 
@@ -2590,30 +2619,8 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-| Manager           | Lockfile                                           |
-| ----------------- | -------------------------------------------------- |
-| `bun`             | `bun.lockb`, `bun.lock`                            |
-| `bundler`         | `Gemfile.lock`                                     |
-| `cargo`           | `Cargo.lock`                                       |
-| `composer`        | `composer.lock`                                    |
-| `conan`           | `conan.lock`                                       |
-| `devbox`          | `devbox.lock`                                      |
-| `gleam`           | `manifest.toml`                                    |
-| `gradle`          | `gradle.lockfile`                                  |
-| `helmv3`          | `Chart.lock`                                       |
-| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
-| `mix`             | `mix.lock`                                         |
-| `nix`             | `flake.lock`                                       |
-| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
-| `nuget`           | `packages.lock.json`                               |
-| `pep621`          | `pdm.lock`, `uv.lock`                              |
-| `pip-compile`     | `requirements.txt`                                 |
-| `pipenv`          | `Pipfile.lock`                                     |
-| `pixi`            | `pixi.lock`                                        |
-| `poetry`          | `poetry.lock`                                      |
-| `pub`             | `pubspec.lock`                                     |
-| `terraform`       | `.terraform.lock.hcl`                              |
-| `uv`              | `uv.lock`                                          |
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
+<!-- Autogenerate end -->
 
 Support for new lock files may be added via feature request.
 
@@ -3728,7 +3735,9 @@ You can suggest a new community package rule by editing [the `replacements.json`
 
 <!-- prettier-ignore -->
 !!! note
-    Replacement updates and lock file maintenance will never be grouped.
+    Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
 
 ### replacementNameTemplate
 
@@ -4895,7 +4904,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 
 <!-- prettier-ignore -->
 !!! note
-    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
     This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
     In short: vulnerability alerts "skip the line".
 
