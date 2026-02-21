@@ -1000,6 +1000,11 @@ export async function setBranchStatus({
     logger.warn('Failed to retrieve commit pipeline');
   }
 
+  if (options.pipeline_id === undefined) {
+    logger.debug('Skipping branch status update because no pipeline was found');
+    return;
+  }
+
   try {
     await gitlabApi.postJson(url, { body: options });
 
