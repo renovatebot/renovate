@@ -325,7 +325,7 @@
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
     "@vitest/coverage-v8": "4.0.18",
-    "@vitest/eslint-plugin": "1.6.7",
+    "@vitest/eslint-plugin": "1.6.9",
     "ajv": "8.18.0",
     "ajv-formats": "3.0.1",
     "aws-sdk-client-mock": "4.1.0",
