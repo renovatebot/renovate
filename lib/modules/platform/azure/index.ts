@@ -13,6 +13,7 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { setTimeout } from 'timers/promises';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -101,6 +102,12 @@ export function initPlatform({
   if (!token && !(username && password)) {
     throw new Error(
       'Init: You must configure an Azure DevOps token, or a username and password',
+    );
+  }
+  const azureAuthType = GlobalConfig.get('azureAuthType', 'auto');
+  if (azureAuthType !== 'auto' && !token) {
+    throw new Error(
+      `Init: azureAuthType is set to "${azureAuthType}" but no token is configured`,
     );
   }
   // TODO: Add a connection check that endpoint/token combination are valid (#9593)

@@ -15,6 +15,7 @@ import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { partial } from '~test/util.ts';
+import type { GlobalConfig as _GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -40,10 +41,16 @@ describe('modules/platform/azure/index', () => {
   let azureHelper: Mocked<typeof import('./azure-helper.ts')>;
   let git: Mocked<typeof _git>;
   let logger: MockedObject<typeof _logger>;
+  let GlobalConfig: typeof _GlobalConfig;
 
   beforeEach(async () => {
     // reset module
     vi.resetModules();
+    const globalConfigModule = await vi.importActual<
+      typeof import('../../../config/global.ts')
+    >('../../../config/global.ts');
+    GlobalConfig = globalConfigModule.GlobalConfig;
+    GlobalConfig.reset();
     hostRules = await vi.importMock('../../../util/host-rules');
     azure = await vi.importActual('.');
     azureApi = await vi.importMock('./azure-got-wrapper');
@@ -140,6 +147,54 @@ describe('modules/platform/azure/index', () => {
           token: 'token',
         }),
       ).toMatchSnapshot();
+    });
+
+    it('should throw if azureAuthType is bearer but no token', () => {
+      GlobalConfig.set({ azureAuthType: 'bearer' });
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          username: 'user',
+          password: 'pass',
+        }),
+      ).toThrow(
+        'Init: azureAuthType is set to "bearer" but no token is configured',
+      );
+    });
+
+    it('should throw if azureAuthType is pat but no token', () => {
+      GlobalConfig.set({ azureAuthType: 'pat' });
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          username: 'user',
+          password: 'pass',
+        }),
+      ).toThrow(
+        'Init: azureAuthType is set to "pat" but no token is configured',
+      );
+    });
+
+    it('should init with azureAuthType bearer and token', async () => {
+      GlobalConfig.set({ azureAuthType: 'bearer' });
+      const res = await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        token: 'my-bearer-token',
+      });
+      expect(res).toEqual({
+        endpoint: 'https://dev.azure.com/renovate12345/',
+      });
+    });
+
+    it('should init with azureAuthType pat and token', async () => {
+      GlobalConfig.set({ azureAuthType: 'pat' });
+      const res = await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        token: 'my-pat-token',
+      });
+      expect(res).toEqual({
+        endpoint: 'https://dev.azure.com/renovate12345/',
+      });
     });
   });
 

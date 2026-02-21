@@ -1,9 +1,15 @@
 import * as azure from 'azure-devops-node-api';
-import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
+import {
+  getBasicHandler,
+  getBearerHandler,
+  getHandlerFromToken,
+  getPersonalAccessTokenHandler,
+} from 'azure-devops-node-api';
 import type { ICoreApi } from 'azure-devops-node-api/CoreApi.js';
 import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
+import { GlobalConfig } from '../../../config/global.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 
@@ -14,6 +20,14 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {
     return getBasicHandler(config.username, config.password, true);
   }
+  const azureAuthType = GlobalConfig.get('azureAuthType', 'auto');
+  if (azureAuthType === 'bearer') {
+    return getBearerHandler(config.token!, true);
+  }
+  if (azureAuthType === 'pat') {
+    return getPersonalAccessTokenHandler(config.token!, true);
+  }
+  // 'auto' — delegate to azure-devops-node-api library heuristic
   // TODO: token can be undefined here (#22198)
   return getHandlerFromToken(config.token!, true);
 }

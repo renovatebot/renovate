@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import { GlobalConfig } from '../../../config/global.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -12,6 +13,9 @@ import {
 } from './util.ts';
 
 describe('modules/platform/azure/util', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
   describe('getGitStatusContextCombinedName', () => {
     it('should return undefined if null context passed', () => {
       const contextName = getGitStatusContextCombinedName(null);
@@ -137,6 +141,35 @@ describe('modules/platform/azure/util', () => {
     it('should configure bearer token', () => {
       const res = getStorageExtraCloneOpts({ token: 'token' });
       expect(res).toMatchSnapshot();
+    });
+
+    it('should use bearer when azureAuthType is bearer even for 52-char token', () => {
+      GlobalConfig.set({ azureAuthType: 'bearer' });
+      const token = '1234567890123456789012345678901234567890123456789012';
+      const res = getStorageExtraCloneOpts({ token });
+      expect(res['-c']).toContain('AUTHORIZATION: bearer');
+      expect(res['-c']).toContain(token);
+      expect(res['-c']).not.toContain('basic');
+    });
+
+    it('should use basic when azureAuthType is pat even for short token', () => {
+      GlobalConfig.set({ azureAuthType: 'pat' });
+      const res = getStorageExtraCloneOpts({ token: 'short-token' });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+      expect(res['-c']).not.toContain('bearer');
+    });
+
+    it('should use bearer for non-52-char token in auto mode', () => {
+      GlobalConfig.set({ azureAuthType: 'auto' });
+      const res = getStorageExtraCloneOpts({ token: 'short-token' });
+      expect(res['-c']).toContain('AUTHORIZATION: bearer');
+    });
+
+    it('should use basic for 52-char token in auto mode', () => {
+      GlobalConfig.set({ azureAuthType: 'auto' });
+      const token = '1234567890123456789012345678901234567890123456789012';
+      const res = getStorageExtraCloneOpts({ token });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
     });
   });
 

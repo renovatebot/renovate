@@ -249,6 +249,32 @@ For example:
 }
 ```
 
+## azureAuthType
+
+Configure the authentication type for the Azure DevOps platform.
+By default (`"auto"`), Renovate uses the `azure-devops-node-api` library's heuristic to detect the token type based on its format.
+Set to `"bearer"` to explicitly use Microsoft Entra ID (AAD) OAuth Bearer tokens, or `"pat"` to force Personal Access Token authentication.
+
+| Value      | Auth header                   | Use case                                                           |
+| ---------- | ----------------------------- | ------------------------------------------------------------------ |
+| `"auto"`   | Detected by token format      | Default, backward-compatible                                       |
+| `"pat"`    | `Basic base64("PAT:<token>")` | Azure DevOps Personal Access Tokens                                |
+| `"bearer"` | `Bearer <token>`              | Microsoft Entra ID tokens (service principals, managed identities) |
+
+For example, to use a Microsoft Entra ID Bearer token:
+
+```json
+{
+  "platform": "azure",
+  "endpoint": "https://dev.azure.com/my-organization",
+  "azureAuthType": "bearer"
+}
+```
+
+!!! note
+Bearer tokens are only supported on Azure DevOps **Services** (cloud), not Azure DevOps Server (on-premises).
+Entra ID tokens expire after approximately 1 hour — ensure your automation refreshes the token before each Renovate run.
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
