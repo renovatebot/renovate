@@ -1,7 +1,7 @@
-import { execaSync } from 'execa';
+import { execa } from 'execa';
 
-function testRe2() {
-  execaSync(
+async function testRe2() {
+  await execa(
     'node',
     [
       '-e',
@@ -12,8 +12,8 @@ function testRe2() {
   console.log(`Ok.`);
 }
 
-function testSqlite() {
-  execaSync(
+async function testSqlite() {
+  await execa(
     'node',
     [
       '-e',
@@ -24,19 +24,19 @@ function testSqlite() {
   console.log(`Ok.`);
 }
 
-(() => {
+void (async () => {
   console.log('Checking re2 ... ');
   try {
-    testRe2();
+    await testRe2();
   } catch (e) {
     console.error(`Failed.\n${e}`);
     try {
       if (e.exitCode === 1) {
         console.log(`Retry re2 install ...`);
-        execaSync('pnpm', ['rb', 're2'], {
+        await execa('pnpm', ['rb', 're2'], {
           stdio: 'inherit',
         });
-        testRe2();
+        await testRe2();
         return;
       }
     } catch (e1) {
@@ -47,19 +47,19 @@ function testSqlite() {
   }
 })();
 
-(() => {
+void (async () => {
   console.log('Checking better-sqlite3 ... ');
   try {
-    testSqlite();
+    await testSqlite();
   } catch (e) {
     console.error(`Failed.\n${e}`);
     try {
       if (e.exitCode === 1) {
         console.log(`Retry better-sqlite3 install ...`);
-        execaSync('pnpm', ['rb', 'better-sqlite3'], {
+        await execa('pnpm', ['rb', 'better-sqlite3'], {
           stdio: 'inherit',
         });
-        testSqlite();
+        await testSqlite();
         return;
       }
     } catch (e1) {
