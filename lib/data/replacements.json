@@ -11,7 +11,6 @@
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
       "replacements:edb-jdbc-to-enterprisedb",
-      "replacements:edb-jdbc18-to-enterprisedb",
       "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
@@ -248,19 +247,14 @@
     ]
   },
   "edb-jdbc-to-enterprisedb": {
-    "description": "`com.edb:edb-jdbc` was moved to `com.enterprisedb:edb-jdbc`.",
+    "description": "`com.edb:edb-jdbc` and `com.edb:edb-jdbc18` were moved to `com.enterprisedb:edb-jdbc`.",
     "packageRules": [
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["com.edb:edb-jdbc"],
         "replacementName": "com.enterprisedb:edb-jdbc",
         "replacementVersion": "42.5.4.2"
-      }
-    ]
-  },
-  "edb-jdbc18-to-enterprisedb": {
-    "description": "`com.edb:edb-jdbc18` was moved to `com.enterprisedb:edb-jdbc`.",
-    "packageRules": [
+      },
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["com.edb:edb-jdbc18"],
