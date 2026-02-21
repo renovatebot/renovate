@@ -61,6 +61,7 @@ describe('modules/manager/mise/extract', () => {
       committed = "1.1.7"
       conan = "2.24.0"
       consul = "1.14.3"
+      gh = "2.87.0"
       dotenv-linter = "3.3.0"
       hivemind = "1.1.0"
       hk = "1.1.2"
@@ -158,6 +159,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'consul',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'hashicorp/consul',
+          },
+          {
+            currentValue: '2.87.0',
+            datasource: 'github-releases',
+            depName: 'gh',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'cli/cli',
           },
           {
             currentValue: '3.3.0',
