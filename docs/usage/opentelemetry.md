@@ -84,6 +84,8 @@ Renovate does not currently support logging in an OTLP format.
 To help you debug, you can print the telemetry to the console.
 Use the environment variable `RENOVATE_TRACING_CONSOLE_EXPORTER`.
 
+You can also set `OTEL_LOG_LEVEL` to control the log level of OpenTelemetry's internal [diagnostics](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/#troubleshooting), which can be helpful for debugging.
+
 ## Help wanted
 
 We're continually looking to improve Renovate's instrumentation, and are aware there may be gaps in instrumentation.
