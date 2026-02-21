@@ -77,6 +77,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: openJdkMatches.version,
+          replaceString: version,
+          autoReplaceStringTemplate: 'openjdk-{{{newValue}}}',
         };
       }
       const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
@@ -87,6 +89,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: adoptOpenJdkMatches.version,
+          replaceString: version,
+          autoReplaceStringTemplate: 'adoptopenjdk-{{{newValue}}}',
         };
       }
       const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
@@ -97,6 +101,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: temurinJdkMatches.version,
+          replaceString: version,
+          autoReplaceStringTemplate: 'temurin-{{{newValue}}}',
         };
       }
       const correttoJdkMatches = regEx(/^corretto-(?<version>\d\S+)/).exec(
@@ -107,6 +113,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: correttoJdkMatches.version,
+          replaceString: version,
+          autoReplaceStringTemplate: 'corretto-{{{newValue}}}',
         };
       }
       const zuluJdkMatches = regEx(/^zulu-(?<version>\d\S+)/).exec(
@@ -117,6 +125,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: zuluJdkMatches.version,
+          replaceString: version,
+          autoReplaceStringTemplate: 'zulu-{{{newValue}}}',
         };
       }
       const oracleGraalvmJdkMatches = regEx(
@@ -127,6 +137,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: oracleGraalvmJdkMatches.version,
+          replaceString: version,
+          autoReplaceStringTemplate: 'oracle-graalvm-{{{newValue}}}',
         };
       }
 
@@ -300,6 +312,8 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
           datasource: GithubTagsDatasource.id,
           packageName: 'apache/kafka',
           currentValue: apacheMatches.version,
+          replaceString: version,
+          autoReplaceStringTemplate: 'apache-{{{newValue}}}',
         };
       }
 
