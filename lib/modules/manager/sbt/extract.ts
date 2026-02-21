@@ -40,6 +40,11 @@ interface Ctx {
   depType?: string;
   useScalaVersion?: boolean;
   variableName?: string;
+
+  // Use to contain temporary object name
+  // when parsing anonymous object structs.
+  // See objectAssignmentMatch.
+  currentObjectName?: string;
 }
 
 const scala = lang.createLang('scala');
@@ -56,7 +61,26 @@ const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
   .op(':=')
   .alt(
-    q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
+    // Dotted symbol. Important to have this first in the `alt` as otherwise
+    // the tree walker will eager parse a simple symbol and stop there.
+    q
+      .sym<Ctx>((ctx, { value: varName }) => {
+        // keep the first part of the path in context
+        ctx.currentVarName = varName;
+        return ctx;
+      })
+      .op('.')
+      .sym((ctx, { value: varName }) => {
+        // build the full variable name from what we saved earlier
+        const dottedVariableName = ctx.currentVarName + '.' + varName;
+        const currentValue = ctx.vars[dottedVariableName];
+        if (currentValue) {
+          ctx.scalaVersion = currentValue;
+        }
+        delete ctx.currentVarName;
+        return ctx;
+      }),
+    // Simple symbol defined previously
     q.sym<Ctx>((ctx, { value: varName }) => {
       const scalaVersion = ctx.vars[varName];
       if (scalaVersion) {
@@ -64,6 +88,8 @@ const scalaVersionMatch = q
       }
       return ctx;
     }),
+    // Direct string
+    q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
@@ -127,6 +153,41 @@ const variableDefinitionMatch = q
   )
   .join(variableValueMatch);
 
+// Parses objects fields of the form `{name} = "{version}"`.
+const objectFieldMatch = q
+  .sym<Ctx>((ctx, { value: fieldName }) => ({
+    ...ctx,
+    currentVarName: `${ctx.currentObjectName}.${fieldName}`,
+  }))
+  .op('=')
+  .str((ctx, { value }) => {
+    ctx.vars[ctx.currentVarName!] = value;
+    delete ctx.currentVarName;
+    return ctx;
+  });
+
+// Parses anonymous objects of the form
+// val {objName} = new {
+//   {name} = "{version}"
+// }
+// and introduces a `objName.name` variable with value "{version}"
+// in the context.
+const objectAssignmentMatch = q
+  .sym<Ctx>('val')
+  .sym((ctx, { value: objectName }) => ({
+    ...ctx,
+    currentObjectName: objectName,
+  }))
+  .op('=')
+  .sym('new')
+  .tree({
+    search: q.many(objectFieldMatch),
+  })
+  .handler((ctx) => {
+    delete ctx.currentObjectName;
+    return ctx;
+  });
+
 const groupIdMatch = q.alt<Ctx>(
   q.sym<Ctx>((ctx, { value: varName }) => {
     const currentGroupId = ctx.vars[varName];
@@ -150,6 +211,27 @@ const artifactIdMatch = q.alt<Ctx>(
 );
 
 const versionMatch = q.alt<Ctx>(
+  // Dotted symbol. Important to have this first in the `alt` as otherwise
+  // the tree walker will eager parse a simple symbol and stop there.
+  q
+    .sym<Ctx>((ctx, { value: varName }) => {
+      // keep the first part of the path in context
+      ctx.currentVarName = varName;
+      return ctx;
+    })
+    .op('.')
+    .sym((ctx, { value: varName }) => {
+      // build the full variable name from what we saved earlier
+      const dottedVariableName = ctx.currentVarName + '.' + varName;
+      const currentValue = ctx.vars[dottedVariableName];
+      if (currentValue) {
+        ctx.currentValue = currentValue;
+        ctx.variableName = dottedVariableName;
+      }
+      delete ctx.currentVarName;
+      return ctx;
+    }),
+  // Simple symbol defined earlier
   q.sym<Ctx>((ctx, { value: varName }) => {
     const currentValue = ctx.vars[varName];
     if (currentValue) {
@@ -158,6 +240,7 @@ const versionMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
+  // Direct string
   q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })),
 );
 
@@ -292,6 +375,7 @@ const query = q.tree<Ctx>({
     sbtPluginMatch,
     addResolverMatch,
     variableDefinitionMatch,
+    objectAssignmentMatch,
   ),
   postHandler: registryUrlHandler,
 });
