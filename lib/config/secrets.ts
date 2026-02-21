@@ -96,11 +96,9 @@ export function applySecretsAndVariablesToConfig(
     deleteSecrets,
   );
 
-  // Also resolve {{ env.X }} patterns using the merged environment
-  // (process.env filtered + customEnvVariables + userEnv)
   return replaceInterpolatedValuesInObject(
     configWithSecrets,
-    getChildEnv({}),
+    getChildEnv(),
     options.env,
     false,
   );
