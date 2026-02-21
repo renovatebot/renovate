@@ -34,7 +34,7 @@ export function getBucket(
   if (fromMajor !== toMajor) {
     if (separateMultipleMajor) { 
       if (separateMultipleMinor) {
-        return `v${toMajor}.${toMinor}
+        return `v${toMajor}.${toMinor}`;
       } 
       return `v${toMajor}`;
     }
