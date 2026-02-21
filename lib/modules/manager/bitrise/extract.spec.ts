@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { BitriseDatasource } from '../../datasource/bitrise';
-import { extractPackageFile } from '.';
+import { BitriseDatasource } from '../../datasource/bitrise/index.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/bitrise/extract', () => {
   describe('extractPackageFile()', () => {

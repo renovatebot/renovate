@@ -1,7 +1,7 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile };
 

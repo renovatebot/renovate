@@ -1,8 +1,8 @@
-import { setTimeout } from 'timers/promises';
-import { isArray } from '@sindresorhus/is';
+import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
+import { setTimeout } from 'timers/promises';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -12,23 +12,23 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { coerceArray } from '../../../util/array';
-import { noLeadingAtSymbol, parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { GitlabHttpOptions } from '../../../util/http/gitlab';
-import { setBaseUrl } from '../../../util/http/gitlab';
-import type { HttpResponse } from '../../../util/http/types';
-import { parseInteger } from '../../../util/number';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
-import type { EmailAddress } from '../../../util/schema-utils';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
+import { setBaseUrl } from '../../../util/http/gitlab.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { parseInteger } from '../../../util/number.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import type { EmailAddress } from '../../../util/schema-utils/index.ts';
+import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -47,35 +47,36 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
   getUserID,
   gitlabApi,
   isUserBusy,
-} from './http';
-import { getMR, updateMR } from './merge-request';
-import { GitlabPrCache } from './pr-cache';
-import type { GitLabMergeRequest } from './schema';
-import { LastPipelineId } from './schema';
+} from './http.ts';
+import { getMR, updateMR } from './merge-request.ts';
+import { GitlabPrCache } from './pr-cache.ts';
+import type { GitLabMergeRequest } from './schema.ts';
+import { LastPipelineId } from './schema.ts';
 import type {
   GitlabComment,
   GitlabIssue,
   GitlabPr,
   MergeMethod,
   RepoResponse,
-} from './types';
+} from './types.ts';
 import {
   DRAFT_PREFIX,
   DRAFT_PREFIX_DEPRECATED,
   defaults,
   getRepoUrl,
   prInfo,
-} from './utils';
-export { extractRulesFromCodeOwnersLines } from './code-owners';
+} from './utils.ts';
+
+export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
   repository: string;
@@ -480,6 +481,7 @@ export async function getBranchStatus(
   res
     .filter((check) => !check.allow_failure)
     .forEach((check) => {
+      // v8 ignore else -- TODO: add test #40625
       if (status !== 'red') {
         // if red, stay red
         let mappedStatus: BranchStatus =
@@ -601,12 +603,21 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJsonUnchecked<{
           merge_status: string;
           detailed_merge_status?: string;
+          merge_when_pipeline_succeeds?: boolean;
           pipeline: {
             status: string;
           };
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+
+        // Exit early if merge_when_pipeline_succeeds is already set
+        if (body.merge_when_pipeline_succeeds === true) {
+          logger.debug(
+            'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+          );
+          return;
+        }
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
@@ -829,6 +840,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\bPR\b/g), 'MR')
     .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+    .replace(regEx(/\]\(\.\.\/issues\//g), '](#')
     // Strip unicode null characters as GitLab markdown does not permit them
     .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
   return smartTruncate(desc, maxBodyLength());
@@ -951,6 +963,7 @@ export async function setBranchStatus({
     context,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (targetUrl) {
     options.target_url = targetUrl;
   }
@@ -1010,11 +1023,13 @@ export async function setBranchStatus({
 // Issue
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
+  // v8 ignore else -- TODO: add test #40625
   if (!config.issueList) {
     const searchParams: Record<string, string> = {
       per_page: '100',
       state: 'opened',
     };
+    // v8 ignore else -- TODO: add test #40625
     if (!config.ignorePrAuthor) {
       searchParams.scope = 'created_by_me';
     }
@@ -1215,21 +1230,21 @@ export async function addReviewers(
 
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
-  try {
-    newReviewerIDs = (
-      await p.all(
-        newReviewers.map((r) => async () => {
-          try {
-            return [await getUserID(r)];
-          } catch {
-            // Unable to fetch userId, try resolve as a group
-            return getMemberUserIDs(r);
-          }
-        }),
-      )
-    ).flat();
-  } catch (err) {
-    logger.warn({ err }, 'Failed to get IDs of the new reviewers');
+  newReviewerIDs = (
+    await p.all(
+      newReviewers.map((r) => async () => {
+        try {
+          return [await getUserID(r)];
+        } catch {
+          // Unable to fetch userId, try resolve as a group
+          return getMemberUserIDs(r);
+        }
+      }),
+    )
+  ).flat();
+
+  if (isNonEmptyArray(newReviewers) && isEmptyArray(newReviewerIDs)) {
+    logger.warn('Failed to get IDs of the new reviewers');
     return;
   }
 
@@ -1338,6 +1353,7 @@ export async function ensureComment({
       maxBodyLength(),
     );
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
         commentNeedsUpdating = comment.body !== body;
@@ -1347,6 +1363,7 @@ export async function ensureComment({
     logger.debug(`Ensuring content-only comment in #${number}`);
     body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body === body) {
         commentId = comment.id;
         commentNeedsUpdating = false;
@@ -1384,6 +1401,7 @@ export async function ensureCommentRemoval(
   const comments = await getComments(issueNo);
   let commentId: number | null | undefined = null;
 
+  // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
     const byTopic = (comment: GitlabComment): boolean =>
       comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -1394,6 +1412,7 @@ export async function ensureCommentRemoval(
     commentId = comments.find(byContent)?.id;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }

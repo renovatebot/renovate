@@ -1,8 +1,9 @@
-import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import type { HostRule } from '../../types';
-import * as memCache from '../cache/memory';
-import * as hostRules from '../host-rules';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import * as memCache from '../cache/memory/index.ts';
+import * as hostRules from '../host-rules.ts';
 import {
   getMergeConfidenceLevel,
   initConfig,
@@ -10,8 +11,7 @@ import {
   isActiveConfidenceLevel,
   resetConfig,
   satisfiesConfidenceLevel,
-} from '.';
-import * as httpMock from '~test/http-mock';
+} from './index.ts';
 
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';

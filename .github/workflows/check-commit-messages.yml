@@ -1,0 +1,55 @@
+name: Check Commit Messages
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  closes-issue-or-discussion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for 'Closes \#' in commit messages
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            // Co-authored-by: Claude Sonnet 4.5 (GitHub Copilot)
+
+            // Get all commits in this PR using the GitHub API
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+
+            // Check each commit message for closing keywords
+            const violatingCommits = [];
+            // Matches: closes #123, fixes #123, closes: #123, etc.
+            const closingPattern = /(closes|fixes|resolves|fixed|closed|resolved):?\s+#\d+/i;
+
+            for (const commit of commits) {
+              const message = commit.commit.message;
+              if (closingPattern.test(message)) {
+                const shortSha = commit.sha.substring(0, 7);
+                const firstLine = message.split('\n')[0];
+                violatingCommits.push({ sha: shortSha, message: firstLine });
+              }
+            }
+
+            // Report results
+            if (violatingCommits.length > 0) {
+              let errorMessage = `Found ${violatingCommits.length} commit(s) with issue closing keywords:\n\n`;
+              for (const commit of violatingCommits) {
+                errorMessage += `- ${commit.sha}: ${commit.message}\n`;
+              }
+              errorMessage += `\nCommit messages should not contain closing keywords (closes, fixes, resolves, etc.). Use the PR description instead.`;
+              core.setFailed(errorMessage);
+            } else {
+              core.info('✓ No commits with issue closing keywords found');
+            }

@@ -1,6 +1,6 @@
-import { logger } from '../../../../logger';
-import { getDatasourceList } from '../../../../modules/datasource';
-import type { HostRule } from '../../../../types';
+import { logger } from '../../../../logger/index.ts';
+import { getDatasourceList } from '../../../../modules/datasource/index.ts';
+import type { HostRule } from '../../../../types/index.ts';
 
 type AuthField = 'token' | 'username' | 'password';
 

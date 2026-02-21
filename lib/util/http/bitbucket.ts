@@ -1,7 +1,7 @@
 import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
-import type { PagedResult } from '../../modules/platform/bitbucket/types';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import type { PagedResult } from '../../modules/platform/bitbucket/types.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 const MAX_PAGES = 100;
 const MAX_PAGELEN = 100;
@@ -26,6 +26,12 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     super(type, options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate', 'pagelen'] as (keyof BitbucketHttpOptions)[]);
+  }
+
   protected override async requestJsonUnsafe<T>(
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<BitbucketHttpOptions>,
@@ -48,6 +54,7 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     );
 
     if (paginate && isPagedResult(result.body)) {
+      // v8 ignore else -- TODO: add test #40625
       if (opts.httpOptions) {
         opts.httpOptions.memCache = false;
       }
@@ -71,6 +78,7 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
       /* v8 ignore next -- hard to test all branches */
       resultBody.size =
         page <= MAX_PAGES ? resultBody.values.length : undefined;
+      // v8 ignore next -- hard to test all branches
       resultBody.next = page <= MAX_PAGES ? nextURL : undefined;
     }
 

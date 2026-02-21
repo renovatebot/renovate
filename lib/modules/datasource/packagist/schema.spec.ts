@@ -1,5 +1,5 @@
-import type { Timestamp } from '../../../util/timestamp';
-import type { ReleaseResult } from '../types';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import type { ReleaseResult } from '../types.ts';
 import {
   ComposerRelease,
   ComposerReleases,
@@ -7,7 +7,7 @@ import {
   RegistryMeta,
   parsePackagesResponse,
   parsePackagesResponses,
-} from './schema';
+} from './schema.ts';
 
 describe('modules/datasource/packagist/schema', () => {
   describe('MinifiedArray', () => {

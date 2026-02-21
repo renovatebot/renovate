@@ -1,4 +1,4 @@
-import type { RenovateConfig, RepoGlobalConfig } from './types';
+import type { RenovateConfig, RepoGlobalConfig } from './types.ts';
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
@@ -6,17 +6,20 @@ export class GlobalConfig {
     'allowCustomCrateRegistries',
     'allowPlugins',
     'allowScripts',
+    'allowShellExecutorForPostUpgradeCommands',
     'allowedCommands',
     'allowedEnv',
     'allowedHeaders',
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
     'cachePrivatePackages',
     'cacheTtlOverride',
+    'configFileNames',
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
@@ -37,10 +40,13 @@ export class GlobalConfig {
     'localDir',
     'migratePresets',
     'onboardingAutoCloseAge',
+    'onboardingBranch',
     'platform',
     'presetCachePersistence',
+    'repositoryCacheForceLocal',
     's3Endpoint',
     's3PathStyle',
+    'toolSettings',
     'userAgent',
   ];
 

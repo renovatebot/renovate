@@ -1,6 +1,6 @@
-import type { UpdateLockedConfig } from '../types';
-import { updateLockedDependency } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import type { UpdateLockedConfig } from '../types.ts';
+import { updateLockedDependency } from './index.ts';
 
 const lockFile = 'compose.lock';
 

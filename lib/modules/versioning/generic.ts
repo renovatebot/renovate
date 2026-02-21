@@ -1,5 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from './types';
+import type { NewValueConfig, VersioningApi } from './types.ts';
 
 export interface GenericVersion {
   release: number[];
@@ -13,8 +13,7 @@ export type VersionComparator = (version: string, other: string) => number;
 
 export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion,
-> implements VersioningApi
-{
+> implements VersioningApi {
   private _getSection(version: string, index: number): number | null {
     const parsed = this._parse(version);
     return parsed && parsed.release.length > index

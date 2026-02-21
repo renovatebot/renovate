@@ -1,6 +1,6 @@
 import { isArray, isPlainObject } from '@sindresorhus/is';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
@@ -30,6 +30,12 @@ export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
 
   constructor(hostType?: string, options?: HttpOptions) {
     super(hostType ?? 'gitea', options);
+  }
+
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof GiteaHttpOptions)[]);
   }
 
   protected override async requestJsonUnsafe<T = unknown>(

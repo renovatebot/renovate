@@ -1,4 +1,4 @@
-import type { RepoCache, RepoCacheData } from '../types';
+import type { RepoCache, RepoCacheData } from '../types.ts';
 
 export class RepoCacheNull implements RepoCache {
   private data: RepoCacheData = {};

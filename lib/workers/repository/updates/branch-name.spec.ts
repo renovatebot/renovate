@@ -1,6 +1,6 @@
-import type { BranchUpgradeConfig } from '../../types';
-import { generateBranchName } from './branch-name';
-import { partial } from '~test/util';
+import { logger, partial } from '~test/util.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import { generateBranchName } from './branch-name.ts';
 
 describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
@@ -14,6 +14,76 @@ describe('workers/repository/updates/branch-name', () => {
       });
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('some-variable-name-grouptopic');
+    });
+
+    it('ignores grouping of replacement update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'grouptopic',
+        updateType: 'replacement',
+        depName: 'axios',
+        depNameSanitized: 'axios',
+        branchTopic: '{{depNameSanitized}}-replacement', // default for replacements
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('axios-replacement');
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+        { depName: 'axios' },
+        'Ignoring grouped branch name for replacement update',
+      );
+    });
+
+    it('applies grouping for lockfile maintenance update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'my lockfiles',
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'lock-file-maintenance-my-lockfiles-grouptopic',
+      );
+    });
+
+    it('uses default branch name for lockfile maintenance without groupName', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        branchTopic: 'lock-file-maintenance',
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}',
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('lock-file-maintenance');
+    });
+
+    it('separates lockFileMaintenance from non-lockFileMaintenance with same groupName', () => {
+      const groupConfig = {
+        branchName: '{{groupSlug}}-{{branchTopic}}',
+        branchTopic: 'grouptopic',
+      };
+      const lockFileUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'lockFileMaintenance',
+        depName: 'lock-file',
+        group: groupConfig,
+      });
+      const regularUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'minor',
+        depName: 'axios',
+        group: groupConfig,
+      });
+      generateBranchName(lockFileUpdate);
+      generateBranchName(regularUpdate);
+      expect(lockFileUpdate.branchName).toBe(
+        'lock-file-maintenance-all-grouptopic',
+      );
+      expect(regularUpdate.branchName).toBe('all-grouptopic');
+      expect(lockFileUpdate.branchName).not.toBe(regularUpdate.branchName);
     });
 
     it('uses groupName if no slug defined, ignores sharedVariableName', () => {

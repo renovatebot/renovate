@@ -1,17 +1,17 @@
-import { dir } from 'tmp-promise';
 import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import * as _exec from '../../../../util/exec';
-import * as _gitAuth from '../../../../util/git/auth';
-import type { StatusResult } from '../../../../util/git/types';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import * as postUpgradeCommands from './execute-post-upgrade-commands';
-import { fs, git, logger, partial } from '~test/util';
+import { fs, git, logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as _exec from '../../../../util/exec/index.ts';
+import * as _gitAuth from '../../../../util/git/auth.ts';
+import type { StatusResult } from '../../../../util/git/types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import * as postUpgradeCommands from './execute-post-upgrade-commands.ts';
 
-vi.mock('../../../../util/exec');
-vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git/auth');
+vi.mock('../../../../util/exec/index.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../../util/git/auth.ts');
 
 const exec = vi.mocked(_exec);
 const gitAuth = vi.mocked(_gitAuth);
@@ -67,7 +67,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -117,7 +117,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -134,6 +134,179 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not execute command with shell mode by default', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: false,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('executes command with shell mode when allowShellExecutorForPostUpgradeCommands=true', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+        allowShellExecutorForPostUpgradeCommands: true,
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: true,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('does not execute command with shell mode when allowShellExecutorForPostUpgradeCommands=false', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+        allowShellExecutorForPostUpgradeCommands: false,
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: false,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
     });
 
     it('creates data file for commands', async () => {
@@ -279,7 +452,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -381,7 +554,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -456,7 +629,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -544,7 +717,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -630,10 +803,13 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         config,
       );
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
-        cwd: localDir,
-        extraEnv: gitEnvVars,
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          extraEnv: gitEnvVars,
+        }),
+      );
       expect(res.artifactErrors).toHaveLength(0);
     });
 
@@ -672,12 +848,21 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         allowedCommands: ['some-command'],
       });
       exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
+      fs.ensureLocalDir.mockResolvedValue(
+        '/default/dir/projects/npm/jest-29.5.0',
+      );
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
-        cwd: 'projects/npm/jest-29.5.0',
-      });
+      expect(fs.ensureLocalDir).toHaveBeenCalledExactlyOnceWith(
+        'projects/npm/jest-29.5.0',
+      );
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: '/default/dir/projects/npm/jest-29.5.0',
+        }),
+      );
     });
 
     it('uses localDir when workingDirTemplate is not provided', async () => {
@@ -714,9 +899,12 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
-        cwd: '/default/dir',
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: '/default/dir',
+        }),
+      );
     });
   });
 });

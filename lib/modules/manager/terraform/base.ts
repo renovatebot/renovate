@@ -1,10 +1,10 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
-import type { ExtractConfig, PackageDependency } from '../types';
-import type { TerraformDefinitionFile } from './hcl/types';
-import type { ProviderLock } from './lockfile/types';
-import { getLockedVersion, massageProviderLookupName } from './util';
+import { regEx } from '../../../util/regex.ts';
+import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
+import type { ExtractConfig, PackageDependency } from '../types.ts';
+import type { TerraformDefinitionFile } from './hcl/types.ts';
+import type { ProviderLock } from './lockfile/types.ts';
+import { getLockedVersion, massageProviderLookupName } from './util.ts';
 
 export abstract class DependencyExtractor {
   /**

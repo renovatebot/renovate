@@ -1,5 +1,5 @@
-import type { RangeConfig } from './types';
-import { getRangeStrategy } from '.';
+import { getRangeStrategy } from './index.ts';
+import type { RangeConfig } from './types.ts';
 
 describe('modules/manager/range', () => {
   it('returns same if not auto', () => {

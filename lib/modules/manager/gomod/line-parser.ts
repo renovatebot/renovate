@@ -1,9 +1,9 @@
 import semver from 'semver';
-import { regEx } from '../../../util/regex';
-import { GoDatasource } from '../../datasource/go';
-import { GolangVersionDatasource } from '../../datasource/golang-version';
-import { isVersion } from '../../versioning/semver';
-import type { PackageDependency } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { GoDatasource } from '../../datasource/go/index.ts';
+import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
+import { isVersion } from '../../versioning/semver/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 function trimQuotes(str: string): string {
   return str.replace(regEx(/^"(.*)"$/), '$1');

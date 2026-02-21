@@ -1,4 +1,4 @@
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/unity3d/extract', () => {
   describe('extractPackageFile()', () => {

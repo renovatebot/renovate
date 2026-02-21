@@ -1,4 +1,3 @@
-/* eslint-disable */
 const ci = !!process.env.CI;
 
 export default {

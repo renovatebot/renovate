@@ -1,7 +1,7 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
-import { logger } from '../../logger';
+import { GlobalConfig } from '../../config/global.ts';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
 
 function assertBaseDir(path: string, allowedDir: string): void {
   if (!path.startsWith(allowedDir)) {

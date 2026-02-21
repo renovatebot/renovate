@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import type { Nullish } from '../../../types';
-import { trimLeadingSlash } from '../../../util/url';
-import type { PackageConfig } from './types';
+import { logger } from '../../../logger/index.ts';
+import type { Nullish } from '../../../types/index.ts';
+import { trimLeadingSlash } from '../../../util/url.ts';
+import type { PackageConfig } from './types.ts';
 
 // Api page size limit 50
 export const pageSize = 50;

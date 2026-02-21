@@ -1,12 +1,13 @@
-import { GlobalConfig } from './global';
-import * as configMigration from './migration';
-import { MigrationsService } from './migrations';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from './global.ts';
+import * as configMigration from './migration.ts';
+import { MigrationsService } from './migrations/index.ts';
 import type {
   MigratedConfig,
   RenovateConfig,
   RenovateSharedConfig,
-} from './types';
-import { logger } from '~test/util';
+} from './types.ts';
+
 interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig;
 }

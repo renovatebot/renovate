@@ -1,34 +1,34 @@
-import { setTimeout } from 'timers/promises';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import type { PartialDeep } from 'type-fest';
-import { GlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import type { FileData } from '../../../types/platform/bitbucket-server';
-import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { deleteBranch } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import type { FileData } from '../../../types/platform/bitbucket-server/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import { deleteBranch } from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import {
   BitbucketServerHttp,
   type BitbucketServerHttpOptions,
   setBaseUrl,
-} from '../../../util/http/bitbucket-server';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { HttpOptions, HttpResponse } from '../../../util/http/types';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { sampleSize } from '../../../util/sample';
-import { sanitize } from '../../../util/sanitize';
-import { isEmailAdress } from '../../../util/schema-utils';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url';
+} from '../../../util/http/bitbucket-server.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { sampleSize } from '../../../util/sample.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { isEmailAdress } from '../../../util/schema-utils/index.ts';
+import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -46,16 +46,17 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { getNewBranchName, repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import { BbsPrCache } from './pr-cache';
+} from '../types.ts';
+import { getNewBranchName, repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { BbsPrCache } from './pr-cache.ts';
 import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
-} from './schema';
-import { ReviewerGroups, User, Users } from './schema';
+  PullRequestMerge,
+} from './schema.ts';
+import { ReviewerGroups, User, Users } from './schema.ts';
 import type {
   BbsConfig,
   BbsPr,
@@ -63,9 +64,13 @@ import type {
   BbsRestPr,
   BbsRestRepo,
   BbsRestUserRef,
-} from './types';
-import * as utils from './utils';
-import { getExtraCloneOpts, parseModifier, splitEscapedSpaces } from './utils';
+} from './types.ts';
+import * as utils from './utils.ts';
+import {
+  getExtraCloneOpts,
+  parseModifier,
+  splitEscapedSpaces,
+} from './utils.ts';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -141,6 +146,7 @@ export async function initPlatform({
     }
     logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
 
+    // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
       defaults.version = bitbucketServerVersion;
     }
@@ -372,7 +378,7 @@ export async function getPr(
   return pr;
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
@@ -384,7 +390,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 function isRelevantPr(
   branchName: string,
@@ -397,7 +403,7 @@ function isRelevantPr(
     matchesState(p.state, state);
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   return await BbsPrCache.getPrs(
@@ -409,7 +415,7 @@ export async function getPrList(): Promise<Pr[]> {
   );
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 export async function findPr({
   branchName,
@@ -691,21 +697,21 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
-  const reviewerSlugs = new Set<string>();
+  const reviewerNames = new Set<string>();
 
   for (const entry of reviewers) {
-    // If entry is an email-address, resolve userslugs
+    // If entry is an email address, resolve username
     if (isEmailAdress(entry)) {
-      const slugs = await getUserSlugsByEmail(entry);
-      for (const slug of slugs) {
-        reviewerSlugs.add(slug);
+      const names = await getUsernamesByEmail(entry);
+      for (const name of names) {
+        reviewerNames.add(name);
       }
     } else {
-      reviewerSlugs.add(entry);
+      reviewerNames.add(entry);
     }
   }
 
-  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerSlugs)], 3, [
+  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerNames)], 3, [
     REPOSITORY_CHANGED,
   ]);
 }
@@ -714,10 +720,10 @@ export async function addReviewers(
  * Resolves Bitbucket users by email address,
  * restricted to users who have REPO_READ permission on the target repository.
  *
- * @param emailAddress - A string that could be the user's email-address.
- * @returns List of user slugs for active, matched users.
+ * @param emailAddress - A string that could be the user's email address.
+ * @returns List of usernames for active, matched users.
  */
-export async function getUserSlugsByEmail(
+export async function getUsernamesByEmail(
   emailAddress: string,
 ): Promise<string[]> {
   try {
@@ -736,12 +742,12 @@ export async function getUserSlugsByEmail(
     if (users.body.length) {
       return users.body
         .filter((u) => u.active && u.emailAddress === emailAddress)
-        .map((u) => u.slug);
+        .map((u) => u.name);
     }
   } catch (err) {
     logger.warn(
       { err, emailAddress },
-      `Failed to resolve email address to user slug`,
+      `Failed to resolve email address to username`,
     );
     throw err;
   }
@@ -759,7 +765,7 @@ async function updatePRAndAddReviewers(
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    // TODO: can `reviewers` be undefined? (#22198)
+    // TODO: can `reviewers` be undefined? (#40625)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
@@ -823,9 +829,7 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   }
 
   logger.debug(`All ${maxAttempts} retry attempts exhausted`);
-  // Can't be `undefined` here.
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
-  throw lastError;
+  throw lastError!;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
@@ -972,6 +976,7 @@ export async function ensureCommentRemoval(
     const comments = await getComments(prNo);
 
     let commentId: number | null | undefined = null;
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       const byTopic = (comment: Comment): boolean =>
         comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -1075,6 +1080,10 @@ export async function createPr({
     config.username,
     pr,
   );
+
+  if (platformPrOptions?.usePlatformAutomerge) {
+    await tryPrAutomerge(pr.number, pr.version!);
+  }
 
   return pr;
 }
@@ -1218,6 +1227,38 @@ export async function mergePr({
   return true;
 }
 
+/**
+ * Enables Bitbucket Server-native automerge for the given PR.
+ * https://confluence.atlassian.com/bitbucketserver094/merge-a-pull-request-1489802114.html#Mergeapullrequest-Auto-mergeapullrequest
+ */
+async function tryPrAutomerge(
+  prNumber: number,
+  prVersion: number,
+): Promise<void> {
+  logger.debug(`automergePr(${prNumber})`);
+
+  if (semver.lt(defaults.version, '8.15.0')) {
+    logger.debug(
+      { prNumber },
+      'Bitbucket Server-native automerge: not supported on this version of Bitbucket. Use 8.15.0 or newer.',
+    );
+    return;
+  }
+
+  try {
+    const body: PullRequestMerge = { autoMerge: true };
+    await bitbucketServerHttp.postJson(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNumber}/merge?version=${prVersion}`,
+      { body },
+    );
+
+    // enabling auto-merge doesn't increase PR version, so we omit updating the cache
+    logger.debug({ prNumber }, 'Bitbucket Server-native automerge: success');
+  } catch (err) {
+    logger.warn({ err, prNumber }, 'Bitbucket Server-native automerge: fail');
+  }
+}
+
 export async function expandGroupMembers(
   reviewers: string[],
 ): Promise<string[]> {
@@ -1305,7 +1346,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (repoGroup) {
     return repoGroup.users
       .filter((user) => user.active)
-      .map((user) => user.slug);
+      .map((user) => user.name);
   }
 
   // If no repo-level group, fall back to project-level group
@@ -1316,7 +1357,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (projectGroup) {
     return projectGroup.users
       .filter((user) => user.active)
-      .map((user) => user.slug);
+      .map((user) => user.name);
   }
 
   // Group not found at either level

@@ -1,17 +1,17 @@
-import { ZodError, z } from 'zod';
+import { ZodError, z } from 'zod/v3';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
-} from '../../constants/error-messages';
-import * as memCache from '../cache/memory';
-import { resetCache } from '../cache/repository';
-import * as hostRules from '../host-rules';
-import * as queue from './queue';
-import * as throttle from './throttle';
-import type { HttpResponse } from './types';
-import { Http, HttpError } from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../../constants/error-messages.ts';
+import * as memCache from '../cache/memory/index.ts';
+import { resetCache } from '../cache/repository/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { Http, HttpError } from './index.ts';
+import * as queue from './queue.ts';
+import * as throttle from './throttle.ts';
+import type { HttpResponse } from './types.ts';
 
 const baseUrl = 'http://renovate.com';
 
@@ -40,7 +40,7 @@ describe('util/http/index', () => {
   it('returns 429 error', async () => {
     httpMock.scope(baseUrl).get('/test').reply(429);
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      'Response code 429 (Too Many Requests)',
+      'Request failed with status code 429 (Too Many Requests): GET http://renovate.com/test',
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -65,9 +65,27 @@ describe('util/http/index', () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      'Response code 404 (Not Found)',
+      'Request failed with status code 404 (Not Found): GET http://renovate.com/test',
     );
     expect(httpMock.allUsed()).toBeTrue();
+  });
+
+  it('does not pass auth on redirects', async () => {
+    hostRules.add({ matchHost: 'renovate.com', token: 'secret' });
+
+    httpMock
+      .scope(baseUrl, { reqheaders: { authorization: 'Bearer secret' } })
+      .get('/test')
+      .reply(302, undefined, {
+        location: 'http://renovate.test/redirected?X-Amz-Algorithm=xxx',
+      });
+
+    httpMock
+      .scope('http://renovate.test', { badheaders: ['authorization'] })
+      .get('/redirected?X-Amz-Algorithm=xxx')
+      .reply(200);
+
+    await expect(http.get('http://renovate.com/test')).resolves.toBeDefined();
   });
 
   it('getJson', async () => {

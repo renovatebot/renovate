@@ -1,13 +1,13 @@
-import { getChangeLogJSON } from '..';
-import type { ChangeLogProject, ChangeLogRelease } from '..';
-import { Fixtures } from '../../../../../../../test/fixtures';
-import * as httpMock from '../../../../../../../test/http-mock';
-import { logger, partial } from '../../../../../../../test/util';
-import * as semverVersioning from '../../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../../util/host-rules';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { getReleaseList, getReleaseNotesMdFile } from '../release-notes';
-import { BitbucketServerChangeLogSource } from './source';
+import { Fixtures } from '../../../../../../../test/fixtures.ts';
+import * as httpMock from '../../../../../../../test/http-mock.ts';
+import { logger, partial } from '../../../../../../../test/util.ts';
+import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as hostRules from '../../../../../../util/host-rules.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import type { ChangeLogProject, ChangeLogRelease } from '../index.ts';
+import { getChangeLogJSON } from '../index.ts';
+import { getReleaseList, getReleaseNotesMdFile } from '../release-notes.ts';
+import { BitbucketServerChangeLogSource } from './source.ts';
 
 const baseUrl = 'https://bitbucket.some.domain.org/';
 const apiBaseUrl = 'https://bitbucket.some.domain.org/rest/api/1.0/';

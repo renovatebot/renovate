@@ -1,9 +1,9 @@
 import { Version, VersionSpec } from '@baszalmstra/rattler';
 import type { SemVer } from 'semver';
 
-import type { RangeStrategy } from '../../../types/versioning';
-import * as pep440 from '../pep440';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import * as pep440 from '../pep440/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 function parse(v: string): Version | null {
   try {
@@ -124,7 +124,7 @@ function isStable(version: string): boolean {
   return !(parse(version)?.isDev ?? true);
 }
 
-function isCompatible(version: string, current?: string): boolean {
+function isCompatible(_version: string, _current?: string): boolean {
   return true;
 }
 
@@ -156,7 +156,7 @@ function getSatisfyingVersion(
     .map((v) => {
       return [new Version(v), v] as const;
     })
-    .filter(([v, raw]) => spec.matches(v))
+    .filter(([v, _raw]) => spec.matches(v))
     .sort((a, b) => {
       return a[0].compare(b[0]);
     });
@@ -178,7 +178,7 @@ function minSatisfyingVersion(
     .map((v) => {
       return [new Version(v), v] as const;
     })
-    .filter(([v, raw]) => spec.matches(v))
+    .filter(([v, _raw]) => spec.matches(v))
     .sort((a, b) => {
       return a[0].compare(b[0]);
     });

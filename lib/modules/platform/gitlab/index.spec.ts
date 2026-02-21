@@ -1,8 +1,9 @@
 // TODO fix mocks
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
-import type { RepoParams } from '..';
-import { GlobalConfig } from '../../../config/global';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -10,21 +11,20 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
-} from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
-import * as memCache from '../../../util/cache/memory';
-import * as repoCache from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import { toBase64 } from '../../../util/string';
-import * as prBodyModule from '../utils/pr-body';
-import * as gitlab from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { toBase64 } from '../../../util/string.ts';
+import type { RepoParams } from '../index.ts';
+import * as prBodyModule from '../utils/pr-body.ts';
+import * as gitlab from './index.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/git', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/git/index.ts', () => mockDeep());
 vi.mock('timers/promises');
-vi.mock('../utils/pr-body', { spy: true });
+vi.mock('../utils/pr-body.ts', { spy: true });
 
 const timers = vi.mocked(_timers);
 
@@ -1689,7 +1689,7 @@ describe('modules/platform/gitlab/index', () => {
         expect(scope.isDone()).toBeTrue();
       });
 
-      it('should fail to get user IDs', async () => {
+      it('should not fail if some reviewers are unknown', async () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
@@ -1701,10 +1701,37 @@ describe('modules/platform/gitlab/index', () => {
           .get('/api/v4/users?username=someotheruser')
           .reply(404)
           .get('/api/v4/groups/someotheruser/members')
+          .reply(404)
+          .put('/api/v4/projects/undefined/merge_requests/42', {
+            reviewer_ids: [1, 2, 10],
+          })
+          .reply(200);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should warn and return early if new reviewers IDs could be fetched', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(404)
+          .get('/api/v4/groups/someuser/members')
+          .reply(404)
+          .get('/api/v4/users?username=someotheruser')
+          .reply(404)
+          .get('/api/v4/groups/someotheruser/members')
           .reply(404);
 
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
         expect(scope.isDone()).toBeTrue();
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          'Failed to get IDs of the new reviewers',
+        );
       });
 
       it('should add gitlab group members as reviewers to MR', async () => {
@@ -3609,6 +3636,26 @@ describe('modules/platform/gitlab/index', () => {
         'PR platform automerge re-attempted...prNo: 12345',
       );
     });
+
+    it('should skip retries when merge_when_pipeline_succeeds is already enabled', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'ci_must_pass',
+          merge_when_pipeline_succeeds: true,
+          pipeline: {
+            status: 'failed',
+          },
+        });
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+      );
+    });
   });
 
   describe('mergePr(pr)', () => {
@@ -3657,6 +3704,22 @@ These updates have all been created already. To force a retry/rebase of any, cli
       expect(
         gitlab.massageMarkdown('See the following PR: #123 for more details'),
       ).toBe('See the following MR: !123 for more details');
+    });
+
+    it('replaces PR relative link with MR reference', () => {
+      expect(
+        gitlab.massageMarkdown(
+          'See the following PR: [abc](../pull/123) for more details',
+        ),
+      ).toBe('See the following MR: [abc](!123) for more details');
+    });
+
+    it('replaces issues relative link with issue reference', () => {
+      expect(
+        gitlab.massageMarkdown(
+          'Check the [Dependency Dashboard](../issues/123) for more information.',
+        ),
+      ).toBe('Check the [Dependency Dashboard](#123) for more information.');
     });
 
     it('avoids false positives when replacing PR with MR', () => {
