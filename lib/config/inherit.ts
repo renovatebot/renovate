@@ -8,6 +8,7 @@ export class InheritConfig {
     'configFileNames',
     'onboardingAutoCloseAge',
     'onboardingBranch',
+    'onboardingPrTitle',
   ];
 
   private static config: GlobalInheritableConfig = {};

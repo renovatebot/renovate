@@ -167,6 +167,7 @@ export interface GlobalInheritableConfig {
   configFileNames?: string[];
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
+  onboardingPrTitle?: string;
 }
 
 // Config options used only within the global worker
@@ -275,7 +276,6 @@ export interface LegacyAdminConfig {
   onboardingCommitMessage?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
-  onboardingPrTitle?: string;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
 
