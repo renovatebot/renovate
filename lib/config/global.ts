@@ -41,6 +41,7 @@ export class GlobalConfig {
     'migratePresets',
     'onboardingAutoCloseAge',
     'onboardingBranch',
+    'onboardingCommitMessage',
     'platform',
     'presetCachePersistence',
     'repositoryCacheForceLocal',
