@@ -50,7 +50,7 @@ async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   return (
     (await platform.findPr({
       branchName: getInheritedOrGlobal('onboardingBranch')!,
-      prTitle: config.onboardingPrTitle,
+      prTitle: getInheritedOrGlobal('onboardingPrTitle'),
       state: '!open',
       targetBranch: config.baseBranch,
     })) ??

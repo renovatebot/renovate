@@ -5,7 +5,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
 
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {
-  return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;
+  return `${config.semanticCommitType ?? 'chore'}: ${getInheritedOrGlobal('onboardingPrTitle')}`;
 }
 
 export function getDefaultConfigFileName(): string {

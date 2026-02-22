@@ -1,6 +1,7 @@
 import { Fixtures } from '~test/fixtures.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import * as cache from '../../../util/cache/repository/index.ts';
@@ -30,10 +31,11 @@ describe('workers/repository/finalize/repository-statistics', () => {
     beforeEach(() => {
       vi.mocked(platform.getPrList).mockReturnValue(prJson);
       config = partial<RenovateConfig>({
-        onboardingPrTitle: 'Configure Renovate',
         defaultBranch: 'main',
         repository: 'owner/repo',
       });
+
+      GlobalConfig.set({ onboardingPrTitle: 'Configure Renovate' });
     });
 
     it('Calls runRenovateRepoStats', () => {

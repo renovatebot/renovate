@@ -30,7 +30,7 @@ export async function finalizeRepo(
       (pr) =>
         pr.state === 'merged' &&
         pr.title !== 'Configure Renovate' &&
-        pr.title !== config.onboardingPrTitle &&
+        pr.title !== getInheritedOrGlobal('onboardingPrTitle') &&
         pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch'),
     )
   ) {

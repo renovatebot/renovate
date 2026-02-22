@@ -42,6 +42,7 @@ export class GlobalConfig {
     'onboardingAutoCloseAge',
     'onboardingBranch',
     'onboardingConfigFileName',
+    'onboardingPrTitle',
     'platform',
     'presetCachePersistence',
     'repositoryCacheForceLocal',

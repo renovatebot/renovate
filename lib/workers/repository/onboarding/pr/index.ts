@@ -247,7 +247,7 @@ If you need any further assistance then you can also [request help here](${
       const prTitle =
         config.semanticCommits === 'enabled'
           ? getSemanticCommitPrTitle(config)
-          : config.onboardingPrTitle!;
+          : getInheritedOrGlobal('onboardingPrTitle')!;
       const pr = await platform.createPr({
         sourceBranch: onboardingBranch,
         targetBranch: config.defaultBranch!,
