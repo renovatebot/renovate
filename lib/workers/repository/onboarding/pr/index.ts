@@ -134,8 +134,7 @@ export async function ensureOnboardingPr(
     return;
   }
 
-  const onboardingConfigHashComment =
-    await getOnboardingConfigHashComment(config);
+  const onboardingConfigHashComment = await getOnboardingConfigHashComment();
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
@@ -292,9 +291,7 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
   return rebaseCheckBox;
 }
 
-async function getOnboardingConfigHashComment(
-  config: RenovateConfig,
-): Promise<string> {
+async function getOnboardingConfigHashComment(): Promise<string> {
   const configFile = getDefaultConfigFileName();
   const existingContents =
     (await getFile(configFile, getInheritedOrGlobal('onboardingBranch'))) ?? '';
