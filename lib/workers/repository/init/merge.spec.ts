@@ -4,6 +4,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { fs, logger, partial, platform, scm } from '~test/util.ts';
 import * as decrypt from '../../../config/decrypt.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
 import * as _migrate from '../../../config/migration.ts';
 import type { AllConfig } from '../../../config/types.ts';
@@ -44,6 +45,7 @@ function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
 
 beforeEach(() => {
   memCache.init();
+  GlobalConfig.reset();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -387,6 +389,7 @@ describe('workers/repository/init/merge', () => {
         warnings: [],
         errors: [],
       });
+      GlobalConfig.set({ requireConfig: 'ignored' });
       expect(
         await mergeRenovateConfig({
           ...config,

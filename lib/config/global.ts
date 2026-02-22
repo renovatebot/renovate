@@ -45,6 +45,7 @@ export class GlobalConfig {
     'platform',
     'presetCachePersistence',
     'repositoryCacheForceLocal',
+    'requireConfig',
     's3Endpoint',
     's3PathStyle',
     'toolSettings',

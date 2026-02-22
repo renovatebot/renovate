@@ -44,7 +44,10 @@ describe('workers/repository/onboarding/branch/index', () => {
       memCache.init();
       config = getConfig();
       config.repository = 'some/repo';
-      GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        requireConfig: config.requireConfig,
+      });
       OnboardingState.prUpdateRequested = false;
       scm.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
@@ -163,6 +166,10 @@ describe('workers/repository/onboarding/branch/index', () => {
     it('handles skipped onboarding combined with requireConfig = optional', async () => {
       config.requireConfig = 'optional';
       config.onboarding = false;
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        requireConfig: 'optional',
+      });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -178,6 +185,10 @@ describe('workers/repository/onboarding/branch/index', () => {
     it('handles skipped onboarding, requireConfig=ignored', async () => {
       config.requireConfig = 'ignored';
       config.onboarding = false;
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        requireConfig: 'ignored',
+      });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -263,6 +274,10 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('detects repo is onboarded via PR', async () => {
       config.requireConfig = 'optional';
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        requireConfig: 'optional',
+      });
       platform.findPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
