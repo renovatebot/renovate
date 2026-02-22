@@ -1,5 +1,5 @@
-import { logger } from '../logger';
-import { regEx } from './regex';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
 
 export function isSkipComment(comment?: string): boolean {
   if (comment && regEx(/^(renovate|pyup):/).test(comment)) {

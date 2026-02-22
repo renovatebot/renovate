@@ -1,14 +1,15 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import { client as _client } from './client';
-import { GerritScm, configureScm } from './scm';
+import { DateTime } from 'luxon';
+import { git, partial } from '~test/util.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { client as _client } from './client.ts';
+import { GerritScm, configureScm } from './scm.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
   GerritRevisionInfo,
-} from './types';
-import { git, partial } from '~test/util';
+} from './types.ts';
 
-vi.mock('./client');
+vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/scm', () => {
@@ -220,6 +221,52 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
         'curSha',
       );
+    });
+  });
+
+  describe('getBranchUpdateDate()', () => {
+    it('no change found for branch name -> return result from git.getBranchUpdateDate', async () => {
+      const expectedDate = DateTime.fromISO('2023-01-15T10:30:00Z');
+      git.getBranchUpdateDate.mockResolvedValueOnce(expectedDate);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      await expect(gerritScm.getBranchUpdateDate('myBranchName')).resolves.toBe(
+        expectedDate,
+      );
+
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          singleChange: true,
+          refreshCache: true,
+          requestDetails: ['CURRENT_REVISION'],
+        },
+      );
+      expect(git.getBranchUpdateDate).toHaveBeenCalledExactlyOnceWith(
+        'myBranchName',
+      );
+    });
+
+    it('open change found for branchname -> return DateTime from Gerrit change', async () => {
+      const gerritDate = '2023-05-20 14:25:30.123456789';
+      const change = partial<GerritChange>({
+        current_revision: 'currentRevSha',
+        revisions: {
+          currentRevSha: partial<GerritRevisionInfo>({
+            created: gerritDate,
+          }),
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+
+      const result = await gerritScm.getBranchUpdateDate('myBranchName');
+
+      expect(result).toBeInstanceOf(DateTime);
+      expect(result!.toISO()).toBe('2023-05-20T14:25:30.123Z');
+      expect(result!.zone.name).toBe('UTC');
+      expect(git.getBranchUpdateDate).not.toHaveBeenCalled();
     });
   });
 

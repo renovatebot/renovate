@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import * as yaml from '../../../util/yaml';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as yaml from '../../../util/yaml.ts';
+import { extractPackageFile } from './index.ts';
 
 const runnerTestWorkflow = codeBlock`
 jobs:

@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '../../../modules/manager';
-import { matchRegexOrGlobList } from '../../../util/string-match';
-import { presets } from './custom-managers';
+import { extractPackageFile } from '../../../modules/manager/index.ts';
+import { matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { presets } from './custom-managers.preset.ts';
 
 describe('config/presets/internal/custom-managers', () => {
   describe('Update `_VERSION` environment variables in Azure Pipelines files', () => {
@@ -394,14 +394,17 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                    | expected
-        ${'Dockerfile'}         | ${true}
-        ${'foo/Dockerfile'}     | ${true}
-        ${'foo/bar/Dockerfile'} | ${true}
-        ${'Dockerfile-foo'}     | ${true}
-        ${'Dockerfilefoo'}      | ${true}
-        ${'foo/Dockerfile-foo'} | ${true}
-        ${'foo-Dockerfile'}     | ${false}
+        path                              | expected
+        ${'Dockerfile'}                   | ${true}
+        ${'foo/Dockerfile'}               | ${true}
+        ${'foo/bar/Dockerfile'}           | ${true}
+        ${'Dockerfile-foo'}               | ${true}
+        ${'Dockerfilefoo'}                | ${true}
+        ${'something.dockerfile'}         | ${true}
+        ${'something.containerfile'}      | ${true}
+        ${'foo/something.Dockerfile-foo'} | ${true}
+        ${'foo/Dockerfile-foo'}           | ${true}
+        ${'foo-Dockerfile'}               | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),
@@ -801,6 +804,40 @@ describe('config/presets/internal/custom-managers', () => {
           depName: 'mongo',
           replaceString:
             '<!-- renovate: datasource=docker depName=mongo -->\n<mongo.container.version>4.4.6</mongo.container.version>',
+        },
+      ]);
+    });
+  });
+
+  describe('Update `*_version` variables in `.tfvars` files', () => {
+    const customManager = presets.tfvarsVersions.customManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        # renovate: datasource=docker depName=python registryUrl=https://index.docker.io
+        python_version = "3.14.0-alpine"
+        # renovate: datasource=npm depName=pnpm
+        pnpm_version = "10.19.0"
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'terraform.tfvars',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '3.14.0-alpine',
+          datasource: 'docker',
+          depName: 'python',
+          registryUrls: ['https://index.docker.io/'],
+        },
+        {
+          currentValue: '10.19.0',
+          datasource: 'npm',
+          depName: 'pnpm',
         },
       ]);
     });

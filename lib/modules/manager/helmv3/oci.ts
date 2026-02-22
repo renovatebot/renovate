@@ -1,5 +1,5 @@
 import { isNullOrUndefined, isString } from '@sindresorhus/is';
-import type { Repository } from './types';
+import type { Repository } from './types.ts';
 
 export function isOCIRegistry(
   repository: Repository | string | null | undefined,

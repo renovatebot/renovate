@@ -8,29 +8,30 @@ import is, {
   isString,
   isUndefined,
 } from '@sindresorhus/is';
-import { allManagersList, getManagerList } from '../modules/manager';
-import { isCustomManager } from '../modules/manager/custom';
-import type { CustomManager } from '../modules/manager/custom/types';
-import type { HostRule } from '../types';
-import { getExpression } from '../util/jsonata';
-import { regEx } from '../util/regex';
+import type { PlatformId } from '../constants/index.ts';
+import { isCustomManager } from '../modules/manager/custom/index.ts';
+import type { CustomManager } from '../modules/manager/custom/types.ts';
+import { allManagersList, getManagerList } from '../modules/manager/index.ts';
+import type { HostRule } from '../types/index.ts';
+import { getExpression } from '../util/jsonata.ts';
+import { regEx } from '../util/regex.ts';
 import {
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
-} from '../util/string-match';
-import * as template from '../util/template';
-import { parseUrl } from '../util/url';
+} from '../util/string-match.ts';
+import * as template from '../util/template/index.ts';
+import { parseUrl } from '../util/url.ts';
 import {
   hasValidSchedule,
   hasValidTimezone,
-} from '../workers/repository/update/branch/schedule';
-import { getConfigFileNames } from './app-strings';
-import { GlobalConfig } from './global';
-import { migrateConfig } from './migration';
-import { getOptions } from './options';
-import { resolveConfigPresets } from './presets';
-import { supportedDatasources } from './presets/internal/merge-confidence';
+} from '../workers/repository/update/branch/schedule.ts';
+import { getConfigFileNames } from './app-strings.ts';
+import { GlobalConfig } from './global.ts';
+import { migrateConfig } from './migration.ts';
+import { getOptions } from './options/index.ts';
+import { resolveConfigPresets } from './presets/index.ts';
+import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import type {
   AllConfig,
   AllowedParents,
@@ -39,10 +40,10 @@ import type {
   StatusCheckKey,
   ValidationMessage,
   ValidationResult,
-} from './types';
-import { allowedStatusCheckStrings } from './types';
-import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
-import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
+} from './types.ts';
+import { allowedStatusCheckStrings } from './types.ts';
+import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches.ts';
+import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers.ts';
 import {
   getParentName,
   isFalseGlobal,
@@ -50,7 +51,7 @@ import {
   validateNumber,
   validatePlainObject,
   validateRegexManagerFields,
-} from './validation-helpers/utils';
+} from './validation-helpers/utils.ts';
 
 const options = getOptions();
 
@@ -101,7 +102,20 @@ function getDeprecationMessage(option: string): string | undefined {
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
   };
-  return deprecatedOptions[option];
+  if (deprecatedOptions[option]) {
+    return deprecatedOptions[option];
+  }
+
+  const found = options.find((o) => o.name === option);
+  if (!found) {
+    return undefined;
+  }
+
+  if (!found.deprecationMsg) {
+    return undefined;
+  }
+
+  return `The '${option}' option is deprecated: ${found.deprecationMsg}`;
 }
 
 function isInhertConfigOption(key: string): boolean {
@@ -260,7 +274,7 @@ export async function validateConfig(
         !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const options = optionParents[key]?.sort().join(', ');
+        const options = optionParents[key]?.toSorted().join(', ');
         const message = `"${key}" can't be used in "${parentName}". Allowed objects: ${options}.`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -816,7 +830,7 @@ async function validateGlobalConfig(
   warnings: ValidationMessage[],
   errors: ValidationMessage[],
   currentPath: string | undefined,
-  config: RenovateConfig,
+  config: AllConfig,
 ): Promise<void> {
   /* v8 ignore next 5 -- not testable yet */
   if (getDeprecationMessage(key)) {
@@ -825,16 +839,34 @@ async function validateGlobalConfig(
       message: getDeprecationMessage(key)!,
     });
   }
+
+  if (key === 'binarySource' && val === 'docker') {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message:
+        'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
+    });
+  }
+
   if (val !== null) {
+    // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {
       if (isString(val)) {
         if (
           key === 'onboardingConfigFileName' &&
-          !getConfigFileNames().includes(val)
+          !getPossibleConfigFileNames({
+            configFileNames: config.configFileNames,
+            platform: config.platform,
+          }).includes(val)
         ) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${getConfigFileNames().join(', ')}.`,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${getPossibleConfigFileNames(
+              {
+                configFileNames: config.configFileNames,
+                platform: config.platform,
+              },
+            ).join(', ')}.`,
           });
         } else if (
           key === 'repositoryCache' &&
@@ -919,6 +951,7 @@ async function validateGlobalConfig(
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {
+            // v8 ignore else -- TODO: add test #40625
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',
@@ -930,6 +963,7 @@ async function validateGlobalConfig(
         if (key === 'mergeConfidenceDatasources') {
           const allowedValues = supportedDatasources;
           for (const value of val as string[]) {
+            // v8 ignore else -- TODO: add test #40625
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',
@@ -990,4 +1024,19 @@ async function validateGlobalConfig(
       }
     }
   }
+}
+
+function getPossibleConfigFileNames({
+  configFileNames,
+  platform,
+}: {
+  configFileNames?: string[];
+  platform?: PlatformId;
+}): string[] {
+  const filenames = getConfigFileNames(platform);
+  if (isNonEmptyArray(configFileNames)) {
+    return filenames.concat(configFileNames);
+  }
+
+  return filenames;
 }

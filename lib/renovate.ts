@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
-import 'source-map-support/register';
+import 'source-map-support/register.js';
 import './punycode.cjs';
-import { instrument, shutdown as telemetryShutdown } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
-import { logger } from './logger';
-import { bootstrap } from './proxy';
-import { start } from './workers/global';
+import {
+  instrument,
+  shutdown as telemetryShutdown,
+} from './instrumentation/index.ts'; // has to be imported before logger and other libraries which are instrumentalised
+import { logger } from './logger/index.ts';
+import { bootstrap } from './proxy.ts';
+import { start } from './workers/global/index.ts';
 
 /* v8 ignore next 3 -- not easily testable */
 process.on('unhandledRejection', (err) => {
@@ -14,8 +17,7 @@ process.on('unhandledRejection', (err) => {
 
 bootstrap();
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async (): Promise<void> => {
+void (async (): Promise<void> => {
   process.exitCode = await instrument('run', () => start());
   await telemetryShutdown(); //gracefully shutdown OpenTelemetry
 

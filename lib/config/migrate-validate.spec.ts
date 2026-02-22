@@ -1,7 +1,7 @@
-import { getConfig } from './defaults';
-import { migrateAndValidate } from './migrate-validate';
-import * as configMigration from './migration';
-import { type RenovateConfig, logger } from '~test/util';
+import { type RenovateConfig, logger } from '~test/util.ts';
+import { getConfig } from './defaults.ts';
+import { migrateAndValidate } from './migrate-validate.ts';
+import * as configMigration from './migration.ts';
 
 let config: RenovateConfig;
 

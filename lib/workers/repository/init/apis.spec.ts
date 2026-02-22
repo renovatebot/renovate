@@ -1,11 +1,11 @@
-import { getConfig } from '../../../config/defaults';
+import type { RenovateConfig } from '~test/util.ts';
+import { platform } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
-} from '../../../constants/error-messages';
-import { initApis } from './apis';
-import { platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import { initApis } from './apis.ts';
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {

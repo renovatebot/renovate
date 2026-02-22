@@ -1,4 +1,4 @@
-import type { Parts } from './types';
+import type { Parts } from './types.ts';
 
 export function extractAllParts(version: string): number[] | null {
   const parts = version.split('.').map((x) => parseInt(x));

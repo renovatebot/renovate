@@ -1,10 +1,9 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
+import { fs } from '~test/util.ts';
+import { extractPackageFile } from './index.ts';
 
-import { extractPackageFile } from '.';
-import { fs } from '~test/util';
-
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const pyprojectToml = `
 [tool.pixi.project]

@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const miseFilename = 'mise.toml';
 
@@ -56,6 +56,7 @@ describe('modules/manager/mise/extract', () => {
       aws-cli = "2.25.10"
       aws-vault = "6.6.1"
       buf = "1.27.0"
+      caddy = "2.10.2"
       ccache = "4.11.3"
       committed = "1.1.7"
       conan = "2.24.0"
@@ -123,6 +124,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'buf',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'bufbuild/buf',
+          },
+          {
+            currentValue: '2.10.2',
+            datasource: 'github-releases',
+            depName: 'caddy',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'caddyserver/caddy',
           },
           {
             currentValue: '4.11.3',
@@ -398,7 +406,7 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'core:node',
             currentValue: '16',
-            packageName: 'nodejs',
+            packageName: 'node',
             datasource: 'node-version',
           },
           {
@@ -671,6 +679,47 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'cargo-bins/cargo-binstall',
             datasource: 'github-releases',
             extractVersion: '^v?(?<version>\\d+\\.)',
+          },
+        ],
+      });
+    });
+
+    it('extracts github backend tools', () => {
+      const content = codeBlock`
+      [tools]
+      "github:BurntSushi/ripgrep" = "14.1.1"
+      "github:cli/cli" = "v2.64.0"
+      "github:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "github:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'github:BurntSushi/ripgrep',
+            currentValue: '14.1.1',
+            packageName: 'BurntSushi/ripgrep',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:cli/cli',
+            currentValue: 'v2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'github-releases',
+            extractVersion: '^release\\-(?<version>.+)',
+          },
+          {
+            depName: 'github:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'github-releases',
+            extractVersion: '^v(?<version>.+)',
           },
         ],
       });

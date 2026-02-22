@@ -1,6 +1,6 @@
-import { getPkgReleases } from '..';
-import { BuildpacksRegistryDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { getPkgReleases } from '../index.ts';
+import { BuildpacksRegistryDatasource } from './index.ts';
 
 const baseUrl = 'https://registry.buildpacks.io/api/v1/buildpacks/';
 

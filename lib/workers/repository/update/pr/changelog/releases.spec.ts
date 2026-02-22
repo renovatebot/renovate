@@ -1,9 +1,9 @@
-import * as datasource from '../../../../../modules/datasource';
-import * as dockerVersioning from '../../../../../modules/versioning/docker';
-import * as npmVersioning from '../../../../../modules/versioning/npm';
-import type { BranchUpgradeConfig } from '../../../../types';
-import * as releases from './releases';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
+import * as datasource from '../../../../../modules/datasource/index.ts';
+import * as dockerVersioning from '../../../../../modules/versioning/docker/index.ts';
+import * as npmVersioning from '../../../../../modules/versioning/npm/index.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
+import * as releases from './releases.ts';
 
 describe('workers/repository/update/pr/changelog/releases', () => {
   describe('getReleaseNotes()', () => {

@@ -1,0 +1,45 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "style": {
+        "noParameterProperties": "error"
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "identifierOrder": "lexicographic"
+          }
+        }
+      }
+    }
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!.pnpm-store",
+      "!.worktrees/**/*",
+      "!**/dist",
+      "!**/tmp",
+      "!**/coverage",
+      "!**/__fixtures__/**",
+      "!**/__mocks__/**",
+      "!**/*.d.ts",
+      "!**/.venv/**",
+      "!config.js",
+      "!patches",
+      "!tools/mkdocs/.cache",
+      "!tools/mkdocs/docs",
+      "!tools/mkdocs/overrides",
+      "!tools/mkdocs/site"
+    ]
+  }
+}

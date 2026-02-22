@@ -1,4 +1,4 @@
-import type { PackageDescription } from './types';
+import type { PackageDescription } from './types.ts';
 
 /**
  * This specifies the directory where the extracted and downloaded packages files are stored relative to cacheDir.

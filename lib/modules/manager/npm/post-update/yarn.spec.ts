@@ -1,25 +1,27 @@
 import fs from 'fs-extra';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../../config/global';
-import * as docker from '../../../../util/exec/docker';
-import { getPkgReleases } from '../../../datasource';
-import type { PostUpdateConfig } from '../../types';
-import type { NpmManagerData } from '../types';
-import { getNodeToolConstraint } from './node-version';
-import * as yarnHelper from './yarn';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
-import type { ExecSnapshots } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import * as util from '~test/util';
+import type { ExecSnapshots } from '~test/exec-util.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as util from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as docker from '../../../../util/exec/docker/index.ts';
+import { getPkgReleases } from '../../../datasource/index.ts';
+import type { PostUpdateConfig } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as yarnHelper from './yarn.ts';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+    await vi.importActual<typeof import('~test/fixtures.js')>(
+      '~test/fixtures.js',
+    )
   ).fsExtra(),
 );
-vi.mock('../../../../util/exec/env');
-vi.mock('./node-version');
-vi.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('./node-version.ts');
+vi.mock('../../../datasource/index.ts', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -767,7 +769,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       localDir: '.',
       binarySource: 'docker',
       cacheDir: '/tmp/cache',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     Fixtures.mock(
       {
@@ -787,10 +789,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = {};
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar', options },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image', options },
       {
         cmd:
-          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/containerbase/sidecar ` +
+          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/renovatebot/base-image ` +
           `bash -l -c "` +
           `install-tool node 16.16.0` +
           ` && ` +

@@ -1,6 +1,6 @@
-import type { RenovateConfig } from '../../../../config/types';
-import type { CommitMessage } from '../../model/commit-message';
-import { CommitMessageFactory } from '../../model/commit-message-factory';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import type { CommitMessage } from '../../model/commit-message.ts';
+import { CommitMessageFactory } from '../../model/commit-message-factory.ts';
 
 export class OnboardingCommitMessageFactory {
   private readonly config: RenovateConfig;

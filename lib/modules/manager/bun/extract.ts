@@ -1,16 +1,17 @@
 import { isArray, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
   getSiblingFileName,
   readLocalFile,
-} from '../../../util/fs';
+} from '../../../util/fs/index.ts';
 
-import { extractPackageJson } from '../npm/extract/common/package-file';
-import type { NpmPackage } from '../npm/extract/types';
-import type { NpmManagerData } from '../npm/types';
-import type { ExtractConfig, PackageFile } from '../types';
-import { filesMatchingWorkspaces } from './utils';
+import { extractPackageJson } from '../npm/extract/common/package-file.ts';
+import type { NpmPackage } from '../npm/extract/types.ts';
+import { resolveNpmrc } from '../npm/npmrc.ts';
+import type { NpmManagerData } from '../npm/types.ts';
+import type { ExtractConfig, PackageFile } from '../types.ts';
+import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
@@ -20,6 +21,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 
 export async function processPackageFile(
   packageFile: string,
+  config: ExtractConfig,
 ): Promise<PackageFile | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
@@ -38,9 +40,13 @@ export async function processPackageFile(
     logger.debug({ packageFile }, 'No dependencies found');
     return null;
   }
+
+  const { npmrc } = await resolveNpmrc(packageFile, config);
+
   return {
     ...result,
     packageFile,
+    npmrc,
   };
 }
 export async function extractAllPackageFiles(
@@ -61,7 +67,7 @@ export async function extractAllPackageFiles(
   );
   for (const lockFile of allLockFiles) {
     const packageFile = getSiblingFileName(lockFile, 'package.json');
-    const res = await processPackageFile(packageFile);
+    const res = await processPackageFile(packageFile, config);
     if (res) {
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
@@ -82,7 +88,7 @@ export async function extractAllPackageFiles(
     if (workspacePackageFiles.length) {
       logger.debug({ workspacePackageFiles }, 'Found bun workspace files');
       for (const workspaceFile of workspacePackageFiles) {
-        const res = await processPackageFile(workspaceFile);
+        const res = await processPackageFile(workspaceFile, config);
         if (res) {
           packageFiles.push({ ...res, lockFiles: [lockFile] });
         }

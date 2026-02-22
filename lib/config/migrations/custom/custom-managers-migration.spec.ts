@@ -1,6 +1,6 @@
-import type { CustomManager } from '../../../modules/manager/custom/types';
-import { CustomManagersMigration } from './custom-managers-migration';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
+import type { CustomManager } from '../../../modules/manager/custom/types.ts';
+import { CustomManagersMigration } from './custom-managers-migration.ts';
 
 describe('config/migrations/custom/custom-managers-migration', () => {
   it('migrates', async () => {

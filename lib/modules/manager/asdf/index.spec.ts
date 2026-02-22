@@ -1,6 +1,6 @@
-import type { StaticTooling } from './upgradeable-tooling';
-import { upgradeableTooling } from './upgradeable-tooling';
-import { extractPackageFile, supportedDatasources } from '.';
+import { extractPackageFile, supportedDatasources } from './index.ts';
+import type { StaticTooling } from './upgradeable-tooling.ts';
+import { upgradeableTooling } from './upgradeable-tooling.ts';
 
 describe('modules/manager/asdf/index', () => {
   describe('supportedDatasources', () => {

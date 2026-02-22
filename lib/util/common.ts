@@ -1,9 +1,10 @@
+import { isNumber } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
-import { GlobalConfig } from '../config/global';
-import { InheritConfig, NOT_PRESET } from '../config/inherit';
-import type { GlobalInheritableConfig } from '../config/types';
+import { GlobalConfig } from '../config/global.ts';
+import { InheritConfig, NOT_PRESENT } from '../config/inherit.ts';
+import type { GlobalInheritableConfig } from '../config/types.ts';
 import {
   AZURE_API_USING_HOST_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
@@ -12,11 +13,11 @@ import {
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-} from '../constants';
-import { logger } from '../logger';
-import type { Nullish } from '../types';
-import * as hostRules from './host-rules';
-import { parseUrl } from './url';
+} from '../constants/index.ts';
+import { logger } from '../logger/index.ts';
+import type { Nullish } from '../types/index.ts';
+import * as hostRules from './host-rules.ts';
+import { parseUrl } from './url.ts';
 
 /**
  * Tries to detect the `platform` from a url.
@@ -156,9 +157,21 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
   key: Key,
 ): GlobalInheritableConfig[Key] {
   const inheritedValue = InheritConfig.get(key);
-  if (inheritedValue !== NOT_PRESET) {
+  const globalValue = GlobalConfig.get(key);
+  if (inheritedValue !== NOT_PRESENT) {
+    // Don't allow inherited config to make `onboardingAutoCloseAge` a higher value than our global setting
+    if (
+      key === 'onboardingAutoCloseAge' &&
+      isNumber(inheritedValue) &&
+      isNumber(globalValue)
+    ) {
+      if (globalValue < inheritedValue) {
+        return globalValue;
+      }
+    }
+
     return inheritedValue;
   }
 
-  return GlobalConfig.get(key);
+  return globalValue;
 }

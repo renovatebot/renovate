@@ -1,12 +1,12 @@
-import { logger } from '../../lib/logger';
-import type { ModuleApi } from '../../lib/types';
-import { regEx } from '../../lib/util/regex';
-import { capitalize } from '../../lib/util/string';
-import { readFile } from '../utils';
+import { logger } from '../../lib/logger/index.ts';
+import type { ModuleApi } from '../../lib/types/index.ts';
+import { regEx } from '../../lib/util/regex.ts';
+import { capitalize } from '../../lib/util/string.ts';
+import { readFile } from '../utils/index.ts';
 
-const replaceStart =
+const defaultReplaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
-const replaceStop = '<!-- Autogenerate end -->';
+const defaultReplaceStop = '<!-- Autogenerate end -->';
 const goodUrlRegex = regEx(/\[(.+?)\]\((.+?)\)/);
 
 export function formatName(input: string): string {
@@ -31,9 +31,16 @@ export function getNameWithUrl(
   return displayName;
 }
 
-export function replaceContent(content: string, txt: string): string {
-  const replaceStartIndex = content.indexOf(replaceStart);
-  const replaceStopIndex = content.indexOf(replaceStop);
+export function replaceContent(
+  content: string,
+  txt: string,
+  opts: {
+    replaceStart: string;
+    replaceStop: string;
+  } = { replaceStart: defaultReplaceStart, replaceStop: defaultReplaceStop },
+): string {
+  const replaceStartIndex = content.indexOf(opts.replaceStart);
+  const replaceStopIndex = content.indexOf(opts.replaceStop);
 
   if (replaceStartIndex < 0) {
     logger.error('Missing replace placeholder');
@@ -42,7 +49,7 @@ export function replaceContent(content: string, txt: string): string {
   return (
     content.slice(0, replaceStartIndex) +
     txt +
-    content.slice(replaceStopIndex + replaceStop.length)
+    content.slice(replaceStopIndex + opts.replaceStop.length)
   );
 }
 

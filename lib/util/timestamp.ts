@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 export type Timestamp = string & { __timestamp: never };
 

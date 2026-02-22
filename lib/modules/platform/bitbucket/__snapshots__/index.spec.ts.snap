@@ -146,6 +146,6 @@ exports[`modules/platform/bitbucket/index > massageMarkdown() > removes html tag
 "
 `;
 
-exports[`modules/platform/bitbucket/index > updatePr() > rethrows exception when PR update error due to unknown reviewers error 1`] = `[HTTPError: Response code 400 (Bad Request)]`;
+exports[`modules/platform/bitbucket/index > updatePr() > rethrows exception when PR update error due to unknown reviewers error 1`] = `[HTTPError: Request failed with status code 400 (Bad Request): PUT https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5]`;
 
-exports[`modules/platform/bitbucket/index > updatePr() > throws an error on failure to get current list of reviewers 1`] = `[HTTPError: Response code 500 (Internal Server Error)]`;
+exports[`modules/platform/bitbucket/index > updatePr() > throws an error on failure to get current list of reviewers 1`] = `[HTTPError: Request failed with status code 500 (Internal Server Error): GET https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5]`;

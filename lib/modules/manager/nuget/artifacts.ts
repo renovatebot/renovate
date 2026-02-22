@@ -1,9 +1,10 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureDir,
   getLocalFiles,
@@ -11,35 +12,49 @@ import {
   outputCacheFile,
   privateCacheDir,
   writeLocalFile,
-} from '../../../util/fs';
-import { getFiles } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+} from '../../../util/fs/index.ts';
+import { getFiles } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { createNuGetConfigXml } from './config-formatter';
+  Upgrade,
+} from '../types.ts';
+import { createNuGetConfigXml } from './config-formatter.ts';
 import {
   GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
-} from './package-tree';
+} from './package-tree.ts';
+import type { Registry } from './types.ts';
 import {
   findGlobalJson,
   getConfiguredRegistries,
   getDefaultRegistries,
-} from './util';
+} from './util.ts';
 
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string,
+  updatedDeps: Upgrade[],
 ): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  const contents = createNuGetConfigXml(registries);
+  const updatedDepsRegistries: Registry[] = Array.from(
+    new Set(
+      updatedDeps
+        .flatMap((dep) => dep.registryUrls ?? [])
+        .filter(isNonEmptyString),
+    ),
+    (url) => ({ url }),
+  );
+
+  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+
+  const contents = createNuGetConfigXml(combinedRegistries);
 
   const cachedNugetConfigFile = upath.join(nugetCacheDir, `nuget.config`);
   await ensureDir(nugetCacheDir);
@@ -52,12 +67,14 @@ async function runDotnetRestore(
   packageFileName: string,
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig,
+  updatedDeps: Upgrade[],
 ): Promise<void> {
   const nugetCacheDir = upath.join(privateCacheDir(), 'nuget');
 
   const nugetConfigFile = await createCachedNuGetConfigFile(
     nugetCacheDir,
     packageFileName,
+    updatedDeps,
   );
 
   const dotnetVersion =
@@ -163,7 +180,7 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    await runDotnetRestore(packageFileName, packageFiles, config);
+    await runDotnetRestore(packageFileName, packageFiles, config, updatedDeps);
 
     const newLockFileContentMap = await getLocalFiles(lockFileNames);
 

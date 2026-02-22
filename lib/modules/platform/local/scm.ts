@@ -1,8 +1,12 @@
 import { glob } from 'glob';
-import { logger } from '../../../logger';
-import { rawExec } from '../../../util/exec/common';
-import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import type { PlatformScm } from '../types';
+import type { DateTime } from 'luxon';
+import { logger } from '../../../logger/index.ts';
+import { rawExec } from '../../../util/exec/common.ts';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+} from '../../../util/git/types.ts';
+import type { PlatformScm } from '../types.ts';
 
 let fileList: string[] | undefined;
 export class LocalFs implements PlatformScm {
@@ -22,6 +26,9 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve(true);
   }
   getBranchCommit(_branchName: string): Promise<LongCommitSha | null> {
+    return Promise.resolve(null);
+  }
+  getBranchUpdateDate(_branchName: string): Promise<DateTime | null> {
     return Promise.resolve(null);
   }
   deleteBranch(_branchName: string): Promise<void> {
