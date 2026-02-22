@@ -116,18 +116,48 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   } as AzurePr;
 }
 
+/**
+ * Detects whether a token string is likely a JWT (JSON Web Token).
+ *
+ * JWTs consist of three base64url-encoded segments separated by dots.
+ * The first segment (header) must decode to valid JSON containing
+ * at least a `typ` or `alg` field.
+ *
+ * This is used to automatically distinguish Microsoft Entra ID (AAD)
+ * Bearer tokens from Azure DevOps Personal Access Tokens (PATs).
+ */
+export function isProbablyJwt(token: string): boolean {
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    return false;
+  }
+
+  try {
+    const header = JSON.parse(
+      Buffer.from(parts[0], 'base64url').toString('utf8'),
+    );
+    return (
+      typeof header === 'object' &&
+      header !== null &&
+      ('typ' in header || 'alg' in header)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   let authType: string;
   let authValue: string;
   if (!config.token && config.username && config.password) {
     authType = 'basic';
     authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (config.token?.length === 52) {
-    authType = 'basic';
-    authValue = toBase64(`:${config.token}`);
-  } else {
+  } else if (isProbablyJwt(config.token!)) {
     authType = 'bearer';
     authValue = config.token!;
+  } else {
+    authType = 'basic';
+    authValue = toBase64(`:${config.token}`);
   }
   addSecretForSanitizing(authValue, 'global');
   return {

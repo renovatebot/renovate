@@ -65,12 +65,6 @@ exports[`modules/platform/azure/util > getStorageExtraCloneOpts > should configu
 }
 `;
 
-exports[`modules/platform/azure/util > getStorageExtraCloneOpts > should configure bearer token 1`] = `
-{
-  "-c": "http.extraHeader=AUTHORIZATION: bearer token",
-}
-`;
-
 exports[`modules/platform/azure/util > getStorageExtraCloneOpts > should configure personal access token 1`] = `
 {
   "-c": "http.extraHeader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3OHRlc3Q=",
