@@ -2,15 +2,19 @@ import { getConfigFileNames } from '../../../config/app-strings.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { getInheritedOrGlobal } from '../../../util/common.ts';
 
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {
   return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;
 }
 
-export function getDefaultConfigFileName(config: RenovateConfig): string {
+export function getDefaultConfigFileName(): string {
   const configFileNames = getConfigFileNames();
-  return configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName!
+  const onboardingConfigFileName = getInheritedOrGlobal(
+    'onboardingConfigFileName',
+  );
+  return configFileNames.includes(onboardingConfigFileName!)
+    ? onboardingConfigFileName!
     : configFileNames[0];
 }
 

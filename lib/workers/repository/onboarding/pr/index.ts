@@ -295,7 +295,7 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
 async function getOnboardingConfigHashComment(
   config: RenovateConfig,
 ): Promise<string> {
-  const configFile = getDefaultConfigFileName(config);
+  const configFile = getDefaultConfigFileName();
   const existingContents =
     (await getFile(configFile, getInheritedOrGlobal('onboardingBranch'))) ?? '';
   const hash = toSha256(existingContents);
