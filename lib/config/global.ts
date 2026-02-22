@@ -39,6 +39,7 @@ export class GlobalConfig {
     'includeMirrors',
     'localDir',
     'migratePresets',
+    'onboarding',
     'onboardingAutoCloseAge',
     'onboardingBranch',
     'platform',

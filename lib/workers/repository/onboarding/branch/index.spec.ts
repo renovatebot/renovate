@@ -162,14 +162,20 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles skipped onboarding combined with requireConfig = optional', async () => {
       config.requireConfig = 'optional';
-      config.onboarding = false;
+      GlobalConfig.set({
+        onboarding: false,
+        onboardingBranch: config.onboardingBranch,
+      });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles skipped onboarding, requireConfig=required, and a config file', async () => {
       config.requireConfig = 'required';
-      config.onboarding = false;
+      GlobalConfig.set({
+        onboarding: false,
+        onboardingBranch: config.onboardingBranch,
+      });
       scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
@@ -177,14 +183,20 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles skipped onboarding, requireConfig=ignored', async () => {
       config.requireConfig = 'ignored';
-      config.onboarding = false;
+      GlobalConfig.set({
+        onboarding: false,
+        onboardingBranch: config.onboardingBranch,
+      });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles skipped onboarding, requireConfig=required, and no config file', async () => {
       config.requireConfig = 'required';
-      config.onboarding = false;
+      GlobalConfig.set({
+        onboarding: false,
+        onboardingBranch: config.onboardingBranch,
+      });
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const onboardingResult = checkOnboardingBranch(config);
