@@ -110,7 +110,7 @@ export async function init(config: AllConfig): Promise<void> {
 export async function cleanup(config: AllConfig): Promise<void> {
   cacheType = undefined;
   if (config?.redisUrl) {
-    await redisCache.end();
+    redisCache.destroy();
   }
   if (cacheProxy?.cleanup) {
     await cacheProxy.cleanup();

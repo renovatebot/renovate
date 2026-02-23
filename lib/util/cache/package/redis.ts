@@ -20,12 +20,13 @@ export function normalizeRedisUrl(url: string): string {
   return url.replace(regEx(/^(rediss?)\+cluster:\/\//), '$1://');
 }
 
-export async function end(): Promise<void> {
+export function destroy(): void {
   try {
     // https://github.com/redis/node-redis#disconnecting
-    await client?.disconnect();
+    client?.destroy();
+    client = undefined;
   } catch (err) {
-    logger.warn({ err }, 'Redis cache end failed');
+    logger.warn({ err }, 'Redis cache destroy failed');
   }
 }
 
