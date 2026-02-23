@@ -10,23 +10,7 @@ import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
 import {
-  awsBeanstalkDetector,
-  awsEc2Detector,
-  awsEcsDetector,
-  awsEksDetector,
-  awsLambdaDetector,
-} from '@opentelemetry/resource-detector-aws';
-import {
-  azureAppServiceDetector,
-  azureFunctionsDetector,
-  azureVmDetector,
-} from '@opentelemetry/resource-detector-azure';
-import { gcpDetector } from '@opentelemetry/resource-detector-gcp';
-import { gitHubDetector } from '@opentelemetry/resource-detector-github';
-import type { ResourceDetector } from '@opentelemetry/resources';
-import {
   detectResources,
-  envDetector,
   resourceFromAttributes,
 } from '@opentelemetry/resources';
 import {
@@ -43,6 +27,7 @@ import {
 import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { getResourceDetectors } from './detectors.ts';
 import type { RenovateSpanOptions } from './types.ts';
 import {
   isTraceDebuggingEnabled,
@@ -92,36 +77,8 @@ export function init(): void {
     [ATTR_SERVICE_VERSION]: env.OTEL_SERVICE_VERSION ?? pkg.version,
   });
 
-  const detectors: ResourceDetector[] = [];
-
-  if (env.RENOVATE_RESOURCE_DETECTORS_AWS !== 'false') {
-    detectors.push(
-      awsBeanstalkDetector,
-      awsEc2Detector,
-      awsEcsDetector,
-      awsEksDetector,
-      awsLambdaDetector,
-    );
-  }
-
-  if (env.RENOVATE_RESOURCE_DETECTORS_AZURE !== 'false') {
-    detectors.push(
-      azureAppServiceDetector,
-      azureFunctionsDetector,
-      azureVmDetector,
-    );
-  }
-
-  if (env.RENOVATE_RESOURCE_DETECTORS_GCP !== 'false') {
-    detectors.push(gcpDetector);
-  }
-
-  if (env.RENOVATE_RESOURCE_DETECTORS_GITHUB !== 'false') {
-    detectors.push(gitHubDetector);
-  }
-
   const detectedResource = detectResources({
-    detectors: [...detectors, envDetector],
+    detectors: getResourceDetectors(env),
   });
 
   const traceProvider = new NodeTracerProvider({

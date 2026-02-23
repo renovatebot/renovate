@@ -192,6 +192,19 @@ describe('instrumentation/reporting', () => {
     await expect(exportStats(config)).toResolve();
   });
 
+  it('reports nothing', async () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: null,
+    };
+
+    await exportStats(config);
+
+    expect(logger.logger.debug).not.toHaveBeenCalled();
+    expect(logger.logger.info).not.toHaveBeenCalled();
+    expect(logger.logger.warn).not.toHaveBeenCalled();
+  });
+
   it('should add problems to report', () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
