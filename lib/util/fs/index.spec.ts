@@ -135,6 +135,37 @@ describe('util/fs/index', () => {
         'Hidden Unicode characters have been discovered in the file `file.txt`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
       );
     });
+
+    // Via https://github.com/renovatebot/renovate/discussions/41381 and https://github.com/renovatebot/renovate/pull/41353, the Byte Order Mark (BOM) character is common on Windows-based platforms
+    describe('if hidden Byte Order Mark (BOM) Unciode characters are found', () => {
+      it('but no other hidden characters, it logs a trace message', async () => {
+        // via https://github.com/Particular/Particular.Packaging/blob/be9e3f4cb60bba9a4dd06dbc9f25fb7ff152e126/src/Particular.Packaging.Tasks/Particular.Packaging.Tasks.csproj
+        await fs.outputFile(
+          `${localDir}/example.csproj`,
+          '\uFEFF<Project Sdk="Microsoft.NET.Sdk">',
+        );
+        await readLocalFile('example.csproj', 'utf8');
+
+        expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+        expect(logger.logger.once.trace).toHaveBeenCalledWith(
+          { file: 'example.csproj', hiddenCharacters: '\\uFEFF' },
+          'Hidden Byte Order Mark (BOM) Unicode characters has been discovered in the file `example.csproj`. This is likely safe, if you are using Microsoft Windows, but please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+        );
+      });
+
+      it('as well as other hidden characters, it logs a warning', async () => {
+        await fs.outputFile(
+          `${localDir}/example.csproj`,
+          '\uFEFF<Project Sdk="Microsoft.NET.Sdk">\u200B',
+        );
+        await readLocalFile('example.csproj', 'utf8');
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { file: 'example.csproj', hiddenCharacters: '\\uFEFF\\u200B' },
+          'Hidden Unicode characters have been discovered in the file `example.csproj`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+        );
+      });
+    });
   });
 
   describe('writeLocalFile', () => {
