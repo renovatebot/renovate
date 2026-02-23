@@ -1,40 +1,66 @@
-[
-  {
-    "cycle": "4.1",
-    "eol": "2025-05-01",
-    "support": true,
-    "releaseDate": "2022-12-13",
-    "latest": "4.1.1",
-    "latestReleaseDate": "2023-03-21",
-    "lts": false
-  },
-  {
-    "cycle": "4.0",
-    "eol": "2024-05-01",
-    "support": true,
-    "releaseDate": "2021-07-26",
-    "latest": "4.0.9",
-    "latestReleaseDate": "2023-04-14",
-    "lts": false
-  },
-  {
-    "cycle": "3.11",
-    "eol": "2023-05-01",
-    "support": true,
-    "releaseDate": "2017-06-23",
-    "latest": "3.11.15",
-    "discontinued": true,
-    "latestReleaseDate": "2023-05-05",
-    "lts": false
-  },
-  {
-    "cycle": "3.0",
-    "eol": "2023-05-01",
-    "support": true,
-    "releaseDate": "2015-11-09",
-    "latest": "3.0.29",
-    "discontinued": true,
-    "latestReleaseDate": "2023-05-15",
-    "lts": false
+{
+  "schema_version": "1.2.0",
+  "generated_at": "2023-06-03T00:00:00+00:00",
+  "last_modified": "2023-06-03T00:00:00+00:00",
+  "result": {
+    "name": "apache-cassandra",
+    "releases": [
+      {
+        "name": "4.1",
+        "releaseDate": "2022-12-13",
+        "isEol": false,
+        "eolFrom": "2025-05-01",
+        "isDiscontinued": false,
+        "discontinuedFrom": null,
+        "isMaintained": true,
+        "latest": {
+          "name": "4.1.1",
+          "date": "2023-03-21",
+          "link": null
+        }
+      },
+      {
+        "name": "4.0",
+        "releaseDate": "2021-07-26",
+        "isEol": false,
+        "eolFrom": "2024-05-01",
+        "isDiscontinued": false,
+        "discontinuedFrom": null,
+        "isMaintained": true,
+        "latest": {
+          "name": "4.0.9",
+          "date": "2023-04-14",
+          "link": null
+        }
+      },
+      {
+        "name": "3.11",
+        "releaseDate": "2017-06-23",
+        "isEol": true,
+        "eolFrom": "2023-05-01",
+        "isDiscontinued": true,
+        "discontinuedFrom": null,
+        "isMaintained": false,
+        "latest": {
+          "name": "3.11.15",
+          "date": "2023-05-05",
+          "link": null
+        }
+      },
+      {
+        "name": "3.0",
+        "releaseDate": "2015-11-09",
+        "isEol": true,
+        "eolFrom": "2023-05-01",
+        "isDiscontinued": true,
+        "discontinuedFrom": null,
+        "isMaintained": false,
+        "latest": {
+          "name": "3.0.29",
+          "date": "2023-05-15",
+          "link": null
+        }
+      }
+    ]
   }
-]
+}

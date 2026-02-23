@@ -1,42 +1,60 @@
-[
-  {
-    "cycle": "4",
-    "discontinued": false,
-    "eol": "2026-09-30",
-    "releaseDate": "2021-09-30",
-    "link": "https://shop.fairphone.com/buy-fairphone-4",
-    "lts": false
-  },
-  {
-    "cycle": "3+",
-    "discontinued": "2022-11-01",
-    "eol": "2025-09-30",
-    "releaseDate": "2020-09-30",
-    "link": "https://shop.fairphone.com/fairphone-3-plus",
-    "lts": false
-  },
-  {
-    "cycle": "3",
-    "discontinued": "2021-09-01",
-    "eol": "2024-09-30",
-    "releaseDate": "2019-09-30",
-    "link": "https://shop.fairphone.com/fairphone-3",
-    "lts": false
-  },
-  {
-    "cycle": "2",
-    "discontinued": "2019-03-31",
-    "eol": "2023-03-07",
-    "releaseDate": "2015-12-21",
-    "link": "https://support.fairphone.com/hc/articles/213290023-FP2-Fairphone-OS-downloads",
-    "lts": false
-  },
-  {
-    "cycle": "1",
-    "discontinued": "2017-07-13",
-    "eol": "2017-07-13",
-    "releaseDate": "2013-12-01",
-    "link": "https://support.fairphone.com/hc/articles/6217522827281-Fairphone-1-Frequently-Asked-Questions-FAQ-",
-    "lts": false
+{
+  "schema_version": "1.2.0",
+  "generated_at": "2023-06-03T00:00:00+00:00",
+  "last_modified": "2023-06-03T00:00:00+00:00",
+  "result": {
+    "name": "fairphone",
+    "releases": [
+      {
+        "name": "4",
+        "releaseDate": "2021-09-30",
+        "isEol": false,
+        "eolFrom": "2026-09-30",
+        "isDiscontinued": false,
+        "discontinuedFrom": null,
+        "isMaintained": true,
+        "latest": null
+      },
+      {
+        "name": "3+",
+        "releaseDate": "2020-09-30",
+        "isEol": false,
+        "eolFrom": "2025-09-30",
+        "isDiscontinued": true,
+        "discontinuedFrom": "2022-11-01",
+        "isMaintained": true,
+        "latest": null
+      },
+      {
+        "name": "3",
+        "releaseDate": "2019-09-30",
+        "isEol": false,
+        "eolFrom": "2024-09-30",
+        "isDiscontinued": true,
+        "discontinuedFrom": "2021-09-01",
+        "isMaintained": true,
+        "latest": null
+      },
+      {
+        "name": "2",
+        "releaseDate": "2015-12-21",
+        "isEol": true,
+        "eolFrom": "2023-03-07",
+        "isDiscontinued": true,
+        "discontinuedFrom": "2019-03-31",
+        "isMaintained": false,
+        "latest": null
+      },
+      {
+        "name": "1",
+        "releaseDate": "2013-12-01",
+        "isEol": true,
+        "eolFrom": "2017-07-13",
+        "isDiscontinued": true,
+        "discontinuedFrom": "2017-07-13",
+        "isMaintained": false,
+        "latest": null
+      }
+    ]
   }
-]
+}

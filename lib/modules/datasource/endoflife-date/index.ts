@@ -36,7 +36,7 @@ export class EndoflifeDateDatasource extends Datasource {
       releases: [],
     };
 
-    const url = joinUrlParts(registryUrl, `${packageName}.json`);
+    const url = joinUrlParts(registryUrl, `v1/products/${packageName}`);
 
     try {
       const response = await this.http.getJson(url, EndoflifeDateVersions);

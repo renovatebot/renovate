@@ -10,7 +10,7 @@ const datasource = EndoflifeDateDatasource.id;
 
 // Default package name and mock path to test with
 const packageName = 'amazon-eks';
-const eksMockPath = `/${packageName}.json`;
+const eksMockPath = `/v1/products/${packageName}`;
 
 describe('modules/datasource/endoflife-date/index', () => {
   beforeAll(() => {
@@ -52,12 +52,12 @@ describe('modules/datasource/endoflife-date/index', () => {
             version: '1.21-eks-17',
           },
           {
-            isDeprecated: false,
+            isDeprecated: true,
             releaseTimestamp: '2022-04-04T00:00:00.000Z',
             version: '1.22-eks-12',
           },
           {
-            isDeprecated: false,
+            isDeprecated: true,
             releaseTimestamp: '2022-08-11T00:00:00.000Z',
             version: '1.23-eks-8',
           },
@@ -122,7 +122,7 @@ describe('modules/datasource/endoflife-date/index', () => {
     it('detects boolean discontinuation', async () => {
       httpMock
         .scope(registryUrl)
-        .get('/apache-cassandra.json')
+        .get('/v1/products/apache-cassandra')
         .reply(200, Fixtures.getJson(`apache-cassandra.json`));
       const res = await getPkgReleases({
         datasource,
@@ -158,7 +158,7 @@ describe('modules/datasource/endoflife-date/index', () => {
     it('detects date discontinuation', async () => {
       httpMock
         .scope(registryUrl)
-        .get('/fairphone.json')
+        .get('/v1/products/fairphone')
         .reply(200, Fixtures.getJson(`fairphone.json`));
       const res = await getPkgReleases({
         datasource,
