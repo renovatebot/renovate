@@ -105,6 +105,7 @@ export default defineConfig(() =>
             '+(config.js)',
             '__mocks__/**',
             // fully ignored files
+            '*.config.{mts,mjs}',
             '*.json',
             'lib/config-validator.ts',
             'lib/constants/category.ts',

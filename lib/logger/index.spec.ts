@@ -4,13 +4,14 @@ import fs from 'fs-extra';
 import { partial } from '~test/util.ts';
 import { add } from '../util/host-rules.ts';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
+import { createDefaultStreams } from './bunyan.ts';
 import {
   addMeta,
   addStream,
   clearProblems,
-  createDefaultStreams,
   getContext,
   getProblems,
+  init,
   levels,
   logLevel,
   logger,
@@ -19,8 +20,8 @@ import {
   setMeta,
   withMeta,
 } from './index.ts';
+import { ProblemStream } from './problem-stream.ts';
 import type { RenovateLogger } from './renovate-logger.ts';
-import { ProblemStream } from './utils.ts';
 
 const logContext = 'initial_context';
 
@@ -30,6 +31,9 @@ vi.mock('node:crypto', () => ({
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
+
+// init logger
+await init();
 
 describe('logger/index', () => {
   beforeEach(() => {
@@ -370,7 +374,12 @@ describe('logger/index', () => {
     expect(logged.msg).toBe('foo');
     expect(logged.foo.foo).toBe('[Circular]');
     expect(logged.foo.bar).toEqual(['[Circular]']);
-    expect(logged.bar).toBe('[Circular]');
+    expect(logged.bar).toEqual([
+      {
+        bar: '[Circular]',
+        foo: '[Circular]',
+      },
+    ]);
   });
 
   it('sanitizes secrets', () => {
