@@ -193,6 +193,7 @@ export const presets: Record<string, Preset> = {
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },
   disableRateLimiting: {
+    commitHourlyLimit: 0,
     description: 'Remove hourly and concurrent rate limits.',
     prConcurrentLimit: 0,
     prHourlyLimit: 0,

@@ -1,4 +1,4 @@
-import type { TypeOf, ZodType } from 'zod';
+import type { TypeOf, ZodType } from 'zod/v3';
 import { GlobalConfig } from '../../../config/global.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';

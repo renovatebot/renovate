@@ -146,6 +146,7 @@ export async function initPlatform({
     }
     logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
 
+    // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
       defaults.version = bitbucketServerVersion;
     }
@@ -377,7 +378,7 @@ export async function getPr(
   return pr;
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
@@ -389,7 +390,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 function isRelevantPr(
   branchName: string,
@@ -402,7 +403,7 @@ function isRelevantPr(
     matchesState(p.state, state);
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   return await BbsPrCache.getPrs(
@@ -414,7 +415,7 @@ export async function getPrList(): Promise<Pr[]> {
   );
 }
 
-// TODO: coverage (#9624)
+// TODO: coverage (#40625)
 /* v8 ignore next */
 export async function findPr({
   branchName,
@@ -764,7 +765,7 @@ async function updatePRAndAddReviewers(
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    // TODO: can `reviewers` be undefined? (#22198)
+    // TODO: can `reviewers` be undefined? (#40625)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
@@ -975,6 +976,7 @@ export async function ensureCommentRemoval(
     const comments = await getComments(prNo);
 
     let commentId: number | null | undefined = null;
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       const byTopic = (comment: Comment): boolean =>
         comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);

@@ -47,6 +47,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
@@ -1043,6 +1044,18 @@
         "matchPackageNames": ["standard-version"],
         "replacementName": "commit-and-tag-version",
         "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "terraform-provider-mrparkers-keycloak-to-keycloak-keycloak": {
+    "description": "The Keycloak Terraform/OpenTofu provider was moved to `keycloak/keycloak`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["terraform-provider"],
+        "matchPackageNames": ["mrparkers/keycloak"],
+        "matchCurrentVersion": "4.4.0",
+        "replacementName": "keycloak/keycloak",
+        "replacementVersion": "4.5.0"
       }
     ]
   },

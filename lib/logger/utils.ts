@@ -16,7 +16,7 @@ import {
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
-import { ZodError } from 'zod';
+import { ZodError } from 'zod/v3';
 import { ExecError } from '../util/exec/exec-error.ts';
 import { regEx } from '../util/regex.ts';
 import { redactedFields, sanitize } from '../util/sanitize.ts';
