@@ -491,7 +491,7 @@ describe('logger/index', () => {
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe(prBody);
     expect(logged.secrets.foo).toBe('***********');
-    expect(logged.someDate).toBe(1617602820000);
+    expect(logged.someDate).toBe('2021-04-05T06:07+00:00');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someLuxonDate).toBe('2020-02-29T00:00:00.000+00:00');
     expect(logged.someLuxonDateTime).toBe('2020-02-29T01:40:21.345+00:00');

@@ -204,7 +204,7 @@ export function sanitizeValue(
   }
 
   if (isDate(value)) {
-    return value;
+    return value.toISOString();
   }
 
   if (DateTime.isDateTime(value)) {
