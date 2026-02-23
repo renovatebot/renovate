@@ -53,6 +53,13 @@ The following resource detectors are used:
 - `GcpDetector` from [@opentelemetry/resource-detector-gcp](https://www.npmjs.com/package/@opentelemetry/resource-detector-gcp) Users hosting on GCP
 - `AzureDetector` from [@opentelemetry/resource-detector-azure](https://www.npmjs.com/package/@opentelemetry/resource-detector-azure) Users hosting on Azure
 
+You can disable any of these detectors by setting the following environment variables to `false`.
+This can avoid unnecessary overhead if you know you're not running in one of these environments, and also allows you to control the emitted attributes more finely.
+
+- `RENOVATE_RESOURCE_DETECTORS_AZURE`
+- `RENOVATE_RESOURCE_DETECTORS_GCP`
+- `RENOVATE_RESOURCE_DETECTORS_GITHUB`.
+
 ## Supported OTLP data
 
 ### Traces

@@ -23,6 +23,7 @@ import {
 } from '@opentelemetry/resource-detector-azure';
 import { gcpDetector } from '@opentelemetry/resource-detector-gcp';
 import { gitHubDetector } from '@opentelemetry/resource-detector-github';
+import type { ResourceDetector } from '@opentelemetry/resources';
 import {
   detectResources,
   envDetector,
@@ -91,20 +92,36 @@ export function init(): void {
     [ATTR_SERVICE_VERSION]: env.OTEL_SERVICE_VERSION ?? pkg.version,
   });
 
-  const detectedResource = detectResources({
-    detectors: [
+  const detectors: ResourceDetector[] = [];
+
+  if (env.RENOVATE_RESOURCE_DETECTORS_AWS !== 'false') {
+    detectors.push(
       awsBeanstalkDetector,
       awsEc2Detector,
       awsEcsDetector,
       awsEksDetector,
       awsLambdaDetector,
+    );
+  }
+
+  if (env.RENOVATE_RESOURCE_DETECTORS_AZURE !== 'false') {
+    detectors.push(
       azureAppServiceDetector,
       azureFunctionsDetector,
       azureVmDetector,
-      gcpDetector,
-      gitHubDetector,
-      envDetector,
-    ],
+    );
+  }
+
+  if (env.RENOVATE_RESOURCE_DETECTORS_GCP !== 'false') {
+    detectors.push(gcpDetector);
+  }
+
+  if (env.RENOVATE_RESOURCE_DETECTORS_GITHUB !== 'false') {
+    detectors.push(gitHubDetector);
+  }
+
+  const detectedResource = detectResources({
+    detectors: [...detectors, envDetector],
   });
 
   const traceProvider = new NodeTracerProvider({
