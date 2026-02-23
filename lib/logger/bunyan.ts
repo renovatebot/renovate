@@ -11,9 +11,9 @@ import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
 import { RenovateStream } from './pretty-stdout.ts';
 import type { ProblemStream } from './problem-stream.ts';
+import type { BunyanLogLevel, BunyanLogger, BunyanStream } from './types.ts';
 import { getEnv } from './utils.ts';
 import { withSanitizer } from './with-sanitizer.ts';
-import type { BunyanLogger, BunyanLogLevel, BunyanStream } from './types.ts';
 
 export function createDefaultStreams(
   stdoutLevel: BunyanLogLevel,

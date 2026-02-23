@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import { regEx } from '../util/regex.ts';
+import { quickStringify } from '../util/stringify.ts';
 import type { BunyanNodeStream, BunyanRecord, BunyanStream } from './types.ts';
 import { sanitizeValue } from './utils.ts';
-import { quickStringify } from '../util/stringify.ts';
 
 export function withSanitizer(streamConfig: BunyanStream): BunyanStream {
   if (streamConfig.type === 'rotating-file') {
