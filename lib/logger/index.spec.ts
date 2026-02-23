@@ -472,6 +472,7 @@ describe('logger/index', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someDate: new Date('2021-04-05T06:07Z'),
       someFn: () => 'secret"password',
       someObject: new SomeClass('secret"password'),
     });
@@ -487,6 +488,7 @@ describe('logger/index', () => {
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe(prBody);
     expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someDate).toBe('2021-04-05T06:07:00.000Z');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');
   });
