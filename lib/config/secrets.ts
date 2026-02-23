@@ -96,10 +96,14 @@ export function applySecretsAndVariablesToConfig(
     deleteSecrets,
   );
 
-  return replaceInterpolatedValuesInObject(
+  const env = getChildEnv({});
+
+  const result = replaceInterpolatedValuesInObject(
     configWithSecrets,
-    getChildEnv(),
+    env,
     options.env,
     false,
   );
+
+  return result;
 }
