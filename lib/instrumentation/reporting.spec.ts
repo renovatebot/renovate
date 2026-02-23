@@ -192,7 +192,7 @@ describe('instrumentation/reporting', () => {
     await expect(exportStats(config)).toResolve();
   });
 
-  it('reports nothing', async () => {
+  it('reports nothing when reportType=null', async () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
       reportType: null,
