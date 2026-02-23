@@ -376,8 +376,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(commander@14.0.3)
       '@containerbase/eslint-plugin':
-        specifier: 1.1.32
-        version: 1.1.32(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)
+        specifier: 1.1.33
+        version: 1.1.33(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)
       '@containerbase/istanbul-reports-html':
         specifier: 1.1.31
         version: 1.1.31
@@ -1059,8 +1059,8 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@containerbase/eslint-plugin@1.1.32':
-    resolution: {integrity: sha512-l/O3OwVpphrwHMX6rNYnIe+iYMiNxgOO72azr/iFr54HW62nJsQi/cPpEk6M1RISuB2I/wE2UpBWZ/eNfofmug==}
+  '@containerbase/eslint-plugin@1.1.33':
+    resolution: {integrity: sha512-pO0+TodXu6eDgflpf+HTtVxauv6HBQdqQQ7CIcTaZ6Jek9aJh1mms89M3IzUosV9CA1Tv5Zvj9ETQQsoK4kgtQ==}
     engines: {node: ^20.9.0 || ^22.11.0 || >=24.10.0, pnpm: ^10.0.0}
     peerDependencies:
       eslint: ^9.0.0
@@ -8170,7 +8170,7 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@containerbase/eslint-plugin@1.1.32(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)':
+  '@containerbase/eslint-plugin@1.1.33(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)':
     dependencies:
       eslint: 9.39.2
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.55.0(eslint@9.39.2)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.2)
