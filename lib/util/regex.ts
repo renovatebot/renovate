@@ -101,11 +101,12 @@ export const hiddenUnicodeCharactersRegex = regEx(
  * Given unicode character(s), convert them to the \u0123 representation, to be output to a user.
  */
 export function toUnicodeEscape(str: string): string {
-  return str
-    .split('')
-    .map((char) => {
+  const items = new Set(
+    str.split('').map((char) => {
       const code = char.charCodeAt(0);
       return '\\u' + code.toString(16).padStart(4, '0').toUpperCase();
-    })
-    .join('');
+    }),
+  );
+
+  return Array.from(items).join('');
 }

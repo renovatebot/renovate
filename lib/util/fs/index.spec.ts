@@ -136,6 +136,19 @@ describe('util/fs/index', () => {
       );
     });
 
+    it('does not log the same hidden Unciode characters if found multiple times', async () => {
+      await fs.outputFile(
+        `${localDir}/file.txt`,
+        'some\u00A0content\u200Dfoo\u200Dbaz',
+      );
+      await readLocalFile('file.txt', 'utf8');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'file.txt', hiddenCharacters: '\\u00A0\\u200D' },
+        'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
+    });
+
     // Via https://github.com/renovatebot/renovate/discussions/41381 and https://github.com/renovatebot/renovate/pull/41353, the Byte Order Mark (BOM) character is common on Windows-based platforms
     describe('if hidden Byte Order Mark (BOM) Unciode characters are found', () => {
       it('but no other hidden characters, it logs a trace message', async () => {
