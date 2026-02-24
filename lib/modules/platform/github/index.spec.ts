@@ -1604,7 +1604,7 @@ describe('modules/platform/github/index', () => {
         expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
       });
 
-      it('falls back to reconcile when lastModified is missing', async () => {
+      it('derives cutoff from cached items when lastModified is missing', async () => {
         const scope = httpMock.scope(githubApiHost);
 
         // Seed cache with items but no lastModified (simulates updateItem usage)
@@ -1618,7 +1618,7 @@ describe('modules/platform/github/index', () => {
                   sourceBranch: 'renovate-branch',
                   title: 'Renovate PR',
                   state: 'open',
-                  updated_at: t1,
+                  updated_at: t2,
                   node_id: '12345',
                 },
               },
@@ -1626,12 +1626,17 @@ describe('modules/platform/github/index', () => {
           },
         };
 
-        // Sync: page has same item unchanged → reconcile returns false → stops
+        // Sync: page has non-Renovate PRs, oldest predates derived cutoff (t2)
         initRepoMock(scope, 'some/repo');
-        scope
-          .get(pagePath(1, 20))
-          .reply(200, [renovatePr], { link: pageLink(2) });
-        // Page 2 NOT mocked — must stop after page 1
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t3, user: { login: 'other' } },
+            { ...pr1, number: 11, updated_at: t1, user: { login: 'other' } },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — cutoff derived from cached item (t2) stops sync
 
         await github.initRepo({
           repository: 'some/repo',
@@ -1684,6 +1689,57 @@ describe('modules/platform/github/index', () => {
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { repo: 'some/repo', pages: 100 },
           'PR cache: hit max sync pages, stopping',
+        );
+      });
+
+      it('reconciles mixed pages with both Renovate and non-Renovate PRs', async () => {
+        const scope = httpMock.scope(githubApiHost);
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — mixed page with Renovate PR among non-Renovate PRs
+        initRepoMock(scope, 'some/repo');
+        const renovatePr2: GhRestPr = {
+          ...renovatePr,
+          number: 2,
+          title: 'Renovate PR 2',
+          updated_at: t3,
+        };
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+            renovatePr2,
+            {
+              ...pr1,
+              number: 11,
+              updated_at: t.toISO(),
+              user: { login: 'other' },
+            },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — oldest (t) < lastModified (t1) → stops
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(2);
+        expect(res).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ number: 1, title: 'Renovate PR' }),
+            expect.objectContaining({ number: 2, title: 'Renovate PR 2' }),
+          ]),
         );
       });
 

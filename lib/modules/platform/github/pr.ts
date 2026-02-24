@@ -67,7 +67,17 @@ export async function getPrCache(
 
   // Snapshot before the loop — reconcile() updates lastModified as it
   // processes items, so reading it inside the loop would create a moving target.
-  const lastModifiedRaw = prApiCache.getLastModified();
+  // If lastModified is missing but items exist (populated via updateItem()),
+  // derive cutoff from the newest cached item.
+  let lastModifiedRaw = prApiCache.getLastModified();
+  if (!lastModifiedRaw && !isInitial) {
+    const items = prApiCache.getItems();
+    for (const item of items) {
+      if (!lastModifiedRaw || item.updated_at > lastModifiedRaw) {
+        lastModifiedRaw = item.updated_at;
+      }
+    }
+  }
   const cutoffTime = lastModifiedRaw ? DateTime.fromISO(lastModifiedRaw) : null;
 
   try {
@@ -108,6 +118,8 @@ export async function getPrCache(
 
       let { body: page } = res;
 
+      // Check stop condition on unfiltered page before username filtering.
+      // Pages are sorted updated_at desc, so the last element is the oldest.
       if (!isInitial && cutoffTime && isNonEmptyArray(page)) {
         const oldestOnPage = DateTime.fromISO(page[page.length - 1].updated_at);
         if (oldestOnPage < cutoffTime) {
@@ -130,10 +142,7 @@ export async function getPrCache(
       const items = page.map(coerceRestPr);
 
       if (isNonEmptyArray(items)) {
-        const reconcileResult = prApiCache.reconcile(items);
-        if (!isInitial && !cutoffTime) {
-          needNextPageSync = reconcileResult;
-        }
+        prApiCache.reconcile(items);
       }
 
       needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
@@ -142,7 +151,7 @@ export async function getPrCache(
         needNextPageFetch &&= !opts.paginate;
       }
 
-      if (!isInitial && needNextPageFetch && pageIdx >= MAX_SYNC_PAGES) {
+      if (!isInitial && needNextPageSync && pageIdx >= MAX_SYNC_PAGES) {
         logger.warn(
           { repo, pages: pageIdx },
           'PR cache: hit max sync pages, stopping',
