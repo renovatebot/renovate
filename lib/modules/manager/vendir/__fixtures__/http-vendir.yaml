@@ -1,0 +1,11 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+- path: vendor
+  contents:
+  - path: openapi
+    http:
+      url: https://raw.githubusercontent.com/mend/renovate-ce-ee/refs/tags/14.0.0/docs/openapi-community.yaml
+  - path: schema
+    http:
+      url: https://example.com/schema.json
