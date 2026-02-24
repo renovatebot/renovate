@@ -32,6 +32,30 @@ describe('modules/manager/vendir/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('extracts http source from vendir.yml', () => {
+      const httpContent = codeBlock`
+        apiVersion: vendir.k14s.io/v1alpha1
+        kind: Config
+        directories:
+        - path: vendor
+          contents:
+          - path: openapi
+            http:
+              url: https://example.com/openapi.yaml
+      `;
+      const result = extractPackageFile(httpContent, 'vendir.yml', {});
+      expect(result).toMatchObject({
+        deps: [
+          {
+            packageName: 'https://example.com/openapi.yaml',
+            currentValue: 'latest',
+            depType: 'HttpSource',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
     it('multiple charts - extracts helm-chart from vendir.yml correctly', () => {
       const result = extractPackageFile(validContents, 'vendir.yml', {
         registryAliases: {
