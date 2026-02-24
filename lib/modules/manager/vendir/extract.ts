@@ -102,13 +102,13 @@ export function extractPackageFile(
   // grab the helm charts
   const contents = pkg.directories.flatMap((directory) => directory.contents);
   for (const content of contents) {
-    if ('helmChart' in content && content.helmChart) {
+    if ('helmChart' in content) {
       const dep = extractHelmChart(content.helmChart, config.registryAliases);
       deps.push(dep);
-    } else if ('git' in content && content.git) {
+    } else if ('git' in content) {
       const dep = extractGitSource(content.git);
       deps.push(dep);
-    } else if ('githubRelease' in content && content.githubRelease) {
+    } else if ('githubRelease' in content) {
       const dep = extractGithubReleaseSource(content.githubRelease);
       deps.push(dep);
     }
