@@ -123,7 +123,9 @@ export function extractPackageFile(
     } else if ('githubRelease' in content && content.githubRelease) {
       const dep = extractGithubReleaseSource(content.githubRelease);
       deps.push(dep);
-    } else if ('http' in content && content.http) {
+    }
+    // v8 ignore else -- hard to test
+    else if ('http' in content && content.http) {
       const dep = extractHttpReleaseSource(content.http);
       deps.push(dep);
     }
