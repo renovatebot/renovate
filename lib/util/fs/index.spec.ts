@@ -132,7 +132,7 @@ describe('util/fs/index', () => {
       // NOTE that we cannot test that this is called once across multiple `readLocalFile` as we're mocking the logger, so we're testing that it's called, not validating the nubmer of times
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         { file: 'file.txt', hiddenCharacters: '\\u00A0\\u200D' },
-        'Hidden Unicode characters have been discovered in the file `file.txt`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+        'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
       );
     });
 
@@ -175,7 +175,7 @@ describe('util/fs/index', () => {
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { file: 'example.csproj', hiddenCharacters: '\\uFEFF\\u200B' },
-          'Hidden Unicode characters have been discovered in the file `example.csproj`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+          'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
         );
       });
     });
