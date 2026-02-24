@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as perlVersioning from '../../versioning/perl/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -23,11 +23,7 @@ export class CpanDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `date` field in the results.';
 
-  @cache({
-    namespace: `datasource-${CpanDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `${packageName}`,
-  })
-  override async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -98,5 +94,18 @@ export class CpanDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  override getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${CpanDatasource.id}`,
+        key: `${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

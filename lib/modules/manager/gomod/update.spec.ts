@@ -1,6 +1,6 @@
+import { Fixtures } from '~test/fixtures.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { updateDependency } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const gomod1 = Fixtures.get('1/go-mod');
 const gomod2 = Fixtures.get('2/go-mod');
@@ -405,15 +405,15 @@ describe('modules/manager/gomod/update', () => {
       const upgrade = {
         depName: 'k8s.io/client-go',
         managerData: { lineNumber: 3, multiLine: true },
-        newValue: 'v2.2.2',
+        newValue: 'v0.22.0',
         depType: 'replace',
         currentValue: 'v0.21.9',
         newMajor: 2,
-        updateType: 'major' as UpdateType,
+        updateType: 'minor' as UpdateType,
       };
       const res = updateDependency({ fileContent, upgrade });
       expect(res).not.toEqual(fileContent);
-      expect(res).toContain('k8s.io/client-go/v2 => k8s.io/client-go v2.2.2');
+      expect(res).toContain('k8s.io/client-go => k8s.io/client-go v0.22.0');
     });
 
     it('should return null for replacement', () => {

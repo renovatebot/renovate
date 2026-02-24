@@ -1,0 +1,30 @@
+import { logger } from '../logger/index.ts';
+import { hiddenUnicodeCharactersRegex, toUnicodeEscape } from './regex.ts';
+
+export function logWarningIfUnicodeHiddenCharactersInPackageFile(
+  file: string,
+  content: string | Buffer,
+): void {
+  const hiddenCharacters = content
+    .toString('utf8')
+    .match(hiddenUnicodeCharactersRegex);
+  if (hiddenCharacters) {
+    if (hiddenCharacters.length === 1 && hiddenCharacters[0] === '\uFEFF') {
+      logger.once.trace(
+        {
+          file,
+          hiddenCharacters: toUnicodeEscape(hiddenCharacters.join('')),
+        },
+        `Hidden Byte Order Mark (BOM) Unicode characters has been discovered in the file \`${file}\`. This is likely safe, if you are using Microsoft Windows, but please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)`,
+      );
+    } else {
+      logger.once.warn(
+        {
+          file,
+          hiddenCharacters: toUnicodeEscape(hiddenCharacters.join('')),
+        },
+        `Hidden Unicode characters have been discovered in the file \`${file}\`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)`,
+      );
+    }
+  }
+}

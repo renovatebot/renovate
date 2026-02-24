@@ -9,8 +9,8 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { systemManifestFileNameRegex } from './common.ts';
 
-export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 export const url = 'https://fluxcd.io/flux';
 export const categories: Category[] = ['cd', 'kubernetes'];

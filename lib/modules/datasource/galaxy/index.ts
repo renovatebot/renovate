@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -26,12 +26,7 @@ export class GalaxyDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `github_user` and `github_repo` fields in the results.';
 
-  @cache({
-    namespace: 'datasource-galaxy',
-    key: (getReleasesConfig: GetReleasesConfig) =>
-      getReleasesConfig.packageName,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -91,5 +86,16 @@ export class GalaxyDatasource extends Datasource {
     });
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: 'datasource-galaxy',
+        key: config.packageName,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

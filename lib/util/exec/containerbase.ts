@@ -235,8 +235,9 @@ const allToolConfig: Record<string, ToolConfig> = {
   },
 };
 
-let _getPkgReleases: Promise<typeof import('../../modules/datasource')> | null =
-  null;
+let _getPkgReleases: Promise<
+  typeof import('../../modules/datasource/index.js')
+> | null = null;
 
 async function getPkgReleases(
   toolConfig: ToolConfig,

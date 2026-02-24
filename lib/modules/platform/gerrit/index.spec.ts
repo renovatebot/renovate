@@ -1,11 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import { git, hostRules, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { repoFingerprint } from '../util.ts';
 import { client as _client } from './client.ts';
-import { writeToConfig } from './index.ts';
 import * as gerrit from './index.ts';
+import { writeToConfig } from './index.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -19,7 +20,6 @@ import {
   TAG_PULL_REQUEST_BODY,
   mapGerritChangeToPr,
 } from './utils.ts';
-import { git, hostRules, partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -39,9 +39,9 @@ vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
-  const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
-    zone: 'utc',
-  }) as DateTime<true>;
+  const t0 = DateTime.fromISO(
+    '2025-04-14T16:33:37.000000000',
+  ).toUTC() as DateTime<true>;
 
   beforeAll(() => {
     vi.useFakeTimers();
@@ -150,6 +150,23 @@ describe('modules/platform/gerrit/index', () => {
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+      });
+    });
+
+    it('initRepo() - passes cloneSubmodules', async () => {
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      await gerrit.initRepo({
+        repository: 'test/repo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
+      });
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
       });
     });
 

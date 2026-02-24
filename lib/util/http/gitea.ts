@@ -32,6 +32,12 @@ export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
     super(hostType ?? 'gitea', options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof GiteaHttpOptions)[]);
+  }
+
   protected override async requestJsonUnsafe<T = unknown>(
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<GiteaHttpOptions>,

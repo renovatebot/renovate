@@ -1,10 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
-import { getPkgReleases } from '../index.ts';
-import { HexDatasource } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { hostRules } from '~test/util.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { HexDatasource } from './index.ts';
 
 const certifiResponse = Fixtures.get('certifi.json');
 const privatePackageResponse = Fixtures.get('private_package.json');

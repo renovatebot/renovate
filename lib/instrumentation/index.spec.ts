@@ -1,6 +1,9 @@
-import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { ProxyTracerProvider } from '@opentelemetry/api';
+import {
+  NodeTracerProvider,
+  SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-node';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import {
   disableInstrumentations,
@@ -17,6 +20,9 @@ describe('instrumentation/index', () => {
   beforeEach(() => {
     api.trace.disable(); // clear global components
     process.env = { ...oldEnv };
+    delete process.env.OTEL_LOG_LEVEL;
+    delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+    delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
   });
 
   afterAll(() => {
@@ -43,7 +49,7 @@ describe('instrumentation/index', () => {
     const nodeProvider = delegateProvider as NodeTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
-        _spanProcessors: [{ _exporter: {} }],
+        _spanProcessors: [expect.any(SimpleSpanProcessor)],
       },
     });
   });

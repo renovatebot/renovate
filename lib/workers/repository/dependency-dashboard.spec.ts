@@ -3,6 +3,9 @@ import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type {
@@ -19,9 +22,6 @@ import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import * as dependencyDashboard from './dependency-dashboard.ts';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
 import { PackageFiles } from './package-files.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger, platform } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 vi.mock('./process/vulnerabilities.ts', () => {
@@ -1489,10 +1489,10 @@ None detected
             'These dependencies are either deprecated or have replacements available',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            '| npm | `cookie-parser` | ![Unavailable]',
+            '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'npm | `express-handlebars` | ![Available]',
+            'npm | [express-handlebars](https://redirect.github.com/express-handlebars/express-handlebars) | ![Available]',
           );
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1971,7 +1971,7 @@ None detected
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
       expect(result).toContain('> ℹ️ **Note**');
-      expect(result).toContain('| Datasource | Name | Last Updated |');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
     });

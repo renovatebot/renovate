@@ -8,8 +8,8 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import { fromVector } from 'ae-cvss-calculator';
-import { z } from 'zod';
+import * as _aeCvss from 'ae-cvss-calculator';
+import { z } from 'zod/v3';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -29,6 +29,8 @@ import type {
   SeverityDetails,
   Vulnerability,
 } from './types.ts';
+
+const { fromVector } = _aeCvss as unknown as typeof _aeCvss.default;
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;

@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { HttpError } from '../../../util/http/index.ts';
@@ -178,16 +178,7 @@ export class DockerDatasource extends Datasource {
     }
   }
 
-  @cache({
-    namespace: 'datasource-docker-imageconfig',
-    key: (
-      registryHost: string,
-      dockerRepository: string,
-      configDigest: string,
-    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
-    ttlMinutes: 1440 * 28,
-  })
-  async getImageConfig(
+  private async _getImageConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -223,16 +214,22 @@ export class DockerDatasource extends Datasource {
     );
   }
 
-  @cache({
-    namespace: 'datasource-docker-imageconfig',
-    key: (
-      registryHost: string,
-      dockerRepository: string,
-      configDigest: string,
-    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
-    ttlMinutes: 1440 * 28,
-  })
-  async getHelmConfig(
+  getImageConfig(
+    registryHost: string,
+    dockerRepository: string,
+    configDigest: string,
+  ): Promise<HttpResponse<OciImageConfig> | undefined> {
+    return withCache(
+      {
+        namespace: 'datasource-docker-imageconfig',
+        key: `${registryHost}:${dockerRepository}@${configDigest}`,
+        ttlMinutes: 1440 * 28,
+      },
+      () => this._getImageConfig(registryHost, dockerRepository, configDigest),
+    );
+  }
+
+  private async _getHelmConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -265,6 +262,21 @@ export class DockerDatasource extends Datasource {
         noAuth: true,
       },
       OciHelmConfig,
+    );
+  }
+
+  getHelmConfig(
+    registryHost: string,
+    dockerRepository: string,
+    configDigest: string,
+  ): Promise<HttpResponse<OciHelmConfig> | undefined> {
+    return withCache(
+      {
+        namespace: 'datasource-docker-imageconfig',
+        key: `${registryHost}:${dockerRepository}@${configDigest}`,
+        ttlMinutes: 1440 * 28,
+      },
+      () => this._getHelmConfig(registryHost, dockerRepository, configDigest),
     );
   }
 
@@ -345,16 +357,7 @@ export class DockerDatasource extends Datasource {
     }
   }
 
-  @cache({
-    namespace: 'datasource-docker-architecture',
-    key: (
-      registryHost: string,
-      dockerRepository: string,
-      currentDigest: string,
-    ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
-    ttlMinutes: 1440 * 28,
-  })
-  async getImageArchitecture(
+  private async _getImageArchitecture(
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
@@ -440,19 +443,33 @@ export class DockerDatasource extends Datasource {
     return undefined;
   }
 
+  getImageArchitecture(
+    registryHost: string,
+    dockerRepository: string,
+    currentDigest: string,
+  ): Promise<string | null | undefined> {
+    return withCache(
+      {
+        namespace: 'datasource-docker-architecture',
+        key: `${registryHost}:${dockerRepository}@${currentDigest}`,
+        ttlMinutes: 1440 * 28,
+      },
+      () =>
+        this._getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+    );
+  }
+
   /*
    * docker.getLabels
    *
    * This function will:
    *  - Return the labels for the requested image
    */
-  @cache({
-    namespace: 'datasource-docker-labels',
-    key: (registryHost: string, dockerRepository: string, tag: string) =>
-      `${registryHost}:${dockerRepository}:${tag}`,
-    ttlMinutes: 24 * 60,
-  })
-  async getLabels(
+  private async _getLabels(
     registryHost: string,
     dockerRepository: string,
     tag: string,
@@ -610,6 +627,21 @@ export class DockerDatasource extends Datasource {
     }
   }
 
+  getLabels(
+    registryHost: string,
+    dockerRepository: string,
+    tag: string,
+  ): Promise<Record<string, string> | undefined> {
+    return withCache(
+      {
+        namespace: 'datasource-docker-labels',
+        key: `${registryHost}:${dockerRepository}:${tag}`,
+        ttlMinutes: 24 * 60,
+      },
+      () => this._getLabels(registryHost, dockerRepository, tag),
+    );
+  }
+
   private async getTagsQuayRegistry(
     registry: string,
     repository: string,
@@ -723,12 +755,7 @@ export class DockerDatasource extends Datasource {
     return tags;
   }
 
-  @cache({
-    namespace: 'datasource-docker-tags',
-    key: (registryHost: string, dockerRepository: string) =>
-      `${registryHost}:${dockerRepository}`,
-  })
-  async getTags(
+  private async _getTags(
     registryHost: string,
     dockerRepository: string,
   ): Promise<string[] | null> {
@@ -816,6 +843,19 @@ export class DockerDatasource extends Datasource {
     }
   }
 
+  getTags(
+    registryHost: string,
+    dockerRepository: string,
+  ): Promise<string[] | null> {
+    return withCache(
+      {
+        namespace: 'datasource-docker-tags',
+        key: `${registryHost}:${dockerRepository}`,
+      },
+      () => this._getTags(registryHost, dockerRepository),
+    );
+  }
+
   /**
    * docker.getDigest
    *
@@ -825,22 +865,7 @@ export class DockerDatasource extends Datasource {
    *  - Look up a sha256 digest for a tag on its registry
    *  - Return the digest as a string
    */
-  @cache({
-    namespace: 'datasource-docker-digest',
-    key: (
-      { registryUrl, packageName, currentDigest }: DigestConfig,
-      newValue?: string,
-    ) => {
-      const newTag = newValue ?? 'latest';
-      const { registryHost, dockerRepository } = getRegistryRepository(
-        packageName,
-        registryUrl!,
-      );
-      const digest = currentDigest ? `@${currentDigest}` : '';
-      return `${registryHost}:${dockerRepository}:${newTag}${digest}`;
-    },
-  })
-  override async getDigest(
+  private async _getDigest(
     { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -997,11 +1022,29 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
-  @cache({
-    namespace: 'datasource-docker-hub-tags',
-    key: (dockerRepository: string) => `${dockerRepository}`,
-  })
-  async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
+  override getDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    const newTag = newValue ?? 'latest';
+    const { registryHost, dockerRepository } = getRegistryRepository(
+      config.packageName,
+      config.registryUrl!,
+    );
+    const digest = config.currentDigest ? `@${config.currentDigest}` : '';
+    return withCache(
+      {
+        namespace: 'datasource-docker-digest',
+        key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
+        fallback: true,
+      },
+      () => this._getDigest(config, newValue),
+    );
+  }
+
+  private async _getDockerHubTags(
+    dockerRepository: string,
+  ): Promise<Release[] | null> {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
@@ -1057,6 +1100,16 @@ export class DockerDatasource extends Datasource {
     );
   }
 
+  getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
+    return withCache(
+      {
+        namespace: 'datasource-docker-hub-tags',
+        key: `${dockerRepository}`,
+      },
+      () => this._getDockerHubTags(dockerRepository),
+    );
+  }
+
   /**
    * docker.getReleases
    *
@@ -1068,21 +1121,7 @@ export class DockerDatasource extends Datasource {
    *
    * This function will filter only tags that contain a semver version
    */
-  @cache({
-    namespace: 'datasource-docker-releases-v2',
-    key: ({ registryUrl, packageName }: GetReleasesConfig) => {
-      const { registryHost, dockerRepository } = getRegistryRepository(
-        packageName,
-        registryUrl!,
-      );
-      return `${registryHost}:${dockerRepository}`;
-    },
-    cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
-      const { registryHost } = getRegistryRepository(packageName, registryUrl!);
-      return registryHost === 'https://index.docker.io';
-    },
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -1159,5 +1198,21 @@ export class DockerDatasource extends Datasource {
       }
     }
     return ret;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const { registryHost, dockerRepository } = getRegistryRepository(
+      config.packageName,
+      config.registryUrl!,
+    );
+    return withCache(
+      {
+        namespace: 'datasource-docker-releases-v2',
+        key: `${registryHost}:${dockerRepository}`,
+        cacheable: registryHost === 'https://index.docker.io',
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

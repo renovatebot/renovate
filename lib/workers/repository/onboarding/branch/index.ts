@@ -7,6 +7,7 @@ import { logger } from '../../../../logger/index.ts';
 import { type Pr, platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git/index.ts';
 import { checkIfConfigured } from '../../configured.ts';
 import { extractAllDependencies } from '../../extract/index.ts';
@@ -29,7 +30,7 @@ export async function checkOnboardingBranch(
 ): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
-  let onboardingBranch = config.onboardingBranch;
+  const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
   const defaultBranch = config.defaultBranch!;
   let isConflicted = false;
   let isModified = false;
@@ -53,7 +54,7 @@ export async function checkOnboardingBranch(
     logger.debug('Onboarding PR already exists');
 
     isModified = await isOnboardingBranchModified(
-      config.onboardingBranch!,
+      onboardingBranch!,
       defaultBranch,
     );
     // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
@@ -64,7 +65,7 @@ export async function checkOnboardingBranch(
       );
       if (commit) {
         logger.info(
-          { branch: config.onboardingBranch, commit, onboarding: true },
+          { branch: onboardingBranch, commit, onboarding: true },
           'Branch updated',
         );
       }
@@ -79,7 +80,7 @@ export async function checkOnboardingBranch(
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
-      isOnboardingCacheValid(defaultBranch, config.onboardingBranch!) &&
+      isOnboardingCacheValid(defaultBranch, onboardingBranch!) &&
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
       logger.debug(
@@ -90,12 +91,12 @@ export async function checkOnboardingBranch(
     }
     OnboardingState.onboardingCacheValid = false;
     if (isModified) {
-      if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
+      if (hasOnboardingBranchChanged(onboardingBranch!)) {
         invalidateExtractCache(config.baseBranch!);
       }
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
-        config.onboardingBranch!,
+        onboardingBranch!,
       );
     }
   } else {
@@ -103,7 +104,6 @@ export async function checkOnboardingBranch(
     const onboardingConfig = await getOnboardingConfig(config);
     let mergedConfig = mergeChildConfig(config, onboardingConfig);
     mergedConfig = await mergeRenovateConfig(mergedConfig);
-    onboardingBranch = mergedConfig.onboardingBranch;
 
     if (
       Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)

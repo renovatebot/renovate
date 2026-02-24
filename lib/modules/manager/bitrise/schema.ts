@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { filterMap } from '../../../util/filter-map.ts';
 import { Yaml } from '../../../util/schema-utils/index.ts';
 import { parseStep } from './utils.ts';

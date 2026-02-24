@@ -1,5 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -8,8 +10,6 @@ import * as _hostRules from '../../../util/host-rules.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as cargo from './index.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, git } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
@@ -25,7 +25,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 describe('modules/manager/cargo/artifacts', () => {
@@ -452,7 +452,7 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -461,7 +461,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
@@ -518,7 +518,7 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -540,7 +540,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e GIT_CONFIG_VALUE_5 ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +

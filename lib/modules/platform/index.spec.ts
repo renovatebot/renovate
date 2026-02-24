@@ -1,10 +1,10 @@
+import * as httpMock from '~test/http-mock.ts';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
 import type { PlatformId } from '../../constants/index.ts';
 import { loadModules } from '../../util/modules.ts';
 import api from './api.ts';
 import * as platform from './index.ts';
 import type { Platform } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.unmock('.');
 vi.unmock('./scm');
@@ -25,7 +25,7 @@ describe('modules/platform/index', () => {
     const platforms = api;
 
     const loadedMgr = await loadModules(
-      __dirname,
+      import.meta.dirname,
       undefined,
       (m) => !['utils', 'git'].includes(m),
     );
@@ -80,13 +80,18 @@ describe('modules/platform/index', () => {
   });
 
   it('merges config hostRules with platform hostRules', async () => {
-    httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
+    httpMock
+      .scope('https://ghe.renovatebot.com')
+      .head('/')
+      .reply(200)
+      .get('/user')
+      .reply(200, { login: 'abc', name: 'some', id: 123 })
+      .get('/user/emails')
+      .reply(200, [{ email: 'user@domain.com' }]);
 
     const config = {
       platform: 'github' as PlatformId,
       endpoint: 'https://ghe.renovatebot.com',
-      gitAuthor: 'user@domain.com',
-      username: 'abc',
       token: '123',
       hostRules: [
         {
@@ -100,7 +105,7 @@ describe('modules/platform/index', () => {
 
     expect(await platform.initPlatform(config)).toEqual({
       endpoint: 'https://ghe.renovatebot.com/',
-      gitAuthor: 'user@domain.com',
+      gitAuthor: 'some <user@domain.com>',
       hostRules: [
         {
           hostType: 'github',
@@ -112,7 +117,6 @@ describe('modules/platform/index', () => {
           hostType: 'github',
           matchHost: 'ghe.renovatebot.com',
           token: '123',
-          username: 'abc',
         },
       ],
       platform: 'github',

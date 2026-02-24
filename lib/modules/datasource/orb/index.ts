@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -38,11 +38,7 @@ export class OrbDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `createdAt` field in the results.';
 
-  @cache({
-    namespace: `datasource-${OrbDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -78,5 +74,16 @@ export class OrbDatasource extends Datasource {
     const dep = { homepage, isPrivate: !!orb.isPrivate, releases };
     logger.trace({ dep }, 'dep');
     return dep;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${OrbDatasource.id}`,
+        key: config.packageName,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

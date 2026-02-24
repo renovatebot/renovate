@@ -13,6 +13,7 @@ export class GlobalConfig {
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
@@ -39,10 +40,14 @@ export class GlobalConfig {
     'localDir',
     'migratePresets',
     'onboardingAutoCloseAge',
+    'onboardingBranch',
+    'onboardingPrTitle',
     'platform',
     'presetCachePersistence',
+    'repositoryCacheForceLocal',
     's3Endpoint',
     's3PathStyle',
+    'toolSettings',
     'userAgent',
   ];
 

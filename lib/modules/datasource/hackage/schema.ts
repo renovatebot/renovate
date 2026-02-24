@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // See https://github.com/haskell/hackage-server
 // revision e885d36c

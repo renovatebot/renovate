@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
 import { detectPlatform, getInheritedOrGlobal, parseJson } from './common.ts';
 import * as hostRules from './host-rules.ts';
-import { logger } from '~test/util.ts';
 
 const validJsonString = `
 {
@@ -243,6 +243,55 @@ describe('util/common', () => {
         configFileNames: ['global'],
       });
       expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
+    });
+
+    describe('when requesting onboardingAutoCloseAge, do not allow inherit config to override global config', () => {
+      it('returns inherited value when inherited < global', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns global value when inherited > global value', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns inherited value when inherited == global', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns inherited value when global value is not set', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: undefined,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
+      });
+
+      it('returns global value when inherited value is not set', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
+      });
     });
   });
 });

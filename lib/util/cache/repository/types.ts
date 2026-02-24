@@ -81,6 +81,11 @@ export interface BranchCache {
   branchFingerprint?: string; // Defunct
   commitFingerprint?: string; // Actively used
   /**
+   * The branch's most recent commit timestamp (ISO string)
+   * Used for commitHourlyLimit tracking
+   */
+  commitTimestamp?: string;
+  /**
    * Branch name
    */
   branchName: string;

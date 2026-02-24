@@ -1,5 +1,9 @@
 import fs from 'fs-extra';
 import { mockDeep } from 'vitest-mock-extended';
+import type { ExecSnapshots } from '~test/exec-util.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as util from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as docker from '../../../../util/exec/docker/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
@@ -7,10 +11,6 @@ import type { PostUpdateConfig } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as yarnHelper from './yarn.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import type { ExecSnapshots } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as util from '~test/util.ts';
 
 vi.mock('fs-extra', async () =>
   (
@@ -769,7 +769,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       localDir: '.',
       binarySource: 'docker',
       cacheDir: '/tmp/cache',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     Fixtures.mock(
       {
@@ -789,10 +789,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = {};
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar', options },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image', options },
       {
         cmd:
-          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/containerbase/sidecar ` +
+          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/renovatebot/base-image ` +
           `bash -l -c "` +
           `install-tool node 16.16.0` +
           ` && ` +

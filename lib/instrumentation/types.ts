@@ -15,7 +15,7 @@ export type RenovateSpanAttributes = {
 } & Attributes;
 
 /**
- * The instrumentation decorator parameters.
+ * The instrumentation parameters.
  */
 export interface SpanParameters {
   /**
