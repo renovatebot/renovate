@@ -81,7 +81,14 @@ describe('util/cache/package/index', () => {
   });
 
   it('catches errors during cleanup', async () => {
-    vi.mocked(backend.destroy).mockRejectedValue(new Error('destroy failed'));
+    const mockBackend = partial<PackageCacheBase>({
+      get: vi.fn(),
+      set: vi.fn(),
+      destroy: vi.fn().mockRejectedValue(new Error('destroy failed')),
+    });
+    vi.mocked(backend.init).mockResolvedValue(undefined);
+    vi.mocked(backend.getBackend).mockReturnValue(mockBackend);
+    await index.init({});
 
     await expect(index.cleanup({})).resolves.toBeUndefined();
   });
