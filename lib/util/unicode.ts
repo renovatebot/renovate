@@ -23,7 +23,7 @@ export function logWarningIfUnicodeHiddenCharactersInPackageFile(
           file,
           hiddenCharacters: toUnicodeEscape(hiddenCharacters.join('')),
         },
-        `Hidden Unicode characters have been discovered in the file \`${file}\`. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)`,
+        `Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)`,
       );
     }
   }
