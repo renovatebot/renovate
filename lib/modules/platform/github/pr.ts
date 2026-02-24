@@ -92,7 +92,6 @@ export async function getPrCache(
       if (pageIdx === 1) {
         opts.cacheProvider = repoCacheProvider;
         if (isInitial) {
-          // Speed up initial fetch
           opts.paginate = true;
         }
       }
@@ -118,9 +117,11 @@ export async function getPrCache(
 
       let { body: page } = res;
 
-      // Check stop condition on unfiltered page before username filtering.
-      // Pages are sorted updated_at desc, so the last element is the oldest.
       if (!isInitial && cutoffTime && isNonEmptyArray(page)) {
+        // Advance watermark so next run doesn't re-scan these pages,
+        // even if no Renovate PRs are found.
+        prApiCache.updateLastModified(page[0].updated_at);
+
         const oldestOnPage = DateTime.fromISO(page[page.length - 1].updated_at);
         if (oldestOnPage < cutoffTime) {
           needNextPageSync = false;
@@ -151,7 +152,12 @@ export async function getPrCache(
         needNextPageFetch &&= !opts.paginate;
       }
 
-      if (!isInitial && needNextPageSync && pageIdx >= MAX_SYNC_PAGES) {
+      if (
+        !isInitial &&
+        needNextPageFetch &&
+        needNextPageSync &&
+        pageIdx >= MAX_SYNC_PAGES
+      ) {
         logger.warn(
           { repo, pages: pageIdx },
           'PR cache: hit max sync pages, stopping',

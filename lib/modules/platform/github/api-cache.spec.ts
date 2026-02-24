@@ -112,6 +112,32 @@ describe('modules/platform/github/api-cache', () => {
     });
   });
 
+  describe('updateLastModified', () => {
+    it('sets lastModified when not present', () => {
+      const apiCache = new ApiCache({ items: {} });
+
+      apiCache.updateLastModified(t2);
+
+      expect(apiCache.getLastModified()).toBe(t2);
+    });
+
+    it('advances lastModified to newer timestamp', () => {
+      const apiCache = new ApiCache({ items: {}, lastModified: t1 });
+
+      apiCache.updateLastModified(t3);
+
+      expect(apiCache.getLastModified()).toBe(t3);
+    });
+
+    it('does not regress lastModified to older timestamp', () => {
+      const apiCache = new ApiCache({ items: {}, lastModified: t3 });
+
+      apiCache.updateLastModified(t1);
+
+      expect(apiCache.getLastModified()).toBe(t3);
+    });
+  });
+
   describe('reconcile', () => {
     it('returns false for empty page', () => {
       const apiCache = new ApiCache({

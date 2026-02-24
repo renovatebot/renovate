@@ -1604,10 +1604,67 @@ describe('modules/platform/github/index', () => {
         expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
       });
 
+      it('advances watermark from unfiltered page so next sync is cheaper', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const t5 = t.plus({ minutes: 5 }).toISO()!;
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — non-Renovate PRs advance watermark to t4
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+            {
+              ...pr1,
+              number: 11,
+              updated_at: t.toISO(),
+              user: { login: 'other' },
+            },
+          ],
+          { link: pageLink(2) },
+        );
+        // Stops after page 1 — oldest (t0) < cutoff (t1)
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 3: sync — watermark is now t4, page has item at t5 and t3
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 12, updated_at: t5, user: { login: 'other' } },
+            { ...pr1, number: 13, updated_at: t3, user: { login: 'other' } },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — oldest (t3) < watermark (t4) → stops
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+      });
+
       it('derives cutoff from cached items when lastModified is missing', async () => {
         const scope = httpMock.scope(githubApiHost);
 
-        // Seed cache with items but no lastModified (simulates updateItem usage)
+        // Seed cache with multiple items but no lastModified (simulates updateItem usage).
         const repoCache = repository.getCache();
         repoCache.platform = {
           github: {
@@ -1618,8 +1675,24 @@ describe('modules/platform/github/index', () => {
                   sourceBranch: 'renovate-branch',
                   title: 'Renovate PR',
                   state: 'open',
-                  updated_at: t2,
+                  updated_at: t1,
                   node_id: '12345',
+                },
+                2: {
+                  number: 2,
+                  sourceBranch: 'renovate-branch-2',
+                  title: 'Renovate PR 2',
+                  state: 'open',
+                  updated_at: t2,
+                  node_id: '12346',
+                },
+                3: {
+                  number: 3,
+                  sourceBranch: 'renovate-branch-3',
+                  title: 'Renovate PR 3',
+                  state: 'open',
+                  updated_at: t1,
+                  node_id: '12347',
                 },
               },
             },
@@ -1636,7 +1709,7 @@ describe('modules/platform/github/index', () => {
           ],
           { link: pageLink(2) },
         );
-        // Page 2 NOT mocked — cutoff derived from cached item (t2) stops sync
+        // Page 2 NOT mocked — cutoff derived from max(item.updated_at) = t2 stops sync
 
         await github.initRepo({
           repository: 'some/repo',
@@ -1644,8 +1717,14 @@ describe('modules/platform/github/index', () => {
         });
         const res = await github.getPrList();
 
-        expect(res).toHaveLength(1);
-        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+        expect(res).toHaveLength(3);
+        expect(res).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ number: 1, title: 'Renovate PR' }),
+            expect.objectContaining({ number: 2, title: 'Renovate PR 2' }),
+            expect.objectContaining({ number: 3, title: 'Renovate PR 3' }),
+          ]),
+        );
       });
 
       it('stops at max sync pages', async () => {

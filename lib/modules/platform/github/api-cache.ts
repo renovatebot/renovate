@@ -11,8 +11,7 @@ export class ApiCache<T extends ApiPageItem> {
   }
 
   getItems(): T[] {
-    const items = Object.values(this.cache.items);
-    return items;
+    return Object.values(this.cache.items);
   }
 
   getItem(number: number): T | null {
@@ -33,15 +32,21 @@ export class ApiCache<T extends ApiPageItem> {
     return this.cache.lastModified;
   }
 
+  updateLastModified(timestamp: string): void {
+    const current = this.cache.lastModified
+      ? DateTime.fromISO(this.cache.lastModified)
+      : null;
+    const incoming = DateTime.fromISO(timestamp);
+    if (!current || incoming > current) {
+      this.cache.lastModified = timestamp;
+    }
+  }
+
   /**
-   * Copies items from `page` to `cache`.
-   * Updates internal cache timestamp.
+   * Copies items from `page` to cache and updates the internal timestamp.
    *
-   * @param cache Cache object
-   * @param page List of cacheable items, sorted by `updated_at` field
-   * starting from the most recently updated.
-   * @returns `true` when the next page is likely to contain fresh items,
-   * otherwise `false`.
+   * @param page Items sorted by `updated_at` desc (most recent first).
+   * @returns `true` when the next page is likely to contain fresh items.
    */
   reconcile(page: T[]): boolean {
     if (page.length === 0) {
