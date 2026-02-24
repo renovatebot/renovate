@@ -1,59 +1,104 @@
-import * as memCache from '../memory/index.ts';
+import { partial } from '~test/util.ts';
 import * as backend from './backend.ts';
-import {
-  cleanup,
-  get,
-  getCacheType,
-  init,
-  set,
-  setWithRawTtl,
-} from './index.ts';
+import type { PackageCacheBase } from './impl/base.ts';
+import * as index from './index.ts';
 
+vi.unmock('./index.ts');
 vi.mock('./backend.ts');
 
 describe('util/cache/package/index', () => {
-  beforeEach(() => {
-    memCache.init();
+  beforeEach(async () => {
+    vi.mocked(backend.getBackend).mockReturnValue(undefined);
+    await index.cleanup({});
   });
 
-  afterEach(() => {
-    memCache.reset();
+  it('returns undefined on get without backend', async () => {
+    expect(await index.get('_test-namespace', 'missing-key')).toBeUndefined();
   });
 
-  it('returns undefined if not initialized', async () => {
-    expect(await get('_test-namespace', 'missing-key')).toBeUndefined();
+  it('stores and retrieves via L1 without backend', async () => {
+    await index.set('_test-namespace', 'some-key', 'some-value', 5);
 
-    expect(
-      await set('_test-namespace', 'some-key', 'some-value', 5),
-    ).toBeUndefined();
+    const result = await index.get('_test-namespace', 'some-key');
 
-    await expect(cleanup({})).resolves.toBeUndefined();
+    expect(result).toBe('some-value');
   });
 
-  it('delegates init to backend', async () => {
-    const config = { cacheDir: 'some-dir' };
+  it('delegates init to backend and wraps result', async () => {
+    const mockBackend = partial<PackageCacheBase>({
+      get: vi.fn().mockResolvedValue('backend-value'),
+      set: vi.fn(),
+      destroy: vi.fn(),
+    });
+    vi.mocked(backend.init).mockResolvedValue(undefined);
+    vi.mocked(backend.getBackend).mockReturnValue(mockBackend);
 
-    await init(config);
+    await index.init({ cacheDir: 'some-dir' });
 
-    expect(backend.init).toHaveBeenCalledWith(config);
+    expect(backend.init).toHaveBeenCalledWith({ cacheDir: 'some-dir' });
+
+    const result = await index.get('_test-namespace', 'some-key');
+
+    expect(result).toBe('backend-value');
   });
 
-  it('delegates get to backend', async () => {
-    vi.mocked(backend.getCacheType).mockReturnValue('file');
-    vi.mocked(backend.get).mockResolvedValue('cached-value');
+  it('delegates cleanup to packageCache.destroy', async () => {
+    const mockBackend = partial<PackageCacheBase>({
+      get: vi.fn(),
+      set: vi.fn(),
+      destroy: vi.fn(),
+    });
+    vi.mocked(backend.init).mockResolvedValue(undefined);
+    vi.mocked(backend.getBackend).mockReturnValue(mockBackend);
+    await index.init({});
 
-    const result = await get('_test-namespace', 'some-key');
+    await index.cleanup({});
 
-    expect(result).toBe('cached-value');
-    expect(backend.get).toHaveBeenCalledWith('_test-namespace', 'some-key');
+    expect(mockBackend.destroy).toHaveBeenCalled();
   });
 
-  it('delegates set to backend', async () => {
-    vi.mocked(backend.getCacheType).mockReturnValue('file');
+  it('resets packageCache to backendless instance on cleanup', async () => {
+    const mockBackend = partial<PackageCacheBase>({
+      get: vi.fn().mockResolvedValue('backend-value'),
+      set: vi.fn(),
+      destroy: vi.fn(),
+    });
+    vi.mocked(backend.init).mockResolvedValue(undefined);
+    vi.mocked(backend.getBackend).mockReturnValue(mockBackend);
 
-    await set('_test-namespace', 'some-key', 'some-value', 5);
+    await index.init({ cacheDir: 'some-dir' });
 
-    expect(backend.set).toHaveBeenCalledWith(
+    const result = await index.get('_test-namespace', 'key');
+
+    expect(result).toBe('backend-value');
+
+    vi.mocked(backend.getBackend).mockReturnValue(undefined);
+    await index.cleanup({});
+
+    const resultAfterCleanup = await index.get('_test-namespace', 'key');
+
+    expect(resultAfterCleanup).toBeUndefined();
+  });
+
+  it('catches errors during cleanup', async () => {
+    vi.mocked(backend.destroy).mockRejectedValue(new Error('destroy failed'));
+
+    await expect(index.cleanup({})).resolves.toBeUndefined();
+  });
+
+  it('delegates set to packageCache', async () => {
+    const mockBackend = partial<PackageCacheBase>({
+      get: vi.fn(),
+      set: vi.fn(),
+      destroy: vi.fn(),
+    });
+    vi.mocked(backend.init).mockResolvedValue(undefined);
+    vi.mocked(backend.getBackend).mockReturnValue(mockBackend);
+
+    await index.init({ cacheDir: 'some-dir' });
+    await index.set('_test-namespace', 'some-key', 'some-value', 5);
+
+    expect(mockBackend.set).toHaveBeenCalledWith(
       '_test-namespace',
       'some-key',
       'some-value',
@@ -61,50 +106,23 @@ describe('util/cache/package/index', () => {
     );
   });
 
-  it('delegates setWithRawTtl to backend', async () => {
-    vi.mocked(backend.getCacheType).mockReturnValue('redis');
+  it('delegates setWithRawTtl to packageCache', async () => {
+    const mockBackend = partial<PackageCacheBase>({
+      get: vi.fn(),
+      set: vi.fn(),
+      destroy: vi.fn(),
+    });
+    vi.mocked(backend.init).mockResolvedValue(undefined);
+    vi.mocked(backend.getBackend).mockReturnValue(mockBackend);
 
-    await setWithRawTtl('_test-namespace', 'some-key', 'some-value', 10);
+    await index.init({ cacheDir: 'some-dir' });
+    await index.setWithRawTtl('_test-namespace', 'some-key', 'some-value', 10);
 
-    expect(backend.set).toHaveBeenCalledWith(
+    expect(mockBackend.set).toHaveBeenCalledWith(
       '_test-namespace',
       'some-key',
       'some-value',
       10,
     );
-  });
-
-  it('deduplicates get via memCache', async () => {
-    vi.mocked(backend.getCacheType).mockReturnValue('file');
-    vi.mocked(backend.get).mockResolvedValue('cached-value');
-
-    const result1 = await get('_test-namespace', 'some-key');
-    const result2 = await get('_test-namespace', 'some-key');
-
-    expect(result1).toBe('cached-value');
-    expect(result2).toBe('cached-value');
-    expect(backend.get).toHaveBeenCalledTimes(1);
-  });
-
-  it('setWithRawTtl updates memCache', async () => {
-    vi.mocked(backend.getCacheType).mockReturnValue('file');
-
-    await setWithRawTtl('_test-namespace', 'some-key', 'new-value', 5);
-    const result = await get('_test-namespace', 'some-key');
-
-    expect(result).toBe('new-value');
-    expect(backend.get).not.toHaveBeenCalled();
-  });
-
-  it('delegates cleanup to backend.destroy', async () => {
-    await cleanup({});
-
-    expect(backend.destroy).toHaveBeenCalled();
-  });
-
-  it('delegates getCacheType to backend', () => {
-    vi.mocked(backend.getCacheType).mockReturnValue('redis');
-
-    expect(getCacheType()).toBe('redis');
   });
 });
