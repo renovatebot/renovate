@@ -29,6 +29,10 @@ export class ApiCache<T extends ApiPageItem> {
     this.cache.items[item.number] = item;
   }
 
+  getLastModified(): string | undefined {
+    return this.cache.lastModified;
+  }
+
   /**
    * Copies items from `page` to `cache`.
    * Updates internal cache timestamp.
@@ -40,6 +44,10 @@ export class ApiCache<T extends ApiPageItem> {
    * otherwise `false`.
    */
   reconcile(page: T[]): boolean {
+    if (page.length === 0) {
+      return false;
+    }
+
     const { items } = this.cache;
     let { lastModified } = this.cache;
 

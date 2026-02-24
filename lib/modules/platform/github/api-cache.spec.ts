@@ -90,7 +90,39 @@ describe('modules/platform/github/api-cache', () => {
     });
   });
 
+  describe('getLastModified', () => {
+    it('returns undefined when no lastModified in cache', () => {
+      const apiCache = new ApiCache({ items: {} });
+
+      expect(apiCache.getLastModified()).toBeUndefined();
+    });
+
+    it('returns stored value when present', () => {
+      const apiCache = new ApiCache({ items: {}, lastModified: t2 });
+
+      expect(apiCache.getLastModified()).toBe(t2);
+    });
+
+    it('returns updated value after reconcile', () => {
+      const apiCache = new ApiCache({ items: {}, lastModified: t1 });
+
+      apiCache.reconcile([{ number: 1, updated_at: t3 }]);
+
+      expect(apiCache.getLastModified()).toBe(t3);
+    });
+  });
+
   describe('reconcile', () => {
+    it('returns false for empty page', () => {
+      const apiCache = new ApiCache({
+        items: { 1: { number: 1, updated_at: t1 } },
+        lastModified: t1,
+      });
+
+      expect(apiCache.reconcile([])).toBeFalse();
+      expect(apiCache.getLastModified()).toBe(t1);
+    });
+
     it('appends new items', () => {
       const apiCache = new ApiCache({ items: {} });
 
