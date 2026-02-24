@@ -165,6 +165,7 @@ export interface RenovateSharedConfig {
 export interface GlobalInheritableConfig {
   bbUseDevelopmentBranch?: boolean;
   configFileNames?: string[];
+  onboarding?: boolean;
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
