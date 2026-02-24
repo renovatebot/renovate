@@ -15,6 +15,7 @@ import type {
   GitRefDefinition,
   GithubReleaseDefinition,
   HelmChartDefinition,
+  HttpReleaseDefinition,
   VendirDefinition,
 } from './schema.ts';
 import { Vendir } from './schema.ts';
@@ -71,6 +72,17 @@ export function extractGithubReleaseSource(
   };
 }
 
+export function extractHttpReleaseSource(
+  httpRelease: HttpReleaseDefinition,
+): PackageDependency {
+  return {
+    packageName: httpRelease.url,
+    currentValue: 'latest',
+    depType: 'HttpSource',
+    skipReason: 'unsupported-datasource',
+  };
+}
+
 export function parseVendir(
   content: string,
   packageFile?: string,
@@ -110,6 +122,9 @@ export function extractPackageFile(
       deps.push(dep);
     } else if ('githubRelease' in content && content.githubRelease) {
       const dep = extractGithubReleaseSource(content.githubRelease);
+      deps.push(dep);
+    } else if ('http' in content && content.http) {
+      const dep = extractHttpReleaseSource(content.http);
       deps.push(dep);
     }
   }
