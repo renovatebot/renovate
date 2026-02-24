@@ -125,5 +125,5 @@ export const PAGE_NOT_FOUND_ERROR = 'page-not-found';
 // Missing API required credentials
 export const MISSING_API_CREDENTIALS = 'missing-api-credentials';
 
-// Logger not initialized
+/** Logger not initialized */
 export const LOGGER_NOT_INITIALIZED = 'logger-not-initialized';
