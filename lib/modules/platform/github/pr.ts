@@ -152,6 +152,7 @@ export async function getPrCache(
         needNextPageFetch &&= !opts.paginate;
       }
 
+      // Safety net: cutoff-based stop should always fire first
       if (
         !isInitial &&
         needNextPageFetch &&
