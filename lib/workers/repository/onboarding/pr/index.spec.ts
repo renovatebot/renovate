@@ -39,6 +39,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       GlobalConfig.set({
         onboardingBranch: config.onboardingBranch,
         onboardingPrTitle: 'Configure Renovate', // default value
+        requireConfig: config.requireConfig,
       });
       InheritConfig.reset();
     });
@@ -465,6 +466,11 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('creates PR (no require config)', async () => {
       config.requireConfig = 'optional';
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate',
+        requireConfig: 'optional',
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });

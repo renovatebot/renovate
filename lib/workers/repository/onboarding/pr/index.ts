@@ -142,7 +142,7 @@ export async function ensureOnboardingPr(
     config.productLinks!.homepage
   })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
-    config.requireConfig === 'required'
+    getInheritedOrGlobal('requireConfig') === 'required'
       ? emojify(
           `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
         )
