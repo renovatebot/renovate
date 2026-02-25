@@ -21,6 +21,9 @@
       }
     }
   },
+  "formatter": {
+    "enabled": false
+  },
   "files": {
     "includes": [
       "**",
