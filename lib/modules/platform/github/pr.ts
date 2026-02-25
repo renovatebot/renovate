@@ -1,4 +1,5 @@
-import { isEmptyArray } from '@sindresorhus/is';
+import { isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
@@ -11,6 +12,8 @@ import { parseLinkHeader } from '../../../util/url.ts';
 import { ApiCache } from './api-cache.ts';
 import { coerceRestPr } from './common.ts';
 import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
+
+const MAX_SYNC_PAGES = 100;
 
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
@@ -48,8 +51,8 @@ function getPrApiCache(): ApiCache<GhPr> {
  *   b. Some of PRs had changed since last run.
  *
  *      In this case, we sequentially fetch page by page
- *      until `ApiCache.coerce` function indicates that
- *      no more fresh items can be found in the next page.
+ *      until the oldest item on an unfiltered page predates
+ *      the cache's `lastModified` timestamp.
  *
  *      We expect to fetch just one page per run in average,
  *      since it's rare to have more than 100 updated PRs.
@@ -61,6 +64,21 @@ export async function getPrCache(
 ): Promise<Record<number, GhPr>> {
   const prApiCache = getPrApiCache();
   const isInitial = isEmptyArray(prApiCache.getItems());
+
+  // Snapshot before the loop — reconcile() updates lastModified as it
+  // processes items, so reading it inside the loop would create a moving target.
+  // If lastModified is missing but items exist (populated via updateItem()),
+  // derive cutoff from the newest cached item.
+  let lastModifiedRaw = prApiCache.getLastModified();
+  if (!lastModifiedRaw && !isInitial) {
+    const items = prApiCache.getItems();
+    for (const item of items) {
+      if (!lastModifiedRaw || item.updated_at > lastModifiedRaw) {
+        lastModifiedRaw = item.updated_at;
+      }
+    }
+  }
+  const cutoffTime = lastModifiedRaw ? DateTime.fromISO(lastModifiedRaw) : null;
 
   try {
     let requestsTotal = 0;
@@ -74,7 +92,6 @@ export async function getPrCache(
       if (pageIdx === 1) {
         opts.cacheProvider = repoCacheProvider;
         if (isInitial) {
-          // Speed up initial fetch
           opts.paginate = true;
         }
       }
@@ -100,6 +117,17 @@ export async function getPrCache(
 
       let { body: page } = res;
 
+      if (!isInitial && cutoffTime && isNonEmptyArray(page)) {
+        // Advance watermark so next run doesn't re-scan these pages,
+        // even if no Renovate PRs are found.
+        prApiCache.updateLastModified(page[0].updated_at);
+
+        const oldestOnPage = DateTime.fromISO(page[page.length - 1].updated_at);
+        if (oldestOnPage < cutoffTime) {
+          needNextPageSync = false;
+        }
+      }
+
       if (username) {
         const filteredPage = page.filter(
           (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
@@ -114,11 +142,28 @@ export async function getPrCache(
 
       const items = page.map(coerceRestPr);
 
-      needNextPageSync = prApiCache.reconcile(items);
+      if (isNonEmptyArray(items)) {
+        prApiCache.reconcile(items);
+      }
+
       needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
 
       if (pageIdx === 1) {
         needNextPageFetch &&= !opts.paginate;
+      }
+
+      // Safety net: cutoff-based stop should always fire first
+      if (
+        !isInitial &&
+        needNextPageFetch &&
+        needNextPageSync &&
+        pageIdx >= MAX_SYNC_PAGES
+      ) {
+        logger.warn(
+          { repo, pages: pageIdx },
+          'PR cache: hit max sync pages, stopping',
+        );
+        needNextPageSync = false;
       }
 
       pageIdx += 1;
