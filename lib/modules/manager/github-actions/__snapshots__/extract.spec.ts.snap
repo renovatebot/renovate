@@ -3,7 +3,7 @@
 exports[`modules/manager/github-actions/extract > extractPackageFile() > extracts multiple action tag lines from yaml configuration file 1`] = `
 [
   {
-    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-digest",
@@ -119,7 +119,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
 exports[`modules/manager/github-actions/extract > extractPackageFile() > extracts multiple docker image lines from yaml configuration file 1`] = `
 [
   {
-    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-digest",
@@ -139,7 +139,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "replaceString": "replicated/dockerfilelint",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-digest",

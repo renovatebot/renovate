@@ -21,7 +21,7 @@ import type {
 } from '../types.ts';
 import { CommunityActions } from './community.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
-import { isSha, isShortSha, parseUsesLine } from './parse.ts';
+import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { Steps } from './schema.ts';
 import { Workflow } from './schema.ts';
 
@@ -100,10 +100,13 @@ function extractRepositoryAction(
   }
 
   // Extend replaceString to include relevant comment portions:
-  // - Pinned version: include only up to the version (truncate trailing text)
+  // - Pinned version or ref: include only up to the matched token (truncate trailing text)
   // - Ratchet exclude: include the full comment to preserve the marker
+  const pinComment =
+    commentData.pinnedVersion ??
+    (isSha(ref) || isShortSha(ref) ? commentData.ref : undefined);
   if (
-    commentData.pinnedVersion &&
+    pinComment &&
     !is.undefined(commentData.index) &&
     !is.undefined(commentData.matchedString)
   ) {
@@ -118,10 +121,10 @@ function extractRepositoryAction(
   }
 
   if (isSha(ref)) {
-    dep.currentValue = commentData.pinnedVersion;
+    dep.currentValue = commentData.pinnedVersion ?? commentData.ref;
     dep.currentDigest = ref;
   } else if (isShortSha(ref)) {
-    dep.currentValue = commentData.pinnedVersion;
+    dep.currentValue = commentData.pinnedVersion ?? commentData.ref;
     dep.currentDigestShort = ref;
   } else {
     dep.currentValue = ref;
@@ -132,7 +135,6 @@ function extractRepositoryAction(
   if (!dep.datasource && dep.currentValue && !isVersionLike) {
     dep.datasource = GithubDigestDatasource.id;
     dep.versioning = exactVersioning.id;
-    dep.autoReplaceStringTemplate = `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`;
   }
 
   dep.datasource ??= GithubTagsDatasource.id;
@@ -202,8 +204,6 @@ function detectDatasource(registryUrl: string): PackageDependency {
     skipReason: 'unsupported-url',
   };
 }
-
-const versionLikeRe = regEx(/^v?\d+/);
 
 const runnerVersionRegex = regEx(
   /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/,

@@ -246,22 +246,26 @@ describe('modules/manager/github-actions/parse', () => {
       });
     });
 
-    it('parses ref=<value> for non-semver refs', () => {
-      const result = parseComment('ref=cargo-llvm-cov');
+    it('parses bare non-semver ref', () => {
+      const result = parseComment(' cargo-llvm-cov');
       expect(result).toEqual({
         index: 0,
-        matchedString: 'ref=cargo-llvm-cov',
-        pinnedVersion: 'cargo-llvm-cov',
+        matchedString: ' cargo-llvm-cov',
+        ref: 'cargo-llvm-cov',
       });
     });
 
-    it('parses ref=<value> with leading whitespace', () => {
-      const result = parseComment(' ref=nextest');
+    it('parses bare branch name', () => {
+      const result = parseComment(' main');
       expect(result).toEqual({
         index: 0,
-        matchedString: ' ref=nextest',
-        pinnedVersion: 'nextest',
+        matchedString: ' main',
+        ref: 'main',
       });
+    });
+
+    it('ignores multi-word comments', () => {
+      expect(parseComment('do not update')).toEqual({});
     });
   });
 

@@ -489,9 +489,10 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0]).toMatchObject({
         depName: 'taiki-e/install-action',
         currentValue: 'cargo-llvm-cov',
+        datasource: 'github-digest',
         versioning: 'exact',
         autoReplaceStringTemplate:
-          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
       });
     });
 
@@ -501,7 +502,7 @@ describe('modules/manager/github-actions/extract', () => {
         jobs:
           build:
             steps:
-              - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # ref=cargo-llvm-cov
+              - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # cargo-llvm-cov
         `,
         'workflow.yml',
       );
@@ -509,11 +510,12 @@ describe('modules/manager/github-actions/extract', () => {
         depName: 'taiki-e/install-action',
         currentValue: 'cargo-llvm-cov',
         currentDigest: '4b1248585248751e3b12fd020cf7ac91540ca09c',
+        datasource: 'github-digest',
         versioning: 'exact',
         replaceString:
-          'taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # ref=cargo-llvm-cov',
+          'taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # cargo-llvm-cov',
         autoReplaceStringTemplate:
-          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
       });
     });
 

@@ -53,10 +53,10 @@ Since these refs have no version ordering, only digest pinning updates are suppo
 - `taiki-e/install-action@cargo-llvm-cov` → `github-digest` datasource (digest pinning only)
 - `actions/checkout@main` → `github-digest` datasource (digest pinning only)
 
-When pinning, Renovate uses a `# ref=<value>` comment to preserve the original ref:
+When pinning, Renovate adds a comment to preserve the original ref:
 
 ```yaml
-- uses: taiki-e/install-action@d8c10dae823f48238abff23fee4146b448aed2f1 # ref=cargo-llvm-cov
+- uses: taiki-e/install-action@d8c10dae823f48238abff23fee4146b448aed2f1 # cargo-llvm-cov
 ```
 
 Non-semver ref support is currently limited to GitHub-hosted actions.
