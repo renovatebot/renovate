@@ -96,15 +96,15 @@ describe('workers/repository/process/libyear', () => {
       calculateLibYears(config, packageFiles);
 
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
-        'No currentVersionTimestamp for some/image',
+        'LibYears: no currentVersionTimestamp for some/image',
       );
 
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
-        'No releaseTimestamp for dep1 update to 3.0.0',
+        'LibYears: no releaseTimestamp for dep1 update to 3.0.0',
       );
 
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
-        'No currentVersionTimestamp for dep3',
+        'LibYears: no currentVersionTimestamp for dep3',
       );
 
       expect(logger.logger.debug).toHaveBeenCalledWith(

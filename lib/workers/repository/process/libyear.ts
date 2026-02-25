@@ -45,7 +45,9 @@ export function calculateLibYears(
 
         depInfo.outdated = true;
         if (!dep.currentVersionTimestamp) {
-          logger.once.debug(`No currentVersionTimestamp for ${dep.depName}`);
+          logger.once.debug(
+            `LibYears: no currentVersionTimestamp for ${dep.depName}`,
+          );
           allDeps.push(depInfo);
           continue;
         }
@@ -57,7 +59,7 @@ export function calculateLibYears(
         for (const update of dep.updates) {
           if (!update.releaseTimestamp) {
             logger.once.debug(
-              `No releaseTimestamp for ${dep.depName} update to ${update.newVersion}`,
+              `LibYears: no releaseTimestamp for ${dep.depName} update to ${update.newVersion}`,
             );
             continue;
           }
