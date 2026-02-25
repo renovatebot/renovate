@@ -26,7 +26,7 @@ permissions:
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft != true
+    if: github.repository == 'renovatebot/renovate' && github.event.pull_request.draft != true
     permissions:
       security-events: write
     steps:

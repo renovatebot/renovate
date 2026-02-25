@@ -10,6 +10,7 @@ permissions: {}
 jobs:
   check-unlabeled-issues:
     runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate'
 
     permissions:
       issues: write
