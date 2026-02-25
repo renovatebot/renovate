@@ -1,4 +1,4 @@
-import Git from 'simple-git';
+import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
@@ -17,8 +17,10 @@ export default async function updateDependency({
     'git-refs',
   ]);
   const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
-  const git = Git(localDir).env(gitEnv);
-  const submoduleGit = Git(upath.join(localDir, upgrade.depName)).env(gitEnv);
+  const git = simpleGit(localDir).env(gitEnv);
+  const submoduleGit = simpleGit(upath.join(localDir, upgrade.depName)).env(
+    gitEnv,
+  );
 
   try {
     await git.submoduleUpdate(['--checkout', '--init', upgrade.depName!]);

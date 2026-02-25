@@ -5,8 +5,8 @@ import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
@@ -282,18 +282,7 @@ export class NugetV3Api {
     return dep;
   }
 
-  @cache({
-    namespace: NugetV3Api.cacheNamespace,
-    key: (
-      _http: Http,
-      registryUrl: string,
-      packageName: string,
-      _packageVersion: string | null,
-      _nupkgUrl: string,
-    ) => `source-url:${registryUrl}:${packageName}`,
-    ttlMinutes: 10080, // 1 week
-  })
-  async getSourceUrlFromNupkg(
+  private async _getSourceUrlFromNupkg(
     http: Http,
     _registryUrl: string,
     packageName: string,
@@ -328,6 +317,30 @@ export class NugetV3Api {
       await fs.rmCache(nupkgFile);
       await fs.rmCache(nupkgContentsDir);
     }
+  }
+
+  getSourceUrlFromNupkg(
+    http: Http,
+    registryUrl: string,
+    packageName: string,
+    packageVersion: string | null,
+    nupkgUrl: string,
+  ): Promise<string | null> {
+    return withCache(
+      {
+        namespace: NugetV3Api.cacheNamespace,
+        key: `source-url:${registryUrl}:${packageName}`,
+        ttlMinutes: 10080, // 1 week
+      },
+      () =>
+        this._getSourceUrlFromNupkg(
+          http,
+          registryUrl,
+          packageName,
+          packageVersion,
+          nupkgUrl,
+        ),
+    );
   }
 
   getDeprecationMessage(packageName: string): string {

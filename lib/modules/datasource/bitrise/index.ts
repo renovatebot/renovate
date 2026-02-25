@@ -1,6 +1,6 @@
 import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
@@ -36,12 +36,7 @@ export class BitriseDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_url` field of the release object in the results.';
 
-  @cache({
-    namespace: `datasource-${BitriseDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      `${registryUrl}/${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -128,5 +123,16 @@ export class BitriseDatasource extends Datasource {
       ...result,
       homepage: `https://bitrise.io/integrations/steps/${packageName}`,
     };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${BitriseDatasource.id}`,
+        key: `${config.registryUrl}/${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

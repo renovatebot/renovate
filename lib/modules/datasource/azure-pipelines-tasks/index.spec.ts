@@ -1,10 +1,10 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { AzurePipelinesTasksDatasource } from './index.ts';
 import { AzurePipelinesTask } from './schema.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
 const builtinTasksPath =

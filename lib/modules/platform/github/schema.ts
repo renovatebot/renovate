@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
@@ -54,7 +54,6 @@ export const GithubVulnerabilityAlert = LooseArray(
     }),
   }),
   {
-    /* v8 ignore next */
     onError: ({ error }) => {
       logger.debug(
         { error },

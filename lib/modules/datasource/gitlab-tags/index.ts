@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -31,12 +31,7 @@ export class GitlabTagsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  @cache({
-    namespace: `datasource-${GitlabTagsDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `getReleases:${getDepHost(registryUrl)}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -71,17 +66,23 @@ export class GitlabTagsDatasource extends Datasource {
     return dependency;
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GitlabTagsDatasource.id}`,
+        key: `getReleases:${getDepHost(config.registryUrl)}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   /**
    * gitlab.getDigest
    *
    * Returs the latest commit hash of the repository.
    */
-  @cache({
-    namespace: `datasource-${GitlabTagsDatasource.id}`,
-    key: ({ registryUrl, packageName }: DigestConfig) =>
-      `getDigest:${getDepHost(registryUrl)}:${packageName}`,
-  })
-  override async getDigest(
+  private async _getDigest(
     { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -125,5 +126,19 @@ export class GitlabTagsDatasource extends Datasource {
     }
 
     return digest;
+  }
+
+  override getDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GitlabTagsDatasource.id}`,
+        key: `getDigest:${getDepHost(config.registryUrl)}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getDigest(config, newValue),
+    );
   }
 }

@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
@@ -23,7 +24,6 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types.ts';
-import { logger } from '~test/util.ts';
 
 const datasource = 'dummy';
 const packageName = 'package';
@@ -158,7 +158,7 @@ describe('modules/datasource/index', () => {
       expect(getDatasources()).toBeDefined();
 
       const managerList = fs
-        .readdirSync(__dirname, { withFileTypes: true })
+        .readdirSync(import.meta.dirname, { withFileTypes: true })
         .filter(
           (dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'),
         )
@@ -191,7 +191,7 @@ describe('modules/datasource/index', () => {
       }
 
       const loadedDs = await loadModules(
-        __dirname,
+        import.meta.dirname,
         validateDatasource,
         filterClassBasedDatasources,
       );

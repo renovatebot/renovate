@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { isString } from '@sindresorhus/is';
-import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type {
   GitPullRequest,
   GitVersionDescriptor,
@@ -14,6 +14,7 @@ import {
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
+import { partial } from '~test/util.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -23,7 +24,6 @@ import type * as _git from '../../../util/git/index.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
 import type { Platform, RepoParams } from '../types.ts';
 import { AzurePrVote } from './types.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 vi.mock('./azure-helper.ts', () => mockDeep());

@@ -1,6 +1,6 @@
 import type { Timestamp } from '../../../../util/timestamp.ts';
-import { adapter } from './releases-query-adapter.ts';
 import type { GithubGraphqlRelease } from './releases-query-adapter.ts';
+import { adapter } from './releases-query-adapter.ts';
 
 const item: GithubGraphqlRelease = {
   version: '1.2.3',

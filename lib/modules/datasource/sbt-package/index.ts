@@ -1,8 +1,8 @@
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -343,15 +343,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     return null;
   }
 
-  @cache({
-    namespace: 'datasource-sbt-package',
-    key: (
-      { registryUrl, packageName }: PostprocessReleaseConfig,
-      { version }: Release,
-    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
-    ttlMinutes: 30 * 24 * 60,
-  })
-  override async postprocessRelease(
+  private async _postprocessRelease(
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
@@ -371,5 +363,19 @@ export class SbtPackageDatasource extends MavenDatasource {
     }
 
     return release;
+  }
+
+  override postprocessRelease(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    return withCache(
+      {
+        namespace: 'datasource-sbt-package',
+        key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
+        ttlMinutes: 30 * 24 * 60,
+      },
+      () => this._postprocessRelease(config, release),
+    );
   }
 }

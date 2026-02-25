@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -7,8 +9,6 @@ import type { FileAddition } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 import * as rules from './post-update/rules.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
@@ -22,7 +22,7 @@ const adminConfig: RepoGlobalConfig = {
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 } satisfies RepoGlobalConfig;
 
 process.env.CONTAINERBASE = 'true';
@@ -155,7 +155,7 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -164,7 +164,7 @@ describe('modules/manager/npm/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool node 20.1.0 ' +
           '&& ' +
@@ -260,6 +260,37 @@ describe('modules/manager/npm/artifacts', () => {
             ...validDepUpdate,
             currentValue: '8.15.5',
             managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null if the pnpmShrinkwrap file is not found', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      );
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: {
+              // to be super explicit it's not set
+              pnpmShrinkwrap: undefined,
+
+              // data from testing in https://github.com/JamieTanna-Mend-testing/pnpm-test-mra-no-workspace/pull/3
+              hasPackageManager: false,
+              npmrcFileName: null,
+              yarnZeroInstall: false,
+            },
             isVulnerabilityAlert: true,
           },
         ],

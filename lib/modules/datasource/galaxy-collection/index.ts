@@ -1,6 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -43,11 +43,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The `sourceUrl` is determined from the `repository` field in the results.';
 
-  @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -112,6 +108,17 @@ export class GalaxyCollectionDatasource extends Datasource {
     };
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+        key: `getReleases:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   constructBaseUrl(registryUrl: string, packageName: string): string {
     const [namespace, projectName] = packageName.split('.');
     if (ansibleProtocolRegex.test(registryUrl)) {
@@ -134,13 +141,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     }
   }
 
-  @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: (_packageName: string, versionsUrl: string, basicRelease: Release) =>
-      `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
-    ttlMinutes: 10080, // 1 week
-  })
-  async getVersionDetails(
+  private async _getVersionDetails(
     packageName: string,
     versionsUrl: string,
     basicRelease: Release,
@@ -166,5 +167,20 @@ export class GalaxyCollectionDatasource extends Datasource {
       isDeprecated: basicRelease.isDeprecated,
       releaseTimestamp: basicRelease.releaseTimestamp,
     };
+  }
+
+  getVersionDetails(
+    packageName: string,
+    versionsUrl: string,
+    basicRelease: Release,
+  ): Promise<Release> {
+    return withCache(
+      {
+        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+        key: `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
+        ttlMinutes: 10080, // 1 week
+      },
+      () => this._getVersionDetails(packageName, versionsUrl, basicRelease),
+    );
   }
 }

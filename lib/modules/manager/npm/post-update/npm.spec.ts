@@ -1,10 +1,10 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global.ts';
-import { getNodeToolConstraint } from './node-version.ts';
-import * as npmHelper from './npm.ts';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as npmHelper from './npm.ts';
 
 vi.mock('../../../../util/exec/env.ts');
 vi.mock('../../../../util/fs/index.ts');
@@ -404,7 +404,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -418,7 +418,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -426,7 +426,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           '-v "/tmp":"/tmp" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& ' +

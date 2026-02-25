@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import type { AllConfig } from '../../config/types.ts';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
 import type { PlatformId } from '../../constants/index.ts';
@@ -10,6 +9,7 @@ import {
   setPrivateKey,
 } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
+import { parseUrl } from '../../util/url.ts';
 import platforms from './api.ts';
 import { setPlatformScmApi } from './scm.ts';
 import type { Platform } from './types.ts';
@@ -58,6 +58,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       ...(config.hostRules ?? []),
     ],
   };
+  // v8 ignore else -- TODO: add test #40625
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     returnConfig.gitAuthor = config.gitAuthor;
@@ -68,8 +69,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    // TODO: null check (#22198)
-    matchHost: URL.parse(returnConfig.endpoint).hostname!,
+    matchHost: parseUrl(returnConfig.endpoint)?.hostname,
   };
   // There might have been platform-specific modifications to the token
   if (returnConfig.token) {

@@ -193,7 +193,7 @@ export async function processBranch(
     } else if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
-        'Closed PR already exists. Skipping branch.',
+        `Closed PR #${existingPr.number} already exists. Skipping branch.`,
       );
       await handleClosedPr(config, existingPr);
       return {
@@ -237,7 +237,7 @@ export async function processBranch(
     }
 
     logger.debug(
-      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}, Hourly Commit Count: ${getCount('HourlyCommits')}`,
     );
 
     if (
@@ -253,15 +253,29 @@ export async function processBranch(
       };
     }
     if (
+      !branchConfig.rebaseRequested &&
       isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
-      logger.debug('Reached commits limit - skipping branch');
+      logger.debug('Reached commits per run limit - skipping branch');
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: 'commit-limit-reached',
+        result: 'commit-per-run-limit-reached',
+      };
+    }
+    if (
+      !branchConfig.rebaseRequested &&
+      isLimitReached('HourlyCommits', branchConfig) &&
+      !dependencyDashboardCheck &&
+      !config.isVulnerabilityAlert
+    ) {
+      logger.debug('Reached hourly commits limit - skipping branch');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'commit-hourly-limit-reached',
       };
     }
     if (branchExists) {
@@ -302,7 +316,7 @@ export async function processBranch(
         config.baseBranch,
       );
       if (branchPr) {
-        logger.debug('Found existing branch PR');
+        logger.debug(`Found existing branch PR #${branchPr.number}`);
         if (branchPr.state !== 'open') {
           logger.debug(
             'PR has been closed or merged since this run started - aborting',
@@ -722,6 +736,7 @@ export async function processBranch(
     if (branchPr) {
       const platformPrOptions = getPlatformPrOptions(config);
       if (
+        commitSha &&
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {

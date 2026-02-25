@@ -18,12 +18,17 @@ You need the following dependencies for local development:
 We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
 Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
 
+For building the documentation, you also need:
+
+- Python `>=3.11`
+- PDM `>=2.26.0`
+
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
 npm install -g pnpm

@@ -1,6 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
@@ -52,13 +52,23 @@ export class GoDatasource extends Datasource {
   static readonly pversionRegexp = regEx(
     /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
   );
-  @cache({
-    namespace: `datasource-${GoDatasource.id}`,
-    // TODO: types (#22198)
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+
+  private _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.goproxy.getReleases(config);
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GoDatasource.id}`,
+        // TODO: types (#22198)
+        key: `getReleases:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 
   /**
@@ -71,12 +81,7 @@ export class GoDatasource extends Datasource {
    *  - Determine the source URL for the module
    *  - Call the respective getDigest in github to retrieve the commit hash
    */
-  @cache({
-    namespace: `datasource-${GoDatasource.id}`,
-    key: ({ packageName }: DigestConfig, newValue?: string) =>
-      `getDigest:${packageName}:${newValue}`,
-  })
-  override async getDigest(
+  private async _getDigest(
     { packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -125,6 +130,20 @@ export class GoDatasource extends Datasource {
         return null;
       }
     }
+  }
+
+  override getDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GoDatasource.id}`,
+        key: `getDigest:${config.packageName}:${newValue}`,
+        fallback: true,
+      },
+      () => this._getDigest(config, newValue),
+    );
   }
 }
 

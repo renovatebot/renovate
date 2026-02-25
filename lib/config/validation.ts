@@ -31,7 +31,7 @@ import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.ts';
+import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import type {
   AllConfig,
   AllowedParents,
@@ -102,7 +102,20 @@ function getDeprecationMessage(option: string): string | undefined {
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
   };
-  return deprecatedOptions[option];
+  if (deprecatedOptions[option]) {
+    return deprecatedOptions[option];
+  }
+
+  const found = options.find((o) => o.name === option);
+  if (!found) {
+    return undefined;
+  }
+
+  if (!found.deprecationMsg) {
+    return undefined;
+  }
+
+  return `The '${option}' option is deprecated: ${found.deprecationMsg}`;
 }
 
 function isInhertConfigOption(key: string): boolean {
@@ -826,6 +839,15 @@ async function validateGlobalConfig(
       message: getDeprecationMessage(key)!,
     });
   }
+
+  if (key === 'binarySource' && val === 'docker') {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message:
+        'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
+    });
+  }
+
   if (val !== null) {
     // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {

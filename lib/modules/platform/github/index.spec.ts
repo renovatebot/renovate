@@ -1,6 +1,8 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -27,8 +29,6 @@ import type {
 import * as branch from './branch.ts';
 import * as github from './index.ts';
 import type { ApiPageCache, GhRestPr } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -153,6 +153,184 @@ describe('modules/platform/github/index', () => {
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
       ).toMatchSnapshot();
+    });
+
+    describe('when using the default gitAuthor', () => {
+      describe('when gitAuthor is not set', () => {
+        describe('when no email access', () => {
+          it('if on GitHub.com, a warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).toHaveBeenCalledWith(
+              {
+                documentationUrl:
+                  'https://github.com/renovatebot/renovate/discussions/39309',
+              },
+              'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+            );
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+
+        describe('when email access', () => {
+          it('no warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+      });
+
+      describe('when explicitly set to only email address', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'renovate@whitesourcesoftware.com',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when explicitly set to RFC-RFC5322 format', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
     });
 
     it('should support default endpoint with email', async () => {
@@ -540,6 +718,24 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    // for coverage
+    it('no token', async () => {
+      hostRules.find.mockReturnValue({});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
+    // for coverage
+    it('app token', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'x-access-token:123test',
+      });
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
     it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
@@ -552,7 +748,7 @@ describe('modules/platform/github/index', () => {
       });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'true',
+        forkToken: 'token',
         forkCreation: true,
       });
       expect(config).toMatchSnapshot();
@@ -1360,6 +1556,313 @@ describe('modules/platform/github/index', () => {
           { number: 2, title: 'Other PR' },
           { number: 1, title: 'Renovate PR' },
         ]);
+      });
+
+      it('stops sync early when non-Renovate PRs dominate', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const t0 = t.toISO()!;
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — pages full of non-Renovate PRs
+        initRepoMock(scope, 'some/repo');
+        scope
+          .get(pagePath(1, 20))
+          .reply(
+            200,
+            [
+              { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+              { ...pr1, number: 11, updated_at: t3, user: { login: 'other' } },
+            ],
+            { link: pageLink(2) },
+          )
+          .get(pagePath(2, 20))
+          .reply(
+            200,
+            [
+              { ...pr1, number: 12, updated_at: t2, user: { login: 'other' } },
+              { ...pr1, number: 13, updated_at: t0, user: { login: 'other' } },
+            ],
+            { link: pageLink(3) },
+          );
+        // Page 3 is NOT mocked — sync must stop before requesting it
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+      });
+
+      it('advances watermark from unfiltered page so next sync is cheaper', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const t5 = t.plus({ minutes: 5 }).toISO()!;
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — non-Renovate PRs advance watermark to t4
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+            {
+              ...pr1,
+              number: 11,
+              updated_at: t.toISO(),
+              user: { login: 'other' },
+            },
+          ],
+          { link: pageLink(2) },
+        );
+        // Stops after page 1 — oldest (t0) < cutoff (t1)
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 3: sync — watermark is now t4, page has item at t5 and t3
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 12, updated_at: t5, user: { login: 'other' } },
+            { ...pr1, number: 13, updated_at: t3, user: { login: 'other' } },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — oldest (t3) < watermark (t4) → stops
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+      });
+
+      it('derives cutoff from cached items when lastModified is missing', async () => {
+        const scope = httpMock.scope(githubApiHost);
+
+        // Seed cache with multiple items but no lastModified (simulates updateItem usage).
+        const repoCache = repository.getCache();
+        repoCache.platform = {
+          github: {
+            pullRequestsCache: {
+              items: {
+                1: {
+                  number: 1,
+                  sourceBranch: 'renovate-branch',
+                  title: 'Renovate PR',
+                  state: 'open',
+                  updated_at: t1,
+                  node_id: '12345',
+                },
+                2: {
+                  number: 2,
+                  sourceBranch: 'renovate-branch-2',
+                  title: 'Renovate PR 2',
+                  state: 'open',
+                  updated_at: t2,
+                  node_id: '12346',
+                },
+                3: {
+                  number: 3,
+                  sourceBranch: 'renovate-branch-3',
+                  title: 'Renovate PR 3',
+                  state: 'open',
+                  updated_at: t1,
+                  node_id: '12347',
+                },
+              },
+            },
+          },
+        };
+
+        // Sync: page has non-Renovate PRs, oldest predates derived cutoff (t2)
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t3, user: { login: 'other' } },
+            { ...pr1, number: 11, updated_at: t1, user: { login: 'other' } },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — cutoff derived from max(item.updated_at) = t2 stops sync
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(3);
+        expect(res).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ number: 1, title: 'Renovate PR' }),
+            expect.objectContaining({ number: 2, title: 'Renovate PR 2' }),
+            expect.objectContaining({ number: 3, title: 'Renovate PR 3' }),
+          ]),
+        );
+      });
+
+      it('stops at max sync pages', async () => {
+        const scope = httpMock.scope(githubApiHost);
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — 100 pages of non-Renovate PRs all newer than lastModified
+        initRepoMock(scope, 'some/repo');
+        for (let i = 1; i <= 100; i++) {
+          scope.get(pagePath(i, 20)).reply(
+            200,
+            [
+              {
+                ...pr1,
+                number: 100 + i,
+                updated_at: t4,
+                user: { login: 'other' },
+              },
+            ],
+            { link: pageLink(i + 1) },
+          );
+        }
+        // Page 101 NOT mocked — must stop at 100
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { repo: 'some/repo', pages: 100 },
+          'PR cache: hit max sync pages, stopping',
+        );
+      });
+
+      it('reconciles mixed pages with both Renovate and non-Renovate PRs', async () => {
+        const scope = httpMock.scope(githubApiHost);
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — mixed page with Renovate PR among non-Renovate PRs
+        initRepoMock(scope, 'some/repo');
+        const renovatePr2: GhRestPr = {
+          ...renovatePr,
+          number: 2,
+          title: 'Renovate PR 2',
+          updated_at: t3,
+        };
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+            renovatePr2,
+            {
+              ...pr1,
+              number: 11,
+              updated_at: t.toISO(),
+              user: { login: 'other' },
+            },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — oldest (t) < lastModified (t1) → stops
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(2);
+        expect(res).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ number: 1, title: 'Renovate PR' }),
+            expect.objectContaining({ number: 2, title: 'Renovate PR 2' }),
+          ]),
+        );
+      });
+
+      it('continues past timestamp tie at page boundary', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const renovatePrT2: GhRestPr = { ...renovatePr, updated_at: t2 };
+
+        // Run 1: initial fetch — cache gets lastModified = t2
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePrT2]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — oldest on page 1 equals lastModified (t2), must continue
+        initRepoMock(scope, 'some/repo');
+        scope
+          .get(pagePath(1, 20))
+          .reply(
+            200,
+            [
+              { ...pr1, number: 10, updated_at: t3, user: { login: 'other' } },
+              { ...pr1, number: 11, updated_at: t2, user: { login: 'other' } },
+            ],
+            { link: pageLink(2) },
+          )
+          .get(pagePath(2, 20))
+          .reply(
+            200,
+            [{ ...pr1, number: 12, updated_at: t1, user: { login: 'other' } }],
+            { link: pageLink(3) },
+          );
+        // Page 3 is NOT mocked — sync must stop after page 2
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
       });
     });
   });
@@ -4233,14 +4736,7 @@ describe('modules/platform/github/index', () => {
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
             },
-            security_vulnerability: {
-              package: {
-                ecosystem: 'npm',
-                name: 'foo',
-              },
-              vulnerable_version_range: '0.0.2',
-              first_patched_version: null,
-            },
+            security_vulnerability: null,
             dependency: {
               manifest_path: 'bar/foo',
             },
@@ -4248,7 +4744,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(1);
     });
 
     it('returns empty if disabled', async () => {

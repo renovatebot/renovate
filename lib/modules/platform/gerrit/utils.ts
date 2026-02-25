@@ -96,7 +96,7 @@ export function mapGerritChangeToPr(
     sourceBranch,
     targetBranch: change.branch,
     title: change.subject,
-    createdAt: change.created.replace(' ', 'T'),
+    createdAt: convertGerritDateToISO(change.created),
     labels: change.hashtags,
     reviewers:
       change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
@@ -127,6 +127,7 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
     const re = regEx(/^Renovate-Branch: (.+)$/m);
     const currentRevision = change.revisions![change.current_revision];
     const message = currentRevision.commit_with_footers;
+    // v8 ignore else -- TODO: add test #40625
     if (message) {
       sourceBranch = re.exec(message)?.[1];
     }
@@ -160,4 +161,9 @@ export function mapBranchStatusToLabel(
   }
   /* v8 ignore next */
   return label.default_value;
+}
+
+// Convert Gerrit date format to ISO format
+export function convertGerritDateToISO(date: string): string {
+  return date.replace(' ', 'T');
 }

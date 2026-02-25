@@ -4,6 +4,7 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { logger } from '../../../logger/index.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { getNewBranchName } from '../util.ts';
@@ -90,6 +91,7 @@ export async function getFile(
           logger.warn({ filePath }, 'Unable to find file');
           return null;
         }
+        // v8 ignore else -- TODO: add test #40625
         if (result.data.typeKey === 'GitUnresolvableToCommitException') {
           logger.warn({ branchName }, 'Unable to find branch');
           return null;
@@ -154,8 +156,8 @@ export async function getMergeMethod(
       await azureApi.policyApi()
     ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
   )
-    .filter((p) => p.settings.scope.some(isRelevantScope))
-    .map((p) => p.settings)[0];
+    .filter((p: PolicyConfiguration) => p.settings.scope.some(isRelevantScope))
+    .map((p: PolicyConfiguration) => p.settings)[0];
 
   logger.debug(
     // TODO: types (#22198)

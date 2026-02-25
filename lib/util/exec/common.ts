@@ -16,6 +16,7 @@ import type {
   RawExecOptions,
 } from './types.ts';
 import { asRawCommand, isCommandWithOptions } from './utils.ts';
+
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
 // The following is step 3. in https://github.com/renovatebot/renovate/issues/16197#issuecomment-1171423890
@@ -129,6 +130,7 @@ export function exec(
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
       detached: process.platform !== 'win32',
       shell,
+      extendEnv: false,
     });
 
     // handle streams

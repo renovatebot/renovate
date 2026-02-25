@@ -26,6 +26,10 @@ export function calculateLibYears(
   for (const [manager, files] of Object.entries(packageFiles)) {
     for (const file of files) {
       for (const dep of file.deps) {
+        if (dep.enabled === false) {
+          continue;
+        }
+
         const depInfo: DepInfo = {
           depName: dep.depName!,
           manager,

@@ -10,15 +10,6 @@
     "no-template-curly-in-string": "error",
     "curly": "error",
     "radix": ["error", "as-needed"],
-    "sort-imports": [
-      "error",
-      {
-        "ignoreCase": false,
-        "ignoreDeclarationSort": true,
-        "ignoreMemberSort": false,
-        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
-      }
-    ],
     "import/extensions": ["error", "always", { "ignorePackages": true }],
     "import/no-cycle": "error",
     "import/default": "error",
@@ -57,6 +48,16 @@
       ],
       "rules": {
         "no-console": "off"
+      }
+    },
+    {
+      "files": ["lib/config/presets/internal/*.preset.ts"],
+      "rules": {
+        "sort-keys": [
+          "error",
+          "asc",
+          { "caseSensitive": false, "natural": true }
+        ]
       }
     }
   ],

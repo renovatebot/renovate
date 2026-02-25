@@ -6,7 +6,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
-import { pkg } from '../../../../expose.cjs';
+import { pkg } from '../../../../expose.ts';
 import { logger } from '../../../../logger/index.ts';
 import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type {
@@ -54,8 +54,8 @@ export function getPlatformPrOptions(
 ): PlatformPrOptions {
   const usePlatformAutomerge = Boolean(
     config.automerge &&
-      (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-      config.platformAutomerge,
+    (config.automergeType === 'pr' || config.automergeType === 'branch') &&
+    config.platformAutomerge,
   );
 
   return {
@@ -512,7 +512,10 @@ export async function ensurePr(
     }
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+      logger.info(
+        { labels: prepareLabels(config) },
+        'DRY-RUN: Would create PR: ' + prTitle,
+      );
       pr = { number: 0 } as never;
     } else {
       try {
@@ -537,7 +540,10 @@ export async function ensurePr(
 
         incCountValue('ConcurrentPRs');
         incCountValue('HourlyPRs');
-        logger.info({ pr: pr?.number, prTitle }, 'PR created');
+        logger.info(
+          { pr: pr?.number, prTitle, labels: pr?.labels },
+          'PR created',
+        );
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
         if (

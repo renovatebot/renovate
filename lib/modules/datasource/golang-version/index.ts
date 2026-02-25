@@ -1,5 +1,5 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -43,8 +43,7 @@ export class GolangVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/golang/go.';
 
-  @cache({ namespace: `datasource-${GolangVersionDatasource.id}`, key: 'all' })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next 3 -- should never happen */
@@ -138,5 +137,16 @@ export class GolangVersionDatasource extends Datasource {
     }
 
     return res;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GolangVersionDatasource.id}`,
+        key: 'all',
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

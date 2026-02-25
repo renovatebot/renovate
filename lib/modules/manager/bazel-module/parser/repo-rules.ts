@@ -1,5 +1,5 @@
-import { query as q } from '@renovatebot/good-enough-parser';
 import type { parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
 import { regEx } from '../../../../util/regex.ts';
 import { kvParams } from './common.ts';
 import type { Ctx } from './context.ts';
