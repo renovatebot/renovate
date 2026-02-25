@@ -245,6 +245,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
+  prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
