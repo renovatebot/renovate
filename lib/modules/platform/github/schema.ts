@@ -2,26 +2,27 @@ import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
+const Ecosystem = z.enum([
+  'actions',
+  'composer',
+  'go',
+  'maven',
+  'npm',
+  'nuget',
+  'pip',
+  'rubygems',
+  'rust',
+]);
+export type Ecosystem = z.infer<typeof Ecosystem>;
+
 const Package = z.object({
-  ecosystem: z
-    .enum([
-      'actions',
-      'composer',
-      'go',
-      'maven',
-      'npm',
-      'nuget',
-      'pip',
-      'rubygems',
-      'rust',
-    ])
-    .catch((ctx) => {
-      logger.debug(
-        { ecosystem: ctx.input },
-        'Skipping vulnerability alert with unsupported ecosystem',
-      );
-      return undefined as any;
-    }),
+  ecosystem: Ecosystem.catch((ctx) => {
+    logger.debug(
+      { ecosystem: ctx.input },
+      'Skipping vulnerability alert with unsupported ecosystem',
+    );
+    return undefined as any;
+  }),
   name: z.string(),
 });
 
