@@ -197,13 +197,13 @@ describe('workers/repository/process/libyear', () => {
         {
           libYears: {
             managers: {
-              npm: 2,
+              npm: 1,
             },
-            total: 2,
+            total: 1,
           },
           dependencyStatus: {
-            outdated: 2,
-            total: 2,
+            outdated: 1,
+            total: 1,
           },
         },
         'Repository libYears',
@@ -211,13 +211,13 @@ describe('workers/repository/process/libyear', () => {
       expect(addLibYears).toHaveBeenCalledExactlyOnceWith(config, {
         libYears: {
           managers: {
-            npm: 2,
+            npm: 1,
           },
-          total: 2,
+          total: 1,
         },
         dependencyStatus: {
-          outdated: 2,
-          total: 2,
+          outdated: 1,
+          total: 1,
         },
       });
     });
