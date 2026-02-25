@@ -4545,6 +4545,32 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('allows packageRules to override sourceUrl from datasource', async () => {
+      config.packageName = 'openjdk';
+      config.currentValue = '17.0.0';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      config.packageRules = [
+        {
+          matchDatasources: ['docker'],
+          sourceUrl: 'https://harbor.example.com',
+        },
+      ];
+      getDockerReleases.mockResolvedValueOnce({
+        sourceUrl: 'https://github.com/upstream/repo',
+        releases: [
+          { version: '17.0.0' },
+          { version: '18.0.0' },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.sourceUrl).toBe('https://harbor.example.com');
+    });
+
     it('handles current age packageRules with version restrictions', async () => {
       config.packageName = 'openjdk';
       config.currentValue = '17.0.0';

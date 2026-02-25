@@ -232,6 +232,12 @@ export async function lookupUpdates(
         { ...config, sourceUrl: res.sourceUrl },
         'source-url',
       );
+      // Write back sourceUrl if overridden by packageRules, so the
+      // user-configured value takes precedence over the datasource value
+      // (e.g. OCI image labels on mirrored Docker images)
+      if (config.sourceUrl && config.sourceUrl !== res.sourceUrl) {
+        res.sourceUrl = config.sourceUrl;
+      }
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
