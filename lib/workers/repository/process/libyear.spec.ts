@@ -141,7 +141,7 @@ describe('workers/repository/process/libyear', () => {
     });
 
     // NOTE that it shouldn't be possible for `updates` to be set when `enabled: false`
-    it('calculates libYears whether dependencies are enabled or disabled', () => {
+    it('skips disabled dependencies when calculating libYears', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
