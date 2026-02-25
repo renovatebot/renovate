@@ -83,27 +83,27 @@ describe('modules/manager/swift/index', () => {
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from]`,
         ),
-      ).not.toBeNull();
+      ).toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from.package(`,
         ),
-      ).not.toBeNull();
+      ).toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from:]`,
         ),
-      ).not.toBeNull();
+      ).toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from:.package(`,
         ),
-      ).not.toBeNull();
+      ).toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]`,
         ),
-      ).not.toBeNull();
+      ).toBeNull();
     });
 
     it('parses package descriptions', () => {
@@ -144,7 +144,7 @@ describe('modules/manager/swift/index', () => {
       ).toMatchObject({ deps: [{ currentValue: '1.2.3' }] });
       expect(
         extractPackageFile(
-          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",exact:"1.2.3"))]`,
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",exact:"1.2.3")]`,
         ),
       ).toMatchObject({ deps: [{ currentValue: '1.2.3' }] });
     });

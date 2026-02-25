@@ -209,7 +209,7 @@ describe('modules/manager/swift/extract', () => {
       expect(result?.deps).toContainEqual({
         datasource: 'github-tags',
         depName: '0x7fs/CountedSet',
-        currentValue: '"master"\n        ',
+        currentValue: '"master"',
       });
 
       expect(result?.deps).toContainEqual({
