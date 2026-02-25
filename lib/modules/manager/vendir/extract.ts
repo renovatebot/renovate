@@ -106,16 +106,10 @@ export function extractPackageFile(
     if ('helmChart' in content && content.helmChart) {
       const dep = extractHelmChart(content.helmChart, config.registryAliases);
       deps.push(dep);
-    } /* v8 ignore else -- hard to test */ else if (
-      'git' in content &&
-      content.git
-    ) {
+    } else if ('git' in content && content.git) {
       const dep = extractGitSource(content.git);
       deps.push(dep);
-    } /* v8 ignore else -- hard to test */ else if (
-      'githubRelease' in content &&
-      content.githubRelease
-    ) {
+    } else if ('githubRelease' in content && content.githubRelease) {
       const dep = extractGithubReleaseSource(content.githubRelease);
       deps.push(dep);
     }
