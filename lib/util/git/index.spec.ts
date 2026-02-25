@@ -99,6 +99,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.add(['Dockerfile']);
     await repo.commit('hidden Unicode');
 
+    await repo.checkout(['-b', 'renovate/binary-file', defaultBranch]);
+    const binaryContent = Buffer.from([
+      0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x00,
+    ]); // 0xe2 0x80 0x8b is UTF-8 encoding of U+200B (zero-width space)
+    await fs.writeFile(base.path + '/binary.dat', binaryContent);
+    await repo.add(['binary.dat']);
+    await repo.commit('add binary file');
+
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
     await repo.checkoutBranch(
@@ -616,6 +624,19 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         { file: 'Dockerfile', hiddenCharacters: '\\u00A0' },
         'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
+    });
+
+    it('logs a trace message (not warning) if hidden Unicode characters are found in a binary file', async () => {
+      await git.getFile('binary.dat', 'renovate/binary-file');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        {
+          file: 'binary.dat',
+          hiddenCharacters: expect.stringContaining('\\u200B'),
+        },
+        'Hidden Unicode characters discovered in file `binary.dat`, but not logging higher than TRACE as it appears to be a binary file',
       );
     });
   });
