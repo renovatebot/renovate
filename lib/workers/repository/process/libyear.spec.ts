@@ -140,6 +140,88 @@ describe('workers/repository/process/libyear', () => {
       });
     });
 
+    // NOTE that it shouldn't be possible for `updates` to be set when `enabled: false`
+    it('calculates libYears whether dependencies are enabled or disabled', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                datasource: 'npm',
+                currentVersion: '0.1.0',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '2.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '3.0.0',
+                  },
+                ],
+              },
+              {
+                depName: 'dep2',
+                enabled: false,
+                datasource: 'npm',
+                currentVersion: '0.1.0',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                // NOTE that updates shouldn't be set when `enabled: false`, but this clarifies that the existing behaviour is to take that into effect
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '2.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '3.0.0',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      calculateLibYears(config, packageFiles);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          libYears: {
+            managers: {
+              npm: 2,
+            },
+            total: 2,
+          },
+          dependencyStatus: {
+            outdated: 2,
+            total: 2,
+          },
+        },
+        'Repository libYears',
+      );
+      expect(addLibYears).toHaveBeenCalledExactlyOnceWith(config, {
+        libYears: {
+          managers: {
+            npm: 2,
+          },
+          total: 2,
+        },
+        dependencyStatus: {
+          outdated: 2,
+          total: 2,
+        },
+      });
+    });
+
     it('de-duplicates if same dep found in different files', () => {
       // there are three package files with the same dependency + version but mixed datasources
       const packageFiles = {
