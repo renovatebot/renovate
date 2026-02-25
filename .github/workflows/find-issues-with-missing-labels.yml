@@ -4,6 +4,8 @@ on:
   schedule:
     # Run every Sunday at midnight
     - cron: '0 0 * * 0'
+  # Or when manually requested
+  workflow_dispatch: {}
 
 permissions: {}
 
