@@ -301,7 +301,7 @@ describe('workers/repository/process/libyear', () => {
       );
     });
 
-    it('ignores disabled dependencies without currentVersionTimestamp', () => {
+    it('ignores disabled dependencies', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
