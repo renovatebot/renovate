@@ -37,6 +37,7 @@ import * as throttle from '../../util/http/throttle.ts';
 import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
 import * as repositoryWorker from '../repository/index.ts';
+import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
 import { parseConfigs } from './config/parse/index.ts';
 import { globalFinalize, globalInitialize } from './initialize.ts';
@@ -45,29 +46,23 @@ import { isLimitReached } from './limits.ts';
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
   repository: RenovateRepository,
-): Promise<RenovateConfig> {
-  let repositoryConfig: RenovateRepository;
-  if (isString(repository)) {
-    repositoryConfig = { repository };
-  } else if (repository.extends?.length) {
-    // Resolve repository-level presets before merging with global config
-    const { config: resolvedRepoConfig } = await resolveConfigPresets(
-      repository,
-      globalConfig,
-    );
-    repositoryConfig = {
-      ...resolvedRepoConfig,
-      repository: repository.repository,
-    };
-  } else {
-    repositoryConfig = repository;
+): Promise<RepositoryWorkerConfig> {
+  const repoIsString = isString(repository);
+  const repoName = repoIsString ? repository : repository.repository;
+
+  const repoConfig: RepositoryWorkerConfig = {
+    ...globalConfig,
+    repository: repoName,
+  };
+
+  if (!repoIsString) {
+    const { repository: _repository, ...repositoryEntryConfig } = repository;
+    // mergeRenovateConfig later resolves this repositories[] object-entry
+    // config in the correct order
+    repoConfig.repositoryEntryConfig = repositoryEntryConfig;
   }
 
-  const repoConfig = configParser.mergeChildConfig(
-    globalConfig,
-    repositoryConfig,
-  );
-  const repoParts = repoConfig.repository.split('/');
+  const repoParts = repoName.split('/');
   repoParts.pop();
   repoConfig.parentOrg = repoParts.join('/');
   repoConfig.topLevelOrg = repoParts.shift();
@@ -76,10 +71,7 @@ export async function getRepositoryConfig(
   repoConfig.localDir =
     platform === 'local'
       ? process.cwd()
-      : upath.join(
-          repoConfig.baseDir,
-          `./repos/${platform}/${repoConfig.repository}`,
-        );
+      : upath.join(repoConfig.baseDir, `./repos/${platform}/${repoName}`);
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
   return configParser.filterConfig(repoConfig, 'repository');
@@ -252,6 +244,7 @@ export async function start(): Promise<number> {
     }
   } finally {
     await globalFinalize(config!);
+    // v8 ignore else -- TODO: add test #40625
     if (logLevel() === 'info') {
       logger.info(
         `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
@@ -274,6 +267,7 @@ function repositoryToOwnerAndRepo(fullName: string): {
   repo: string;
 } {
   const parts = fullName.split('/');
+  // v8 ignore else -- TODO: add test #40625
   const repo = parts.pop() ?? '';
   const owner = parts.join('/');
   return { owner, repo };
