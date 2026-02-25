@@ -1,12 +1,5 @@
 import type { PackageDependency } from '../types.ts';
 
-export interface MatchResult {
-  idx: number;
-  len: number;
-  label: string;
-  substr: string;
-}
-
 export interface Ctx {
   readonly source: string;
 
