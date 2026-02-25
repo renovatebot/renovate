@@ -2,13 +2,19 @@ import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
 import { regEx } from '../../../../../util/regex.ts';
 import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags/index.ts';
-import { DockerDatasource } from '../../../../datasource/docker/index.ts';
 import { GitTagsDatasource } from '../../../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.ts';
 import { TerraformModuleDatasource } from '../../../../datasource/terraform-module/index.ts';
 import type { PackageDependency } from '../../../types.ts';
-import { DependencyExtractor } from '../../base.ts';
+import {
+  DependencyExtractor,
+  ociRefMatchRegex,
+  parseOciRef,
+} from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+
+// Re-export for tests
+export { ociRefMatchRegex };
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
@@ -22,9 +28,7 @@ export const gitTagsRefMatchRegex = regEx(
 export const azureDevOpsSshRefMatchRegex = regEx(
   /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
-export const ociRefMatchRegex = regEx(
-  /^oci:\/\/(?<registry>[^/:]+)\/(?<repository>[^:]+?)(?::(?<tag>.+))?$/,
-);
+
 export const hostnameMatchRegex = regEx(
   /^(?<hostname>[a-zA-Z\d]([a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
 );
@@ -71,18 +75,14 @@ export class ModuleExtractor extends DependencyExtractor {
     const bitbucketRefMatch = bitbucketRefMatchRegex.exec(source);
     const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source);
     const azureDevOpsSshRefMatch = azureDevOpsSshRefMatchRegex.exec(source);
-    const ociRefMatch = ociRefMatchRegex.exec(source);
 
-    if (ociRefMatch?.groups) {
-      const { registry, repository, tag } = ociRefMatch.groups;
-      dep.depName = `${registry}/${repository}`;
-      dep.packageName = `${registry}/${repository}`;
-      dep.registryUrls = [`https://${registry}`];
-      dep.datasource = DockerDatasource.id;
-      if (tag) {
-        dep.currentValue = tag;
-      }
-    } else if (githubRefMatch?.groups) {
+    const ociDep = parseOciRef(dep, source);
+    if (ociDep) {
+      ociDep.depName = ociDep.packageName;
+      return ociDep;
+    }
+
+    if (githubRefMatch?.groups) {
       dep.packageName = githubRefMatch.groups.project.replace(
         regEx(/\.git$/),
         '',

@@ -7,6 +7,30 @@ import type { TerraformDefinitionFile } from './hcl/types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
 import { getLockedVersion, massageProviderLookupName } from './util.ts';
 
+export const ociRefMatchRegex = regEx(
+  /^oci:\/\/(?<registry>[^/:]+)\/(?<repository>[^:]+?)(?::(?<tag>.+))?$/,
+);
+
+export function parseOciRef(
+  dep: PackageDependency,
+  source: string,
+): PackageDependency | null {
+  const ociMatch = ociRefMatchRegex.exec(source);
+  if (!ociMatch?.groups) {
+    return null;
+  }
+
+  const { registry, repository, tag } = ociMatch.groups;
+  dep.packageName = `${registry}/${repository}`;
+  dep.datasource = DockerDatasource.id;
+  if (tag) {
+    dep.currentValue = tag;
+  } else {
+    dep.skipReason = 'unspecified-version';
+  }
+  return dep;
+}
+
 export abstract class DependencyExtractor {
   /**
    * Get a list of signals which can be used to scan for potential processable content
@@ -30,9 +54,6 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
   sourceExtractionRegex = regEx(
     /^(?:(?<hostname>(?:[a-zA-Z0-9-_]+\.+)+[a-zA-Z0-9-_]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/,
   );
-  ociRefMatchRegex = regEx(
-    /^oci:\/\/(?<registry>[^/:]+)\/(?<repository>[^:]+?)(?::(?<tag>.+))?$/,
-  );
 
   protected analyzeTerraformProvider(
     dep: PackageDependency,
@@ -45,31 +66,25 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
 
     if (isNonEmptyString(dep.managerData?.source)) {
       // TODO #22198
-      const ociMatch = this.ociRefMatchRegex.exec(dep.managerData.source);
-      if (ociMatch?.groups) {
-        const { registry, repository, tag } = ociMatch.groups;
-        dep.packageName = `${registry}/${repository}`;
-        dep.registryUrls = [`https://${registry}`];
-        dep.datasource = DockerDatasource.id;
-        if (tag) {
-          dep.currentValue = tag;
-        }
-      } else {
-        const source = this.sourceExtractionRegex.exec(dep.managerData.source);
-        if (!source?.groups) {
-          dep.skipReason = 'unsupported-url';
-          return dep;
-        }
+      const ociDep = parseOciRef(dep, dep.managerData.source);
+      if (ociDep) {
+        return ociDep;
+      }
 
-        // buildin providers https://github.com/terraform-providers
-        if (source.groups.namespace === 'terraform-providers') {
-          dep.registryUrls = [`https://releases.hashicorp.com`];
-        } else if (source.groups.hostname) {
-          dep.registryUrls = [`https://${source.groups.hostname}`];
-          dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
-        } else {
-          dep.packageName = dep.managerData?.source;
-        }
+      const source = this.sourceExtractionRegex.exec(dep.managerData.source);
+      if (!source?.groups) {
+        dep.skipReason = 'unsupported-url';
+        return dep;
+      }
+
+      // buildin providers https://github.com/terraform-providers
+      if (source.groups.namespace === 'terraform-providers') {
+        dep.registryUrls = [`https://releases.hashicorp.com`];
+      } else if (source.groups.hostname) {
+        dep.registryUrls = [`https://${source.groups.hostname}`];
+        dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
+      } else {
+        dep.packageName = dep.managerData?.source;
       }
     }
     massageProviderLookupName(dep);

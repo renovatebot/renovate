@@ -342,60 +342,30 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
   });
 
   describe('ociRefMatchRegex', () => {
-    it('should extract registry and repository from OCI source', () => {
-      const simple = ociRefMatchRegex.exec(
-        'oci://registry.example.com/namespace/module',
-      )?.groups;
-      const ghcr = ociRefMatchRegex.exec(
-        'oci://ghcr.io/myorg/terraform-modules/vpc',
-      )?.groups;
-      const dockerHub = ociRefMatchRegex.exec(
-        'oci://docker.io/terraform/modules',
-      )?.groups;
+    it.each`
+      source                                           | registry                  | repository                       | tag
+      ${'oci://registry.example.com/namespace/module'} | ${'registry.example.com'} | ${'namespace/module'}            | ${undefined}
+      ${'oci://ghcr.io/myorg/terraform-modules/vpc'}   | ${'ghcr.io'}              | ${'myorg/terraform-modules/vpc'} | ${undefined}
+      ${'oci://docker.io/terraform/modules'}           | ${'docker.io'}            | ${'terraform/modules'}           | ${undefined}
+    `(
+      'should extract registry and repository from $source',
+      ({ source, registry, repository, tag }) => {
+        const groups = ociRefMatchRegex.exec(source)?.groups;
+        expect(groups).toEqual({ registry, repository, tag });
+      },
+    );
 
-      expect(simple).toEqual({
-        registry: 'registry.example.com',
-        repository: 'namespace/module',
-        tag: undefined,
-      });
-      expect(ghcr).toEqual({
-        registry: 'ghcr.io',
-        repository: 'myorg/terraform-modules/vpc',
-        tag: undefined,
-      });
-      expect(dockerHub).toEqual({
-        registry: 'docker.io',
-        repository: 'terraform/modules',
-        tag: undefined,
-      });
-    });
-
-    it('should extract version tag from OCI source URL', () => {
-      const withVersion = ociRefMatchRegex.exec(
-        'oci://registry.example.com/namespace/module:1.2.3',
-      )?.groups;
-      const withDigest = ociRefMatchRegex.exec(
-        'oci://ghcr.io/org/module:sha256:abc123def456',
-      )?.groups;
-      const withComplexTag = ociRefMatchRegex.exec(
-        'oci://docker.io/modules/app:v2.0.0-beta.1',
-      )?.groups;
-
-      expect(withVersion).toEqual({
-        registry: 'registry.example.com',
-        repository: 'namespace/module',
-        tag: '1.2.3',
-      });
-      expect(withDigest).toEqual({
-        registry: 'ghcr.io',
-        repository: 'org/module',
-        tag: 'sha256:abc123def456',
-      });
-      expect(withComplexTag).toEqual({
-        registry: 'docker.io',
-        repository: 'modules/app',
-        tag: 'v2.0.0-beta.1',
-      });
-    });
+    it.each`
+      source                                                 | registry                  | repository            | tag
+      ${'oci://registry.example.com/namespace/module:1.2.3'} | ${'registry.example.com'} | ${'namespace/module'} | ${'1.2.3'}
+      ${'oci://ghcr.io/org/module:sha256:abc123def456'}      | ${'ghcr.io'}              | ${'org/module'}       | ${'sha256:abc123def456'}
+      ${'oci://docker.io/modules/app:v2.0.0-beta.1'}         | ${'docker.io'}            | ${'modules/app'}      | ${'v2.0.0-beta.1'}
+    `(
+      'should extract version tag from $source',
+      ({ source, registry, repository, tag }) => {
+        const groups = ociRefMatchRegex.exec(source)?.groups;
+        expect(groups).toEqual({ registry, repository, tag });
+      },
+    );
   });
 });
