@@ -26,7 +26,7 @@ describe('workers/repository/process/vulnerabilities', () => {
   describe('create()', () => {
     beforeEach(resetOsv);
 
-    it('works', async () => {
+    it('works, and is a singleton', async () => {
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
       });
