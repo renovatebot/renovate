@@ -267,7 +267,7 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm prettier --write --cache-location .cache/prettier
+          pnpm prettier-fix --cache-location .cache/prettier
           git diff --quiet || {
             echo "[ERROR] Please apply the changes prettier suggests:"
             git diff --color=always

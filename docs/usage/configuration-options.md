@@ -4383,6 +4383,17 @@ This feature works with the following managers:
 }
 ```
 
+If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
+
+```json title="Using a pull-through cache for public images"
+{
+  "registryAliases": {
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/ghcr.io": "ghcr.io",
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/dockerhub": "docker.io"
+  }
+}
+```
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.

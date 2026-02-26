@@ -1,6 +1,7 @@
 import { isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global.ts';
+import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
@@ -81,99 +82,107 @@ export async function getPrCache(
 
   try {
     const maxSyncPages = GlobalConfig.get('prCacheSyncMaxPages', 100);
+    const startTime = Date.now();
     let requestsTotal = 0;
     let apiQuotaAffected = false;
     let needNextPageFetch = true;
     let needNextPageSync = true;
 
     let pageIdx = 1;
-    while (needNextPageFetch && needNextPageSync) {
-      const opts: GithubHttpOptions = { paginate: false, memCache: false };
-      if (pageIdx === 1) {
-        opts.cacheProvider = repoCacheProvider;
-        if (isInitial) {
-          opts.paginate = true;
+
+    await instrument('sync GitHub PR cache', async () => {
+      while (needNextPageFetch && needNextPageSync) {
+        const opts: GithubHttpOptions = { paginate: false, memCache: false };
+        if (pageIdx === 1) {
+          opts.cacheProvider = repoCacheProvider;
+          if (isInitial) {
+            opts.paginate = true;
+          }
         }
-      }
 
-      let perPage: number;
-      if (isInitial) {
-        logger.debug('PR cache: initial fetch');
-        perPage = 100;
-      } else {
-        logger.debug('PR cache: sync fetch');
-        perPage = 20;
-      }
+        let perPage: number;
+        if (isInitial) {
+          logger.debug('PR cache: initial fetch');
+          perPage = 100;
+        } else {
+          logger.debug('PR cache: sync fetch');
+          perPage = 20;
+        }
 
-      const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
+        const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
-      const res = await http.getJsonUnchecked<GhRestPr[]>(urlPath, opts);
-      apiQuotaAffected = true;
-      requestsTotal += 1;
+        const res = await http.getJsonUnchecked<GhRestPr[]>(urlPath, opts);
+        apiQuotaAffected = true;
+        requestsTotal += 1;
 
-      const {
-        headers: { link: linkHeader },
-      } = res;
+        const {
+          headers: { link: linkHeader },
+        } = res;
 
-      let { body: page } = res;
+        let { body: page } = res;
 
-      if (!isInitial && cutoffTime && isNonEmptyArray(page)) {
-        // Advance watermark so next run doesn't re-scan these pages,
-        // even if no Renovate PRs are found.
-        prApiCache.updateLastModified(page[0].updated_at);
+        if (!isInitial && cutoffTime && isNonEmptyArray(page)) {
+          // Advance watermark so next run doesn't re-scan these pages,
+          // even if no Renovate PRs are found.
+          prApiCache.updateLastModified(page[0].updated_at);
 
-        const oldestOnPage = DateTime.fromISO(page[page.length - 1].updated_at);
-        if (oldestOnPage < cutoffTime) {
+          const oldestOnPage = DateTime.fromISO(
+            page[page.length - 1].updated_at,
+          );
+          if (oldestOnPage < cutoffTime) {
+            needNextPageSync = false;
+          }
+        }
+
+        if (username) {
+          const filteredPage = page.filter(
+            (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
+          );
+
+          logger.debug(
+            `PR cache: Filtered ${page.length} PRs to ${filteredPage.length} (user=${username})`,
+          );
+
+          page = filteredPage;
+        }
+
+        const items = page.map(coerceRestPr);
+
+        if (isNonEmptyArray(items)) {
+          prApiCache.reconcile(items);
+        }
+
+        needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
+
+        if (pageIdx === 1) {
+          needNextPageFetch &&= !opts.paginate;
+        }
+
+        // Safety net: cutoff-based stop should always fire first
+        if (
+          !isInitial &&
+          needNextPageFetch &&
+          needNextPageSync &&
+          pageIdx >= maxSyncPages
+        ) {
+          logger.warn(
+            { repo, pages: pageIdx },
+            'PR cache: hit max sync pages, stopping',
+          );
           needNextPageSync = false;
         }
+
+        pageIdx += 1;
       }
+    });
 
-      if (username) {
-        const filteredPage = page.filter(
-          (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
-        );
-
-        logger.debug(
-          `PR cache: Filtered ${page.length} PRs to ${filteredPage.length} (user=${username})`,
-        );
-
-        page = filteredPage;
-      }
-
-      const items = page.map(coerceRestPr);
-
-      if (isNonEmptyArray(items)) {
-        prApiCache.reconcile(items);
-      }
-
-      needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
-
-      if (pageIdx === 1) {
-        needNextPageFetch &&= !opts.paginate;
-      }
-
-      // Safety net: cutoff-based stop should always fire first
-      if (
-        !isInitial &&
-        needNextPageFetch &&
-        needNextPageSync &&
-        pageIdx >= maxSyncPages
-      ) {
-        logger.warn(
-          { repo, pages: pageIdx },
-          'PR cache: hit max sync pages, stopping',
-        );
-        needNextPageSync = false;
-      }
-
-      pageIdx += 1;
-    }
-
+    const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
       {
         pullsTotal: prApiCache.getItems().length,
         requestsTotal,
         apiQuotaAffected,
+        durationMs,
       },
       `PR cache: getPrList success`,
     );
