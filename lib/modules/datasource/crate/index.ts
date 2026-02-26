@@ -22,7 +22,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { ReleaseTimestamp } from './schema.ts';
+import { RegistryConfigSchema, ReleaseTimestamp } from './schema.ts';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -47,14 +47,9 @@ export class CrateDatasource extends Datasource {
     super(CrateDatasource.id);
   }
 
-  override defaultRegistryUrls = ['https://crates.io'];
+  override defaultRegistryUrls = ['sparse+https://index.crates.io/'];
 
   override defaultVersioning = cargoVersioning.id;
-
-  static readonly CRATES_IO_BASE_URL =
-    'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
-
-  static readonly CRATES_IO_API_BASE_URL = 'https://crates.io/api/v1/';
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
@@ -153,25 +148,77 @@ export class CrateDatasource extends Datasource {
         namespace: `datasource-${CrateDatasource.id}`,
         // TODO: types (#22198)
         key: `${config.registryUrl}/${config.packageName}`,
-        cacheable: CrateDatasource.areReleasesCacheable(config.registryUrl),
+        cacheable: CrateDatasource.isCratesIo(config.registryUrl),
         fallback: true,
       },
       () => this._getReleases(config),
     );
   }
 
+  /**
+   * Fetches the registry's config.json which provides the API base URL
+   * and download URL template.
+   * See: https://doc.rust-lang.org/cargo/reference/registry-index.html#index-configuration
+   */
+  private async fetchRegistryConfig(
+    info: RegistryInfo,
+  ): Promise<{ dl: string; api?: string } | null> {
+    const cacheKey = `crate-datasource/registry-config/${info.rawUrl}`;
+    const cached = memCache.get<{ dl: string; api?: string }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    if (info.clonePath) {
+      try {
+        const configPath = upath.join(info.clonePath, 'config.json');
+        const content = await readCacheFile(configPath, 'utf8');
+        const parsed = RegistryConfigSchema.safeParse(JSON.parse(content));
+        if (parsed.success) {
+          memCache.set(cacheKey, parsed.data);
+          return parsed.data;
+        }
+      } catch {
+        logger.debug(
+          { registryUrl: info.rawUrl },
+          'Could not read config.json from cloned registry',
+        );
+      }
+    } else if (info.isSparse) {
+      try {
+        const configUrl = joinUrlParts(info.rawUrl, 'config.json');
+        const { body } = await this.http.getJsonUnchecked<unknown>(configUrl);
+        const parsed = RegistryConfigSchema.safeParse(body);
+        if (parsed.success) {
+          memCache.set(cacheKey, parsed.data);
+          return parsed.data;
+        }
+      } catch {
+        logger.debug(
+          { registryUrl: info.rawUrl },
+          'Could not fetch registry config.json',
+        );
+      }
+    }
+
+    return null;
+  }
+
   private async _getCrateMetadata(
     info: RegistryInfo,
     packageName: string,
   ): Promise<CrateMetadata | null> {
-    if (info.flavor !== 'crates.io') {
+    const registryConfig = await this.fetchRegistryConfig(info);
+    if (!registryConfig?.api) {
       return null;
     }
+
+    const apiBaseUrl = joinUrlParts(registryConfig.api, 'api/v1/');
 
     // The `?include=` suffix is required to avoid unnecessary database queries
     // on the crates.io server. This lets us work around the regular request
     // throttling of one request per second.
-    const crateUrl = `${CrateDatasource.CRATES_IO_API_BASE_URL}crates/${packageName}?include=`;
+    const crateUrl = `${apiBaseUrl}crates/${packageName}?include=`;
 
     logger.debug(
       { crateUrl, packageName, registryUrl: info.rawUrl },
@@ -202,7 +249,7 @@ export class CrateDatasource extends Datasource {
       {
         namespace: `datasource-${CrateDatasource.id}-metadata`,
         key: `${info.rawUrl}/${packageName}`,
-        cacheable: CrateDatasource.areReleasesCacheable(info.rawUrl),
+        cacheable: info.flavor === 'crates.io',
         ttlMinutes: 24 * 60, // 24 hours
       },
       () => this._getCrateMetadata(info, packageName),
@@ -221,16 +268,11 @@ export class CrateDatasource extends Datasource {
       return readCacheFile(path, 'utf8');
     }
 
-    const baseUrl =
-      info.flavor === 'crates.io'
-        ? CrateDatasource.CRATES_IO_BASE_URL
-        : info.rawUrl;
-
-    if (info.flavor === 'crates.io' || info.isSparse) {
+    if (info.isSparse) {
       const packageSuffix = CrateDatasource.getIndexSuffix(
         packageName.toLowerCase(),
       );
-      const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
+      const crateUrl = joinUrlParts(info.rawUrl, ...packageSuffix);
       try {
         return (await this.http.getText(crateUrl)).body;
       } catch (err) {
@@ -259,7 +301,7 @@ export class CrateDatasource extends Datasource {
         return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${packageName}`;
       }
       default:
-        return `${info.rawUrl}/${packageName}`;
+        return `${info.url}/${packageName}`;
     }
   }
 
@@ -310,7 +352,7 @@ export class CrateDatasource extends Datasource {
     }
 
     let flavor: RegistryFlavor;
-    if (url.hostname === 'crates.io') {
+    if (url.hostname === 'index.crates.io') {
       flavor = 'crates.io';
     } else if (url.hostname === 'dl.cloudsmith.io') {
       flavor = 'cloudsmith';
@@ -442,12 +484,13 @@ export class CrateDatasource extends Datasource {
     }
   }
 
-  private static areReleasesCacheable(
-    registryUrl: string | undefined,
-  ): boolean {
-    // We only cache public releases, we don't want to cache private
-    // cloned data between runs.
-    return registryUrl === 'https://crates.io';
+  private static isCratesIo(registryUrl: string | undefined): boolean {
+    if (!registryUrl) {
+      return false;
+    }
+    const normalized = registryUrl.replace(/^sparse\+/, '');
+    const parsed = parseUrl(normalized);
+    return parsed?.hostname === 'index.crates.io';
   }
 
   public static getIndexSuffix(packageName: string): string[] {
@@ -470,11 +513,23 @@ export class CrateDatasource extends Datasource {
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    if (release.releaseTimestamp || registryUrl !== 'https://crates.io') {
+    if (release.releaseTimestamp) {
       return release;
     }
 
-    const url = `https://crates.io/api/v1/crates/${packageName}/${release.versionOrig ?? release.version}`;
+    // Look up the registry config from cache (populated during getReleases)
+    const rawUrl = registryUrl?.replace(/^sparse\+/, '');
+    if (!rawUrl) {
+      return release;
+    }
+    const cacheKey = `crate-datasource/registry-config/${rawUrl}`;
+    const config = memCache.get<{ dl: string; api?: string }>(cacheKey);
+    if (!config?.api) {
+      return release;
+    }
+
+    const apiBaseUrl = joinUrlParts(config.api, 'api/v1/');
+    const url = `${apiBaseUrl}crates/${packageName}/${release.versionOrig ?? release.version}`;
     // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
     // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
     const { body: releaseTimestamp } = await this.http.getJson(
@@ -495,7 +550,7 @@ export class CrateDatasource extends Datasource {
         namespace: `datasource-crate`,
         key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
         ttlMinutes: 7 * 24 * 60,
-        cacheable: config.registryUrl === 'https://crates.io',
+        cacheable: CrateDatasource.isCratesIo(config.registryUrl ?? undefined),
       },
       () => this._postprocessRelease(config, release),
     );

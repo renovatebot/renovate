@@ -21,12 +21,24 @@ import type { RegistryInfo } from './types.ts';
 vi.mock('simple-git');
 const simpleGit = vi.mocked(_simpleGit);
 
-const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;
-
-const baseUrl =
-  'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
+const API_BASE_URL = 'https://crates.io';
+const DL_BASE_URL = 'https://static.crates.io/crates';
+const CRATES_IO_REGISTRY_URL = 'sparse+https://index.crates.io/';
+const CRATES_IO_REGISTRY_URL_PARSED = 'https://index.crates.io/';
 
 const datasource = CrateDatasource.id;
+
+const cratesIoConfig = {
+  dl: DL_BASE_URL,
+  api: API_BASE_URL,
+};
+
+function mockCratesIoConfig(): void {
+  httpMock
+    .scope(CRATES_IO_REGISTRY_URL_PARSED)
+    .get('/config.json')
+    .reply(200, cratesIoConfig);
+}
 
 function setupGitMocks(delayMs?: number): {
   mockClone: MockedFunction<SimpleGit['clone']>;
@@ -74,7 +86,7 @@ function setupErrorGitMock(): {
 function mockCratesApiCallFor(crateName: string, response?: httpMock.Body) {
   httpMock
     .scope(API_BASE_URL)
-    .get(`/crates/${crateName}?include=`)
+    .get(`/api/v1/crates/${crateName}?include=`)
     .reply(response ? 200 : 404, response);
 }
 
@@ -132,7 +144,10 @@ describe('modules/datasource/crate/index', () => {
 
     it('returns null for missing registry url', async () => {
       // FIXME: should not call default registry?
-      httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(404, {});
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/no/n_/non_existent_crate')
+        .reply(404, {});
       expect(
         await getPkgReleases({
           datasource,
@@ -153,88 +168,107 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('returns null for empty result', async () => {
+      mockCratesIoConfig();
       mockCratesApiCallFor('non_existent_crate');
-      httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/no/n_/non_existent_crate')
+        .reply(200, {});
       expect(
         await getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
-          registryUrls: ['https://crates.io'],
+          registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
       ).toBeNull();
     });
 
     it('returns null for missing fields', async () => {
+      mockCratesIoConfig();
       mockCratesApiCallFor('non_existent_crate');
       httpMock
-        .scope(baseUrl)
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, undefined);
       expect(
         await getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
-          registryUrls: ['https://crates.io'],
+          registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
       ).toBeNull();
     });
 
     it('returns null for empty list', async () => {
+      mockCratesIoConfig();
       mockCratesApiCallFor('non_existent_crate');
-      httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, '\n');
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/no/n_/non_existent_crate')
+        .reply(200, '\n');
       expect(
         await getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
-          registryUrls: ['https://crates.io'],
+          registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
       ).toBeNull();
     });
 
     it('returns null for 404', async () => {
-      httpMock.scope(baseUrl).get('/so/me/some_crate').reply(404);
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/so/me/some_crate')
+        .reply(404);
       expect(
         await getPkgReleases({
           datasource,
           packageName: 'some_crate',
-          registryUrls: ['https://crates.io'],
+          registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
       ).toBeNull();
     });
 
     it('throws for 5xx', async () => {
-      httpMock.scope(baseUrl).get('/so/me/some_crate').reply(502);
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/so/me/some_crate')
+        .reply(502);
       await expect(
         getPkgReleases({
           datasource,
           packageName: 'some_crate',
-          registryUrls: ['https://crates.io'],
+          registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for unknown error', async () => {
-      httpMock.scope(baseUrl).get('/so/me/some_crate').replyWithError('');
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/so/me/some_crate')
+        .replyWithError('');
       expect(
         await getPkgReleases({
           datasource,
           packageName: 'some_crate',
-          registryUrls: ['https://crates.io'],
+          registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
       ).toBeNull();
     });
 
     it('processes real data: libc', async () => {
+      mockCratesIoConfig();
       mockCratesApiCallFor('libc', Fixtures.get('libc.json'));
 
       httpMock
-        .scope(baseUrl)
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/li/bc/libc')
         .reply(200, Fixtures.get('libc'));
       const res = await getPkgReleases({
         datasource,
         packageName: 'libc',
-        registryUrls: ['https://crates.io'],
+        registryUrls: [CRATES_IO_REGISTRY_URL],
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -242,16 +276,17 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('processes real data: amethyst', async () => {
+      mockCratesIoConfig();
       mockCratesApiCallFor('amethyst', Fixtures.get('amethyst.json'));
 
       httpMock
-        .scope(baseUrl)
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/am/et/amethyst')
         .reply(200, Fixtures.get('amethyst'));
       const res = await getPkgReleases({
         datasource,
         packageName: 'amethyst',
-        registryUrls: ['https://crates.io'],
+        registryUrls: [CRATES_IO_REGISTRY_URL],
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -373,6 +408,7 @@ describe('modules/datasource/crate/index', () => {
 
       const url = 'https://github.com/mcorbin/othertestregistry';
       const sparseUrl = `sparse+${url}`;
+      httpMock.scope(url).get('/config.json').reply(404);
       httpMock.scope(url).get('/my/pk/mypkg').reply(200, {});
 
       const res = await getPkgReleases({
@@ -465,7 +501,7 @@ describe('modules/datasource/crate/index', () => {
   });
 
   describe('fetchCrateRecordsPayload', () => {
-    it('rejects if it has neither clonePath nor crates.io flavor', async () => {
+    it('rejects if it has neither clonePath nor sparse protocol', async () => {
       const info: RegistryInfo = {
         rawUrl: 'https://example.com',
         url: new URL('https://example.com'),
@@ -482,7 +518,11 @@ describe('modules/datasource/crate/index', () => {
   describe('postprocessRelease', () => {
     const datasource = new CrateDatasource();
 
-    it('no-op for registries other than crates.io', async () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
+    it('no-op for registries without cached config', async () => {
       const releaseOrig = { version: '4.5.17' };
 
       const res = await datasource.postprocessRelease(
@@ -505,7 +545,7 @@ describe('modules/datasource/crate/index', () => {
       const res = await datasource.postprocessRelease(
         {
           packageName: 'clap',
-          registryUrl: 'https://crates.io',
+          registryUrl: CRATES_IO_REGISTRY_URL,
         },
         releaseOrig,
       );
@@ -514,9 +554,14 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('fetches releaseTimestamp', async () => {
+      memCache.set(
+        `crate-datasource/registry-config/${CRATES_IO_REGISTRY_URL_PARSED}`,
+        cratesIoConfig,
+      );
+
       httpMock
         .scope(API_BASE_URL)
-        .get('/crates/clap/4.5.17')
+        .get('/api/v1/crates/clap/4.5.17')
         .reply(200, {
           version: {
             created_at: '2024-09-04T19:16:41.355243+00:00',
@@ -526,7 +571,7 @@ describe('modules/datasource/crate/index', () => {
       const res = await datasource.postprocessRelease(
         {
           packageName: 'clap',
-          registryUrl: 'https://crates.io',
+          registryUrl: CRATES_IO_REGISTRY_URL,
         },
         { version: '4.5.17' },
       );
