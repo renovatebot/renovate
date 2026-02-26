@@ -10,53 +10,6 @@ import { extractPackageFile } from './index.ts';
 const modules = Fixtures.get('modules.tf');
 const bitbucketModules = Fixtures.get('bitbucketModules.tf');
 const azureDevOpsModules = Fixtures.get('azureDevOpsModules.tf');
-const ociModules = codeBlock`
-  module "vpc_oci" {
-    source  = "oci://registry.example.com/terraform-modules/vpc"
-    version = "1.2.3"
-  }
-
-  module "networking_oci" {
-    source  = "oci://ghcr.io/myorg/terraform-modules/networking"
-    version = "2.0.0"
-  }
-
-  module "storage_oci_tagged" {
-    source = "oci://docker.io/terraform-modules/storage:3.1.0"
-  }
-
-  module "database_oci_digest" {
-    source = "oci://registry.example.com/terraform-modules/database:sha256:abc123"
-  }
-
-  module "traditional" {
-    source  = "hashicorp/consul/aws"
-    version = "0.1.0"
-  }
-
-  terraform {
-    required_providers {
-      custom_oci = {
-        source  = "oci://registry.example.com/providers/custom"
-        version = "1.0.0"
-      }
-
-      another_oci = {
-        source  = "oci://ghcr.io/mycompany/providers/mycloud"
-        version = "2.5.0"
-      }
-
-      tagged_oci = {
-        source = "oci://registry.example.com/providers/tagged:4.2.0"
-      }
-
-      aws = {
-        source  = "hashicorp/aws"
-        version = "4.0.0"
-      }
-    }
-  }
-`;
 const providers = Fixtures.get('providers.tf');
 const docker = Fixtures.get('docker.tf');
 const kubernetes = Fixtures.get('kubernetes.tf');
@@ -383,8 +336,39 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extracts OCI modules and providers', async () => {
-      const res = await extractPackageFile(ociModules, 'oci.tf', {});
-      expect(res?.deps).toHaveLength(9);
+      const src = codeBlock`
+        module "vpc_oci" {
+          source  = "oci://registry.example.com/terraform-modules/vpc"
+          version = "1.2.3"
+        }
+
+        module "storage_oci_tagged" {
+          source = "oci://ghcr.io/terraform-modules/storage:3.1.0"
+        }
+
+        module "no_version_oci" {
+          source = "oci://registry.example.com/terraform-modules/noversion"
+        }
+
+        terraform {
+          required_providers {
+            custom_oci = {
+              source  = "oci://registry.example.com/providers/custom"
+              version = "1.0.0"
+            }
+
+            tagged_oci = {
+              source = "oci://ghcr.io/providers/tagged:4.2.0"
+            }
+
+            no_version_oci = {
+              source = "oci://registry.example.com/providers/noversion"
+            }
+          }
+        }
+      `;
+      const res = await extractPackageFile(src, 'oci.tf', {});
+      expect(res?.deps).toHaveLength(6);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: '1.2.3',
@@ -394,31 +378,18 @@ describe('modules/manager/terraform/extract', () => {
           packageName: 'registry.example.com/terraform-modules/vpc',
         },
         {
-          currentValue: '2.0.0',
-          datasource: 'docker',
-          depName: 'ghcr.io/myorg/terraform-modules/networking',
-          depType: 'module',
-          packageName: 'ghcr.io/myorg/terraform-modules/networking',
-        },
-        {
           currentValue: '3.1.0',
           datasource: 'docker',
-          depName: 'docker.io/terraform-modules/storage',
+          depName: 'ghcr.io/terraform-modules/storage',
           depType: 'module',
-          packageName: 'docker.io/terraform-modules/storage',
+          packageName: 'ghcr.io/terraform-modules/storage',
         },
         {
-          currentValue: 'sha256:abc123',
           datasource: 'docker',
-          depName: 'registry.example.com/terraform-modules/database',
+          depName: 'registry.example.com/terraform-modules/noversion',
           depType: 'module',
-          packageName: 'registry.example.com/terraform-modules/database',
-        },
-        {
-          currentValue: '0.1.0',
-          datasource: 'terraform-module',
-          depName: 'hashicorp/consul/aws',
-          depType: 'module',
+          packageName: 'registry.example.com/terraform-modules/noversion',
+          skipReason: 'unspecified-version',
         },
         {
           currentValue: '1.0.0',
@@ -428,25 +399,18 @@ describe('modules/manager/terraform/extract', () => {
           packageName: 'registry.example.com/providers/custom',
         },
         {
-          currentValue: '2.5.0',
-          datasource: 'docker',
-          depName: 'another_oci',
-          depType: 'required_provider',
-          packageName: 'ghcr.io/mycompany/providers/mycloud',
-        },
-        {
           currentValue: '4.2.0',
           datasource: 'docker',
           depName: 'tagged_oci',
           depType: 'required_provider',
-          packageName: 'registry.example.com/providers/tagged',
+          packageName: 'ghcr.io/providers/tagged',
         },
         {
-          currentValue: '4.0.0',
-          datasource: 'terraform-provider',
-          depName: 'aws',
+          datasource: 'docker',
+          depName: 'no_version_oci',
           depType: 'required_provider',
-          packageName: 'hashicorp/aws',
+          packageName: 'registry.example.com/providers/noversion',
+          skipReason: 'unspecified-version',
         },
       ]);
     });

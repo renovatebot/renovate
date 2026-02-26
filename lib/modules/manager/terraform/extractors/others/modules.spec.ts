@@ -5,7 +5,6 @@ import {
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
   hostnameMatchRegex,
-  ociRefMatchRegex,
 } from './modules.ts';
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
@@ -339,33 +338,5 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         hostname: 'example.com',
       });
     });
-  });
-
-  describe('ociRefMatchRegex', () => {
-    it.each`
-      source                                           | registry                  | repository                       | tag
-      ${'oci://registry.example.com/namespace/module'} | ${'registry.example.com'} | ${'namespace/module'}            | ${undefined}
-      ${'oci://ghcr.io/myorg/terraform-modules/vpc'}   | ${'ghcr.io'}              | ${'myorg/terraform-modules/vpc'} | ${undefined}
-      ${'oci://docker.io/terraform/modules'}           | ${'docker.io'}            | ${'terraform/modules'}           | ${undefined}
-    `(
-      'should extract registry and repository from $source',
-      ({ source, registry, repository, tag }) => {
-        const groups = ociRefMatchRegex.exec(source)?.groups;
-        expect(groups).toEqual({ registry, repository, tag });
-      },
-    );
-
-    it.each`
-      source                                                 | registry                  | repository            | tag
-      ${'oci://registry.example.com/namespace/module:1.2.3'} | ${'registry.example.com'} | ${'namespace/module'} | ${'1.2.3'}
-      ${'oci://ghcr.io/org/module:sha256:abc123def456'}      | ${'ghcr.io'}              | ${'org/module'}       | ${'sha256:abc123def456'}
-      ${'oci://docker.io/modules/app:v2.0.0-beta.1'}         | ${'docker.io'}            | ${'modules/app'}      | ${'v2.0.0-beta.1'}
-    `(
-      'should extract version tag from $source',
-      ({ source, registry, repository, tag }) => {
-        const groups = ociRefMatchRegex.exec(source)?.groups;
-        expect(groups).toEqual({ registry, repository, tag });
-      },
-    );
   });
 });

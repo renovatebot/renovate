@@ -1,35 +1,12 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import type { TerraformDefinitionFile } from './hcl/types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
 import { getLockedVersion, massageProviderLookupName } from './util.ts';
-
-export const ociRefMatchRegex = regEx(
-  /^oci:\/\/(?<registry>[^/:]+)\/(?<repository>[^:]+?)(?::(?<tag>.+))?$/,
-);
-
-export function parseOciRef(
-  dep: PackageDependency,
-  source: string,
-): PackageDependency | null {
-  const ociMatch = ociRefMatchRegex.exec(source);
-  if (!ociMatch?.groups) {
-    return null;
-  }
-
-  const { registry, repository, tag } = ociMatch.groups;
-  dep.packageName = `${registry}/${repository}`;
-  dep.datasource = DockerDatasource.id;
-  if (tag) {
-    dep.currentValue = tag;
-  } else {
-    dep.skipReason = 'unspecified-version';
-  }
-  return dep;
-}
 
 export abstract class DependencyExtractor {
   /**
@@ -66,9 +43,18 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
 
     if (isNonEmptyString(dep.managerData?.source)) {
       // TODO #22198
-      const ociDep = parseOciRef(dep, dep.managerData.source);
-      if (ociDep) {
-        return ociDep;
+      if (isOCIRegistry(dep.managerData.source)) {
+        const imagePath = removeOCIPrefix(dep.managerData.source);
+        const parsed = getDep(imagePath, false);
+        dep.packageName = parsed.packageName;
+        dep.datasource = parsed.datasource;
+        if (!dep.currentValue && parsed.currentValue) {
+          dep.currentValue = parsed.currentValue;
+        }
+        if (!dep.currentValue) {
+          dep.skipReason = 'unspecified-version';
+        }
+        return dep;
       }
 
       const source = this.sourceExtractionRegex.exec(dep.managerData.source);
