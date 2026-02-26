@@ -55,6 +55,11 @@ function setupGitMocks(delayMs?: number): {
         const path = `${clonePath}/my/pk/mypkg`;
         fs.mkdirSync(upath.dirname(path), { recursive: true });
         fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
+        fs.writeFileSync(
+          `${clonePath}/config.json`,
+          JSON.stringify({ dl: 'https://example.com/crates' }),
+          { encoding: 'utf8' },
+        );
       },
     );
 
@@ -351,6 +356,19 @@ describe('modules/datasource/crate/index', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads config.json from cloned registry', async () => {
+      const { mockClone } = setupGitMocks();
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      const url = 'https://github.com/mcorbin/testregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalled();
+      expect(res).not.toBeNull();
     });
 
     it('guards against race conditions while cloning', async () => {
