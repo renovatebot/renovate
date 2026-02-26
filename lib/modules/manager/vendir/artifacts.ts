@@ -8,6 +8,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
@@ -33,6 +34,7 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Vendir artifacts');
     const execOptions: ExecOptions = {
+      extraEnv: { ...getGitEnvironmentVariables([]) },
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [

@@ -12,6 +12,7 @@ jobs:
   analysis:
     name: Scorecard analysis
     runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate'
     permissions:
       # Needed to upload the results to code-scanning dashboard.
       security-events: write

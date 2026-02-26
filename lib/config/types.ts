@@ -165,9 +165,11 @@ export interface RenovateSharedConfig {
 export interface GlobalInheritableConfig {
   bbUseDevelopmentBranch?: boolean;
   configFileNames?: string[];
+  onboarding?: boolean;
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
   onboardingConfigFileName?: string;
+  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
 }
 
@@ -244,6 +246,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
+  prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;

@@ -1383,7 +1383,7 @@ export async function ensureComment({
       'Updated comment',
     );
   } else {
-    logger.debug('Comment is already update-to-date');
+    logger.debug('Comment is already up-to-date');
   }
   return true;
 }

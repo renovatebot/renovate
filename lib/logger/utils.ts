@@ -20,6 +20,7 @@ import { ZodError } from 'zod/v3';
 import { ExecError } from '../util/exec/exec-error.ts';
 import { regEx } from '../util/regex.ts';
 import { redactedFields, sanitize } from '../util/sanitize.ts';
+import { quickStringify } from '../util/stringify.ts';
 import type { BunyanRecord, BunyanStream } from './types.ts';
 
 const excludeProps = ['pid', 'time', 'v', 'hostname'];
@@ -284,10 +285,7 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(
-              regEx(/\n?$/),
-              '\n',
-            );
+          : quickStringify(raw)?.replace(regEx(/\n?$/), '\n');
       stream.write(result, enc, cb);
     };
 

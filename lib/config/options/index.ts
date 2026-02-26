@@ -514,7 +514,14 @@ const options: Readonly<RenovateOptions>[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+      'scm-manager',
+    ],
   },
   {
     name: 'dryRun',
@@ -626,7 +633,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.11.0',
+    default: 'ghcr.io/renovatebot/base-image:13.13.1',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1050,7 +1057,12 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Username for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'scm-manager',
+    ],
     globalOnly: true,
   },
   {
@@ -3190,7 +3202,13 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['bitbucket-server', 'forgejo', 'gitea', 'gitlab'],
+    supportedPlatforms: [
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'gitlab',
+      'scm-manager',
+    ],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -3310,6 +3328,17 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'repository',
     default: 90,
     globalOnly: true,
+  },
+  {
+    name: 'prCacheSyncMaxPages',
+    description:
+      'Maximum number of pages to fetch when syncing the pull request cache.',
+    type: 'integer',
+    default: 100,
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+    experimentalIssues: [41485],
   },
   {
     name: 'dockerMaxPages',
