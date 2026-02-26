@@ -627,9 +627,9 @@ export class Result<T extends Val, E extends Val = Error> {
  *
  * All the methods resemble `Result` methods, but work asynchronously.
  */
-export class AsyncResult<T extends Val, E extends Val>
-  implements PromiseLike<Result<T, E>>
-{
+export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
+  Result<T, E>
+> {
   private asyncResult: Promise<Result<T, E>>;
 
   private constructor(asyncResult: Promise<Result<T, E>>) {
