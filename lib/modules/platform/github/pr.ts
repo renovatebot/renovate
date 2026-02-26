@@ -1,5 +1,6 @@
 import { isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../config/global.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -13,8 +14,6 @@ import { parseLinkHeader } from '../../../util/url.ts';
 import { ApiCache } from './api-cache.ts';
 import { coerceRestPr } from './common.ts';
 import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
-
-const MAX_SYNC_PAGES = 100;
 
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
@@ -81,8 +80,9 @@ export async function getPrCache(
   }
   const cutoffTime = lastModifiedRaw ? DateTime.fromISO(lastModifiedRaw) : null;
 
-  const startTime = Date.now();
   try {
+    const maxSyncPages = GlobalConfig.get('prCacheSyncMaxPages', 100);
+    const startTime = Date.now();
     let requestsTotal = 0;
     let apiQuotaAffected = false;
     let needNextPageFetch = true;
@@ -163,7 +163,7 @@ export async function getPrCache(
           !isInitial &&
           needNextPageFetch &&
           needNextPageSync &&
-          pageIdx >= MAX_SYNC_PAGES
+          pageIdx >= maxSyncPages
         ) {
           logger.warn(
             { repo, pages: pageIdx },

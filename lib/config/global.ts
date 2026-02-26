@@ -45,6 +45,7 @@ export class GlobalConfig {
     'onboardingNoDeps',
     'onboardingPrTitle',
     'platform',
+    'prCacheSyncMaxPages',
     'presetCachePersistence',
     'repositoryCacheForceLocal',
     's3Endpoint',
