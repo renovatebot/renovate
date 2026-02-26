@@ -1,4 +1,3 @@
-import { Stream } from 'node:stream';
 import {
   isArray,
   isBuffer,
@@ -11,49 +10,12 @@ import {
   isObject,
   isPlainObject,
   isString,
-  isUndefined,
 } from '@sindresorhus/is';
-import bunyan from 'bunyan';
-import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod/v3';
 import { ExecError } from '../util/exec/exec-error.ts';
 import { regEx } from '../util/regex.ts';
 import { redactedFields, sanitize } from '../util/sanitize.ts';
-import type { BunyanRecord, BunyanStream } from './types.ts';
-
-const excludeProps = ['pid', 'time', 'v', 'hostname'];
-
-export class ProblemStream extends Stream {
-  private _problems: BunyanRecord[] = [];
-
-  readable: boolean;
-
-  writable: boolean;
-
-  constructor() {
-    super();
-    this.readable = false;
-    this.writable = true;
-  }
-
-  write(data: BunyanRecord): boolean {
-    const problem = { ...data };
-    for (const prop of excludeProps) {
-      delete problem[prop];
-    }
-    this._problems.push(problem);
-    return true;
-  }
-
-  getProblems(): BunyanRecord[] {
-    return this._problems;
-  }
-
-  clearProblems(): void {
-    this._problems = [];
-  }
-}
 
 const contentFields = [
   'content',
@@ -266,89 +228,6 @@ export function sanitizeValue(
   }
 
   return value;
-}
-
-export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
-  if (streamConfig.type === 'rotating-file') {
-    throw new Error("Rotating files aren't supported");
-  }
-
-  const stream = streamConfig.stream as BunyanStream;
-  if (stream?.writable) {
-    const write = (
-      chunk: BunyanRecord,
-      enc: BufferEncoding,
-      cb: (err?: Error | null) => void,
-    ): void => {
-      const raw = sanitizeValue(chunk);
-      const result =
-        streamConfig.type === 'raw'
-          ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(
-              regEx(/\n?$/),
-              '\n',
-            );
-      stream.write(result, enc, cb);
-    };
-
-    return {
-      ...streamConfig,
-      type: 'raw',
-      stream: { write },
-    } as bunyan.Stream;
-  }
-
-  if (streamConfig.path) {
-    const fileStream = fs.createWriteStream(streamConfig.path, {
-      flags: 'a',
-      encoding: 'utf8',
-    });
-
-    return withSanitizer({ ...streamConfig, stream: fileStream });
-  }
-
-  throw new Error("Missing 'stream' or 'path' for bunyan stream");
-}
-
-/**
- * A function that terminates execution if the log level that was entered is
- *  not a valid value for the Bunyan logger.
- * @param logLevelToCheck
- * @returns returns the logLevel when the logLevelToCheck is valid or the defaultLevel passed as argument when it is undefined. Else it stops execution.
- */
-export function validateLogLevel(
-  logLevelToCheck: string | undefined,
-  defaultLevel: bunyan.LogLevelString,
-): bunyan.LogLevelString {
-  const allowedValues: bunyan.LogLevelString[] = [
-    'trace',
-    'debug',
-    'info',
-    'warn',
-    'error',
-    'fatal',
-  ];
-
-  if (
-    isUndefined(logLevelToCheck) ||
-    (isString(logLevelToCheck) &&
-      allowedValues.includes(logLevelToCheck as bunyan.LogLevelString))
-  ) {
-    // log level is in the allowed values or its undefined
-    return (logLevelToCheck as bunyan.LogLevelString) ?? defaultLevel;
-  }
-
-  const logger = bunyan.createLogger({
-    name: 'renovate',
-    streams: [
-      {
-        level: 'fatal',
-        stream: process.stdout,
-      },
-    ],
-  });
-  logger.fatal({ logLevel: logLevelToCheck }, 'Invalid log level');
-  process.exit(1);
 }
 
 // Can't use `util/regex` because of circular reference to logger

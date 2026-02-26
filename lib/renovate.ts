@@ -8,12 +8,16 @@ void (async (): Promise<void> => {
   const otel = await import('./instrumentation/index.ts');
   otel.init();
   (await import('./proxy.ts')).bootstrap();
-  const { logger } = await import('./logger/index.ts');
-  const { start } = await import('./workers/global/index.ts');
+
+  const logger = await import('./logger/index.ts');
+  // TODO: consider removal ?
   /* v8 ignore next 3 -- not easily testable */
   process.on('unhandledRejection', (err) => {
-    logger.error({ err }, 'unhandledRejection');
+    logger.logger.error({ err }, 'unhandledRejection');
   });
+  await logger.init();
+
+  const { start } = await import('./workers/global/index.ts');
   process.exitCode = await otel.instrument('run', start);
   await otel.shutdown(); //gracefully shutdown OpenTelemetry
 
