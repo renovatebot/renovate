@@ -7,12 +7,13 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
 export { bumpPackageVersion } from '../pep621/update.ts';
-export { extractPackageFile } from './extract.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 export { updateLockedDependency } from './update-locked.ts';
 
 export const supersedesManagers = ['pep621'];
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['poetry.lock'];
 
 export const url = 'https://python-poetry.org/docs';
 export const categories: Category[] = ['python'];

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';

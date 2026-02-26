@@ -1,7 +1,7 @@
+import { partial } from '~test/util.ts';
 import { rawExec as _rawExec } from '../../../util/exec/common.ts';
 import type { ExecResult } from '../../../util/exec/types.ts';
 import { LocalFs } from './scm.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('glob', () => ({
   glob: vi.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
@@ -35,6 +35,10 @@ describe('modules/platform/local/scm', () => {
 
     it('getBranchCommit', async () => {
       expect(await localFs.getBranchCommit('')).toBeNull();
+    });
+
+    it('getBranchUpdateDate', async () => {
+      expect(await localFs.getBranchUpdateDate('')).toBeNull();
     });
 
     it('deleteBranch', async () => {

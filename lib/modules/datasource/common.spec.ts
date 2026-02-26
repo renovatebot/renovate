@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import { defaultVersioning } from '../versioning/index.ts';
 import {
   applyConstraintsFiltering,
@@ -12,7 +13,6 @@ import {
 import { CustomDatasource } from './custom/index.ts';
 import { NpmDatasource } from './npm/index.ts';
 import type { ReleaseResult } from './types.ts';
-import { logger } from '~test/util.ts';
 
 describe('modules/datasource/common', () => {
   describe('getDatasourceFor', () => {

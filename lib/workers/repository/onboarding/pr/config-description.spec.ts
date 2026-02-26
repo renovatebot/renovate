@@ -1,7 +1,7 @@
-import type { PackageFile } from '../../../../modules/manager/types.ts';
-import { getConfigDesc } from './config-description.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { getConfigDesc } from './config-description.ts';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {

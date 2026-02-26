@@ -10,22 +10,7 @@ import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
 import {
-  awsBeanstalkDetector,
-  awsEc2Detector,
-  awsEcsDetector,
-  awsEksDetector,
-  awsLambdaDetector,
-} from '@opentelemetry/resource-detector-aws';
-import {
-  azureAppServiceDetector,
-  azureFunctionsDetector,
-  azureVmDetector,
-} from '@opentelemetry/resource-detector-azure';
-import { gcpDetector } from '@opentelemetry/resource-detector-gcp';
-import { gitHubDetector } from '@opentelemetry/resource-detector-github';
-import {
   detectResources,
-  envDetector,
   resourceFromAttributes,
 } from '@opentelemetry/resources';
 import {
@@ -41,8 +26,8 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
-import { getEnv } from '../util/env.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { getResourceDetectors } from './detectors.ts';
 import type { RenovateSpanOptions } from './types.ts';
 import {
   isTraceDebuggingEnabled,
@@ -53,11 +38,19 @@ import {
 
 let instrumentations: Instrumentation[] = [];
 
-init();
-
 export function init(): void {
   if (!isTracingEnabled()) {
     return;
+  }
+
+  // v8 ignore if -- TODO add tests
+  if (process.env.OTEL_LOG_LEVEL) {
+    api.diag.setLogger(
+      new api.DiagConsoleLogger(),
+      api.DiagLogLevel[
+        process.env.OTEL_LOG_LEVEL.toUpperCase() as keyof typeof api.DiagLogLevel
+      ],
+    );
   }
 
   const spanProcessors: SpanProcessor[] = [];
@@ -70,10 +63,11 @@ export function init(): void {
   if (isTraceSendingEnabled()) {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
+    // TODO: fix me, transitive initializes logger
     spanProcessors.push(new GitOperationSpanProcessor());
   }
 
-  const env = getEnv();
+  const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors
   const baseResource = resourceFromAttributes({
     // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
     [ATTR_SERVICE_NAME]: env.OTEL_SERVICE_NAME ?? 'renovate',
@@ -84,19 +78,7 @@ export function init(): void {
   });
 
   const detectedResource = detectResources({
-    detectors: [
-      awsBeanstalkDetector,
-      awsEc2Detector,
-      awsEcsDetector,
-      awsEksDetector,
-      awsLambdaDetector,
-      azureAppServiceDetector,
-      azureFunctionsDetector,
-      azureVmDetector,
-      gcpDetector,
-      gitHubDetector,
-      envDetector,
-    ],
+    detectors: getResourceDetectors(env),
   });
 
   const traceProvider = new NodeTracerProvider({

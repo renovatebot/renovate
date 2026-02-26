@@ -1,7 +1,7 @@
-import { GlobalConfig } from '../../../config/global.ts';
-import { updateArtifacts } from './index.ts';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
