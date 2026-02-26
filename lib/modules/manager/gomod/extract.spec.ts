@@ -124,6 +124,55 @@ describe('modules/manager/gomod/extract', () => {
       });
     });
 
+    it('extracts replace directives from non-public module path', () => {
+      const goMod = codeBlock`
+        module github.com/JamieTanna-Mend-testing/tka-9783-golang-pro-main
+        go 1.25.5
+        require pro-lib v0.0.0-00010101000000-000000000000
+        replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.0-20260219031232-e6910bd8fb97
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            managerData: {
+              lineNumber: 1,
+            },
+            depName: 'go',
+            depType: 'golang',
+            currentValue: '1.25.5',
+            datasource: 'golang-version',
+            versioning: 'go-mod-directive',
+          },
+          {
+            managerData: {
+              lineNumber: 2,
+            },
+            depName: 'pro-lib',
+            depType: 'require',
+            currentValue: 'v0.0.0-00010101000000-000000000000',
+            currentDigest: '000000000000',
+            datasource: 'go',
+            digestOneAndOnly: true,
+            versioning: 'loose',
+            skipReason: 'invalid-version',
+          },
+          {
+            managerData: {
+              lineNumber: 3,
+            },
+            depName: 'github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns',
+            depType: 'replace',
+            currentValue: 'v0.0.0-20260219031232-e6910bd8fb97',
+            currentDigest: 'e6910bd8fb97',
+            datasource: 'go',
+            digestOneAndOnly: true,
+            versioning: 'loose',
+          },
+        ],
+      });
+    });
+
     // https://go.dev/doc/modules/gomod-ref#exclude
     it('ignores exclude directives from multi-line and single line', () => {
       const goMod = codeBlock`
