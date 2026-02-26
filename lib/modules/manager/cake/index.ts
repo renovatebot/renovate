@@ -79,7 +79,7 @@ export function extractPackageFile(content: string): PackageFileContent {
         deps.push(dep);
       }
     } else if (type === 'dependencyFromInstallTools') {
-      const matches = value.matchAll(/"dotnet:[^"]+"/g);
+      const matches = value.matchAll(regEx(/"dotnet:[^"]+"/g));
       for (const match of matches) {
         const withoutQuote = match.toString().slice(1, -1);
         const dep = parseDependencyLine(withoutQuote);
