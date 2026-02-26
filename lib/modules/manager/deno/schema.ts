@@ -1,5 +1,5 @@
 import validateNpmPackageName from 'validate-npm-package-name';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { regEx } from '../../../util/regex.ts';
 import {
   Json,
