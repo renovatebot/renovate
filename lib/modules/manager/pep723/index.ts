@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+
 export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'PEP 723';

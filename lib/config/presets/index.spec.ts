@@ -1,4 +1,6 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
@@ -16,8 +18,6 @@ import {
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger } from '~test/util.ts';
 
 vi.mock('./npm/index.ts');
 vi.mock('./github/index.ts');

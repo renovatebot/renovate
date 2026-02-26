@@ -1,10 +1,14 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options/index.ts';
-import { allManagersList } from '../../lib/modules/manager/index.ts';
+import {
+  allManagersList,
+  getManagers,
+} from '../../lib/modules/manager/index.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
+import { replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -137,18 +141,21 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     }
   });
 
-  if (type === 'array') {
-    data.push(['default', '<code>[]</code>']);
+  if (data.find((k) => k[0] === 'default') === undefined) {
+    if (type === 'array') {
+      data.push(['default', '<code>[]</code>']);
+    }
+    if (type === 'string' && def === undefined) {
+      data.push(['default', '<code>null</code>']);
+    }
+    if (type === 'boolean' && def === undefined) {
+      data.push(['default', '<code>true</code>']);
+    }
+    if (type === 'boolean' && def === null) {
+      data.push(['default', '<code>null</code>']);
+    }
   }
-  if (type === 'string' && def === undefined) {
-    data.push(['default', '<code>null</code>']);
-  }
-  if (type === 'boolean' && def === undefined) {
-    data.push(['default', '<code>true</code>']);
-  }
-  if (type === 'boolean' && def === null) {
-    data.push(['default', '<code>null</code>']);
-  }
+
   return buildHtmlTable(data);
 }
 
@@ -217,6 +224,31 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   return indexed;
 }
 
+function generateLockFileTable(): string {
+  const allManagers = getManagers();
+  const rows: { name: string; lockFiles: string[] }[] = [];
+
+  for (const [name, definition] of allManagers) {
+    if (
+      definition.supportsLockFileMaintenance &&
+      definition.lockFileNames?.length
+    ) {
+      rows.push({ name, lockFiles: definition.lockFileNames });
+    }
+  }
+
+  rows.sort((a, b) => a.name.localeCompare(b.name));
+
+  let table = '\n| Manager | Lockfile |\n';
+  table += '| :-- | :-- |\n';
+  for (const row of rows) {
+    const lockFiles = row.lockFiles.map((f) => `\`${f}\``).join(', ');
+    table += `| \`${row.name}\` | ${lockFiles} |\n`;
+  }
+
+  return table;
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -266,7 +298,13 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       }
     });
 
-  await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));
+  let content = configOptionsRaw.join('\n');
+
+  if (!bot) {
+    content = replaceContent(content, generateLockFileTable());
+  }
+
+  await updateFile(`${dist}/${configFile}`, content);
 }
 
 function generateAdvancedUse(): string {

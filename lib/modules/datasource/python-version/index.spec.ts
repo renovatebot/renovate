@@ -1,4 +1,6 @@
 import { satisfies } from '@renovatebot/pep440';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -6,8 +8,6 @@ import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
 import { getPkgReleases } from '../index.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { PythonVersionDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 describe('modules/datasource/python-version/index', () => {
   describe('dependent datasources', () => {
@@ -72,6 +72,39 @@ describe('modules/datasource/python-version/index', () => {
 
     it('returns null for error', async () => {
       httpMock.scope(defaultRegistryUrl).get('').replyWithError('error');
+      expect(
+        await getPkgReleases({
+          datasource,
+          packageName: 'python',
+        }),
+      ).toBeNull();
+    });
+
+    it('falls back to prebuild releases on 429', async () => {
+      httpMock.scope(defaultRegistryUrl).get('').reply(429);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'python',
+      });
+      expect(res?.releases).toHaveLength(3);
+      const versions = res?.releases.map((r) => r.version);
+      expect(versions).toContain('3.12.1');
+      expect(versions).toContain('3.12.0');
+      expect(versions).toContain('3.7.8');
+      expect(
+        res?.releases.find((r) => r.version === '3.7.8')?.isDeprecated,
+      ).toBeTrue();
+      expect(
+        res?.releases.find((r) => r.version === '3.12.1')?.isDeprecated,
+      ).toBeFalse();
+    });
+
+    it('returns null on 429 when prebuild releases are unavailable', async () => {
+      vi.spyOn(
+        PythonVersionDatasource.prototype,
+        'getPrebuildReleases',
+      ).mockResolvedValueOnce(null);
+      httpMock.scope(defaultRegistryUrl).get('').reply(429);
       expect(
         await getPkgReleases({
           datasource,

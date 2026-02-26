@@ -7,6 +7,7 @@ import { extractPackageFile } from './extract.ts';
 import { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Gemfile.lock'];
 
 /*
  * Each of the below functions contain some explanations within their own files.

@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import * as memCache from './cache/memory/index.ts';
 import {
   AbandonedPackageStats,
@@ -9,7 +10,6 @@ import {
   PackageCacheStats,
   makeTimingReport,
 } from './stats.ts';
-import { logger } from '~test/util.ts';
 
 describe('util/stats', () => {
   beforeEach(() => {

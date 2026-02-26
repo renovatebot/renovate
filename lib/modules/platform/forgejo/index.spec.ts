@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
@@ -27,8 +29,6 @@ import type {
   RepoPermission,
   User,
 } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger, partial } from '~test/util.ts';
 
 /**
  * latest tested forgejo version.
@@ -3011,6 +3011,15 @@ describe('modules/platform/forgejo/index', () => {
 
       expect(forgejo.massageMarkdown(body)).toBe(
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(forgejo.massageMarkdown(body)).toBe(
+        '[#123](issues/123) [#124](issues/124) [#125](issues/125)',
       );
     });
   });

@@ -4,7 +4,11 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
+import {
+  exec,
+  getToolSettingsOptions,
+  gradleJvmArg,
+} from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   localPathExists,
@@ -156,6 +160,9 @@ export async function updateArtifacts({
       return null;
     }
 
+    // Limit the Gradle daemon Java heap memory size to prevent OOM errors
+    // leading to Renovate kernel-OOMs and timeouts. See #39558
+    cmd += gradleJvmArg(getToolSettingsOptions(config.toolSettings));
     cmd += ' :wrapper';
 
     let checksum: string | null = null;

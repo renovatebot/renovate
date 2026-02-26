@@ -1,0 +1,18 @@
+import type { Pr } from '../types.ts';
+import type { PullRequest } from './schema.ts';
+
+export function mapPrFromScmToRenovate(pr: PullRequest): Pr {
+  return {
+    sourceBranch: pr.source,
+    targetBranch: pr.target,
+    createdAt: pr.creationDate,
+    closedAt: pr.closeDate ?? undefined,
+    hasAssignees: !!pr.reviewer?.length,
+    labels: pr.labels,
+    number: parseInt(pr.id),
+    reviewers: pr.reviewer?.map((review) => review.displayName) ?? [],
+    state: pr.status,
+    title: pr.title,
+    isDraft: pr.status === 'DRAFT',
+  };
+}

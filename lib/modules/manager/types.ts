@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
 } from '../../config/types.ts';
@@ -48,6 +49,7 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
+  toolSettings?: ToolSettingsOptions;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -276,11 +278,12 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
-export interface ManagerApi extends ModuleApi {
+interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
   supportsLockFileMaintenance?: boolean;
+  lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
 
@@ -318,6 +321,12 @@ export interface ManagerApi extends ModuleApi {
     config: UpdateLockedConfig,
   ): MaybePromise<UpdateLockedResult>;
 }
+
+export type ManagerApi = ManagerApiBase &
+  // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
+  (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
+    | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
+  );
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig<T = Record<string, any>>
