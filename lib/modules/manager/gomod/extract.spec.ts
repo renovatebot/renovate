@@ -396,4 +396,99 @@ describe('modules/manager/gomod/extract', () => {
     const res = extractPackageFile(goMod);
     expect(res).toBeNull();
   });
+
+  it('marks placeholder pseudo versions with skipReason invalid-version', () => {
+    const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+        go 1.19
+        require (
+          github.com/foo/bar v1.2.3
+          github.com/baz/qux v0.0.0-00010101000000-000000000000
+          github.com/example/local v0.0.0-00010101000000-000000000000 // indirect
+          github.com/non/placeholder v1.2.4-0.20230101120000-abcdef123456
+          monorepo v0.0.0-00010101000000-000000000000
+        )
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          managerData: {
+            lineNumber: 1,
+          },
+          depName: 'go',
+          depType: 'golang',
+          currentValue: '1.19',
+          datasource: 'golang-version',
+          versioning: 'go-mod-directive',
+        },
+        {
+          managerData: {
+            lineNumber: 3,
+            multiLine: true,
+          },
+          depName: 'github.com/foo/bar',
+          depType: 'require',
+          currentValue: 'v1.2.3',
+          datasource: 'go',
+        },
+        {
+          managerData: {
+            lineNumber: 4,
+            multiLine: true,
+          },
+          depName: 'github.com/baz/qux',
+          depType: 'require',
+          currentValue: 'v0.0.0-00010101000000-000000000000',
+          datasource: 'go',
+          skipReason: 'invalid-version',
+          currentDigest: '000000000000',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+        },
+        {
+          managerData: {
+            lineNumber: 5,
+            multiLine: true,
+          },
+          depName: 'github.com/example/local',
+          depType: 'indirect',
+          currentValue: 'v0.0.0-00010101000000-000000000000',
+          datasource: 'go',
+          skipReason: 'invalid-version',
+          enabled: false,
+          currentDigest: '000000000000',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+        },
+        {
+          managerData: {
+            lineNumber: 6,
+            multiLine: true,
+          },
+          depName: 'github.com/non/placeholder',
+          depType: 'require',
+          currentValue: 'v1.2.4-0.20230101120000-abcdef123456',
+          datasource: 'go',
+          currentDigest: 'abcdef123456',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+        },
+        {
+          managerData: {
+            lineNumber: 7,
+            multiLine: true,
+          },
+          depName: 'monorepo',
+          depType: 'require',
+          currentValue: 'v0.0.0-00010101000000-000000000000',
+          datasource: 'go',
+          currentDigest: '000000000000',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+          skipReason: 'invalid-version',
+        },
+      ],
+    });
+  });
 });

@@ -183,7 +183,7 @@
     "@redis/client": "5.11.0",
     "@renovatebot/detect-tools": "1.2.8",
     "@renovatebot/good-enough-parser": "1.2.0",
-    "@renovatebot/osv-offline": "2.1.1",
+    "@renovatebot/osv-offline": "2.1.2",
     "@renovatebot/pep440": "4.2.2",
     "@renovatebot/pgp": "1.3.2",
     "@renovatebot/ruby-semver": "4.1.2",
