@@ -278,7 +278,7 @@
     "re2": "1.23.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.2",
+    "@biomejs/biome": "2.4.3",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/eslint-plugin": "1.1.33",
     "@containerbase/istanbul-reports-html": "1.1.32",
