@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
 const validApplication = Fixtures.get('validApplication.yml');
