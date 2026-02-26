@@ -617,6 +617,13 @@ describe('config/presets/index', () => {
   });
 
   describe('getPreset', () => {
+    it('does not use cache for internal presets', async () => {
+      const memCacheGetSpy = vi.spyOn(memCache, 'get');
+      expect(await presets.getPreset(':dependencyDashboard', {})).toBeDefined();
+      expect(memCacheGetSpy).not.toHaveBeenCalled();
+      expect(packageCache.get).not.toHaveBeenCalled();
+    });
+
     it('handles removed presets with a migration', async () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({
