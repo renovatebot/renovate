@@ -14,7 +14,7 @@ const requireRegex = regEx(
 );
 
 const replaceRegex = regEx(
-  /^(?<keyword>replace)?\s+(?<module>[^\s]+\/[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
+  /^(?<keyword>replace)?\s+(?<module>[^\s]+\/?[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
 );
 
 export const excludeBlockStartRegex = regEx(/^(?<keyword>exclude)\s+\(\s*$/);
