@@ -28,7 +28,7 @@ async function validateOptimizeForDisabled(
   config: RenovateConfig,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await getJsonFile(getDefaultConfigFileName(config));
+    const renovateConfig = await getJsonFile(getDefaultConfigFileName());
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
@@ -60,7 +60,7 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (config.forkProcessing !== 'enabled' && config.isFork) {
-    const defaultConfigFile = getDefaultConfigFileName(config);
+    const defaultConfigFile = getDefaultConfigFileName();
     const repoConfig = await getJsonFile(defaultConfigFile);
     if (!repoConfig) {
       logger.debug(
