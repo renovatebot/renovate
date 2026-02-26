@@ -95,6 +95,7 @@ function updatePinInJson(
     `"identity"\\s*:\\s*"${escapeRegExp(pin.identity)}"`,
   );
   const identityMatch = identityPattern.exec(updated);
+  /* istanbul ignore if: identity always exists after JSON parse + matchPinForDep */
   if (!identityMatch) {
     return content;
   }
@@ -102,6 +103,7 @@ function updatePinInJson(
   // Find the enclosing object block (search for the opening brace before identity)
   const beforeIdentity = updated.slice(0, identityMatch.index);
   const blockStart = beforeIdentity.lastIndexOf('{');
+  /* istanbul ignore if: valid JSON always has enclosing braces */
   if (blockStart === -1) {
     return content;
   }
@@ -120,6 +122,7 @@ function updatePinInJson(
       }
     }
   }
+  /* istanbul ignore if: valid JSON always has matching braces */
   if (blockEnd === -1) {
     return content;
   }

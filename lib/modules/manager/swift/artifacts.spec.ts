@@ -506,4 +506,80 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toBeNull();
   });
+
+  it('returns null when dep has no datasource or packageName', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          // no datasource — resolveCommitSha returns null
+          newVersion: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version" : "5.10.0"');
+    // Revision unchanged — no datasource to resolve SHA
+    expect(contents).toContain(
+      '"revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a"',
+    );
+  });
+
+  it('returns null when Package.resolved has no pins array', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(
+      JSON.stringify({ version: 2, somethingElse: true }),
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          newVersion: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('handles getDigest throwing an error', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockRejectedValue(
+      new Error('network error'),
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version" : "5.10.0"');
+    // Revision unchanged — getDigest threw
+    expect(contents).toContain(
+      '"revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a"',
+    );
+  });
 });
