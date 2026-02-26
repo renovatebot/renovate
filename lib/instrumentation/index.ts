@@ -10,22 +10,7 @@ import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
 import {
-  awsBeanstalkDetector,
-  awsEc2Detector,
-  awsEcsDetector,
-  awsEksDetector,
-  awsLambdaDetector,
-} from '@opentelemetry/resource-detector-aws';
-import {
-  azureAppServiceDetector,
-  azureFunctionsDetector,
-  azureVmDetector,
-} from '@opentelemetry/resource-detector-azure';
-import { gcpDetector } from '@opentelemetry/resource-detector-gcp';
-import { gitHubDetector } from '@opentelemetry/resource-detector-github';
-import {
   detectResources,
-  envDetector,
   resourceFromAttributes,
 } from '@opentelemetry/resources';
 import {
@@ -42,6 +27,7 @@ import {
 import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { getResourceDetectors } from './detectors.ts';
 import type { RenovateSpanOptions } from './types.ts';
 import {
   isTraceDebuggingEnabled,
@@ -92,19 +78,7 @@ export function init(): void {
   });
 
   const detectedResource = detectResources({
-    detectors: [
-      awsBeanstalkDetector,
-      awsEc2Detector,
-      awsEcsDetector,
-      awsEksDetector,
-      awsLambdaDetector,
-      azureAppServiceDetector,
-      azureFunctionsDetector,
-      azureVmDetector,
-      gcpDetector,
-      gitHubDetector,
-      envDetector,
-    ],
+    detectors: getResourceDetectors(env),
   });
 
   const traceProvider = new NodeTracerProvider({
