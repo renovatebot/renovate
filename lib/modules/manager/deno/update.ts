@@ -27,7 +27,7 @@ function getValueByDatasource(
 
 // ported from lib/modules/manager/npm/update/dependency/index.ts
 function replaceAsString(
-  parsedContents: UpdateDenoJsonFile | UpdateImportMapJsonFile,
+  parsedContents: UpdateDenoJsonFile,
   fileContent: string,
   depType: string,
   searchString: string,
@@ -59,7 +59,7 @@ function replaceAsString(
 }
 
 function updateImportMapLikeDepTypes(
-  parsedContents: UpdateDenoJsonFile | UpdateImportMapJsonFile,
+  parsedContents: UpdateDenoJsonFile,
   fileContent: string,
   depType: string,
   searchString: string,

@@ -3,12 +3,12 @@ import { DenoDatasource } from '../../datasource/deno/index.ts';
 import { JsrDatasource } from '../../datasource/jsr/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 
+export { getRangeStrategy } from '../npm/index.ts'; // for node-compat
 export { updateArtifacts } from './artifacts.ts';
 export { extractAllPackageFiles } from './extract.ts';
 // The reason updateDependency is necessary is that extractPackageFile cannot retrieve the correct lock file
 // See: normalizeWorkspace in lib/modules/manager/deno/post.ts
 export { updateDependency } from './update.ts';
-export { getRangeStrategy } from '../npm/index.ts'; // for node-compat
 
 export const url =
   'https://docs.deno.com/runtime/getting_started/installation/';
