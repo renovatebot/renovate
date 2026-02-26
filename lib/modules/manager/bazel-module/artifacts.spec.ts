@@ -32,6 +32,7 @@ describe('modules/manager/bazel-module/artifacts', () => {
   });
 
   it('returns null if no MODULE.bazel.lock found', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
     expect(
       await updateArtifacts({
@@ -44,7 +45,19 @@ describe('modules/manager/bazel-module/artifacts', () => {
     ).toBeNull();
   });
 
+  it('returns null if no updated deps', async () => {
+    expect(
+      await updateArtifacts({
+        packageFileName: 'MODULE.bazel',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      }),
+    ).toBeNull();
+  });
+
   it('returns updated MODULE.bazel.lock when modified', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     fs.readLocalFile.mockResolvedValueOnce('new lock content');
     const execSnapshots = mockExecAll();
@@ -72,24 +85,26 @@ describe('modules/manager/bazel-module/artifacts', () => {
   });
 
   it('returns null if MODULE.bazel.lock is unchanged', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    mockExecAll();
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [] as string[],
     } as unknown as StatusResult);
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'MODULE.bazel',
-        updatedDeps: [{ depName: 'rules_go' }],
-        newPackageFileContent:
-          'bazel_dep(name = "rules_go", version = "0.42.0")',
-        config,
-      }),
-    ).toBeNull();
+    const result = await updateArtifacts({
+      packageFileName: 'MODULE.bazel',
+      updatedDeps: [{ depName: 'rules_go' }],
+      newPackageFileContent: 'bazel_dep(name = "rules_go", version = "0.42.0")',
+      config,
+    });
+
+    expect(result).toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
   });
 
   it('returns artifactError on exec failure', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     mockExecAll(new Error('bazel mod deps failed'));
 
@@ -111,6 +126,7 @@ describe('modules/manager/bazel-module/artifacts', () => {
   });
 
   it('re-throws TEMPORARY_ERROR', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     mockExecAll(new Error(TEMPORARY_ERROR));
 
@@ -126,6 +142,7 @@ describe('modules/manager/bazel-module/artifacts', () => {
   });
 
   it('handles subdirectory MODULE.bazel', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('subdir/MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     fs.readLocalFile.mockResolvedValueOnce('new lock content');
     mockExecAll();
