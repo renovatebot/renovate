@@ -155,6 +155,7 @@ describe('modules/manager/gomod/extract', () => {
             datasource: 'go',
             digestOneAndOnly: true,
             versioning: 'loose',
+            skipReason: 'invalid-version',
           },
           {
             managerData: {
