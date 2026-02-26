@@ -104,6 +104,7 @@ export interface RenovateSharedConfig {
   ignoreTests?: boolean;
   ignoreUnstable?: boolean;
   includePaths?: string[];
+  ignoreHiddenUnicodeCharacters?: string[];
   internalChecksAsSuccess?: boolean;
   internalChecksFilter?: 'strict' | 'flexible' | 'none';
   keepUpdatedLabel?: string;
@@ -256,6 +257,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   cachePrivatePackages?: boolean;
   repositoryCacheForceLocal?: boolean;
   configFileNames?: string[];
+  ignoreHiddenUnicodeCharacters?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;

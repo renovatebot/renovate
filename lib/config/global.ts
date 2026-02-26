@@ -35,6 +35,7 @@ export class GlobalConfig {
     'gitTimeout',
     'githubTokenWarn',
     'httpCacheTtlDays',
+    'ignoreHiddenUnicodeCharacters',
     'ignorePrAuthor',
     'includeMirrors',
     'localDir',

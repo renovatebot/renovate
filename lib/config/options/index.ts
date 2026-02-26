@@ -1389,6 +1389,18 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
   },
   {
+    name: 'ignoreHiddenUnicodeCharacters',
+    description:
+      'List of Unicode characters (in \\uXXXX or U+XXXX format) that are ignored and will not trigger hidden Unicode warnings.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    default: [],
+    cli: false,
+    env: false,
+    mergeable: true,
+  },
+  {
     name: 'updateInternalDeps',
     description:
       'Whether to update internal dep versions in a monorepo. Works on Yarn Workspaces.',
