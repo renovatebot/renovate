@@ -16,6 +16,7 @@ export const categories: Category[] = ['js'];
 
 export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
+// NOTE: Deno could support another lock filename that specified in deno.json
 export const lockFileNames = ['deno.lock'];
 export const supportedDatasources = [
   NpmDatasource.id,
