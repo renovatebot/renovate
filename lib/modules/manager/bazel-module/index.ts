@@ -6,6 +6,7 @@ import { MavenDatasource } from '../../datasource/maven/index.ts';
 import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile };
+export { updateArtifacts } from './artifacts.ts';
 
 export const url = 'https://bazel.build/external/module';
 export const categories: Category[] = ['bazel'];

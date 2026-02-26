@@ -75,8 +75,8 @@ describe('modules/manager/bazel-module/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
-      modified: [],
-    } as StatusResult);
+      modified: [] as string[],
+    } as unknown as StatusResult);
 
     expect(
       await updateArtifacts({
