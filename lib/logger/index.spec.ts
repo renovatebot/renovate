@@ -370,7 +370,12 @@ describe('logger/index', () => {
     expect(logged.msg).toBe('foo');
     expect(logged.foo.foo).toBe('[Circular]');
     expect(logged.foo.bar).toEqual(['[Circular]']);
-    expect(logged.bar).toBe('[Circular]');
+    expect(logged.bar).toEqual([
+      {
+        bar: '[Circular]',
+        foo: '[Circular]',
+      },
+    ]);
   });
 
   it('sanitizes secrets', () => {
