@@ -715,15 +715,54 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('deleteHashtag()', () => {
-    it('deleteHashtag', async () => {
+  describe('setHashtags()', () => {
+    it('add hashtags', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/hashtags', {
+          add: ['hashtag1', 'hashtag2'],
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.setHashtags(123456, { add: ['hashtag1', 'hashtag2'] }),
+      ).toResolve();
+    });
+
+    it('remove hashtags', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/hashtags', {
           remove: ['hashtag1'],
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.deleteHashtag(123456, 'hashtag1')).toResolve();
+      await expect(
+        client.setHashtags(123456, { remove: ['hashtag1'] }),
+      ).toResolve();
+    });
+
+    it('add and remove hashtags in single call', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/hashtags', {
+          add: ['hashtag2', 'hashtag3'],
+          remove: ['hashtag1'],
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.setHashtags(123456, {
+          add: ['hashtag2', 'hashtag3'],
+          remove: ['hashtag1'],
+        }),
+      ).toResolve();
+    });
+
+    it('does nothing when no hashtags provided', async () => {
+      await expect(client.setHashtags(123456, {})).toResolve();
+      await expect(client.setHashtags(123456, { add: [] })).toResolve();
+      await expect(client.setHashtags(123456, { remove: [] })).toResolve();
+      await expect(
+        client.setHashtags(123456, { add: [], remove: [] }),
+      ).toResolve();
     });
   });
 
