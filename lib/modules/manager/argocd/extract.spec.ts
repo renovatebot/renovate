@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 
@@ -203,14 +204,14 @@ spec:
     describe('OCI Helm charts', () => {
       it('handles redundant chart in repoURL when chart is specified', () => {
         const result = extractPackageFile(
-          `
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-spec:
-  source:
-    chart: tuppr
-    repoURL: oci://ghcr.io/home-operations/charts/tuppr
-    targetRevision: 0.0.40
+          codeBlock`
+            apiVersion: argoproj.io/v1alpha1
+            kind: Application
+            spec:
+              source:
+                chart: tuppr
+                repoURL: oci://ghcr.io/home-operations/charts/tuppr
+                targetRevision: 0.0.40
           `,
           'applications.yml',
         );
@@ -227,13 +228,13 @@ spec:
 
       it('handles redundant last component in repoURL when chart is NOT specified', () => {
         const result = extractPackageFile(
-          `
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-spec:
-  source:
-    repoURL: oci://ghcr.io/home-operations/charts/tuppr/tuppr
-    targetRevision: 0.0.43
+          codeBlock`
+            apiVersion: argoproj.io/v1alpha1
+            kind: Application
+            spec:
+              source:
+                repoURL: oci://ghcr.io/home-operations/charts/tuppr/tuppr
+                targetRevision: 0.0.43
           `,
           'applications.yml',
         );
@@ -250,14 +251,14 @@ spec:
 
       it('handles standard OCI with registry base and chart', () => {
         const result = extractPackageFile(
-          `
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-spec:
-  source:
-    chart: mychart
-    repoURL: oci://ghcr.io/myorg
-    targetRevision: 1.0.0
+          codeBlock`
+            apiVersion: argoproj.io/v1alpha1
+            kind: Application
+            spec:
+              source:
+                chart: mychart
+                repoURL: oci://ghcr.io/myorg
+                targetRevision: 1.0.0
           `,
           'applications.yml',
         );
@@ -274,14 +275,14 @@ spec:
 
       it('handles OCI without explicit protocol (implicit OCI)', () => {
         const result = extractPackageFile(
-          `
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-spec:
-  source:
-    chart: mychart
-    repoURL: ghcr.io/myorg/mychart
-    targetRevision: 1.0.0
+          codeBlock`
+            apiVersion: argoproj.io/v1alpha1
+            kind: Application
+            spec:
+              source:
+                chart: mychart
+                repoURL: ghcr.io/myorg/mychart
+                targetRevision: 1.0.0
           `,
           'applications.yml',
         );
