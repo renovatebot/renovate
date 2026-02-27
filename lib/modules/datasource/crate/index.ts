@@ -183,7 +183,7 @@ export class CrateDatasource extends Datasource {
           'Could not read config.json from cloned registry',
         );
       }
-    } else if (info.isSparse) {
+    } else {
       try {
         const configUrl = joinUrlParts(info.rawUrl, 'config.json');
         const { body } = await this.http.getJson(
@@ -267,18 +267,16 @@ export class CrateDatasource extends Datasource {
       return readCacheFile(path, 'utf8');
     }
 
-    if (info.isSparse) {
-      const packageSuffix = CrateDatasource.getIndexSuffix(
-        packageName.toLowerCase(),
-      );
-      const crateUrl = joinUrlParts(info.rawUrl, ...packageSuffix);
-      try {
-        return (await this.http.getText(crateUrl)).body;
-      } catch (err) {
-        this.handleGenericErrors(err);
-      }
+    // sparse index
+    const packageSuffix = CrateDatasource.getIndexSuffix(
+      packageName.toLowerCase(),
+    );
+    const crateUrl = joinUrlParts(info.rawUrl, ...packageSuffix);
+    try {
+      return (await this.http.getText(crateUrl)).body;
+    } catch (err) {
+      this.handleGenericErrors(err);
     }
-    throw new Error(`unsupported crate registry flavor: ${info.flavor}`);
   }
 
   /**
@@ -363,7 +361,6 @@ export class CrateDatasource extends Datasource {
       flavor,
       rawUrl: registryFetchUrl,
       url,
-      isSparse: isSparseRegistry,
     };
 
     if (
@@ -375,7 +372,7 @@ export class CrateDatasource extends Datasource {
       );
       return null;
     }
-    if (!registry.isSparse) {
+    if (!isSparseRegistry) {
       const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
       const lockKey = registryFetchUrl;
 

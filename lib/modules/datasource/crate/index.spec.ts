@@ -16,7 +16,6 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
-import type { RegistryInfo } from './types.ts';
 
 vi.mock('simple-git');
 const simpleGit = vi.mocked(_simpleGit);
@@ -545,21 +544,6 @@ describe('modules/datasource/crate/index', () => {
       });
       expect(mockClone).toHaveBeenCalledTimes(2);
       expect(res).toBeNull();
-    });
-  });
-
-  describe('fetchCrateRecordsPayload', () => {
-    it('rejects if it has neither clonePath nor sparse protocol', async () => {
-      const info: RegistryInfo = {
-        rawUrl: 'https://example.com',
-        url: new URL('https://example.com'),
-        flavor: 'cloudsmith',
-        isSparse: false,
-      };
-      const crateDatasource = new CrateDatasource();
-      await expect(
-        crateDatasource.fetchCrateRecordsPayload(info, 'benedict'),
-      ).toReject();
     });
   });
 
