@@ -3,7 +3,13 @@ import type { Category } from '../../../constants/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { isHttpUrl } from '../../../util/url.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { Registry } from '../nuget/types.ts';
+import { applyRegistries, getConfiguredRegistries } from '../nuget/util.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
 
 export const url = 'https://cakebuild.net/docs';
 export const categories: Category[] = ['dotnet'];
@@ -67,25 +73,38 @@ function parseDependencyLine(line: string): PackageDependency | null {
   }
 }
 
-export function extractPackageFile(content: string): PackageFileContent {
-  const deps: PackageDependency[] = [];
+function parseAndPushDependencyLine(
+  registries: Registry[] | undefined,
+  deps: PackageDependency[],
+  value: string,
+): PackageDependency[] {
+  const dep = parseDependencyLine(value);
+  if (dep) {
+    applyRegistries(dep as any, registries);
+    deps.push(dep);
+  }
+  return deps;
+}
+
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  _config: ExtractConfig,
+): Promise<PackageFileContent | null> {
+  let deps: PackageDependency[] = [];
+  const registries = await getConfiguredRegistries(packageFile);
+
   lexer.reset(content);
   let token = lexer.next();
   while (token) {
     const { type, value } = token;
     if (type === 'dependency' || type === 'dependencyQuoted') {
-      const dep = parseDependencyLine(value);
-      if (dep) {
-        deps.push(dep);
-      }
+      deps = parseAndPushDependencyLine(registries, deps, value);
     } else if (type === 'dependencyFromInstallTools') {
       const matches = value.matchAll(regEx(/"dotnet:[^"]+"/g));
       for (const match of matches) {
         const withoutQuote = match.toString().slice(1, -1);
-        const dep = parseDependencyLine(withoutQuote);
-        if (dep) {
-          deps.push(dep);
-        }
+        deps = parseAndPushDependencyLine(registries, deps, withoutQuote);
       }
     }
     token = lexer.next();
