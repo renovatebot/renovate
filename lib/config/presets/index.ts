@@ -46,7 +46,6 @@ const presetSources: Record<string, PresetApi> = {
   github,
   gitlab,
   http,
-  internal,
   local,
   npm,
 };
@@ -120,33 +119,49 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params, rawParams } =
     parsePreset(preset);
-  const cacheKey = `preset:${preset}`;
-  const presetCachePersistence = GlobalConfig.get(
-    'presetCachePersistence',
-    false,
-  );
 
   let presetConfig: Preset | null | undefined;
 
-  if (presetCachePersistence) {
-    presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
-  } else {
-    presetConfig = memCache.get(cacheKey);
-  }
-
-  if (isNullOrUndefined(presetConfig)) {
-    presetConfig = await presetSources[presetSource].getPreset({
+  if (presetSource === 'internal') {
+    presetConfig = internal.getPreset({
       repo,
       presetPath,
       presetName,
       tag,
     });
+  } else {
+    const cacheKey = `preset:${preset}`;
+    const presetCachePersistence = GlobalConfig.get(
+      'presetCachePersistence',
+      false,
+    );
+
     if (presetCachePersistence) {
-      await packageCache.set(presetCacheNamespace, cacheKey, presetConfig, 15);
+      presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
     } else {
-      memCache.set(cacheKey, presetConfig);
+      presetConfig = memCache.get(cacheKey);
+    }
+
+    if (isNullOrUndefined(presetConfig)) {
+      presetConfig = await presetSources[presetSource].getPreset({
+        repo,
+        presetPath,
+        presetName,
+        tag,
+      });
+      if (presetCachePersistence) {
+        await packageCache.set(
+          presetCacheNamespace,
+          cacheKey,
+          presetConfig,
+          15,
+        );
+      } else {
+        memCache.set(cacheKey, presetConfig);
+      }
     }
   }
+
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }

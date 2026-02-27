@@ -2,6 +2,7 @@ import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import * as p from '../../../../util/promises.ts';
 import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { getDefaultVersioning } from '../../../datasource/common.ts';
 import type { GetPkgReleasesConfig } from '../../../datasource/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
 import { get as getVersioning } from '../../../versioning/index.ts';
@@ -29,15 +30,17 @@ async function updateAllLocks(
     locks,
     async (lock) => {
       const updateConfig: GetPkgReleasesConfig = {
-        versioning: 'hashicorp',
         datasource: 'terraform-provider',
         packageName: lock.packageName,
+        registryUrls: [lock.registryUrl],
       };
       const { releases } = (await getPkgReleases(updateConfig)) ?? {};
       if (!releases) {
         return null;
       }
-      const versioning = getVersioning(updateConfig.versioning);
+      const versioning = getVersioning(
+        getDefaultVersioning('terraform-provider'),
+      );
       const versionsList = releases.map((release) => release.version);
       const newVersion = versioning.getSatisfyingVersion(
         versionsList,

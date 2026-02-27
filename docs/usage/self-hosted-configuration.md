@@ -1130,6 +1130,10 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## platform
 
+## prCacheSyncMaxPages
+
+Maximum number of pages to fetch when syncing the pull request cache.
+
 ## prCommitsPerRunLimit
 
 Parameter to reduce CI load.

@@ -196,7 +196,7 @@ export async function mergeRenovateConfig(
     logger.debug(
       'When mode=silent and repo has no config file, we use the onboarding config as repo config',
     );
-    const configFileName = getDefaultConfigFileName(config);
+    const configFileName = getDefaultConfigFileName();
     repoConfig = {
       configFileName,
       configFileParsed: await getOnboardingConfig(config),

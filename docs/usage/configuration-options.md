@@ -4383,6 +4383,17 @@ This feature works with the following managers:
 }
 ```
 
+If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
+
+```json title="Using a pull-through cache for public images"
+{
+  "registryAliases": {
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/ghcr.io": "ghcr.io",
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/dockerhub": "docker.io"
+  }
+}
+```
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
@@ -4701,7 +4712,7 @@ Please see the above link for valid timezone names.
 
 ## toolSettings
 
-When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle-wrapper` manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
+When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle`](./modules/manager/gradle/index.md) or [the `gradle-wrapper`](./modules/manager/gradle-wrapper/index.md) managers, the repository's Gradle Wrapper will be invoked, if present.
 
 The JVM heap size for the Java invocations is 512m by default.
 This can be overridden using the following options.
@@ -4715,14 +4726,14 @@ This option can be used on the repository level and in the [Renovate configurati
 
 <!-- prettier-ignore -->
 !!! note
-    The JVM memory settings are considered for the `gradle-wrapper` manager.
+    The JVM memory settings are considered for the `gradle` and `gradle-wrapper` manager.
 
 ### jvmMaxMemory
 
 Maximum heap size in MB for Java VMs.
 Defaults to `512` for both the repository level and self-hosted configuration.
 
-To allow repositories to use _more_ than 512m of heap during the Gradle Wrapper update, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
+To allow repositories to use _more_ than 512m of heap during any invocations of the Gradle Wrapper, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
 
 ### jvmMemory
 

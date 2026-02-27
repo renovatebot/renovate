@@ -73,8 +73,16 @@ export async function extractAllDependencies(
   // De-duplicate results using supersedesManagers
   processSupersedesManagers(extractResults);
 
+  // Sort alphabetically for stable log output. See #40091
+  const sortedExtractDurations = Object.keys(extractDurations)
+    .sort()
+    .reduce<Record<string, number>>((acc, key) => {
+      acc[key] = extractDurations[key];
+      return acc;
+    }, {});
+
   logger.debug(
-    { managers: extractDurations },
+    { managers: sortedExtractDurations },
     'manager extract durations (ms)',
   );
   let fileCount = 0;
