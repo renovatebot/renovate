@@ -29,6 +29,7 @@ import type {
   RegistryFlavor,
   RegistryInfo,
 } from './types.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 
 type CloneResult =
   | {
@@ -173,11 +174,9 @@ export class CrateDatasource extends Datasource {
       try {
         const configPath = upath.join(info.clonePath, 'config.json');
         const content = await readCacheFile(configPath, 'utf8');
-        const parsed = Json.pipe(RegistryConfigSchema).safeParse(content);
-        if (parsed.success) {
-          memCache.set(cacheKey, parsed.data);
-          return parsed.data;
-        }
+        const parsed = Json.pipe(RegistryConfigSchema).parse(content);
+        memCache.set(cacheKey, parsed);
+        return parsed;
       } catch {
         logger.debug(
           { registryUrl: info.rawUrl },
@@ -187,9 +186,12 @@ export class CrateDatasource extends Datasource {
     } else if (info.isSparse) {
       try {
         const configUrl = joinUrlParts(info.rawUrl, 'config.json');
-        const { body } = await this.http.getJson(configUrl, RegistryConfigSchema);
-        memCache.set(cacheKey, parsed.data);
-        returnbody;
+        const { body } = await this.http.getJson(
+          configUrl,
+          RegistryConfigSchema,
+        );
+        memCache.set(cacheKey, body);
+        return body;
       } catch {
         logger.debug(
           { registryUrl: info.rawUrl },
