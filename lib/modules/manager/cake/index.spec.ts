@@ -18,11 +18,6 @@ describe('modules/manager/cake/index', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    // Clean up
-    GlobalConfig.reset();
-  });
-
   it('extracts', async () => {
     expect(
       await extractPackageFile(
