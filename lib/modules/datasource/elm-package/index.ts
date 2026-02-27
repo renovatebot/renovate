@@ -3,7 +3,7 @@ import { joinUrlParts } from '../../../util/url.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { ElmPackageReleasesSchema } from './types.ts';
+import { ElmPackageReleasesSchema } from './schema.ts';
 
 export class ElmPackageDatasource extends Datasource {
   static readonly id = 'elm-package';
@@ -57,7 +57,7 @@ export class ElmPackageDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    /* v8 ignore next 3 -- defensive check, result is null only if schema validation fails */
+    /* v8 ignore if -- defensive check, result is null only if schema validation fails */
     if (!result) {
       return null;
     }
