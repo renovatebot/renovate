@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { EmailAddress } from '../../../util/schema-utils/index.ts';
 
 export const User = z.object({
+  name: z.string(),
   displayName: z.string(),
   emailAddress: EmailAddress.catch(''),
   active: z.boolean(),
-  slug: z.string(),
 });
 
 export const Users = z.array(User);

@@ -1,11 +1,14 @@
-import { setTimeout } from 'timers/promises';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
 import { simpleGit as _simpleGit } from 'simple-git';
+import { setTimeout } from 'timers/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import type { MockedFunction } from 'vitest';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
@@ -14,9 +17,6 @@ import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
 import type { RegistryInfo } from './types.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('simple-git');
 const simpleGit = vi.mocked(_simpleGit);

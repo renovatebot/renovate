@@ -110,6 +110,7 @@ export class BitbucketPrCache {
       }
 
       const cacheOldTime = updated_on ? DateTime.fromISO(updated_on) : null;
+      // v8 ignore else -- TODO: add test #40625
       if (!cacheOldTime || itemNewTime > cacheOldTime) {
         updated_on = rawItem.updated_on;
       }

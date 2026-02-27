@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger, partial } from '~test/util.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import { matchesContentDescriptor } from './extract.ts';
 import { extractAllPackageFiles } from './index.ts';
 import * as parser from './parser.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, logger, partial } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

@@ -1,5 +1,7 @@
 import type { RequestError, Response } from 'got';
 import { DateTime } from 'luxon';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { InheritConfig } from '../../../../config/inherit.ts';
@@ -11,8 +13,6 @@ import * as memCache from '../../../../util/cache/memory/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { OnboardingState } from '../common.ts';
 import { ensureOnboardingPr } from './index.ts';
-import { partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
@@ -36,7 +36,11 @@ describe('workers/repository/onboarding/pr/index', () => {
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>());
-      GlobalConfig.reset();
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate', // default value
+      });
+      InheritConfig.reset();
     });
 
     it('returns if onboarded', async () => {
@@ -472,7 +476,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('dryrun of creates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: config.onboardingBranch,
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -484,7 +491,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('dryrun of updates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: config.onboardingBranch,
+      });
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',

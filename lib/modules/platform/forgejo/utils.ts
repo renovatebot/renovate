@@ -13,7 +13,9 @@ import type { GitUrlOption, Pr } from '../types.ts';
 import type { PR, PRMergeMethod, Repo } from './types.ts';
 
 export function smartLinks(body: string): string {
-  return body?.replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
+  return body
+    ?.replace(regEx(/\]\(\.\.\/issues\//g), '](issues/')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
 }
 
 export function trimTrailingApiPath(url: string): string {

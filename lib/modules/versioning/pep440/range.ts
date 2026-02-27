@@ -117,6 +117,17 @@ export function getNewValue({
     return newVersion;
   }
 
+  // Handle bare versions (e.g., "v0.7.15") that don't strictly equal
+  // currentVersion due to normalization, treating them as pinned while
+  // preserving the v-prefix.
+  if (parseVersion(currentValue)) {
+    const vPrefix = regEx(/^(?<prefix>[vV])/).exec(currentValue);
+    if (vPrefix) {
+      return `${vPrefix.groups!.prefix}${newVersion}`;
+    }
+    return newVersion;
+  }
+
   try {
     ranges = parseCurrentRange(currentValue);
     if (!ranges.length) {

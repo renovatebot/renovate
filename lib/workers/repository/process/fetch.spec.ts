@@ -1,10 +1,10 @@
+import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { fetchUpdates } from './fetch.ts';
 import * as lookup from './lookup/index.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 const lookupUpdates = vi.mocked(lookup).lookupUpdates;
 

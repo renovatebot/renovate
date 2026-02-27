@@ -1,8 +1,8 @@
+import { partial, platform } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { prAlreadyExisted } from './check-existing.ts';
-import { partial, platform } from '~test/util.ts';
 
 describe('workers/repository/update/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
