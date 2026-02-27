@@ -68,6 +68,19 @@ describe('modules/datasource/elm-package/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('returns null for invalid JSON response', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages/elm/core/releases.json')
+        .reply(200, 'not-json');
+      expect(
+        await getPkgReleases({
+          datasource: ElmPackageDatasource.id,
+          packageName: 'elm/core',
+        }),
+      ).toBeNull();
+    });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope(baseUrl)
