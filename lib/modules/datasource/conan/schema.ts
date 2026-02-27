@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import type { ReleaseResult } from '../types.ts';
 import { conanDatasourceRegex } from './common.ts';

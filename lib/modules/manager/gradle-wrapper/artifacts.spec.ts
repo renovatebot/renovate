@@ -2,6 +2,10 @@ import type { Stats } from 'node:fs';
 import os from 'node:os';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { env, fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
@@ -9,12 +13,8 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
-import { gradleJvmArg, updateBuildFile, updateLockFiles } from './artifacts.ts';
+import { updateBuildFile, updateLockFiles } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { env, fs, git, logger, partial } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../../util/exec/env.ts');
@@ -70,13 +70,6 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         { version: '16.0.1' },
         { version: '17.0.0' },
       ],
-    });
-  });
-
-  describe('gradleJvmArg()', () => {
-    it('takes the values given to it, and returns the JVM arguments', () => {
-      const result = gradleJvmArg({ jvmMemory: 256, jvmMaxMemory: 768 });
-      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx768m"');
     });
   });
 
@@ -364,7 +357,8 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         {
           artifactError: {
             lockFile: 'gradle/wrapper/gradle-wrapper.properties',
-            stderr: 'Response code 404 (Not Found)',
+            stderr:
+              'Request failed with status code 404 (Not Found): GET https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
           },
         },
       ]);

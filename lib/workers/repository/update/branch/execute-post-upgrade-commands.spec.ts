@@ -1,13 +1,13 @@
-import { dir } from 'tmp-promise';
 import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import upath from 'upath';
+import { fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as _exec from '../../../../util/exec/index.ts';
 import * as _gitAuth from '../../../../util/git/auth.ts';
 import type { StatusResult } from '../../../../util/git/types.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import * as postUpgradeCommands from './execute-post-upgrade-commands.ts';
-import { fs, git, logger, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/exec/index.ts');
 vi.mock('../../../../util/fs/index.ts');

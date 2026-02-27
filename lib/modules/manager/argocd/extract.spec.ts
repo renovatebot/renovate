@@ -1,5 +1,5 @@
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const validApplication = Fixtures.get('validApplication.yml');
 const malformedApplication = Fixtures.get('malformedApplications.yml');

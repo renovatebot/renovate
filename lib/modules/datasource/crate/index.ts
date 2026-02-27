@@ -338,7 +338,14 @@ export class CrateDatasource extends Datasource {
       const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
       const lockKey = registryFetchUrl;
 
-      const releaseLock = await acquireLock(lockKey, 'crate-registry');
+      const executionTimeout =
+        GlobalConfig.get('executionTimeout', 15) * 60 * 1000;
+      const gitTimeout = GlobalConfig.get('gitTimeout', executionTimeout);
+      const releaseLock = await acquireLock(
+        lockKey,
+        'crate-registry',
+        gitTimeout,
+      );
       try {
         const cached = memCache.get<CloneResult>(cacheKey);
 

@@ -10,7 +10,6 @@
         "LOG_LEVEL": "debug"
       },
       "console": "integratedTerminal",
-      "runtimeExecutable": "tsx",
       "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
@@ -23,7 +22,6 @@
       },
       "preLaunchTask": "npm: clean-cache",
       "console": "integratedTerminal",
-      "runtimeExecutable": "tsx",
       "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {

@@ -1,9 +1,9 @@
+import { partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
 import * as schedule from '../branch/schedule.ts';
 import { tryBranchAutomerge } from './automerge.ts';
-import { partial, platform, scm } from '~test/util.ts';
 
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {

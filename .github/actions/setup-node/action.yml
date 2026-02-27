@@ -21,6 +21,25 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # Per #41288 and #41289, make sure that we fail if the values are provided as an empty string
+    - name: Make sure that required parameters aren't an empty string
+      shell: bash
+      run: |
+        error=0
+        if [[ -z "${{ inputs.node-version }}" ]]; then
+          >&2 echo 'Error: `node-version` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ -z "${{ inputs.os }}" ]]; then
+          >&2 echo 'Error: `os` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ $error -ne 0 ]]; then
+          exit 1
+        fi
+
     - name: Calculate `CACHE_KEY`
       shell: bash
       run: |

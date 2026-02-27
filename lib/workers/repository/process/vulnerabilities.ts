@@ -8,10 +8,11 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import * as _aeCvss from 'ae-cvss-calculator';
-import { z } from 'zod';
+import * as aeCvss from 'ae-cvss-calculator';
+import { z } from 'zod/v3';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
+import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
 import type {
@@ -30,10 +31,10 @@ import type {
   Vulnerability,
 } from './types.ts';
 
-const { fromVector } = _aeCvss as unknown as typeof _aeCvss.default;
-
 export class Vulnerabilities {
-  private osvOffline: OsvOffline | undefined;
+  private static osvOffline: Promise<OsvOffline> | undefined;
+
+  private osvOffline: OsvOffline;
 
   private static readonly datasourceEcosystemMap: Record<
     string,
@@ -51,17 +52,21 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  private constructor() {
-    // private constructor
+  private constructor(osvOffline: OsvOffline) {
+    this.osvOffline = osvOffline;
   }
 
-  private async initialize(): Promise<void> {
-    this.osvOffline = await OsvOffline.create();
+  private static initialize(): Promise<OsvOffline> {
+    // no async here, so osv promise will only be created once
+    Vulnerabilities.osvOffline ??= OsvOffline.create();
+    return Vulnerabilities.osvOffline;
   }
 
   static async create(): Promise<Vulnerabilities> {
-    const instance = new Vulnerabilities();
-    await instance.initialize();
+    // intialize osv only once
+    const osvOffline = await Vulnerabilities.initialize();
+
+    const instance = new Vulnerabilities(osvOffline);
     return instance;
   }
 
@@ -176,9 +181,15 @@ export class Vulnerabilities {
     }
 
     try {
-      const osvVulnerabilities = await this.osvOffline?.getVulnerabilities(
-        ecosystem,
-        packageName,
+      const osvVulnerabilities = await instrument(
+        'get OSV vulnerabilities',
+        () => this.osvOffline.getVulnerabilities(ecosystem, packageName),
+        {
+          attributes: {
+            packageName,
+            ecosystem,
+          },
+        },
       );
       if (
         isNullOrUndefined(osvVulnerabilities) ||
@@ -519,7 +530,7 @@ export class Vulnerabilities {
     });
 
     try {
-      const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
+      const parsedCvssScore: CvssVector<any> | null = aeCvss.fromVector(vector);
       const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
 
       return [res.baseScore.toFixed(1), res.baseSeverity];

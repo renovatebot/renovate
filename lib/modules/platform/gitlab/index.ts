@@ -1,7 +1,7 @@
-import { setTimeout } from 'timers/promises';
 import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -75,6 +75,7 @@ import {
   getRepoUrl,
   prInfo,
 } from './utils.ts';
+
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
@@ -480,6 +481,7 @@ export async function getBranchStatus(
   res
     .filter((check) => !check.allow_failure)
     .forEach((check) => {
+      // v8 ignore else -- TODO: add test #40625
       if (status !== 'red') {
         // if red, stay red
         let mappedStatus: BranchStatus =
@@ -838,6 +840,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\bPR\b/g), 'MR')
     .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+    .replace(regEx(/\]\(\.\.\/issues\//g), '](#')
     // Strip unicode null characters as GitLab markdown does not permit them
     .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
   return smartTruncate(desc, maxBodyLength());
@@ -960,6 +963,7 @@ export async function setBranchStatus({
     context,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (targetUrl) {
     options.target_url = targetUrl;
   }
@@ -1027,11 +1031,13 @@ export async function setBranchStatus({
 // Issue
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
+  // v8 ignore else -- TODO: add test #40625
   if (!config.issueList) {
     const searchParams: Record<string, string> = {
       per_page: '100',
       state: 'opened',
     };
+    // v8 ignore else -- TODO: add test #40625
     if (!config.ignorePrAuthor) {
       searchParams.scope = 'created_by_me';
     }
@@ -1355,6 +1361,7 @@ export async function ensureComment({
       maxBodyLength(),
     );
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
         commentNeedsUpdating = comment.body !== body;
@@ -1364,6 +1371,7 @@ export async function ensureComment({
     logger.debug(`Ensuring content-only comment in #${number}`);
     body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body === body) {
         commentId = comment.id;
         commentNeedsUpdating = false;
@@ -1383,7 +1391,7 @@ export async function ensureComment({
       'Updated comment',
     );
   } else {
-    logger.debug('Comment is already update-to-date');
+    logger.debug('Comment is already up-to-date');
   }
   return true;
 }
@@ -1401,6 +1409,7 @@ export async function ensureCommentRemoval(
   const comments = await getComments(issueNo);
   let commentId: number | null | undefined = null;
 
+  // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
     const byTopic = (comment: GitlabComment): boolean =>
       comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -1411,6 +1420,7 @@ export async function ensureCommentRemoval(
     commentId = comments.find(byContent)?.id;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }

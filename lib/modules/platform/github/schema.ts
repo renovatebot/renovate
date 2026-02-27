@@ -1,26 +1,28 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
+const Ecosystem = z.enum([
+  'actions',
+  'composer',
+  'go',
+  'maven',
+  'npm',
+  'nuget',
+  'pip',
+  'rubygems',
+  'rust',
+]);
+export type Ecosystem = z.infer<typeof Ecosystem>;
+
 const Package = z.object({
-  ecosystem: z
-    .union([
-      z.literal('maven'),
-      z.literal('npm'),
-      z.literal('nuget'),
-      z.literal('pip'),
-      z.literal('rubygems'),
-      z.literal('rust'),
-      z.literal('composer'),
-      z.literal('go'),
-    ])
-    .catch((ctx) => {
-      logger.debug(
-        { ecosystem: ctx.input },
-        'Skipping vulnerability alert with unsupported ecosystem',
-      );
-      return undefined as any;
-    }),
+  ecosystem: Ecosystem.catch((ctx) => {
+    logger.debug(
+      { ecosystem: ctx.input },
+      'Skipping vulnerability alert with unsupported ecosystem',
+    );
+    return undefined as any;
+  }),
   name: z.string(),
 });
 
@@ -53,7 +55,6 @@ export const GithubVulnerabilityAlert = LooseArray(
     }),
   }),
   {
-    /* v8 ignore next */
     onError: ({ error }) => {
       logger.debug(
         { error },

@@ -1,6 +1,6 @@
+import * as httpMock from '~test/http-mock.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const defaultTo = '1.2.3';
 const newUnixWrapperContent = `Unix wrapper script for ${defaultTo}`;
@@ -104,14 +104,14 @@ describe('modules/manager/batect-wrapper/artifacts', () => {
           artifactError: {
             lockFile: 'batect',
             stderr:
-              'HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect failed: HTTPError: Response code 404 (Not Found)',
+              'HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect failed: HTTPError: Request failed with status code 404 (Not Found): GET https://github.com/batect/batect/releases/download/3.4.5/batect',
           },
         },
         {
           artifactError: {
             lockFile: 'batect.cmd',
             stderr:
-              "HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect.cmd failed: HTTPError: Response code 418 (I'm a Teapot)",
+              "HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect.cmd failed: HTTPError: Request failed with status code 418 (I'm a Teapot): GET https://github.com/batect/batect/releases/download/3.4.5/batect.cmd",
           },
         },
       ]);

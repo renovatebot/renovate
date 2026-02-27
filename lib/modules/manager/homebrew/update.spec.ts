@@ -1,9 +1,9 @@
 import { Readable } from 'node:stream';
 import { codeBlock } from 'common-tags';
-import * as handlers from './handlers/index.ts';
-import { updateDependency } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import * as handlers from './handlers/index.ts';
+import { updateDependency } from './index.ts';
 
 const aide = Fixtures.get('aide.rb.sample');
 const ibazel = Fixtures.get('ibazel.rb.sample');

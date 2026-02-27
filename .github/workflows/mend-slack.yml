@@ -22,10 +22,10 @@ jobs:
 
           if [ $diff -lt 86400 ]; then
             hours=$((diff / 3600))
-            echo "::set-output name=ago::$hours hours ago"
+            echo "ago=$hours hours ago" >> "$GITHUB_OUTPUT"
           else
             days=$((diff / 86400))
-            echo "::set-output name=ago::$days days ago"
+            echo "ago=$days days ago" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Post to Slack

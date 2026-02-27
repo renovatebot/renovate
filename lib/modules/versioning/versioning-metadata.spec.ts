@@ -1,5 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { readFile } from 'fs-extra';
+import { z } from 'zod/v4';
 
 describe('modules/versioning/versioning-metadata', () => {
   const allVersioning = readdirSync('lib/modules/versioning', {
@@ -37,15 +38,24 @@ describe('modules/versioning/versioning-metadata', () => {
     });
 
     it('contains mandatory fields', async () => {
-      const versioningObj = await import(`./${versioning}/index.ts`);
+      const Base = z.object({
+        id: z.string(),
+        displayName: z.string(),
+        urls: z.array(z.unknown()),
+      });
+      const VersioningMetadata = z.discriminatedUnion('supportsRanges', [
+        Base.extend({
+          supportsRanges: z.literal(true),
+          supportedRangeStrategies: z.array(z.string()),
+        }),
+        Base.extend({
+          supportsRanges: z.literal(false),
+        }),
+      ]);
+      const versioningObj = VersioningMetadata.parse(
+        await import(`./${versioning}/index.ts`),
+      );
       expect(versioningObj.id).toEqual(versioning);
-      expect(versioningObj.displayName).toBeDefined();
-      expect(versioningObj.urls).toBeArray();
-      expect(versioningObj.supportsRanges).toBeBoolean();
-      if (versioningObj.supportsRanges === true) {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(versioningObj.supportedRangeStrategies).toBeArrayOfStrings();
-      }
     });
   });
 });
