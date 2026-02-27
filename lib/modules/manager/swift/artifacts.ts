@@ -4,8 +4,14 @@ import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
 import { scm } from '../../platform/scm.ts';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import type { PackageResolvedJson, PackageResolvedPin } from './types.ts';
+import type {
+  PackageDependency,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types.ts';
+import type { PackageResolvedPin } from './schema.ts';
+import { PackageResolvedJson } from './schema.ts';
 
 async function findPackageResolvedFiles(): Promise<string[]> {
   const fileList = await scm.getFileList();
@@ -20,11 +26,7 @@ function normalizeUrl(url: string): string {
 }
 
 function matchPinForDep(
-  dep: {
-    depName?: string;
-    datasource?: string;
-    registryUrls?: string[] | null;
-  },
+  dep: PackageDependency,
   pins: PackageResolvedPin[],
 ): PackageResolvedPin | null {
   let depUrl: string;
@@ -44,13 +46,7 @@ function matchPinForDep(
 }
 
 async function resolveCommitSha(
-  dep: {
-    newDigest?: string;
-    datasource?: string;
-    depName?: string;
-    packageName?: string;
-    registryUrls?: string[] | null;
-  },
+  dep: Upgrade,
   newVersion: string,
 ): Promise<string | null> {
   if (dep.newDigest) {
@@ -172,30 +168,16 @@ export async function updateArtifacts({
       continue;
     }
 
-    let parsed: PackageResolvedJson;
-    try {
-      parsed = JSON.parse(content) as PackageResolvedJson;
-    } catch {
-      logger.debug({ resolvedFile }, 'swift: could not parse Package.resolved');
-      continue;
-    }
-
-    if (parsed.version < 2) {
+    const parseResult = PackageResolvedJson.safeParse(content);
+    if (!parseResult.success) {
       logger.debug(
-        { resolvedFile, version: parsed.version },
-        'swift: unsupported Package.resolved version',
+        { resolvedFile, error: parseResult.error },
+        'swift: could not parse Package.resolved',
       );
       continue;
     }
 
-    if (!Array.isArray(parsed.pins)) {
-      logger.debug(
-        { resolvedFile },
-        'swift: Package.resolved has no pins array',
-      );
-      continue;
-    }
-
+    const parsed = parseResult.data;
     let updated = content;
 
     for (const dep of updatedDeps) {

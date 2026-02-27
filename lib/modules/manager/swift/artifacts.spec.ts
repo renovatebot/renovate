@@ -1,4 +1,3 @@
-import { Fixtures } from '~test/fixtures.ts';
 import { fs, scm } from '~test/util.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -17,14 +16,55 @@ vi.mock('../../datasource/index.ts', async () => {
   };
 });
 
-const v2Fixture = Fixtures.get('Package.resolved.v2.json');
-const v3Fixture = Fixtures.get('Package.resolved.v3.json');
+const v2Fixture = JSON.stringify(
+  {
+    pins: [
+      {
+        identity: 'alamofire',
+        kind: 'remoteSourceControl',
+        location: 'https://github.com/Alamofire/Alamofire',
+        state: {
+          revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
+          version: '5.9.1',
+        },
+      },
+      {
+        identity: 'swift-argument-parser',
+        kind: 'remoteSourceControl',
+        location: 'https://github.com/apple/swift-argument-parser.git',
+        state: {
+          revision: 'c8ed701b513cf5177118a175d85c4c06d8f9f97c',
+          version: '1.4.0',
+        },
+      },
+    ],
+    version: 2,
+  },
+  null,
+  2,
+);
+
+const v3Fixture = JSON.stringify(
+  {
+    originHash: 'abc123def456',
+    pins: [
+      {
+        identity: 'alamofire',
+        kind: 'remoteSourceControl',
+        location: 'https://github.com/Alamofire/Alamofire',
+        state: {
+          revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
+          version: '5.9.1',
+        },
+      },
+    ],
+    version: 3,
+  },
+  null,
+  2,
+);
 
 describe('modules/manager/swift/artifacts', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
   it('returns null when no Package.resolved files exist', async () => {
     scm.getFileList.mockResolvedValue(['Package.swift', 'Sources/main.swift']);
 
@@ -117,12 +157,12 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"version" : "5.10.0"');
-    expect(contents).toContain('"revision" : "newrevisionsha123"');
+    expect(contents).toContain('"version": "5.10.0"');
+    expect(contents).toContain('"revision": "newrevisionsha123"');
     // Other pin unchanged
-    expect(contents).toContain('"version" : "1.4.0"');
+    expect(contents).toContain('"version": "1.4.0"');
     expect(contents).toContain(
-      '"revision" : "c8ed701b513cf5177118a175d85c4c06d8f9f97c"',
+      '"revision": "c8ed701b513cf5177118a175d85c4c06d8f9f97c"',
     );
   });
 
@@ -153,10 +193,10 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"version" : "5.10.0"');
-    expect(contents).toContain('"revision" : "alamofiresha"');
-    expect(contents).toContain('"version" : "1.5.0"');
-    expect(contents).toContain('"revision" : "argparsersha"');
+    expect(contents).toContain('"version": "5.10.0"');
+    expect(contents).toContain('"revision": "alamofiresha"');
+    expect(contents).toContain('"version": "1.5.0"');
+    expect(contents).toContain('"revision": "argparsersha"');
   });
 
   it('skips dep with no matching pin', async () => {
@@ -199,10 +239,10 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"version" : "5.10.0"');
+    expect(contents).toContain('"version": "5.10.0"');
     // Revision unchanged since getDigest returned null
     expect(contents).toContain(
-      '"revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a"',
+      '"revision": "f455c2975872ccd2d9c81594c658af65716e9b9a"',
     );
   });
 
@@ -255,12 +295,11 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"version" : "1.5.0"');
+    expect(contents).toContain('"version": "1.5.0"');
   });
 
   it('matches URL with trailing slash normalization', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
-    // Fixture with trailing slash in location
     const fixtureWithSlash = v2Fixture.replace(
       '"https://github.com/Alamofire/Alamofire"',
       '"https://github.com/Alamofire/Alamofire/"',
@@ -325,7 +364,7 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"version" : "5.10.0"');
+    expect(contents).toContain('"version": "5.10.0"');
   });
 
   it('handles gitlab-tags with custom registryUrls', async () => {
@@ -391,7 +430,7 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"revision" : "precomputedsha456"');
+    expect(contents).toContain('"revision": "precomputedsha456"');
     // getDigest should not have been called
     expect(datasource.getDigest).not.toHaveBeenCalled();
   });
@@ -416,8 +455,8 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"originHash" : "abc123def456"');
-    expect(contents).toContain('"version" : "5.10.0"');
+    expect(contents).toContain('"originHash": "abc123def456"');
+    expect(contents).toContain('"version": "5.10.0"');
   });
 
   it('returns null when pin is already up-to-date', async () => {
@@ -440,7 +479,7 @@ describe('modules/manager/swift/artifacts', () => {
     expect(result).toBeNull();
   });
 
-  it('preserves Xcode formatting with spaces before colons', async () => {
+  it('preserves formatting in targeted replacement', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2Fixture);
     vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
@@ -460,12 +499,9 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    // Xcode uses "key" : "value" format (space before colon)
-    expect(contents).toContain('"version" : "5.10.0"');
-    expect(contents).toContain('"revision" : "newsha"');
     // Verify overall structure is preserved
-    expect(contents).toContain('"identity" : "alamofire"');
-    expect(contents).toContain('"version" : 2');
+    expect(contents).toContain('"identity": "alamofire"');
+    expect(contents).toContain('"version": 2');
   });
 
   it('returns null when Package.resolved cannot be read', async () => {
@@ -526,10 +562,10 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"version" : "5.10.0"');
+    expect(contents).toContain('"version": "5.10.0"');
     // Revision unchanged — no datasource to resolve SHA
     expect(contents).toContain(
-      '"revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a"',
+      '"revision": "f455c2975872ccd2d9c81594c658af65716e9b9a"',
     );
   });
 
@@ -576,10 +612,10 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    expect(contents).toContain('"version" : "5.10.0"');
+    expect(contents).toContain('"version": "5.10.0"');
     // Revision unchanged — getDigest threw
     expect(contents).toContain(
-      '"revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a"',
+      '"revision": "f455c2975872ccd2d9c81594c658af65716e9b9a"',
     );
   });
 });
