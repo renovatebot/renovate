@@ -47,6 +47,7 @@ describe('modules/platform/gitlab/index', () => {
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
     delete process.env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
     delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
+    delete process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE;
     delete process.env.RENOVATE_X_PLATFORM_VERSION;
 
     gitlab.resetPlatform();
@@ -1135,6 +1136,14 @@ describe('modules/platform/gitlab/index', () => {
     it('should log message that failed to retrieve commit pipeline', async () => {
       const scope = await initRepo();
       scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
@@ -1157,8 +1166,9 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it.each(states)(
-      'skips setting branch status %s when no pipeline is found',
+      'skips setting branch status %s when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is set and no pipeline is found',
       async (state) => {
+        process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE = 'true';
         const scope = await initRepo();
         scope
           .get(
@@ -1186,6 +1196,14 @@ describe('modules/platform/gitlab/index', () => {
     it('waits for 1000ms by default', async () => {
       const scope = await initRepo();
       scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
@@ -1246,6 +1264,14 @@ describe('modules/platform/gitlab/index', () => {
 
       const scope = await initRepo();
       scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
@@ -1283,6 +1309,14 @@ describe('modules/platform/gitlab/index', () => {
 
       const scope = await initRepo();
       scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )

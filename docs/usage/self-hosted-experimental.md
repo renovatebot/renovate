@@ -76,6 +76,11 @@ Can be useful for slow-running, self-hosted GitLab instances that don't react fa
 
 Default value: `1000` (milliseconds).
 
+## `RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE`
+
+If set to any value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
+This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
+
 ## `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY`
 
 If set, Renovate will use this as a delay to proceed with an automerge.
