@@ -5,6 +5,7 @@ export const RegistryConfigSchema = z.object({
   dl: z.string(),
   api: z.string().optional(),
 });
+export type RegistryConfigSchema = z.infer<typeof RegistryConfigSchema>;
 
 export const ReleaseTimestamp = z
   .object({

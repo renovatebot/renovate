@@ -162,9 +162,9 @@ export class CrateDatasource extends Datasource {
    */
   private async fetchRegistryConfig(
     info: RegistryInfo,
-  ): Promise<{ dl: string; api?: string } | null> {
+  ): Promise<RegistryConfigSchema | null> {
     const cacheKey = `crate-datasource/registry-config/${info.rawUrl}`;
-    const cached = memCache.get<{ dl: string; api?: string }>(cacheKey);
+    const cached = memCache.get<RegistryConfigSchema>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -173,7 +173,7 @@ export class CrateDatasource extends Datasource {
       try {
         const configPath = upath.join(info.clonePath, 'config.json');
         const content = await readCacheFile(configPath, 'utf8');
-        const parsed = RegistryConfigSchema.safeParse(JSON.parse(content));
+        const parsed = Json.pipe(RegistryConfigSchema).safeParse(content);
         if (parsed.success) {
           memCache.set(cacheKey, parsed.data);
           return parsed.data;
@@ -187,12 +187,9 @@ export class CrateDatasource extends Datasource {
     } else if (info.isSparse) {
       try {
         const configUrl = joinUrlParts(info.rawUrl, 'config.json');
-        const { body } = await this.http.getJsonUnchecked<unknown>(configUrl);
-        const parsed = RegistryConfigSchema.safeParse(body);
-        if (parsed.success) {
-          memCache.set(cacheKey, parsed.data);
-          return parsed.data;
-        }
+        const { body } = await this.http.getJson(configUrl, RegistryConfigSchema);
+        memCache.set(cacheKey, parsed.data);
+        returnbody;
       } catch {
         logger.debug(
           { registryUrl: info.rawUrl },
@@ -488,7 +485,7 @@ export class CrateDatasource extends Datasource {
     if (!registryUrl) {
       return false;
     }
-    const normalized = registryUrl.replace(/^sparse\+/, '');
+    const normalized = registryUrl.replace(regEx(/^sparse\+/), '');
     const parsed = parseUrl(normalized);
     return parsed?.hostname === 'index.crates.io';
   }
