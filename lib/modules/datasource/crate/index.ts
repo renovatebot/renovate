@@ -11,6 +11,7 @@ import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as cargoVersioning from '../../versioning/cargo/index.ts';
@@ -29,7 +30,6 @@ import type {
   RegistryFlavor,
   RegistryInfo,
 } from './types.ts';
-import { Json } from '../../../util/schema-utils/index.ts';
 
 type CloneResult =
   | {
