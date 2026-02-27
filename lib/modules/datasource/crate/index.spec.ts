@@ -16,6 +16,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
+import type { RegistryConfigSchema } from './schema.ts';
 
 vi.mock('simple-git');
 const simpleGit = vi.mocked(_simpleGit);
@@ -27,7 +28,7 @@ const CRATES_IO_REGISTRY_URL_PARSED = 'https://index.crates.io/';
 
 const datasource = CrateDatasource.id;
 
-const cratesIoConfig = {
+const cratesIoConfig: RegistryConfigSchema = {
   dl: DL_BASE_URL,
   api: API_BASE_URL,
 };
