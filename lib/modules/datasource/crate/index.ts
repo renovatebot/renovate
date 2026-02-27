@@ -376,7 +376,7 @@ export class CrateDatasource extends Datasource {
       );
       return null;
     }
-    if (registry.flavor !== 'crates.io' && !registry.isSparse) {
+    if (!registry.isSparse) {
       const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
       const lockKey = registryFetchUrl;
 

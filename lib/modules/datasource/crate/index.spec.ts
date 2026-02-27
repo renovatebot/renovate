@@ -298,6 +298,36 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('uses cached registry config for subsequent packages', async () => {
+      mockCratesIoConfig();
+      mockCratesApiCallFor('libc', Fixtures.get('libc.json'));
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+
+      const res1 = await getPkgReleases({
+        datasource,
+        packageName: 'libc',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+      expect(res1).not.toBeNull();
+
+      // Second package: config.json should come from memCache (no extra HTTP mock needed)
+      mockCratesApiCallFor('amethyst', Fixtures.get('amethyst.json'));
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/am/et/amethyst')
+        .reply(200, Fixtures.get('amethyst'));
+
+      const res2 = await getPkgReleases({
+        datasource,
+        packageName: 'amethyst',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+      expect(res2).not.toBeNull();
+    });
+
     it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
@@ -547,6 +577,20 @@ describe('modules/datasource/crate/index', () => {
         {
           packageName: 'clap',
           registryUrl: 'https://example.com',
+        },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
+    it('no-op when registryUrl is null', async () => {
+      const releaseOrig = { version: '4.5.17' };
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: null,
         },
         releaseOrig,
       );
