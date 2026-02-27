@@ -84,7 +84,7 @@ Default value: `250` (milliseconds).
 
 ## `RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE`
 
-If set to any value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
+If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
 This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
 
 ## `RENOVATE_X_HARD_EXIT`

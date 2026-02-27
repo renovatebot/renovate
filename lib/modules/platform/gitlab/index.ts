@@ -998,7 +998,7 @@ export async function setBranchStatus({
 
   if (
     options.pipeline_id === undefined &&
-    env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE
+    env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE === 'true'
   ) {
     logger.debug('Skipping branch status update because no pipeline was found');
     return;
