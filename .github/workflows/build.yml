@@ -267,7 +267,7 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm prettier --write --cache-location .cache/prettier
+          pnpm prettier-fix --cache-location .cache/prettier
           git diff --quiet || {
             echo "[ERROR] Please apply the changes prettier suggests:"
             git diff --color=always
@@ -825,7 +825,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@7afa17dc1480d504d962635e85ca62b674f9264f # v4.1.9
+        uses: containerbase/internal-tools@47c5fbb8818143e740b3bed860012a9b19c740c4 # v4.1.15
         with:
           command: docker-config
 

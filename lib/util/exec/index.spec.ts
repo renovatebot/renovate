@@ -8,7 +8,7 @@ import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
 import { setCustomEnv } from '../env.ts';
 import * as dockerModule from './docker/index.ts';
 import { getHermitEnvs } from './hermit.ts';
-import { exec, getToolSettingsOptions } from './index.ts';
+import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
@@ -1413,6 +1413,13 @@ describe('util/exec/index', () => {
           );
         });
       });
+    });
+  });
+
+  describe('gradleJvmArg()', () => {
+    it('takes the values given to it, and returns the JVM arguments', () => {
+      const result = gradleJvmArg({ jvmMemory: 256, jvmMaxMemory: 768 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx768m"');
     });
   });
 });

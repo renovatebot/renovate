@@ -19,6 +19,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages.ts';
+import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types/index.ts';
@@ -928,7 +929,9 @@ export async function getPrList(): Promise<GhPr[]> {
     }
 
     // TODO: check null `repo` (#22198)
-    const prCache = await getPrCache(githubApi, repo!, username);
+    const prCache = await instrument('getPrCache', () =>
+      getPrCache(githubApi, repo!, username),
+    );
     config.prList = Object.values(prCache).sort(
       ({ number: a }, { number: b }) => b - a,
     );
@@ -1715,7 +1718,7 @@ export async function ensureComment({
         'Comment updated',
       );
     } else {
-      logger.debug('Comment is already update-to-date');
+      logger.debug('Comment is already up-to-date');
     }
     return true;
   } catch (err) /* v8 ignore next */ {

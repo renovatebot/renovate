@@ -33,7 +33,7 @@ export function getConfigDesc(
   _packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
-  const configFile = getDefaultConfigFileName(config);
+  const configFile = getDefaultConfigFileName();
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   const descriptionArr = getDescriptionArray(config);

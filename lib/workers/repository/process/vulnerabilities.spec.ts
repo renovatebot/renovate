@@ -24,8 +24,15 @@ vi.mock('@renovatebot/osv-offline', () => {
 
 describe('workers/repository/process/vulnerabilities', () => {
   describe('create()', () => {
-    it('works', async () => {
+    beforeEach(resetOsv);
+
+    it('works, and is a singleton', async () => {
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+      });
       await expect(Vulnerabilities.create()).resolves.not.toThrow();
+      await expect(Vulnerabilities.create()).resolves.not.toThrow();
+      expect(createMock).toHaveBeenCalledTimes(1);
     });
 
     it('throws when osv-offline error', async () => {
@@ -40,6 +47,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     let vulnerabilities: Vulnerabilities;
 
     beforeAll(async () => {
+      resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
       });
@@ -144,6 +152,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     };
 
     beforeAll(async () => {
+      resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
       });
@@ -1551,3 +1560,8 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 });
+
+function resetOsv() {
+  // @ts-expect-error - reset the cached OSV client to avoid state leak between tests
+  Vulnerabilities.osvOffline = undefined;
+}

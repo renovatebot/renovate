@@ -134,8 +134,7 @@ export async function ensureOnboardingPr(
     return;
   }
 
-  const onboardingConfigHashComment =
-    await getOnboardingConfigHashComment(config);
+  const onboardingConfigHashComment = await getOnboardingConfigHashComment();
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
@@ -247,7 +246,7 @@ If you need any further assistance then you can also [request help here](${
       const prTitle =
         config.semanticCommits === 'enabled'
           ? getSemanticCommitPrTitle(config)
-          : config.onboardingPrTitle!;
+          : getInheritedOrGlobal('onboardingPrTitle')!;
       const pr = await platform.createPr({
         sourceBranch: onboardingBranch,
         targetBranch: config.defaultBranch!,
@@ -292,10 +291,8 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
   return rebaseCheckBox;
 }
 
-async function getOnboardingConfigHashComment(
-  config: RenovateConfig,
-): Promise<string> {
-  const configFile = getDefaultConfigFileName(config);
+async function getOnboardingConfigHashComment(): Promise<string> {
+  const configFile = getDefaultConfigFileName();
   const existingContents =
     (await getFile(configFile, getInheritedOrGlobal('onboardingBranch'))) ?? '';
   const hash = toSha256(existingContents);

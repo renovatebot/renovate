@@ -273,3 +273,7 @@ export function getToolSettingsOptions(
 
   return options;
 }
+
+export function gradleJvmArg(config: ToolSettingsOptions): string {
+  return ` -Dorg.gradle.jvmargs="-Xms${config.jvmMemory}m -Xmx${config.jvmMaxMemory}m"`;
+}
