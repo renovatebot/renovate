@@ -1,4 +1,4 @@
-import { ClientRequest } from 'node:http';
+import { ClientRequest, ServerResponse } from 'node:http';
 import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
@@ -102,6 +102,18 @@ export function init(): void {
           request.path.endsWith(`/protection`) &&
           response.statusCode === 404
         ) {
+          span.setStatus({ code: SpanStatusCode.OK });
+        } else if (
+          request instanceof ClientRequest &&
+          request.path === '/v2/' &&
+          request.method === 'GET' &&
+          !request.getHeader('authorization') &&
+          response instanceof ServerResponse &&
+          response.getHeader('www-authenticate') &&
+          response.getHeader('docker-distribution-api-version') &&
+          response.statusCode === 401
+        ) {
+          // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },
