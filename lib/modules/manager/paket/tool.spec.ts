@@ -2,7 +2,6 @@ import upath from 'upath';
 import type { ExecResult } from '~test/exec-util.ts';
 import { exec } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
 import type { CommandWithOptions } from '../../../util/exec/types.ts';
 import { runPaketUpdate } from './tool.ts';
 import type { UpdatePackage } from './types.ts';
@@ -22,12 +21,15 @@ export function mockExecAll(
   return snapshots;
 }
 
-const adminConfig: RepoGlobalConfig = {
-  localDir: upath.resolve('lib/modules/manager/paket/__fixtures__'),
-};
 const packageFilePath = './paket.dependencies';
 
 describe('modules/manager/paket/tool', () => {
+  beforeAll(() => {
+    GlobalConfig.set({
+      localDir: upath.resolve('lib/modules/manager/paket/__fixtures__'),
+    });
+  });
+
   describe('runPaketUpdate()', () => {
     it('update all packages if no parameters', async () => {
       const execSnapshots = mockExecAll({
@@ -72,7 +74,6 @@ describe('modules/manager/paket/tool', () => {
           '    Created dependency graph (29 packages in total)\n' +
           '  Total time taken: 6 seconds\n',
       });
-      GlobalConfig.set(adminConfig);
 
       await runPaketUpdate({ filePath: packageFilePath });
 
@@ -116,7 +117,6 @@ describe('modules/manager/paket/tool', () => {
       'can specify parameters (%o)',
       async (command: UpdatePackage, expected) => {
         const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
 
         await runPaketUpdate(command);
 
@@ -125,7 +125,6 @@ describe('modules/manager/paket/tool', () => {
     );
     it('secure parameters (impossible case normally)', async () => {
       const execSnapshots = mockExecAll();
-      GlobalConfig.set(adminConfig);
 
       await runPaketUpdate({
         filePath: packageFilePath,
