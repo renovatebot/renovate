@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git } from '~test/util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -25,10 +25,6 @@ describe('modules/manager/bazel-module/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();
     GlobalConfig.set(adminConfig);
-  });
-
-  afterEach(() => {
-    GlobalConfig.reset();
   });
 
   it('returns null if no MODULE.bazel.lock found', async () => {
@@ -56,14 +52,47 @@ describe('modules/manager/bazel-module/artifacts', () => {
     ).toBeNull();
   });
 
+  it('regenerates lockfile during lockfile maintenance', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
+    fs.readLocalFile.mockResolvedValueOnce('old lock content');
+    fs.readLocalFile.mockResolvedValueOnce('new lock content');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['MODULE.bazel.lock'],
+      }),
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'MODULE.bazel',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: { ...config, isLockFileMaintenance: true },
+    });
+
+    expect(result).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'MODULE.bazel.lock',
+          contents: 'new lock content',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
+  });
+
   it('returns updated MODULE.bazel.lock when modified', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     fs.readLocalFile.mockResolvedValueOnce('new lock content');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(partial<StatusResult>({
-      modified: ['MODULE.bazel.lock'],
-    }));
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['MODULE.bazel.lock'],
+      }),
+    );
 
     const result = await updateArtifacts({
       packageFileName: 'MODULE.bazel',
@@ -88,9 +117,11 @@ describe('modules/manager/bazel-module/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: [] as string[],
-    } as unknown as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+      }),
+    );
 
     const result = await updateArtifacts({
       packageFileName: 'MODULE.bazel',
@@ -146,9 +177,11 @@ describe('modules/manager/bazel-module/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     fs.readLocalFile.mockResolvedValueOnce('new lock content');
     mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['subdir/MODULE.bazel.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['subdir/MODULE.bazel.lock'],
+      }),
+    );
 
     const result = await updateArtifacts({
       packageFileName: 'subdir/MODULE.bazel',

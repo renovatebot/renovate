@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
+  deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -14,10 +15,12 @@ export async function updateArtifacts({
   packageFileName,
   updatedDeps,
   newPackageFileContent,
+  config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`bazel-module.updateArtifacts(${packageFileName})`);
+  const { isLockFileMaintenance } = config;
 
-  if (!updatedDeps.length) {
+  if (!updatedDeps.length && !isLockFileMaintenance) {
     logger.debug('No updated bazel-module deps - returning null');
     return null;
   }
@@ -32,6 +35,10 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+
+    if (isLockFileMaintenance) {
+      await deleteLocalFile(lockFileName);
+    }
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
