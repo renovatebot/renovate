@@ -9,7 +9,7 @@ export function mapPrFromScmToRenovate(pr: PullRequest): Pr {
     closedAt: pr.closeDate ?? undefined,
     hasAssignees: !!pr.reviewer?.length,
     labels: pr.labels,
-    number: parseInt(pr.id),
+    number: parseInt(pr.id, 10),
     reviewers: pr.reviewer?.map((review) => review.displayName) ?? [],
     state: pr.status,
     title: pr.title,

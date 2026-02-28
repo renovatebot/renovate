@@ -64,7 +64,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val),
+        val: parseInt(val, 10),
         isTransition: transition,
       });
     } else {

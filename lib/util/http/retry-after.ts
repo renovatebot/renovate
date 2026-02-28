@@ -101,7 +101,7 @@ export function getRetryAfter(err: unknown): number | null {
     return seconds;
   }
 
-  const seconds = parseInt(retryAfter);
+  const seconds = parseInt(retryAfter, 10);
   if (!Number.isNaN(seconds) && seconds >= 0) {
     return seconds;
   }

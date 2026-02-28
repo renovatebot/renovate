@@ -41,7 +41,7 @@ export function getGitAuthenticatedEnvironmentVariables(
   let gitConfigCount = 0;
   if (gitConfigCountEnvVariable) {
     // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
-    gitConfigCount = parseInt(gitConfigCountEnvVariable);
+    gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
         {
