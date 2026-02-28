@@ -385,7 +385,7 @@ export async function validateConfig(
                   }
                 } else {
                   errors.push({
-                    topic: 'Configuration Warning',
+                    topic: 'Configuration Error',
                     message: `${currentPath}: preset value is not a string`,
                   });
                 }
