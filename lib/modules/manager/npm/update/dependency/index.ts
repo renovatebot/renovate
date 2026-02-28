@@ -109,9 +109,41 @@ function replaceAsString(
         return testContent;
       }
     }
-    /* v8 ignore next 3 -- needs test */
   }
-  throw new Error();
+  /* v8 ignore next -- hard to test */
+  throw new Error('Could not replace dependency');
+}
+
+function removeAsString(
+  parsedContents: NpmPackage,
+  fileContent: string,
+  depType: NpmDepType,
+  depName: string,
+  currentValue: string,
+): string {
+  delete parsedContents[depType]![depName];
+
+  const escapedDepName = escapeRegExp(depName);
+  const escapedValue = escapeRegExp(currentValue);
+  const keyValue = `"${escapedDepName}"\\s*:\\s*"${escapedValue}"`;
+  const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
+
+  // Skip ahead to depType section
+  const searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
+  logger.trace(`Starting search at index ${searchIndex}`);
+
+  // Only search within the content starting from the depType section
+  const contentBeforeDepType = fileContent.slice(0, searchIndex);
+  const contentFromDepType = fileContent.slice(searchIndex);
+  const newContentFromDepType = contentFromDepType.replace(regex, '');
+  const newContent = contentBeforeDepType + newContentFromDepType;
+
+  /* v8 ignore else -- hard to test */
+  if (dequal(parsedContents, JSON.parse(newContent))) {
+    return newContent;
+  } else {
+    throw new Error('Could not remove dependency');
+  }
 }
 
 export function updateDependency({
@@ -187,15 +219,27 @@ export function updateDependency({
         overrideDepParents,
       );
       if (upgrade.newName) {
-        newFileContent = replaceAsString(
-          parsedContents,
-          newFileContent,
-          depType as NpmDepType,
-          depName,
-          depName,
-          upgrade.newName,
-          overrideDepParents,
-        );
+        const newNameExists =
+          parsedContents[depType as NpmDepType]?.[upgrade.newName];
+        if (newNameExists) {
+          newFileContent = removeAsString(
+            parsedContents,
+            newFileContent,
+            depType as NpmDepType,
+            depName,
+            newValue!,
+          );
+        } else {
+          newFileContent = replaceAsString(
+            parsedContents,
+            newFileContent,
+            depType as NpmDepType,
+            depName,
+            depName,
+            upgrade.newName,
+            overrideDepParents,
+          );
+        }
       }
     }
     /* v8 ignore next -- needs test */
