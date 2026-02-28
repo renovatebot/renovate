@@ -9,17 +9,18 @@ vi.mock('../../../util/fs');
 describe('modules/manager/paket/artifacts', () => {
   const packageFileName = '/app/test/paket.dependencies';
 
-  function initializeMock() {
+  beforeEach(() => {
     fs.getSiblingFileName.mockImplementation(
       (fileName: string, siblingName: string) => {
-        expect(fileName).equals(packageFileName);
-        expect(siblingName).equals('paket.lock');
+        if (fileName !== packageFileName) {
+          throw new Error(`Not expected fileName: ${fileName}`);
+        }
+        if (siblingName !== 'paket.lock') {
+          throw new Error(`Not expected siblingName: ${siblingName}`);
+        }
         return '/app/test/paket.lock';
       },
     );
-  }
-  beforeEach(() => {
-    initializeMock();
   });
 
   describe('updateArtifacts()', () => {
