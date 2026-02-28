@@ -21,8 +21,32 @@ After you installed the hosted app, please read the [reading list](../../../read
 
 ## Authentication
 
-First, [create an API token](https://support.atlassian.com/bitbucket-cloud/docs/create-an-api-token/) for the bot account.
-Give the bot API token the following permission scopes:
+### Recommended: Workspace Access Tokens
+
+**We recommend using [Workspace Access Tokens](https://support.atlassian.com/bitbucket-cloud/docs/workspace-access-tokens/)** instead of personal access tokens.
+Workspace Access Tokens provide higher API rate limits than personal access tokens, which is important for repositories with many dependencies.
+
+Create a Workspace Access Token with the following permission scopes:
+
+| Scopes               |
+| -------------------- |
+| Account: Read        |
+| Repository: Read     |
+| Repository: Write    |
+| Pull Requests: Read  |
+| Pull Requests: Write |
+
+Let Renovate use your Workspace Access Token by doing _one_ of the following:
+
+- Set your token as an environment variable `RENOVATE_TOKEN`
+- Set your token when you run Renovate in the CLI with `--token=`
+- Set your token as a `token` in your `config.js` file
+
+### Alternative: Personal Access Tokens
+
+If you prefer to use a personal access token, [create an API token](https://support.atlassian.com/bitbucket-cloud/docs/create-an-api-token/) for the bot account with the following scopes:
+
+Note: if you're only using a Personal Access Token for Dependency Dashboard issues you can restrict this further.
 
 | Permission                                                                                                               | Scope                |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------- |
@@ -37,7 +61,7 @@ Give the bot API token the following permission scopes:
 
 The bot also needs to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
 
-Let Renovate use your API token by doing _one_ of the following:
+Let Renovate use your personal API token by doing _one_ of the following:
 
 - Set your API token as a `password` in your `config.js` file
 - Set your API token as an environment variable `RENOVATE_PASSWORD`
@@ -47,6 +71,15 @@ Remember to:
 
 - Set the `username` for the bot account, which is your Atlassian account email. You can find your email through "Personal Bitbucket settings" on the "Email aliases" page for your account
 - Set `platform=bitbucket` somewhere in your Renovate config file
+
+### Authentication Flow
+
+Renovate uses different authentication methods depending on the API endpoint:
+
+- **For `/issues` endpoints**: When both `username`+`password` and `token` are provided, Renovate will prefer username+password authentication (Basic auth) for issues-related API calls
+- **For all other endpoints**: When a `token` is available, Renovate will use Bearer token authentication
+
+This hybrid approach ensures compatibility with Bitbucket Cloud's API requirements while maximizing the benefits of higher rate limits when using Workspace Access Tokens.
 
 ## Unsupported platform features/concepts
 
