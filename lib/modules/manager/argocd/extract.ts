@@ -30,7 +30,7 @@ export function extractPackageFile(
   _config?: ExtractConfig,
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
-  if (fileTestRegex.test(content) === false) {
+  if (!fileTestRegex.test(content)) {
     logger.debug(
       `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`,
     );
@@ -52,10 +52,14 @@ function processSource(source: ApplicationSource): PackageDependency[] {
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
     if (isOCIRegistry(source.repoURL) || !source.repoURL.includes('://')) {
       const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+      const depName =
+        registryURL === source.chart || registryURL.endsWith(`/${source.chart}`)
+          ? registryURL
+          : `${registryURL}/${source.chart}`;
 
       return [
         {
-          depName: `${registryURL}/${source.chart}`,
+          depName,
           currentValue: source.targetRevision,
           datasource: DockerDatasource.id,
         },
@@ -72,9 +76,17 @@ function processSource(source: ApplicationSource): PackageDependency[] {
     ];
   }
 
-  // Handle OCI Helm chart without explicit chart field
+  // Handle OCI Helm chart without an explicit chart field
   if (isOCIRegistry(source.repoURL)) {
-    const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+    let registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+
+    const parts = registryURL.split('/');
+    if (
+      parts.length > 1 &&
+      parts[parts.length - 1] === parts[parts.length - 2]
+    ) {
+      registryURL = parts.slice(0, -1).join('/');
+    }
 
     return [
       {
@@ -93,7 +105,7 @@ function processSource(source: ApplicationSource): PackageDependency[] {
     },
   ];
 
-  // Git repo is pointing to a Kustomize resources
+  // Git repo is pointing to a Kustomize resource
   if (source.kustomize?.images) {
     dependencies.push(
       ...source.kustomize.images.map(processKustomizeImage).filter(isTruthy),
