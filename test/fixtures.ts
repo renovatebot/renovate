@@ -2,7 +2,9 @@ import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
 import type { DirectoryJSON } from 'memfs';
 import { fs as memfs, vol } from 'memfs';
-import type { TDataOut } from 'memfs/lib/encoding.js';
+
+type TDataOut = string | Buffer;
+
 import upath from 'upath';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
