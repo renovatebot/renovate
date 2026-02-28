@@ -5,6 +5,8 @@ import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags/i
 import { GitTagsDatasource } from '../../../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.ts';
 import { TerraformModuleDatasource } from '../../../../datasource/terraform-module/index.ts';
+import { getDep } from '../../../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci.ts';
 import type { PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
@@ -21,6 +23,7 @@ export const gitTagsRefMatchRegex = regEx(
 export const azureDevOpsSshRefMatchRegex = regEx(
   /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
+
 export const hostnameMatchRegex = regEx(
   /^(?<hostname>[a-zA-Z\d]([a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
 );
@@ -63,6 +66,21 @@ export class ModuleExtractor extends DependencyExtractor {
   private analyseTerraformModule(dep: PackageDependency): PackageDependency {
     // TODO #22198
     const source = dep.managerData!.source as string;
+
+    if (isOCIRegistry(source)) {
+      const parsed = getDep(removeOCIPrefix(source), false);
+      dep.depName = parsed.packageName;
+      dep.packageName = parsed.packageName;
+      dep.datasource = parsed.datasource;
+      if (!dep.currentValue && parsed.currentValue) {
+        dep.currentValue = parsed.currentValue;
+      }
+      if (!dep.currentValue) {
+        dep.skipReason = 'unspecified-version';
+      }
+      return dep;
+    }
+
     const githubRefMatch = githubRefMatchRegex.exec(source);
     const bitbucketRefMatch = bitbucketRefMatchRegex.exec(source);
     const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source);
