@@ -389,6 +389,7 @@ exports[`modules/manager/poetry/extract > extractPackageFile() > extracts multip
       "datasource": "pypi",
       "depName": "dep5",
       "depType": "dependencies",
+      "managerData": {},
       "skipReason": "unspecified-version",
     },
     {
