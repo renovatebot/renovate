@@ -1080,6 +1080,24 @@ describe('util/package-rules/index', () => {
     expect(res.groupSlug).toBe('b');
   });
 
+  it('compiles templated groupName before creating groupSlug', async () => {
+    const config: TestConfig = {
+      packageName: 'my-package',
+      groupSlug: 'existing-slug', // Simulates preset like pinDigest setting this
+      packageRules: [
+        {
+          matchPackageNames: ['*'],
+          groupName: '{{packageName}}',
+          // Note: no groupSlug set - this triggers the bug
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    // Should be slugified from compiled template value 'my-package', not raw template string
+    expect(res.groupSlug).toBe('my-package');
+    expect(res.groupName).toBe('{{packageName}}'); // groupName stays as template
+  });
+
   it('matches matchSourceUrls with patterns (case-insensitive)', async () => {
     const config: TestConfig = {
       packageRules: [
