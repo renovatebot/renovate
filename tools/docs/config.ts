@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
+import { getConfigFileNames } from '../../lib/config/app-strings.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
   allManagersList,
@@ -249,6 +250,24 @@ function generateLockFileTable(): string {
   return table;
 }
 
+function generateConfigFileNames(): string {
+  // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
+  const filenames = getConfigFileNames();
+
+  const all = Array.from(new Set(filenames))
+    // remove `package.json`, as we'll write a custom line item for it
+    .filter((v) => v !== 'package.json');
+
+  let output = '';
+  for (const f of all) {
+    output += `1. \`${f}\`\n`;
+  }
+
+  output += '1. `package.json` _(within a `"renovate"` section)_\n';
+
+  return output.trimEnd();
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -302,6 +321,13 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   if (!bot) {
     content = replaceContent(content, generateLockFileTable());
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateConfigFileNames(), {
+      replaceStart: '<!-- config-filenames-begin -->',
+      replaceStop: '<!-- config-filenames-end -->',
+    });
   }
 
   await updateFile(`${dist}/${configFile}`, content);
