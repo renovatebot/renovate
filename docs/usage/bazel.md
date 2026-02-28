@@ -181,7 +181,7 @@ For this to work:
 1. Your repository must already have a `MODULE.bazel.lock` file
 1. [Bazelisk](https://github.com/bazelbuild/bazelisk) must be available in the environment, or Renovate must be configured to install tools via containerbase (`binarySource=install`)
 
-Renovate determines the correct Bazel version from the `.bazelversion` file in your repository.
+Renovate uses Bazelisk, which determines the correct Bazel version from the `.bazelversion` file in your repository.
 
 If no `MODULE.bazel.lock` file exists, Renovate skips the lockfile update step.
 

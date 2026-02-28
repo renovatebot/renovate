@@ -69,6 +69,6 @@ Requirements:
 
 - A `MODULE.bazel.lock` file must already exist in the repository
 - [Bazelisk](https://github.com/bazelbuild/bazelisk) must be available (Renovate installs it automatically when using containerbase)
-- The correct Bazel version is determined from the `.bazelversion` file in the repository
+- Bazelisk determines the correct Bazel version from the `.bazelversion` file in the repository (if present)
 
 If no `MODULE.bazel.lock` file is found, the lockfile update step is skipped.

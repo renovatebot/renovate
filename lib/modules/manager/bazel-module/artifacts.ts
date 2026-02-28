@@ -48,7 +48,10 @@ export async function updateArtifacts({
     await exec('bazel mod deps', execOptions);
 
     const status = await getRepoStatus();
-    if (!status.modified.includes(lockFileName)) {
+    if (
+      !status.modified.includes(lockFileName) &&
+      !status.not_added?.includes(lockFileName)
+    ) {
       return null;
     }
 

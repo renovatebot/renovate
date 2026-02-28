@@ -83,6 +83,28 @@ describe('modules/manager/bazel-module/artifacts', () => {
     expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
   });
 
+  it('returns null if lockfile maintenance produces no changes', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
+    fs.readLocalFile.mockResolvedValueOnce('old lock content');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+      }),
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'MODULE.bazel',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: { ...config, isLockFileMaintenance: true },
+    });
+
+    expect(result).toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
+  });
+
   it('returns updated MODULE.bazel.lock when modified', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
