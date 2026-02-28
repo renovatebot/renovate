@@ -200,16 +200,16 @@ describe('modules/manager/swift/extract', () => {
     it('extracts dependencies from sample package file', () => {
       const result = extractPackageFile(Fixtures.get('SamplePackage.swift'));
 
-      expect(result?.deps).toHaveLength(9);
+      expect(result?.deps).toHaveLength(10);
 
       const githubDeps =
         result?.deps.filter((dep) => dep.datasource === 'github-tags') ?? [];
-      expect(githubDeps).toHaveLength(9);
+      expect(githubDeps).toHaveLength(10);
 
       expect(result?.deps).toContainEqual({
         datasource: 'github-tags',
         depName: '0x7fs/CountedSet',
-        currentValue: '"master"\n        ',
+        currentValue: '"master"',
       });
 
       expect(result?.deps).toContainEqual({
@@ -258,6 +258,34 @@ describe('modules/manager/swift/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('handles dependencies with local package', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(path: "../LocalPackage")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toBeNull();
+    });
+
+    it('handles dependencies with name (deprecated args)', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(name: "repo", url: "https://github.com/example/repo", from: "1.0.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result?.deps).toMatchObject([
+        { depName: 'example/repo', currentValue: 'from: "1.0.0"' },
+      ]);
+    });
+
     it('extracts multiple dependencies with different datasources', () => {
       const content = `
         let package = Package(
@@ -274,6 +302,33 @@ describe('modules/manager/swift/extract', () => {
       expect(result?.deps[0].datasource).toBe('github-tags');
       expect(result?.deps[1].datasource).toBe('gitlab-tags');
       expect(result?.deps[2].datasource).toBe('git-tags');
+    });
+
+    it('extracts multiple dependencies with traits arguments', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://github.com/example/repo1", from: "1.0.0", traits: []),
+            .package(url: "https://github.com/example/repo2", "2.0.0"..<"3.0.0", traits: [.defaults]),
+            .package(
+              url: "https://github.com/example/repo3",
+              .exact("4.0.0"),
+              traits: [
+                .trait(name: "CUSTOM_TRAIT"),
+                .trait(name: "ANOTHER_TRAIT")
+              ]
+            )
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result?.deps).toHaveLength(3);
+      expect(result?.deps).toMatchObject([
+        { depName: 'example/repo1', currentValue: 'from: "1.0.0"' },
+        { depName: 'example/repo2', currentValue: '"2.0.0"..<"3.0.0"' },
+        { depName: 'example/repo3', currentValue: '4.0.0' },
+      ]);
     });
   });
 });
