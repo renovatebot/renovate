@@ -1,6 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { getSiblingFileName } from '../../../util/fs/index.ts';
-import { getFiles } from '../../../util/git/index.ts';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type {
   ExtractConfig,
@@ -19,8 +18,7 @@ export async function extractPackageFile(
   logger.debug(`paket.extractPackageFile(${packageFile})`);
 
   const lockFileName = getSiblingFileName(packageFile, 'paket.lock');
-  const lockFileContentMap = await getFiles([lockFileName]);
-  const lockFileContent = lockFileContentMap[lockFileName];
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!lockFileContent) {
     throw new Error(`Could not to paket lock file: ${lockFileName}`);
   }

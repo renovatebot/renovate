@@ -1,5 +1,5 @@
 import { beforeEach, describe } from 'vitest';
-import { fs, git } from '~test/util.ts';
+import { fs } from '~test/util.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './extract.ts';
@@ -49,9 +49,12 @@ NUGET
 `;
 
     it('return all packages', async () => {
-      git.getFiles.mockResolvedValueOnce({
-        [lockFileName]: lockFileContent,
-      });
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).equals(lockFileName);
+          return Promise.resolve(lockFileContent);
+        },
+      );
 
       const result = await extractPackageFile(
         packageFileContent,
@@ -99,7 +102,12 @@ NUGET
     });
 
     it('throw error if not found lock file', async () => {
-      git.getFiles.mockResolvedValueOnce({});
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).equals(lockFileName);
+          return Promise.resolve(null);
+        },
+      );
 
       const result = extractPackageFile(
         packageFileContent,
@@ -111,13 +119,16 @@ NUGET
     });
 
     it('return package name of dependencies file if unknown in lock file', async () => {
-      git.getFiles.mockResolvedValueOnce({
-        [lockFileName]: `
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).equals(lockFileName);
+          return Promise.resolve(`
 NUGET
   remote: https://api.nuget.org/v3/index.json
     FSharp.Core (9.0.300)
-`,
-      });
+`);
+        },
+      );
       const packageFileContent = `
 source https://api.nuget.org/v3/index.json
 

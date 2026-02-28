@@ -1,6 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { getLocalFiles } from '../../../util/fs/index.ts';
-import { getFiles } from '../../../util/git/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
 import { runPaketUpdate } from './tool.ts';
 
@@ -9,7 +8,7 @@ export async function updateLockedDependency(
 ): Promise<UpdateLockedResult> {
   logger.debug(`paket.updateLockedDependency(${config.lockFile}})`);
 
-  const existingLockFileContentMap = await getFiles([config.lockFile]);
+  const existingLockFileContent = await readLocalFile(config.lockFile, 'utf8');
 
   await runPaketUpdate({
     filePath: config.lockFile,
@@ -17,12 +16,8 @@ export async function updateLockedDependency(
     version: config.newVersion,
   });
 
-  const newLockFileContentMap = await getLocalFiles([config.lockFile]);
-  const newLockFileContent = newLockFileContentMap[config.lockFile];
-  if (
-    existingLockFileContentMap[config.lockFile] === newLockFileContent ||
-    !newLockFileContent
-  ) {
+  const newLockFileContent = await readLocalFile(config.lockFile, 'utf8');
+  if (existingLockFileContent === newLockFileContent || !newLockFileContent) {
     logger.debug(`Lock file ${config.lockFile} is unchanged`);
     return { status: 'already-updated' };
   }

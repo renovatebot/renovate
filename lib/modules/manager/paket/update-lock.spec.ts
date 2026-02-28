@@ -1,5 +1,5 @@
 import { beforeEach, describe } from 'vitest';
-import { fs, git } from '~test/util.ts';
+import { fs } from '~test/util.ts';
 import type { UpdateLockedConfig } from '../types.ts';
 import * as tool from './tool.ts';
 import { updateLockedDependency } from './update-lock.ts';
@@ -36,13 +36,18 @@ describe('modules/manager/paket/update-lock', () => {
       const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
 
-      git.getFiles.mockResolvedValueOnce({
-        [lockFileName]: 'Old fake lock file content',
-      });
       const newContentLockFile = 'New fake lock file content';
-      fs.getLocalFiles.mockResolvedValueOnce({
-        [lockFileName]: newContentLockFile,
-      });
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).equals(lockFileName);
+
+          if (toolSpy.mock.calls.length === 0) {
+            return Promise.resolve('Old fake lock file content');
+          } else {
+            return Promise.resolve(newContentLockFile);
+          }
+        },
+      );
 
       const result = await updateLockedDependency(config);
 
@@ -64,14 +69,12 @@ describe('modules/manager/paket/update-lock', () => {
     it('return null if no changes', async () => {
       const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
-
-      const contentLockFile = 'Fake lock file content';
-      git.getFiles.mockResolvedValueOnce({
-        [lockFileName]: contentLockFile,
-      });
-      fs.getLocalFiles.mockResolvedValueOnce({
-        [lockFileName]: contentLockFile,
-      });
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).equals(lockFileName);
+          return Promise.resolve('Old fake lock file content');
+        },
+      );
 
       const result = await updateLockedDependency(config);
 
