@@ -90,4 +90,19 @@ describe('config/options/index', () => {
       }
     }
   });
+
+  describe('no option has both globalOnly and inheritConfigSupport set', () => {
+    const opts = getOptions();
+    opts.forEach((option) => {
+      if (option.globalOnly && option.inheritConfigSupport) {
+        it(`option "${option.name}" should not have both globalOnly and inheritConfigSupport set`, () => {
+          // This will always fail if such an option exists
+          expect(
+            option.globalOnly && option.inheritConfigSupport,
+            "Options shouldn't be 'only usable globally' and 'can be set in inherit config'",
+          ).toBeFalsy();
+        });
+      }
+    });
+  });
 });
