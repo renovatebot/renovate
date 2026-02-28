@@ -54,9 +54,16 @@ export function getConfig(input: string[]): AllConfig {
     if (option.cli !== false) {
       const param = `<${option.type}>`.replace('<boolean>', '[boolean]');
       const optionString = `${getCliName(option)} ${param}`;
+      let description = option.description;
+      if (option.allowedValues) {
+        description =
+          description +
+          ` (Allowed values: ${JSON.stringify(option.allowedValues)})`;
+      }
+
       program = program.option(
         optionString,
-        option.description,
+        description,
         coersions[option.type],
       );
     }
