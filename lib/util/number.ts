@@ -26,6 +26,6 @@ export function parseInteger(
 ): number {
   // Number.parseInt returns NaN if the value is not a finite integer.
   const parsed =
-    isString(val) && /^\d+$/.test(val) ? Number.parseInt(val) : Number.NaN;
+    isString(val) && /^\d+$/.test(val) ? Number.parseInt(val, 10) : Number.NaN;
   return Number.isFinite(parsed) ? parsed : (def ?? 0);
 }

@@ -200,7 +200,7 @@ describe('modules/platform/scm-manager/index', () => {
           sourceBranch: pullRequest.source,
           createdAt: pullRequest.creationDate,
           labels: pullRequest.labels,
-          number: parseInt(pullRequest.id),
+          number: parseInt(pullRequest.id, 10),
           state: pullRequest.status,
           targetBranch: pullRequest.target,
           title: pullRequest.title,
@@ -375,7 +375,7 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(await scmPlatform.getPr(parseInt(pullRequest.id))).toEqual(
+      expect(await scmPlatform.getPr(parseInt(pullRequest.id, 10))).toEqual(
         renovatePr,
       );
     });
@@ -399,7 +399,7 @@ describe('modules/platform/scm-manager/index', () => {
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(200, pullRequest);
 
-      expect(await scmPlatform.getPr(parseInt(pullRequest.id))).toEqual(
+      expect(await scmPlatform.getPr(parseInt(pullRequest.id, 10))).toEqual(
         renovatePr,
       );
     });

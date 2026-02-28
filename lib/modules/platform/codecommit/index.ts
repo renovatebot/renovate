@@ -189,7 +189,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
           ? 'open'
           : 'closed',
-      number: Number.parseInt(prId),
+      number: Number.parseInt(prId, 10),
       title: prInfo.title!,
       body: prInfo.description!,
       createdAt: prInfo.creationDate?.toISOString(),
@@ -394,7 +394,7 @@ export async function createPr({
   }
 
   return {
-    number: Number.parseInt(prCreateRes.pullRequest.pullRequestId),
+    number: Number.parseInt(prCreateRes.pullRequest.pullRequestId, 10),
     state: 'open',
     title: prCreateRes.pullRequest.title,
     sourceBranch,
