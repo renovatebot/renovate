@@ -8,7 +8,54 @@ import type {
 } from '../types.ts';
 import { parse as parseDependenciesFile } from './parsers/dependencies-file.ts';
 import { parse as parseLockFile } from './parsers/lock-file.ts';
-import type { PaketPackage } from './types.ts';
+import type {
+  DependenciesFile,
+  DependenciesFileGroup,
+  DependenciesFilePackage,
+  LockFileDependency,
+  PaketPackage,
+} from './types.ts';
+
+const searchPackageVersion = (
+  dependencies: LockFileDependency[],
+  group: DependenciesFileGroup,
+  p: DependenciesFilePackage,
+): LockFileDependency | undefined =>
+  dependencies.find(
+    (d) =>
+      d.groupName === group.groupName &&
+      d.packageName.toUpperCase() === p.name.toUpperCase(),
+  );
+
+function convertToPackageDependency(
+  dependencies: LockFileDependency[],
+  group: DependenciesFileGroup,
+  p: DependenciesFilePackage,
+): PackageDependency {
+  const lockVersion = searchPackageVersion(dependencies, group, p);
+
+  const version = lockVersion?.version;
+  const name = lockVersion?.packageName ?? p.name;
+  return {
+    depType: 'dependencies',
+    depName: name,
+    currentVersion: version,
+    datasource: NugetDatasource.id,
+    rangeStrategy: 'update-lockfile',
+    lockedVersion: version,
+  };
+}
+
+function convertLockFileDependencyToPackageDependency(
+  parsedPackageFile: DependenciesFile,
+  parsedLockFile: LockFileDependency[],
+): PackageDependency[] {
+  return parsedPackageFile.groups.flatMap((group) => {
+    return group.nugetPackages.map((p) => {
+      return convertToPackageDependency(parsedLockFile, group, p);
+    });
+  });
+}
 
 export async function extractPackageFile(
   content: string,
@@ -26,28 +73,11 @@ export async function extractPackageFile(
   const parsedPackageFile = parseDependenciesFile(content);
   const parsedLockFile = parseLockFile(lockFileContent);
 
-  const deps: PackageDependency[] = parsedPackageFile.groups.flatMap(
-    (group) => {
-      return group.nugetPackages.map((p) => {
-        const lockVersion = parsedLockFile.find(
-          (d) =>
-            d.groupName === group.groupName &&
-            d.packageName.toUpperCase() === p.name.toUpperCase(),
-        );
-
-        const version = lockVersion?.version;
-        const name = lockVersion?.packageName ?? p.name;
-        return {
-          depType: 'dependencies',
-          depName: name,
-          currentVersion: version,
-          datasource: NugetDatasource.id,
-          rangeStrategy: 'update-lockfile',
-          lockedVersion: version,
-        };
-      });
-    },
-  );
+  const deps: PackageDependency[] =
+    convertLockFileDependencyToPackageDependency(
+      parsedPackageFile,
+      parsedLockFile,
+    );
 
   return {
     deps,
