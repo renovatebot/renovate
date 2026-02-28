@@ -89,12 +89,20 @@ async function runDotnetRestore(
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
   };
 
+  // the first empty item results in adding a leading space once joined with other arguments from the array
+  const dotnetRestoreOpts = [''];
+  if (config.postUpdateOptions?.includes('dotnetEnableWindowsTargeting')) {
+    dotnetRestoreOpts.push('-p:EnableWindowsTargeting=true');
+  }
+
   const cmds = [
     ...dependentPackageFileNames.map(
       (fileName) =>
+        // it is essential that dotnetRestoreOpts are added directly after the previous arguments
+        // as the leading space will be added dynamically
         `dotnet restore ${quote(
           fileName,
-        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
+        )} --force-evaluate --configfile ${quote(nugetConfigFile)}${dotnetRestoreOpts.join(' ')}`,
     ),
   ];
 
