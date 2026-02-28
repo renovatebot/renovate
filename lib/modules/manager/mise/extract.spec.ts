@@ -192,6 +192,8 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-tags',
             depName: 'kafka',
             packageName: 'apache/kafka',
+            replaceString: 'apache-3.9.0',
+            autoReplaceStringTemplate: 'apache-{{{newValue}}}',
           },
           {
             currentValue: '1.11.13',
@@ -725,6 +727,22 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('provides skipReason for kafka without apache prefix', () => {
+      const content = codeBlock`
+      [tools]
+      kafka = "3.9.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'kafka',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', () => {
       const content = codeBlock`
       [tools]
@@ -882,6 +900,8 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            replaceString: 'openjdk-21.0.2',
+            autoReplaceStringTemplate: 'openjdk-{{{newValue}}}',
           },
         ],
       });
@@ -897,6 +917,8 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            replaceString: 'temurin-21.0.2',
+            autoReplaceStringTemplate: 'temurin-{{{newValue}}}',
           },
         ],
       });
@@ -912,6 +934,8 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            replaceString: 'zulu-21.0.2',
+            autoReplaceStringTemplate: 'zulu-{{{newValue}}}',
           },
         ],
       });
@@ -927,6 +951,8 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            replaceString: 'corretto-21.0.2',
+            autoReplaceStringTemplate: 'corretto-{{{newValue}}}',
           },
         ],
       });
@@ -942,6 +968,8 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            replaceString: 'oracle-graalvm-21.0.2',
+            autoReplaceStringTemplate: 'oracle-graalvm-{{{newValue}}}',
           },
         ],
       });
@@ -957,6 +985,8 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            replaceString: 'adoptopenjdk-21.0.2',
+            autoReplaceStringTemplate: 'adoptopenjdk-{{{newValue}}}',
           },
         ],
       });
