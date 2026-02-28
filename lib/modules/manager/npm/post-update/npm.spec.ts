@@ -489,6 +489,94 @@ describe('modules/manager/npm/post-update/npm', () => {
     ]);
   });
 
+  describe('passes NODE_OPTIONS', () => {
+    it('if nodeMaxMemory set on global config', async () => {
+      GlobalConfig.set({
+        localDir: '',
+        toolSettings: {
+          nodeMaxMemory: 3456,
+        },
+      });
+
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+      const skipInstalls = true;
+      const updates = [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: false,
+        },
+      ];
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        updates,
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=3456',
+      );
+    });
+
+    it('if nodeMaxMemory set on repo config', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+      const skipInstalls = true;
+      const updates = [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: false,
+        },
+      ];
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        {
+          skipInstalls,
+          toolSettings: {
+            nodeMaxMemory: 3456,
+          },
+        },
+        updates,
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=3456',
+      );
+    });
+  });
+
   describe('installs workspace only packages separately', () => {
     const updates = [
       {
