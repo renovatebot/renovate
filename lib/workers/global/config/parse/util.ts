@@ -52,6 +52,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
     case '.yaml':
     case '.yml':
       return parseSingleYaml(await readSystemFile(file, 'utf8'));
+    case '.jsonc':
     case '.json5':
     case '.json':
       return parseJson(

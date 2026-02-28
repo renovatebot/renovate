@@ -92,13 +92,17 @@ The "Configure Renovate" PR will include a `renovate.json` file in the root dire
 If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
 
 - `renovate.json5`
+- `renovate.jsonc`
 - `.github/renovate.json`
 - `.github/renovate.json5`
+- `.github/renovate.jsonc`
 - `.gitlab/renovate.json`
 - `.gitlab/renovate.json5`
+- `.gitlab/renovate.jsonc`
 - `.renovaterc`
 - `.renovaterc.json`
 - `.renovaterc.json5`
+- `.renovaterc.jsonc`
 - `package.json` (deprecated)
 
 Or in a custom file present within the [`configFileNames`](../self-hosted-configuration.md#configfilenames).
