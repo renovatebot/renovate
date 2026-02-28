@@ -1,10 +1,31 @@
 import { codeBlock } from 'common-tags';
+import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as nugetExtractUtil from '../nuget/util.ts';
+import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
+const config: ExtractConfig = {};
+const adminConfig: RepoGlobalConfig = {
+  localDir: upath.resolve('lib/modules/manager/cake/__fixtures__'),
+};
+
 describe('modules/manager/cake/index', () => {
-  it('extracts', () => {
-    expect(extractPackageFile(Fixtures.get('build.cake'))).toMatchObject({
+  beforeEach(() => {
+    // Initialize GlobalConfig with required values
+    GlobalConfig.set(adminConfig);
+  });
+
+  it('extracts', async () => {
+    expect(
+      await extractPackageFile(
+        Fixtures.get('build.cake'),
+        'build.cake',
+        config,
+      ),
+    ).toMatchObject({
       deps: [
         { depName: 'Foo.Foo', currentValue: undefined },
         { depName: 'Bim.Bim', currentValue: '6.6.6' },
@@ -21,7 +42,7 @@ describe('modules/manager/cake/index', () => {
     });
   });
 
-  it('extracts dotnet tools from single sdk style build file', () => {
+  it('extracts dotnet tools from single sdk style build file', async () => {
     const content = codeBlock`
     #:sdk Cake.Sdk
 
@@ -47,35 +68,37 @@ describe('modules/manager/cake/index', () => {
 
     RunTarget(target);
     `;
-    expect(extractPackageFile(content)).toMatchObject({
-      deps: [
-        {
-          depName: 'SingleTool.Install.First',
-          currentValue: '1.0.0',
-          datasource: 'nuget',
-          registryUrls: ['https://api.nuget.org/v3/index.json'],
-        },
-        {
-          depName: 'SingleTool.Install.Second',
-          currentValue: '1.2.0',
-          datasource: 'nuget',
-        },
-        {
-          depName: 'MultipleTools.Install.First',
-          currentValue: '2.0.0',
-          datasource: 'nuget',
-          registryUrls: ['https://api.nuget.org/v3/index.json'],
-        },
-        {
-          depName: 'MultipleTools.Install.Second',
-          currentValue: '2.1.1',
-          datasource: 'nuget',
-        },
-      ],
-    });
+    expect(await extractPackageFile(content, 'build.cs', config)).toMatchObject(
+      {
+        deps: [
+          {
+            depName: 'SingleTool.Install.First',
+            currentValue: '1.0.0',
+            datasource: 'nuget',
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
+          },
+          {
+            depName: 'SingleTool.Install.Second',
+            currentValue: '1.2.0',
+            datasource: 'nuget',
+          },
+          {
+            depName: 'MultipleTools.Install.First',
+            currentValue: '2.0.0',
+            datasource: 'nuget',
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
+          },
+          {
+            depName: 'MultipleTools.Install.Second',
+            currentValue: '2.1.1',
+            datasource: 'nuget',
+          },
+        ],
+      },
+    );
   });
 
-  it('skips invalid entries in InstallTools', () => {
+  it('skips invalid entries in InstallTools', async () => {
     const content = codeBlock`
     #:sdk Cake.Sdk
 
@@ -85,14 +108,42 @@ describe('modules/manager/cake/index', () => {
       "dotnet:?package=Good.Tool&version=1.2.3"
     );
     `;
-    expect(extractPackageFile(content)).toMatchObject({
-      deps: [
-        {
-          depName: 'Good.Tool',
-          currentValue: '1.2.3',
-          datasource: 'nuget',
-        },
-      ],
-    });
+    expect(await extractPackageFile(content, 'build.cs', config)).toMatchObject(
+      {
+        deps: [
+          {
+            depName: 'Good.Tool',
+            currentValue: '1.2.3',
+            datasource: 'nuget',
+          },
+        ],
+      },
+    );
+  });
+
+  it('calls applyRegistries to honor nuget.config files if present for .cake files', async () => {
+    const applyRegistriesSpy = vi
+      .spyOn(nugetExtractUtil, 'applyRegistries')
+      .mockImplementation((deps: any) => deps);
+
+    const content = codeBlock`#addin nuget:?package=Contoso.SomePackage&version=1.2.3`;
+    await extractPackageFile(content, 'build.cake', config);
+
+    expect(applyRegistriesSpy).toHaveBeenCalled();
+  });
+
+  it('calls applyRegistries to honor nuget.config files if present for InstallTools', async () => {
+    const applyRegistriesSpy = vi
+      .spyOn(nugetExtractUtil, 'applyRegistries')
+      .mockImplementation((deps: any) => deps);
+
+    const content = codeBlock`
+      #:sdk Cake.Sdk
+
+      InstallTools("dotnet:?package=Good.Tool&version=1.2.3");
+      `;
+    await extractPackageFile(content, 'build.cs', config);
+
+    expect(applyRegistriesSpy).toHaveBeenCalled();
   });
 });
