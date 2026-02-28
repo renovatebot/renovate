@@ -61,9 +61,9 @@ describe('modules/manager/bazel-module/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
     fs.readLocalFile.mockResolvedValueOnce('new lock content');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
+    git.getRepoStatus.mockResolvedValueOnce(partial<StatusResult>({
       modified: ['MODULE.bazel.lock'],
-    } as StatusResult);
+    }));
 
     const result = await updateArtifacts({
       packageFileName: 'MODULE.bazel',
