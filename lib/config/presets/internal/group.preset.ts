@@ -342,6 +342,8 @@ const staticGroups = {
         groupName: 'kubernetes packages',
         groupSlug: 'kubernetes-go',
         matchDatasources: ['go'],
+        // Should be kept up to date with
+        // https://github.com/kubernetes/kubernetes/blob/bebefd8382f3df4953afc76b5787a147deb0798f/staging/README.md
         matchPackageNames: [
           'k8s.io/api**',
           'k8s.io/apiextensions-apiserver**',
@@ -356,15 +358,19 @@ const staticGroups = {
           'k8s.io/component-helpers**',
           'k8s.io/controller-manager**',
           'k8s.io/cri-api**',
-          // 'k8s.io/csi-api', has no go.mod set up and does not follow the versioning of other repos
+          'k8s.io/cri-client**',
           'k8s.io/csi-translation-lib**',
+          'k8s.io/dynamic-resource-allocation**',
+          'k8s.io/endpointslice**',
+          'k8s.io/externaljwt**',
+          'k8s.io/kms**',
           'k8s.io/kube-aggregator**',
           'k8s.io/kube-controller-manager**',
           'k8s.io/kube-proxy**',
           'k8s.io/kube-scheduler**',
           'k8s.io/kubectl**',
           'k8s.io/kubelet**',
-          'k8s.io/legacy-cloud-providers**',
+          'k8s.io/legacy-cloud-providers**', // This no longer receives updates, but should still be grouped if used
           'k8s.io/metrics**',
           'k8s.io/mount-utils**',
           'k8s.io/pod-security-admission**',
