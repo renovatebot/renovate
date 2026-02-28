@@ -160,6 +160,16 @@ describe('workers/repository/process/extract-update', () => {
     });
   });
 
+  describe('update()', () => {
+    it('returns undefined for non-onboarded repos', async () => {
+      const config = {
+        repoIsOnboarded: false,
+      };
+      const res = await update(config, []);
+      expect(res).toBeUndefined();
+    });
+  });
+
   describe('isCacheExtractValid()', () => {
     let cachedExtract: BaseBranchCache;
 
