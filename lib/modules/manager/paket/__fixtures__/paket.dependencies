@@ -1,0 +1,22 @@
+source https://api.nuget.org/v3/index.json
+
+framework: net8.0
+
+nuget Fsharp.Core
+nuget xunit
+
+github forki/FsUnit FsUnit.fs
+
+// Gist files.
+gist fpellet/b28953bc4d1ad9ffa4c5a1c471d0db82 assert.fs
+
+// HTTP resources.
+http http://www.fssnip.net/1n decrypt.fs
+
+git http://github.com/forki/AskMe.git
+
+clitool dotnet-fable
+
+group GroupA
+  source https://api.nuget.org/v3/index.json
+  nuget Fake
