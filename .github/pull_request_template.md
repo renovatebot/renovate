@@ -46,3 +46,4 @@ The public repository: <URL>
 
 <!-- Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again. This makes it harder for us to review your work because we don't know what has changed. -->
 <!-- PRs will always be squashed by us when we merge your work. You can commit as many times as you need in this branch. -->
+<!-- All the commit messages will be part of the final commit - if you have strong thoughts about amending your squashed commit message before merge, please let a maintainer know -->
