@@ -8,6 +8,7 @@ import oxlint from 'eslint-plugin-oxlint';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import noRepoInLogger from './tools/eslint-rules/no-repo-in-logger.js';
 
 const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
@@ -77,7 +78,15 @@ export default tseslint.config(
   eslintConfigPrettier,
   {
     ...jsFiles,
+    plugins: {
+      'local-rules': {
+        rules: {
+          'no-repo-in-logger': noRepoInLogger,
+        },
+      },
+    },
     rules: {
+      'local-rules/no-repo-in-logger': 'error',
       'import-x/default': 2,
       'import-x/named': 2,
       'import-x/namespace': 2,
