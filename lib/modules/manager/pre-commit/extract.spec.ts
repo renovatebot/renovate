@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/util.ts';
@@ -22,6 +23,29 @@ const invalidRepoPrecommitConfig = Fixtures.get(
 const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml',
 );
+const pinnedPrecommitConfig = codeBlock`
+  failfast: true
+  repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.4.0
+      hooks:
+        - id: check-yaml
+
+    - repo: https://github.com/pre-commit/mirrors-prettier
+      rev: 6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode
+      hooks:
+        - id: prettier
+
+    - repo: https://github.com/crate-ci/typos
+      rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12
+      hooks:
+        - id: typos
+
+    - repo: https://github.com/python-jsonschema/check-jsonschema
+      rev: a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1
+      hooks:
+        - id: check-renovate
+`;
 
 describe('modules/manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
@@ -174,7 +198,7 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle unknown private git repos', () => {
-      // First attemp returns a result
+      // First attempt returns a result
       hostRules.find.mockReturnValueOnce({ token: 'value' });
       // But all subsequent checks (those with hostType), then fail:
       hostRules.find.mockReturnValue({});
@@ -188,6 +212,54 @@ describe('modules/manager/pre-commit/extract', () => {
             packageName: 'pre-commit/pre-commit-hooks',
             registryUrls: ['enterprise.com'],
             skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('can handle pinned repo versions', () => {
+      const result = extractPackageFile(pinnedPrecommitConfig, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v4.4.0',
+            datasource: 'github-tags',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}} # frozen: {{newValue}}',
+            currentValue: 'v3.0.0-alpha.9-for-vscode',
+            currentDigest: '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e',
+            datasource: 'github-tags',
+            depName: 'pre-commit/mirrors-prettier',
+            depType: 'repository',
+            packageName: 'pre-commit/mirrors-prettier',
+            replaceString:
+              '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}}  # frozen: {{newValue}}',
+            currentValue: 'v1.14.12',
+            currentDigest: '20b36ca07fa1bfe124912287ac8502cf12f140e6',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+            replaceString:
+              '20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}} # frozen: {{newValue}}',
+            currentValue: '0.23.1',
+            currentDigest: 'a00caac4f0cec045f7f67d222c3fcd0744285c51',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              'a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1',
           },
         ],
       });

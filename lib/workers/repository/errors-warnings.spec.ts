@@ -94,6 +94,29 @@ describe('workers/repository/errors-warnings', () => {
       `);
     });
 
+    it('returns 2 pr warnings text dependencyDashboard true with issue link', () => {
+      const config: RenovateConfig = { dependencyDashboardIssue: 123 };
+      const dependencyDashboard = true;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+        ],
+      };
+
+      const res = getDepWarningsPR(packageFiles, config, dependencyDashboard);
+      expect(res).toContain(
+        'Check the [Dependency Dashboard](../issues/123) for more information.',
+      );
+    });
+
     it('returns 2 pr warnings text dependencyDashboard false', () => {
       const config: RenovateConfig = {};
       const dependencyDashboard = false;

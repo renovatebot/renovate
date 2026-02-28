@@ -190,6 +190,27 @@ describe('util/exec/common', () => {
       });
     });
 
+    // GHSA-8wc6-vgrq-x6cf
+    it('never extends the process environment', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await exec(cmd, partial<RawExecOptions>());
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ extendEnv: false }),
+      );
+    });
+
     it('throws if an error occurs, when using CommandWithOptions', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
@@ -700,6 +721,27 @@ describe('util/exec/common', () => {
         stderr,
         stdout,
       });
+    });
+
+    // GHSA-8wc6-vgrq-x6cf
+    it('never extends the process environment', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await rawExec(cmd, partial<RawExecOptions>());
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ extendEnv: false }),
+      );
     });
 
     describe('is instrumented', () => {

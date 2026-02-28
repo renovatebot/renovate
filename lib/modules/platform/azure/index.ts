@@ -695,7 +695,7 @@ export async function ensureComment({
   } else {
     logger.debug(
       { repository: config.repository, issueNo: number, topic },
-      'Comment is already update-to-date',
+      'Comment is already up-to-date',
     );
   }
 
@@ -959,6 +959,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
         isRequired = true;
       }
       if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
+        // v8 ignore else -- TODO: add test #40625
         if (ids.filter((c) => c.id === t.id).length === 0) {
           // TODO #22198
           ids.push({ id: t.id!, name: reviewer, isRequired });

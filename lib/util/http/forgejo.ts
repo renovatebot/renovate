@@ -32,6 +32,12 @@ export class ForgejoHttp extends HttpBase<ForgejoHttpOptions> {
     super(hostType ?? 'forgejo', options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof ForgejoHttpOptions)[]);
+  }
+
   protected override async requestJsonUnsafe<T = unknown>(
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<ForgejoHttpOptions>,

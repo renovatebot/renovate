@@ -6,6 +6,7 @@
 #   - `env` can be specified per-step only
 #   - if `run` is used, `shell` must be explicitly specified
 name: 'Calculate matrix for `node_modules` prefetch'
+description: 'Calculate matrix for `node_modules` prefetch'
 inputs:
   repo:
     description: 'Repository name'

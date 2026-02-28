@@ -163,8 +163,14 @@ export interface RenovateSharedConfig {
  * Contains all options with globalOnly=true && inheritConfigSupport=true
  */
 export interface GlobalInheritableConfig {
+  bbUseDevelopmentBranch?: boolean;
   configFileNames?: string[];
+  onboarding?: boolean;
   onboardingAutoCloseAge?: number;
+  onboardingBranch?: string;
+  onboardingConfigFileName?: string;
+  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
+  onboardingPrTitle?: string;
 }
 
 // Config options used only within the global worker
@@ -240,6 +246,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
+  prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
@@ -249,6 +256,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  repositoryCacheForceLocal?: boolean;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
@@ -272,7 +280,6 @@ export interface LegacyAdminConfig {
   onboardingCommitMessage?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
-  onboardingPrTitle?: string;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
 
@@ -406,6 +413,7 @@ export interface RenovateConfig
   branchConcurrentLimit?: number | null;
   parentOrg?: string;
   prConcurrentLimit?: number;
+  commitHourlyLimit?: number;
   prHourlyLimit?: number;
 
   printConfig?: boolean;
