@@ -1,25 +1,8 @@
 import upath from 'upath';
-import type { ExecResult } from '~test/exec-util.ts';
-import { exec } from '~test/exec-util.ts';
+import { mockExecAll } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { CommandWithOptions } from '../../../util/exec/types.ts';
 import { runPaketUpdate } from './tool.ts';
 import type { UpdatePackage } from './types.ts';
-
-const defaultExecResult = { stdout: '', stderr: '' };
-export function mockExecAll(
-  execResult: ExecResult = defaultExecResult,
-): (string | CommandWithOptions)[] {
-  const snapshots: (string | CommandWithOptions)[] = [];
-  exec.mockImplementation((cmd) => {
-    snapshots.push(cmd);
-    if (execResult instanceof Error) {
-      throw execResult;
-    }
-    return execResult as never;
-  });
-  return snapshots;
-}
 
 const packageFilePath = './paket.dependencies';
 
@@ -77,7 +60,7 @@ describe('modules/manager/paket/tool', () => {
 
       await runPaketUpdate({ filePath: packageFilePath });
 
-      expect(execSnapshots).toEqual(['paket update']);
+      expect(execSnapshots.map((s) => s.cmd)).toEqual(['paket update']);
     });
     test.each([
       [
@@ -120,7 +103,7 @@ describe('modules/manager/paket/tool', () => {
 
         await runPaketUpdate(command);
 
-        expect(execSnapshots).toEqual([expected]);
+        expect(execSnapshots.map((s) => s.cmd)).toEqual([expected]);
       },
     );
     it('secure parameters (impossible case normally)', async () => {
@@ -133,7 +116,7 @@ describe('modules/manager/paket/tool', () => {
         version: '1 2 3',
       });
 
-      expect(execSnapshots).toEqual([
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
         `paket update --group 'Group A'  --version '1 2 3'  'FSharp Core' `,
       ]);
     });
