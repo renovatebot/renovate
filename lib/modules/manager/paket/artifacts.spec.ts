@@ -76,5 +76,27 @@ describe('modules/manager/paket/artifacts', () => {
 
       expect(result).toBeNull();
     });
+
+    it('return artefact error if cmd failed', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockRejectedValue(new Error('Cmd error'));
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).equals(lockFileName);
+          return Promise.resolve('Old fake lock file content');
+        },
+      );
+
+      const result = await updateArtifacts(updateArtifact);
+
+      expect(result).toEqual([
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: 'Cmd error',
+          },
+        },
+      ]);
+    });
   });
 });

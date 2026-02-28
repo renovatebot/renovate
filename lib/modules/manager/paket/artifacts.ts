@@ -14,22 +14,34 @@ export async function updateArtifacts(
   );
   const existingLockFileContent = await readLocalFile(lockFileName);
 
-  await runPaketUpdate({ filePath: lockFileName });
+  try {
+    await runPaketUpdate({ filePath: lockFileName });
 
-  const newLockFileContent = await readLocalFile(lockFileName);
+    const newLockFileContent = await readLocalFile(lockFileName);
 
-  if (existingLockFileContent === newLockFileContent) {
-    logger.debug(`Lock file ${lockFileName} is unchanged`);
-    return null;
-  }
+    if (existingLockFileContent === newLockFileContent) {
+      logger.debug(`Lock file ${lockFileName} is unchanged`);
+      return null;
+    }
 
-  return [
-    {
-      file: {
-        type: 'addition',
-        path: lockFileName,
-        contents: newLockFileContent,
+    return [
+      {
+        file: {
+          type: 'addition',
+          path: lockFileName,
+          contents: newLockFileContent,
+        },
       },
-    },
-  ];
+    ];
+  } catch (err) {
+    logger.debug({ err }, 'Failed to generate lock file');
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: err.stdout ?? err.message,
+        },
+      },
+    ];
+  }
 }
