@@ -806,6 +806,8 @@ export async function validateConfig(
         }
       }
     }
+
+    validateAllowedValues(key, val, currentPath, errors);
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
@@ -1022,6 +1024,37 @@ async function validateGlobalConfig(
           message: `Configuration option \`${currentPath}\` should be a JSON object.`,
         });
       }
+    }
+  }
+
+  validateAllowedValues(key, val, currentPath, errors);
+}
+
+function validateAllowedValues(
+  key: string,
+  val: any,
+  currentPath: string | undefined,
+  errors: ValidationMessage[],
+): void {
+  const option = options.find((o) => o.name === key);
+  if (option?.allowedValues?.length) {
+    if (val === null && option.default === null) {
+      // do nothing
+    } else if (isArray(val, isString)) {
+      const invalidOptions = val.filter(
+        (v) => !option.allowedValues?.includes(v),
+      );
+      if (invalidOptions.length) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid ${currentPath}: ${option.name} had invalid values \`${JSON.stringify(invalidOptions)}\` which are not part of the allowedValues: ${JSON.stringify(option.allowedValues)}`,
+        });
+      }
+    } else if (key !== 'versioning' && !option.allowedValues.includes(val)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Invalid ${currentPath}: ${option.name} had a value \`${JSON.stringify(val)}\` which was not part of the allowedValues: ${JSON.stringify(option.allowedValues)}`,
+      });
     }
   }
 }

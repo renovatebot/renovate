@@ -2,7 +2,7 @@ import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
-import type { RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfig } from './types.ts';
 import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
@@ -718,9 +718,13 @@ describe('config/validation', () => {
         true,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
+      expect(errors).toHaveLength(2);
       expect(errors).toMatchInlineSnapshot(`
         [
+          {
+            "message": "Invalid customManagers[0].customType: customType had a value \`"unknown"\` which was not part of the allowedValues: ["jsonata","regex"]",
+            "topic": "Configuration Error",
+          },
           {
             "message": "Invalid customType: unknown. Key is not a custom manager",
             "topic": "Configuration Error",
@@ -1591,6 +1595,47 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
+    it('errors if a value does not match the allowedValues', async () => {
+      const config: Partial<RenovateConfig> = {
+        // for a single value
+        // @ts-expect-error: contains invalid values
+        mode: 'not-valid',
+        // for an array
+        postUpdateOptions: ['invalid', 'another'],
+        hostRules: [
+          {
+            // this is allowed, as it's the default value
+            artifactAuth: null,
+          },
+        ],
+        packageRules: [
+          {
+            matchDepNames: ['/.*/'],
+            versioning: 'regex:^(?<major>1)',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchInlineSnapshot(`
+        [
+          {
+            "message": "Invalid mode: mode had a value \`"not-valid"\` which was not part of the allowedValues: ["full","silent"]",
+            "topic": "Configuration Error",
+          },
+          {
+            "message": "Invalid postUpdateOptions: postUpdateOptions had invalid values \`["invalid","another"]\` which are not part of the allowedValues: ["bundlerConservative","composerWithAll","composerNoMinimalChanges","dotnetWorkloadRestore","gomodMassage","gomodTidy","gomodTidy1.17","gomodTidyE","gomodUpdateImportPaths","gomodSkipVendor","gomodVendor","goGenerate","helmUpdateSubChartArchives","kustomizeInflateHelmCharts","npmDedupe","npmInstallTwice","pnpmDedupe","yarnDedupeFewer","yarnDedupeHighest"]",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
     it('errors if no bumpVersion filePattern is provided', async () => {
       // @ts-expect-error -- TODO: fix test
       const config = partial<RenovateConfig>({
@@ -1614,7 +1659,7 @@ describe('config/validation', () => {
         true,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(4);
     });
 
     it('errors if no matchStrings are provided for bumpVersion', async () => {
@@ -1638,7 +1683,7 @@ describe('config/validation', () => {
         true,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(4);
     });
 
     it('allow bumpVersion', async () => {
@@ -1662,7 +1707,7 @@ describe('config/validation', () => {
         true,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(4);
     });
   });
 
@@ -2313,6 +2358,35 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
+    });
+
+    it('errors if a value does not match the allowedValues', async () => {
+      const config: Partial<AllConfig> = {
+        // for a single value
+        // @ts-expect-error: contains invalid values
+        autodiscoverRepoOrder: 'middle-out',
+
+        // for an array
+        mergeConfidenceDatasources: ['some', 'value'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(2); // 2 * mergeConfidenceDatasources warnings
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchInlineSnapshot(`
+        [
+          {
+            "message": "Invalid autodiscoverRepoOrder: autodiscoverRepoOrder had a value \`"middle-out"\` which was not part of the allowedValues: ["asc","desc"]",
+            "topic": "Configuration Error",
+          },
+          {
+            "message": "Invalid mergeConfidenceDatasources: mergeConfidenceDatasources had invalid values \`["some","value"]\` which are not part of the allowedValues: ["go","maven","npm","nuget","packagist","pypi","rubygems"]",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
     });
   });
 });
