@@ -140,6 +140,12 @@ export async function getDependency(
         devDependencies: res.versions?.[version].devDependencies,
         attestation: isString(res.versions?.[version].dist?.attestations?.url),
       };
+      if (res.versions?.[version].dist?.integrity) {
+        release.newDigest = res.versions[version].dist.integrity;
+      }
+      if (res.versions?.[version].dist?.tarball) {
+        release.downloadUrl = res.versions[version].dist.tarball;
+      }
       const releaseTimestamp = asTimestamp(res.time?.[version]);
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
