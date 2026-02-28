@@ -1,9 +1,10 @@
 import { dir as tmpDir } from 'tmp-promise';
 import type { MockInstance } from 'vitest';
 import { GlobalConfig } from '../../../config/global.ts';
-import * as memCache from '../memory/index.ts';
 import * as packageCache from './index.ts';
 import { withCache } from './with-cache.ts';
+
+vi.unmock('./index.ts');
 
 describe('util/cache/package/with-cache', () => {
   let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
@@ -14,7 +15,6 @@ describe('util/cache/package/with-cache', () => {
   beforeEach(async () => {
     vi.useRealTimers();
     GlobalConfig.reset();
-    memCache.init();
     dirResult = await tmpDir({ unsafeCleanup: true });
     setCache = vi.spyOn(packageCache, 'setWithRawTtl');
     await packageCache.init({ cacheDir: dirResult.path });
