@@ -10,6 +10,7 @@
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
+      "replacements:edb-jdbc-to-enterprisedb",
       "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
@@ -243,6 +244,23 @@
         "matchCurrentValue": "/^((debian|alpine)-)?1\\.29\\.2$/",
         "replacementName": "docker",
         "replacementVersion": "23.0.0-cli"
+      }
+    ]
+  },
+  "edb-jdbc-to-enterprisedb": {
+    "description": "`com.edb:edb-jdbc` and `com.edb:edb-jdbc18` were moved to `com.enterprisedb:edb-jdbc`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
+      },
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc18"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
       }
     ]
   },
