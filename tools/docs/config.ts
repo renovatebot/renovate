@@ -66,20 +66,45 @@ function buildHtmlTable(data: string[][]): string {
     }
 
     table += indent`${2}<tr>\n`;
-    for (const col of row) {
+    for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      const col = row[colIndex];
+
       if (i === 0) {
+        // header row
         table += indent`${3}<th>${col}</th>\n`;
         continue;
       }
+
+      const cellHtml = formatCell(col, row, colIndex);
+
       table +=
-        indent`${3}<td>${col}` +
+        indent`${3}${cellHtml}` +
         (`${col}`.endsWith('\n') ? indent`${3}` : '') +
-        `</td>\n`;
+        `\n`;
     }
     table += indent`${2}</tr>\n`;
   }
   table += indent`${1}</tbody>\n</table>\n`;
   return table;
+}
+
+// Helper: format a cell based on row type
+function formatCell(col: string, row: string[], colIndex: number): string {
+  const firstCol = (row[0] ?? '').toLowerCase().trim();
+  const isParentsRow = firstCol === 'parents';
+
+  // Special formatting for "parents" row, second column
+  if (isParentsRow && colIndex === 1) {
+    const items = col
+      .split(',')
+      .map((s) => `<code>${s.trim()}</code>`)
+      .map((item) => `<span>${item}</span>`)
+      .join('');
+    return `<td class="parents">${items}</td>`;
+  }
+
+  // Default cell
+  return `<td>${col}</td>`;
 }
 
 function genTable(obj: [string, string][], type: string, def: any): string {
