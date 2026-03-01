@@ -50,7 +50,7 @@ describe('modules/versioning/hex/index', () => {
   });
 
   it('getPinnedValue returns == prefixed version', () => {
-    expect(hexScheme.getPinnedValue?.('1.2.3')).toBe('== 1.2.3');
+    expect(hexScheme.getPinnedValue!('1.2.3')).toBe('== 1.2.3');
   });
 
   it.each`
