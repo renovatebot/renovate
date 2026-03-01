@@ -35,6 +35,11 @@ export default tseslint.config(
       '.github/workflows/**/*.js',
       '.worktrees/**/*',
       '.markdownlint-cli2.mjs',
+      '**/.agents/**',
+      '**/.claude/**',
+      '**/.opencode/**',
+      '**/AGENTS.md',
+      '**/CLAUDE.md',
     ],
   },
   {
