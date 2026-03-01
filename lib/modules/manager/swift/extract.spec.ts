@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -259,7 +260,7 @@ describe('modules/manager/swift/extract', () => {
     });
 
     it('handles dependencies with local package', () => {
-      const content = `
+      const content = codeBlock`
         let package = Package(
           name: "MyPackage",
           dependencies: [
@@ -272,7 +273,7 @@ describe('modules/manager/swift/extract', () => {
     });
 
     it('handles dependencies with name (deprecated args)', () => {
-      const content = `
+      const content = codeBlock`
         let package = Package(
           name: "MyPackage",
           dependencies: [
@@ -305,7 +306,7 @@ describe('modules/manager/swift/extract', () => {
     });
 
     it('extracts multiple dependencies with traits arguments', () => {
-      const content = `
+      const content = codeBlock`
         let package = Package(
           name: "MyPackage",
           dependencies: [
