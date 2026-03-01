@@ -226,16 +226,8 @@ export function parseComment(commentBody: string): CommentData {
 
   const bareMatch = bareTokenRe.exec(commentBody);
   if (bareMatch?.groups?.token) {
-    const token = bareMatch.groups.token;
-    if (versionLikeRe.test(token)) {
-      return {
-        pinnedVersion: token,
-        matchedString: bareMatch[0],
-        index: bareMatch.index,
-      };
-    }
     return {
-      ref: token,
+      ref: bareMatch.groups.token,
       matchedString: bareMatch[0],
       index: bareMatch.index,
     };
