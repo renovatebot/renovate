@@ -8,7 +8,7 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import * as aeCvss from 'ae-cvss-calculator';
+import * as _aeCvss from 'ae-cvss-calculator';
 import { z } from 'zod/v3';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
@@ -30,6 +30,9 @@ import type {
   SeverityDetails,
   Vulnerability,
 } from './types.ts';
+
+const { fromVector } = (_aeCvss as unknown as { default: typeof _aeCvss })
+  .default;
 
 export class Vulnerabilities {
   private static osvOffline: Promise<OsvOffline> | undefined;
@@ -530,7 +533,7 @@ export class Vulnerabilities {
     });
 
     try {
-      const parsedCvssScore: CvssVector<any> | null = aeCvss.fromVector(vector);
+      const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
       const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
 
       return [res.baseScore.toFixed(1), res.baseSeverity];
