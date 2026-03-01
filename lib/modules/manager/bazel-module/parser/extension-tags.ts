@@ -3,6 +3,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { kvParams } from './common.ts';
 import type { Ctx } from './context.ts';
 
+import { crateExtensionPrefix, crateExtensionTags } from './crate.ts';
 import { mavenExtensionPrefix, mavenExtensionTags } from './maven.ts';
 import { ociExtensionPrefix, ociExtensionTags } from './oci.ts';
 
@@ -20,10 +21,14 @@ import { ociExtensionPrefix, ociExtensionTags } from './oci.ts';
 // by assuming the extension names start with well-known prefixes.
 
 const supportedExtensionRegex = regEx(
-  `^(${ociExtensionPrefix}|${mavenExtensionPrefix}).*$`,
+  `^(${crateExtensionPrefix}|${ociExtensionPrefix}|${mavenExtensionPrefix}).*$`,
 );
 
-const supportedExtensionTags = [...mavenExtensionTags, ...ociExtensionTags];
+const supportedExtensionTags = [
+  ...crateExtensionTags,
+  ...mavenExtensionTags,
+  ...ociExtensionTags,
+];
 
 const supportedExtensionTagsRegex = regEx(
   `^(${supportedExtensionTags.join('|')})$`,

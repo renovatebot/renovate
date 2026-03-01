@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { BazelDatasource } from '../../datasource/bazel/index.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
@@ -16,6 +17,7 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   BazelDatasource.id,
+  CrateDatasource.id,
   DockerDatasource.id,
   GithubTagsDatasource.id,
   MavenDatasource.id,

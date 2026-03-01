@@ -4,6 +4,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { BazelDatasource } from '../../datasource/bazel/index.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
@@ -366,6 +367,82 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unspecified-version',
             registryUrls: ['https://example.com/custom_registry'],
+          },
+        ],
+      });
+    });
+
+    it('returns crate.spec dependencies', async () => {
+      const input = codeBlock`
+        crate.spec(
+            package = "axum",
+            version = "0.8.4",
+        )
+        crate.spec(
+            package = "tokio",
+            version = "1.45.1",
+            features = [
+                "full",
+            ],
+        )
+        crate.spec(
+            package = "custom_crate",
+            git = "https://github.com/example/custom_crate.git",
+            tag = "v1.0.0",
+        )
+        crate.spec(
+            package = "local_crate",
+            path = "/var/crate",
+        )
+        crate.spec(
+            package = "no_version_crate",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: CrateDatasource.id,
+            depType: 'crate_spec',
+            depName: 'axum',
+            currentValue: '0.8.4',
+            managerData: { nestedVersion: true },
+          },
+          {
+            datasource: CrateDatasource.id,
+            depType: 'crate_spec',
+            depName: 'tokio',
+            currentValue: '1.45.1',
+            managerData: { nestedVersion: true },
+          },
+          {
+            datasource: 'github-tags',
+            depType: 'crate_spec',
+            depName: 'custom_crate',
+            currentValue: 'v1.0.0',
+            packageName: 'example/custom_crate',
+            registryUrls: ['https://github.com'],
+            managerData: { nestedVersion: false },
+          },
+          {
+            datasource: CrateDatasource.id,
+            depType: 'crate_spec',
+            depName: 'local_crate',
+            currentValue: '',
+            managerData: { nestedVersion: false },
+            skipReason: 'path-dependency',
+          },
+          {
+            datasource: CrateDatasource.id,
+            currentValue: '',
+            depName: 'no_version_crate',
+            depType: 'crate_spec',
+            managerData: {
+              nestedVersion: false,
+            },
+            skipReason: 'invalid-dependency-specification',
           },
         ],
       });
