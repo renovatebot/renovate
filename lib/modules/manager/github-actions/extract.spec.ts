@@ -433,6 +433,11 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'actions/checkout@1e204e # v2.1.0',
         },
         {
+          currentDigestShort: '1e204e',
+          currentValue: 'some-ref-name',
+          replaceString: 'actions/checkout@1e204e # some-ref-name',
+        },
+        {
           currentValue: '01aecc#v2.1.0',
           replaceString: 'actions/checkout@01aecc#v2.1.0',
         },
