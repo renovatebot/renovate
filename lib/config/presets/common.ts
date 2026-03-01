@@ -33,6 +33,7 @@ export const removedPresets: Record<string, string | null> = {
   'npm:unpublishSafe': 'security:minimumReleaseAgeNpm',
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
     'replacements:messageFormat-to-scoped',
+  'replacements:ojdbc10-to-ojdbc11': 'replacements:ojdbc-to-ojdbc11',
   'regexManagers:azurePipelinesVersions':
     'customManagers:azurePipelinesVersions',
   'regexManagers:biomeVersions': 'customManagers:biomeVersions',
