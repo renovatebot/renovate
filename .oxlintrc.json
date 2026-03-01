@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript"],
+  "plugins": ["import", "typescript", "promise"],
+  "jsPlugins": ["./tools/lint/rules.cjs"],
   "categories": {},
   "rules": {
     "eqeqeq": "error",
@@ -15,20 +16,62 @@
     "import/default": "error",
     "import/named": "error",
     "import/namespace": "error",
+    "import/export": "error",
+    "import/no-self-import": "error",
+    "import/no-duplicates": "warn",
+    "import/no-named-as-default": "warn",
+    "import/no-absolute-path": "error",
+    "import/no-dynamic-require": "error",
+    "no-restricted-imports": [
+      "error",
+      { "paths": ["nock", "parse-link-header", "path"] }
+    ],
+    "renovate/no-tools-import": "error",
+    "object-shorthand": ["error", "always"],
     "typescript/consistent-type-imports": [
       "error",
       {
         "disallowTypeAnnotations": false
       }
     ],
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "as",
+        "objectLiteralTypeAssertions": "allow"
+      }
+    ],
+    "typescript/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true
+      }
+    ],
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/no-unsafe-call": "off",
+    "typescript/no-unsafe-member-access": "off",
+    "typescript/no-unsafe-return": "off",
     "no-unused-vars": "error",
-    "no-unassigned-vars": "error"
+    "no-unassigned-vars": "error",
+    "promise/always-return": "error",
+    "promise/catch-or-return": "error",
+    "promise/no-return-wrap": "error"
   },
   "overrides": [
     {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
-        "no-template-curly-in-string": "off"
+        "no-template-curly-in-string": "off",
+        "typescript/explicit-function-return-type": "off",
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["**/*.{js,mjs,cjs}"],
+      "rules": {
+        "typescript/explicit-function-return-type": "off"
       }
     },
     {

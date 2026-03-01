@@ -78,6 +78,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         if (upath.extname(file) === '.js') {
           const require = createRequire(import.meta.url);
           try {
+            // oxlint-disable-next-line import/no-dynamic-require
             tmpConfig = require(absoluteFilePath);
           } catch {
             // If require also fails (e.g. strict ESM package), throw the original import error

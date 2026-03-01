@@ -16,10 +16,6 @@ describe('workers/global/limits', () => {
     resetAllLimits();
   });
 
-  beforeEach(() => {
-    resetAllLimits();
-  });
-
   it('increments limited value', () => {
     setMaxLimit('Commits', 3);
 

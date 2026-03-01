@@ -1,11 +1,29 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "enabled": false
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": false,
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
       "style": {
-        "noParameterProperties": "error"
+        "noParameterProperties": "error",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "conventions": [
+              {
+                "selector": { "kind": "enumMember" },
+                "formats": ["CONSTANT_CASE"]
+              },
+              { "match": ".*" }
+            ]
+          }
+        }
       }
     }
   },
@@ -20,9 +38,6 @@
         }
       }
     }
-  },
-  "formatter": {
-    "enabled": false
   },
   "files": {
     "includes": [
@@ -44,5 +59,26 @@
       "!tools/mkdocs/overrides",
       "!tools/mkdocs/site"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "*.config.ts",
+        "*.config.mts",
+        "*.config.mjs",
+        "*.config.js",
+        "*.config.cjs",
+        "test/**",
+        "tools/**",
+        "**/*.spec.ts"
+      ],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUndeclaredDependencies": "off"
+          }
+        }
+      }
+    }
+  ]
 }
