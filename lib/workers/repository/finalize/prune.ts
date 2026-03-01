@@ -27,11 +27,13 @@ async function cleanUpBranches(
 
   for (const branchName of remainingBranches) {
     try {
-      // get base branch from branch name if base branches are configured
-      // use default branch if no base branches are configured
-      // use defaul branch name if no match (can happen when base branches are configured later)
+      // try to extract base branch from branch name (for multiple base branches)
+      // fall back to the configured base branch, then the repository default
+      // (extraction can fail for branches created before baseBranches was configured)
       const baseBranch =
-        baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
+        baseBranchRe?.exec(branchName)?.[1] ??
+        config.baseBranches?.[0] ??
+        config.defaultBranch!;
       const pr = await platform.findPr({
         branchName,
         state: 'open',
@@ -116,11 +118,11 @@ async function cleanUpBranches(
 }
 
 /**
- * Calculates a {RegExp} to extract the base branch from a branch name if base branch patterns is configured.
+ * Calculates a {RegExp} to extract the base branch from a branch name if base branches are configured.
  * @param config Renovate configuration
  */
 function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
-  if (!config.baseBranchPatterns?.length) {
+  if (!config.baseBranches?.length) {
     return null;
   }
 
@@ -131,8 +133,7 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
     .map(escapeRegExp);
 
   // calculate possible base branches and escape for regex
-  // if baseBranchPatterns is configured, baseBranches will be defined too
-  const baseBranches = config.baseBranches!.map(escapeRegExp);
+  const baseBranches = config.baseBranches.map(escapeRegExp);
 
   // create regex to extract base branche from branch name
   const baseBranchRe = regEx(
