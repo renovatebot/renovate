@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './index.ts';
+import { extractPep723 } from './utils.ts';
 
-describe('modules/manager/pep723/extract', () => {
-  describe('extractPackageFile()', () => {
+describe('modules/manager/pep723/utils', () => {
+  describe('parsePep723()', () => {
     it('should extract dependencies', () => {
-      const res = extractPackageFile(
+      const res = extractPep723(
         codeBlock`
           # /// script
           # requires-python = ">=3.11"
@@ -40,7 +40,7 @@ describe('modules/manager/pep723/extract', () => {
     });
 
     it('should skip invalid dependencies', () => {
-      const res = extractPackageFile(
+      const res = extractPep723(
         codeBlock`
           # /// script
           # requires-python = "==3.11"
@@ -69,7 +69,7 @@ describe('modules/manager/pep723/extract', () => {
     });
 
     it('should return null on missing dependencies', () => {
-      const res = extractPackageFile(
+      const res = extractPep723(
         codeBlock`
           # /// script
           # requires-python = ">=3.11"
@@ -82,7 +82,7 @@ describe('modules/manager/pep723/extract', () => {
     });
 
     it('should return null on invalid TOML', () => {
-      const res = extractPackageFile(
+      const res = extractPep723(
         codeBlock`
           # /// script
           # requires-python
@@ -99,7 +99,7 @@ describe('modules/manager/pep723/extract', () => {
     });
 
     it('should return null if there is no PEP 723 metadata', () => {
-      const res = extractPackageFile(
+      const res = extractPep723(
         codeBlock`
           if True:
               print("requires-python>=3.11")
