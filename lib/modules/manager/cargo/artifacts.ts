@@ -51,6 +51,13 @@ async function cargoUpdatePrecise(
   // First update individual dependencies to their `newVersion`. Necessary when
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
+    // If the range is bumped in Cargo.toml, the old lockedVersion may no longer
+    // exist in Cargo's dependency graph, so let the --workspace update at the
+    // end re-resolve it instead.
+    if (dep.currentValue && dep.newValue && dep.currentValue !== dep.newValue) {
+      continue;
+    }
+
     cmds.push(
       `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
