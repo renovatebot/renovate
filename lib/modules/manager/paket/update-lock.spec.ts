@@ -1,4 +1,4 @@
-import { beforeEach, describe } from 'vitest';
+import { describe } from 'vitest';
 import { fs } from '~test/util.ts';
 import type { UpdateLockedConfig } from '../types.ts';
 import * as tool from './tool.ts';
@@ -8,20 +8,6 @@ vi.mock('../../../util/fs');
 
 describe('modules/manager/paket/update-lock', () => {
   const packageFileName = '/app/test/paket.dependencies';
-
-  beforeEach(() => {
-    fs.getSiblingFileName.mockImplementation(
-      (fileName: string, siblingName: string) => {
-        if (fileName !== packageFileName) {
-          throw new Error(`Not expected fileName: ${fileName}`);
-        }
-        if (siblingName !== 'paket.lock') {
-          throw new Error(`Not expected siblingName: ${siblingName}`);
-        }
-        return '/app/test/paket.lock';
-      },
-    );
-  });
 
   describe('updateLockedDependency()', () => {
     const lockFileName = '/app/test/paket.lock';
