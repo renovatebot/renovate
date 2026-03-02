@@ -4032,6 +4032,37 @@ These must be known by [Containerbase](https://github.com/containerbase/base).
 !!! note
     When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
 
+For example:
+
+```json title="Adding a tool requirement"
+{
+  "postUpgradeTasks": {
+    "commands": ["make generate"],
+    "installTools": {
+      "golang": {}
+    }
+  }
+}
+```
+
+```json title="Utilising constraints for tool requirements"
+{
+  "constraints": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
+  "postUpgradeTasks": {
+    "commands": ["npm install", "npm run update-readme"],
+    "installTools": {
+      "node": {}
+    }
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    The tool objects inside `installTools` currently do not expose any additional configurability.
+
 ### workingDirTemplate
 
 A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
