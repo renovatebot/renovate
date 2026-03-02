@@ -219,7 +219,7 @@ export class CrateDatasource extends Datasource {
     // throttling of one request per second.
     const crateUrl = `${apiBaseUrl}crates/${packageName}?include=`;
 
-    logger.debug(
+    logger.trace(
       { crateUrl, packageName, registryUrl: info.rawUrl },
       'downloading crate metadata',
     );
@@ -272,7 +272,7 @@ export class CrateDatasource extends Datasource {
       packageName.toLowerCase(),
     );
     const crateUrl = joinUrlParts(info.rawUrl, ...packageSuffix);
-    logger.debug(
+    logger.trace(
       { crateUrl, packageName, registryUrl: info.rawUrl },
       'fetching crate records from sparse index',
     );
@@ -530,7 +530,7 @@ export class CrateDatasource extends Datasource {
 
     const apiBaseUrl = joinUrlParts(config.api, 'api/v1/');
     const url = `${apiBaseUrl}crates/${packageName}/${release.versionOrig ?? release.version}`;
-    logger.debug(
+    logger.trace(
       { url, packageName, version: release.version, registryUrl },
       'fetching crate release timestamp',
     );
