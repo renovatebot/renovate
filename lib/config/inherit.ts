@@ -6,9 +6,13 @@ export class InheritConfig {
   static OPTIONS: readonly (keyof GlobalInheritableConfig)[] = [
     'bbUseDevelopmentBranch',
     'configFileNames',
+    'onboarding',
     'onboardingAutoCloseAge',
     'onboardingBranch',
     'onboardingCommitMessage',
+    'onboardingConfigFileName',
+    'onboardingNoDeps',
+    'onboardingPrTitle',
   ];
 
   private static config: GlobalInheritableConfig = {};

@@ -109,7 +109,7 @@ export async function checkOnboardingBranch(
       Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
         .length === 0
     ) {
-      if (config.onboardingNoDeps !== 'enabled') {
+      if (getInheritedOrGlobal('onboardingNoDeps') !== 'enabled') {
         throw new Error(REPOSITORY_NO_PACKAGE_FILES);
       }
     }

@@ -403,7 +403,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const next = linkHeader?.next;
       const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
-        let lastPage = parseInt(linkHeader.last.page);
+        let lastPage = parseInt(linkHeader.last.page, 10);
         // v8 ignore else -- TODO: add test #40625
         if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);

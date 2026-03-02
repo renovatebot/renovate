@@ -16,7 +16,10 @@ describe('workers/repository/onboarding/branch/create', () => {
 
   beforeEach(() => {
     config = getConfig();
-    GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
+    GlobalConfig.set({
+      onboardingBranch: config.onboardingBranch,
+      onboardingConfigFileName: config.onboardingConfigFileName,
+    });
   });
 
   describe('createOnboardingBranch', () => {
@@ -240,7 +243,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = undefined;
+        GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
 
         await createOnboardingBranch(config);
 
@@ -265,7 +268,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = 'superConfigFile.yaml';
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: 'superConfigFile.yaml',
+        });
 
         await createOnboardingBranch(config);
 
@@ -291,7 +297,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+        });
 
         await createOnboardingBranch(config);
 
@@ -317,7 +326,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+        });
 
         await createOnboardingBranch(config);
 
