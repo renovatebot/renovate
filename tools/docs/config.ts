@@ -8,7 +8,7 @@ import {
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { replaceContent } from './utils.ts';
+import { formatCell, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -75,7 +75,7 @@ function buildHtmlTable(data: string[][]): string {
         continue;
       }
 
-      const cellHtml = formatCell(col, row, colIndex);
+      const cellHtml = formatCell(row, colIndex);
 
       table +=
         indent`${3}${cellHtml}` +
@@ -86,25 +86,6 @@ function buildHtmlTable(data: string[][]): string {
   }
   table += indent`${1}</tbody>\n</table>\n`;
   return table;
-}
-
-// Helper: format a cell based on row type
-function formatCell(col: string, row: string[], colIndex: number): string {
-  const firstCol = (row[0] ?? '').toLowerCase().trim();
-  const isParentsRow = firstCol === 'parents';
-
-  // Special formatting for "parents" row, second column
-  if (isParentsRow && colIndex === 1) {
-    const items = col
-      .split(',')
-      .map((s) => `<code>${s.trim()}</code>`)
-      .map((item) => `<span>${item}</span>`)
-      .join('');
-    return `<td class="parents">${items}</td>`;
-  }
-
-  // Default cell
-  return `<td>${col}</td>`;
 }
 
 function genTable(obj: [string, string][], type: string, def: any): string {
