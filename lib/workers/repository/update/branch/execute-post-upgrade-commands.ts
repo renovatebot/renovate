@@ -144,6 +144,18 @@ export async function postUpgradeCommandsExecutor(
                 RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: dataFilePath,
               };
             }
+            if (upgrade.postUpgradeTasks?.installTools) {
+              execOpts.toolConstraints ??= [];
+
+              for (const [tool] of Object.entries(
+                upgrade.postUpgradeTasks?.installTools,
+              )) {
+                execOpts.toolConstraints.push({
+                  toolName: tool,
+                  constraint: upgrade.constraints?.[tool],
+                });
+              }
+            }
             const execResult = await exec(compiledCmd, execOpts);
 
             logger.debug(

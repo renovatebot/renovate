@@ -169,6 +169,7 @@ const options: Readonly<RenovateOptions>[] = [
       commands: [],
       fileFilters: [],
       executionMode: 'update',
+      installTools: {},
     },
   },
   {
@@ -206,6 +207,21 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     parents: ['postUpgradeTasks'],
     default: ['**/*'],
+    cli: false,
+  },
+  {
+    name: 'installTools',
+    description: 'Install tools before executing commands',
+    type: 'object',
+    parents: ['postUpgradeTasks'],
+    default: {},
+    additionalProperties: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+    mergeable: false,
+    freeChoice: true,
     cli: false,
   },
   {
