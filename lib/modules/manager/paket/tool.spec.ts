@@ -62,7 +62,8 @@ describe('modules/manager/paket/tool', () => {
 
       expect(execSnapshots.map((s) => s.cmd)).toEqual(['paket update']);
     });
-    test.each([
+
+    it.each([
       [
         { filePath: packageFilePath, packageName: 'FSharp.Core' },
         'paket update FSharp.Core ',
@@ -106,6 +107,7 @@ describe('modules/manager/paket/tool', () => {
         expect(execSnapshots.map((s) => s.cmd)).toEqual([expected]);
       },
     );
+
     it('secure parameters (impossible case normally)', async () => {
       const execSnapshots = mockExecAll();
 
