@@ -552,9 +552,6 @@ importers:
       eslint-plugin-oxlint:
         specifier: 1.50.0
         version: 1.50.0
-      eslint-plugin-promise:
-        specifier: 7.2.1
-        version: 7.2.1(eslint@9.39.3)
       expect-more-jest:
         specifier: 5.5.0
         version: 5.5.0
