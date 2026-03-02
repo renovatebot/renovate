@@ -497,12 +497,55 @@ jobs:
           fail_ci_if_error: github.event_name != 'pull_request'
           verbose: true
 
+  coverage-threshold:
+    needs:
+      - test
+      - setup-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: success() && github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          filter: blob:none # we don't need all blobs
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          show-progress: false
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: coverage-*
+          path: coverage
+          merge-multiple: true
+
+      - name: Merge coverage reports
+        run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
+
+      - name: Report coverage
+        run: pnpm nyc report -t ./coverage/nyc --skip-full -r text -r text-summary
+
+      - name: Check coverage threshold
+        run: |
+          pnpm nyc check-coverage -t ./coverage/nyc \
+            --statements 99.88 \
+            --branches 97.84 \
+            --functions 99.96 \
+            --lines 99.87 \
+
   # Catch-all required check for test matrix and coverage
   test-success:
     needs:
       - setup
       - test
       - codecov
+      - coverage-threshold
       - lint-actions
     runs-on: ubuntu-latest
     timeout-minutes: 1
@@ -532,6 +575,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.codecov.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled coverage-threshold
+        if: |
+          needs.coverage-threshold.result == 'failure' ||
+          needs.coverage-threshold.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped coverage-threshold when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.coverage-threshold.result == 'skipped'
         run: exit 1
 
       - name: Fail for failed or cancelled Actions linting
@@ -719,6 +775,7 @@ jobs:
       - test-success
       - build-docs
       - codecov
+      - coverage-threshold
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
