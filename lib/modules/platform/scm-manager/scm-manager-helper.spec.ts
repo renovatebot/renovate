@@ -62,7 +62,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     },
   };
 
-  describe(getCurrentUser, () => {
+  describe('getCurrentUser', () => {
     it('should return the current user', async () => {
       const expectedUser: User = {
         mail: 'test@test.de',
@@ -88,7 +88,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     );
   });
 
-  describe(getRepo, () => {
+  describe('getRepo', () => {
     it('should return the repo', async () => {
       httpMock
         .scope(endpoint)
@@ -119,7 +119,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     );
   });
 
-  describe(getAllRepos, () => {
+  describe('getAllRepos', () => {
     it('should return all repos', async () => {
       httpMock
         .scope(endpoint)
@@ -151,7 +151,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     );
   });
 
-  describe(getDefaultBranch, () => {
+  describe('getDefaultBranch', () => {
     it('should return the default branch', async () => {
       httpMock
         .scope(endpoint)
@@ -182,7 +182,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     );
   });
 
-  describe(getAllRepoPrs, () => {
+  describe('getAllRepoPrs', () => {
     it('should return all repo PRs', async () => {
       httpMock
         .scope(endpoint)
@@ -244,7 +244,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     );
   });
 
-  describe(getRepoPr, () => {
+  describe('getRepoPr', () => {
     it('should return the repo PR', async () => {
       httpMock
         .scope(endpoint)
@@ -279,7 +279,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     );
   });
 
-  describe(createScmPr, () => {
+  describe('createScmPr', () => {
     it('should create PR for a repo', async () => {
       const expectedCreateParams: PullRequestCreateParams = {
         source: 'feature/test',
@@ -338,7 +338,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     );
   });
 
-  describe(updateScmPr, () => {
+  describe('updateScmPr', () => {
     it('should update PR for a repo', async () => {
       const expectedUpdateParams: PullRequestUpdateParams = {
         title: 'Test Title',
