@@ -8,7 +8,6 @@ describe('modules/versioning/index', () => {
   it('should fallback to semver-coerced', () => {
     const semverCoerced = allVersioning.get(semverCoercedVersioning.id);
     expect(allVersioning.get(undefined)).toBe(semverCoerced);
-
     expect(allVersioning.get('unknown')).toBe(semverCoerced);
   });
 
