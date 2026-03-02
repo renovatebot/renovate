@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript", "promise"],
+  "plugins": ["import", "typescript", "promise", "vitest"],
   "jsPlugins": ["./tools/lint/rules.cjs"],
   "categories": {},
   "rules": {
@@ -64,6 +64,7 @@
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
         "no-template-curly-in-string": "off",
+        "jest/valid-title": "error",
         "typescript/explicit-function-return-type": "off",
         "no-restricted-imports": "off"
       }
