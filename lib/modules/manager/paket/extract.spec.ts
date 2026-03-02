@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { beforeEach, describe } from 'vitest';
 import { fs } from '~test/util.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
@@ -25,7 +26,7 @@ describe('modules/manager/paket/extract', () => {
 
   describe('extractPackageFile()', () => {
     const config: ExtractConfig = {};
-    const packageFileContent = `
+    const packageFileContent = codeBlock`
 source https://api.nuget.org/v3/index.json
 
 nuget Fsharp.Core
@@ -37,7 +38,7 @@ group GroupA
   nuget xunit
 `;
     const lockFileName = '/app/test/paket.lock';
-    const lockFileContent = `
+    const lockFileContent = codeBlock`
 NUGET
   remote: https://api.nuget.org/v3/index.json
     FSharp.Core (9.0.300)
@@ -123,14 +124,14 @@ NUGET
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
           expect(filename).equals(lockFileName);
-          return Promise.resolve(`
+          return Promise.resolve(codeBlock`
 NUGET
   remote: https://api.nuget.org/v3/index.json
     FSharp.Core (9.0.300)
 `);
         },
       );
-      const packageFileContent = `
+      const packageFileContent = codeBlock`
 source https://api.nuget.org/v3/index.json
 
 nuget Fsharp.Core

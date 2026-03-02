@@ -1,10 +1,11 @@
+import { codeBlock } from 'common-tags';
 import type { LockFileDependency } from '../types.ts';
 import { parse } from './lock-file.ts';
 
 describe('modules/manager/paket/parsers/lock-file', () => {
   describe('parse()', () => {
     it('should return all nuget package version on main group', () => {
-      const result = parse(`
+      const result = parse(codeBlock`
 RESTRICTION: == net8.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
@@ -34,7 +35,7 @@ NUGET
     });
 
     it('should return all nuget sources on main group', () => {
-      const result = parse(`
+      const result = parse(codeBlock`
 RESTRICTION: == net8.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
@@ -64,7 +65,7 @@ NUGET
     });
 
     it('should ignore other package line', () => {
-      const result = parse(`
+      const result = parse(codeBlock`
 RESTRICTION: == net8.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
@@ -80,7 +81,7 @@ NUGET
     });
 
     it('should return all nuget sources of all groups', () => {
-      const result = parse(`
+      const result = parse(codeBlock`
 RESTRICTION: == net8.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
