@@ -400,8 +400,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.3(typescript@5.9.3))
       '@smithy/util-stream':
-        specifier: 4.5.12
-        version: 4.5.12
+        specifier: 4.5.13
+        version: 4.5.13
       '@types/auth-header':
         specifier: 1.0.6
         version: 1.0.6
@@ -2329,8 +2329,8 @@ packages:
     resolution: {integrity: sha512-HrBzistfpyE5uqTwiyLsFHscgnwB0kgv8vySp7q5kZ0Eltn/tjosaSGGDj/jJ9ys7pWzIP/icE2d+7vMKXLv7A==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/util-stream@4.5.12':
-    resolution: {integrity: sha512-D8tgkrmhAX/UNeCZbqbEO3uqyghUnEmmoO9YEvRuwxjlkKKUE7FOgCJnqpTlQPe9MApdWPky58mNQQHbnCzoNg==}
+  '@smithy/util-stream@4.5.13':
+    resolution: {integrity: sha512-ZJQh++mmjO7JiWAW4SdWFrsde1VE038g4uGtkTlvCGcpytMLsxIAg9o9blorLYaQG47EfY9QjLP38od88NLL8w==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-stream@4.5.15':
@@ -9334,7 +9334,7 @@ snapshots:
       '@smithy/types': 4.13.0
       tslib: 2.8.1
 
-  '@smithy/util-stream@4.5.12':
+  '@smithy/util-stream@4.5.13':
     dependencies:
       '@smithy/fetch-http-handler': 5.3.11
       '@smithy/node-http-handler': 4.4.12
