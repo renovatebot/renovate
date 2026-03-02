@@ -3417,7 +3417,7 @@ The following example matches any file in directories starting with `app/`:
 }
 ```
 
-The following example matches any `.toml` file in a `v2` or `v3` directory:
+The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory:
 
 ```json
 {
