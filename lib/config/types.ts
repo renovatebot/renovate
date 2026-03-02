@@ -168,6 +168,7 @@ export interface GlobalInheritableConfig {
   onboarding?: boolean;
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
+  onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
