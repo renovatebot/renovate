@@ -352,6 +352,10 @@ function isExclusiveRegistry(ctx: Ctx): boolean {
 export function handleRegistryUrl(ctx: Ctx): Ctx {
   let localVariables = ctx.globalVars;
 
+  if (!ctx.tokenMap.registryUrl) {
+    return ctx;
+  }
+
   if (ctx.tokenMap.name) {
     const nameTokens = loadFromTokenMap(ctx, 'name');
     const nameValue = interpolateString(nameTokens, ctx, localVariables);
