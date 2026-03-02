@@ -654,6 +654,7 @@ describe('modules/manager/cargo/artifacts', () => {
               GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
               GIT_CONFIG_VALUE_6: 'ssh://git@gitlab.enterprise.com/',
               GIT_CONFIG_VALUE_7: 'git@gitlab.enterprise.com:',
+              GIT_CONFIG_VALUE_8: 'https://gitlab.enterprise.com/',
             }),
           }),
         }),

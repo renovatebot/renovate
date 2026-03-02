@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { updateDependency } from './index.ts';
@@ -362,6 +363,34 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pravesht/gocql/v2 v2.0.0');
+    });
+
+    // from #41260, a Go module with a `replace` on the same module (for this example) and a multi-line replace being converted to a single-line `replace`
+    it('handles replace line with major version update that bumps both sides of the replace', () => {
+      const gomod = codeBlock`
+        module github.com/walsm232/renovate-gomod-bug-test
+
+        go 1.25
+
+        replace (
+            github.com/grpc-ecosystem/grpc-gateway => github.com/grpc-ecosystem/grpc-gateway v1.16.0
+        )
+      `;
+
+      const upgrade = {
+        depName: 'github.com/grpc-ecosystem/grpc-gateway',
+        managerData: { multiLine: true, lineNumber: 5 },
+        newValue: 'v2.28.0',
+        depType: 'replace',
+        currentValue: 'v1.16.0',
+        newMajor: 2,
+        updateType: 'major' as UpdateType,
+      };
+      const res = updateDependency({ fileContent: gomod, upgrade });
+      expect(res).not.toEqual(gomod);
+      expect(res).toContain(
+        'github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0',
+      );
     });
 
     it('handles replace line with digest', () => {

@@ -1,4 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
@@ -55,6 +56,26 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
         dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
       } else {
         dep.packageName = dep.managerData?.source;
+        const foundLocks = locks.filter(
+          (lock) => lock.packageName === dep.packageName,
+        );
+
+        if (
+          foundLocks.length === 1 &&
+          foundLocks[0].registryUrl !==
+            TerraformProviderDatasource.defaultRegistryUrls[0]
+        ) {
+          logger.debug(
+            { dep, foundLocks },
+            'Terraform: Single lock found for provider with non-default registry URL',
+          );
+          dep.registryUrls = [foundLocks[0].registryUrl];
+        } else if (foundLocks.length > 1) {
+          logger.debug(
+            { dep, foundLocks },
+            'Terraform: Multiple locks found for provider unable to determine registry URL',
+          );
+        }
       }
     }
     massageProviderLookupName(dep);

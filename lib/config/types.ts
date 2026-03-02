@@ -165,9 +165,13 @@ export interface RenovateSharedConfig {
 export interface GlobalInheritableConfig {
   bbUseDevelopmentBranch?: boolean;
   configFileNames?: string[];
+  onboarding?: boolean;
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
   onboardingConfig?: RenovateConfig;
+  onboardingConfigFileName?: string;
+  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
+  onboardingPrTitle?: string;
 }
 
 // Config options used only within the global worker
@@ -243,6 +247,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
+  prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
@@ -276,7 +281,6 @@ export interface LegacyAdminConfig {
   onboardingCommitMessage?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
-  onboardingPrTitle?: string;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
 

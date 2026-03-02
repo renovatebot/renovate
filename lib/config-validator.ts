@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { Command, CommanderError } from 'commander';
 import 'source-map-support/register.js';
 import './punycode.cjs';
+
+import { Command, CommanderError } from 'commander';
 import { dequal } from 'dequal';
 import fs from 'fs-extra';
 import { getConfigFileNames } from './config/app-strings.ts';
