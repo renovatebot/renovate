@@ -57,7 +57,17 @@
     "no-unassigned-vars": "error",
     "promise/always-return": "error",
     "promise/catch-or-return": "error",
-    "promise/no-return-wrap": "error"
+    "promise/no-return-wrap": "error",
+    "promise/param-names": "error",
+    "promise/no-nesting": "warn",
+    "promise/no-promise-in-callback": "warn",
+    "promise/no-callback-in-promise": "warn",
+    "promise/avoid-new": "error",
+    "promise/no-new-statics": "error",
+    "promise/no-return-in-finally": "warn",
+    "promise/valid-params": "warn",
+    "promise/no-multiple-resolved": "error",
+    "typescript/unbound-method": "error"
   },
   "overrides": [
     {
@@ -66,7 +76,8 @@
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
         "typescript/explicit-function-return-type": "off",
-        "no-restricted-imports": "off"
+        "no-restricted-imports": "off",
+        "promise/avoid-new": "off"
       }
     },
     {

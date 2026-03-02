@@ -100,6 +100,7 @@ export function exec(
     }
   }
 
+  // oxlint-disable-next-line promise/avoid-new -- execa uses event-based API, requires manual promise handling
   return new Promise((resolve, reject) => {
     let cmd = asRawCommand(theCmd);
     let args: string[] = [];

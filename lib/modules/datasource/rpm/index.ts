@@ -208,6 +208,7 @@ export class RpmDatasource extends Datasource {
       }
     });
 
+    // oxlint-disable-next-line promise/avoid-new -- SAX parser uses event-based API with cleanup logic
     await new Promise<void>((resolve, reject) => {
       let settled = false;
       saxParser.on('error', (err: Error) => {
