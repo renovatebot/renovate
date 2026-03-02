@@ -10,6 +10,7 @@ export class InheritConfig {
     'onboardingAutoCloseAge',
     'onboardingBranch',
     'onboardingCommitMessage',
+    'onboardingConfig',
     'onboardingConfigFileName',
     'onboardingNoDeps',
     'onboardingPrTitle',
