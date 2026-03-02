@@ -16,8 +16,13 @@ describe('modules/versioning/index', () => {
   });
 
   it('matches the API contract', async () => {
+    const versionings = allVersioning.getVersionings();
+
     const VersioningApiSchema = z
       .string()
+      .refine((name) => versionings.has(name), {
+        error: 'Allowed in config but does not exist in the API',
+      })
       .transform(async (name) => {
         const { api } = await import(`./${name}/index.ts`);
         return isVersioningApiConstructor(api) ? new api() : api;
