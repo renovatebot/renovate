@@ -4022,6 +4022,16 @@ Dotfiles are included.
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
 
+### installTools
+
+Whether to install any additional tools dynamically before executing the `commands`.
+
+These must be known by [Containerbase](https://github.com/containerbase/base).
+
+<!-- prettier-ignore -->
+!!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
+
 ### workingDirTemplate
 
 A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.

@@ -304,6 +304,7 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
+  installTools?: Record<string, Record<never, never>>;
 }
 
 export type UpdateConfig<
