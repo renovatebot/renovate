@@ -84,6 +84,7 @@ async function extractBazelPfc(
     // Ignore any entries for custom configurations
     .filter((ce) => ce.config === undefined)
     .map((ce) => ce.getOption('registry')?.value)
+    .map((url) => url?.replace(/^["']|["']$/g, ''))
     .filter(isNotNullOrUndefined);
   if (registryUrls.length) {
     pfc.registryUrls = registryUrls;

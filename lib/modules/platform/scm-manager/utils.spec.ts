@@ -12,7 +12,7 @@ import {
 } from './utils.ts';
 
 describe('modules/platform/scm-manager/utils', () => {
-  describe(getMergeMethod, () => {
+  describe('getMergeMethod', () => {
     it.each`
       strategy          | method
       ${undefined}      | ${null}
@@ -35,7 +35,7 @@ describe('modules/platform/scm-manager/utils', () => {
     );
   });
 
-  describe(smartLinks, () => {
+  describe('smartLinks', () => {
     it.each`
       body            | result
       ${''}           | ${''}
@@ -48,7 +48,7 @@ describe('modules/platform/scm-manager/utils', () => {
     );
   });
 
-  describe(matchPrState, () => {
+  describe('matchPrState', () => {
     const defaultPr: Pr = {
       sourceBranch: 'feature/test',
       createdAt: '2023-08-02T10:48:24.762Z',
@@ -94,7 +94,7 @@ describe('modules/platform/scm-manager/utils', () => {
     );
   });
 
-  describe(getRepoUrl, () => {
+  describe('getRepoUrl', () => {
     const repo: Repo = {
       contact: 'test@test.com',
       creationDate: '2023-08-02T10:48:24.762Z',

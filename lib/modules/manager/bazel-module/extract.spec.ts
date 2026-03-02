@@ -130,6 +130,8 @@ describe('modules/manager/bazel-module/extract', () => {
         registryUrls: [
           'https://example.com/custom_registry.git',
           'https://github.com/bazelbuild/bazel-central-registry',
+          'http://example.com/registry-with-single-quotes.git',
+          'http://example.com/registry-with-double-quotes.git',
         ],
         deps: [
           {
