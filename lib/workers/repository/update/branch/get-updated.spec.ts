@@ -1,5 +1,6 @@
 import { isArray } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
+import { git } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
 import * as _bundler from '../../../../modules/manager/bundler/index.ts';
@@ -19,7 +20,6 @@ import type {
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import * as _autoReplace from './auto-replace.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
-import { git } from '~test/util.ts';
 
 const bundler = vi.mocked(_bundler);
 const composer = vi.mocked(_composer);

@@ -34,6 +34,7 @@ import { GitRefsDatasource } from './git-refs/index.ts';
 import { GitTagsDatasource } from './git-tags/index.ts';
 import { GiteaReleasesDatasource } from './gitea-releases/index.ts';
 import { GiteaTagsDatasource } from './gitea-tags/index.ts';
+import { GithubDigestDatasource } from './github-digest/index.ts';
 import { GithubReleaseAttachmentsDatasource } from './github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from './github-releases/index.ts';
 import { GithubRunnersDatasource } from './github-runners/index.ts';
@@ -117,6 +118,7 @@ api.set(GitRefsDatasource.id, new GitRefsDatasource());
 api.set(GitTagsDatasource.id, new GitTagsDatasource());
 api.set(GiteaReleasesDatasource.id, new GiteaReleasesDatasource());
 api.set(GiteaTagsDatasource.id, new GiteaTagsDatasource());
+api.set(GithubDigestDatasource.id, new GithubDigestDatasource());
 api.set(
   GithubReleaseAttachmentsDatasource.id,
   new GithubReleaseAttachmentsDatasource(),

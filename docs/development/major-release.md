@@ -87,3 +87,4 @@ git push
   - Go to the last tagged release (of the last major version) and download `docs.tgz`
   - Copy the `renovate-schema.json`, `renovate-inherited-schema.json` and `renovate-global-schema.json`
   - See [schemastore#5294](https://github.com/SchemaStore/schemastore/pull/5294) as an example of what configuration may be needed to have the PR build pass
+- Close the Milestone for the release

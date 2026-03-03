@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import * as gleamManager from './index.ts';
 import { fs } from '~test/util.ts';
+import * as gleamManager from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

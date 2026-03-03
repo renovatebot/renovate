@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
@@ -14,8 +16,6 @@ import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs, hostRules, logger, partial } from '~test/util.ts';
 
 vi.mock('google-auth-library');
 vi.mock('../../../../util/fs/index.ts');
@@ -402,7 +402,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -437,7 +437,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/renovatebot/base-image',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -449,7 +449,7 @@ describe('modules/manager/pep621/processors/uv', () => {
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool python 3.11.1 ' +
             '&& ' +

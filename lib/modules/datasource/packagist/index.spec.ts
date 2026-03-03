@@ -1,12 +1,12 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import * as composerVersioning from '../../versioning/composer/index.ts';
 import { id as versioning } from '../../versioning/loose/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { PackagistDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 

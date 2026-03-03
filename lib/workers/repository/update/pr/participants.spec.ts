@@ -1,10 +1,10 @@
+import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
 import * as _util from '../../../../util/sample.ts';
 import * as _codeOwners from './code-owners.ts';
 import { addParticipants } from './participants.ts';
-import { partial, platform } from '~test/util.ts';
 
 vi.mock('../../../../util/sample.ts');
 const util = vi.mocked(_util);

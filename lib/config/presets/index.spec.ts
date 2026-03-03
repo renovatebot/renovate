@@ -1,4 +1,6 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
@@ -16,8 +18,6 @@ import {
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger } from '~test/util.ts';
 
 vi.mock('./npm/index.ts');
 vi.mock('./github/index.ts');
@@ -617,6 +617,13 @@ describe('config/presets/index', () => {
   });
 
   describe('getPreset', () => {
+    it('does not use cache for internal presets', async () => {
+      const memCacheGetSpy = vi.spyOn(memCache, 'get');
+      expect(await presets.getPreset(':dependencyDashboard', {})).toBeDefined();
+      expect(memCacheGetSpy).not.toHaveBeenCalled();
+      expect(packageCache.get).not.toHaveBeenCalled();
+    });
+
     it('handles removed presets with a migration', async () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({

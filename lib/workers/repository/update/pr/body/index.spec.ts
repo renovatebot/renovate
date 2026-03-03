@@ -1,3 +1,4 @@
+import { platform } from '~test/util.ts';
 import type { PackageFile } from '../../../../../modules/manager/types.ts';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body.ts';
 import * as _template from '../../../../../util/template/index.ts';
@@ -9,7 +10,6 @@ import * as _header from './header.ts';
 import { getPrBody } from './index.ts';
 import * as _notes from './notes.ts';
 import * as _table from './updates-table.ts';
-import { platform } from '~test/util.ts';
 
 vi.mock('./changelogs.ts');
 const changelogs = vi.mocked(_changelogs);

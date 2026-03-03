@@ -1,5 +1,5 @@
 import { regEx } from '../../../util/regex.ts';
-import { presets } from './monorepos.ts';
+import { presets } from './monorepos.preset.ts';
 
 const todo = new Set([
   'arcus.background-jobs',

@@ -1,4 +1,6 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as mavenVersioning from '../../versioning/maven/index.ts';
@@ -6,8 +8,6 @@ import { getPkgReleases } from '../index.ts';
 import { MAVEN_REPO } from '../maven/common.ts';
 import { SbtPackageDatasource } from './index.ts';
 import { extractPageLinks } from './util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);

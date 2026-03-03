@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { getVersioningList } from '../../lib/modules/versioning/index.ts';
+import type { RangeStrategy } from '../../lib/types/versioning.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import {
   type OpenItems,
@@ -17,7 +18,7 @@ interface Versioning {
   displayName: string;
   urls: string[];
   supportsRanges: boolean;
-  supportedRangeStrategies?: string[];
+  supportedRangeStrategies?: RangeStrategy[];
 }
 
 export async function generateVersioning(
@@ -28,7 +29,7 @@ export async function generateVersioning(
   let versioningContent = '\nSupported values for `versioning` are:\n\n';
   for (const versioning of versioningList) {
     const definition = (await import(
-      `../../lib/modules/versioning/${versioning}`
+      `../../lib/modules/versioning/${versioning}/index.ts`
     )) as Versioning;
     const { id, displayName, urls, supportsRanges, supportedRangeStrategies } =
       definition;

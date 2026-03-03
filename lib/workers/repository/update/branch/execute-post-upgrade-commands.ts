@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 // TODO #22198
 import { isArray, isNonEmptyArray } from '@sindresorhus/is';
+import crypto from 'crypto';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -133,7 +133,7 @@ export async function postUpgradeCommandsExecutor(
               // It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`), as there may be special characters included in the given commands that can be leveraged here
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
-                true,
+                false,
               ),
 
               cwd: workingDir,
@@ -143,6 +143,18 @@ export async function postUpgradeCommandsExecutor(
               execOpts.env = {
                 RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: dataFilePath,
               };
+            }
+            if (upgrade.postUpgradeTasks?.installTools) {
+              execOpts.toolConstraints ??= [];
+
+              for (const [tool] of Object.entries(
+                upgrade.postUpgradeTasks?.installTools,
+              )) {
+                execOpts.toolConstraints.push({
+                  toolName: tool,
+                  constraint: upgrade.constraints?.[tool],
+                });
+              }
             }
             const execResult = await exec(compiledCmd, execOpts);
 

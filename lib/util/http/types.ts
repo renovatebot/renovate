@@ -1,12 +1,12 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import type {
-  Options,
+  OptionsInit,
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
   OptionsOfTextResponseBody,
   RequestError,
 } from 'got';
-import type { ZodError } from 'zod';
+import type { ZodError } from 'zod/v3';
 import type { HttpCacheProvider } from './cache/types.ts';
 import type { EmptyResultError } from './errors.ts';
 
@@ -20,18 +20,41 @@ export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
 export type GotTextOptions = OptionsOfTextResponseBody & GotExtraOptions;
 export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
 
-export type GotStreamOptions = Options & GotExtraOptions;
+export type GotStreamOptions = OptionsInit & GotExtraOptions;
 
+/**
+ * Renovate extra options.
+ */
 export interface GotExtraOptions {
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
+
   token?: string;
   hostType?: string;
   enabled?: boolean;
   memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
+
+  /**
+   * Got request timeout, overrides got interface.
+   * Do not delete in `normalizeGotOptions`.
+   */
+  timeout?: number;
 }
+
+/**
+ * Renovate extra options that are not part of `got` options.
+ */
+export const GotExtraOptionKeys: (keyof GotExtraOptions)[] = [
+  'abortOnError',
+  'abortIgnoreStatusCodes',
+  'enabled',
+  'hostType',
+  'memCache',
+  'noAuth',
+  'token',
+];
 
 export type OutgoingHttpHeaders = Record<string, string | string[] | undefined>;
 
@@ -48,6 +71,10 @@ export interface GraphqlOptions {
   readOnly?: boolean;
 }
 
+/**
+ * Renovate http options that are partly not part of `got` options.
+ * Remember to delete these in `normalizeGotOptions` before passing to `got`.
+ */
 export interface HttpOptions {
   body?: any;
   username?: string;

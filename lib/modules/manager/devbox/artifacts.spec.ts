@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs, git, partial } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');

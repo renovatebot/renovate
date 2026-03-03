@@ -1,15 +1,16 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as vendir from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 process.env.CONTAINERBASE = 'true';
 
@@ -23,7 +24,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -35,6 +36,10 @@ describe('modules/manager/vendir/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
+  });
+
+  afterEach(() => {
+    hostRules.clear();
   });
 
   it('returns null if no vendir.lock.yml found', async () => {
@@ -341,6 +346,88 @@ describe('modules/manager/vendir/artifacts', () => {
     ]);
   });
 
+  it('sets GIT_CONFIG variables when Host Rules are configured', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'some-token',
+    });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'github.enterprise.com',
+      token: 'some-enterprise-token',
+    });
+    hostRules.add({
+      hostType: 'gitlab',
+      matchHost: 'gitlab.enterprise.com',
+      token: 'some-gitlab-token',
+    });
+
+    // artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('vendor');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['vendor/Chart.yaml'],
+      }),
+    );
+    const updatedDeps = [{ depName: 'dep1' }];
+
+    await vendir.updateArtifacts({
+      packageFileName: 'vendir.yml',
+      updatedDeps,
+      newPackageFileContent: vendirFile,
+      config: {
+        ...config,
+      },
+    });
+
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '9',
+              GIT_CONFIG_KEY_0:
+                'url.https://ssh:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://git:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_3:
+                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_4:
+                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_5:
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_6:
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_7:
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_8:
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+              GIT_CONFIG_VALUE_1: 'git@github.com:',
+              GIT_CONFIG_VALUE_2: 'https://github.com/',
+              GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
+              GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
+              GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
+              GIT_CONFIG_VALUE_6: 'ssh://git@gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_7: 'git@gitlab.enterprise.com:',
+            }),
+          }),
+        }),
+      ]),
+    );
+  });
+
   it('works explicit global binarySource', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
@@ -488,7 +575,7 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -498,7 +585,7 @@ describe('modules/manager/vendir/artifacts', () => {
             '-v "/tmp/cache/containerbase":"/tmp/cache/containerbase" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar' +
+            'ghcr.io/renovatebot/base-image' +
             ' bash -l -c "' +
             'install-tool vendir 0.35.0' +
             ' && ' +

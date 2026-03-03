@@ -1,3 +1,5 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _secrets from '../../../config/secrets.ts';
 import * as _onboarding from '../onboarding/branch/index.ts';
@@ -5,8 +7,6 @@ import * as _apis from './apis.ts';
 import * as _config from './config.ts';
 import { initRepo } from './index.ts';
 import * as _merge from './merge.ts';
-import { logger, partial } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../onboarding/branch/index.ts');
 vi.mock('../configured.ts');

@@ -3,6 +3,7 @@ import {
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -100,6 +101,98 @@ describe('modules/manager/mise/backends', () => {
       expect(createGemToolConfig('rubocop')).toStrictEqual({
         packageName: 'rubocop',
         datasource: 'rubygems',
+      });
+    });
+  });
+
+  describe('createGithubToolConfig()', () => {
+    it('should create a tooling config with empty options', () => {
+      expect(
+        createGithubToolConfig('BurntSushi/ripgrep', '14.1.1', {}),
+      ).toStrictEqual({
+        packageName: 'BurntSushi/ripgrep',
+        datasource: 'github-releases',
+        currentValue: '14.1.1',
+      });
+    });
+
+    it('should not set extractVersion if the version has leading v', () => {
+      expect(createGithubToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
+        packageName: 'cli/cli',
+        datasource: 'github-releases',
+        currentValue: 'v2.64.0',
+      });
+    });
+
+    it('should set extractVersion with custom version_prefix', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'release-',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^release\\-(?<version>.+)',
+      });
+    });
+
+    it('should set extractVersion with version_prefix even if version has leading v', () => {
+      expect(
+        createGithubToolConfig('some/repo', 'v1.0.0', {
+          version_prefix: 'version-',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: 'v1.0.0',
+        extractVersion: '^version\\-(?<version>.+)',
+      });
+    });
+
+    it('should handle empty version_prefix with version not having v', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', { version_prefix: '' }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('should handle empty version_prefix with version having v', () => {
+      expect(
+        createGithubToolConfig('some/repo', 'v1.0.0', { version_prefix: '' }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: 'v1.0.0',
+      });
+    });
+
+    it('should escape special regex characters in version_prefix', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'v1.0+',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^v1\\.0\\+(?<version>.+)',
+      });
+    });
+
+    it('should escape brackets and parentheses in version_prefix', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'prefix[test](v)',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^prefix\\[test\\]\\(v\\)(?<version>.+)',
       });
     });
   });

@@ -1,6 +1,6 @@
-import { getNpmLock } from './npm.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
+import { getNpmLock } from './npm.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 

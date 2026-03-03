@@ -5,16 +5,16 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { id as versioning } from '../../versioning/maven/index.ts';
-import { getPkgReleases } from '../index.ts';
 import type { Release, ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
 import { postprocessRelease } from '../postprocess-release.ts';
 import { MAVEN_REPO } from './common.ts';
 import { MavenDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const googleAuth = vi.mocked(_googleAuth);
 vi.mock('google-auth-library');
@@ -67,14 +67,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
       const [major, minor, patch] = latest
         .replace('-SNAPSHOT', '')
         .split('.')
-        .map((x) => parseInt(x))
+        .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       scope
         .get(
           `/${packagePath}/${latest}/${artifact}-${latest.replace(
             '-SNAPSHOT',
             '',
-          )}-20200101.${major}${minor}${patch}-${parseInt(patch)}.pom`,
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
         )
         .reply(200, pom);
     } else {

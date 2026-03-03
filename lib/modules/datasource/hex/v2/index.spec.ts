@@ -4,7 +4,7 @@ import { Package } from './package.ts';
 import { Signed } from './signed.ts';
 
 function protobufLoad(file: string): Promise<protobuf.Root> {
-  const resolvedFile = upath.join(__dirname, file);
+  const resolvedFile = upath.join(import.meta.dirname, file);
   return new Promise((resolve, reject) => {
     protobuf.load(resolvedFile, (err, root) => {
       if (err) {

@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
+import { fs } from '~test/util.ts';
 import type { Registry } from './types.ts';
 import { bumpPackageVersion } from './update.ts';
 import {
@@ -8,7 +9,6 @@ import {
   findVersion,
   getConfiguredRegistries,
 } from './util.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

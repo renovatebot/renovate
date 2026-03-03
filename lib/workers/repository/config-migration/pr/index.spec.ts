@@ -1,6 +1,9 @@
 import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
 import { mock } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -9,9 +12,6 @@ import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
 import type { MigratedData } from '../branch/migrated-data.ts';
 import { ensureConfigMigrationPr } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = platform.massageMarkdown;
@@ -57,10 +57,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('creates PR with default PR title', async () => {
-      await ensureConfigMigrationPr(
-        { ...config, onboardingPrTitle: '' },
-        migratedData,
-      );
+      await ensureConfigMigrationPr(config, migratedData);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       createPrBody = platform.createPr.mock.calls[0][0].prBody;

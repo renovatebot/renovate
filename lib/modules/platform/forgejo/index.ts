@@ -674,6 +674,7 @@ const platform: Platform = {
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
+        // v8 ignore else -- TODO: add test #40625
         if (pr?.bodyStruct) {
           if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
             logger.debug(
@@ -1022,6 +1023,7 @@ const platform: Platform = {
     const commentList = await helper.getComments(config.repository, issue);
 
     let comment: Comment | null = null;
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       comment = findCommentByTopic(commentList, deleteConfig.topic);
     } else if (deleteConfig.type === 'by-content') {

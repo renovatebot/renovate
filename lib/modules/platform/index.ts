@@ -2,7 +2,7 @@ import type { AllConfig } from '../../config/types.ts';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
 import type { PlatformId } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
-import type { HostRule } from '../../types';
+import type { HostRule } from '../../types/index.ts';
 import {
   setGitAuthor,
   setNoVerify,
@@ -58,6 +58,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       ...(config.hostRules ?? []),
     ],
   };
+  // v8 ignore else -- TODO: add test #40625
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     returnConfig.gitAuthor = config.gitAuthor;

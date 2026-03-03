@@ -1,8 +1,8 @@
+import { git } from '~test/util.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { globalInitialize } from './initialize.ts';
-import { git } from '~test/util.ts';
 
 const initPlatform = vi.mocked(_initPlatform);
 

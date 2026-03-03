@@ -16,6 +16,7 @@ import {
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -134,6 +135,8 @@ function getToolConfig(
       return createDotnetToolConfig(toolName);
     case 'gem':
       return createGemToolConfig(toolName);
+    case 'github':
+      return createGithubToolConfig(toolName, version, toolOptions);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':

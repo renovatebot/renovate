@@ -136,7 +136,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
   node: {
     misePluginUrl: 'https://mise.jdx.dev/lang/node.html',
     config: {
-      packageName: 'nodejs',
+      packageName: 'node',
       datasource: NodeVersionDatasource.id,
     },
   },

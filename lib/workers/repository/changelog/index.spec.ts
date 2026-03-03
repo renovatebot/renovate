@@ -1,7 +1,7 @@
+import { partial } from '~test/util.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
 import { embedChangelogs } from './index.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../update/pr/changelog/index.ts');
 

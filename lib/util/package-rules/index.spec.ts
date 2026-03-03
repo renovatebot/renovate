@@ -1,3 +1,4 @@
+import { hostRules } from '~test/util.ts';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
@@ -5,7 +6,6 @@ import { OrbDatasource } from '../../modules/datasource/orb/index.ts';
 import type { HostRule } from '../../types/index.ts';
 import type { MergeConfidence } from '../merge-confidence/types.ts';
 import { applyPackageRules } from './index.ts';
-import { hostRules } from '~test/util.ts';
 
 type TestConfig = PackageRuleInputConfig & {
   x?: number;

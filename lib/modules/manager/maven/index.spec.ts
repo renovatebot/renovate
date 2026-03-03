@@ -1,4 +1,7 @@
 // TODO #22198
+
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   extractAllPackageFiles,
@@ -6,8 +9,6 @@ import {
   resolveParents,
 } from './extract.ts';
 import { updateDependency } from './update.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

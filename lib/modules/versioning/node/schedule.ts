@@ -1,4 +1,4 @@
-import _nodeSchedule from '../../../data/node-js-schedule.json';
+import _nodeSchedule from '../../../data/node-js-schedule.json' with { type: 'json' };
 import type { Nullish } from '../../../types/index.ts';
 import semver from '../semver/index.ts';
 

@@ -1,3 +1,4 @@
+import type { GitRef } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { PackageCacheNamespace } from '../../../util/cache/package/namespaces.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -32,12 +33,12 @@ export class AzureTagsDatasource extends Datasource {
     const azureTags = await azureApiGit.getRefs(repo, undefined, 'tags');
 
     // Filter out tags that do not have a name
-    const filteredTags = azureTags.filter((tag) => tag.name);
+    const filteredTags = azureTags.filter((tag: GitRef) => tag.name);
 
     const dependency: ReleaseResult = {
       sourceUrl: AzureTagsDatasource.getSourceUrl(repo, registryUrl!),
       registryUrl,
-      releases: filteredTags.map((tag) => ({
+      releases: filteredTags.map((tag: GitRef) => ({
         version: tag.name!,
         gitRef: tag.name!,
         releaseTimestamp: null,

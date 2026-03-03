@@ -1,3 +1,8 @@
 {
-  "*": "prettier --ignore-unknown --write"
+  "*.{js,cjs,mjs,mts,ts}": [
+    "oxlint --import-plugin --fix",
+    "biome check --write",
+    "prettier --write"
+  ],
+  "!(*.{js,cjs,mjs,mts,ts})": "prettier --ignore-unknown --write"
 }

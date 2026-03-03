@@ -24,7 +24,11 @@ class Unity3dPackagesVersioningApi extends GenericVersioningApi {
     }
     const { major, minor, patch, label } = matches.groups;
 
-    const release = [parseInt(major), parseInt(minor), parseInt(patch)];
+    const release = [
+      parseInt(major, 10),
+      parseInt(minor, 10),
+      parseInt(patch, 10),
+    ];
     const isStable = !Unity3dPackagesVersioningApi.unstableRegex.test(label);
 
     return { release, prerelease: isStable ? undefined : label };

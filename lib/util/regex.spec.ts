@@ -27,7 +27,7 @@ describe('util/regex', () => {
 
   it('Falls back to RegExp', async () => {
     vi.resetModules();
-    vi.doMock('../expose.cjs', () => ({
+    vi.doMock('../expose.ts', () => ({
       re2: () => {
         throw new Error();
       },

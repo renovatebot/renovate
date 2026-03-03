@@ -5,6 +5,7 @@
     "esbenp.prettier-vscode",
     "vitest.explorer",
     "editorconfig.editorconfig",
-    "github.vscode-github-actions"
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github"
   ]
 }

@@ -1,3 +1,4 @@
+import type { DateTime } from 'luxon';
 import { logger } from '../../logger/index.ts';
 import { getCache } from '../cache/repository/index.ts';
 import type { BranchCache } from '../cache/repository/types.ts';
@@ -12,6 +13,7 @@ export function setBranchNewCommit(
   branchName: string,
   baseBranch: string,
   commitSha: string,
+  commitTimestamp: DateTime | null,
 ): void {
   logger.debug('setBranchCommit()');
   const cache = getCache();
@@ -34,4 +36,7 @@ export function setBranchNewCommit(
   branch.isModified = false;
   branch.pristine = true;
   branch.sha = commitSha;
+  if (commitTimestamp) {
+    branch.commitTimestamp = commitTimestamp.toISO()!;
+  }
 }

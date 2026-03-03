@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { CondaDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const packageName = 'main/pytest';
 const depUrl = `/${packageName}`;

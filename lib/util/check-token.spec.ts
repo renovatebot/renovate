@@ -1,4 +1,5 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { hostRules, logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
@@ -12,7 +13,6 @@ import {
   isGithubServerToServerToken,
   takePersonalAccessTokenIfPossible,
 } from './check-token.ts';
-import { hostRules, logger } from '~test/util.ts';
 
 vi.mock('./host-rules.ts', () => mockDeep());
 

@@ -1,5 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -10,8 +12,6 @@ import * as _datasource from '../../datasource/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as composer from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
@@ -33,7 +33,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 const repoStatus = partial<StatusResult>({
@@ -787,7 +787,7 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
         options: {},
       },
       {
@@ -802,7 +802,7 @@ describe('modules/manager/composer/artifacts', () => {
           '-e COMPOSER_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool php 7.3' +
           ' && ' +

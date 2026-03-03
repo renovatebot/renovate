@@ -1,7 +1,7 @@
+import * as httpMock from '~test/http-mock.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { Http } from '../../../util/http/index.ts';
 import { MetadataCache } from './metadata-cache.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);

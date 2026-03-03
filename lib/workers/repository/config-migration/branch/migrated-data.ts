@@ -4,7 +4,7 @@ import JSON5 from 'json5';
 import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration.ts';
-import { prettier } from '../../../../expose.cjs';
+import { prettier } from '../../../../expose.ts';
 import { logger } from '../../../../logger/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';

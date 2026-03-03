@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
-import { pkg } from '../../../../expose.cjs';
+import { pkg } from '../../../../expose.ts';
 import { logger } from '../../../../logger/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { coersions } from './coersions.ts';

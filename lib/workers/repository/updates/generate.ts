@@ -471,10 +471,9 @@ export function generateBranchConfig(
   // explicit set `isLockFileMaintenance` for the branch for groups
   if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
     config.isLockFileMaintenance = true;
-    // istanbul ignore if: not worth testing
+    // istanbul ignore if: should never happen
     if (config.upgrades.some((upgrade) => !upgrade.isLockFileMaintenance)) {
-      // TODO: warn?
-      logger.debug(
+      logger.warn(
         'Grouping lockfile maintenance with other update types is not supported',
       );
     }

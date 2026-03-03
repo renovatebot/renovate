@@ -1,6 +1,6 @@
-import { extractLockFileVersions, parseLockFile } from './locked-version.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
+import { extractLockFileVersions, parseLockFile } from './locked-version.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

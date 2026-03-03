@@ -1,11 +1,11 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { id as versioning } from '../../versioning/loose/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { RepologyDatasource } from './index.ts';
 import type { RepologyPackage } from './types.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const datasource = RepologyDatasource.id;
 

@@ -1,3 +1,4 @@
+import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -5,7 +6,6 @@ import { Http } from '../../../util/http/index.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { getDependency } from './get.ts';
 import { resolveRegistryUrl, setNpmrc } from './npmrc.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('../../../util/cache/package/index.ts');
 
@@ -360,7 +360,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
@@ -508,7 +508,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
@@ -550,7 +550,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",

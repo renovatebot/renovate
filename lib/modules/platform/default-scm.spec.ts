@@ -1,7 +1,7 @@
+import { git, partial } from '~test/util.ts';
 import { RENOVATE_FORK_UPSTREAM } from '../../util/git/index.ts';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
 import { DefaultGitScm } from './default-scm.ts';
-import { git, partial } from '~test/util.ts';
 
 describe('modules/platform/default-scm', () => {
   const defaultGitScm = new DefaultGitScm();
@@ -28,6 +28,12 @@ describe('modules/platform/default-scm', () => {
     git.getBranchCommit.mockReturnValueOnce('sha' as LongCommitSha);
     await defaultGitScm.getBranchCommit('branchName');
     expect(git.getBranchCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it('delegate getBranchUpdateDate to util/git', async () => {
+    git.getBranchUpdateDate.mockResolvedValueOnce(null);
+    await defaultGitScm.getBranchUpdateDate('branchName');
+    expect(git.getBranchUpdateDate).toHaveBeenCalledTimes(1);
   });
 
   it('delegate isBranchBehindBase to util/git', async () => {

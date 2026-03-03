@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { regEx } from '../../../util/regex.ts';
 import { Yaml } from '../../../util/schema-utils/index.ts';
 

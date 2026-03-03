@@ -1,4 +1,6 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, getFixturePath, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as yaml from '../../../../util/yaml.ts';
 import type { PackageFile } from '../../types.ts';
@@ -10,8 +12,6 @@ import {
   findPnpmWorkspace,
   getPnpmLock,
 } from './pnpm.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, getFixturePath, logger, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 

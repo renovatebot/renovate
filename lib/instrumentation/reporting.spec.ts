@@ -1,5 +1,7 @@
 import type { S3Client } from '@aws-sdk/client-s3';
 import { mock, mockDeep } from 'vitest-mock-extended';
+import { s3 } from '~test/s3.ts';
+import { fs, logger } from '~test/util.ts';
 import type { RenovateConfig } from '../config/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
@@ -13,8 +15,6 @@ import {
   resetReport,
 } from './reporting.ts';
 import type { Report } from './types.ts';
-import { s3 } from '~test/s3.ts';
-import { fs, logger } from '~test/util.ts';
 
 vi.mock('../util/fs/index.ts', () => mockDeep());
 vi.mock('../util/s3.ts', () => mockDeep());
@@ -190,6 +190,19 @@ describe('instrumentation/reporting', () => {
 
     fs.writeSystemFile.mockRejectedValue(null);
     await expect(exportStats(config)).toResolve();
+  });
+
+  it('reports nothing when reportType=null', async () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: null,
+    };
+
+    await exportStats(config);
+
+    expect(logger.logger.debug).not.toHaveBeenCalled();
+    expect(logger.logger.info).not.toHaveBeenCalled();
+    expect(logger.logger.warn).not.toHaveBeenCalled();
   });
 
   it('should add problems to report', () => {

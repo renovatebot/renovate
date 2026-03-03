@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -11,10 +13,8 @@ import { GithubReleasesDatasource } from '../../modules/datasource/github-releas
 import * as _repositoryCache from '../cache/repository/index.ts';
 import type { RepoCacheData } from '../cache/repository/types.ts';
 import * as hostRules from '../host-rules.ts';
-import { GithubHttp, setBaseUrl } from './github.ts';
 import type { GraphqlPageCache } from './github.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
+import { GithubHttp, setBaseUrl } from './github.ts';
 
 vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
@@ -310,7 +310,9 @@ describe('util/http/github', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(
           fail(401, { message: 'Some unauthorized' }),
-        ).rejects.toThrow('Response code 401 (Some unauthorized)');
+        ).rejects.toThrow(
+          'Request failed with status code 401 (Some unauthorized): GET https://api.github.com/some-url',
+        );
         expect(logger.logger.once.warn).toHaveBeenCalled();
       });
       async function fail(
@@ -347,7 +349,7 @@ describe('util/http/github', () => {
 
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
-          'Response code 404 (Not Found)',
+          'Request failed with status code 404 (Not Found): GET https://api.github.com/some-url',
         );
       });
 
@@ -355,7 +357,7 @@ describe('util/http/github', () => {
         await expect(
           fail(410, { message: 'Issues are disabled for this repo' }),
         ).rejects.toThrow(
-          'Response code 410 (Issues are disabled for this repo)',
+          'Request failed with status code 410 (Issues are disabled for this repo): GET https://api.github.com/some-url',
         );
       });
 
@@ -705,7 +707,9 @@ describe('util/http/github', () => {
         githubApi.queryRepoField(graphqlQuery, 'someItem', {
           paginate: false,
         }),
-      ).rejects.toThrow("Response code 418 (I'm a Teapot)");
+      ).rejects.toThrow(
+        "Request failed with status code 418 (I'm a Teapot): POST https://api.github.com/graphql",
+      );
     });
 
     it('halves node count and retries request', async () => {

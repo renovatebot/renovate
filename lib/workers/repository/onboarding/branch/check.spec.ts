@@ -1,4 +1,6 @@
 import { DateTime } from 'luxon';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { InheritConfig } from '../../../../config/inherit.ts';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
@@ -7,22 +9,19 @@ import type { Pr } from '../../../../modules/platform/types.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
 import type { LongCommitSha } from '../../../../util/git/types.ts';
 import { isOnboarded } from './check.ts';
-import { git, partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../../../../util/cache/repository/index.ts');
 
 const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
-  beforeAll(() => {
-    GlobalConfig.reset();
+  beforeEach(() => {
+    GlobalConfig.set({ onboarding: true });
   });
 
   const config = partial<RenovateConfig>({
     requireConfig: 'required',
     suppressNotifications: [],
-    onboarding: true,
   });
 
   const bodyStruct = {
@@ -185,6 +184,30 @@ describe('workers/repository/onboarding/branch/check', () => {
 
       GlobalConfig.set({ onboardingAutoCloseAge: 2 });
       InheritConfig.set({ onboardingAutoCloseAge: 1 });
+
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: createdAt.toISO(),
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
+
+    it('does not allow inherited onboardingAutoCloseAge to be higher than global config', async () => {
+      const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
+      // PR was created 36 hours ago (1.5 days)
+      const createdAt = now.minus({ hour: 36 });
+
+      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      InheritConfig.set({ onboardingAutoCloseAge: 10 });
 
       cache.getCache.mockReturnValue({});
       platform.findPr.mockResolvedValue(

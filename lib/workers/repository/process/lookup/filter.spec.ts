@@ -1,9 +1,9 @@
+import { partial } from '~test/util.ts';
 import type { Release } from '../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import { filterVersions } from './filter.ts';
 import type { FilterConfig } from './types.ts';
-import { partial } from '~test/util.ts';
 
 const versioning = allVersioning.get('semver');
 

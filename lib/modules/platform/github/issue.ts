@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';

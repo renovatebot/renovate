@@ -1,5 +1,5 @@
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/cloudbuild/extract', () => {
   describe('extractPackageFile()', () => {

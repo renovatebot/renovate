@@ -210,6 +210,10 @@ export async function readDashboardBody(
   Object.assign(config, dashboardChecks);
 }
 
+function formatAsMarkdownLink(name: string, url?: string | null): string {
+  return url ? `[${name}](${url})` : `\`${name}\``;
+}
+
 function getListItem(branch: BranchConfig, type: string): string {
   let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
@@ -377,7 +381,10 @@ export async function ensureDependencyDashboard(
 
   // Check packageFiles for any deprecations or replacements
   let hasDeprecationsOrReplacements = false;
-  const deprecatedPackages: Record<string, Record<string, boolean>> = {};
+  const deprecatedPackages: Record<
+    string,
+    Record<string, { hasReplacement: boolean; sourceUrl?: string | null }>
+  > = {};
   logger.debug('Checking packageFiles for deprecated or replacement packages');
   if (isNonEmptyObject(packageFiles)) {
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
@@ -390,7 +397,10 @@ export async function ensureDependencyDashboard(
           if (name && (dep.deprecationMessage ?? hasReplacement)) {
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
-            deprecatedPackages[manager][name] ??= hasReplacement;
+            deprecatedPackages[manager][name] ??= {
+              hasReplacement,
+              sourceUrl: dep.sourceUrl,
+            };
           }
         }
       }
@@ -446,13 +456,15 @@ export async function ensureDependencyDashboard(
     issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
       'These dependencies are either deprecated or have replacements available:\n\n';
-    issueBody += '| Datasource | Name | Replacement PR? |\n';
+    issueBody += '| Datasource | Package | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
       const deps = deprecatedPackages[manager];
       for (const depName of Object.keys(deps).sort()) {
-        const hasReplacement = deps[depName];
-        issueBody += `| ${manager} | \`${depName}\` | ${
+        const { hasReplacement, sourceUrl } = deps[depName];
+        const packageName = formatAsMarkdownLink(depName, sourceUrl);
+
+        issueBody += `| ${manager} | ${packageName} | ${
           hasReplacement
             ? '![Available](https://img.shields.io/badge/available-green?style=flat-square)'
             : '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)'
@@ -498,7 +510,8 @@ export async function ensureDependencyDashboard(
     (branch) =>
       branch.result === 'branch-limit-reached' ||
       branch.result === 'pr-limit-reached' ||
-      branch.result === 'commit-limit-reached',
+      branch.result === 'commit-per-run-limit-reached' ||
+      branch.result === 'commit-hourly-limit-reached',
     'Rate-Limited',
     'The following updates are currently rate-limited. To force their creation now, click on a checkbox below.',
     'unlimit',
@@ -551,7 +564,8 @@ export async function ensureDependencyDashboard(
     'needs-pr-approval',
     'not-scheduled',
     'pr-limit-reached',
-    'commit-limit-reached',
+    'commit-per-run-limit-reached',
+    'commit-hourly-limit-reached',
     'branch-limit-reached',
     'already-existed',
     'error',
@@ -662,7 +676,10 @@ export function getAbandonedPackagesMd(
 ): string {
   const abandonedPackages: Record<
     string,
-    Record<string, string | undefined | null>
+    Record<
+      string,
+      { mostRecentTimestamp?: string | null; sourceUrl?: string | null }
+    >
   > = {};
   let abandonedCount = 0;
 
@@ -672,7 +689,10 @@ export function getAbandonedPackagesMd(
         if (dep.depName && dep.isAbandoned) {
           abandonedCount++;
           abandonedPackages[manager] = abandonedPackages[manager] || {};
-          abandonedPackages[manager][dep.depName] = dep.mostRecentTimestamp;
+          abandonedPackages[manager][dep.depName] = {
+            mostRecentTimestamp: dep.mostRecentTimestamp,
+            sourceUrl: dep.sourceUrl,
+          };
         }
       }
     }
@@ -696,17 +716,18 @@ export function getAbandonedPackagesMd(
 
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
-  abandonedMd += '| Datasource | Name | Last Updated |\n';
+  abandonedMd += '| Datasource | Package | Last Updated |\n';
   abandonedMd += '|------------|------|-------------|\n';
 
   for (const manager of Object.keys(abandonedPackages).sort()) {
     const deps = abandonedPackages[manager];
     for (const depName of Object.keys(deps).sort()) {
-      const mostRecentTimestamp = deps[depName];
+      const { mostRecentTimestamp, sourceUrl } = deps[depName];
       const formattedDate = mostRecentTimestamp
         ? DateTime.fromISO(mostRecentTimestamp).toFormat('yyyy-MM-dd')
         : 'unknown';
-      abandonedMd += `| ${manager} | \`${depName}\` | \`${formattedDate}\` |\n`;
+      const packageName = formatAsMarkdownLink(depName, sourceUrl);
+      abandonedMd += `| ${manager} | ${packageName} | \`${formattedDate}\` |\n`;
     }
   }
 

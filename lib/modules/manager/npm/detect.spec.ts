@@ -1,5 +1,5 @@
-import { detectGlobalConfig } from './index.ts';
 import { fs } from '~test/util.ts';
+import { detectGlobalConfig } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

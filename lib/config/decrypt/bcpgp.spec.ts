@@ -1,10 +1,10 @@
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
 import { decryptConfig, setPrivateKeys } from '../decrypt.ts';
 import { GlobalConfig } from '../global.ts';
 import type { AllConfig } from '../types.ts';
 import { tryDecryptBcPgp } from './bcpgp.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger } from '~test/util.ts';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const privateKeyEcc = `
@@ -47,7 +47,7 @@ describe('config/decrypt/bcpgp', () => {
       ).toBeNull();
       expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
         { runtime: 'invalid-runtime' },
-        'Unknown PGP runtime, using wasm-dotnet',
+        'Unknown PGP runtime, using wasm-java',
       );
     });
 
@@ -69,9 +69,10 @@ describe('config/decrypt/bcpgp', () => {
       );
     });
 
-    it('fails with ECC and AEAD', async () => {
+    it('fails with ECC and AEAD (wasm-dotnet', async () => {
       // not supported by bouncycastle C# implementation
       // https://github.com/bcgit/bc-csharp/issues/497
+      process.env.RENOVATE_X_PGP_RUNTIME = 'wasm-dotnet';
       expect(
         await tryDecryptBcPgp(
           privateKeyEcc,
@@ -83,7 +84,24 @@ describe('config/decrypt/bcpgp', () => {
         ),
       ).toBeNull(); // '{"o":"abc","r":"","v":"123"}'
       expect(logger.logger.trace).toHaveBeenCalledExactlyOnceWith(
-        'Using default PGP runtime: wasm-dotnet',
+        { runtime: 'wasm-dotnet' },
+        'Using configured PGP runtime',
+      );
+    });
+
+    it('works with ECC and AEAD (wasm-java)', async () => {
+      expect(
+        await tryDecryptBcPgp(
+          privateKeyEcc,
+          'hF4DdO67WRkDWjwSAQdAmRs+snKu04B3aKLNCF1ePqnXDQskj/Mj+neZbd0ucQgw' +
+            'TvchqMgVWv20RqhLKEdhyCp/iqnhCzDTRpbPyqjqPZ49kxDZqq9EhwvmBldiSBb5' +
+            '1F0BCQIQsycgt62mxOWtYITs3GGBnDS5s7iMxbxgOg5BlEMu2EQvgxvGETdz6n76' +
+            'h7t+FpU4y1ljrsNSLY36QPD4Jg2cGR48vMLVnPS6+eg3gFz3WfP5BAX3c6jQIOA=\n' +
+            '=C3oS',
+        ),
+      ).toBe('{"o":"abc","r":"","v":"123"}');
+      expect(logger.logger.trace).toHaveBeenCalledExactlyOnceWith(
+        'Using default PGP runtime: wasm-java',
       );
     });
 

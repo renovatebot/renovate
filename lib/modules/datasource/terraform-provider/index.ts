@@ -44,7 +44,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results.';
+    'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results and only for `https://registry.terraform.io`';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the the `source` field in the results.';

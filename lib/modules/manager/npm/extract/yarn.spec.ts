@@ -1,10 +1,10 @@
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import {
   extractYarnCatalogs,
   getYarnLock,
   getYarnVersionFromLock,
 } from './yarn.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 

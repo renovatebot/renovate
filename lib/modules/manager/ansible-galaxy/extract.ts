@@ -1,8 +1,8 @@
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import { extractCollectionsMetaDataFile } from './collections-metadata.ts';
 import { extractCollections } from './collections.ts';
+import { extractCollectionsMetaDataFile } from './collections-metadata.ts';
 import { extractRoles } from './roles.ts';
 
 export function getSliceEndNumber(

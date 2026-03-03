@@ -4,7 +4,11 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
+import {
+  exec,
+  getToolSettingsOptions,
+  gradleJvmArg,
+} from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findUpLocal,
@@ -29,9 +33,7 @@ import {
 import { isGradleBuildFile } from './utils.ts';
 
 export function isGradleExecutionAllowed(command: string): boolean {
-  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', [
-    'gradleWrapper',
-  ]);
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', []);
 
   if (!allowlist.includes('gradleWrapper')) {
     logger.once.warn(
@@ -210,7 +212,7 @@ export async function updateArtifacts({
     const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
-    const baseCmd = `${gradlewName} --console=plain --dependency-verification lenient -q`;
+    const baseCmd = `${gradlewName}${gradleJvmArg(getToolSettingsOptions(config.toolSettings))} --console=plain --dependency-verification lenient -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},

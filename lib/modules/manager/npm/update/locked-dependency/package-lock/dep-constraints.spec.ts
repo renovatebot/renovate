@@ -1,5 +1,5 @@
-import { findDepConstraints } from './dep-constraints.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { findDepConstraints } from './dep-constraints.ts';
 
 vi.mock('../../../../../../util/fs/index.ts');
 

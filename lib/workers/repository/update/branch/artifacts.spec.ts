@@ -1,9 +1,9 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
-import { partial, platform } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/update/branch/artifacts', () => {
   let config: BranchConfig;

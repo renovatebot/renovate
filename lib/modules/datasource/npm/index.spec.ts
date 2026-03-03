@@ -1,9 +1,9 @@
+import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { NpmDatasource, setNpmrc } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const datasource = NpmDatasource.id;
 

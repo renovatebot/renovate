@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 import type { SkipReason, StageName } from '../../../types/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';

@@ -1,4 +1,5 @@
-import { pathToFileURL } from 'url';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 import { isFunction } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
@@ -63,16 +64,40 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       const absoluteFilePath = upath.isAbsolute(file)
         ? file
         : `${process.cwd()}/${file}`;
-      // use file url paths to avoid issues with windows paths
-      // typescript does not support file URL for import
-      const tmpConfig = await import(pathToFileURL(absoluteFilePath).href);
+      const fileUrl = pathToFileURL(absoluteFilePath).href;
+
+      let tmpConfig: unknown;
+      try {
+        // Try ESM import first (default for "type": "module")
+        tmpConfig = await import(fileUrl);
+      } catch (err) {
+        /* v8 ignore start -- CJS fallback not testable in vitest */
+
+        // If the file is .js, it might be a legacy CJS config (using module.exports)
+        // This usually throws ReferenceError (module is not defined) or SyntaxError
+        if (upath.extname(file) === '.js') {
+          const require = createRequire(import.meta.url);
+          try {
+            tmpConfig = require(absoluteFilePath);
+          } catch {
+            // If require also fails (e.g. strict ESM package), throw the original import error
+            // to encourage the user to fix their config format.
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+        /* v8 ignore stop */
+      }
+
       /* v8 ignore next -- not testable */
-      let config = tmpConfig.default ?? tmpConfig;
+      let config =
+        (tmpConfig as { default?: RenovateConfig }).default ?? tmpConfig;
       // Allow the config to be a function
       if (isFunction(config)) {
         config = config();
       }
-      return config;
+      return config as RenovateConfig;
     }
     default:
       throw new Error('Unsupported file type');

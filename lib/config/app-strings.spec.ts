@@ -1,6 +1,10 @@
 import { getConfigFileNames, setUserConfigFileNames } from './app-strings.ts';
 
 describe('config/app-strings', () => {
+  beforeEach(() => {
+    setUserConfigFileNames([]);
+  });
+
   it('adds user configured filenames to list', () => {
     let filenames = getConfigFileNames();
     expect(filenames.includes('abc')).toBeFalse();
@@ -20,5 +24,19 @@ describe('config/app-strings', () => {
     expect(
       getConfigFileNames('github').includes('.github/renovate.json'),
     ).toBeTrue();
+  });
+
+  it('does not allow the local platform to have an associated filename', () => {
+    const filenames = getConfigFileNames('local');
+
+    expect(filenames.includes('.local/renovate.json')).toBeFalse();
+    expect(filenames).toEqual([
+      'renovate.json',
+      'renovate.json5',
+      '.renovaterc',
+      '.renovaterc.json',
+      '.renovaterc.json5',
+      'package.json',
+    ]);
   });
 });

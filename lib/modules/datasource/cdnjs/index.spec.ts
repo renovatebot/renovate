@@ -1,9 +1,9 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { CdnjsDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const baseUrl = 'https://api.cdnjs.com/';
 

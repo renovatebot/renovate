@@ -1,11 +1,11 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import type { GithubTagItem } from '../../../util/github/graphql/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { GithubTagsDatasource } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const githubApiHost = 'https://api.github.com';
 

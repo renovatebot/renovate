@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { regEx } from '../../../util/regex.ts';
 import { githubApi } from './common.ts';
 

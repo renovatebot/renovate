@@ -7,7 +7,7 @@
     "strictNullChecks": true,
     "noEmit": true,
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
-    "target": "es2022",
+    "target": "es2024",
     "moduleResolution": "nodenext",
     "module": "nodenext",
     "allowImportingTsExtensions": true,
@@ -19,7 +19,7 @@
     "noImplicitOverride": true,
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for tsdown */,
-    "lib": ["es2023"],
+    "lib": ["ES2024"],
     "types": ["node", "vitest/globals"],
     "checkJs": true,
     "skipLibCheck": true, // https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971
@@ -43,9 +43,5 @@
     "tools/mkdocs/site",
     ".github/workflows/**/*.js",
     ".worktrees/**/*"
-  ],
-  "ts-node": {
-    "transpileOnly": true,
-    "esm": false
-  }
+  ]
 }

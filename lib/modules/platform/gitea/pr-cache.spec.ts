@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
@@ -9,7 +10,6 @@ import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { GiteaPrCache } from './pr-cache.ts';
 import type { PR, Repo } from './types.ts';
 import { toRenovatePR } from './utils.ts';
-import { partial } from '~test/util.ts';
 
 const http = new GiteaHttp();
 const ignorePrAuthor = false;

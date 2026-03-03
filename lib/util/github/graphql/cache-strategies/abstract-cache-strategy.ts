@@ -14,8 +14,7 @@ import { isDateExpired } from '../util.ts';
  */
 export abstract class AbstractGithubGraphqlCacheStrategy<
   GithubItem extends GithubDatasourceItem,
-> implements GithubGraphqlCacheStrategy<GithubItem>
-{
+> implements GithubGraphqlCacheStrategy<GithubItem> {
   /**
    * Time period after which a cache record is considered expired.
    */

@@ -1,5 +1,5 @@
 import { isString, isTruthy } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { escapeRegExp, regEx } from '../../../../util/regex.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';

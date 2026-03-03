@@ -1,8 +1,8 @@
 import { mockDeep } from 'vitest-mock-extended';
-import * as _hostRules from '../../../util/host-rules.ts';
-import { GoDatasource } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { GoDatasource } from './index.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 const hostRules = vi.mocked(_hostRules);

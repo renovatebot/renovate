@@ -4,14 +4,16 @@ import { customManagerList as customManagers } from './custom/index.ts';
 
 describe('modules/manager/metadata', () => {
   const managerList: string[] = fs
-    .readdirSync(__dirname, { withFileTypes: true })
+    .readdirSync(import.meta.dirname, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
     .filter((name) => !name.startsWith('__') && name !== 'custom')
     .sort();
 
   const customManagerList = fs
-    .readdirSync(upath.join(__dirname, 'custom'), { withFileTypes: true })
+    .readdirSync(upath.join(import.meta.dirname, 'custom'), {
+      withFileTypes: true,
+    })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
     .filter((name) => !name.startsWith('__'))
@@ -22,7 +24,7 @@ describe('modules/manager/metadata', () => {
     async (manager) => {
       let readme: string | undefined;
       try {
-        const readmeFilePath = `${__dirname}/${
+        const readmeFilePath = `${import.meta.dirname}/${
           (customManagers.includes(manager) ? 'custom/' : '') + manager
         }/readme.md`;
         readme = await fs.readFile(readmeFilePath, 'utf8');

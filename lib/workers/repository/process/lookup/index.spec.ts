@@ -1,7 +1,10 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import * as hostRules from '../../../../../lib/util/host-rules.ts';
 import { getConfig } from '../../../../config/defaults.ts';
-import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.ts';
+import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { CustomDatasource } from '../../../../modules/datasource/custom/index.ts';
@@ -25,18 +28,15 @@ import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
+import * as McApi from '../../../../util/merge-confidence/index.ts';
 import {
   initConfig,
   resetConfig,
 } from '../../../../util/merge-confidence/index.ts';
-import * as McApi from '../../../../util/merge-confidence/index.ts';
 import { Result } from '../../../../util/result.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as lookup from './index.ts';
 import type { LookupUpdateConfig } from './types.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const qJson = {
   ...Fixtures.getJson('01.json'),

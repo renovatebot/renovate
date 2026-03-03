@@ -31,7 +31,7 @@ import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.ts';
+import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import type {
   AllConfig,
   AllowedParents,
@@ -839,6 +839,15 @@ async function validateGlobalConfig(
       message: getDeprecationMessage(key)!,
     });
   }
+
+  if (key === 'binarySource' && val === 'docker') {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message:
+        'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
+    });
+  }
+
   if (val !== null) {
     // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {

@@ -22,7 +22,7 @@ import type {
   RenovateRepository,
 } from '../../config/types.ts';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.cjs';
+import { pkg } from '../../expose.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import {
   exportStats,
@@ -46,9 +46,26 @@ export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
   repository: RenovateRepository,
 ): Promise<RenovateConfig> {
+  let repositoryConfig: RenovateRepository;
+  if (isString(repository)) {
+    repositoryConfig = { repository };
+  } else if (repository.extends?.length) {
+    // Resolve repository-level presets before merging with global config
+    const { config: resolvedRepoConfig } = await resolveConfigPresets(
+      repository,
+      globalConfig,
+    );
+    repositoryConfig = {
+      ...resolvedRepoConfig,
+      repository: repository.repository,
+    };
+  } else {
+    repositoryConfig = repository;
+  }
+
   const repoConfig = configParser.mergeChildConfig(
     globalConfig,
-    isString(repository) ? { repository } : repository,
+    repositoryConfig,
   );
   const repoParts = repoConfig.repository.split('/');
   repoParts.pop();
@@ -82,7 +99,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines!.node!;
+  const range = pkg.engines.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
       { release: process.release, versions: process.versions },
@@ -107,6 +124,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 }
 
 export async function start(): Promise<number> {
+  logger.info({ renovateVersion: pkg.version }, 'Renovate started');
   // istanbul ignore next
   if (regexEngineStatus.type === 'available') {
     logger.debug('Using RE2 regex engine');

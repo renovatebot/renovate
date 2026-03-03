@@ -1,7 +1,7 @@
+import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../../../config/global.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { hasPackageManager } from './package-file.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 vi.mock('fs-extra', async () =>
   (

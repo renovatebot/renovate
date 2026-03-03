@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { logger, partial } from '~test/util.ts';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
@@ -10,7 +11,6 @@ import {
   downloadMavenXml,
   downloadS3Protocol,
 } from './util.ts';
-import { logger, partial } from '~test/util.ts';
 
 const http = new Http('test');
 

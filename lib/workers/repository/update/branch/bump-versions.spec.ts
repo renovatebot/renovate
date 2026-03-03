@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
+import { fs, logger, partial, scm } from '~test/util.ts';
 import * as templates from '../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { bumpVersions } from './bump-versions.ts';
-import { fs, logger, partial, scm } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 

@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins/index.ts';
+
 export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://www.jenkins.io/doc';

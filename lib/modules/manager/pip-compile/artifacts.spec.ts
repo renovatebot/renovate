@@ -1,6 +1,9 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -11,9 +14,6 @@ import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { constructPipCompileCmd } from './artifacts.ts';
 import { extractHeaderCommand } from './common.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 const datasource = vi.mocked(_datasource);
 
@@ -62,7 +62,7 @@ const adminConfig: RepoGlobalConfig = {
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 } satisfies RepoGlobalConfig;
 
 process.env.CONTAINERBASE = 'true';
@@ -195,7 +195,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -208,7 +208,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e PYTHON_KEYRING_BACKEND ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
@@ -531,7 +531,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -544,7 +544,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e PYTHON_KEYRING_BACKEND ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +

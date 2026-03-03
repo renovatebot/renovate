@@ -506,7 +506,7 @@ describe('modules/manager/kustomize/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
 
@@ -549,7 +549,7 @@ describe('modules/manager/kustomize/artifacts', () => {
     ]);
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -561,7 +561,7 @@ describe('modules/manager/kustomize/artifacts', () => {
           '-e HELM_REPOSITORY_CACHE ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool helm 3.17.0' +
           ' && ' +

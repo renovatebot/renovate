@@ -1,5 +1,7 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
 import {
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
@@ -11,8 +13,6 @@ import {
   parseKotlinSource,
   parseProps,
 } from './parser.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, logger } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -690,6 +690,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'base="https://foo.bar"'} | ${'maven(uri(base + "/baz"))'}                                   | ${'https://foo.bar/baz'}
         ${''}                       | ${'maven(uri(["https://foo.bar/baz"]))'}                         | ${null}
         ${''}                       | ${'maven { ["https://foo.bar/baz"] }'}                           | ${null}
+        ${''}                       | ${'maven { name = "baz" }'}                                      | ${null}
         ${''}                       | ${'maven { url "https://foo.bar/baz" }'}                         | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url base + "/baz" }'}                                 | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url "${base}/baz" }'}                                 | ${'https://foo.bar/baz'}

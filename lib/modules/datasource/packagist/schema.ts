@@ -1,5 +1,5 @@
 import { isUndefined } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';

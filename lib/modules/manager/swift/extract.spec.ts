@@ -1,5 +1,5 @@
-import { extractPackageFile } from './extract.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/swift/extract', () => {
   describe('extractPackageFile()', () => {

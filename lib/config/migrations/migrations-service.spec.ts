@@ -103,7 +103,9 @@ describe('config/migrations/migrations-service', () => {
 
   it('includes all defined migration classes in MigrationsService.customMigrations', () => {
     const allDefinedMigrationClasses: string[] = fs
-      .readdirSync(upath.join(__dirname, 'custom'), { withFileTypes: true })
+      .readdirSync(upath.join(import.meta.dirname, 'custom'), {
+        withFileTypes: true,
+      })
       .map((file) => file.name)
       .filter((name) => !name.includes('spec.ts'));
 
