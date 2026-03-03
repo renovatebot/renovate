@@ -2,7 +2,6 @@ import * as tar from 'tar-stream';
 import { promisify } from 'util';
 import { vi } from 'vitest';
 import * as zlib from 'zlib';
-import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
@@ -27,8 +26,22 @@ async function createTarGz(
   return gzip(Buffer.concat(chunks));
 }
 
+const nginxApkIndex = [
+  'P:nginx',
+  'V:1.24.0-r16',
+  'U:https://www.nginx.org/',
+  't:1714170434',
+].join('\n');
+
 describe('modules/datasource/apk/index', () => {
-  const apkIndexArchivePath = Fixtures.getPath('APKINDEX.tar.gz');
+  let apkIndexArchive: Buffer;
+
+  beforeAll(async () => {
+    apkIndexArchive = await createTarGz([
+      { name: 'APKINDEX', content: nginxApkIndex },
+    ]);
+  });
+
   const apkDatasource = new ApkDatasource();
 
   it('should export ApkDatasource', () => {
@@ -58,7 +71,7 @@ describe('modules/datasource/apk/index', () => {
       httpMock
         .scope('https://dl-cdn.alpinelinux.org')
         .get('/alpine/latest-stable/main/x86_64/APKINDEX.tar.gz')
-        .replyWithFile(200, apkIndexArchivePath);
+        .reply(200, apkIndexArchive);
 
       const res = await getPkgReleases(config);
       expect(res).toBeNull();
@@ -73,7 +86,7 @@ describe('modules/datasource/apk/index', () => {
       httpMock
         .scope('https://dl-cdn.alpinelinux.org')
         .get('/alpine/latest-stable/main/x86_64/APKINDEX.tar.gz')
-        .replyWithFile(200, apkIndexArchivePath);
+        .reply(200, apkIndexArchive);
 
       const res = await getPkgReleases(config);
       expect(res).toEqual({
@@ -101,7 +114,7 @@ describe('modules/datasource/apk/index', () => {
       httpMock
         .scope('https://dl-cdn.alpinelinux.org')
         .get('/alpine/v3.19/main/x86_64/APKINDEX.tar.gz')
-        .replyWithFile(200, apkIndexArchivePath);
+        .reply(200, apkIndexArchive);
 
       const res = await getPkgReleases(config);
       expect(res).toEqual({
