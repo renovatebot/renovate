@@ -35,3 +35,10 @@ test/datasource/nuget/_fixtures/obj
 
 # pdm
 /.pdm-python
+
+# local development directories
+/.agents
+/.claude
+/.opencode
+/AGENTS.md
+/CLAUDE.md

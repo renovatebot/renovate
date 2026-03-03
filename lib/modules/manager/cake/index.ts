@@ -25,6 +25,10 @@ const lexer = moo.states({
       match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/, // TODO #12870
       value: (s: string) => s.trim().slice(1, -1),
     },
+    dependencyFromInstallTools: {
+      match: /(?:InstallTools?\s*\()[^)]+(?:\s*\)\s*;)/,
+      lineBreaks: true,
+    },
     unknown: moo.fallback,
   },
 });
@@ -73,6 +77,15 @@ export function extractPackageFile(content: string): PackageFileContent {
       const dep = parseDependencyLine(value);
       if (dep) {
         deps.push(dep);
+      }
+    } else if (type === 'dependencyFromInstallTools') {
+      const matches = value.matchAll(regEx(/"dotnet:[^"]+"/g));
+      for (const match of matches) {
+        const withoutQuote = match.toString().slice(1, -1);
+        const dep = parseDependencyLine(withoutQuote);
+        if (dep) {
+          deps.push(dep);
+        }
       }
     }
     token = lexer.next();

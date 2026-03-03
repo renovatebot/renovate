@@ -188,5 +188,5 @@ export function parseModifier(value: string): number | null {
   if (!match) {
     return null;
   }
-  return parseInt(match[1] ?? '1');
+  return parseInt(match[1] ?? '1', 10);
 }
