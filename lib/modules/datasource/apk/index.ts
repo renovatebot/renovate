@@ -115,8 +115,8 @@ export class ApkDatasource extends Datasource {
               next();
             });
 
+            /* v8 ignore next 4 -- hard to test stream errors */
             stream.on('error', (err: Error) => {
-              /* v8 ignore next 2 -- hard to test stream errors */
               logger.warn({ err }, 'Error reading APKINDEX file from tar');
               next();
             });
