@@ -1,4 +1,4 @@
-import { AutomergeMinorMigration } from './automerge-minor-migration';
+import { AutomergeMinorMigration } from './automerge-minor-migration.ts';
 
 describe('config/migrations/custom/automerge-minor-migration', () => {
   it('should migrate value to object', async () => {

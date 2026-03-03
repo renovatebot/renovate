@@ -2,32 +2,32 @@ import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { filterMap } from '../../../util/filter-map';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getEnv } from '../../../util/env.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { filterMap } from '../../../util/filter-map.ts';
 import {
   ensureCacheDir,
   findLocalSiblingOrParent,
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import { isValid } from '../../versioning/semver';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isValid } from '../../versioning/semver/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { getExtraDepsNotice } from './artifacts-extra';
+} from '../types.ts';
+import { getExtraDepsNotice } from './artifacts-extra.ts';
 
 const { major, valid } = semver;
 

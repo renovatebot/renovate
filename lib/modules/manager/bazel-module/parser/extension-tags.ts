@@ -1,10 +1,10 @@
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import { kvParams } from './common';
-import type { Ctx } from './context';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import { kvParams } from './common.ts';
+import type { Ctx } from './context.ts';
 
-import { mavenExtensionPrefix, mavenExtensionTags } from './maven';
-import { ociExtensionPrefix, ociExtensionTags } from './oci';
+import { mavenExtensionPrefix, mavenExtensionTags } from './maven.ts';
+import { ociExtensionPrefix, ociExtensionTags } from './oci.ts';
 
 // In bazel modules an extension tag is (roughly) a "member function application".
 // For example:

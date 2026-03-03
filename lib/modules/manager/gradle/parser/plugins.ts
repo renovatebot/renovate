@@ -1,6 +1,6 @@
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
 import {
   cleanupTempVars,
   qStringValue,
@@ -8,8 +8,8 @@ import {
   qVersion,
   storeInTokenMap,
   storeVarToken,
-} from './common';
-import { handlePlugin } from './handlers';
+} from './common.ts';
+import { handlePlugin } from './handlers.ts';
 
 export const qPlugins = q
   .sym(regEx(/^(?:id|kotlin)$/), storeVarToken)

@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import type { ApkPackage } from './types';
+import { logger } from '../../../logger/index.ts';
+import type { ApkPackage } from './types.ts';
 
 /**
  * Parses an APK index file content and extracts package information
@@ -51,7 +51,7 @@ export function parseApkIndex(indexContent: string): ApkPackage[] {
             packageInfo.url = value;
             break;
           case 't':
-            packageInfo.buildDate = parseInt(value);
+            packageInfo.buildDate = parseInt(value, 10);
             break;
         }
       }

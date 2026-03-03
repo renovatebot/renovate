@@ -1,7 +1,7 @@
 import { isEmptyString, isNullOrUndefined } from '@sindresorhus/is';
-import { BitriseDatasource } from '../../datasource/bitrise';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency } from '../types';
+import { BitriseDatasource } from '../../datasource/bitrise/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 export function parseStep(
   stepRef: string,

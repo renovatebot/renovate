@@ -1,6 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import type { ValidationMessage } from '../types';
-import type { CheckBaseBranchesArgs } from './types';
+import type { ValidationMessage } from '../types.ts';
+import type { CheckBaseBranchesArgs } from './types.ts';
 
 /**
  * Only if type condition or context condition violated then errors array will be mutated to store metadata

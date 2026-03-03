@@ -1,24 +1,24 @@
-import { lang, query as q } from 'good-enough-parser';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency } from '../types';
-import { qApplyFrom } from './parser/apply-from';
-import { qAssignments } from './parser/assignments';
-import { qKotlinImport } from './parser/common';
-import { qDependencies, qLongFormDep } from './parser/dependencies';
-import { setParseGradleFunc } from './parser/handlers';
-import { qToolchainVersion } from './parser/language-version';
-import { qKotlinMultiObjectVarAssignment } from './parser/objects';
-import { qPlugins } from './parser/plugins';
-import { qRegistryUrls } from './parser/registry-urls';
-import { qVersionCatalogs } from './parser/version-catalogs';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { PackageDependency } from '../types.ts';
+import { qApplyFrom } from './parser/apply-from.ts';
+import { qAssignments } from './parser/assignments.ts';
+import { qKotlinImport } from './parser/common.ts';
+import { qDependencies, qLongFormDep } from './parser/dependencies.ts';
+import { setParseGradleFunc } from './parser/handlers.ts';
+import { qToolchainVersion } from './parser/language-version.ts';
+import { qKotlinMultiObjectVarAssignment } from './parser/objects.ts';
+import { qPlugins } from './parser/plugins.ts';
+import { qRegistryUrls } from './parser/registry-urls.ts';
+import { qVersionCatalogs } from './parser/version-catalogs.ts';
 import type {
   Ctx,
   GradleManagerData,
   PackageRegistry,
   PackageVariables,
   ParseGradleResult,
-} from './types';
-import { parseDependencyString } from './utils';
+} from './types.ts';
+import { parseDependencyString } from './utils.ts';
 
 const groovy = lang.createLang('groovy');
 const ctx: Ctx = {

@@ -1,4 +1,4 @@
-import { DatasourceMigration } from './datasource-migration';
+import { DatasourceMigration } from './datasource-migration.ts';
 
 describe('config/migrations/custom/datasource-migration', () => {
   it('should migrate adoptium-java', async () => {

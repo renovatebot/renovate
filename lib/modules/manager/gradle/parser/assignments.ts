@@ -1,7 +1,7 @@
-import type { parser } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
+import type { parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
 import {
   cleanupTempVars,
   coalesceVariable,
@@ -13,12 +13,12 @@ import {
   reduceNestingDepth,
   storeInTokenMap,
   storeVarToken,
-} from './common';
+} from './common.ts';
 import {
   qDependencyStrings,
   qGroovyMapNotationDependencies,
-} from './dependencies';
-import { handleAssignment } from './handlers';
+} from './dependencies.ts';
+import { handleAssignment } from './handlers.ts';
 
 // foo = "1.2.3"
 const qGroovySingleVarAssignment = qVariableAssignmentIdentifier

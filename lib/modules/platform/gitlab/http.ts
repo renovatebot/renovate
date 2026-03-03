@@ -1,7 +1,7 @@
 import { isEmptyArray } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import type { GitLabUser, GitlabUserStatus } from './types';
+import { logger } from '../../../logger/index.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import type { GitLabUser, GitlabUserStatus } from './types.ts';
 
 export const gitlabApi = new GitlabHttp();
 
@@ -31,8 +31,16 @@ async function getMembers(group: string): Promise<GitLabUser[]> {
 }
 
 export async function getMemberUserIDs(group: string): Promise<number[]> {
-  const members = await getMembers(group);
-  return members.map((u) => u.id);
+  try {
+    const members = await getMembers(group);
+    return members.map((u) => u.id);
+  } catch (err) {
+    logger.once.warn(
+      { group, errorMessage: err.message },
+      `Unable to fetch user IDs for members of the ${group} group`,
+    );
+    return [];
+  }
 }
 
 export async function getMemberUsernames(group: string): Promise<string[]> {

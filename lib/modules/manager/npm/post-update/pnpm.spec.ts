@@ -1,15 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../../config/global';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import { getNodeToolConstraint } from './node-version';
-import * as pnpmHelper from './pnpm';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs, partial } from '~test/util';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as pnpmHelper from './pnpm.ts';
 
-vi.mock('../../../../util/exec/env');
-vi.mock('../../../../util/fs');
-vi.mock('./node-version');
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./node-version.ts');
 
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
@@ -505,7 +505,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -518,7 +518,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -526,7 +526,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           '-v "/tmp":"/tmp" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +

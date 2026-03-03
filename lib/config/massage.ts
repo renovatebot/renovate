@@ -1,7 +1,7 @@
 import { isArray, isNonEmptyArray, isObject, isString } from '@sindresorhus/is';
-import { clone } from '../util/clone';
-import { getOptions } from './options';
-import type { PackageRule, RenovateConfig, UpdateType } from './types';
+import { clone } from '../util/clone.ts';
+import { getOptions } from './options/index.ts';
+import type { PackageRule, RenovateConfig, UpdateType } from './types.ts';
 
 const options = getOptions();
 

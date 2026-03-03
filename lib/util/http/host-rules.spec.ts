@@ -1,9 +1,9 @@
-import { GlobalConfig } from '../../config/global';
-import { bootstrap } from '../../proxy';
-import type { HostRule } from '../../types';
-import * as hostRules from '../host-rules';
-import { applyHostRule, findMatchingRule } from './host-rules';
-import type { GotOptions } from './types';
+import { GlobalConfig } from '../../config/global.ts';
+import { bootstrap } from '../../proxy.ts';
+import type { HostRule } from '../../types/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { applyHostRule, findMatchingRule } from './host-rules.ts';
+import type { GotOptions } from './types.ts';
 
 const url = 'https://github.com';
 

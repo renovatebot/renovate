@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro';
+import { logger } from '../../../logger/index.ts';
+import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro.ts';
 
 const refreshInterval = { days: 1 };
 

@@ -1,17 +1,17 @@
+import * as tar from 'tar-stream';
 import { promisify } from 'util';
 import * as zlib from 'zlib';
-import * as tar from 'tar-stream';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { HttpError } from '../../../util/http';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { id as looseVersioning } from '../../versioning/loose';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { parseApkIndex } from './parser';
-import type { ApkPackage } from './types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { id as looseVersioning } from '../../versioning/loose/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { parseApkIndex } from './parser.ts';
+import type { ApkPackage } from './types.ts';
 
 export const apkDatasourceId = 'apk';
 
@@ -157,12 +157,7 @@ export class ApkDatasource extends Datasource {
   /**
    * Gets all available packages from an APK repository
    */
-  @cache({
-    namespace: `datasource-${ApkDatasource.id}`,
-    key: (registryUrl: string) => registryUrl,
-    ttlMinutes: 60, // Cache for 1 hour
-  })
-  async getPackages(registryUrl: string): Promise<ApkPackage[]> {
+  private async _getPackages(registryUrl: string): Promise<ApkPackage[]> {
     logger.debug(`Fetching APK packages from ${registryUrl}`);
 
     try {
@@ -179,6 +174,18 @@ export class ApkDatasource extends Datasource {
       logger.warn({ registryUrl, err }, 'Failed to fetch APK packages');
       throw err;
     }
+  }
+
+  getPackages(registryUrl: string): Promise<ApkPackage[]> {
+    return withCache(
+      {
+        namespace: `datasource-${ApkDatasource.id}`,
+        key: registryUrl,
+        ttlMinutes: 60,
+        fallback: true,
+      },
+      () => this._getPackages(registryUrl),
+    );
   }
 
   /**

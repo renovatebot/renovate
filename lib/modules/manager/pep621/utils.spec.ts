@@ -1,5 +1,5 @@
 import { isTruthy } from '@sindresorhus/is';
-import { parsePEP508 } from './utils';
+import { parsePEP508 } from './utils.ts';
 
 describe('modules/manager/pep621/utils', () => {
   describe('parsePEP508()', () => {

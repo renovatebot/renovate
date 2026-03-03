@@ -1,19 +1,19 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import type { RepoGlobalConfig } from '../../../../config/types';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import * as hostRules from '../../../../util/host-rules';
-import { getPkgReleases as _getPkgReleases } from '../../../datasource';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types';
-import { parsePyProject } from '../extract';
-import { depTypes } from '../utils';
-import { PdmProcessor } from './pdm';
-import { mockExecAll } from '~test/exec-util';
-import { fs, partial } from '~test/util';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as hostRules from '../../../../util/host-rules.ts';
+import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import { parsePyProject } from '../extract.ts';
+import { depTypes } from '../utils.ts';
+import { PdmProcessor } from './pdm.ts';
 
-vi.mock('../../../../util/fs');
-vi.mock('../../../datasource');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../datasource/index.ts');
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
@@ -57,7 +57,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -84,7 +84,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/renovatebot/base-image',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -96,7 +96,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool python 3.11.2 ' +
             '&& ' +

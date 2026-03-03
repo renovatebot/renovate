@@ -1,10 +1,10 @@
 import { vi } from 'vitest';
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import type { GetPkgReleasesConfig } from '../types';
-import { ApkDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import type { GetPkgReleasesConfig } from '../types.ts';
+import { ApkDatasource } from './index.ts';
 
 describe('modules/datasource/apk/index', () => {
   const apkIndexArchivePath = Fixtures.getPath('APKINDEX.tar.gz');

@@ -1,19 +1,19 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
-import * as pub from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs } from '~test/util';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../types.ts';
+import * as pub from './index.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../../util/http');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/http/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -204,7 +204,7 @@ describe('modules/manager/pub/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
@@ -226,7 +226,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/renovatebot/base-image',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -238,7 +238,7 @@ describe('modules/manager/pub/artifacts', () => {
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             `install-tool ${params.sdk} 3.3.9` +
             ' && ' +

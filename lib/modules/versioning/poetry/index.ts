@@ -1,17 +1,17 @@
 import { parseRange } from 'semver-utils';
-import { logger } from '../../../logger';
-import type { RangeStrategy } from '../../../types/versioning';
-import { api as npm } from '../npm';
-import { api as pep440 } from '../pep440';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { api as npm } from '../npm/index.ts';
+import { api as pep440 } from '../pep440/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
-import { VERSION_PATTERN } from './patterns';
+import { VERSION_PATTERN } from './patterns.ts';
 import {
   npm2poetry,
   poetry2npm,
   poetry2semver,
   semver2poetry,
-} from './transform';
+} from './transform.ts';
 
 export const id = 'poetry';
 export const displayName = 'Poetry';

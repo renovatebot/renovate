@@ -2,17 +2,17 @@ import { isArray, isNonEmptyString, isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { markdownTable } from 'markdown-table';
 import semver from 'semver';
-import { mergeChildConfig } from '../../../config';
-import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
-import { safeStringify } from '../../../util/stringify';
-import * as template from '../../../util/template';
-import type { Timestamp } from '../../../util/timestamp';
-import { uniq } from '../../../util/uniq';
-import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { CommitMessage } from '../model/commit-message';
+import { mergeChildConfig } from '../../../config/index.ts';
+import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { safeStringify } from '../../../util/stringify.ts';
+import * as template from '../../../util/template/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { uniq } from '../../../util/uniq.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import { CommitMessage } from '../model/commit-message.ts';
 
 function prettifyVersion(version: string): string {
   if (regEx(/^\d/).test(version)) {
@@ -471,10 +471,9 @@ export function generateBranchConfig(
   // explicit set `isLockFileMaintenance` for the branch for groups
   if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
     config.isLockFileMaintenance = true;
-    // istanbul ignore if: not worth testing
+    // istanbul ignore if: should never happen
     if (config.upgrades.some((upgrade) => !upgrade.isLockFileMaintenance)) {
-      // TODO: warn?
-      logger.debug(
+      logger.warn(
         'Grouping lockfile maintenance with other update types is not supported',
       );
     }

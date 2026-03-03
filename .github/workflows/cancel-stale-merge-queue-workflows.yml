@@ -2,6 +2,8 @@ name: Cancel stale merge queue workflows
 on:
   merge_group:
     types:
+      # NOTE that this does not appear to be supported through the schemas, but does appear to be a valid type
+      # See also: https://github.com/orgs/community/discussions/69342
       - destroyed
 
 permissions:

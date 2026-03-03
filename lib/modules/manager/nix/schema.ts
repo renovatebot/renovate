@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { Json } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { Json } from '../../../util/schema-utils/index.ts';
 
 const InputType = z.enum([
   'file',

@@ -1,5 +1,5 @@
-import { generateLoginCmd } from './common';
-import type { RepositoryRule } from './types';
+import { generateLoginCmd } from './common.ts';
+import type { RepositoryRule } from './types.ts';
 
 describe('modules/manager/helmv3/common', () => {
   it('should generate a login command with username and password', async () => {

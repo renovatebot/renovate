@@ -1,4 +1,4 @@
-import { findHandler, findHandlerByType } from '.';
+import { findHandler, findHandlerByType } from './index.ts';
 
 describe('modules/manager/homebrew/handlers/index', () => {
   describe('findHandlerByType', () => {

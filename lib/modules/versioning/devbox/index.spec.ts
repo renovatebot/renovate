@@ -1,4 +1,4 @@
-import devbox from '.';
+import devbox from './index.ts';
 
 describe('modules/versioning/devbox/index', () => {
   it.each`

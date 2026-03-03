@@ -1,15 +1,15 @@
 import { isUndefined } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { FindPRConfig, Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { getMigrationBranchName } from '../common';
-import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { createConfigMigrationBranch } from './create';
-import type { MigratedData } from './migrated-data';
-import { rebaseMigrationBranch } from './rebase';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { FindPRConfig, Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getMigrationBranchName } from '../common.ts';
+import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
+import { createConfigMigrationBranch } from './create.ts';
+import type { MigratedData } from './migrated-data.ts';
+import { rebaseMigrationBranch } from './rebase.ts';
 
 export type CheckConfigMigrationBranchResult =
   | { result: 'no-migration-branch' }

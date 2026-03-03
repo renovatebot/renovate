@@ -1,20 +1,20 @@
 import { isArray } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
-import { isVersion } from '../../versioning/semver';
-import { getDep as getDockerDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry/index.ts';
+import { isVersion } from '../../versioning/semver/index.ts';
+import { getDep as getDockerDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   type ProjectDescriptor,
   ProjectDescriptorToml,
   isBuildpackByName,
   isBuildpackByURI,
-} from './schema';
+} from './schema.ts';
 
 export const DOCKER_PREFIX = regEx(/^docker:\/?\//);
 const dockerRef = regEx(

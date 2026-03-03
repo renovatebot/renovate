@@ -1,5 +1,5 @@
-import type { VulnerabilityPackage } from '../../../types';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
+import type { VulnerabilityPackage } from '../../../types/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 
 export function normalizeNamePerEcosystem({
   name,

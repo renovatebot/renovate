@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { isVersion } from '../../versioning/ruby';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { isVersion } from '../../versioning/ruby/index.ts';
 
 const DEP_REGEX = regEx(/\((?<version>.*)\)/);
 

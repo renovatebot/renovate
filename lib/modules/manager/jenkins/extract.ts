@@ -1,12 +1,12 @@
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { isSkipComment } from '../../../util/ignore';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
-import * as mavenVersioning from '../../versioning/maven';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { JenkinsPlugin, JenkinsPlugins } from './types';
+import { logger } from '../../../logger/index.ts';
+import { isSkipComment } from '../../../util/ignore.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins/index.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { JenkinsPlugin, JenkinsPlugins } from './types.ts';
 
 const YamlExtension = regEx(/\.ya?ml$/);
 

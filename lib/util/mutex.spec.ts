@@ -1,4 +1,4 @@
-import { acquireLock, getMutex } from './mutex';
+import { acquireLock, getMutex } from './mutex.ts';
 
 vi.unmock('./mutex');
 

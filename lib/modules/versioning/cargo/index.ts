@@ -1,10 +1,10 @@
 import { major as getMajor, minor as getMinor } from 'semver';
 import semver from 'semver-stable';
-import { logger } from '../../../logger';
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import { api as npm } from '../npm';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import { api as npm } from '../npm/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'cargo';
 export const displayName = 'Cargo';

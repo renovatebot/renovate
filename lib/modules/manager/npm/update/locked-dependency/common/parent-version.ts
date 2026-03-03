@@ -1,10 +1,10 @@
-import { logger } from '../../../../../../logger';
+import { logger } from '../../../../../../logger/index.ts';
 import type {
   GetPkgReleasesConfig,
   ReleaseResult,
-} from '../../../../../datasource';
-import { getPkgReleases } from '../../../../../datasource';
-import { api as semver } from '../../../../../versioning/npm';
+} from '../../../../../datasource/index.ts';
+import { getPkgReleases } from '../../../../../datasource/index.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
 
 const pkgCache = new Map<string, Promise<ReleaseResult | null>>();
 

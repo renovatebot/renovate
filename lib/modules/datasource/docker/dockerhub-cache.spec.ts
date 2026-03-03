@@ -1,9 +1,9 @@
-import * as _packageCache from '../../../util/cache/package';
-import type { DockerHubCacheData } from './dockerhub-cache';
-import { DockerHubCache } from './dockerhub-cache';
-import type { DockerHubTag } from './schema';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import type { DockerHubCacheData } from './dockerhub-cache.ts';
+import { DockerHubCache } from './dockerhub-cache.ts';
+import type { DockerHubTag } from './schema.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 function oldCacheData(): DockerHubCacheData {

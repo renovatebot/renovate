@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import type { BranchConfig } from '../../types';
+import { logger } from '../../../logger/index.ts';
+import type { BranchConfig } from '../../types.ts';
 
 export function sortBranches(branches: Partial<BranchConfig>[]): void {
   // Sort branches

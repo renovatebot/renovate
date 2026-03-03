@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import { Json } from '../../../util/schema-utils';
-import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { FvmConfig } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { FvmConfig } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

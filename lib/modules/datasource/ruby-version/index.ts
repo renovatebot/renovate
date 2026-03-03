@@ -1,12 +1,15 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { parse } from '../../../util/html';
-import type { HttpError } from '../../../util/http';
-import { asTimestamp } from '../../../util/timestamp';
-import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { parse } from '../../../util/html.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import {
+  isVersion,
+  id as rubyVersioningId,
+} from '../../versioning/ruby/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class RubyVersionDatasource extends Datasource {
   static readonly id = 'ruby-version';
@@ -28,8 +31,7 @@ export class RubyVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/ruby/ruby.';
 
-  @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
@@ -69,6 +71,17 @@ export class RubyVersionDatasource extends Datasource {
     }
 
     return res;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${RubyVersionDatasource.id}`,
+        key: 'all',
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 
   override handleHttpErrors(err: HttpError): never | void {

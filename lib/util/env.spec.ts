@@ -1,5 +1,5 @@
-import * as memCache from './cache/memory';
-import { getEnv, setCustomEnv, setUserEnv } from './env';
+import * as memCache from './cache/memory/index.ts';
+import { getEnv, setCustomEnv, setUserEnv } from './env.ts';
 
 describe('util/env', () => {
   beforeEach(() => {

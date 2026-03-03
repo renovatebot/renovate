@@ -1,15 +1,15 @@
-import { logger } from '../../../logger';
-import { detectPlatform } from '../../../util/common';
-import { regEx } from '../../../util/regex';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { TerraformModuleDatasource } from '../../datasource/terraform-module';
-import type { PackageDependency } from '../types';
-import { extractTerragruntProvider } from './providers';
-import type { ExtractionResult, TerraformManagerData } from './types';
+import { logger } from '../../../logger/index.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { regEx } from '../../../util/regex.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { TerraformModuleDatasource } from '../../datasource/terraform-module/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { extractTerragruntProvider } from './providers.ts';
+import type { ExtractionResult, TerraformManagerData } from './types.ts';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,

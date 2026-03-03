@@ -1,6 +1,6 @@
-import { GlobalConfig } from '../../../config/global';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { extractPackageFile } from './index.ts';
 
 const requirements1 = Fixtures.get('requirements1.txt');
 const requirements2 = Fixtures.get('requirements2.txt');

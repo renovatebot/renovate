@@ -1,10 +1,10 @@
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { id as semverVersioning } from '../../versioning/semver';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency } from '../types';
-import { extractAllPackageFiles } from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { id as semverVersioning } from '../../versioning/semver/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { ExtractConfig, PackageDependency } from '../types.ts';
+import { extractAllPackageFiles } from './index.ts';
 
 const fixturesDir = 'lib/modules/manager/batect/__fixtures__';
 

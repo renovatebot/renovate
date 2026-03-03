@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
-import { logger } from '../../../logger';
-import { parseApkIndex } from './parser';
+import { logger } from '../../../logger/index.ts';
+import { parseApkIndex } from './parser.ts';
 
 describe('modules/datasource/apk/parser', () => {
   describe('parseApkIndex', () => {

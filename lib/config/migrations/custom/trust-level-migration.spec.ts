@@ -1,4 +1,4 @@
-import { TrustLevelMigration } from './trust-level-migration';
+import { TrustLevelMigration } from './trust-level-migration.ts';
 
 describe('config/migrations/custom/trust-level-migration', () => {
   it('should handle hight level', async () => {

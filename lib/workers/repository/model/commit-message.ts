@@ -1,5 +1,5 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import type { CommitMessageJSON } from '../../../types';
+import type { CommitMessageJSON } from '../../../types/index.ts';
 
 /**
  * @see https://git-scm.com/docs/git-commit#_discussion

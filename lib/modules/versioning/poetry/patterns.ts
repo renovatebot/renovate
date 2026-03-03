@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 /**
  * regex used by poetry.core.version.Version to parse union of SemVer

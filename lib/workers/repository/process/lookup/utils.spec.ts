@@ -1,5 +1,5 @@
-import type { LookupUpdateConfig } from './types';
-import { determineNewReplacementName } from './utils';
+import type { LookupUpdateConfig } from './types.ts';
+import { determineNewReplacementName } from './utils.ts';
 
 const lookupConfig: LookupUpdateConfig = {
   datasource: 'npm',

@@ -1,4 +1,4 @@
-import { getDepHost, getSourceUrl } from './util';
+import { getDepHost, getSourceUrl } from './util.ts';
 
 describe('modules/datasource/gitlab-tags/util', () => {
   describe('getDepHost', () => {

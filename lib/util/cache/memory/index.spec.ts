@@ -1,4 +1,4 @@
-import * as memCache from '.';
+import * as memCache from './index.ts';
 
 describe('util/cache/memory/index', () => {
   it('returns undefined if not init', () => {

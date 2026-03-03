@@ -1,5 +1,5 @@
 import { expect } from 'vitest';
-import { NpmUrlHandler } from './npm';
+import { NpmUrlHandler } from './npm.ts';
 
 describe('modules/manager/homebrew/handlers/npm', () => {
   const handler = new NpmUrlHandler();

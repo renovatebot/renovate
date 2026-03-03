@@ -1,4 +1,4 @@
-import { SemanticCommitsMigration } from './semantic-commits-migration';
+import { SemanticCommitsMigration } from './semantic-commits-migration.ts';
 
 describe('config/migrations/custom/semantic-commits-migration', () => {
   it('should migrate true to "enabled"', async () => {

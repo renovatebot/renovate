@@ -4,7 +4,7 @@ import {
   GemMetadata,
   GemVersions,
   MarshalledVersionInfo,
-} from './schema';
+} from './schema.ts';
 
 describe('modules/datasource/rubygems/schema', () => {
   describe('MarshalledVersionInfo', () => {

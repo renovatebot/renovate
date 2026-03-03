@@ -1,4 +1,4 @@
-import type { GenericImageResourceDef } from '../../types';
+import type { GenericImageResourceDef } from '../../types.ts';
 
 const KubernetesSpecContainer = ['spec', 'container', 'image'];
 const KubernetesSpecInitContainer = ['spec', 'init_container', 'image'];

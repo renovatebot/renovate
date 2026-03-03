@@ -1,4 +1,4 @@
-import { getCombinedKey } from './key';
+import { getCombinedKey } from './key.ts';
 
 describe('util/cache/package/key', () => {
   describe('getCombinedKey', () => {

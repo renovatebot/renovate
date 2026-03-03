@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import type { Http, HttpOptions } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
+import { logger } from '../../../logger/index.ts';
+import type { Http, HttpOptions } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 
 /**
  * Extracts the base suite URL from a package URL by removing the last two path segments.

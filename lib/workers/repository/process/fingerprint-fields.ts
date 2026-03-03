@@ -1,4 +1,4 @@
-import type { UpgradeFingerprintConfig } from '../../types';
+import type { UpgradeFingerprintConfig } from '../../types.ts';
 
 type CommitFingerprintFields = keyof UpgradeFingerprintConfig;
 

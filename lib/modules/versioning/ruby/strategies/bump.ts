@@ -1,9 +1,9 @@
 import { gt, gte, lt } from '@renovatebot/ruby-semver';
-import { GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
-import type { Range } from '../range';
-import { parseRanges, stringifyRanges } from '../range';
-import { adapt, trimZeroes } from '../version';
-import { replacePart } from './replace';
+import { GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator.ts';
+import type { Range } from '../range.ts';
+import { parseRanges, stringifyRanges } from '../range.ts';
+import { adapt, trimZeroes } from '../version.ts';
+import { replacePart } from './replace.ts';
 
 export default ({ range, to }: { range: string; to: string }): string => {
   const parts = parseRanges(range).map((part): Range => {
