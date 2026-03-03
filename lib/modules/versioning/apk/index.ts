@@ -70,12 +70,12 @@ class ApkVersioningApi extends GenericVersioningApi {
     }
 
     // Extract numeric parts for major/minor/patch/extra
-    const release = [parseInt(major)];
+    const release = [parseInt(major, 10)];
     if (minor) {
-      release.push(parseInt(minor));
+      release.push(parseInt(minor, 10));
     }
     if (patch) {
-      release.push(parseInt(patch));
+      release.push(parseInt(patch, 10));
     }
     // Handle any additional version parts (e.g., 1.2.3.4.5)
     if (extra) {
@@ -175,8 +175,8 @@ class ApkVersioningApi extends GenericVersioningApi {
         if (!matchv2 || !/^\d+$/.test(matchv2)) {
           return 1;
         }
-        const num1 = parseInt(matchv1);
-        const num2 = parseInt(matchv2);
+        const num1 = parseInt(matchv1, 10);
+        const num2 = parseInt(matchv2, 10);
         if (num1 !== num2) {
           return num1 - num2;
         }
