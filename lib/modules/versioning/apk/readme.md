@@ -1,4 +1,4 @@
-Alpine Package Keeper (apk) versioning is used for packages served from [APK repositories](https://wiki.alpinelinux.org/wiki/Repositories) such as the official Alpine Linux repositories or the [Wolfi APK package repository](https://packages.wolfi.dev/os)
+Alpine Package Keeper (APK) versioning is used for packages served from [APK repositories](https://wiki.alpinelinux.org/wiki/Repositories), such as the official Alpine Linux repositories or the [Wolfi APK package repository](https://packages.wolfi.dev/os)
 
 This implementation follows the [Alpine Linux Package versions](https://wiki.alpinelinux.org/wiki/Package_policies#Package_versions) for version formatting.
 
