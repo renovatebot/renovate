@@ -562,8 +562,8 @@ importers:
         specifier: 17.3.0
         version: 17.3.0
       graphql:
-        specifier: 16.12.0
-        version: 16.12.0
+        specifier: 16.13.0
+        version: 16.13.0
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -2133,6 +2133,7 @@ packages:
 
   '@sinonjs/text-encoding@0.7.3':
     resolution: {integrity: sha512-DE427ROAphMQzU4ENbliGYrBSYPXF+TtLg9S8vzeA+OF4ZKzoDdzfL8sxuMUGS/lgRhM6j1URSk9ghf7Xo1tyA==}
+    deprecated: 'Deprecated: no longer maintained, as we are not depending on it'
 
   '@smithy/abort-controller@4.2.10':
     resolution: {integrity: sha512-qocxM/X4XGATqQtUkbE9SPUB6wekBi+FyJOMbPj0AhvyvFGYEmOlz6VB22iMePCQsFmMIvFSeViDvA7mZJG47g==}
@@ -4151,8 +4152,8 @@ packages:
   grapheme-splitter@1.0.4:
     resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
 
-  graphql@16.12.0:
-    resolution: {integrity: sha512-DKKrynuQRne0PNpEbzuEdHlYOMksHSUI8Zc9Unei5gTsMNA2/vMpoMz/yKba50pejK56qj98qM0SjYxAKi13gQ==}
+  graphql@16.13.0:
+    resolution: {integrity: sha512-uSisMYERbaB9bkA9M4/4dnqyktaEkf1kMHNKq/7DHyxVeWqHQ2mBmVqm5u6/FVHwF3iCNalKcg82Zfl+tffWoA==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   gtoken@8.0.0:
@@ -11359,7 +11360,7 @@ snapshots:
 
   grapheme-splitter@1.0.4: {}
 
-  graphql@16.12.0: {}
+  graphql@16.13.0: {}
 
   gtoken@8.0.0:
     dependencies:
