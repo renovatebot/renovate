@@ -11,7 +11,8 @@ import type {
   GithubHttpOptions,
 } from '../../http/github.ts';
 import type { HttpResponse } from '../../http/types.ts';
-import { getApiBaseUrl } from '../url.ts';
+import { parseUrl } from '../../url.ts';
+import { getApiBaseUrl, getSourceUrlBase } from '../url.ts';
 import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy.ts';
 import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy.ts';
 import type {
@@ -36,6 +37,33 @@ function isUnknownGraphqlError(err: Error): boolean {
   return message.startsWith('Something went wrong while executing your query.');
 }
 
+function isGithubHost(registryUrl: string | undefined): boolean {
+  if (!registryUrl) {
+    return true; // defaults to github.com
+  }
+
+  const sourceUrlBase = getSourceUrlBase(registryUrl);
+  if (
+    sourceUrlBase === 'https://github.com/' ||
+    sourceUrlBase === 'https://api.github.com/'
+  ) {
+    return true;
+  }
+
+  // GHE with explicit API path
+  if (sourceUrlBase.endsWith('/api/v3/')) {
+    return true;
+  }
+
+  // GHE with 'github' in hostname
+  const { hostname } = parseUrl(registryUrl) ?? {};
+  if (hostname?.includes('github')) {
+    return true;
+  }
+
+  return false;
+}
+
 function canBeSolvedByShrinking(err: Error): boolean {
   const errors: Error[] = err instanceof AggregateError ? err.errors : [err];
   return errors.some(
@@ -52,6 +80,13 @@ export class GithubGraphqlDatasourceFetcher<
     http: GithubHttp,
     adapter: GithubGraphqlDatasourceAdapter<T, U>,
   ): Promise<U[]> {
+    if (!isGithubHost(config.registryUrl)) {
+      logger.once.debug(
+        { registryUrl: config.registryUrl },
+        'GitHub GraphQL datasource: skipping non-GitHub registryUrl',
+      );
+      return [];
+    }
     const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,

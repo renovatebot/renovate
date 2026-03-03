@@ -116,6 +116,16 @@ describe('util/github/graphql/datasource-fetcher', () => {
       http = new GithubHttp();
     });
 
+    it('returns empty result for non-GitHub registryUrl', async () => {
+      const res = await Datasource.query(
+        { packageName: 'foo/bar', registryUrl: 'https://pypi.org/pypi/' },
+        http,
+        adapter,
+      );
+
+      expect(res).toEqual([]);
+    });
+
     it('can perform query and receive result', async () => {
       httpMock
         .scope('https://api.github.com/')
