@@ -127,7 +127,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'pdm.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

@@ -624,7 +624,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [
-          { lockFile: 'package-lock.json', stderr: 'some-error' },
+          { fileName: 'package-lock.json', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
       });
@@ -638,7 +638,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalFiles,
         ),
       ).toStrictEqual({
-        artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
+        artifactErrors: [{ fileName: 'yarn.lock', stderr: 'some-error' }],
         updatedArtifacts: [],
       });
     });
@@ -660,7 +660,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [
-          { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
+          { fileName: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
       });

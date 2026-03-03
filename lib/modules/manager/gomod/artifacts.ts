@@ -498,7 +498,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: sumFileName,
+          fileName: sumFileName,
           stderr: err.message,
         },
       },
