@@ -1,4 +1,4 @@
-import assert from 'node:assert';
+import { expect } from 'vitest';
 import { formatCell } from '../utils.ts';
 
 describe('tools/docs/test/config', () => {
@@ -7,13 +7,12 @@ describe('tools/docs/test/config', () => {
       ['parents', '.,package,test,ansible'],
       0,
     );
-    assert.equal(parentsRowHeader, '<td>parents</td>');
+    expect(parentsRowHeader).toEqual('<td>parents</td>');
   });
 
   it('parents content should be multiple code blocks', () => {
     const parents = formatCell(['parents', '.,packageRules,argocd,ansible'], 1);
-    assert.equal(
-      parents,
+    expect(parents).toEqual(
       '<td class="parents"><span><code>.</code></span><span><code>ansible</code></span><span><code>argocd</code></span><span><code>packageRules</code></span></td>',
     );
   });
