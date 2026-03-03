@@ -491,118 +491,41 @@ describe('modules/versioning/apk/index', () => {
       expect(apk.sortVersions('1', '1')).toBe(0);
     });
 
-    it('should handle letter vs number comparison in _compareVersionParts', () => {
-      // Test case where we compare a letter to a number
-      // This should trigger the "letters are less than numbers" path
-      expect(apk.sortVersions('2.39.0a-r0', '2.39.0-r0')).toBeLessThan(0);
-      expect(apk.sortVersions('2.39.0-r0', '2.39.0a-r0')).toBeGreaterThan(0);
+    it('should handle letter vs number at same position in version parts', () => {
+      expect(apk.sortVersions('1a', '1.1')).toBeLessThan(0);
+      expect(apk.sortVersions('1.1', '1a')).toBeGreaterThan(0);
     });
 
-    it('should handle number vs letter comparison in _compareVersionParts', () => {
-      // Test case where we compare a number to a letter
-      // This should trigger the "numbers are greater than letters" path
-      // We need versions where the first has more numeric parts than the second
+    it('should handle number vs letter comparison in version parts', () => {
       expect(apk.sortVersions('2.39.0.1-r0', '2.39.0a-r0')).toBeGreaterThan(0);
       expect(apk.sortVersions('2.39.0a-r0', '2.39.0.1-r0')).toBeLessThan(0);
     });
 
-    it('should handle number vs undefined comparison in _compareVersionParts', () => {
-      // Test case where we compare a number to undefined (shorter version)
-      // This should trigger the "numbers are greater than letters" path
-      // When v1 has more parts than v2, matchv2 will be undefined
+    it('should handle extra numeric parts in remaining segments', () => {
       expect(apk.sortVersions('2.39.0.1-r0', '2.39.0-r0')).toBeGreaterThan(0);
       expect(apk.sortVersions('2.39.0-r0', '2.39.0.1-r0')).toBeLessThan(0);
     });
 
-    it('should handle string vs string comparison in _compareVersionParts', () => {
-      // Test case where we compare two different strings
-      // This should trigger the lexicographic comparison path
+    it('should handle lexicographic string comparison in version parts', () => {
       expect(apk.sortVersions('2.39.0a-r0', '2.39.0b-r0')).toBeLessThan(0);
       expect(apk.sortVersions('2.39.0b-r0', '2.39.0a-r0')).toBeGreaterThan(0);
     });
 
-    it('should handle equal strings in _compareVersionParts', () => {
-      // Test case where both strings at same position are equal
-      // This covers the false branch of `if (matchv1 !== matchv2)`
-      expect(apk.sortVersions('2.39.0a', '2.39.0a')).toBe(0);
-      expect(apk.sortVersions('1.0a', '1.0a')).toBe(0);
-      // Test where letter 'a' and package fix '_p' have equal strings at same position
-      // but different numbers following, triggering the continue-loop path
-      // v1: 1.0a_p1-r0 -> version='10a_p1' -> regex matches ['10','a','p','1']
-      // v2: 1.0a_p2-r0 -> version='10a_p2' -> regex matches ['10','a','p','2']
-      // At index 1&2, both have 'a' and 'p' (equal strings, continue loop)
+    it('should handle equal letter parts continuing to next segment', () => {
       expect(apk.sortVersions('1.0a_p1-r0', '1.0a_p2-r0')).toBeLessThan(0);
       expect(apk.sortVersions('1.0a_p2-r0', '1.0a_p1-r0')).toBeGreaterThan(0);
     });
 
-    it('should handle undefined vs string comparison in _compareVersionParts', () => {
-      // Test case where one version has more parts than the other
-      // This should trigger the "One is undefined, the other exists" path
-      // where matchv1 exists and matchv2 is undefined
-      expect(apk.sortVersions('2.39.0.1-r0', '2.39.0-r0')).toBeGreaterThan(0);
-      expect(apk.sortVersions('2.39.0-r0', '2.39.0.1-r0')).toBeLessThan(0);
+    it('should handle trailing letter in remaining segments', () => {
+      expect(apk.sortVersions('1', '1a')).toBeGreaterThan(0);
+      expect(apk.sortVersions('1a', '1')).toBeLessThan(0);
     });
 
-    it('should handle equal version comparison in _compareVersionParts', () => {
-      // Test case where versions are exactly equal
-      // This should trigger the final return 0 in _compareVersionParts
-      expect(apk.sortVersions('2.39.0-r0', '2.39.0-r0')).toBe(0);
-      expect(apk.sortVersions('1.0.0', '1.0.0')).toBe(0);
-      expect(apk.sortVersions('0.3.4_pre20061029', '0.3.4_pre20061029')).toBe(
-        0,
-      );
-      expect(apk.sortVersions('6.5_p20250503-r0', '6.5_p20250503-r0')).toBe(0);
-
-      // Test with more complex equal versions to ensure we hit the return 0 path
-      expect(apk.sortVersions('2.39.0a-r0', '2.39.0a-r0')).toBe(0);
-      expect(apk.sortVersions('2.39.0_beta-r0', '2.39.0_beta-r0')).toBe(0);
-      expect(apk.sortVersions('2.39.0_rc1-r0', '2.39.0_rc1-r0')).toBe(0);
+    it('should return 0 for numerically equal but string-different versions', () => {
+      expect(apk.sortVersions('1.0', '1.00')).toBe(0);
     });
 
-    it('should handle versions with different lengths in _compareVersionParts', () => {
-      // Test case where one version has more parts than the other
-      // This should trigger the remaining segments logic
-      expect(apk.sortVersions('2.39.0.1-r0', '2.39.0-r0')).toBeGreaterThan(0);
-      expect(apk.sortVersions('2.39.0-r0', '2.39.0.1-r0')).toBeLessThan(0);
-      // Test with valid APK version formats
-      expect(apk.sortVersions('2.39.0_rc1-r0', '2.39.0-r0')).toBeGreaterThan(0);
-      expect(apk.sortVersions('2.39.0-r0', '2.39.0_rc1-r0')).toBeLessThan(0);
-    });
-
-    it('should handle versions with equal parts but different lengths', () => {
-      // Test case where all common parts are equal but one version has more parts
-      // This should trigger the final return 0 path when all parts are equal
-      expect(apk.sortVersions('2.39.0', '2.39.0')).toBe(0);
-      expect(apk.sortVersions('2.39.0a', '2.39.0a')).toBe(0);
-    });
-
-    it('should handle versions where one has more parts during main comparison', () => {
-      // Test case where one version has more parts than the other during the main comparison loop
-      // This should trigger the else block where one is undefined, the other exists
-      // We need versions where the for loop runs but one version has fewer parts
-      expect(apk.sortVersions('2.39.0.1', '2.39.0')).toBeGreaterThan(0);
-      expect(apk.sortVersions('2.39.0', '2.39.0.1')).toBeLessThan(0);
-    });
-
-    it('should handle versions with different lengths where for loop runs but one has fewer parts', () => {
-      // Test case where the for loop runs but one version has fewer parts
-      // This should trigger the else block where one is undefined, the other exists
-      // In APK versioning, letters are less than numbers, so 2.39.0a < 2.39.0
-      expect(apk.sortVersions('2.39.0a', '2.39.0')).toBeLessThan(0);
-      expect(apk.sortVersions('2.39.0', '2.39.0a')).toBeGreaterThan(0);
-    });
-
-    it('should handle versions where regex matches different numbers of parts', () => {
-      // Test case where the regex matches different numbers of parts for the two versions
-      // This should trigger the else block where one is undefined, the other exists
-      // We need versions where the regex produces different numbers of matches
-      expect(apk.sortVersions('2.39.0a', '2.39.0b')).toBeLessThan(0);
-      expect(apk.sortVersions('2.39.0b', '2.39.0a')).toBeGreaterThan(0);
-    });
-
-    it('should handle versions with different lengths in remaining segments', () => {
-      // Test case where versions have different lengths and we need to handle remaining segments
-      // This should trigger the remaining segments logic
+    it('should handle versions with different extra segment lengths', () => {
       expect(apk.sortVersions('2.39.0.1.2', '2.39.0.1')).toBeGreaterThan(0);
       expect(apk.sortVersions('2.39.0.1', '2.39.0.1.2')).toBeLessThan(0);
     });

@@ -56,26 +56,17 @@ class ApkVersioningApi extends GenericVersioningApi {
       releaseNum,
     } = match.groups;
 
-    // Build the full version string (without release number and prerelease)
-    // Note: packageFixNum/extra/prereleaseNum use ?? '' defensively but regex always matches (empty string)
-    /* v8 ignore next 3 */
-    const packageFixFull = packageFixType
-      ? packageFixType + (packageFixNum ?? '')
-      : '';
+    const packageFixFull = packageFixType ? packageFixType + packageFixNum : '';
 
-    // Build minorPatch string for version comparison
-    /* v8 ignore next 2 */
     const minorPatchStr =
-      (minor ? `.${minor}` : '') + (patch ? `.${patch}` : '') + (extra ?? '');
+      (minor ? `.${minor}` : '') + (patch ? `.${patch}` : '') + extra;
 
     // For version comparison, we only include the base version + package fix, not prerelease
     const versionStr = major + minorPatchStr + (letter ?? '') + packageFixFull;
 
-    // Extract prerelease identifier if present
     let prerelease: string | undefined;
     if (prereleaseType) {
-      /* v8 ignore next */
-      prerelease = prereleaseType.substring(1) + (prereleaseNum ?? '');
+      prerelease = prereleaseType.substring(1) + prereleaseNum;
     }
 
     // Extract numeric parts for major/minor/patch/extra
@@ -172,40 +163,30 @@ class ApkVersioningApi extends GenericVersioningApi {
     if (v1 === v2) {
       return 0;
     }
-    /* v8 ignore next -- defensive null handling, regex always matches valid version strings */
-    const matchesv1 = v1.match(alphaNumRegex) ?? [];
-    /* v8 ignore next -- defensive null handling, regex always matches valid version strings */
-    const matchesv2 = v2.match(alphaNumRegex) ?? [];
+    const matchesv1 = v1.match(alphaNumRegex)!;
+    const matchesv2 = v2.match(alphaNumRegex)!;
     const matches = Math.min(matchesv1.length, matchesv2.length);
 
     for (let i = 0; i < matches; i++) {
       const matchv1 = matchesv1[i];
       const matchv2 = matchesv2[i];
 
-      // Compare numbers vs strings
       if (matchv1 && /^\d+$/.test(matchv1)) {
         if (!matchv2 || !/^\d+$/.test(matchv2)) {
-          return 1; // numbers are greater than letters
+          return 1;
         }
         const num1 = parseInt(matchv1);
         const num2 = parseInt(matchv2);
         if (num1 !== num2) {
           return num1 - num2;
         }
-        /* v8 ignore next 2 */
       } else if (matchv2 && /^\d+$/.test(matchv2)) {
-        return -1; // letters are less than numbers
-        /* v8 ignore next 5 */
-      } else if (matchv1 && matchv2) {
-        // Both are strings, compare lexicographically
-        if (matchv1 !== matchv2) {
-          return matchv1.localeCompare(matchv2);
-        }
+        return -1;
+      } else if (matchv1 !== matchv2) {
+        return matchv1.localeCompare(matchv2);
       }
     }
 
-    // Handle remaining segments when one version has more parts
-    /* v8 ignore next */
     if (matchesv1.length !== matchesv2.length) {
       const maxLength = Math.max(matchesv1.length, matchesv2.length);
       for (let i = matches; i < maxLength; i++) {
@@ -213,26 +194,17 @@ class ApkVersioningApi extends GenericVersioningApi {
         const matchv2 = matchesv2[i];
 
         if (matchv1 && /^\d+$/.test(matchv1)) {
-          // v1 has a number, v2 doesn't (implicit 0), numbers are greater
           return 1;
         } else if (matchv2 && /^\d+$/.test(matchv2)) {
-          // v2 has a number, v1 doesn't (implicit 0), numbers are greater
           return -1;
         } else if (matchv1) {
-          // v1 has a non-numeric part, v2 doesn't (implicit empty), letters are less than empty
           return -1;
-          /* v8 ignore next 3 */
-        } else if (matchv2) {
-          // v2 has a non-numeric part, v1 doesn't (implicit empty), letters are less than empty
+        } else {
           return 1;
         }
-        /* v8 ignore next -- unreachable in practice due to early returns in loop */
       }
-      /* v8 ignore next -- unreachable in practice due to early returns in loop */
     }
 
-    // All parts compared successfully, versions are equal
-    /* v8 ignore next -- unreachable in practice due to early returns in comparison logic */
     return 0;
   }
 
@@ -310,13 +282,8 @@ class ApkVersioningApi extends GenericVersioningApi {
         case '==':
           return this.equals(version, targetVersion);
         case '~': {
-          // Tilde range: allow patch-level changes if a minor version is specified
-          const targetParsed = this._parse(targetVersion);
-          const versionParsed = this._parse(version);
-          /* v8 ignore next 3 -- unreachable defensive code, isValid filters out invalid versions */
-          if (!targetParsed || !versionParsed) {
-            return false;
-          }
+          const targetParsed = this._parse(targetVersion)!;
+          const versionParsed = this._parse(version)!;
 
           // Must have same major and minor versions
           if (
