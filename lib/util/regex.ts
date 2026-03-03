@@ -86,7 +86,6 @@ export const newlineRegex = regEx(/\r?\n/);
  * - Ideographic space (\u3000)
  * - Zero-width space (\u200B)
  * - Zero-width non-joiner (\u200C)
- * - Zero-width joiner (\u200D)
  * - Zero-width no-break space (\uFEFF)
  * - Left-to-right mark (\u200E)
  * - Right-to-left mark (\u200F)
@@ -94,18 +93,19 @@ export const newlineRegex = regEx(/\r?\n/);
  * - Soft hyphen (\u00AD)
  */
 export const hiddenUnicodeCharactersRegex = regEx(
-  /([\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\u200B\u200C\uFEFF\u200E\u200F\u202A-\u202E\u00AD\u200D])/g,
+  /([\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\u200B\u200C\uFEFF\u200E\u200F\u202A-\u202E\u00AD])/g,
 );
 
 /**
  * Given unicode character(s), convert them to the \u0123 representation, to be output to a user.
  */
 export function toUnicodeEscape(str: string): string {
-  return str
-    .split('')
-    .map((char) => {
+  const items = new Set(
+    str.split('').map((char) => {
       const code = char.charCodeAt(0);
       return '\\u' + code.toString(16).padStart(4, '0').toUpperCase();
-    })
-    .join('');
+    }),
+  );
+
+  return Array.from(items).join('');
 }

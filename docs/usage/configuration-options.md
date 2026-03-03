@@ -3417,7 +3417,7 @@ The following example matches any file in directories starting with `app/`:
 }
 ```
 
-The following example matches any `.toml` file in a `v2` or `v3` directory:
+The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory:
 
 ```json
 {
@@ -4022,6 +4022,47 @@ Dotfiles are included.
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
 
+### installTools
+
+Whether to install any additional tools dynamically before executing the `commands`.
+
+These must be known by [Containerbase](https://github.com/containerbase/base).
+
+<!-- prettier-ignore -->
+!!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
+
+For example:
+
+```json title="Adding a tool requirement"
+{
+  "postUpgradeTasks": {
+    "commands": ["make generate"],
+    "installTools": {
+      "golang": {}
+    }
+  }
+}
+```
+
+```json title="Utilising constraints for tool requirements"
+{
+  "constraints": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
+  "postUpgradeTasks": {
+    "commands": ["npm install", "npm run update-readme"],
+    "installTools": {
+      "node": {}
+    }
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    The tool objects inside `installTools` currently do not expose any additional configurability.
+
 ### workingDirTemplate
 
 A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
@@ -4383,6 +4424,17 @@ This feature works with the following managers:
 }
 ```
 
+If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
+
+```json title="Using a pull-through cache for public images"
+{
+  "registryAliases": {
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/ghcr.io": "ghcr.io",
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/dockerhub": "docker.io"
+  }
+}
+```
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
@@ -4701,7 +4753,7 @@ Please see the above link for valid timezone names.
 
 ## toolSettings
 
-When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle-wrapper` manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
+When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle`](./modules/manager/gradle/index.md) or [the `gradle-wrapper`](./modules/manager/gradle-wrapper/index.md) managers, the repository's Gradle Wrapper will be invoked, if present.
 
 The JVM heap size for the Java invocations is 512m by default.
 This can be overridden using the following options.
@@ -4715,14 +4767,14 @@ This option can be used on the repository level and in the [Renovate configurati
 
 <!-- prettier-ignore -->
 !!! note
-    The JVM memory settings are considered for the `gradle-wrapper` manager.
+    The JVM memory settings are considered for the `gradle` and `gradle-wrapper` manager.
 
 ### jvmMaxMemory
 
 Maximum heap size in MB for Java VMs.
 Defaults to `512` for both the repository level and self-hosted configuration.
 
-To allow repositories to use _more_ than 512m of heap during the Gradle Wrapper update, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
+To allow repositories to use _more_ than 512m of heap during any invocations of the Gradle Wrapper, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
 
 ### jvmMemory
 

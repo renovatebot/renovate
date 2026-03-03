@@ -23,7 +23,7 @@ export async function rebaseOnboardingBranch(
     return null;
   }
 
-  const configFile = getDefaultConfigFileName(config);
+  const configFile = getDefaultConfigFileName();
   const contents = await getOnboardingConfigContents(config, configFile);
   const currentConfigHash = toSha256(contents);
 

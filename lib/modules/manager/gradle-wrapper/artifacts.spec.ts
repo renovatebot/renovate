@@ -13,7 +13,7 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
-import { gradleJvmArg, updateBuildFile, updateLockFiles } from './artifacts.ts';
+import { updateBuildFile, updateLockFiles } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -70,13 +70,6 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         { version: '16.0.1' },
         { version: '17.0.0' },
       ],
-    });
-  });
-
-  describe('gradleJvmArg()', () => {
-    it('takes the values given to it, and returns the JVM arguments', () => {
-      const result = gradleJvmArg({ jvmMemory: 256, jvmMaxMemory: 768 });
-      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx768m"');
     });
   });
 
