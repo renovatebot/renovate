@@ -1,4 +1,3 @@
-import { expect } from 'vitest';
 import { formatCell } from '../utils.ts';
 
 describe('tools/docs/test/config', () => {
