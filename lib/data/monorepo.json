@@ -450,6 +450,7 @@
       "https://github.com/kubernetes/kube-scheduler",
       "https://github.com/kubernetes/kubectl",
       "https://github.com/kubernetes/kubelet",
+      "https://github.com/kubernetes/legacy-cloud-providers",
       "https://github.com/kubernetes/metrics",
       "https://github.com/kubernetes/mount-utils",
       "https://github.com/kubernetes/pod-security-admission",

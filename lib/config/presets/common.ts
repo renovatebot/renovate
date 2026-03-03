@@ -29,6 +29,7 @@ export const removedPresets: Record<string, string | null> = {
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,
   'group:jsTestMonMajor': 'group:jsTestNonMajor',
+  'group:kubernetes': 'group:k8s-ioMonorepo',
   'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
   'npm:unpublishSafe': 'security:minimumReleaseAgeNpm',
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
