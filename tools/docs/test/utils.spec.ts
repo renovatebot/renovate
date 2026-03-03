@@ -1,6 +1,6 @@
 import { formatCell } from '../utils.ts';
 
-describe('tools/docs/test/config', () => {
+describe('tools/docs/test/utils', () => {
   it('parents row header should be a td block', () => {
     const parentsRowHeader = formatCell(
       ['parents', '.,package,test,ansible'],
