@@ -56,12 +56,12 @@ function buildHtmlTable(data: string[][]): string {
     return '';
   }
   let table = `<table>\n`;
-  for (const [i, row] of data.entries()) {
-    if (i === 0) {
+  for (const [rowIndex, row] of data.entries()) {
+    if (rowIndex === 0) {
       table += indent`${1}<thead>\n`;
     }
 
-    if (i === 1) {
+    if (rowIndex === 1) {
       table += indent`${1}</thead>\n` + indent`${1}<tbody>\n`;
     }
 
@@ -69,7 +69,7 @@ function buildHtmlTable(data: string[][]): string {
     for (let colIndex = 0; colIndex < row.length; colIndex++) {
       const col = row[colIndex];
 
-      if (i === 0) {
+      if (rowIndex === 0) {
         // header row
         table += indent`${3}<th>${col}</th>\n`;
         continue;
