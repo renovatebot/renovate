@@ -4,7 +4,7 @@ import { parse } from './dependencies-file.ts';
 describe('modules/manager/paket/parsers/dependencies-file', () => {
   describe('parse()', () => {
     it('should return all packages on main group', () => {
-      const result = parse(`
+      const result = parse(codeBlock`
       source https://api.nuget.org/v3/index.json
 
       framework: net8.0
