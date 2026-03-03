@@ -202,7 +202,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Podfile.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Podfile.lock', stderr: 'not found' } },
     ]);
     expect(execSnapshots).toBeEmpty();
   });
@@ -223,7 +223,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Podfile.lock', stderr: 'exec exception' } },
+      { artifactError: { fileName: 'Podfile.lock', stderr: 'exec exception' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });

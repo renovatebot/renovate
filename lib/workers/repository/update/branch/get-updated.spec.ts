@@ -455,14 +455,14 @@ describe('workers/repository/update/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            lockFile: 'composer.lock',
+            fileName: 'composer.lock',
             stderr: 'some error',
           },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+        artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
 
@@ -477,14 +477,14 @@ describe('workers/repository/update/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            lockFile: 'composer.lock',
+            fileName: 'composer.lock',
             stderr: 'some error',
           },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+        artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
 

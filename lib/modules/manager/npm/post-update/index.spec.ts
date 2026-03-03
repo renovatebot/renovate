@@ -638,7 +638,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalFiles,
         ),
       ).toStrictEqual({
-        artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
+        artifactErrors: [{ fileName: 'yarn.lock', stderr: 'some-error' }],
         updatedArtifacts: [],
       });
     });

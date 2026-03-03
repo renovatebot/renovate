@@ -212,7 +212,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileNames.join(', '),
+          fileName: lockFileNames.join(', '),
           // error is written to stdout
           stderr: err.stdout ?? err.message,
         },

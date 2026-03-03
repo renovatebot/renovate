@@ -164,7 +164,7 @@ export async function postUpgradeCommandsExecutor(
             );
           } catch (error) {
             artifactErrors.push({
-              lockFile: upgrade.packageFile,
+              fileName: upgrade.packageFile,
               stderr: sanitize(error.message),
             });
           }
@@ -177,7 +177,7 @@ export async function postUpgradeCommandsExecutor(
             'Post-upgrade task did not match any on allowedCommands list',
           );
           artifactErrors.push({
-            lockFile: upgrade.packageFile,
+            fileName: upgrade.packageFile,
             stderr: sanitize(
               `Post-upgrade command '${compiledCmd}' has not been added to the allowed list in allowedCommands`,
             ),

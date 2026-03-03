@@ -478,7 +478,7 @@ describe('modules/manager/mix/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'mix.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'mix.lock', stderr: 'not found' } },
     ]);
   });
 
@@ -494,7 +494,7 @@ describe('modules/manager/mix/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
+      { artifactError: { fileName: 'mix.lock', stderr: 'exec-error' } },
     ]);
   });
 
