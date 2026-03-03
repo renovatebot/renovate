@@ -13,6 +13,8 @@ import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { parseApkIndex } from './parser.ts';
 import type { ApkPackage } from './types.ts';
 
+const gunzip = promisify(zlib.gunzip);
+
 export const apkDatasourceId = 'apk';
 
 const defaultConfig = {
@@ -82,8 +84,6 @@ export class ApkDatasource extends Datasource {
     try {
       logger.debug('Extracting APK index from tar.gz buffer');
 
-      // First, decompress the gzip data
-      const gunzip = promisify(zlib.gunzip);
       const decompressedBuffer = await gunzip(buffer);
 
       logger.debug(
@@ -133,14 +133,13 @@ export class ApkDatasource extends Datasource {
           if (apkIndexContent) {
             logger.debug('Successfully extracted APKINDEX content');
             resolve(apkIndexContent);
-          } /* v8 ignore next 3 -- hard to test stream errors */ else {
+          } else {
             logger.warn('APKINDEX file not found in tar archive');
             resolve('');
           }
         });
 
         extract.on('error', (err: Error) => {
-          /* v8 ignore next 2 -- hard to test tar extraction errors */
           logger.warn({ err }, 'Error extracting tar archive');
           reject(err);
         });
@@ -148,7 +147,7 @@ export class ApkDatasource extends Datasource {
         // Write the decompressed buffer to the extract stream
         extract.end(decompressedBuffer);
       });
-    } /* v8 ignore next 3 -- hard to test gzip decompression errors */ catch (err) {
+    } catch (err) {
       logger.warn({ err }, 'Error extracting APK index from tar.gz');
       return '';
     }

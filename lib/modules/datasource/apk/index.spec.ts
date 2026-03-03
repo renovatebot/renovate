@@ -1,10 +1,31 @@
+import * as tar from 'tar-stream';
+import { promisify } from 'util';
 import { vi } from 'vitest';
+import * as zlib from 'zlib';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
 import { ApkDatasource } from './index.ts';
+
+const gzip = promisify(zlib.gzip);
+
+async function createTarGz(
+  entries: { name: string; content: string }[],
+): Promise<Buffer> {
+  const pack = tar.pack();
+  for (const entry of entries) {
+    pack.entry({ name: entry.name }, entry.content);
+  }
+  pack.finalize();
+
+  const chunks: Buffer[] = [];
+  for await (const chunk of pack) {
+    chunks.push(chunk);
+  }
+  return gzip(Buffer.concat(chunks));
+}
 
 describe('modules/datasource/apk/index', () => {
   const apkIndexArchivePath = Fixtures.getPath('APKINDEX.tar.gz');
@@ -426,6 +447,54 @@ c:abc123def456`;
 
       expect(result).toBeNull();
       extractSpy.mockRestore();
+    });
+
+    it('should handle invalid gzip data', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(200, Buffer.from('not-gzip-data'));
+
+      const result = await new ApkDatasource().getReleases({
+        packageName: 'bash',
+        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle tar archive without APKINDEX file', async () => {
+      const tarGzBuffer = await createTarGz([
+        { name: 'DESCRIPTION', content: 'not the index file' },
+      ]);
+
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(200, tarGzBuffer);
+
+      const result = await new ApkDatasource().getReleases({
+        packageName: 'bash',
+        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle corrupt tar data', async () => {
+      const corruptTarGz = await gzip(Buffer.alloc(512, 0xff));
+
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(200, corruptTarGz);
+
+      const result = await new ApkDatasource().getReleases({
+        packageName: 'bash',
+        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+      });
+
+      expect(result).toBeNull();
     });
   });
 });
