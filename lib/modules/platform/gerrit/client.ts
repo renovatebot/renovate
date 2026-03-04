@@ -247,15 +247,13 @@ class GerritClient {
     changeNumber: number,
     hashtagsInput: GerritHashtagsInput,
   ): Promise<void> {
-    if (hashtagsInput.add?.length === 0) {
-      delete hashtagsInput.add;
-    }
-    if (hashtagsInput.remove?.length === 0) {
-      delete hashtagsInput.remove;
-    }
-    if (hashtagsInput.add || hashtagsInput.remove) {
+    const add = hashtagsInput.add?.length ? hashtagsInput.add : undefined;
+    const remove = hashtagsInput.remove?.length
+      ? hashtagsInput.remove
+      : undefined;
+    if (add ?? remove) {
       await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
-        body: hashtagsInput,
+        body: { add, remove },
       });
     }
   }
