@@ -906,5 +906,111 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
     });
+
+    describe('when using installTools', () => {
+      interface TestCase {
+        description: string;
+        constraints?: Record<string, string>;
+        installTools: Record<string, Record<never, never>>;
+        expected: { toolName: string; constraint: string | undefined }[];
+      }
+
+      it.each<TestCase>([
+        {
+          description: 'constraints are passed',
+          constraints: { npm: '10.2.3' },
+          installTools: { npm: {} },
+          expected: [{ toolName: 'npm', constraint: '10.2.3' }],
+        },
+        {
+          description:
+            'constraints are passed for only the tools specified in installTools',
+          constraints: { composer: '> 2.3', npm: '10.2.3' },
+          installTools: { npm: {} },
+          expected: [
+            // but not composer
+            { toolName: 'npm', constraint: '10.2.3' },
+          ],
+        },
+        {
+          description: 'tools without a constraint are still used',
+          constraints: {
+            // node does not have a constraint
+          },
+          installTools: { node: {} },
+          expected: [{ toolName: 'node', constraint: undefined }],
+        },
+        {
+          description: 'tools with undefined `constraints` are still used',
+          constraints: undefined,
+          installTools: { node: {} },
+          expected: [{ toolName: 'node', constraint: undefined }],
+        },
+      ])('$description', async ({ constraints, installTools, expected }) => {
+        const commands = partial<BranchUpgradeConfig>([
+          {
+            constraints,
+            manager: 'some-manager',
+            branchName: 'main',
+            postUpgradeTasks: {
+              commands: ['some-command'],
+              executionMode: 'update',
+              installTools,
+            },
+          },
+        ]);
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+            { type: 'addition', path: 'artifact', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep2',
+            },
+          ],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({
+          stdout: 'success',
+          stderr: '',
+        });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: [],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const localDir = upath.join(tmpDir.path, 'local');
+        GlobalConfig.set({
+          localDir,
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+          commands,
+          config,
+        );
+
+        expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+          'some-command',
+          expect.objectContaining({
+            toolConstraints: expected,
+          }),
+        );
+        expect(res.artifactErrors).toHaveLength(0);
+      });
+    });
   });
 });

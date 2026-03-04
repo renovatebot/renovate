@@ -169,6 +169,7 @@ const options: Readonly<RenovateOptions>[] = [
       commands: [],
       fileFilters: [],
       executionMode: 'update',
+      installTools: {},
     },
   },
   {
@@ -206,6 +207,21 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     parents: ['postUpgradeTasks'],
     default: ['**/*'],
+    cli: false,
+  },
+  {
+    name: 'installTools',
+    description: 'Install tools before executing commands',
+    type: 'object',
+    parents: ['postUpgradeTasks'],
+    default: {},
+    additionalProperties: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+    mergeable: false,
+    freeChoice: true,
     cli: false,
   },
   {
@@ -633,7 +649,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.14.0',
+    default: 'ghcr.io/renovatebot/base-image:13.16.0',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',

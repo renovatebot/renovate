@@ -168,6 +168,7 @@ export interface GlobalInheritableConfig {
   onboarding?: boolean;
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
+  onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
@@ -304,6 +305,7 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
+  installTools?: Record<string, Record<never, never>>;
 }
 
 export type UpdateConfig<
