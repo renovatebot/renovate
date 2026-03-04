@@ -425,7 +425,7 @@
       "https://github.com/junit-team/junit5",
       "https://github.com/junit-team/junit-framework"
     ],
-    "k8s-io": [
+    "kubernetes": [
       "https://github.com/kubernetes/api",
       "https://github.com/kubernetes/apiextensions-apiserver",
       "https://github.com/kubernetes/apimachinery",
