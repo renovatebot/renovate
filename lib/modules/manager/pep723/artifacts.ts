@@ -58,9 +58,9 @@ export async function updateArtifacts({
 
     let cmd: string;
     if (isLockFileMaintenance) {
-      cmd = `uv lock --script ${packageFileName} --upgrade`;
+      cmd = `uv lock --script ${quote(packageFileName)} --upgrade`;
     } else {
-      cmd = `uv lock --script ${packageFileName} ${updatedDeps.map((dep) => `--upgrade-package ${quote(dep.depName!)}`).join(' ')}`;
+      cmd = `uv lock --script ${quote(packageFileName)} ${updatedDeps.map((dep) => `--upgrade-package ${quote(dep.depName!)}`).join(' ')}`;
     }
 
     await exec(cmd, execOptions);
