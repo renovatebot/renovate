@@ -327,6 +327,66 @@ describe('modules/datasource/maven/index', () => {
     expect(res?.sourceUrl).toBe('https://github.com/example/test');
   });
 
+  it('extracts sourceTag from scm.tag with explicit version', async () => {
+    const pom = codeBlock`
+      <project>
+        <scm>
+          <tag>release/v2.0.0</tag>
+        </scm>
+      </project>
+    `;
+    mockGenericPackage({ pom });
+
+    const res = await get();
+
+    expect(res?.sourceTag).toBe('release/v2.0.0');
+  });
+
+  it('does not set sourceTag when scm.tag is missing', async () => {
+    const pom = codeBlock`
+      <project>
+        <scm>
+          <url>scm:git:https://github.com/example/test</url>
+        </scm>
+      </project>
+    `;
+    mockGenericPackage({ pom });
+
+    const res = await get();
+
+    expect(res?.sourceTag).toBeUndefined();
+  });
+
+  it('does not set sourceTag when scm.tag is empty', async () => {
+    const pom = codeBlock`
+      <project>
+        <scm>
+          <tag></tag>
+        </scm>
+      </project>
+    `;
+    mockGenericPackage({ pom });
+
+    const res = await get();
+
+    expect(res?.sourceTag).toBeUndefined();
+  });
+
+  it('does not set sourceTag when scm.tag is blank', async () => {
+    const pom = codeBlock`
+      <project>
+        <scm>
+          <tag>   </tag>
+        </scm>
+      </project>
+    `;
+    mockGenericPackage({ pom });
+
+    const res = await get();
+
+    expect(res?.sourceTag).toBeUndefined();
+  });
+
   describe('supports relocation', () => {
     it('with only groupId present', async () => {
       const pom = codeBlock`
@@ -567,6 +627,7 @@ describe('modules/datasource/maven/index', () => {
 
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/parent-scm/parent',
+        sourceTag: 'v1.0.0',
         homepage: 'https://parent-home.example.com',
       });
     });
@@ -662,6 +723,7 @@ describe('modules/datasource/maven/index', () => {
         pom: Fixtures.get('child-all-info/pom.xml'),
         latest: '2.0.0',
       });
+      mockGenericPackage(parentPackage);
 
       const res = await get();
 
@@ -711,6 +773,115 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toMatchObject({
         sourceUrl: 'https://github.com/child-scm/child',
       });
+    });
+
+    it('should get sourceTag from parent when child has no scm.tag', async () => {
+      const childPom = codeBlock`
+        <project>
+          <parent>
+            <groupId>org.example</groupId>
+            <artifactId>parent</artifactId>
+            <version>1.0.0</version>
+          </parent>
+          <scm>
+            <url>https://github.com/child-scm/child</url>
+          </scm>
+        </project>
+      `;
+      const parentPom = codeBlock`
+        <project>
+          <scm>
+            <tag>v1.0.0</tag>
+          </scm>
+        </project>
+      `;
+      mockGenericPackage({ pom: childPom });
+      mockGenericPackage({
+        dep: 'org.example:parent',
+        meta: null,
+        pom: parentPom,
+        latest: '1.0.0',
+      });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/child-scm/child',
+        sourceTag: 'v1.0.0',
+      });
+    });
+
+    it('should prefer child scm.tag over parent scm.tag', async () => {
+      const childPom = codeBlock`
+        <project>
+          <parent>
+            <groupId>org.example</groupId>
+            <artifactId>parent</artifactId>
+            <version>1.0.0</version>
+          </parent>
+          <scm>
+            <url>https://github.com/child-scm/child</url>
+            <tag>child-v2.0.0</tag>
+          </scm>
+        </project>
+      `;
+      const parentPom = codeBlock`
+        <project>
+          <scm>
+            <tag>parent-v1.0.0</tag>
+          </scm>
+        </project>
+      `;
+      mockGenericPackage({ pom: childPom });
+      mockGenericPackage({
+        dep: 'org.example:parent',
+        meta: null,
+        pom: parentPom,
+        latest: '1.0.0',
+      });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/child-scm/child',
+        sourceTag: 'child-v2.0.0',
+      });
+    });
+
+    it('should not inherit parent scm.tag when it is HEAD', async () => {
+      const childPom = codeBlock`
+        <project>
+          <parent>
+            <groupId>org.example</groupId>
+            <artifactId>parent</artifactId>
+            <version>1.0.0</version>
+          </parent>
+        </project>
+      `;
+      const parentPom = codeBlock`
+        <project>
+          <scm>
+            <tag>HEAD</tag>
+            <url>https://github.com/parent-scm/parent</url>
+          </scm>
+          <url>https://parent-home.example.com</url>
+        </project>
+      `;
+      mockGenericPackage({ pom: childPom });
+      mockGenericPackage({
+        dep: 'org.example:parent',
+        meta: null,
+        pom: parentPom,
+        latest: '1.0.0',
+      });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/parent-scm/parent',
+        homepage: 'https://parent-home.example.com',
+      });
+      expect(res?.sourceTag).toBeUndefined();
     });
   });
 
