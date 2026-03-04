@@ -387,6 +387,23 @@ describe('modules/datasource/maven/index', () => {
     expect(res?.sourceTag).toBeUndefined();
   });
 
+  it('does not set sourceTag when scm.tag is HEAD', async () => {
+    const pom = codeBlock`
+      <project>
+        <scm>
+          <url>https://github.com/example/test</url>
+          <tag>HEAD</tag>
+        </scm>
+      </project>
+    `;
+    mockGenericPackage({ pom });
+
+    const res = await get();
+
+    expect(res?.sourceUrl).toBe('https://github.com/example/test');
+    expect(res?.sourceTag).toBeUndefined();
+  });
+
   describe('supports relocation', () => {
     it('with only groupId present', async () => {
       const pom = codeBlock`
