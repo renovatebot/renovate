@@ -45,7 +45,7 @@ export async function createOnboardingBranch(
   const prTitle =
     config.semanticCommits === 'enabled'
       ? getSemanticCommitPrTitle(config)
-      : config.onboardingPrTitle!;
+      : getInheritedOrGlobal('onboardingPrTitle')!;
 
   return scm.commitAndPush({
     baseBranch: config.baseBranch,

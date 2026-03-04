@@ -20,6 +20,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       GlobalConfig.set({
         localDir: '',
         onboardingConfigFileName: 'renovate.json',
+        onboardingPrTitle: 'Configure Renovate',
         platform: 'github',
       });
       memCache.init();
@@ -32,7 +33,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         onboardingConfig: {
           $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         },
-        onboardingPrTitle: 'Configure Renovate',
         repository: 'some/repo',
       };
       configModule.getOnboardingConfigContents.mockResolvedValue('');
@@ -57,6 +57,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       GlobalConfig.set({
         localDir: '',
         onboardingConfigFileName: '.github/renovate.json',
+        onboardingPrTitle: 'Configure Renovate',
         platform: 'github',
       });
       await rebaseOnboardingBranch(config, hash);
@@ -73,7 +74,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      GlobalConfig.set({ localDir: '', platform: 'github' });
+      GlobalConfig.set({
+        localDir: '',
+        onboardingPrTitle: 'Configure Renovate',
+        platform: 'github',
+      });
       await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
@@ -113,7 +118,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('uses semantic commit PR title when semanticCommits is enabled', async () => {
-      GlobalConfig.set({ localDir: '', platform: 'github' });
+      GlobalConfig.set({
+        localDir: '',
+        onboardingPrTitle: 'Configure Renovate',
+        platform: 'github',
+      });
       await rebaseOnboardingBranch(
         {
           ...config,

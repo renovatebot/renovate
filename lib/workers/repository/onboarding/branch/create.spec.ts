@@ -19,6 +19,7 @@ describe('workers/repository/onboarding/branch/create', () => {
     GlobalConfig.set({
       onboardingBranch: config.onboardingBranch,
       onboardingConfigFileName: config.onboardingConfigFileName,
+      onboardingPrTitle: 'Configure Renovate',
     });
   });
 
@@ -231,7 +232,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch(config);
 
@@ -259,6 +263,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         GlobalConfig.set({
           onboardingBranch: config.onboardingBranch,
           onboardingConfigFileName: 'superConfigFile.yaml',
+          onboardingPrTitle: 'Configure Renovate',
         });
 
         await createOnboardingBranch(config);
@@ -288,6 +293,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         GlobalConfig.set({
           onboardingBranch: config.onboardingBranch,
           onboardingConfigFileName: path,
+          onboardingPrTitle: 'Configure Renovate',
         });
 
         await createOnboardingBranch(config);
@@ -317,6 +323,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         GlobalConfig.set({
           onboardingBranch: config.onboardingBranch,
           onboardingConfigFileName: path,
+          onboardingPrTitle: 'Configure Renovate',
         });
 
         await createOnboardingBranch(config);
