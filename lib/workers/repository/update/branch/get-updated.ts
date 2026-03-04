@@ -615,7 +615,7 @@ async function checkForPendingVersions(
 
     if (resolvedVersion && upgradeInfo.pendingVersions.has(resolvedVersion)) {
       const expectedVersion = upgradeInfo.newVersion;
-      /* v8 ignore next 10 -- should not happen */
+      /* v8 ignore next if -- should not happen */
       if (!expectedVersion) {
         logger.error(
           {
