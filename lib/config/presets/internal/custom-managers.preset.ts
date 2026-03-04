@@ -110,7 +110,6 @@ export const presets: Record<string, Preset> = {
         depNameTemplate: 'java',
         managerFilePatterns: ['**/pom.xml'],
         matchStrings: ['<java\\.version>(?<currentValue>.+?)</java\\.version>'],
-        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
     ],
     description: 'Update `java.version` properties in `pom.xml` files.',
