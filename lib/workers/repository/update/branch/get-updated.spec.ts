@@ -1580,13 +1580,14 @@ describe('workers/repository/update/branch/get-updated', () => {
       gomod.extractPackageFile.mockResolvedValueOnce(null);
       await getUpdatedPackageFiles(config);
 
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         { packageFile: 'go.mod', manager: 'gomod' },
         'Could not re-extract the packageFile after updating it',
       );
     });
 
-    it('skips deps without a depName when checking for pending versions', async () => {
+    // should never happen, but our types allow this
+    it('rejects when an updated dependency has no depName', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
         manager: 'composer',
@@ -1608,24 +1609,35 @@ describe('workers/repository/update/branch/get-updated', () => {
       composer.extractPackageFile.mockResolvedValueOnce({
         deps: [
           {
+            depName: undefined,
             lockedVersion: '1.3.0',
-          },
-          {
-            depName: 'some-dep',
-            lockedVersion: '1.2.3',
           },
         ],
       });
-      const res = await getUpdatedPackageFiles(config);
-      expect(res.artifactErrors).toHaveLength(0);
+
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrowError(
+        'update-failure',
+      );
+
+      expect(logger.logger.error).toHaveBeenCalledWith(
+        {
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: 'renovate/pin',
+          depName: undefined,
+        },
+        "No depName found after updating 'composer.json'",
+      );
     });
 
-    it('does not include expected version in artifact error when upgrade has no newVersion', async () => {
+    // should never happen, but our types allow this
+    it('rejects when an updated dependency has no new version', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
         manager: 'composer',
         branchName: '',
         depName: 'some-dep',
+        newVersion: '1.2.3',
         pendingVersions: ['1.3.0'],
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
@@ -1642,14 +1654,57 @@ describe('workers/repository/update/branch/get-updated', () => {
         deps: [
           {
             depName: 'some-dep',
-            lockedVersion: '1.3.0',
+            lockedVersion: undefined,
+            newVersion: undefined,
+            currentVersion: undefined,
+            currentValue: undefined,
           },
         ],
       });
-      const res = await getUpdatedPackageFiles(config);
-      expect(res.artifactErrors).toHaveLength(1);
-      expect(res.artifactErrors[0].stderr).not.toContain(
-        'Renovate was attempting to update to',
+
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrowError(
+        'update-failure',
+      );
+
+      expect(logger.logger.error).toHaveBeenCalledWith(
+        {
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: 'renovate/pin',
+          depName: 'some-dep',
+          newVersion: undefined,
+        },
+        "No new version found for 'some-dep' after updating 'composer.json'",
+      );
+    });
+
+    // should never happen, but our types allow this
+    it('rejects when upgrade has no depName', async () => {
+      config.upgrades.push({
+        packageFile: 'composer.json',
+        manager: 'composer',
+        branchName: 'renovate/pin',
+        depName: undefined,
+        newVersion: '5.6.7',
+      });
+
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrowError(
+        'update-failure',
+      );
+    });
+
+    // should never happen, but our types allow this
+    it('rejects when upgrade has no depName', async () => {
+      config.upgrades.push({
+        packageFile: 'composer.json',
+        manager: 'composer',
+        branchName: '',
+        depName: 'some-dep',
+        newVersion: undefined,
+      });
+
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrowError(
+        'update-failure',
       );
     });
 

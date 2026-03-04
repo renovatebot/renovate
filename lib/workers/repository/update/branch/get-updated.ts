@@ -568,7 +568,7 @@ async function checkForPendingVersions(
     config,
   );
   if (!extracted) {
-    logger.debug(
+    logger.warn(
       { packageFile: packageFileName, manager },
       'Could not re-extract the packageFile after updating it',
     );
@@ -576,9 +576,20 @@ async function checkForPendingVersions(
   }
 
   for (const dep of extracted.deps) {
+    // shouldn't ever happen
     if (!dep.depName) {
-      continue;
+      logger.error(
+        {
+          packageFile: packageFileName,
+          manager,
+          branchName: config.branchName,
+          depName: dep.depName,
+        },
+        `No depName found after updating '${packageFileName}'`,
+      );
+      throw new Error(WORKER_FILE_UPDATE_FAILED);
     }
+
     const upgradeInfo = depNameToUpgradeInfo.get(dep.depName);
     if (!upgradeInfo) {
       continue;
@@ -588,8 +599,38 @@ async function checkForPendingVersions(
       dep.newVersion ??
       dep.currentVersion ??
       dep.currentValue;
+    if (!resolvedVersion) {
+      logger.error(
+        {
+          packageFile: packageFileName,
+          manager,
+          branchName: config.branchName,
+          depName: dep.depName,
+          newVersion: resolvedVersion,
+        },
+        `No new version found for '${dep.depName}' after updating '${packageFileName}'`,
+      );
+      throw new Error(WORKER_FILE_UPDATE_FAILED);
+    }
+
     if (resolvedVersion && upgradeInfo.pendingVersions.has(resolvedVersion)) {
       const expectedVersion = upgradeInfo.newVersion;
+      /* v8 ignore next 10 -- should not happen */
+      if (!expectedVersion) {
+        logger.error(
+          {
+            packageFile: packageFileName,
+            manager,
+            branchName: config.branchName,
+            depName: dep.depName,
+            newVersion: resolvedVersion,
+            expectedVersion,
+          },
+          `No expectedVersion found for '${dep.depName}' after updating '${packageFileName}'`,
+        );
+        continue;
+      }
+
       if (config.minimumReleaseAgeBehaviour === 'timestamp-optional') {
         logger.once.warn(
           {
