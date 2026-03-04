@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import type { PackageFileContent } from '../types';
-import { findHandler } from './handlers';
-import { extractRubyString } from './utils';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { PackageFileContent } from '../types.ts';
+import { findHandler } from './handlers/index.ts';
+import { extractRubyString } from './utils.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('extractPackageFile()');

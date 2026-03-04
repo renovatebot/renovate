@@ -1,10 +1,10 @@
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../util/regex';
-import { CpanDatasource } from '../../datasource/cpan';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as perlVersioning from '../../versioning/perl';
-import type { PackageDependency } from '../types';
-import { cpanfile } from './language';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../util/regex.ts';
+import { CpanDatasource } from '../../datasource/cpan/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import * as perlVersioning from '../../versioning/perl/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { cpanfile } from './language.ts';
 
 interface Ctx {
   deps: PackageDependency[];

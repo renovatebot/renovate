@@ -1,11 +1,14 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import ignore from 'ignore';
-import { logger } from '../../../../logger';
-import type { FileOwnerRule, Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { readLocalFile } from '../../../../util/fs';
-import { getBranchFiles, getBranchFilesFromCommit } from '../../../../util/git';
-import { newlineRegex, regEx } from '../../../../util/regex';
+import { logger } from '../../../../logger/index.ts';
+import type { FileOwnerRule, Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import {
+  getBranchFiles,
+  getBranchFilesFromCommit,
+} from '../../../../util/git/index.ts';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
 
 interface FileOwnersScore {
   file: string;

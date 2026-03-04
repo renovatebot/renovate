@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { linkify, sanitizeMarkdown } from './markdown';
+import { linkify, sanitizeMarkdown } from './markdown.ts';
 
 describe('util/markdown', () => {
   describe('.linkify', () => {

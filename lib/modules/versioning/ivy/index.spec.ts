@@ -1,10 +1,10 @@
+import ivy from './index.ts';
 import {
   REV_TYPE_LATEST,
   REV_TYPE_RANGE,
   REV_TYPE_SUBREV,
   parseDynamicRevision,
-} from './parse';
-import ivy from '.';
+} from './parse.ts';
 
 describe('modules/versioning/ivy/index', () => {
   it.each`
@@ -36,8 +36,8 @@ describe('modules/versioning/ivy/index', () => {
     ${''}
     ${'.+'}
     ${'[0,1),(1,)'}
-  `('parseDynamicRevision("$input") === null', ({ input, type, value }) => {
-    expect(parseDynamicRevision(value)).toBeNull();
+  `('parseDynamicRevision("$input") === null', ({ input }) => {
+    expect(parseDynamicRevision(input)).toBeNull();
   });
 
   it.each`

@@ -1,4 +1,4 @@
-import { updateArtifacts } from '.';
+import { updateArtifacts } from './index.ts';
 
 describe('modules/manager/git-submodules/artifact', () => {
   describe('updateArtifacts()', () => {

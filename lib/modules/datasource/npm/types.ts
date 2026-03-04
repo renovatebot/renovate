@@ -1,5 +1,5 @@
-import type { PackageRule } from '../../../config/types';
-import type { HostRule } from '../../../types';
+import type { PackageRule } from '../../../config/types.ts';
+import type { HostRule } from '../../../types/index.ts';
 
 export interface NpmrcRules {
   hostRules: HostRule[];

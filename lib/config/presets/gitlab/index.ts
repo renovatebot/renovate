@@ -1,12 +1,12 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import type { Nullish } from '../../../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { GitlabProject } from '../../../types/platform/gitlab';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import type { HttpResponse } from '../../../util/http/types';
-import type { Preset, PresetConfig } from '../types';
-import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { Nullish } from '../../../types/index.ts';
+import type { GitlabProject } from '../../../types/platform/gitlab/index.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import type { Preset, PresetConfig } from '../types.ts';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
 
 const gitlabApi = new GitlabHttp();
 export const Endpoint = 'https://gitlab.com/api/v4/';

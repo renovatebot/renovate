@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { streamToString } from '../../../util/streams';
+import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -9,7 +9,7 @@ import {
   getRepoByName,
   getStorageExtraCloneOpts,
   max4000Chars,
-} from './util';
+} from './util.ts';
 
 describe('modules/platform/azure/util', () => {
   describe('getGitStatusContextCombinedName', () => {

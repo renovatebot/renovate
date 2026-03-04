@@ -1,4 +1,4 @@
-import { GlasskubeVersioningApi } from '.';
+import { GlasskubeVersioningApi } from './index.ts';
 
 describe('modules/versioning/glasskube/index', () => {
   const versioning = new GlasskubeVersioningApi();

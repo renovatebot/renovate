@@ -1,5 +1,5 @@
-import * as template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
+import * as template from '../../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../../types.ts';
 
 export function getPrFooter(config: BranchConfig): string {
   if (config.prFooter) {

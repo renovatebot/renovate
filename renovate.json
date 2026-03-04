@@ -109,7 +109,7 @@
       "customType": "regex",
       "managerFilePatterns": ["lib/config/options/index.ts"],
       "matchStrings": [
-        "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
+        "default: '(?<depName>ghcr.io/renovatebot/base-image):(?<currentValue>.*)'"
       ],
       "datasourceTemplate": "docker"
     }

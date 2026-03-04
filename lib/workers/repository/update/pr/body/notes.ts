@@ -1,8 +1,8 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { emojify } from '../../../../../util/emoji';
-import * as template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
+import { logger } from '../../../../../logger/index.ts';
+import { emojify } from '../../../../../util/emoji.ts';
+import * as template from '../../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../../types.ts';
 
 export function getPrNotes(config: BranchConfig): string {
   const notes = [];

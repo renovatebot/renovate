@@ -1,17 +1,17 @@
 import { Marshal } from '@qnighy/marshal';
-import type { ZodError } from 'zod';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { Http, HttpError } from '../../../util/http';
-import { AsyncResult, Result } from '../../../util/result';
-import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
-import * as rubyVersioning from '../../versioning/ruby';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { getV1Releases } from './common';
-import { MetadataCache } from './metadata-cache';
-import { GemInfo, MarshalledVersionInfo } from './schema';
-import { VersionsEndpointCache } from './versions-endpoint-cache';
+import type { ZodError } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { Http, HttpError } from '../../../util/http/index.ts';
+import { AsyncResult, Result } from '../../../util/result.ts';
+import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
+import * as rubyVersioning from '../../versioning/ruby/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { getV1Releases } from './common.ts';
+import { MetadataCache } from './metadata-cache.ts';
+import { GemInfo, MarshalledVersionInfo } from './schema.ts';
+import { VersionsEndpointCache } from './versions-endpoint-cache.ts';
 
 function unlessServerSide<
   T extends NonNullable<unknown>,
@@ -53,17 +53,7 @@ export class RubygemsDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_uri` field in the results.';
 
-  @cache({
-    namespace: `datasource-${RubygemsDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `releases:${registryUrl!}:${packageName}`,
-    cacheable: ({ registryUrl }: GetReleasesConfig) => {
-      const registryHostname = parseUrl(registryUrl)?.hostname;
-      return registryHostname === 'rubygems.org';
-    },
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -111,6 +101,20 @@ export class RubygemsDatasource extends Datasource {
 
     logger.debug({ packageName, registryUrl }, `Rubygems fetch error: ${err}`);
     return null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const registryHostname = parseUrl(config.registryUrl)?.hostname;
+    return withCache(
+      {
+        namespace: `datasource-${RubygemsDatasource.id}`,
+        // TODO: types (#22198)
+        key: `releases:${config.registryUrl!}:${config.packageName}`,
+        fallback: true,
+        cacheable: registryHostname === 'rubygems.org',
+      },
+      () => this._getReleases(config),
+    );
   }
 
   private getReleasesViaInfoEndpoint(

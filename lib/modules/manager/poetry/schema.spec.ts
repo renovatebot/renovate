@@ -1,4 +1,4 @@
-import { PoetryPyProject, PoetrySection, PoetrySources } from './schema';
+import { PoetryPyProject, PoetrySection, PoetrySources } from './schema.ts';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {

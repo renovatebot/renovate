@@ -166,7 +166,25 @@ exports[`config/validation > validateConfig(config) > included managers of the w
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > returns deprecation warnings 1`] = `
+exports[`config/validation > validateConfig(config) > returns custom deprecation warnings for branchName 1`] = `
+[
+  {
+    "message": "Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead",
+    "topic": "Deprecation Warning",
+  },
+]
+`;
+
+exports[`config/validation > validateConfig(config) > returns custom deprecation warnings for commitMessage 1`] = `
+[
+  {
+    "message": "Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.",
+    "topic": "Deprecation Warning",
+  },
+]
+`;
+
+exports[`config/validation > validateConfig(config) > returns custom deprecation warnings for prTitle 1`] = `
 [
   {
     "message": "Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.",

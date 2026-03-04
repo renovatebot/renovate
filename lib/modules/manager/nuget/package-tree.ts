@@ -1,11 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { minimatchFilter } from '../../../util/minimatch';
-import { scm } from '../../platform/scm';
-import type { ProjectFile } from './types';
-import { readFileAsXmlDocument } from './util';
+import { logger } from '../../../logger/index.ts';
+import { minimatchFilter } from '../../../util/minimatch.ts';
+import { scm } from '../../platform/scm.ts';
+import type { ProjectFile } from './types.ts';
+import { readFileAsXmlDocument } from './util.ts';
 
 export const GLOBAL_JSON = 'global.json';
 export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';

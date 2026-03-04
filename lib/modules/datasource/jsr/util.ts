@@ -3,7 +3,7 @@
 // Copyright 2024 the JSR authors. All rights reserved. MIT license.
 
 import { isNull } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 export function extractJsrPackageName(packageName: string): {
   scope: string;

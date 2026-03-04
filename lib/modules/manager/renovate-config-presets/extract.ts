@@ -1,11 +1,11 @@
 import { isNonEmptyArray, isNullOrUndefined } from '@sindresorhus/is';
-import { parsePreset } from '../../../config/presets/parse';
-import { logger } from '../../../logger';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { RenovateJson } from './schema';
+import { parsePreset } from '../../../config/presets/parse.ts';
+import { logger } from '../../../logger/index.ts';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { RenovateJson } from './schema.ts';
 
 const supportedPresetSources: Record<string, string> = {
   github: GithubTagsDatasource.id,

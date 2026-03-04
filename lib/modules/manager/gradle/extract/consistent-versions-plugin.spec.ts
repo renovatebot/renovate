@@ -4,7 +4,7 @@ import {
   parseLockFile,
   parsePropsFile,
   usesGcv,
-} from './consistent-versions-plugin';
+} from './consistent-versions-plugin.ts';
 
 describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
   it('works for sub folders', () => {

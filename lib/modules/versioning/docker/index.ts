@@ -1,8 +1,8 @@
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'docker';
 export const displayName = 'Docker';

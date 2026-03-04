@@ -1,6 +1,6 @@
-import _nodeSchedule from '../../../data/node-js-schedule.json';
-import type { Nullish } from '../../../types';
-import semver from '../semver';
+import _nodeSchedule from '../../../data/node-js-schedule.json' with { type: 'json' };
+import type { Nullish } from '../../../types/index.ts';
+import semver from '../semver/index.ts';
 
 interface NodeJsSchedule {
   lts?: string;

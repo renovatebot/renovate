@@ -1,14 +1,14 @@
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
-import { JavaVersionDatasource } from '../../datasource/java-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as regexVersioning from '../../versioning/regex';
-import * as semverVersioning from '../../versioning/semver';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling';
-import { upgradeableTooling } from '../asdf/upgradeable-tooling';
+import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import * as regexVersioning from '../../versioning/regex/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
+import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
+import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
 
 export interface ToolingDefinition {
   config: ToolingConfig;
@@ -136,7 +136,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
   node: {
     misePluginUrl: 'https://mise.jdx.dev/lang/node.html',
     config: {
-      packageName: 'nodejs',
+      packageName: 'node',
       datasource: NodeVersionDatasource.id,
     },
   },
@@ -220,6 +220,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  caddy: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'caddyserver/caddy',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   ccache: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -234,6 +242,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'crate-ci/committed',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  conan: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'conan-io/conan',
+      datasource: GithubReleasesDatasource.id,
     },
   },
   consul: {
@@ -397,6 +412,20 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'stripe/stripe-cli',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  swiftformat: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'nicklockwood/SwiftFormat',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  swiftlint: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'realm/SwiftLint',
+      datasource: GithubReleasesDatasource.id,
     },
   },
   taplo: {

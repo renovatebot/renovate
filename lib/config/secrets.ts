@@ -1,12 +1,12 @@
 import { isPlainObject } from '@sindresorhus/is';
-import type { InterpolatorOptions } from '../util/interpolator';
+import type { InterpolatorOptions } from '../util/interpolator.ts';
 import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
-} from '../util/interpolator';
-import { regEx } from '../util/regex';
-import { addSecretForSanitizing } from '../util/sanitize';
-import type { AllConfig, RenovateConfig } from './types';
+} from '../util/interpolator.ts';
+import { regEx } from '../util/regex.ts';
+import { addSecretForSanitizing } from '../util/sanitize.ts';
+import type { AllConfig, RenovateConfig } from './types.ts';
 
 const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);

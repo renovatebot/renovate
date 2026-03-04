@@ -1,10 +1,10 @@
-import { z } from 'zod';
-import { Timestamp } from '../../../timestamp';
+import { z } from 'zod/v3';
+import { Timestamp } from '../../../timestamp.ts';
 import type {
   GithubBranchItem,
   GithubGraphqlDatasourceAdapter,
-} from '../types';
-import { prepareQuery } from '../util';
+} from '../types.ts';
+import { prepareQuery } from '../util.ts';
 
 const key = 'github-branches-datasource-v1';
 

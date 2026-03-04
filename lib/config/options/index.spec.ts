@@ -1,13 +1,13 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import * as manager from '../../modules/manager';
-import * as platform from '../../modules/platform';
-import { getOptions } from '.';
+import * as manager from '../../modules/manager/index.ts';
+import * as platform from '../../modules/platform/index.ts';
+import { getOptions } from './index.ts';
 
 vi.unmock('../../modules/platform');
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
-    vi.doMock('../../modules/manager', () => ({
+    vi.doMock('../../modules/manager/index.ts', () => ({
       getManagers: vi.fn(() => new Map().set('testManager', {})),
     }));
 

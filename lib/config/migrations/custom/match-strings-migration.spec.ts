@@ -1,4 +1,4 @@
-import { MatchStringsMigration } from './match-strings-migration';
+import { MatchStringsMigration } from './match-strings-migration.ts';
 
 describe('config/migrations/custom/match-strings-migration', () => {
   it('should migrate properly', async () => {

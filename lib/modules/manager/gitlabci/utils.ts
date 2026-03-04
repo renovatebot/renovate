@@ -1,6 +1,6 @@
-import { regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
-import type { PackageDependency } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { PackageDependency } from '../types.ts';
 
 const depProxyRe = regEx(
   `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?/)(?<depName>.+)`,

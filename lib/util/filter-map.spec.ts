@@ -1,4 +1,4 @@
-import { filterMap } from './filter-map';
+import { filterMap } from './filter-map.ts';
 
 describe('util/filter-map', () => {
   it('should return an empty array when given an empty array', () => {

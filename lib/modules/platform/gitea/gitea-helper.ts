@@ -1,9 +1,9 @@
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import type { GiteaHttpOptions } from '../../../util/http/gitea';
-import { GiteaHttp } from '../../../util/http/gitea';
-import { fromBase64 } from '../../../util/string';
-import { getQueryString } from '../../../util/url';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import type { GiteaHttpOptions } from '../../../util/http/gitea.ts';
+import { GiteaHttp } from '../../../util/http/gitea.ts';
+import { fromBase64 } from '../../../util/string.ts';
+import { getQueryString } from '../../../util/url.ts';
 import type {
   Branch,
   CombinedCommitStatus,
@@ -29,8 +29,8 @@ import type {
   RepoSearchParams,
   RepoSearchResults,
   User,
-} from './types';
-import { API_PATH } from './utils';
+} from './types.ts';
+import { API_PATH } from './utils.ts';
 
 export const giteaHttp = new GiteaHttp();
 

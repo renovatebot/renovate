@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import { Pubspec, PubspecLock } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { Pubspec, PubspecLock } from './schema.ts';
 
 export function parsePubspec(
   fileName: string,

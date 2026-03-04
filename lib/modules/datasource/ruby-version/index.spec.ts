@@ -1,7 +1,7 @@
-import { getPkgReleases } from '..';
-import { RubyVersionDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { getPkgReleases } from '../index.ts';
+import { RubyVersionDatasource } from './index.ts';
 
 const datasource = RubyVersionDatasource.id;
 

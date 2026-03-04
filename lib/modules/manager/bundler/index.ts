@@ -1,12 +1,13 @@
-import type { Category } from '../../../constants';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import { RubygemsDatasource } from '../../datasource/rubygems';
-import * as rubyVersioning from '../../versioning/ruby';
-import { updateArtifacts } from './artifacts';
-import { extractPackageFile } from './extract';
-import { updateLockedDependency } from './update-locked';
+import type { Category } from '../../../constants/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import * as rubyVersioning from '../../versioning/ruby/index.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { extractPackageFile } from './extract.ts';
+import { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Gemfile.lock'];
 
 /*
  * Each of the below functions contain some explanations within their own files.

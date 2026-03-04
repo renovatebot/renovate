@@ -1,4 +1,4 @@
-import { ClientRequest } from 'node:http';
+import { ClientRequest, ServerResponse } from 'node:http';
 import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
@@ -10,22 +10,7 @@ import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
 import {
-  awsBeanstalkDetector,
-  awsEc2Detector,
-  awsEcsDetector,
-  awsEksDetector,
-  awsLambdaDetector,
-} from '@opentelemetry/resource-detector-aws';
-import {
-  azureAppServiceDetector,
-  azureFunctionsDetector,
-  azureVmDetector,
-} from '@opentelemetry/resource-detector-azure';
-import { gcpDetector } from '@opentelemetry/resource-detector-gcp';
-import { gitHubDetector } from '@opentelemetry/resource-detector-github';
-import {
   detectResources,
-  envDetector,
   resourceFromAttributes,
 } from '@opentelemetry/resources';
 import {
@@ -40,24 +25,32 @@ import {
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 import { isPromise } from '@sindresorhus/is';
-import { pkg } from '../expose.cjs';
-import { getEnv } from '../util/env';
-import { GitOperationSpanProcessor } from '../util/git/span-processor';
-import type { RenovateSpanOptions } from './types';
+import { pkg } from '../expose.ts';
+import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { getResourceDetectors } from './detectors.ts';
+import type { RenovateSpanOptions } from './types.ts';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
   massageThrowable,
-} from './utils';
+} from './utils.ts';
 
 let instrumentations: Instrumentation[] = [];
-
-init();
 
 export function init(): void {
   if (!isTracingEnabled()) {
     return;
+  }
+
+  // v8 ignore if -- TODO add tests
+  if (process.env.OTEL_LOG_LEVEL) {
+    api.diag.setLogger(
+      new api.DiagConsoleLogger(),
+      api.DiagLogLevel[
+        process.env.OTEL_LOG_LEVEL.toUpperCase() as keyof typeof api.DiagLogLevel
+      ],
+    );
   }
 
   const spanProcessors: SpanProcessor[] = [];
@@ -70,10 +63,11 @@ export function init(): void {
   if (isTraceSendingEnabled()) {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
+    // TODO: fix me, transitive initializes logger
     spanProcessors.push(new GitOperationSpanProcessor());
   }
 
-  const env = getEnv();
+  const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors
   const baseResource = resourceFromAttributes({
     // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
     [ATTR_SERVICE_NAME]: env.OTEL_SERVICE_NAME ?? 'renovate',
@@ -84,19 +78,7 @@ export function init(): void {
   });
 
   const detectedResource = detectResources({
-    detectors: [
-      awsBeanstalkDetector,
-      awsEc2Detector,
-      awsEcsDetector,
-      awsEksDetector,
-      awsLambdaDetector,
-      azureAppServiceDetector,
-      azureFunctionsDetector,
-      azureVmDetector,
-      gcpDetector,
-      gitHubDetector,
-      envDetector,
-    ],
+    detectors: getResourceDetectors(env),
   });
 
   const traceProvider = new NodeTracerProvider({
@@ -111,10 +93,9 @@ export function init(): void {
 
   instrumentations = [
     new HttpInstrumentation({
-      /* v8 ignore next -- not easily testable */
+      /* v8 ignore start -- not easily testable */
       applyCustomAttributesOnSpan: (span, request, response) => {
         // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
-        /* v8 ignore next -- not easily testable */
         if (
           request instanceof ClientRequest &&
           request.host === `api.github.com` &&
@@ -122,8 +103,21 @@ export function init(): void {
           response.statusCode === 404
         ) {
           span.setStatus({ code: SpanStatusCode.OK });
+        } else if (
+          request instanceof ClientRequest &&
+          request.path === '/v2/' &&
+          request.method === 'GET' &&
+          !request.getHeader('authorization') &&
+          response instanceof ServerResponse &&
+          response.getHeader('www-authenticate') &&
+          response.getHeader('docker-distribution-api-version') &&
+          response.statusCode === 401
+        ) {
+          // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
+          span.setStatus({ code: SpanStatusCode.OK });
         }
       },
+      /* v8 ignore stop -- not easily testable */
     }),
     new BunyanInstrumentation(),
     new RedisInstrumentation(),

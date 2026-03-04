@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import type { Pr } from '../../../../modules/platform/types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 

@@ -1,6 +1,6 @@
-import { regEx } from '../../../util/regex';
-import { DockerDatasource } from '../../datasource/docker';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export const pythonRuntimeRegex = regEx(
   '^python-(?<version>\\d+\\.\\d+\\.\\d+)$',

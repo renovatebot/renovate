@@ -1,4 +1,4 @@
-import { AbstractMigration } from '../base/abstract-migration';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class BinarySourceMigration extends AbstractMigration {
   override readonly propertyName = 'binarySource';

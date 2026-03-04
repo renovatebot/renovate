@@ -1,19 +1,23 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import { CrateDatasource } from '../../datasource/crate';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
-import { extractLockFileContentVersions } from './locked-version';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { regEx } from '../../../util/regex.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types.ts';
+import { extractLockFileContentVersions } from './locked-version.ts';
 
 async function cargoUpdate(
   manifestPath: string,

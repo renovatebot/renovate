@@ -1,9 +1,9 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import type { VersioningApi } from '../types';
-import { getNewValue, toSemverRange } from './range';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { VersioningApi } from '../types.ts';
+import { getNewValue, toSemverRange } from './range.ts';
 
 export const id = 'swift';
 export const displayName = 'Swift';

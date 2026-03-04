@@ -1,5 +1,5 @@
-import { getPkgReleases } from '..';
-import { GithubRunnersDatasource } from '.';
+import { getPkgReleases } from '../index.ts';
+import { GithubRunnersDatasource } from './index.ts';
 
 describe('modules/datasource/github-runners/index', () => {
   describe('getReleases', () => {

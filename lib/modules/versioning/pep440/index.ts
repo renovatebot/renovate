@@ -1,7 +1,7 @@
 import * as pep440 from '@renovatebot/pep440';
-import type { RangeStrategy } from '../../../types/versioning';
-import type { VersioningApi } from '../types';
-import { getNewValue, getPinnedValue, isLessThanRange } from './range';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { VersioningApi } from '../types.ts';
+import { getNewValue, getPinnedValue, isLessThanRange } from './range.ts';
 
 export const id = 'pep440';
 export const displayName = 'PEP440';

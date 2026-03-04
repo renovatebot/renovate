@@ -1,7 +1,7 @@
 // TODO: types (#22198)
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { UpdateDependencyConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
 
 function getNameWithNoVersion(name: string): string {
   // remove version suffixes like /v1 or /v2
@@ -120,7 +120,7 @@ export function updateDependency({
       ) {
         if (currentName === currentNameNoVersion) {
           // If package currently has no version, pin to latest one.
-          newLine = newLine.replace(
+          newLine = newLine.replaceAll(
             currentName,
             `${currentName}/v${upgrade.newMajor}`,
           );

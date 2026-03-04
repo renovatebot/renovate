@@ -1,6 +1,6 @@
-import { regEx } from '../../../util/regex';
-import { get } from '../../versioning';
-import * as mavenVersioning from '../../versioning/maven';
+import { regEx } from '../../../util/regex.ts';
+import { get } from '../../versioning/index.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
 
 /*
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions

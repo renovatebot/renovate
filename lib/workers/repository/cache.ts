@@ -1,18 +1,18 @@
-import { REPOSITORY_CHANGED } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { platform } from '../../modules/platform';
-import { scm } from '../../modules/platform/scm';
-import { getCache } from '../../util/cache/repository';
+import { REPOSITORY_CHANGED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { platform } from '../../modules/platform/index.ts';
+import { scm } from '../../modules/platform/scm.ts';
+import { getCache } from '../../util/cache/repository/index.ts';
 import type {
   BranchCache,
   BranchUpgradeCache,
-} from '../../util/cache/repository/types';
-import { getCachedBehindBaseResult } from '../../util/git/behind-base-branch-cache';
-import { getCachedConflictResult } from '../../util/git/conflicts-cache';
-import { getCachedModifiedResult } from '../../util/git/modified-cache';
-import { getCachedPristineResult } from '../../util/git/pristine';
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import { getPrCache } from './update/pr/pr-cache';
+} from '../../util/cache/repository/types.ts';
+import { getCachedBehindBaseResult } from '../../util/git/behind-base-branch-cache.ts';
+import { getCachedConflictResult } from '../../util/git/conflicts-cache.ts';
+import { getCachedModifiedResult } from '../../util/git/modified-cache.ts';
+import { getCachedPristineResult } from '../../util/git/pristine.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
+import { getPrCache } from './update/pr/pr-cache.ts';
 
 function generateBranchUpgradeCache(
   upgrade: BranchUpgradeConfig,
@@ -70,6 +70,7 @@ async function generateBranchCache(
     let isModified: boolean | undefined;
     let isBehindBase: boolean | undefined;
     let isConflicted: boolean | undefined;
+    let commitTimestamp: string | undefined;
     if (baseBranchSha && branchSha) {
       const branchPr = await platform.getBranchPr(branchName, baseBranch);
       if (branchPr) {
@@ -90,6 +91,11 @@ async function generateBranchCache(
           baseBranch,
           baseBranchSha,
         ) ?? undefined;
+      // Get commit timestamp for hourly limit tracking
+      const commitDate = await scm.getBranchUpdateDate(branchName);
+      if (commitDate) {
+        commitTimestamp = commitDate.toISO()!;
+      }
     } else if (baseBranchSha && !branchSha && branch.prNo) {
       // if branch was deleted/ PR exists and ignored
       prNo = branch.prNo;
@@ -107,6 +113,7 @@ async function generateBranchCache(
       baseBranchSha,
       baseBranch,
       commitFingerprint,
+      commitTimestamp,
       branchName,
       isBehindBase,
       isConflicted,

@@ -1,5 +1,5 @@
-import { regEx } from '../../../../util/regex';
-import * as utils from './utils';
+import { regEx } from '../../../../util/regex.ts';
+import * as utils from './utils.ts';
 
 describe('modules/manager/custom/regex/utils', () => {
   it('does not crash for lazy regex', () => {

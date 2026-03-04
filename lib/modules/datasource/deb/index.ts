@@ -1,14 +1,17 @@
 import readline from 'readline';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import * as fs from '../../../util/fs';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { packageKeys, requiredPackageKeys } from './common';
-import { downloadAndExtractPackage } from './packages';
-import { formatReleaseResult, releaseMetaInformationMatches } from './release';
-import type { PackageDescription } from './types';
-import { constructComponentUrls } from './url';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import * as fs from '../../../util/fs/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { packageKeys, requiredPackageKeys } from './common.ts';
+import { downloadAndExtractPackage } from './packages.ts';
+import {
+  formatReleaseResult,
+  releaseMetaInformationMatches,
+} from './release.ts';
+import type { PackageDescription } from './types.ts';
+import { constructComponentUrls } from './url.ts';
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';
@@ -57,13 +60,7 @@ export class DebDatasource extends Datasource {
    * @param lastTimestamp - The timestamp of the last modification.
    * @returns a list of packages with minimal Metadata.
    */
-  @cache({
-    namespace: `datasource-${DebDatasource.id}`,
-    key: (extractedFile: string, lastTimestamp: Date) =>
-      `${extractedFile}:${lastTimestamp.getTime()}`,
-    ttlMinutes: 24 * 60,
-  })
-  async parseExtractedPackageIndex(
+  private async _parseExtractedPackageIndex(
     extractedFile: string,
     _lastTimestamp: Date,
   ): Promise<Record<string, PackageDescription[]>> {
@@ -109,11 +106,21 @@ export class DebDatasource extends Datasource {
     return allPackages;
   }
 
-  @cache({
-    namespace: `datasource-${DebDatasource.id}`,
-    key: (componentUrl: string) => componentUrl,
-  })
-  async getPackageIndex(
+  parseExtractedPackageIndex(
+    extractedFile: string,
+    lastTimestamp: Date,
+  ): Promise<Record<string, PackageDescription[]>> {
+    return withCache(
+      {
+        namespace: `datasource-${DebDatasource.id}`,
+        key: `${extractedFile}:${lastTimestamp.getTime()}`,
+        ttlMinutes: 24 * 60,
+      },
+      () => this._parseExtractedPackageIndex(extractedFile, lastTimestamp),
+    );
+  }
+
+  private async _getPackageIndex(
     componentUrl: string,
   ): Promise<Record<string, PackageDescription[]>> {
     const { extractedFile, lastTimestamp } = await downloadAndExtractPackage(
@@ -123,18 +130,25 @@ export class DebDatasource extends Datasource {
     return await this.parseExtractedPackageIndex(extractedFile, lastTimestamp);
   }
 
+  getPackageIndex(
+    componentUrl: string,
+  ): Promise<Record<string, PackageDescription[]>> {
+    return withCache(
+      {
+        namespace: `datasource-${DebDatasource.id}`,
+        key: componentUrl,
+      },
+      () => this._getPackageIndex(componentUrl),
+    );
+  }
+
   /**
    * Fetches the release information for a given package from the registry URL.
    *
    * @param config - Configuration for fetching releases.
    * @returns The release result if the package is found, otherwise null.
    */
-  @cache({
-    namespace: `datasource-${DebDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -174,5 +188,16 @@ export class DebDatasource extends Datasource {
     }
 
     return aggregatedRelease;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${DebDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

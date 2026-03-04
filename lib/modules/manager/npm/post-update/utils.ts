@@ -1,9 +1,9 @@
 import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
-import { logger } from '../../../../logger';
-import { Lazy } from '../../../../util/lazy';
-import type { PackageJson } from '../schema';
-import { loadPackageJson } from '../utils';
+import { logger } from '../../../../logger/index.ts';
+import { Lazy } from '../../../../util/lazy.ts';
+import type { PackageJson } from '../schema.ts';
+import { loadPackageJson } from '../utils.ts';
 
 export function lazyLoadPackageJson(
   lockFileDir: string,

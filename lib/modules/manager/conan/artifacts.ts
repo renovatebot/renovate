@@ -1,15 +1,15 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 async function conanLockUpdate(
   conanFilePath: string,

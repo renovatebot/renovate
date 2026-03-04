@@ -2,12 +2,12 @@ import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
   CONFIG_VARIABLES_INVALID,
-} from '../constants/error-messages';
-import { getConfig } from './defaults';
+} from '../constants/error-messages.ts';
+import { getConfig } from './defaults.ts';
 import {
   applySecretsAndVariablesToConfig,
   validateConfigSecretsAndVariables,
-} from './secrets';
+} from './secrets.ts';
 
 describe('config/secrets', () => {
   describe('validateConfigSecretsAndVariables(config)', () => {
