@@ -3,6 +3,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
 import * as _decrypt from '../../../../config/decrypt.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
 import { getCustomEnv } from '../../../../util/env.ts';
 import { getParentDir, readSystemFile } from '../../../../util/fs/index.ts';
 import getArgv from './__fixtures__/argv.ts';
@@ -394,6 +395,106 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig.configFileNames).toBeUndefined();
       expect(getConfigFileNames()[0]).toBe('myrenovate.json');
       expect(getConfigFileNames()[1]).toBe('.github/myrenovate.json');
+    });
+
+    // TODO #41551
+    describe('when `repositories` is being overridden', () => {
+      it('warns when CLI config overrides repositories from file config', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          repositories: ['org/repo1', 'org/repo2'],
+        });
+        defaultArgv = defaultArgv.concat(['org/repo3']);
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
+
+      it('warns when CLI config overrides repositories from env config', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({});
+        const env: NodeJS.ProcessEnv = {
+          ...defaultEnv,
+          RENOVATE_REPOSITORIES: '["org/repo1"]',
+        };
+        defaultArgv = defaultArgv.concat(['org/repo3']);
+        await configParser.parseConfigs(env, defaultArgv);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
+
+      it('does not warn when CLI config sets repositories without override', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({});
+        defaultArgv = defaultArgv.concat(['org/repo1']);
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+        expect(logger.warn).not.toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
+
+      it('does not warn when CLI config has no repositories', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          repositories: ['org/repo1'],
+        });
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+        expect(logger.warn).not.toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
+
+      it('does not warn when CLI config has same repositories as file config', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          repositories: ['org/repo1'],
+        });
+        defaultArgv = defaultArgv.concat(['org/repo1']);
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+        expect(logger.warn).not.toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
+
+      it('warns when CLI overrides repositories with repo-specific configuration', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          repositories: [
+            {
+              repository: 'org/simple-repo',
+              repositoryCache: 'disabled',
+            },
+          ],
+        });
+        defaultArgv = defaultArgv.concat(['org/simple-repo']);
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
+
+      it('does not warn when both values are the same', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          repositories: ['org/simple-repo'],
+        });
+        defaultArgv = defaultArgv.concat(['org/simple-repo']);
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+        expect(logger.warn).not.toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
+
+      // TODO
+      it('warns when both values are effectively the same', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          repositories: [
+            {
+              repository: 'org/simple-repo',
+            },
+          ],
+        });
+        defaultArgv = defaultArgv.concat(['org/simple-repo']);
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      });
     });
   });
 });

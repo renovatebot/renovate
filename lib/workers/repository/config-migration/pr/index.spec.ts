@@ -57,10 +57,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('creates PR with default PR title', async () => {
-      await ensureConfigMigrationPr(
-        { ...config, onboardingPrTitle: '' },
-        migratedData,
-      );
+      await ensureConfigMigrationPr(config, migratedData);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       createPrBody = platform.createPr.mock.calls[0][0].prBody;

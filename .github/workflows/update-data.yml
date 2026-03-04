@@ -12,6 +12,7 @@ permissions: {}
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate'
     permissions:
       contents: write
       pull-requests: write

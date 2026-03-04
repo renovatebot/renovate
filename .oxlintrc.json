@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript"],
+  "plugins": ["import", "typescript", "vitest"],
   "categories": {},
   "rules": {
     "eqeqeq": "error",
@@ -9,7 +9,7 @@
     "no-negated-condition": "error",
     "no-template-curly-in-string": "error",
     "curly": "error",
-    "radix": ["error", "as-needed"],
+    "radix": ["error"],
     "import/extensions": ["error", "always", { "ignorePackages": true }],
     "import/no-cycle": "error",
     "import/default": "error",
@@ -28,7 +28,8 @@
     {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
-        "no-template-curly-in-string": "off"
+        "no-template-curly-in-string": "off",
+        "jest/valid-title": "error"
       }
     },
     {

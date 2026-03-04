@@ -41,10 +41,20 @@ export const GithubReleaseContent = z.object({
   githubRelease: GithubRelease,
 });
 
+export const HttpRelease = z.object({
+  url: z.string(),
+});
+
+export const HttpContent = z.object({
+  path: z.string(),
+  http: HttpRelease,
+});
+
 export const Contents = z.union([
   HelmChartContent,
   GitRefContent,
   GithubReleaseContent,
+  HttpContent,
 ]);
 
 export const Vendir = VendirResource.extend({
@@ -60,3 +70,4 @@ export type VendirDefinition = z.infer<typeof Vendir>;
 export type HelmChartDefinition = z.infer<typeof HelmChart>;
 export type GitRefDefinition = z.infer<typeof GitRef>;
 export type GithubReleaseDefinition = z.infer<typeof GithubRelease>;
+export type HttpReleaseDefinition = z.infer<typeof HttpRelease>;

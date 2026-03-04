@@ -120,7 +120,7 @@ export function updateDependency({
       ) {
         if (currentName === currentNameNoVersion) {
           // If package currently has no version, pin to latest one.
-          newLine = newLine.replace(
+          newLine = newLine.replaceAll(
             currentName,
             `${currentName}/v${upgrade.newMajor}`,
           );

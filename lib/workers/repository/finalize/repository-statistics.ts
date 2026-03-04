@@ -10,6 +10,7 @@ import type {
   BranchCache,
   BranchUpgradeCache,
 } from '../../../util/cache/repository/types.ts';
+import { getInheritedOrGlobal } from '../../../util/common.ts';
 import type {
   BaseBranchMetadata,
   BranchMetadata,
@@ -25,7 +26,7 @@ export function runRenovateRepoStats(
   for (const pr of prList) {
     if (
       pr.title === 'Configure Renovate' ||
-      pr.title === config.onboardingPrTitle
+      pr.title === getInheritedOrGlobal('onboardingPrTitle')
     ) {
       continue;
     }
