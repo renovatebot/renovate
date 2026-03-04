@@ -348,6 +348,15 @@ function removeKnownPlaceholders(str: string): string {
   return str.replace(regEx(/\/tree\/\${[^}]+}/), '');
 }
 
+function normalizeScmTag(scmTag: string | undefined): string | undefined {
+  const trimmedTag = scmTag?.trim();
+  if (!trimmedTag || trimmedTag.toUpperCase() === 'HEAD') {
+    return undefined;
+  }
+
+  return trimmedTag;
+}
+
 export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
@@ -543,6 +552,11 @@ export async function getDependencyInfo(
         }
       }
 
+      const sourceTag = normalizeScmTag(pomContent.valueWithPath('scm.tag'));
+      if (sourceTag) {
+        result.sourceTag = sourceTag;
+      }
+
       const relocation = pomContent.descendantWithPath(
         'distributionManagement.relocation',
       );
@@ -569,7 +583,7 @@ export async function getDependencyInfo(
       if (
         recursionLimit > 0 &&
         parent &&
-        (!result.sourceUrl || !result.homepage)
+        (!result.sourceUrl || !result.sourceTag || !result.homepage)
       ) {
         // if we found a parent and are missing some information
         // trying to get the scm/homepage information from it
@@ -590,6 +604,9 @@ export async function getDependencyInfo(
           );
           if (!result.sourceUrl && parentInformation.sourceUrl) {
             result.sourceUrl = parentInformation.sourceUrl;
+          }
+          if (!result.sourceTag && parentInformation.sourceTag) {
+            result.sourceTag = parentInformation.sourceTag;
           }
           if (!result.homepage && parentInformation.homepage) {
             result.homepage = parentInformation.homepage;
