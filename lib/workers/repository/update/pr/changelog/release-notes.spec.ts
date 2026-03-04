@@ -1099,6 +1099,50 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         body: 'some body\n',
       });
     });
+
+    it('matches release notes using sourceTag', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 123,
+          version: `random-prefix-1.0.0`,
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          description: 'wrong body',
+          name: 'some/dep',
+        },
+        {
+          id: 456,
+          version: `my-custom-tag/1.0.1`,
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          description: 'some body',
+          name: 'some/dep',
+        },
+      ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'exampleDep',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        }),
+        partial<BranchUpgradeConfig>({
+          sourceTag: 'my-custom-tag/1.0.1',
+        }),
+      );
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 456,
+        tag: 'my-custom-tag/1.0.1',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
   });
 
   describe('getReleaseNotesMd()', () => {
