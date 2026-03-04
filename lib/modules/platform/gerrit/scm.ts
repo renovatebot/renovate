@@ -46,6 +46,13 @@ export async function pushForReview(options: {
 }
 
 export class GerritScm extends DefaultGitScm {
+  /**
+   * Branches that have a local commit prepared but no Gerrit change created yet
+   * (push is deferred to createPr()). These need special handling in
+   * mergeToLocal since they can't be fetched from origin.
+   */
+  private pendingChangeBranches = new Set<string>();
+
   override async branchExists(branchName: string): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
@@ -206,6 +213,7 @@ export class GerritScm extends DefaultGitScm {
           });
           /* v8 ignore else -- should never happen */
           if (pushResult) {
+            this.pendingChangeBranches.delete(commit.branchName);
             return commitSha;
           }
         }
@@ -214,6 +222,7 @@ export class GerritScm extends DefaultGitScm {
         logger.debug(
           `Commit prepared but not pushed for review yet (${commit.baseBranch})`,
         );
+        this.pendingChangeBranches.add(commit.branchName);
         return commitSha;
       }
     }
@@ -221,10 +230,20 @@ export class GerritScm extends DefaultGitScm {
   }
 
   override deleteBranch(branchName: string): Promise<void> {
+    this.pendingChangeBranches.delete(branchName);
     return Promise.resolve();
   }
 
   override async mergeToLocal(branchName: string): Promise<void> {
+    // If the branch was committed locally but not yet pushed (deferred to
+    // createPr), we can't fetch it from origin. Merge the local branch directly.
+    if (this.pendingChangeBranches.has(branchName)) {
+      logger.debug(
+        `Branch ${branchName} has no Gerrit change yet, merging local branch`,
+      );
+      return git.mergeToLocal(branchName, { localBranch: true });
+    }
+
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
       branchName,
