@@ -6,11 +6,7 @@ import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsResult,
-  Upgrade,
-} from '../types.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { extractPep723 } from './utils.ts';
 
 export async function updateArtifacts({
@@ -64,7 +60,7 @@ export async function updateArtifacts({
     if (isLockFileMaintenance) {
       cmd = `uv lock --script ${packageFileName} --upgrade`;
     } else {
-      cmd = generateCMD(packageFileName, updatedDeps);
+      cmd = `uv lock --script ${packageFileName} ${updatedDeps.map((dep) => `--upgrade-package ${quote(dep.depName!)}`).join(' ')}`;
     }
 
     await exec(cmd, execOptions);
@@ -103,8 +99,4 @@ export async function updateArtifacts({
       },
     ];
   }
-}
-
-function generateCMD(packageFileName: string, updatedDeps: Upgrade[]): string {
-  return `uv lock --script ${packageFileName} ${updatedDeps.map((dep) => `--upgrade-package ${quote(dep.depName!)}`).join(' ')}`;
 }
