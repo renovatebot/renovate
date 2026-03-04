@@ -91,13 +91,21 @@ The recommendation is to set `internalChecksFilter=strict` when using `minimumRe
 
 Depending on your manager, datasource and the given package(s), it may be that some updates provide a release timestamp that can have `minimumReleaseAge` enforced.
 
-It's most likely the case that `major`, `minor`, and `patch` update types will have a corresponding `minimumReleaseAge`.
+<!-- markdownlint-disable MD060 -->
 
-Generally, Renovate does not provide release timestamps for `digest` updates.
-
-The `replacement` update type [does not currently](https://github.com/renovatebot/renovate/issues/39400) provide release timestamps.
-
-The `lockFileMaintenance` update type does not provide release timestamps, as the package manager performs the required changes to update package(s).
+| Update Type           | Supports `minimumReleaseAge`? | Notes                                                                                                     |
+| --------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `major`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
+| `minor`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
+| `patch`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
+| `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
+| `digest`              | 🟡                            | Generally not supported. Depends on the Manager, Datasource, and package(s)                               |
+| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
+| `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
+| `lockFileUpdate`      | ❌                            |                                                                                                           |
+| `rollback`            | ❌                            |                                                                                                           |
+| `bump`                | ❌                            |                                                                                                           |
+| `replacement`         | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/39400)                                 |
 
 You can validate which update types may have release timestamps by following something similar to how [verify if the registry you're using](#which-registries-support-release-timestamps).
 
