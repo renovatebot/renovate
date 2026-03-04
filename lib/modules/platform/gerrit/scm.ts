@@ -20,7 +20,7 @@ export function configureScm(repo: string, login: string): void {
   username = login;
 }
 
-export async function pushForReview(options: {
+export function pushForReview(options: {
   sourceRef: string;
   targetBranch: string;
   files: FileChange[];
