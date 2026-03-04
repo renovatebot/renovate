@@ -29,6 +29,21 @@ The following configuration options can be used to enable and tune the functiona
 
 ## FAQs
 
+### My package manager has support for minimum release age, how does Renovate work with that? Do I need to set it in both?
+
+We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
+
+Renovate's concept of `minimumReleaseAge` is set independently to your package manager's configuration, and is used by Renovate to decide whether to suggest dependency updates.
+Renovate does not currently have the ability to determine the `minimumReleaseAge` from your package manager's configuration.
+
+When Renovate performs a dependency update, it may delegate to your package manager to update artifacts, such as the lockfile.
+In some cases, this can lead to a transitive dependency being introduced, [which Renovate is not aware of](#what-happens-to-transitive-dependencies), and so could lead to a dependency being introduced without Renovate's `minimumReleaseAge` check being followed.
+
+To protect against this, it's recommended to ensure that your package manager configuration includes the relevant minimum release age checks, too.
+
+There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
+If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
+
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 <!-- prettier-ignore -->
