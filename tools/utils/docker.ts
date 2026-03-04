@@ -70,7 +70,7 @@ export async function bake(
     if (result.signal) {
       logger.error(`Signal received: ${result.signal}`);
       process.exit(-1);
-    } else if (result.status && result.status !== 0) {
+    } else if (result.exitCode) {
       if (tries > 0) {
         logger.debug(`Error occured:\n ${result.stderr}`);
         const delay = opts.delay ? toMs(opts.delay) : null;
@@ -81,7 +81,7 @@ export async function bake(
       } else {
         logger.error(`Error occured:\n${result.stderr}`);
         if (opts.exitOnError !== false) {
-          process.exit(result.status);
+          process.exit(result.exitCode);
         }
         return null;
       }
@@ -109,10 +109,10 @@ export function sign(
   if (result.signal) {
     logger.error(`Signal received: ${result.signal}`);
     process.exit(-1);
-  } else if (result.status && result.status !== 0) {
+  } else if (result.exitCode) {
     logger.error(`Error occured:\n${result.stderr}`);
     if (opts.exitOnError !== false) {
-      process.exit(result.status);
+      process.exit(result.exitCode);
     }
   } else {
     logger.debug(`Succeeded:\n${result.stdout || result.stderr}`);

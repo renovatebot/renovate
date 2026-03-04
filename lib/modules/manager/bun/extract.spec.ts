@@ -215,4 +215,37 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
   });
+
+  it('extracts .npmrc from sibling or parent directory', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.findLocalSiblingOrParent.mockImplementation(
+      (packageFile, configFile): Promise<string | null> => {
+        if (packageFile === 'package.json' && configFile === '.npmrc') {
+          return Promise.resolve('.npmrc');
+        }
+        return Promise.resolve(null);
+      },
+    );
+    fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+      if (fileName === '.npmrc') {
+        return Promise.resolve('registry=https://custom.registry.com\n');
+      }
+      if (fileName === 'package.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+          }),
+        );
+      }
+      return Promise.resolve(null);
+    });
+
+    const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+    expect(packageFiles).toHaveLength(1);
+    expect(packageFiles[0].npmrc).toBe(
+      'registry=https://custom.registry.com\n',
+    );
+  });
 });

@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { logger } from '../../lib/logger/index.ts';
 import { exec } from '../../lib/util/exec/index.ts';
 

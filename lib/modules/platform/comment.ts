@@ -36,7 +36,9 @@ export async function ensureCommentRemoval(
   const repoCache = getCache();
 
   const { type, number } = config;
+  // v8 ignore else -- TODO: add test #40625
   if (repoCache.prComments?.[number]) {
+    // v8 ignore else -- TODO: add test #40625
     if (type === 'by-topic') {
       delete repoCache.prComments?.[number]?.[config.topic];
     } else if (type === 'by-content') {
@@ -44,6 +46,7 @@ export async function ensureCommentRemoval(
       for (const [cachedTopic, cachedContentHash] of Object.entries(
         repoCache.prComments?.[number],
       )) {
+        // v8 ignore else -- TODO: add test #40625
         if (cachedContentHash === contentHash) {
           delete repoCache.prComments?.[number]?.[cachedTopic];
           return;

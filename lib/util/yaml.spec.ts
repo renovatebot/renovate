@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { parseSingleYaml, parseYaml } from './yaml.ts';
 
 describe('util/yaml', () => {

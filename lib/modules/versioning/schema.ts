@@ -1,5 +1,5 @@
 import { isFunction } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../logger/index.ts';
 import versionings from './api.ts';
 import * as defaultVersioning from './semver-coerced/index.ts';

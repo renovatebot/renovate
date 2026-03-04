@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { LooseArray, multidocYaml } from '../../../util/schema-utils/index.ts';
 
 export const KubernetesResource = z.object({

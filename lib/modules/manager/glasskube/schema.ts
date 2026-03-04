@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 export const Package = z.object({
   apiVersion: z.string().startsWith('packages.glasskube.dev/'),

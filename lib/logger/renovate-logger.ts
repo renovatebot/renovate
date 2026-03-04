@@ -139,14 +139,19 @@ export class RenovateLogger implements Logger {
 
   private logOnceFn(level: bunyan.LogLevelString): LoggerFunction {
     const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
-      once(() => {
-        const logFn = this[level].bind(this); // bind to the instance.
-        if (isString(p1)) {
-          logFn(p1);
-        } else {
-          logFn(p1, p2);
-        }
-      }, logOnceFn);
+      once(
+        () => {
+          const logFn = this[level].bind(this); // bind to the instance.
+          if (isString(p1)) {
+            logFn(p1);
+          } else {
+            logFn(p1, p2);
+          }
+        },
+        logOnceFn,
+        p1,
+        p2,
+      );
     };
     return logOnceFn;
   }

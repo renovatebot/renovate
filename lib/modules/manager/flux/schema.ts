@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { KubernetesResource } from '../kubernetes/schema.ts';
 
 export const HelmRelease = KubernetesResource.extend({

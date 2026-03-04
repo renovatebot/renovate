@@ -1489,10 +1489,10 @@ None detected
             'These dependencies are either deprecated or have replacements available',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            '| npm | `cookie-parser` | ![Unavailable]',
+            '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'npm | `express-handlebars` | ![Available]',
+            'npm | [express-handlebars](https://redirect.github.com/express-handlebars/express-handlebars) | ![Available]',
           );
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1971,7 +1971,7 @@ None detected
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
       expect(result).toContain('> ℹ️ **Note**');
-      expect(result).toContain('| Datasource | Name | Last Updated |');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
     });

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
 export const GleamToml = Toml.pipe(

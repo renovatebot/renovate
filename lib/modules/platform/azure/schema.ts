@@ -1,5 +1,5 @@
 import type { WrappedException as _WrappedException } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { Json } from '../../../util/schema-utils/index.ts';
 
 const _WrappedException: z.ZodSchema<_WrappedException> = z.lazy(() =>

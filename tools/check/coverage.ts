@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import upath from 'upath';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import type { CoverageInfo } from './types.ts';
 
 const StatementLocation = z.object({

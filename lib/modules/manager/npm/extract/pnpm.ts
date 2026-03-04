@@ -7,7 +7,7 @@ import {
 } from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
-import type { z } from 'zod';
+import type { z } from 'zod/v3';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import {

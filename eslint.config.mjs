@@ -1,6 +1,5 @@
 import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
-import vitest from '@vitest/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import * as importX from 'eslint-plugin-import-x';
@@ -29,11 +28,17 @@ export default tseslint.config(
       'patches',
       '**/tmp/',
       '**/.venv/',
+      'tools/mkdocs/.cache',
       'tools/mkdocs/docs',
       'tools/mkdocs/site',
       '.github/workflows/**/*.js',
       '.worktrees/**/*',
       '.markdownlint-cli2.mjs',
+      '**/.agents/**',
+      '**/.claude/**',
+      '**/.opencode/**',
+      '**/AGENTS.md',
+      '**/CLAUDE.md',
     ],
   },
   {
@@ -228,22 +233,13 @@ export default tseslint.config(
   {
     files: ['**/*.spec.ts', 'test/**'],
 
-    plugins: { vitest },
-
     languageOptions: {
       globals: {
         ...globals.vitest,
       },
     },
 
-    settings: {
-      vitest: {
-        typecheck: true,
-      },
-    },
-
     rules: {
-      ...vitest.configs.recommended.rules,
       'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,

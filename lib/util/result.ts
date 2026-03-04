@@ -3,8 +3,8 @@ import type {
   input as ZodInput,
   output as ZodOutput,
   ZodType,
-} from 'zod';
-import { NEVER, ZodError, ZodIssueCode } from 'zod';
+} from 'zod/v3';
+import { NEVER, ZodError, ZodIssueCode } from 'zod/v3';
 import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
 
@@ -627,9 +627,9 @@ export class Result<T extends Val, E extends Val = Error> {
  *
  * All the methods resemble `Result` methods, but work asynchronously.
  */
-export class AsyncResult<T extends Val, E extends Val>
-  implements PromiseLike<Result<T, E>>
-{
+export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
+  Result<T, E>
+> {
   private asyncResult: Promise<Result<T, E>>;
 
   private constructor(asyncResult: Promise<Result<T, E>>) {

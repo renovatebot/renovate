@@ -235,5 +235,47 @@ describe('workers/repository/updates/flatten', () => {
       ).toHaveLength(2);
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
     });
+
+    it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {
+      // TODO #22198
+      config.lockFileMaintenance!.enabled = true;
+      config.packageRules = [
+        {
+          matchUpdateTypes: ['major', 'lockFileMaintenance'],
+          groupName: 'group-lock-major',
+        },
+      ];
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                currentValue: '1.0.0',
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(2);
+      const lockFileUpdate = res.find(
+        (u) => u.updateType === 'lockFileMaintenance',
+      );
+      const regularUpdate = res.find(
+        (u) => u.updateType !== 'lockFileMaintenance',
+      );
+      expect(lockFileUpdate!.branchName).toContain('lock-file-maintenance');
+      expect(regularUpdate!.branchName).not.toContain('lock-file-maintenance');
+      expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
+    });
   });
 });

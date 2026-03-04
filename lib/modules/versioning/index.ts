@@ -8,6 +8,7 @@ export * from './types.ts';
 export const defaultVersioning = semverCoerced;
 
 export const getVersioningList = (): string[] => Array.from(versionings.keys());
+
 /**
  * Get versioning map. Can be used to dynamically add new versioning type
  */

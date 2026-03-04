@@ -13,6 +13,7 @@ import { addExtractionStats } from '../../instrumentation/reporting.ts';
 import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types.ts';
 import { logger, setMeta } from '../../logger/index.ts';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap.ts';
+import { getInheritedOrGlobal } from '../../util/common.ts';
 import { removeDanglingContainers } from '../../util/exec/docker/index.ts';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs/index.ts';
 import { isCloned } from '../../util/git/index.ts';
@@ -116,7 +117,7 @@ export async function renovateRepository(
       OnboardingState.prUpdateRequested;
     const extractResult = performExtract
       ? await extractDependencies(config)
-      : emptyExtract(config);
+      : emptyExtract();
     addExtractionStats(config, extractResult);
 
     const { branches, branchList, packageFiles } = extractResult;
@@ -227,7 +228,7 @@ export async function renovateRepository(
 }
 
 // istanbul ignore next: renovateRepository is ignored
-function emptyExtract(config: RenovateConfig): ExtractResult {
+function emptyExtract(): ExtractResult {
   return instrument(
     'extract',
     () => {
@@ -235,7 +236,7 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
       addSplit('lookup');
       return {
         branches: [],
-        branchList: [config.onboardingBranch!], // to prevent auto closing
+        branchList: [getInheritedOrGlobal('onboardingBranch')!], // to prevent auto closing
         packageFiles: {},
       };
     },

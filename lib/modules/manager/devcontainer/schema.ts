@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { Jsonc, LooseRecord } from '../../../util/schema-utils/index.ts';
 
 export const DevContainerFile = Jsonc.pipe(

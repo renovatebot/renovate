@@ -1,5 +1,5 @@
-import type { SpawnSyncReturns } from 'child_process';
 import { Command } from 'commander';
+import type { ExecaSyncReturnValue } from 'execa';
 import fs from 'fs-extra';
 import { logger } from '../lib/logger/index.ts';
 import { generateDocs } from './docs/index.ts';
@@ -68,13 +68,13 @@ async function prepareDocs(opts: any): Promise<void> {
   }
 }
 
-function checkResult(res: SpawnSyncReturns<string>): void {
+function checkResult(res: ExecaSyncReturnValue<string>): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);
-  } else if (res.status && res.status !== 0) {
+  } else if (res.exitCode) {
     logger.error(`Error occured:\n${res.stderr || res.stdout}`);
-    process.exit(res.status);
+    process.exit(res.exitCode);
   } else {
     logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
   }

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { regEx } from '../../../../util/regex.ts';
 import { GoDatasource } from '../../../datasource/go/index.ts';
 import type { PackageDependency } from '../../types.ts';
