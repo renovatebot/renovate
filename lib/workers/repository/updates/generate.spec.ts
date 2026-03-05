@@ -1124,6 +1124,7 @@ describe('workers/repository/updates/generate', () => {
       const separateMinorUpdates = [
         {
           ...requiredDefaultOptions,
+          commitMessageExtra: '',
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
@@ -1141,6 +1142,7 @@ describe('workers/repository/updates/generate', () => {
       const separateMajorUpdates = [
         {
           ...requiredDefaultOptions,
+          commitMessageExtra: '',
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
@@ -1158,6 +1160,7 @@ describe('workers/repository/updates/generate', () => {
       const separatePatchUpdates = [
         {
           ...requiredDefaultOptions,
+          commitMessageExtra: '',
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
@@ -1181,6 +1184,48 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       expect(generateBranchConfig(branch)).toMatchObject({
         prTitle: 'some-title (patch)',
+      });
+
+      // Does not append suffix when commitMessageExtra provides a version
+      const majorWithVersionInTitle = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '2.0.0',
+          newVersion: '2.0.0',
+          newMajor: 2,
+          prettyNewMajor: 'v2',
+          commitMessageExtra: 'to v2',
+          isGroup: true,
+          separateMajorMinor: true,
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 0,
+        },
+      ];
+      expect(generateBranchConfig(majorWithVersionInTitle)).toMatchObject({
+        prTitle: 'some-title',
+      });
+      const minorWithVersionInTitle = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '1.2.0',
+          newVersion: '1.2.0',
+          commitMessageExtra: 'to 1.2.0',
+          isGroup: true,
+          separateMinorPatch: true,
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 0,
+        },
+      ];
+      expect(generateBranchConfig(minorWithVersionInTitle)).toMatchObject({
+        prTitle: 'some-title',
       });
     });
 
