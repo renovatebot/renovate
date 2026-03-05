@@ -4783,13 +4783,9 @@ Defaults to `jvmMaxMemory`.
 
 ### nodeMaxMemory
 
-Maximum memory in MiB for Node child processes invoked by Renovate.
-
 <!-- prettier-ignore -->
 !!! note
     This does not apply to _every_ Node process created by Renovate, only the managers noted above.
-
-If unset (as it is by default), the Node process will automagically determine the memory limit to use.
 
 ## updateInternalDeps
 
