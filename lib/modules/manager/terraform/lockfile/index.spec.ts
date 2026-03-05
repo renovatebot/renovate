@@ -46,7 +46,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: '.terraform.lock.hcl',
+          fileName: '.terraform.lock.hcl',
           stderr: 'File not found',
         },
       },

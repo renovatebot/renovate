@@ -192,7 +192,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Cargo.lock', stderr: 'Exec error' } },
+      { artifactError: { fileName: 'Cargo.lock', stderr: 'Exec error' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd }]);
   });
@@ -863,7 +863,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Cargo.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Cargo.lock', stderr: 'not found' } },
     ]);
   });
 });

@@ -435,7 +435,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'packages.lock.json',
+          fileName: 'packages.lock.json',
           stderr: 'not found',
         },
       },

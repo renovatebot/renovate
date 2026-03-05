@@ -337,7 +337,7 @@ describe('modules/manager/conan/artifacts', () => {
         config: { ...config, updateType: 'lockFileMaintenance' },
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'conan.lock', stderr: errorMessage } },
+      { artifactError: { fileName: 'conan.lock', stderr: errorMessage } },
     ]);
   });
 });

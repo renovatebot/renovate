@@ -173,7 +173,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'requirements.txt',
+          fileName: 'requirements.txt',
           stderr: `undefined\nundefined`,
         },
       },
