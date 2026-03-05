@@ -947,7 +947,7 @@ describe('config/presets/internal/custom-managers', () => {
         {
           currentValue: '11',
           datasource: 'java-version',
-          depName: 'java',
+          depName: 'java-jdk',
           replaceString: '<java.version>11</java.version>',
         },
       ]);
