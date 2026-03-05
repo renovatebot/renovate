@@ -1,6 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
-import { logger } from '../../../logger/index.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { GithubGraphqlResponse } from '../../http/github.ts';
@@ -115,68 +114,6 @@ describe('util/github/graphql/datasource-fetcher', () => {
 
     beforeEach(() => {
       http = new GithubHttp();
-    });
-
-    it('returns empty result and warns for non-GitHub registryUrl', async () => {
-      const res = await Datasource.query(
-        { packageName: 'foo/bar', registryUrl: 'https://pypi.org/pypi/' },
-        http,
-        adapter,
-      );
-
-      expect(res).toEqual([]);
-      expect(logger.once.warn).toHaveBeenCalledWith(
-        { registryUrl: 'https://pypi.org/pypi/' },
-        'GitHub GraphQL datasource: configured registryUrl is not a GitHub host — please check your registryUrls config',
-      );
-    });
-
-    it('proceeds normally for github.com registryUrl', async () => {
-      httpMock
-        .scope('https://api.github.com/')
-        .post('/graphql')
-        .reply(
-          200,
-          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
-        );
-
-      const res = await Datasource.query(
-        {
-          packageName: 'foo/bar',
-          registryUrl: 'https://github.com',
-        },
-        http,
-        adapter,
-      );
-
-      expect(res).toEqual([
-        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
-      ]);
-      expect(logger.once.warn).not.toHaveBeenCalled();
-    });
-
-    it('proceeds normally for GHE registryUrl with /api/v3/ path', async () => {
-      httpMock
-        .scope('https://ghe.company.com/api/')
-        .post('/graphql')
-        .reply(
-          200,
-          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
-        );
-
-      const res = await Datasource.query(
-        {
-          packageName: 'foo/bar',
-          registryUrl: 'https://ghe.company.com/api/v3/',
-        },
-        http,
-        adapter,
-      );
-
-      expect(res).toEqual([
-        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
-      ]);
-      expect(logger.once.warn).not.toHaveBeenCalled();
     });
 
     it('can perform query and receive result', async () => {

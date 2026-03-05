@@ -237,6 +237,13 @@ export async function validateConfig(
         });
       }
     }
+    if (key === 'registryUrls' && !parentPath && isNonEmptyArray(val)) {
+      warnings.push({
+        topic: 'Configuration Warning',
+        message:
+          'Setting `registryUrls` at the top level of your config has no effect. Use `registryUrls` inside `packageRules` to apply it to specific packages.',
+      });
+    }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
       !(is as any).function(val) // Ignore all functions
