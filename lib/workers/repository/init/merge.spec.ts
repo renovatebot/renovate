@@ -449,6 +449,84 @@ describe('workers/repository/init/merge', () => {
       expect(res.npmrc).toBe('something_authToken=token');
     });
 
+    describe('detects npmrc from the repository', () => {
+      it('and sets it if found', async () => {
+        scm.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
+        fs.findLocalSiblingOrParent.mockImplementation(
+          (packageFile, configFile): Promise<string | null> => {
+            console.log('findLocalSiblingOrParent', {
+              packageFile,
+              configFile,
+            });
+            if (packageFile === '.' && configFile === '.npmrc') {
+              return Promise.resolve('.npmrc');
+            }
+            return Promise.resolve(null);
+          },
+        );
+        fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+          if (fileName === 'renovate.json') {
+            return Promise.resolve('{}');
+          }
+          if (fileName === '.npmrc') {
+            return Promise.resolve('registry=https://custom.registry.com\n');
+          }
+          if (fileName === 'package.json') {
+            return Promise.resolve('{}');
+          }
+          console.log(`Read + ${fileName}`);
+          return Promise.resolve(null);
+        });
+
+        migrateAndValidate.migrateAndValidate.mockResolvedValue({
+          ...config,
+          warnings: [],
+          errors: [],
+        });
+        migrate.migrateConfig.mockImplementation((c) => ({
+          isMigrated: true,
+          migratedConfig: c,
+        }));
+
+        const res = await mergeRenovateConfig(config);
+        expect(res.npmrc).toBe('registry=https://custom.registry.com\n');
+      });
+
+      it('and does nothing if it is not found', async () => {
+        scm.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
+        fs.findLocalSiblingOrParent.mockImplementation(
+          (packageFile, configFile): Promise<string | null> => {
+            if (packageFile === '.' && configFile === '.npmrc') {
+              return Promise.resolve('.npmrc');
+            }
+            return Promise.resolve(null);
+          },
+        );
+        fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+          if (fileName === 'renovate.json') {
+            return Promise.resolve('{}');
+          }
+          if (fileName === 'package.json') {
+            return Promise.resolve('{}');
+          }
+          return Promise.resolve(null);
+        });
+
+        migrateAndValidate.migrateAndValidate.mockResolvedValue({
+          ...config,
+          warnings: [],
+          errors: [],
+        });
+        migrate.migrateConfig.mockImplementation((c) => ({
+          isMigrated: true,
+          migratedConfig: c,
+        }));
+
+        const res = await mergeRenovateConfig(config);
+        expect(res.npmrc).toBeNull();
+      });
+    });
+
     it('deletes user conifgured env after setting in mem cache', async () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{"env": { "var": "value" }}');
