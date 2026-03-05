@@ -298,7 +298,7 @@ describe('config/presets/internal/custom-managers', () => {
         ${'foo/bitbucket-pipelines.yaml'}     | ${false}
         ${'foo/bar/bitbucket-pipelines.yml'}  | ${true}
         ${'foo/bar/bitbucket-pipelines.yaml'} | ${false}
-        ${'.bitbucket/shared-pipelines.yml'}  | ${false}
+        ${'.bitbucket/shared-pipelines.yml'}  | ${true}
         ${'.bitbucket/shared-pipeline.yaml'}  | ${false}
         ${'bitbucket-pipelines'}              | ${false}
       `('$path', ({ path, expected }) => {
