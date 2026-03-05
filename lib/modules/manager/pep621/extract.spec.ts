@@ -1,11 +1,12 @@
 import { codeBlock } from 'common-tags';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { depTypes } from './utils';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { extractPackageFile } from './index.ts';
+import { depTypes } from './utils.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
@@ -347,6 +348,7 @@ describe('modules/manager/pep621/extract', () => {
           "dep4",
           "dep5",
           "dep6",
+          "dep7",
           "dep-with_NORMALIZATION",
         ]
 
@@ -355,6 +357,7 @@ describe('modules/manager/pep621/extract', () => {
         dep3 = { path = "/local-dep.whl" }
         dep4 = { url = "https://example.com" }
         dep5 = { workspace = true }
+        dep7 = { git = "ssh://git@github.com/foo/baz", tag = "1.0.1" }
         dep_WITH-normalization = { workspace = true }
         `,
         'pyproject.toml',
@@ -391,9 +394,51 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'dep6',
         },
         {
+          depName: 'dep7',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          packageName: 'foo/baz',
+          currentValue: '1.0.1',
+          registryUrls: ['https://github.com'],
+        },
+        {
           depName: 'dep-with_NORMALIZATION',
           depType: depTypes.uvSources,
           skipReason: 'inherited-dependency',
+        },
+      ]);
+    });
+
+    it('should handle SSH git URLs correctly for GitHub sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = [
+          "dep1",
+          "dep2",
+        ]
+
+        [tool.uv.sources]
+        dep1 = { git = "ssh://git@github.com/foo/dep1", tag = "v1.2.3" }
+        dep2 = { git = "ssh://git@github.com/foo/dep2", rev = "abcd1234" }
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          packageName: 'foo/dep1',
+          currentValue: 'v1.2.3',
+          registryUrls: ['https://github.com'],
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'ssh://git@github.com/foo/dep2',
         },
       ]);
     });
@@ -508,6 +553,10 @@ describe('modules/manager/pep621/extract', () => {
         Fixtures.get('pyproject_pdm_lockedversion.lock'),
       );
 
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('pdm.lock');
+
       const res = await extractPackageFile(
         Fixtures.get('pyproject_pdm_lockedversion.toml'),
         'pyproject.toml',
@@ -539,6 +588,7 @@ describe('modules/manager/pep621/extract', () => {
             skipReason: 'unspecified-version',
           },
         ],
+        lockFiles: ['pdm.lock'],
       });
     });
 
@@ -570,6 +620,10 @@ describe('modules/manager/pep621/extract', () => {
         `,
       );
 
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
       const res = await extractPackageFile(
         codeBlock`
           [project]
@@ -600,6 +654,7 @@ describe('modules/manager/pep621/extract', () => {
             lockedVersion: '24.2.0',
           },
         ],
+        lockFiles: ['uv.lock'],
       });
     });
 

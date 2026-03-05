@@ -1,6 +1,6 @@
-import { getPkgReleases } from '..';
-import { Unity3dPackagesDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { getPkgReleases } from '../index.ts';
+import { Unity3dPackagesDatasource } from './index.ts';
 
 describe('modules/datasource/unity3d-packages/index', () => {
   it(`package with no versions`, async () => {
@@ -194,6 +194,63 @@ describe('modules/datasource/unity3d-packages/index', () => {
           version: '1.14.3',
         },
       ],
+    });
+  });
+
+  it(`package with repository`, async () => {
+    const data = `
+      {
+        "versions": {
+          "1.14.3": {
+            "repository": {
+              "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.openxr.git"
+            },
+            "version": "1.14.3"
+          },
+          "1.12.0-exp.1": {
+            "version": "1.12.0-exp.1"
+          }
+        },
+        "time": {
+          "1.14.3": "2025-04-18T18:06:12.036Z",
+          "1.12.0-exp.1": "2024-07-03T15:24:28.000Z"
+        }
+      }
+    `;
+
+    httpMock
+      .scope('https://packages.unity.com')
+      .get('/com.unity.xr.openxr')
+      .reply(200, data);
+
+    const res = await getPkgReleases({
+      datasource: Unity3dPackagesDatasource.id,
+      packageName: 'com.unity.xr.openxr',
+      registryUrls: [],
+    });
+
+    expect(res).toStrictEqual({
+      registryUrl: 'https://packages.unity.com',
+      releases: [
+        {
+          changelogContent: undefined,
+          changelogUrl: undefined,
+          isStable: false,
+          registryUrl: 'https://packages.unity.com',
+          releaseTimestamp: '2024-07-03T15:24:28.000Z',
+          version: '1.12.0-exp.1',
+        },
+        {
+          changelogContent: undefined,
+          changelogUrl: undefined,
+          isStable: true,
+          registryUrl: 'https://packages.unity.com',
+          releaseTimestamp: '2025-04-18T18:06:12.036Z',
+          version: '1.14.3',
+        },
+      ],
+      sourceUrl:
+        'https://github.cds.internal.unity3d.com/unity/xr.sdk.openxr.git',
     });
   });
 });

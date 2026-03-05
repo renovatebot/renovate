@@ -1,8 +1,8 @@
-import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { Datasource } from './datasource';
-import type { GetReleasesConfig, ReleaseResult } from './types';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
+import { Datasource } from './datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from './types.ts';
 
 const exampleUrl = 'https://example.com/';
 
@@ -12,7 +12,7 @@ class TestDatasource extends Datasource {
   }
 
   async getReleases(
-    getReleasesConfig: GetReleasesConfig,
+    _getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     try {
       await this.http.get(exampleUrl);

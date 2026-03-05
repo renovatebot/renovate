@@ -1,26 +1,27 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { type Http, HttpError } from '../../../util/http';
-import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
-import type { HttpOptions, HttpResponse } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
-import { getS3Client, parseS3Url } from '../../../util/s3';
-import { streamToString } from '../../../util/streams';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url';
-import { getGoogleAuthToken } from '../util';
-import { MAVEN_REPO } from './common';
+import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { getCacheType } from '../../../util/cache/package/index.ts';
+import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
+import { type Http, HttpError } from '../../../util/http/index.ts';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import { getS3Client, parseS3Url } from '../../../util/s3.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
+import { getGoogleAuthToken } from '../util.ts';
+import { MAVEN_REPO } from './common.ts';
 import type {
   DependencyInfo,
   MavenDependency,
   MavenFetchResult,
   MavenFetchSuccess,
-} from './types';
+} from './types.ts';
 
 function getHost(url: string): string | undefined {
   return parseUrl(url)?.host;
@@ -95,10 +96,10 @@ export async function downloadHttpProtocol(
       return result;
     })
     .catch((err): MavenFetchResult => {
-      /* v8 ignore start: never happens, needs for type narrowing */
+      /* v8 ignore next: never happens, needs for type narrowing */
       if (!(err instanceof HttpError)) {
         return Result.err({ type: 'unknown', err });
-      } /* v8 ignore stop */
+      }
 
       const failedUrl = url;
       if (err.message === HOST_DISABLED) {
@@ -126,6 +127,20 @@ export async function downloadHttpProtocol(
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
         if (getHost(url) === getHost(MAVEN_REPO)) {
+          const statusCode = err?.response?.statusCode;
+          if (statusCode === 429) {
+            if (getCacheType() === 'redis') {
+              logger.once.warn(
+                { failedUrl },
+                'Maven Central rate limiting detected despite Redis caching.',
+              );
+            } else {
+              logger.once.warn(
+                { failedUrl },
+                'Maven Central rate limiting detected. Persistent caching required.',
+              );
+            }
+          }
           return Result.err({ type: 'maven-central-temporary-error', err });
         } else {
           return Result.err({ type: 'temporary-error' });
@@ -274,6 +289,10 @@ export async function downloadArtifactRegistryProtocol(
 
 function containsPlaceholder(str: string): boolean {
   return regEx(/\${.*?}/g).test(str);
+}
+
+function removeKnownPlaceholders(str: string): string {
+  return str.replace(regEx(/\/tree\/\${[^}]+}/), '');
 }
 
 export function getMavenUrl(
@@ -454,7 +473,10 @@ export async function getDependencyInfo(
       }
 
       const sourceUrl = pomContent.valueWithPath('scm.url');
-      if (sourceUrl && !containsPlaceholder(sourceUrl)) {
+      if (
+        sourceUrl &&
+        !containsPlaceholder(removeKnownPlaceholders(sourceUrl))
+      ) {
         result.sourceUrl = sourceUrl
           .replace(regEx(/^scm:/), '')
           .replace(regEx(/^git:/), '')

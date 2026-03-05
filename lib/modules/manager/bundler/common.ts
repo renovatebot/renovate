@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import type { UpdateArtifact } from '../types';
+} from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { UpdateArtifact } from '../types.ts';
 
 export const delimiters = ['"', "'"];
 

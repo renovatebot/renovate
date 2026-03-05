@@ -1,7 +1,7 @@
 import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
 import type { SegmentElement } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 interface RubyVersion {
   major: number;

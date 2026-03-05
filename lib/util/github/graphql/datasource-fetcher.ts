@@ -1,18 +1,19 @@
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../cache/memory';
-import * as packageCache from '../../cache/package';
-import type { PackageCacheNamespace } from '../../cache/package/types';
+import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as memCache from '../../cache/memory/index.ts';
+import * as packageCache from '../../cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
   GithubHttpOptions,
-} from '../../http/github';
-import type { HttpResponse } from '../../http/types';
-import { getApiBaseUrl } from '../url';
-import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy';
-import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy';
+} from '../../http/github.ts';
+import type { HttpResponse } from '../../http/types.ts';
+import { getApiBaseUrl } from '../url.ts';
+import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy.ts';
+import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheStrategy,
@@ -22,7 +23,7 @@ import type {
   GithubGraphqlRepoResponse,
   GithubPackageConfig,
   RawQueryResponse,
-} from './types';
+} from './types.ts';
 
 /**
  * We know empirically that certain type of GraphQL errors
@@ -71,15 +72,19 @@ export class GithubGraphqlDatasourceFetcher<
   private cursor: string | null = null;
 
   private isPersistent: boolean | undefined;
+  private http: GithubHttp;
+  private datasourceAdapter: GithubGraphqlDatasourceAdapter<
+    GraphqlItem,
+    ResultItem
+  >;
 
   constructor(
     packageConfig: GithubPackageConfig,
-    private http: GithubHttp,
-    private datasourceAdapter: GithubGraphqlDatasourceAdapter<
-      GraphqlItem,
-      ResultItem
-    >,
+    http: GithubHttp,
+    datasourceAdapter: GithubGraphqlDatasourceAdapter<GraphqlItem, ResultItem>,
   ) {
+    this.http = http;
+    this.datasourceAdapter = datasourceAdapter;
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
     this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
@@ -205,7 +210,7 @@ export class GithubGraphqlDatasourceFetcher<
         if (!shrinkResult) {
           throw err;
         }
-        const { body, ...options } = this.getRawQueryOptions();
+        const { body: _, ...options } = this.getRawQueryOptions();
         logger.debug(
           { options, newSize: this.itemsPerQuery },
           'Shrinking GitHub GraphQL page size after error',
@@ -228,10 +233,19 @@ export class GithubGraphqlDatasourceFetcher<
       'cachePrivatePackages',
       false,
     );
+    const skipStabilization = !is.undefined(this.datasourceAdapter.maxItems);
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent
-        ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
-        : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
+        ? new GithubGraphqlPackageCacheStrategy<ResultItem>(
+            cacheNs,
+            cacheKey,
+            skipStabilization,
+          )
+        : new GithubGraphqlMemoryCacheStrategy<ResultItem>(
+            cacheNs,
+            cacheKey,
+            skipStabilization,
+          );
     return this._cacheStrategy;
   }
 
@@ -243,7 +257,12 @@ export class GithubGraphqlDatasourceFetcher<
     let hasNextPage = true;
     let isPaginationDone = false;
     let nextCursor: string | undefined;
+    let itemCount = 0;
+    const maxItems = this.datasourceAdapter.maxItems;
     while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
+      if (!is.undefined(maxItems) && itemCount >= maxItems) {
+        break;
+      }
       const queryResult = await this.doShrinkableQuery();
 
       const resultItems: ResultItem[] = [];
@@ -261,6 +280,7 @@ export class GithubGraphqlDatasourceFetcher<
         }
         resultItems.push(item);
       }
+      itemCount += resultItems.length;
 
       // It's important to call `getCacheStrategy()` after `doShrinkableQuery()`
       // because `doShrinkableQuery()` may change `this.isCacheable`.
@@ -315,8 +335,8 @@ export class GithubGraphqlDatasourceFetcher<
    */
   private doUniqueQuery(): Promise<ResultItem[]> {
     const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
-    const resultPromise =
-      memCache.get<Promise<ResultItem[]>>(cacheKey) ?? this.doCachedQuery();
+    let resultPromise = memCache.get<Promise<ResultItem[]>>(cacheKey);
+    resultPromise ??= this.doCachedQuery();
     memCache.set(cacheKey, resultPromise);
     return resultPromise;
   }

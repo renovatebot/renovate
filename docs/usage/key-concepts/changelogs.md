@@ -49,7 +49,7 @@ Fetching changelogs from github.com requires a GitHub token because GitHub block
 
 This means that if you run Renovate on self-hosted GitHub Enterprise Server, or any non-GitHub platform which Renovate supports, then you need to configure a github.com Personal Access Token in Renovate in order to fetch changelogs.
 
-Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs) to learn more.
+Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
 
 ## Troubleshooting missing changelogs
 

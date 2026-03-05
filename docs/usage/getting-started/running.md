@@ -57,6 +57,10 @@ We recommend this default image for most users.
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
+<!-- prettier-ignore -->
+!!! warning
+    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
 Read the [`binarySource` config option docs](../self-hosted-configuration.md#binarysource) for more information.
@@ -148,11 +152,15 @@ Mend Renovate On-Premises and Mend Remediate both run as long-lived containers, 
 Renovate's server-side/admin config is referred to as its "global" config, and can be set by using either:
 
 - a config file, or
+- an additional config file, or
 - environment variables, or
 - CLI parameters
 
 By default Renovate checks if a file named `config.js` is present.
 Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
+
+Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
+Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -209,12 +217,13 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Gitea](../modules/platform/gitea/index.md)
 - [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
 - [GitLab](../modules/platform/gitlab/index.md)
+- [SCM-Manager](../modules/platform/scm-manager/index.md)
 
-### GitHub.com token for changelogs
+### GitHub.com token for changelogs (and tools)
 
 If you are running on any platform except github.com, you should also set the environment variable `RENOVATE_GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can be _any_ account on GitHub, and needs only `read-only` access.
-It's used when fetching changelogs for repositories in order to increase the hourly API limit.
+It's used when fetching changelogs for repositories, as well as some Renovate-specific tools at runtime, in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
 <!-- prettier-ignore -->

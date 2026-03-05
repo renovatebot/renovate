@@ -1,9 +1,9 @@
-import type { Category } from '../../../constants';
-import { GoDatasource } from '../../datasource/go';
-import { GolangVersionDatasource } from '../../datasource/golang-version';
-import { updateArtifacts } from './artifacts';
-import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
+import type { Category } from '../../../constants/index.ts';
+import { GoDatasource } from '../../datasource/go/index.ts';
+import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { extractPackageFile } from './extract.ts';
+import { updateDependency } from './update.ts';
 
 export { extractPackageFile, updateDependency, updateArtifacts };
 

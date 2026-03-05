@@ -1,9 +1,14 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
+import { EmailAddress } from '../../../util/schema-utils/index.ts';
 
-export const UserSchema = z.object({
+export const User = z.object({
+  name: z.string(),
   displayName: z.string(),
-  emailAddress: z.string(),
+  emailAddress: EmailAddress.catch(''),
+  active: z.boolean(),
 });
+
+export const Users = z.array(User);
 
 export const Files = z.array(z.string());
 
@@ -13,6 +18,12 @@ export const Comment = z.object({
 });
 
 export type Comment = z.infer<typeof Comment>;
+
+export const PullRequestMerge = z.object({
+  autoMerge: z.boolean().optional(),
+});
+
+export type PullRequestMerge = z.infer<typeof PullRequestMerge>;
 
 export const PullRequestCommentActivity = z.object({
   action: z.literal('COMMENTED'),
@@ -30,3 +41,12 @@ export const PullRequestActivity = z.union([
 ]);
 
 export type PullRequestActivity = z.infer<typeof PullRequestActivity>;
+
+export const ReviewerGroup = z.object({
+  name: z.string(),
+  users: z.array(User),
+  scope: z.object({
+    type: z.union([z.literal('REPOSITORY'), z.literal('PROJECT')]),
+  }),
+});
+export const ReviewerGroups = z.array(ReviewerGroup);

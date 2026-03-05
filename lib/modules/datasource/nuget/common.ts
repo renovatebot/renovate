@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import { api as versioning } from '../../versioning/nuget';
-import type { ParsedRegistryUrl } from './types';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { api as versioning } from '../../versioning/nuget/index.ts';
+import type { ParsedRegistryUrl } from './types.ts';
 
 const buildMetaRe = regEx(/\+.+$/g);
 

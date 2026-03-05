@@ -1,14 +1,14 @@
 // TODO #22198
-import is from '@sindresorhus/is';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { extractPackageFile } from '../../../../modules/manager';
-import type { PackageDependency } from '../../../../modules/manager/types';
-import { writeLocalFile } from '../../../../util/fs';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { matchAt, replaceAt } from '../../../../util/string';
-import { compile } from '../../../../util/template';
-import type { BranchUpgradeConfig } from '../../../types';
+import { isNumber, isString, isUndefined } from '@sindresorhus/is';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { extractPackageFile } from '../../../../modules/manager/index.ts';
+import type { PackageDependency } from '../../../../modules/manager/types.ts';
+import { writeLocalFile } from '../../../../util/fs/index.ts';
+import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { matchAt, replaceAt } from '../../../../util/string.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
@@ -43,14 +43,15 @@ export async function confirmIfDepUpdated(
       return false;
     }
     // istanbul ignore if
-    if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
+    if (isNumber(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
         `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
       );
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
 
@@ -196,6 +197,28 @@ async function checkExistingBranch(
   return existingContent;
 }
 
+/**
+ * Check if an update from `current` to `newString` should be performed and return 1 if so.
+ *
+ * @remarks
+ * Useful for counting the number of updates to do.
+ *
+ * @param current The current value (if undefined then no update is required)
+ * @param newString The new value (if undefined then no update is required)
+ *
+ * @returns 1 if `current !== newString` and 0 if they are equal or at least one is undefined.
+ */
+function updatedToInt(
+  current: string | undefined,
+  newString: string | undefined,
+): number {
+  if (current && newString && newString !== current) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -224,11 +247,26 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
+
+  // count how many strings need to be updated
+  const changedCount =
+    updatedToInt(depName, newName) +
+    updatedToInt(currentValue, newValue) +
+    updatedToInt(currentDigest, newDigest);
+  if (changedCount > 1) {
+    logger.debug(
+      { packageFile, depName, changedCount },
+      'Multiple changed values, might need special handling (#36461)',
+    );
+  }
+
   const replaceWithoutReplaceString =
-    is.string(newName) &&
-    newName !== depName &&
-    (is.undefined(upgrade.replaceString) ||
-      !upgrade.replaceString?.includes(depName!));
+    (isString(newName) &&
+      newName !== depName &&
+      (isUndefined(upgrade.replaceString) ||
+        !upgrade.replaceString?.includes(depName!))) ||
+    // for jsonata manager, fixes #36461
+    (isUndefined(upgrade.replaceString) && changedCount > 1);
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
@@ -290,7 +328,11 @@ export async function doAutoReplace(
       } else if (
         currentDigestShort &&
         newDigest &&
-        currentDigestShort !== newDigest
+        currentDigestShort !== newDigest &&
+        // Only use short digest replacement when there's no full currentDigest
+        // that already matches newDigest (otherwise we'd incorrectly replace
+        // part of an already-correct digest)
+        !(currentDigest && currentDigest === newDigest)
       ) {
         if (!newString.includes(currentDigestShort)) {
           logger.debug(
@@ -454,7 +496,8 @@ export async function doAutoReplace(
         newContent = existingContent;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next

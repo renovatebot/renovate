@@ -1,11 +1,11 @@
-import { GlobalConfig } from '../../../../config/global';
-import * as presets from '../../../../config/presets/local';
-import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
-import { getOnboardingConfig, getOnboardingConfigContents } from './config';
-import { partial } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as presets from '../../../../config/presets/local/index.ts';
+import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util.ts';
+import { getOnboardingConfig, getOnboardingConfigContents } from './config.ts';
 
-vi.mock('../../../../config/presets/local');
+vi.mock('../../../../config/presets/local/index.ts');
 
 const mockedPresets = vi.mocked(presets);
 
@@ -15,16 +15,15 @@ describe('workers/repository/onboarding/branch/config', () => {
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
+      onboardingConfig: {
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      },
       platform: 'github',
     });
   });
 
   beforeEach(() => {
     config = partial<RenovateConfig>({
-      onboardingConfig: {
-        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-      },
-      platform: 'github',
       repository: 'some/repo',
     });
   });
@@ -123,7 +122,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
-      expect(onboardingConfig).toEqual(config.onboardingConfig);
+      expect(onboardingConfig).toEqual(GlobalConfig.get('onboardingConfig'));
     });
 
     it('ignores an unknown error', async () => {
@@ -132,7 +131,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
-      expect(onboardingConfig).toEqual(config.onboardingConfig);
+      expect(onboardingConfig).toEqual(GlobalConfig.get('onboardingConfig'));
     });
 
     it('ignores unsupported platform', async () => {
@@ -141,7 +140,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
-      expect(onboardingConfig).toEqual(config.onboardingConfig);
+      expect(onboardingConfig).toEqual(GlobalConfig.get('onboardingConfig'));
     });
   });
 });

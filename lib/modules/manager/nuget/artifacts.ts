@@ -1,9 +1,10 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { join } from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import upath from 'upath';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureDir,
   getLocalFiles,
@@ -11,36 +12,51 @@ import {
   outputCacheFile,
   privateCacheDir,
   writeLocalFile,
-} from '../../../util/fs';
-import { getFiles } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+} from '../../../util/fs/index.ts';
+import { getFiles } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { createNuGetConfigXml } from './config-formatter';
+  Upgrade,
+} from '../types.ts';
+import { createNuGetConfigXml } from './config-formatter.ts';
 import {
+  GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
-} from './package-tree';
+} from './package-tree.ts';
+import type { Registry } from './types.ts';
 import {
   findGlobalJson,
   getConfiguredRegistries,
   getDefaultRegistries,
-} from './util';
+} from './util.ts';
 
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string,
+  updatedDeps: Upgrade[],
 ): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  const contents = createNuGetConfigXml(registries);
+  const updatedDepsRegistries: Registry[] = Array.from(
+    new Set(
+      updatedDeps
+        .flatMap((dep) => dep.registryUrls ?? [])
+        .filter(isNonEmptyString),
+    ),
+    (url) => ({ url }),
+  );
 
-  const cachedNugetConfigFile = join(nugetCacheDir, `nuget.config`);
+  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+
+  const contents = createNuGetConfigXml(combinedRegistries);
+
+  const cachedNugetConfigFile = upath.join(nugetCacheDir, `nuget.config`);
   await ensureDir(nugetCacheDir);
   await outputCacheFile(cachedNugetConfigFile, contents);
 
@@ -51,12 +67,14 @@ async function runDotnetRestore(
   packageFileName: string,
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig,
+  updatedDeps: Upgrade[],
 ): Promise<void> {
-  const nugetCacheDir = join(privateCacheDir(), 'nuget');
+  const nugetCacheDir = upath.join(privateCacheDir(), 'nuget');
 
   const nugetConfigFile = await createCachedNuGetConfigFile(
     nugetCacheDir,
     packageFileName,
+    updatedDeps,
   );
 
   const dotnetVersion =
@@ -65,7 +83,7 @@ async function runDotnetRestore(
   const execOptions: ExecOptions = {
     docker: {},
     extraEnv: {
-      NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
+      NUGET_PACKAGES: upath.join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',
     },
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
@@ -79,6 +97,13 @@ async function runDotnetRestore(
         )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
     ),
   ];
+
+  if (config.postUpdateOptions?.includes('dotnetWorkloadRestore')) {
+    cmds.unshift(
+      `dotnet workload restore --configfile ${quote(nugetConfigFile)}`,
+    );
+  }
+
   await exec(cmds, execOptions);
 }
 
@@ -98,8 +123,11 @@ export async function updateArtifacts({
     packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
     packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
 
+  const isGlobalJson = packageFileName === GLOBAL_JSON;
+
   if (
     !isCentralManagement &&
+    !isGlobalJson &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -116,6 +144,7 @@ export async function updateArtifacts({
   const deps = await getDependentPackageFiles(
     packageFileName,
     isCentralManagement,
+    isGlobalJson,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
@@ -151,7 +180,7 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    await runDotnetRestore(packageFileName, packageFiles, config);
+    await runDotnetRestore(packageFileName, packageFiles, config, updatedDeps);
 
     const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
@@ -176,7 +205,6 @@ export async function updateArtifacts({
 
     return retArray.length > 0 ? retArray : null;
   } catch (err) {
-    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

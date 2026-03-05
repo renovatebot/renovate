@@ -1,9 +1,9 @@
 import { Version, VersionSpec } from '@baszalmstra/rattler';
 import type { SemVer } from 'semver';
 
-import type { RangeStrategy } from '../../../types/versioning';
-import * as pep440 from '../pep440';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import * as pep440 from '../pep440/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 function parse(v: string): Version | null {
   try {
@@ -22,7 +22,6 @@ export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
 ];
 
@@ -64,6 +63,10 @@ function isSingleVersion(input: string): boolean {
   return isValidVersion(input.replace(/^==/, '').trimStart());
 }
 
+function getPinnedValue(newVersion: string): string {
+  return `==${newVersion}`;
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -71,10 +74,6 @@ function getNewValue({
   newVersion,
   isReplacement,
 }: NewValueConfig): string | null {
-  if (rangeStrategy === 'pin') {
-    return '==' + newVersion;
-  }
-
   if (currentValue === '*') {
     if (rangeStrategy === 'bump') {
       return '>=' + newVersion;
@@ -125,7 +124,7 @@ function isStable(version: string): boolean {
   return !(parse(version)?.isDev ?? true);
 }
 
-function isCompatible(version: string, current?: string): boolean {
+function isCompatible(_version: string, _current?: string): boolean {
   return true;
 }
 
@@ -157,7 +156,7 @@ function getSatisfyingVersion(
     .map((v) => {
       return [new Version(v), v] as const;
     })
-    .filter(([v, raw]) => spec.matches(v))
+    .filter(([v, _raw]) => spec.matches(v))
     .sort((a, b) => {
       return a[0].compare(b[0]);
     });
@@ -179,7 +178,7 @@ function minSatisfyingVersion(
     .map((v) => {
       return [new Version(v), v] as const;
     })
-    .filter(([v, raw]) => spec.matches(v))
+    .filter(([v, _raw]) => spec.matches(v))
     .sort((a, b) => {
       return a[0].compare(b[0]);
     });
@@ -215,7 +214,7 @@ export const api = {
 
   minSatisfyingVersion,
   getNewValue,
-
+  getPinnedValue,
   matches,
   sortVersions,
 } satisfies VersioningApi;

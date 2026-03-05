@@ -1,4 +1,4 @@
-import { isSemVerXRange } from './common';
+import { isSemVerXRange } from './common.ts';
 
 describe('modules/versioning/semver/common', () => {
   it.each`

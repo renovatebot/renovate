@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages.ts';
+import { extractPackageFile } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const localDir = '/tmp/github/some/repo';
 
@@ -339,7 +339,7 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toMatchObject({
+      expect(result).toStrictEqual({
         datasource: 'helm',
         deps: [
           {
@@ -355,7 +355,7 @@ describe('modules/manager/helmfile/extract', () => {
           },
           {
             currentValue: '0.4.2',
-            depName: 'url-example',
+            depName: 'ghcr.io/example/oci-repo/url-example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/url-example',
           },
@@ -529,9 +529,8 @@ describe('modules/manager/helmfile/extract', () => {
           {
             currentValue: '0.4.2',
             datasource: 'docker',
-            depName: 'subgroup',
+            depName: 'gitlab.example.com:5000/group/subgroup',
             packageName: 'gitlab.example.com:5000/group/subgroup',
-            registryUrls: [],
           },
         ],
       });
@@ -551,6 +550,7 @@ describe('modules/manager/helmfile/extract', () => {
             version: 0.4.0
       `;
       const result = await extractPackageFile(content, 'helmfile.yaml', {});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           repo: {

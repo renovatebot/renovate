@@ -1,12 +1,15 @@
-import type { RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { RepoParams, RepoResult } from '../../../modules/platform';
-import { platform } from '../../../modules/platform';
-import { getDefaultConfigFileName } from '../onboarding/common';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type {
+  RepoParams,
+  RepoResult,
+} from '../../../modules/platform/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { getDefaultConfigFileName } from '../onboarding/common.ts';
 
 // TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &
@@ -25,7 +28,7 @@ async function validateOptimizeForDisabled(
   config: RenovateConfig,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await getJsonFile(getDefaultConfigFileName(config));
+    const renovateConfig = await getJsonFile(getDefaultConfigFileName());
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
@@ -57,7 +60,7 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (config.forkProcessing !== 'enabled' && config.isFork) {
-    const defaultConfigFile = getDefaultConfigFileName(config);
+    const defaultConfigFile = getDefaultConfigFileName();
     const repoConfig = await getJsonFile(defaultConfigFile);
     if (!repoConfig) {
       logger.debug(
@@ -65,7 +68,8 @@ async function validateIncludeForks(config: RenovateConfig): Promise<void> {
       );
       throw new Error(REPOSITORY_FORKED);
     }
-    if (repoConfig.includeForks) {
+    // TODO: global only setting
+    if ('includeForks' in repoConfig && repoConfig.includeForks) {
       logger.debug(
         `Found legacy setting includeForks in ${defaultConfigFile} - continuing`,
       );

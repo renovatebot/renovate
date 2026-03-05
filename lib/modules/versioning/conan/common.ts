@@ -1,6 +1,6 @@
 import * as semver from 'semver';
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
 
 export function makeVersion(
   version: string,

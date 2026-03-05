@@ -1,5 +1,5 @@
-import { getPkgReleases } from '../index';
-import { KubernetesApiDatasource } from '.';
+import { getPkgReleases } from '../index.ts';
+import { KubernetesApiDatasource } from './index.ts';
 
 const datasource = KubernetesApiDatasource.id;
 

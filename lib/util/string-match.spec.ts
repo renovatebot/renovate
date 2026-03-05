@@ -3,7 +3,7 @@ import {
   getRegexPredicate,
   matchRegexOrGlob,
   matchRegexOrGlobList,
-} from './string-match';
+} from './string-match.ts';
 
 describe('util/string-match', () => {
   describe('matchRegexOrGlobList()', () => {

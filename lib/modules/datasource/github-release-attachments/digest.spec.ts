@@ -1,8 +1,8 @@
-import type { GithubDigestFile } from '../../../util/github/types';
-import { toSha256 } from '../../../util/hash';
-import { GitHubReleaseAttachmentMocker } from './test';
-import { GithubReleaseAttachmentsDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import type { GithubDigestFile } from '../../../util/github/types.ts';
+import { toSha256 } from '../../../util/hash.ts';
+import { GithubReleaseAttachmentsDatasource } from './index.ts';
+import { GitHubReleaseAttachmentMocker } from './test/index.ts';
 
 describe('modules/datasource/github-release-attachments/digest', () => {
   const packageName = 'some/dep';
@@ -131,6 +131,26 @@ describe('modules/datasource/github-release-attachments/digest', () => {
           release,
         );
         expect(digest).toBeNull();
+      });
+
+      it('falls back to digesting file when checksum file is removed', async () => {
+        const checksumAssetWithVersion: GithubDigestFile = {
+          assetName: 'SHASUMS.txt',
+          currentVersion: 'v1.0.0',
+          currentDigest: '0'.repeat(64),
+          digestedFileName: 'asset-v1.0.0.zip',
+        };
+        const updatedContent = 'new content';
+        const release = releaseMock.withAssets('v1.0.1', {
+          'asset-v1.0.1.zip': updatedContent,
+        });
+        const contentDigest = toSha256(updatedContent);
+
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
+          checksumAssetWithVersion,
+          release,
+        );
+        expect(digest).toEqual(contentDigest);
       });
     });
 

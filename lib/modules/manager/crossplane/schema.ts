@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { regEx } from '../../../util/regex';
+import { z } from 'zod/v3';
+import { regEx } from '../../../util/regex.ts';
 
-export const XPKGSchema = z.object({
+export const XPKG = z.object({
   apiVersion: z.string().regex(regEx(/^pkg\.crossplane\.io\//)),
   kind: z.enum(['Provider', 'Configuration', 'Function']),
   spec: z.object({
@@ -9,4 +9,4 @@ export const XPKGSchema = z.object({
   }),
 });
 
-export type XPKG = z.infer<typeof XPKGSchema>;
+export type XPKG = z.infer<typeof XPKG>;

@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
-import type { ExtractConfig, PackageDependency } from '../types';
-import { matchesContentDescriptor } from './extract';
-import * as parser from './parser';
-import { extractAllPackageFiles } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger, partial } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger, partial } from '~test/util.ts';
+import type { ExtractConfig, PackageDependency } from '../types.ts';
+import { matchesContentDescriptor } from './extract.ts';
+import { extractAllPackageFiles } from './index.ts';
+import * as parser from './parser.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 function mockFs(files: Record<string, string>): void {
   fs.getLocalFiles.mockImplementation(
@@ -119,6 +119,72 @@ describe('modules/manager/gradle/extract', () => {
         ],
       },
       { packageFile: 'build.gradle', deps: [] },
+    ]);
+  });
+
+  it('resolves versions in build.gradle.kts', async () => {
+    const fsMock = {
+      'build.gradle.kts': codeBlock`
+        object Versions {
+          const val RETROFIT = "2.9.0"
+          const val SPRING_BOOT = "3.5.5"
+          const val DETEKT_FORMATTING = "1.23.6"
+          const val SPRING_CLOUD = "4.2.1"
+        }
+        allprojects {
+          dependencies {
+              constraints {
+                  api("com.squareup.retrofit2:retrofit:\${Versions.RETROFIT}")
+              }
+
+              kapt(platform("org.springframework.boot:spring-boot-dependencies:\${Versions.SPRING_BOOT}"))
+
+              detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:\${Versions.DETEKT_FORMATTING}")
+
+              implementation(
+                  platform(
+                      "org.springframework.cloud:spring-cloud-contract-dependencies:" +
+                          Versions.SPRING_CLOUD
+                  )
+              )
+              implementation(platform("org.springframework.boot:spring-boot-dependencies:\${Versions.SPRING_BOOT}"))
+          }
+      }
+        `,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
+    );
+    expect(res).toMatchObject([
+      {
+        packageFile: 'build.gradle.kts',
+        deps: [
+          {
+            depName: 'com.squareup.retrofit2:retrofit',
+            currentValue: '2.9.0',
+            sharedVariableName: 'Versions.RETROFIT',
+          },
+          {
+            depName: 'org.springframework.boot:spring-boot-dependencies',
+            currentValue: '3.5.5',
+            sharedVariableName: 'Versions.SPRING_BOOT',
+          },
+          {
+            depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
+            currentValue: '1.23.6',
+            sharedVariableName: 'Versions.DETEKT_FORMATTING',
+          },
+          {
+            depName:
+              'org.springframework.cloud:spring-cloud-contract-dependencies',
+            currentValue: '4.2.1',
+            sharedVariableName: 'Versions.SPRING_CLOUD',
+          },
+        ],
+      },
     ]);
   });
 
@@ -936,72 +1002,6 @@ describe('modules/manager/gradle/extract', () => {
         },
       ]);
     });
-
-    it('ignores empty TOML file', async () => {
-      const fsMock = {
-        'gradle/libs.versions.toml': '',
-      };
-      mockFs(fsMock);
-
-      expect(
-        await extractAllPackageFiles(
-          partial<ExtractConfig>(),
-          Object.keys(fsMock),
-        ),
-      ).toBeNull();
-    });
-
-    it('deletes commit message for plugins with version reference', async () => {
-      const fsMock = {
-        'gradle/libs.versions.toml': codeBlock`
-        [versions]
-        detekt = "1.18.1"
-
-        [plugins]
-        detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-
-        [libraries]
-        detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-      `,
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-      expect(res).toMatchObject([
-        {
-          packageFile: 'gradle/libs.versions.toml',
-          deps: [
-            {
-              depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
-              sharedVariableName: 'detekt',
-              currentValue: '1.18.1',
-              managerData: {
-                fileReplacePosition: 21,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              fileReplacePosition: 21,
-            },
-            {
-              depType: 'plugin',
-              depName: 'io.gitlab.arturbosch.detekt',
-              packageName:
-                'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-              currentValue: '1.18.1',
-              managerData: {
-                fileReplacePosition: 21,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              sharedVariableName: 'detekt',
-              fileReplacePosition: 21,
-            },
-          ],
-        },
-      ]);
-    });
   });
 
   describe('apply from', () => {
@@ -1243,118 +1243,6 @@ describe('modules/manager/gradle/extract', () => {
         Object.keys(fsMock),
       );
       expect(res).toBeNull();
-    });
-
-    it('supports multiple levels of glob', async () => {
-      const fsMock = {
-        'versions.props': codeBlock`
-          org.apache.* = 4
-          org.apache.lucene:* = 3
-          org.apache.lucene:a.* = 2
-          org.apache.lucene:a.b = 1
-          org.apache.foo*:* = 5
-        `,
-        'versions.lock': codeBlock`
-          # Run ./gradlew --write-locks to regenerate this file
-          org.apache.solr:x.y:1 (10 constraints: 95be0c15)
-          org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
-          org.apache.lucene:a.c:1 (10 constraints: 95be0c15)
-          org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
-          org.apache.lucene:d:1 (10 constraints: 95be0c15)
-          org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
-          org.apache.foo-bar:a:1 (10 constraints: 95be0c15)
-        `,
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-
-      // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
-      expect(res).toMatchObject([
-        {
-          packageFile: 'versions.lock',
-          deps: [],
-        },
-        {
-          packageFile: 'versions.props',
-          deps: [
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 91,
-              },
-              depName: 'org.apache.lucene:a.b',
-              currentValue: '1',
-              lockedVersion: '1',
-              fileReplacePosition: 91,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 65,
-              },
-              depName: 'org.apache.lucene:a.c',
-              currentValue: '2',
-              lockedVersion: '1',
-              sharedVariableName: 'org.apache.lucene:a.*',
-              fileReplacePosition: 65,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 65,
-              },
-              depName: 'org.apache.lucene:a.d',
-              currentValue: '2',
-              lockedVersion: '1',
-              sharedVariableName: 'org.apache.lucene:a.*',
-              fileReplacePosition: 65,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 39,
-              },
-              depName: 'org.apache.lucene:d',
-              currentValue: '3',
-              lockedVersion: '1',
-              sharedVariableName: 'org.apache.lucene:*',
-              fileReplacePosition: 39,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 39,
-              },
-              depName: 'org.apache.lucene:e.f',
-              currentValue: '3',
-              lockedVersion: '1',
-              sharedVariableName: 'org.apache.lucene:*',
-              fileReplacePosition: 39,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                fileReplacePosition: 113,
-                packageFile: 'versions.props',
-              },
-              depName: 'org.apache.foo-bar:a',
-              currentValue: '5',
-              lockedVersion: '1',
-              sharedVariableName: 'org.apache.foo*:*',
-              fileReplacePosition: 113,
-              depType: 'dependencies',
-            },
-          ],
-        },
-      ]);
     });
   });
 });

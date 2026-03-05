@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
-import { logger } from '../logger';
-import type { CombinedHostRule, HostRule } from '../types';
-import { clone } from './clone';
-import * as sanitize from './sanitize';
-import { toBase64 } from './string';
-import { isHttpUrl, massageHostUrl, parseUrl } from './url';
+import { isFalsy, isString, isTruthy, isUndefined } from '@sindresorhus/is';
+import { logger } from '../logger/index.ts';
+import type { CombinedHostRule, HostRule } from '../types/index.ts';
+import { clone } from './clone.ts';
+import * as sanitize from './sanitize.ts';
+import { toBase64 } from './string.ts';
+import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
 
 let hostRules: HostRule[] = [];
 
@@ -59,7 +59,7 @@ export function add(params: HostRule): void {
   }
   confidentialFields.forEach((field) => {
     const secret = rule[field];
-    if (is.string(secret) && secret.length > 3) {
+    if (isString(secret) && secret.length > 3) {
       sanitize.addSecretForSanitizing(secret);
     }
   });
@@ -131,7 +131,7 @@ function fromLowerToHigherRank(a: HostRule, b: HostRule): number {
 }
 
 export function find(search: HostRuleSearch): CombinedHostRule {
-  if ([search.hostType, search.url].every(is.falsy)) {
+  if ([search.hostType, search.url].every(isFalsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }
@@ -149,6 +149,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
 
     if (rule.hostType) {
       hostTypeMatch = false;
+      // v8 ignore else -- TODO: add test #40625
       if (search.hostType === rule.hostType) {
         hostTypeMatch = true;
       }
@@ -161,8 +162,9 @@ export function find(search: HostRuleSearch): CombinedHostRule {
       }
     }
 
-    if (!is.undefined(rule.readOnly)) {
+    if (!isUndefined(rule.readOnly)) {
       readOnlyMatch = false;
+      // v8 ignore else -- TODO: add test #40625
       if (search.readOnly === rule.readOnly) {
         readOnlyMatch = true;
         hostTypeMatch = true; // When we match `readOnly`, we don't care about `hostType`
@@ -186,7 +188,7 @@ export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter((rule) => rule.hostType === hostType)
     .map((rule) => rule.resolvedHost)
-    .filter(is.truthy);
+    .filter(isTruthy);
 }
 
 export function hostType({ url }: { url: string }): string | null {
@@ -195,7 +197,7 @@ export function hostType({ url }: { url: string }): string | null {
       .filter((rule) => rule.matchHost && matchesHost(url, rule.matchHost))
       .sort(fromShorterToLongerMatchHost)
       .map((rule) => rule.hostType)
-      .filter(is.truthy)
+      .filter(isTruthy)
       .pop() ?? null
   );
 }

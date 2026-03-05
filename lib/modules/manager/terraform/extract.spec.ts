@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { join } from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as hashicorp from '../../versioning/hashicorp';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as hashicorp from '../../versioning/hashicorp/index.ts';
+import { extractPackageFile } from './index.ts';
 
 const modules = Fixtures.get('modules.tf');
 const bitbucketModules = Fixtures.get('bitbucketModules.tf');
@@ -22,13 +22,13 @@ const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 // auto-mock fs
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/terraform/extract', () => {
   beforeEach(() => {

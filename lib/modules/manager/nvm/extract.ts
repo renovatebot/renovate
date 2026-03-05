@@ -1,10 +1,17 @@
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(content: string): PackageFileContent {
   const dep: PackageDependency = {
     depName: 'node',
-    currentValue: content.trim(),
+    currentValue: content
+      .split('\n')
+      // Remove code comments
+      .map((line) => line.replace(/#.*$/, '').trim())
+      .filter(isNonEmptyStringAndNotWhitespace)
+      .join('\n')
+      .trim(),
     datasource: NodeVersionDatasource.id,
   };
   return { deps: [dep] };

@@ -1,6 +1,6 @@
-import * as npmUpdater from '../..';
-import { type Upgrade } from '../../../types';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { type Upgrade } from '../../../types.ts';
+import * as npmUpdater from '../../index.ts';
 
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
@@ -414,6 +414,31 @@ describe('modules/manager/npm/update/dependency/index', () => {
           }
         }
       }`;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: overrideDependencies,
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
+    });
+    it('handles yarn.catalogs dependencies', () => {
+      const upgrade = {
+        depType: 'yarn.catalogs.default',
+        depName: 'typescript',
+        newValue: '0.60.0',
+      };
+
+      const overrideDependencies = `
+        nodeLinker: node-modules
+
+        catalog:
+          typescript: 0.0.5
+      `;
+      const expected = `nodeLinker: node-modules
+
+        catalog:
+          typescript: 0.60.0
+`;
+
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
         upgrade,

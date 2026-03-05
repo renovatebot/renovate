@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/scalafmt/extract', () => {
   describe('extractPackageFile()', () => {

@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { matchRegexOrGlob } from '../../string-match';
-import type { PackageCacheNamespace } from './types';
+import { isNumber } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global.ts';
+import { matchRegexOrGlob } from '../../string-match.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 /**
  * This MUST NOT be used outside of cache implementation
@@ -13,13 +13,13 @@ export function getTtlOverride(
 ): number | undefined {
   const overrides = GlobalConfig.get('cacheTtlOverride', {});
   let ttl: number | undefined = overrides[namespace];
-  if (is.number(ttl)) {
+  if (isNumber(ttl)) {
     return ttl;
   }
 
   let maxLen = 0;
   for (const [key, value] of Object.entries(overrides)) {
-    if (!is.number(value)) {
+    if (!isNumber(value)) {
       continue;
     }
 
@@ -30,7 +30,7 @@ export function getTtlOverride(
     }
   }
 
-  if (is.number(ttl)) {
+  if (isNumber(ttl)) {
     return ttl;
   }
 

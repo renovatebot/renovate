@@ -1,20 +1,19 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { logger } from '../../../../../../logger';
-import { ReleasesSchema } from '../../../../../../modules/datasource/gitea-releases/schema';
-import type { ContentsResponse } from '../../../../../../modules/platform/gitea/schema';
+import { logger } from '../../../../../../logger/index.ts';
+import { Releases } from '../../../../../../modules/datasource/gitea-releases/schema.ts';
 import {
-  ContentsListResponseSchema,
-  ContentsResponseSchema,
-} from '../../../../../../modules/platform/gitea/schema';
-import { GiteaHttp } from '../../../../../../util/http/gitea';
-import { fromBase64 } from '../../../../../../util/string';
-import { compareChangelogFilePath } from '../common';
+  ContentsListResponse,
+  ContentsResponse,
+} from '../../../../../../modules/platform/gitea/schema.ts';
+import { GiteaHttp } from '../../../../../../util/http/gitea.ts';
+import { fromBase64 } from '../../../../../../util/string.ts';
+import { compareChangelogFilePath } from '../common.ts';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
-} from '../types';
+} from '../types.ts';
 
 export const id = 'gitea-changelog';
 const http = new GiteaHttp(id);
@@ -34,7 +33,7 @@ export async function getReleaseNotesMd(
       {
         paginate: false, // no pagination yet
       },
-      ContentsListResponseSchema,
+      ContentsListResponse,
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'file');
@@ -59,7 +58,7 @@ export async function getReleaseNotesMd(
 
   const fileRes = await http.getJson(
     `${apiPrefix}/${changelogFile}`,
-    ContentsResponseSchema,
+    ContentsResponse,
   );
   // istanbul ignore if: should never happen
   if (!fileRes.body.content) {
@@ -83,7 +82,7 @@ export async function getReleaseList(
     {
       paginate: true,
     },
-    ReleasesSchema,
+    Releases,
   );
   return res.body.map((release) => ({
     url: `${project.baseUrl}${project.repository}/releases/tag/${release.tag_name}`,

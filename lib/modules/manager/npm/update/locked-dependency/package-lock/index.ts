@@ -1,13 +1,16 @@
 import detectIndent from 'detect-indent';
 import type { PackageJson } from 'type-fest';
-import { logger } from '../../../../../../logger';
-import { api as semver } from '../../../../../versioning/npm';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
-import { updateDependency } from '../../dependency';
-import { findFirstParentVersion } from '../common/parent-version';
-import { findDepConstraints } from './dep-constraints';
-import { getLockedDependencies } from './get-locked';
-import type { PackageLockOrEntry } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
+import type {
+  UpdateLockedConfig,
+  UpdateLockedResult,
+} from '../../../../types.ts';
+import { updateDependency } from '../../dependency/index.ts';
+import { findFirstParentVersion } from '../common/parent-version.ts';
+import { findDepConstraints } from './dep-constraints.ts';
+import { getLockedDependencies } from './get-locked.ts';
+import type { PackageLockOrEntry } from './types.ts';
 
 export async function updateLockedDependency(
   config: UpdateLockedConfig,
@@ -110,7 +113,7 @@ export async function updateLockedDependency(
         }
       }
       // Don't return {} if we're a parent update or else the whole update will fail
-      // istanbul ignore if: too hard to replicate
+      /* v8 ignore next -- too hard to replicate */
       if (isParentUpdate) {
         const files: Record<string, string> = {};
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -118,7 +121,7 @@ export async function updateLockedDependency(
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         files[lockFile!] = lockFileContent!;
         return { status, files };
-      }
+      } /* v8 ignore stop -- too hard to replicate */
       return { status };
     }
     logger.debug(
@@ -151,9 +154,8 @@ export async function updateLockedDependency(
         logger.debug(
           `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
             // TODO: types (#22198)
-            parentDepName
-              ? `${parentDepName}@${parentVersion!}`
-              : /* istanbul ignore next: hard to test */ packageFile
+            /* v8 ignore next -- hard to test */
+            parentDepName ? `${parentDepName}@${parentVersion!}` : packageFile
           }`,
         );
       } else if (parentDepName && parentVersion) {
@@ -233,7 +235,7 @@ export async function updateLockedDependency(
         parentUpdateConfig,
         true,
       );
-      // istanbul ignore if: hard to test due to recursion
+      /* v8 ignore next -- hard to test due to recursion */
       if (!parentUpdateResult.files) {
         logger.debug(
           // TODO: types (#22198)
@@ -243,9 +245,9 @@ export async function updateLockedDependency(
       }
       newPackageJsonContent =
         parentUpdateResult.files[packageFile] || newPackageJsonContent;
+      /* v8 ignore next 2 -- hard to test */
       newLockFileContent =
-        parentUpdateResult.files[lockFile] ||
-        /* istanbul ignore next: hard to test */ newLockFileContent;
+        parentUpdateResult.files[lockFile] || newLockFileContent;
     }
     const files: Record<string, string> = {};
     if (newLockFileContent) {
@@ -260,7 +262,8 @@ export async function updateLockedDependency(
       return { status: 'unsupported' };
     }
     return { status: 'updated', files };
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next -- needs test */
+  } catch (err) {
     logger.error({ err }, 'updateLockedDependency() error');
     return { status: 'update-failed' };
   }

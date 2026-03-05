@@ -1,5 +1,6 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import type { Pr, PrBodyStruct } from '../types';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { EmailAddress } from '../../../util/schema-utils/index.ts';
+import type { Pr, PrBodyStruct } from '../types.ts';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
@@ -84,7 +85,7 @@ export interface PlatformConfig {
   isGHApp?: boolean;
   existingRepos?: string[];
   userDetails?: UserDetails;
-  userEmail?: string | null;
+  userEmail?: EmailAddress | null;
 }
 
 export interface LocalRepoConfig {
@@ -109,8 +110,6 @@ export interface LocalRepoConfig {
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
 }
-
-export type BranchProtection = any;
 
 export interface GhRepo {
   id: string;

@@ -1,6 +1,8 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import { setBaseUrl } from '../../../util/http/forgejo';
-import { toBase64 } from '../../../util/string';
+import * as httpMock from '~test/http-mock.ts';
+import { logger, partial } from '~test/util.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { setBaseUrl } from '../../../util/http/forgejo.ts';
+import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,
   closePR,
@@ -21,6 +23,7 @@ import {
   getRepoContents,
   getRepoLabels,
   getVersion,
+  isOrg,
   mergePR,
   orgListRepos,
   requestPrReviewers,
@@ -31,7 +34,7 @@ import {
   updateIssue,
   updateIssueLabels,
   updatePR,
-} from './forgejo-helper';
+} from './forgejo-helper.ts';
 import type {
   Branch,
   Comment,
@@ -44,9 +47,7 @@ import type {
   Repo,
   RepoContents,
   User,
-} from './types';
-import * as httpMock from '~test/http-mock';
-import { logger, partial } from '~test/util';
+} from './types.ts';
 
 describe('modules/platform/forgejo/forgejo-helper', () => {
   const forgejoApiHost = 'https://forgejo.renovatebot.com/';
@@ -212,6 +213,24 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       const res = await getVersion();
 
       expect(res).toEqual(version);
+    });
+  });
+
+  describe('isOrg', () => {
+    it('should call /api/v1/orgs/[org] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/orgs/${mockRepo.owner.username}`)
+        .reply(200, {})
+        .get(`/orgs/user`)
+        .reply(404)
+        .get(`/orgs/error`)
+        .reply(503);
+      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      // uses cached result
+      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      expect(await isOrg('user')).toEqual(false);
+      await expect(isOrg('error')).rejects.toThrow();
     });
   });
 
@@ -469,6 +488,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         mockPR.head!.label,
       );
       expect(res).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           err: expect.any(Object),

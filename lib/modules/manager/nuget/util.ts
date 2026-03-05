@@ -1,17 +1,17 @@
 import upath from 'upath';
 import type { XmlElement, XmlNodeBase } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   findLocalSiblingOrParent,
   findUpLocal,
   readLocalFile,
-} from '../../../util/fs';
-import { minimatch } from '../../../util/minimatch';
-import { regEx } from '../../../util/regex';
-import { nugetOrg } from '../../datasource/nuget';
-import { GlobalJson } from './schema';
-import type { NugetPackageDependency, Registry } from './types';
+} from '../../../util/fs/index.ts';
+import { minimatch } from '../../../util/minimatch.ts';
+import { regEx } from '../../../util/regex.ts';
+import { nugetOrg } from '../../datasource/nuget/index.ts';
+import { GlobalJson } from './schema.ts';
+import type { NugetPackageDependency, Registry } from './types.ts';
 
 export async function readFileAsXmlDocument(
   file: string,

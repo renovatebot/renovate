@@ -2,8 +2,8 @@ import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
-} from '../../types';
-import type { PyProject } from '../schema';
+} from '../../types.ts';
+import type { PyProject } from '../schema.ts';
 
 export interface PyProjectProcessor {
   updateArtifacts(
@@ -24,4 +24,6 @@ export interface PyProjectProcessor {
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]>;
+
+  getLockfiles(project: PyProject, packageFile: string): Promise<string[]>;
 }

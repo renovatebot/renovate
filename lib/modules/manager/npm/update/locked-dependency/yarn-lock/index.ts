@@ -1,10 +1,13 @@
 import { parseSyml } from '@yarnpkg/parsers';
-import { logger } from '../../../../../../logger';
-import { api as semver } from '../../../../../versioning/npm';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
-import { getLockedDependencies } from './get-locked';
-import { replaceConstraintVersion } from './replace';
-import type { YarnLock, YarnLockEntryUpdate } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
+import type {
+  UpdateLockedConfig,
+  UpdateLockedResult,
+} from '../../../../types.ts';
+import { getLockedDependencies } from './get-locked.ts';
+import { replaceConstraintVersion } from './replace.ts';
+import type { YarnLock, YarnLockEntryUpdate } from './types.ts';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig,
@@ -75,13 +78,14 @@ export function updateLockedDependency(
         newVersion,
       );
     }
-    // istanbul ignore if: cannot test
+    /* v8 ignore next 4 -- cannot test */
     if (newLockFileContent === lockFileContent) {
       logger.debug('Failed to make any changes to lock file');
       return { status: 'update-failed' };
     }
     return { status: 'updated', files: { [lockFile]: newLockFileContent } };
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next -- needs test */
+  } catch (err) {
     logger.error({ err }, 'updateLockedDependency() error');
     return { status: 'update-failed' };
   }

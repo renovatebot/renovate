@@ -23,13 +23,6 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_STATIC_REPO_CONFIG`
-
-If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, it will be applied to the repository config before resolving the actual configuration file within the repository.
-
-> [!warning]
-> An invalid value will result in the scan being aborted.
-
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
@@ -53,6 +46,11 @@ If set to `"true"`, a config error Issue will be raised in case repository confi
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
+
+## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
+
+If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.
+This is useful in environments where a user cannot approve its own PRs.
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
@@ -84,6 +82,11 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
+## `RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE`
+
+If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
+This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
@@ -96,6 +99,18 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
+## `RENOVATE_X_PGP_RUNTIME`
+
+Specify which PGP runtime to use for decrypting Renovate config.
+Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
+
+<!-- prettier-ignore -->
+!!! note
+    `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
+    Incompatible with `RENOVATE_X_USE_OPENPGP`.
+
+Default: `wasm-java`.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
@@ -112,14 +127,22 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
-## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
-
-If set, Renovate will persist repository cache locally after uploading to S3.
-
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.
 Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+
+## `RENOVATE_X_STATIC_REPO_CONFIG_FILE`
+
+If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
+
+<!-- prettier-ignore -->
+!!! warning
+    If the file is missing or contains invalid configuration, the scan will be aborted.
+
+<!-- prettier-ignore -->
+!!! note
+    You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
@@ -127,7 +150,11 @@ Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
 
-Use `openpgp` instead of `kbpgp` for `PGP` decryption.
+<!-- prettier-ignore -->
+!!! note
+    Incompatible with `RENOVATE_X_PGP_RUNTIME`.
+
+Use `openpgp` instead of [Bouncy Castle](https://www.bouncycastle.org/) for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 

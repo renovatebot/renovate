@@ -1,11 +1,15 @@
-import { z } from 'zod';
-import { LooseArray, LooseRecord, Yaml } from '../../../util/schema-utils';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { id as semverVersioning } from '../../versioning/semver';
-import { getDep } from '../dockerfile/extract';
-import type { PackageDependency } from '../types';
+import { z } from 'zod/v3';
+import {
+  LooseArray,
+  LooseRecord,
+  Yaml,
+} from '../../../util/schema-utils/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { id as semverVersioning } from '../../versioning/semver/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { PackageDependency } from '../types.ts';
 
-export const BatectConfigSchema = Yaml.pipe(
+export const BatectConfig = Yaml.pipe(
   z.object({
     containers: LooseRecord(
       z.string(),
@@ -56,4 +60,4 @@ export const BatectConfigSchema = Yaml.pipe(
   };
 });
 
-export type BatectConfig = z.infer<typeof BatectConfigSchema>;
+export type BatectConfig = z.infer<typeof BatectConfig>;

@@ -756,10 +756,10 @@ Map {
 
 exports[`modules/manager/bundler/locked-version > Parse Rails Gem Lock File 1`] = `
 Map {
-  "activerecord-jdbc-adapter" => "52.1-java",
-  "activerecord-jdbcmysql-adapter" => "52.1-java",
-  "activerecord-jdbcpostgresql-adapter" => "52.1-java",
-  "activerecord-jdbcsqlite3-adapter" => "52.1-java",
+  "activerecord-jdbc-adapter" => "52.1",
+  "activerecord-jdbcmysql-adapter" => "52.1",
+  "activerecord-jdbcpostgresql-adapter" => "52.1",
+  "activerecord-jdbcsqlite3-adapter" => "52.1",
   "addressable" => "2.5.2",
   "amq-protocol" => "2.3.0",
   "archive-zip" => "0.11.0",

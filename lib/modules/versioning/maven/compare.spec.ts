@@ -5,7 +5,7 @@ import {
   parseRange,
   rangeToStr,
   tokenize,
-} from './compare';
+} from './compare.ts';
 
 describe('modules/versioning/maven/compare', () => {
   describe('Standard behavior', () => {

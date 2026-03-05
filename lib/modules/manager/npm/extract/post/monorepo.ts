@@ -1,10 +1,13 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { getParentDir, getSiblingFileName } from '../../../../../util/fs';
-import type { PackageFile } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import { detectPnpmWorkspaces } from '../pnpm';
-import { matchesAnyPattern } from '../utils';
+import { isArray, isString } from '@sindresorhus/is';
+import { logger } from '../../../../../logger/index.ts';
+import {
+  getParentDir,
+  getSiblingFileName,
+} from '../../../../../util/fs/index.ts';
+import type { PackageFile } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { detectPnpmWorkspaces } from '../pnpm.ts';
+import { matchesAnyPattern } from '../utils.ts';
 
 export async function detectMonorepos(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
@@ -24,7 +27,7 @@ export async function detectMonorepos(
     const packages = workspacesPackages as string[] | undefined;
     if (packages?.length) {
       const internalPackagePatterns = (
-        is.array(packages) ? packages : [packages]
+        isArray(packages) ? packages : [packages]
       ).map((pattern) => getSiblingFileName(packageFile!, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
@@ -38,7 +41,7 @@ export async function detectMonorepos(
 
       p.deps?.forEach((dep) => {
         if (
-          is.string(dep.depName) &&
+          isString(dep.depName) &&
           internalPackageNames.includes(dep.depName)
         ) {
           dep.isInternal = true;

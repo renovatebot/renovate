@@ -2,12 +2,12 @@ import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
   CONFIG_VARIABLES_INVALID,
-} from '../constants/error-messages';
-import { getConfig } from './defaults';
+} from '../constants/error-messages.ts';
+import { getConfig } from './defaults.ts';
 import {
   applySecretsAndVariablesToConfig,
   validateConfigSecretsAndVariables,
-} from './secrets';
+} from './secrets.ts';
 
 describe('config/secrets', () => {
   describe('validateConfigSecretsAndVariables(config)', () => {
@@ -69,6 +69,25 @@ describe('config/secrets', () => {
       const result = applySecretsAndVariablesToConfig({ config });
       expect(result).toEqual({
         hostRules: [{ hostType: 'npm', token: 'secret123' }],
+      });
+    });
+
+    it('replaces all secrets and variables', () => {
+      const config = {
+        secrets: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        variables: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        customEnvVariables: {
+          SECRETS: '{{ secrets.FOO }} {{ secrets.BAR }} {{ secrets.BAZ }}',
+          VARIABLES:
+            '{{ variables.FOO }} {{ variables.BAR }} {{ variables.BAZ }}',
+        },
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        customEnvVariables: {
+          SECRETS: 'foo bar baz',
+          VARIABLES: 'foo bar baz',
+        },
       });
     });
 

@@ -1,9 +1,9 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 /**
  *  Response from registry.buildpacks.io
  */
-export const BuildpacksRegistryResponseSchema = z.object({
+export const BuildpacksRegistryResponse = z.object({
   latest: z
     .object({
       homepage: z.string().optional(),

@@ -2,10 +2,10 @@ import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
-import { getPkgReleases } from '..';
-import { add, clear } from '../../../util/host-rules';
-import { GitRefsDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { add, clear } from '../../../util/host-rules.ts';
+import { getPkgReleases } from '../index.ts';
+import { GitRefsDatasource } from './index.ts';
 
 vi.mock('simple-git');
 const simpleGitFactoryMock = vi.mocked(simpleGit);
@@ -129,7 +129,7 @@ describe('modules/datasource/git-refs/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledWith({});
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({});
     });
 
     it('calls simpleGit with git envs if hostrules exist', async () => {
@@ -146,7 +146,7 @@ describe('modules/datasource/git-refs/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
@@ -171,7 +171,7 @@ describe('modules/datasource/git-refs/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:token123@git.example.com/.insteadOf',

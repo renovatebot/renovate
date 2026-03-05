@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro';
+import { logger } from '../../../logger/index.ts';
+import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro.ts';
 
 const refreshInterval = { days: 1 };
 
@@ -59,7 +59,7 @@ export class RollingReleasesData {
     for (let i = 0; i < 3; i++) {
       const di = this.distroInfo.getNLatest(i);
 
-      // istanbul ignore if: should never happen
+      // should never happen, just for type checking
       if (!di) {
         return;
       }

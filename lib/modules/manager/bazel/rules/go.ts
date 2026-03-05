@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { regEx } from '../../../../util/regex';
-import { GoDatasource } from '../../../datasource/go';
-import type { PackageDependency } from '../../types';
+import { z } from 'zod/v3';
+import { regEx } from '../../../../util/regex.ts';
+import { GoDatasource } from '../../../datasource/go/index.ts';
+import type { PackageDependency } from '../../types.ts';
 
 export const goRules = ['go_repository', '_go_repository'] as const;
 
@@ -39,7 +39,7 @@ export const GoTarget = z
         const remoteMatch = regEx(
           /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/,
         ).exec(remote);
-        if (remoteMatch && remoteMatch[0].length === remote.length) {
+        if (remoteMatch?.[0].length === remote.length) {
           dep.packageName = remote.replace('https://', '');
         } else {
           dep.skipReason = 'unsupported-remote';

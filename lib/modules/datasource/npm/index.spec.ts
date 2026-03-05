@@ -1,9 +1,9 @@
-import { getPkgReleases } from '..';
-import { GlobalConfig } from '../../../config/global';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as hostRules from '../../../util/host-rules';
-import { NpmDatasource, setNpmrc } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { getPkgReleases } from '../index.ts';
+import { NpmDatasource, setNpmrc } from './index.ts';
 
 const datasource = NpmDatasource.id;
 
@@ -138,6 +138,58 @@ describe('modules/datasource/npm/index', () => {
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res?.deprecationMessage).toMatchSnapshot();
+  });
+
+  it('should return attestation', async () => {
+    const deprecatedPackage = {
+      name: 'foobar',
+      versions: {
+        '0.0.1': {
+          foo: 1,
+          dist: {
+            attestations: {
+              url: 'https://registry.npmjs.org/-/npm/v1/attestations/foobar@0.0.1',
+            },
+          },
+        },
+        '0.0.2': {
+          foo: 2,
+          dist: {
+            attestations: {
+              url: 'https://registry.npmjs.org/-/npm/v1/attestations/foobar@0.0.2',
+            },
+          },
+        },
+      },
+      repository: {
+        type: 'git',
+        url: 'git://github.com/renovateapp/dummy.git',
+      },
+      'dist-tags': {
+        latest: '0.0.2',
+      },
+      time: {
+        '0.0.1': '2018-05-06T07:21:53+02:00',
+        '0.0.2': '2018-05-07T07:21:53+02:00',
+      },
+    };
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, deprecatedPackage);
+    const res = await getPkgReleases({ datasource, packageName: 'foobar' });
+    expect(res).toMatchObject({
+      releases: [
+        {
+          version: '0.0.1',
+          attestation: true,
+        },
+        {
+          version: '0.0.2',
+          attestation: true,
+        },
+      ],
+    });
   });
 
   it('should handle foobar', async () => {

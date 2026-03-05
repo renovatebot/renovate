@@ -1,5 +1,5 @@
-import { getConfig } from '../../../../config/defaults';
-import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { getConfig } from '../../../../config/defaults.ts';
+import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
 
 describe('workers/repository/config-migration/branch/commit-message', () => {
   const config = getConfig();
@@ -23,7 +23,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       fileName,
     );
     expect(commitMessageFactory.getPrTitle()).toBe(
-      'chore(config): migrate renovate config',
+      'chore(config): migrate Renovate config',
     );
   });
 
@@ -44,7 +44,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       config,
       fileName,
     );
-    expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
+    expect(commitMessageFactory.getPrTitle()).toBe('Migrate Renovate config');
   });
 
   it('returns default values when commitMessage template string is empty', () => {
@@ -54,6 +54,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       config,
       fileName,
     );
-    expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
+    expect(commitMessageFactory.getPrTitle()).toBe('Migrate Renovate config');
   });
 });

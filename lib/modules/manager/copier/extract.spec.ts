@@ -1,4 +1,4 @@
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/copier/extract', () => {
   describe('extractPackageFile()', () => {
@@ -13,6 +13,65 @@ describe('modules/manager/copier/extract', () => {
           {
             depName: 'https://github.com/username/template-repo',
             packageName: 'https://github.com/username/template-repo',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depType: 'template',
+          },
+        ],
+      });
+    });
+
+    it('extracts repository and version from .copier-answers.yml with ssh URL', () => {
+      const content = `
+        _commit: v1.0.0
+        _src_path: git@github.com:renovatebot/somedir/renovate.git
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'git@github.com:renovatebot/somedir/renovate.git',
+            packageName: 'git@github.com:renovatebot/somedir/renovate.git',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depType: 'template',
+          },
+        ],
+      });
+    });
+
+    it('extracts repository and version from .copier-answers.yml with ssh URL and non-bare Repo', () => {
+      const content = `
+        _commit: v1.0.0
+        _src_path: git@some-scm-server.tld:renovatebot/somedir/renovate
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'git@some-scm-server.tld:renovatebot/somedir/renovate',
+            packageName: 'git@some-scm-server.tld:renovatebot/somedir/renovate',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depType: 'template',
+          },
+        ],
+      });
+    });
+
+    it('extracts repository and version from .copier-answers.yml with ssh URL and a username different from git', () => {
+      const content = `
+        _commit: v1.0.0
+        _src_path: someuser@some-scm-server.tld:renovatebot/somedir/renovate.git
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName:
+              'someuser@some-scm-server.tld:renovatebot/somedir/renovate.git',
+            packageName:
+              'someuser@some-scm-server.tld:renovatebot/somedir/renovate.git',
             currentValue: 'v1.0.0',
             datasource: 'git-tags',
             depType: 'template',

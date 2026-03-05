@@ -1,40 +1,40 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { isHttpUrl } from '../../../util/url';
-import { parseYaml } from '../../../util/yaml';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { findDependencies } from '../helm-values/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
-import { extractImage } from '../kustomize/extract';
+import { isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isHttpUrl } from '../../../util/url.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { findDependencies } from '../helm-values/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { extractImage } from '../kustomize/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   collectHelmRepos,
   isSystemManifest,
   systemManifestHeaderRegex,
-} from './common';
-import { FluxResource, type HelmRepository } from './schema';
+} from './common.ts';
+import { FluxResource, type HelmRepository } from './schema.ts';
 import type {
   FluxManagerData,
   FluxManifest,
   ResourceFluxManifest,
   SystemFluxManifest,
-} from './types';
+} from './types.ts';
 
 function readManifest(
   content: string,
@@ -112,6 +112,7 @@ function resolveHelmRepository(
   dep: PackageDependency,
   matchingRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
+  sourceRefName?: string,
 ): void {
   if (matchingRepositories.length) {
     dep.registryUrls = matchingRepositories
@@ -130,15 +131,34 @@ function resolveHelmRepository(
           return repo.spec.url;
         }
       })
-      .filter(is.string);
+      .filter(isString);
 
     // if registryUrls is empty, delete it from dep
     if (!dep.registryUrls?.length) {
       delete dep.registryUrls;
     }
-  } else {
-    dep.skipReason = 'unknown-registry';
+    return;
   }
+
+  if (sourceRefName && registryAliases) {
+    const aliasUrl = registryAliases[sourceRefName];
+    if (aliasUrl) {
+      if (isOCIRegistry(aliasUrl)) {
+        // Treat alias value as an OCI registry URL
+        dep.datasource = DockerDatasource.id;
+        dep.packageName = getDep(
+          `${removeOCIPrefix(aliasUrl)}/${dep.depName}`,
+          false,
+          registryAliases,
+        ).packageName;
+      } else {
+        dep.registryUrls = [aliasUrl];
+      }
+      return;
+    }
+  }
+
+  dep.skipReason = 'unknown-registry';
 }
 
 function resolveSystemManifest(
@@ -182,15 +202,20 @@ function resolveResourceManifest(
             dep.skipReason = 'local-chart';
             delete dep.datasource;
           } else {
+            const sourceRef = chartSpec.sourceRef;
             const matchingRepositories = helmRepositories.filter(
               (rep) =>
-                rep.kind === chartSpec.sourceRef?.kind &&
-                rep.metadata.name === chartSpec.sourceRef.name &&
+                rep.kind === sourceRef?.kind &&
+                rep.metadata.name === sourceRef.name &&
                 rep.metadata.namespace ===
-                  (chartSpec.sourceRef.namespace ??
-                    resource.metadata?.namespace),
+                  (sourceRef?.namespace ?? resource.metadata?.namespace),
             );
-            resolveHelmRepository(dep, matchingRepositories, registryAliases);
+            resolveHelmRepository(
+              dep,
+              matchingRepositories,
+              registryAliases,
+              sourceRef?.name,
+            );
           }
           deps.push(dep);
         } else {
@@ -222,13 +247,19 @@ function resolveResourceManifest(
           dep.currentValue = resource.spec.version;
           dep.datasource = HelmDatasource.id;
 
+          const sourceRef = resource.spec.sourceRef;
           const matchingRepositories = helmRepositories.filter(
             (rep) =>
-              rep.kind === resource.spec.sourceRef?.kind &&
-              rep.metadata.name === resource.spec.sourceRef.name &&
+              rep.kind === sourceRef?.kind &&
+              rep.metadata.name === sourceRef.name &&
               rep.metadata.namespace === resource.metadata?.namespace,
           );
-          resolveHelmRepository(dep, matchingRepositories, registryAliases);
+          resolveHelmRepository(
+            dep,
+            matchingRepositories,
+            registryAliases,
+            sourceRef?.name,
+          );
         } else {
           dep.skipReason = 'unsupported-datasource';
         }

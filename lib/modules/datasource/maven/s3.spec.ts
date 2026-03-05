@@ -1,13 +1,13 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import type { ReleaseResult } from '..';
-import { getPkgReleases } from '..';
-import { logger } from '../../../logger';
-import * as hostRules from '../../../util/host-rules';
-import { id as versioning } from '../../versioning/maven';
-import { MavenDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '../../../logger/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { id as versioning } from '../../versioning/maven/index.ts';
+import type { ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
+import { MavenDatasource } from './index.ts';
 
 const datasource = MavenDatasource.id;
 
@@ -65,6 +65,11 @@ describe('modules/datasource/maven/s3', () => {
           { version: '1.0.2' },
           { version: '1.0.3' },
         ],
+        respectLatest: false,
+        tags: {
+          latest: '1.0.2',
+          release: '1.0.2',
+        },
         isPrivate: true,
       });
     });
@@ -88,6 +93,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -107,6 +113,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -126,6 +133,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.trace).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -145,6 +153,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.trace).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -177,6 +186,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             err: expect.objectContaining({ message: 'Unknown error' }),

@@ -1,10 +1,14 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
-import { getOptions } from '../../lib/config/options';
-import { allManagersList } from '../../lib/modules/manager';
-import { getCliName } from '../../lib/workers/global/config/parse/cli';
-import { getEnvName } from '../../lib/workers/global/config/parse/env';
-import { readFile, updateFile } from '../utils';
+import { getOptions } from '../../lib/config/options/index.ts';
+import {
+  allManagersList,
+  getManagers,
+} from '../../lib/modules/manager/index.ts';
+import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
+import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
+import { readFile, updateFile } from '../utils/index.ts';
+import { formatCell, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -52,25 +56,31 @@ function buildHtmlTable(data: string[][]): string {
     return '';
   }
   let table = `<table>\n`;
-  for (const [i, row] of data.entries()) {
-    if (i === 0) {
+  for (const [rowIndex, row] of data.entries()) {
+    if (rowIndex === 0) {
       table += indent`${1}<thead>\n`;
     }
 
-    if (i === 1) {
+    if (rowIndex === 1) {
       table += indent`${1}</thead>\n` + indent`${1}<tbody>\n`;
     }
 
     table += indent`${2}<tr>\n`;
-    for (const col of row) {
-      if (i === 0) {
+    for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      const col = row[colIndex];
+
+      if (rowIndex === 0) {
+        // header row
         table += indent`${3}<th>${col}</th>\n`;
         continue;
       }
+
+      const cellHtml = formatCell(row, colIndex);
+
       table +=
-        indent`${3}<td>${col}` +
+        indent`${3}${cellHtml}` +
         (`${col}`.endsWith('\n') ? indent`${3}` : '') +
-        `</td>\n`;
+        `\n`;
     }
     table += indent`${2}</tr>\n`;
   }
@@ -120,10 +130,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       ) {
         el[1] = `<code>${el[1]}</code>`;
       }
-      // objects and arrays should be printed in JSON notation
       if (
-        (type === 'object' || type === 'array') &&
-        (el[0] === 'default' || el[0] === 'additionalProperties')
+        // objects and arrays should be printed in JSON notation
+        ((type === 'object' || type === 'array') &&
+          (el[0] === 'default' || el[0] === 'additionalProperties')) ||
+        // enum values for `allowedValues` should be printed in JSON notation
+        el[0] === 'allowedValues'
       ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
@@ -135,23 +147,26 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     }
   });
 
-  if (type === 'list') {
-    data.push(['default', '`[]`']);
+  if (data.find((k) => k[0] === 'default') === undefined) {
+    if (type === 'array') {
+      data.push(['default', '<code>[]</code>']);
+    }
+    if (type === 'string' && def === undefined) {
+      data.push(['default', '<code>null</code>']);
+    }
+    if (type === 'boolean' && def === undefined) {
+      data.push(['default', '<code>true</code>']);
+    }
+    if (type === 'boolean' && def === null) {
+      data.push(['default', '<code>null</code>']);
+    }
   }
-  if (type === 'string' && def === undefined) {
-    data.push(['default', '<code>null</code>']);
-  }
-  if (type === 'boolean' && def === undefined) {
-    data.push(['default', '<code>true</code>']);
-  }
-  if (type === 'boolean' && def === null) {
-    data.push(['default', '<code>null</code>']);
-  }
+
   return buildHtmlTable(data);
 }
 
 function stringifyArrays(el: Record<string, any>): void {
-  const ignoredKeys = ['default', 'experimentalIssues'];
+  const ignoredKeys = ['allowedValues', 'default', 'experimentalIssues'];
 
   for (const [key, value] of Object.entries(el)) {
     if (!ignoredKeys.includes(key) && Array.isArray(value)) {
@@ -215,6 +230,31 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   return indexed;
 }
 
+function generateLockFileTable(): string {
+  const allManagers = getManagers();
+  const rows: { name: string; lockFiles: string[] }[] = [];
+
+  for (const [name, definition] of allManagers) {
+    if (
+      definition.supportsLockFileMaintenance &&
+      definition.lockFileNames?.length
+    ) {
+      rows.push({ name, lockFiles: definition.lockFileNames });
+    }
+  }
+
+  rows.sort((a, b) => a.name.localeCompare(b.name));
+
+  let table = '\n| Manager | Lockfile |\n';
+  table += '| :-- | :-- |\n';
+  for (const row of rows) {
+    const lockFiles = row.lockFiles.map((f) => `\`${f}\``).join(', ');
+    table += `| \`${row.name}\` | ${lockFiles} |\n`;
+  }
+
+  return table;
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -264,7 +304,13 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       }
     });
 
-  await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));
+  let content = configOptionsRaw.join('\n');
+
+  if (!bot) {
+    content = replaceContent(content, generateLockFileTable());
+  }
+
+  await updateFile(`${dist}/${configFile}`, content);
 }
 
 function generateAdvancedUse(): string {

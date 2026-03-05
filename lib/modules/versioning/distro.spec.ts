@@ -1,12 +1,12 @@
-import { DateTime, Settings } from 'luxon';
-import { DistroInfo } from './distro';
+import { DateTime } from 'luxon';
+import { DistroInfo } from './distro.ts';
 
 describe('modules/versioning/distro', () => {
   const di = new DistroInfo('data/ubuntu-distro-info.json');
 
   beforeAll(() => {
     const dt = DateTime.fromISO('2021-03-20');
-    Settings.now = () => dt.valueOf();
+    vi.useFakeTimers({ now: dt.valueOf() });
   });
 
   it.each`
@@ -161,6 +161,11 @@ describe('modules/versioning/distro', () => {
 
   it('works with debian', () => {
     const di = new DistroInfo('data/debian-distro-info.json');
+    delete di.getSchedule('trixie')?.eol_lts;
+    delete di.getSchedule('trixie')?.eol;
     expect(di.isEolLts('trixie')).toBe(true);
+    expect(di.isCreated('trixie')).toBe(false);
+    expect(di.isCreated('unknown')).toBe(false);
+    expect(di.isReleased('unknown')).toBe(false);
   });
 });

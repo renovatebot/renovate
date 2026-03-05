@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/terragrunt/extract', () => {
   describe('extractPackageFile()', () => {
@@ -30,6 +30,13 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'terragrunt',
           },
           {},
+          {
+            currentValue: '1.0.0',
+            datasource: 'terraform-module',
+            depName: 'abc/helloworld/aws',
+            depType: 'terragrunt',
+            registryUrls: ['https://registry.domain.com'],
+          },
           {
             currentValue: '1.0.0',
             datasource: 'terraform-module',

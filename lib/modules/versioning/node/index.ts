@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
 import { valid } from 'semver';
-import npm, { isVersion } from '../npm';
-import type { NewValueConfig, VersioningApi } from '../types';
-import { findScheduleForCodename, findScheduleForVersion } from './schedule';
+import npm, { isVersion } from '../npm/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { findScheduleForCodename, findScheduleForVersion } from './schedule.ts';
 
 export const id = 'node';
 export const displayName = 'Node.js';

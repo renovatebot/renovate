@@ -1,25 +1,25 @@
-import { join } from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import type { UpdateArtifact } from '../types';
+import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type { UpdateArtifact } from '../types.ts';
 import {
   getBundlerConstraint,
   getLockFilePath,
   getRubyConstraint,
-} from './common';
-import { Fixtures } from '~test/fixtures';
-import { fs, partial } from '~test/util';
+} from './common.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const gemfile = Fixtures.get('Gemfile.sourceGroup');
 const lockedContent = Fixtures.get('Gemfile.gitlab-foss.lock');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 describe('modules/manager/bundler/common', () => {

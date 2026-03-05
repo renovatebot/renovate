@@ -1,4 +1,4 @@
-import { coerceNumber, parseInteger } from './number';
+import { coerceNumber, parseInteger } from './number.ts';
 
 describe('util/number', () => {
   it.each`

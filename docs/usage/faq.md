@@ -31,10 +31,10 @@ If you're self hosting Renovate, use the latest release if possible.
 
 ## Renovate core features not supported on all platforms
 
-| Feature               | Platforms which lack feature                    | See Renovate issue(s)                                        |
-| --------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server, Gerrit      | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
+| Feature               | Platforms which lack feature                                 | See Renovate issue(s)                                        |
+| --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server, Gerrit, SCM-Manager      | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab, SCM-Manager |                                                              |
 
 ## Major platform features not supported by Renovate
 
@@ -217,7 +217,7 @@ As above, but apply a `groupName`:
   "packageRules": [
     {
       "matchPackageNames": "abc**",
-      "groupName": ["abc packages"]
+      "groupName": "abc packages"
     }
   ]
 }
@@ -307,8 +307,8 @@ plugins {
 
 Renovate will give the dependency these properties:
 
-- `depName=com.gradle.develocity`
-- `packageName: com.gradle.develocity:com.gradle.develocity.gradle.plugin`
+- `depName`: `com.gradle.develocity`
+- `packageName`: `com.gradle.develocity:com.gradle.develocity.gradle.plugin`
 
 Again, often the `depName` and `packageName` are equal.
 The names Renovate uses for the `depName` and `packageName` depend on the package manager (and package ecosystem naming conventions).

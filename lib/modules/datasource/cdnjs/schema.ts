@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import type { Release } from '../types';
+import { z } from 'zod/v3';
+import type { Release } from '../types.ts';
 
 export const Homepage = z.string().optional().catch(undefined);
 
@@ -19,12 +19,12 @@ export const Versions = z
 
 export const Sri = z.record(z.string());
 
-export const CdnjsAPIVersionResponseSchema = z.object({
+export const CdnjsAPIVersionResponse = z.object({
   homepage: Homepage,
   repository: Repository,
   versions: Versions,
 });
 
-export const CdnjsAPISriResponseSchema = z.object({
+export const CdnjsAPISriResponse = z.object({
   sri: Sri,
 });

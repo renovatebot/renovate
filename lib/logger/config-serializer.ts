@@ -1,9 +1,8 @@
 import traverse from 'neotraverse/legacy';
-import type { RenovateConfig } from '../config/types';
 
-export default function configSerializer(
-  config: RenovateConfig,
-): RenovateConfig {
+export default function configSerializer<T extends Record<string, unknown>>(
+  config: T,
+): T {
   const templateFields = ['prBody'];
   const contentFields = [
     'content',

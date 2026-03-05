@@ -1,7 +1,8 @@
 import { remark } from 'remark';
+import gfm from 'remark-gfm';
 import type { Options as RemarkGithubOptions } from 'remark-github';
 import github from 'remark-github';
-import { regEx } from './regex';
+import { regEx } from './regex.ts';
 
 // Generic replacements/link-breakers
 export function sanitizeMarkdown(markdown: string): string {
@@ -39,6 +40,7 @@ export async function linkify(
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   const output = await remark()
     .use({ settings: { bullet: '-' } })
+    .use(gfm)
     .use(github, { mentionStrong: false, ...options })
     .process(content);
   return output.toString();

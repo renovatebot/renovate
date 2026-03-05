@@ -1,15 +1,16 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import type { PackageDependency } from '../types';
-import type { ExtractionResult } from './types';
-import { keyValueExtractionRegex } from './util';
+import { isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { ExtractionResult } from './types.ts';
+import { keyValueExtractionRegex } from './util.ts';
 
 export function extractTFLintPlugin(
   startingLine: number,
   lines: string[],
-  pluginName: string,
+  // TODO: remove unused parameter
+  _pluginName: string,
 ): ExtractionResult {
   let lineNumber = startingLine;
   const deps: PackageDependency[] = [];
@@ -27,7 +28,7 @@ export function extractTFLintPlugin(
     const line = lines[lineNumber];
 
     // istanbul ignore else
-    if (is.string(line)) {
+    if (isString(line)) {
       // `{` will be counted with +1 and `}` with -1.
       // Therefore if we reach braceCounter == 0 then we found the end of the tflint configuration block.
       const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;

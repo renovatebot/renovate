@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
-import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
-import { logger } from '../../logger';
-import type { HostRule } from '../../types';
-import { detectPlatform } from '../common';
-import { getEnv } from '../env';
-import { find, getAll } from '../host-rules';
-import { regEx } from '../regex';
-import { createURLFromHostOrURL, isHttpUrl } from '../url';
-import type { AuthenticationRule } from './types';
-import { parseGitUrl } from './url';
+import { isEmptyString } from '@sindresorhus/is';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
+import { logger } from '../../logger/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import { detectPlatform } from '../common.ts';
+import { getEnv } from '../env.ts';
+import { find, getAll } from '../host-rules.ts';
+import { regEx } from '../regex.ts';
+import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
+import type { AuthenticationRule } from './types.ts';
+import { parseGitUrl } from './url.ts';
 
 const githubApiUrls = new Set([
   'github.com',
@@ -128,7 +128,8 @@ export function getAuthenticationRules(
     // sshPort is string, wrong type!
     // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72361
     // https://github.com/IonicaBizau/parse-path/blob/87f71f273da90f85f6845937a70b7c032eeae4e3/lib/index.js#L45
-    if (!sshPort || is.emptyString(sshPort)) {
+    // v8 ignore next -- TODO: add test #40625
+    if (!sshPort || isEmptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
       // For non-default port, the generated auth config will likely be incorrect.
       sshPort = '7999';

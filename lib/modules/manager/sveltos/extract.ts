@@ -1,17 +1,17 @@
-import { coerceArray } from '../../../util/array';
-import { trimTrailingSlash } from '../../../util/url';
-import { parseYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { coerceArray } from '../../../util/array.ts';
+import { trimTrailingSlash } from '../../../util/url.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { ProfileDefinition, type SveltosHelmSource } from './schema';
-import { removeRepositoryName } from './util';
+} from '../types.ts';
+import { ProfileDefinition, type SveltosHelmSource } from './schema.ts';
+import { removeRepositoryName } from './util.ts';
 
 export function extractPackageFile(
   content: string,

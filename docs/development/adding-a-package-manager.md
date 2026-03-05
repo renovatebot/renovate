@@ -45,6 +45,7 @@ The function returns an array of detected or extracted dependencies, including t
 - dependency type (dependencies, devDependencies, etc)
 - currentValue
 - versioning used (like SemVer, PEP 440)
+- a list of lock files ( `lockFiles` ) that are associated with this package file, if applicable
 
 The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it gets.
 It needs to understand enough to extract a correct list of dependencies.

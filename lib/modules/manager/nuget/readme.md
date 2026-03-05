@@ -20,6 +20,9 @@ For Renovate to work with .NET Framework projects, you need to update these file
 - `.props`
 - `.targets`
 
+You can also extract from the single code file projects (since `.NET 10`).
+But, you need to add those files manually to the `managerFilePatterns` as they are not supported by default.
+
 ### Disabling updates for pinned versions
 
 In NuGet, when you use versions like `Version="1.2.3"` then it means "1.2.3 or greater, up to v2"
@@ -37,5 +40,16 @@ If you would like Renovate to disable updating of exact versions (warning: you m
       "enabled": false
     }
   ]
+}
+```
+
+### Workload restore
+
+Sometimes you need to run `dotnet workload restore` to ensure that all required workloads are installed before restoring the project.
+You can enable this behavior by adding `dotnetWorkloadRestore` to the `postUpdateOptions` in your Renovate configuration.
+
+```json
+{
+  "postUpdateOptions": ["dotnetWorkloadRestore"]
 }
 ```

@@ -4,15 +4,16 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { logger } from '../../../logger';
-import { streamToString } from '../../../util/streams';
-import { getNewBranchName } from '../util';
-import * as azureApi from './azure-got-wrapper';
-import { WrappedExceptionSchema } from './schema';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { logger } from '../../../logger/index.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { getNewBranchName } from '../util.ts';
+import * as azureApi from './azure-got-wrapper.ts';
+import { WrappedException } from './schema.ts';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
-} from './util';
+} from './util.ts';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
@@ -84,20 +85,21 @@ export async function getFile(
   if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
-      const result = WrappedExceptionSchema.safeParse(fileContent);
+      const result = WrappedException.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
           logger.warn({ filePath }, 'Unable to find file');
           return null;
         }
+        // v8 ignore else -- TODO: add test #40625
         if (result.data.typeKey === 'GitUnresolvableToCommitException') {
           logger.warn({ branchName }, 'Unable to find branch');
           return null;
         }
       }
-    } catch /* v8 ignore start */ {
+    } catch /* v8 ignore next */ {
       // it 's not a JSON, so I send the content directly with the line under
-    } /* v8 ignore stop */
+    }
 
     return fileContent;
   }
@@ -154,8 +156,8 @@ export async function getMergeMethod(
       await azureApi.policyApi()
     ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
   )
-    .filter((p) => p.settings.scope.some(isRelevantScope))
-    .map((p) => p.settings)[0];
+    .filter((p: PolicyConfiguration) => p.settings.scope.some(isRelevantScope))
+    .map((p: PolicyConfiguration) => p.settings)[0];
 
   logger.debug(
     // TODO: types (#22198)

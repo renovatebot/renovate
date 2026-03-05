@@ -1,24 +1,26 @@
-import { z } from 'zod';
-import { Toml } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { Toml } from '../../../util/schema-utils/index.ts';
 
-const MiseToolOptionsSchema = z.object({
+const MiseToolOptions = z.object({
   // ubi backend only
   tag_regex: z.string().optional(),
+  // github backend only
+  version_prefix: z.string().optional(),
 });
-export type MiseToolOptionsSchema = z.infer<typeof MiseToolOptionsSchema>;
+export type MiseToolOptions = z.infer<typeof MiseToolOptions>;
 
-const MiseToolSchema = z.union([
+const MiseTool = z.union([
   z.string(),
-  MiseToolOptionsSchema.extend({
+  MiseToolOptions.extend({
     version: z.string().optional(),
   }),
   z.array(z.string()),
 ]);
-export type MiseToolSchema = z.infer<typeof MiseToolSchema>;
+export type MiseTool = z.infer<typeof MiseTool>;
 
-export const MiseFileSchema = z.object({
-  tools: z.record(MiseToolSchema),
-});
-export type MiseFileSchema = z.infer<typeof MiseFileSchema>;
-
-export const MiseFileSchemaToml = Toml.pipe(MiseFileSchema);
+export const MiseFile = Toml.pipe(
+  z.object({
+    tools: z.record(MiseTool),
+  }),
+);
+export type MiseFile = z.infer<typeof MiseFile>;

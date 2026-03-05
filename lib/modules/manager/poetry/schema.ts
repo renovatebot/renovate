@@ -1,26 +1,28 @@
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
-import { parseGitUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
+import { z } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   LooseArray,
   LooseRecord,
   Toml,
   withDepType,
-} from '../../../util/schema-utils';
-import { uniq } from '../../../util/uniq';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import * as gitVersioning from '../../versioning/git';
-import * as pep440Versioning from '../../versioning/pep440';
-import * as poetryVersioning from '../../versioning/poetry';
-import { dependencyPattern } from '../pip_requirements/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+} from '../../../util/schema-utils/index.ts';
+import { uniq } from '../../../util/uniq.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import * as gitVersioning from '../../versioning/git/index.ts';
+import * as pep440Versioning from '../../versioning/pep440/index.ts';
+import * as poetryVersioning from '../../versioning/poetry/index.ts';
+import { DependencyGroup, ProjectSection } from '../pep621/schema.ts';
+import { depTypes } from '../pep621/utils.ts';
+import { dependencyPattern } from '../pip_requirements/extract.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const PoetryOptionalDependencyMixin = z
   .object({
@@ -269,60 +271,22 @@ export const PoetrySources = LooseArray(PoetrySource, {
   })
   .catch([]);
 
-export const PoetrySectionSchema = z
-  .object({
-    version: z.string().optional().catch(undefined),
-    dependencies: withDepType(
-      PoetryDependencies,
-      'dependencies',
-      false,
-    ).optional(),
-    'dev-dependencies': withDepType(
-      PoetryDependencies,
-      'dev-dependencies',
-    ).optional(),
-    group: PoetryGroupDependencies.optional(),
-    source: PoetrySources,
-  })
-  .transform(
-    ({
-      version,
-      dependencies = [],
-      'dev-dependencies': devDependencies = [],
-      group: groupDependencies = [],
-      source: sourceUrls,
-    }) => {
-      const deps: PackageDependency[] = [
-        ...dependencies,
-        ...devDependencies,
-        ...groupDependencies,
-      ];
+export const PoetrySection = z.object({
+  version: z.string().optional().catch(undefined),
+  dependencies: withDepType(
+    PoetryDependencies,
+    'dependencies',
+    false,
+  ).optional(),
+  'dev-dependencies': withDepType(
+    PoetryDependencies,
+    'dev-dependencies',
+  ).optional(),
+  group: PoetryGroupDependencies.optional(),
+  source: PoetrySources,
+});
 
-      const res: PackageFileContent = { deps, packageFileVersion: version };
-
-      if (sourceUrls.length) {
-        for (const dep of res.deps) {
-          if (dep.managerData?.sourceName) {
-            const sourceUrl = sourceUrls.find(
-              ({ name }) => name === dep.managerData?.sourceName,
-            );
-            if (sourceUrl?.url) {
-              dep.registryUrls = [sourceUrl.url];
-            }
-          }
-        }
-
-        const sourceUrlsFiltered = sourceUrls.filter(
-          ({ priority }) => priority !== 'explicit',
-        );
-        res.registryUrls = uniq(sourceUrlsFiltered.map(({ url }) => url!));
-      }
-
-      return res;
-    },
-  );
-
-export type PoetrySectionSchema = z.infer<typeof PoetrySectionSchema>;
+export type PoetrySection = z.infer<typeof PoetrySection>;
 
 const BuildSystemRequireVal = z
   .string()
@@ -341,40 +305,105 @@ const BuildSystemRequireVal = z
     return { depName, poetryRequirement };
   });
 
-export const PoetrySchema = z
-  .object({
-    tool: z
-      .object({ poetry: PoetrySectionSchema })
-      .transform(({ poetry }) => poetry),
-    'build-system': z
-      .object({
-        'build-backend': z.string().refine(
-          // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
-          (buildBackend) =>
-            buildBackend === 'poetry.masonry.api' ||
-            buildBackend === 'poetry.core.masonry.api',
-        ),
-        requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
-          const req = vals.find(
-            ({ depName }) => depName === 'poetry' || depName === 'poetry_core',
+export const PoetryPyProject = Toml.pipe(
+  z
+    .object({
+      project: ProjectSection.optional().catch(undefined),
+      tool: z.object({ poetry: PoetrySection }).optional().catch(undefined),
+      'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch([]),
+      'build-system': z
+        .object({
+          'build-backend': z.string().refine(
+            // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+            (buildBackend) =>
+              buildBackend === 'poetry.masonry.api' ||
+              buildBackend === 'poetry.core.masonry.api',
+          ),
+          requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
+            const req = vals.find(
+              ({ depName }) =>
+                depName === 'poetry' ||
+                depName === 'poetry_core' ||
+                depName === 'poetry-core',
+            );
+            return req?.poetryRequirement;
+          }),
+        })
+        .transform(({ requires: poetryRequirement }) => poetryRequirement)
+        .optional()
+        .catch(undefined),
+    })
+    .transform((pyproject) => {
+      const {
+        project,
+        tool,
+        'build-system': poetryRequirement,
+        'dependency-groups': dependencyGroups,
+      } = pyproject;
+
+      const deps: PackageDependency[] = [];
+
+      const projectDependencies = project?.dependencies;
+      if (projectDependencies) {
+        deps.push(...projectDependencies);
+      }
+
+      const projectOptionalDependencies = project?.['optional-dependencies'];
+      if (projectOptionalDependencies) {
+        deps.push(...projectOptionalDependencies);
+      }
+
+      deps.push(...dependencyGroups);
+
+      const poetryDependencies = tool?.poetry?.dependencies;
+      if (poetryDependencies) {
+        deps.push(...poetryDependencies);
+      }
+
+      const poetryDevDependencies = tool?.poetry?.['dev-dependencies'];
+      if (poetryDevDependencies) {
+        deps.push(...poetryDevDependencies);
+      }
+
+      const poetryGroupDependencies = tool?.poetry?.group;
+      if (poetryGroupDependencies) {
+        deps.push(...poetryGroupDependencies);
+      }
+
+      const packageFileVersion = tool?.poetry?.version;
+      const packageFileContent: PackageFileContent = {
+        deps,
+        packageFileVersion,
+      };
+
+      const sourceUrls = tool?.poetry?.source;
+      if (sourceUrls) {
+        for (const dep of deps) {
+          if (dep.managerData?.sourceName) {
+            const sourceUrl = sourceUrls.find(
+              ({ name }) => name === dep.managerData?.sourceName,
+            );
+            if (sourceUrl?.url) {
+              dep.registryUrls = [sourceUrl.url];
+            }
+          }
+        }
+
+        const sourceUrlsFiltered = sourceUrls.filter(
+          ({ priority }) => priority !== 'explicit',
+        );
+        if (sourceUrlsFiltered.length) {
+          packageFileContent.registryUrls = uniq(
+            sourceUrlsFiltered.map(({ url }) => url!),
           );
-          return req?.poetryRequirement;
-        }),
-      })
-      .transform(({ requires: poetryRequirement }) => poetryRequirement)
-      .optional()
-      .catch(undefined),
-  })
-  .transform(
-    ({ tool: packageFileContent, 'build-system': poetryRequirement }) => ({
-      packageFileContent,
-      poetryRequirement,
+        }
+      }
+
+      return { packageFileContent, poetryRequirement };
     }),
-  );
+);
 
-export type PoetrySchema = z.infer<typeof PoetrySchema>;
-
-export const PoetrySchemaToml = Toml.pipe(PoetrySchema);
+export type PoetryPyProject = z.infer<typeof PoetryPyProject>;
 
 const poetryConstraint: Record<string, string> = {
   '1.0': '<1.1.0',

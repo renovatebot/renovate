@@ -1,4 +1,4 @@
-import { AbstractMigration } from './abstract-migration';
+import { AbstractMigration } from './abstract-migration.ts';
 
 describe('config/migrations/base/abstract-migration', () => {
   it('should not allow to use method rewrite', () => {
@@ -11,6 +11,7 @@ describe('config/migrations/base/abstract-migration', () => {
     }
     const customMigration = new CustomMigration(
       {
+        // @ts-expect-error -- testing invalid usage
         fooBar: true,
       },
       {},
@@ -29,6 +30,7 @@ describe('config/migrations/base/abstract-migration', () => {
     }
     const customMigration = new CustomMigration(
       {
+        // @ts-expect-error -- testing invalid usage
         fooBar: true,
       },
       {},

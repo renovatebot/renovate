@@ -1,10 +1,10 @@
-import { newlineRegex } from '../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { newlineRegex } from '../../../util/regex.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   endBlockRegex,
   excludeBlockStartRegex,
   parseLine,
-} from './line-parser';
+} from './line-parser.ts';
 
 function findMatchingModule(
   tool: PackageDependency,

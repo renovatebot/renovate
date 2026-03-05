@@ -49,13 +49,15 @@ export interface PnpmWorkspaceFile {
   packages: string[];
   catalog?: Record<string, string>;
   catalogs?: Record<string, Record<string, string>>;
+  minimumReleaseAge?: number;
+  minimumReleaseAgeExclude?: string[];
 }
 
 /**
  * A pnpm catalog is either the default catalog (catalog:, catalogs:default), or
  * a named one (catalogs:<name>)
  */
-export interface PnpmCatalog {
+export interface Catalog {
   name: string;
   dependencies: NpmPackageDependency;
 }

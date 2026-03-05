@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
-import { join } from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { extractPackageFile } from './index.ts';
 
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134
@@ -29,7 +29,7 @@ describe('modules/manager/pipenv/extract', () => {
   beforeEach(() => {
     Fixtures.reset();
     GlobalConfig.set({
-      localDir: join(localDir),
+      localDir: upath.join(localDir),
     });
   });
 

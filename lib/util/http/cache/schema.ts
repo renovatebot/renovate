@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
-export const HttpCacheSchema = z
+export const HttpCache = z
   .object({
     etag: z.string().optional(),
     lastModified: z.string().optional(),
@@ -9,4 +9,4 @@ export const HttpCacheSchema = z
   })
   .nullable()
   .catch(null);
-export type HttpCache = z.infer<typeof HttpCacheSchema>;
+export type HttpCache = z.infer<typeof HttpCache>;

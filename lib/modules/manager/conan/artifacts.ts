@@ -1,19 +1,21 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 async function conanLockUpdate(
   conanFilePath: string,
   isLockFileMaintenance: boolean | undefined,
+  conanConstraint?: string,
+  pythonConstraint?: string,
 ): Promise<void> {
   const command =
     `conan lock create ${quote(conanFilePath)}` +
@@ -21,6 +23,16 @@ async function conanLockUpdate(
 
   const execOptions: ExecOptions = {
     extraEnv: { ...getGitEnvironmentVariables(['conan']) },
+    toolConstraints: [
+      {
+        toolName: 'python',
+        constraint: pythonConstraint,
+      },
+      {
+        toolName: 'conan',
+        constraint: conanConstraint,
+      },
+    ],
     docker: {},
   };
 
@@ -61,7 +73,12 @@ export async function updateArtifacts(
     await writeLocalFile(packageFileName, newPackageFileContent);
 
     logger.trace(`Updating ${lockFileName}`);
-    await conanLockUpdate(packageFileName, isLockFileMaintenance);
+    await conanLockUpdate(
+      packageFileName,
+      isLockFileMaintenance,
+      config.constraints?.conan,
+      config.constraints?.python,
+    );
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (!newLockFileContent) {

@@ -34,6 +34,11 @@ exports[`modules/datasource/maven/index > falls back to next registry url 1`] = 
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
@@ -101,6 +106,11 @@ exports[`modules/datasource/maven/index > removes authentication header after re
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
@@ -138,6 +148,11 @@ exports[`modules/datasource/maven/index > returns releases 1`] = `
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
@@ -176,6 +191,11 @@ exports[`modules/datasource/maven/index > returns releases from custom repositor
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
@@ -213,6 +233,11 @@ exports[`modules/datasource/maven/index > skips registry with invalid XML 1`] = 
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
@@ -250,5 +275,10 @@ exports[`modules/datasource/maven/index > skips registry with invalid metadata s
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;

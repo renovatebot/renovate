@@ -1,11 +1,12 @@
-import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isString } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class DatasourceMigration extends AbstractMigration {
   override readonly propertyName = 'datasource';
 
   override run(value: unknown): void {
-    if (is.string(value)) {
+    // v8 ignore else -- TODO: add test #40625
+    if (isString(value)) {
       const newValue = migrateDatasource(value);
       this.rewrite(newValue);
     }

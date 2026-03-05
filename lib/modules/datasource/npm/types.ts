@@ -1,9 +1,17 @@
-import type { PackageRule } from '../../../config/types';
-import type { HostRule } from '../../../types';
+import type { PackageRule } from '../../../config/types.ts';
+import type { HostRule } from '../../../types/index.ts';
 
 export interface NpmrcRules {
   hostRules: HostRule[];
   packageRules: PackageRule[];
+}
+
+export interface NpmAttestations {
+  url?: string;
+}
+
+export interface NpmDistribution {
+  attestations?: NpmAttestations;
 }
 
 export interface NpmResponseVersion {
@@ -17,6 +25,7 @@ export interface NpmResponseVersion {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   engines?: Record<string, string>;
+  dist?: NpmDistribution;
 }
 
 export interface NpmResponse {

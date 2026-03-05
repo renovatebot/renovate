@@ -82,11 +82,14 @@ Fill the array with alternate index URL(s).
 
 ## Disabling Python support
 
-```json title="Disabling all managers where language is set to Python"
+```json title="Disabling all managers in the Python category"
 {
-  "python": {
-    "enabled": false
-  }
+  "packageRules": [
+    {
+      "matchCategories": ["python"],
+      "enabled": false
+    }
+  ]
 }
 ```
 

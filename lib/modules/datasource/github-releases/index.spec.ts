@@ -1,11 +1,11 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { getDigest, getPkgReleases } from '..';
-import * as githubGraphql from '../../../util/github/graphql';
-import * as _hostRules from '../../../util/host-rules';
-import type { Timestamp } from '../../../util/timestamp';
-import { GithubReleasesDatasource } from '.';
+import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { GithubReleasesDatasource } from './index.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 const hostRules = vi.mocked(_hostRules);
 
 describe('modules/datasource/github-releases/index', () => {

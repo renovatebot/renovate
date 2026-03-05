@@ -1,33 +1,46 @@
-import * as decrypt from '../../../config/decrypt';
-import { getConfig } from '../../../config/defaults';
-import * as _migrateAndValidate from '../../../config/migrate-validate';
-import * as _migrate from '../../../config/migration';
-import type { AllConfig } from '../../../config/types';
-import * as memCache from '../../../util/cache/memory';
-import * as repoCache from '../../../util/cache/repository';
-import { initRepoCache } from '../../../util/cache/repository/init';
-import type { RepoCacheData } from '../../../util/cache/repository/types';
-import { getUserEnv } from '../../../util/env';
-import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache';
-import { OnboardingState } from '../onboarding/common';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import type { MockInstance } from 'vitest';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, logger, partial, platform, scm } from '~test/util.ts';
+import * as decrypt from '../../../config/decrypt.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
+import * as _migrate from '../../../config/migration.ts';
+import type { AllConfig } from '../../../config/types.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import { initRepoCache } from '../../../util/cache/repository/init.ts';
+import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
+import { getUserEnv } from '../../../util/env.ts';
+import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
+import { OnboardingState } from '../onboarding/common.ts';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
-  mergeStaticRepoEnvConfig,
+  resolveStaticRepoConfig,
   setNpmTokenInNpmrc,
-} from './merge';
-import { fs, logger, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './merge.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../onboarding/branch/onboarding-branch-cache');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
 
 const migrate = vi.mocked(_migrate);
 const migrateAndValidate = vi.mocked(_migrateAndValidate);
 const onboardingCache = vi.mocked(_onboardingCache);
 
 let config: RenovateConfig;
+
+function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
+  const mockedError = new Error('mocked exit called');
+
+  return [
+    vi.spyOn(process, 'exit').mockImplementationOnce(() => {
+      throw mockedError;
+    }),
+    mockedError,
+  ];
+}
 
 beforeEach(() => {
   memCache.init();
@@ -36,8 +49,8 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-vi.mock('../../../config/migration');
-vi.mock('../../../config/migrate-validate');
+vi.mock('../../../config/migration.ts');
+vi.mock('../../../config/migrate-validate.ts');
 
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
@@ -63,6 +76,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists',
       );
@@ -377,6 +391,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig({
           ...config,
           requireConfig: 'ignored',
+          // @ts-expect-error -- TODO: do we still need this?
           configFileParsed: undefined,
           warnings: undefined,
           secrets: undefined,
@@ -489,7 +504,7 @@ describe('workers/repository/init/merge', () => {
   });
 
   describe('static repository config', () => {
-    const repoStaticConfigKey = 'RENOVATE_STATIC_REPO_CONFIG';
+    const repoStaticConfigFileKey = 'RENOVATE_X_STATIC_REPO_CONFIG_FILE';
 
     beforeEach(() => {
       migrate.migrateConfig.mockImplementation((c) => ({
@@ -505,52 +520,106 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
-    describe('mergeStaticRepoEnvConfig()', () => {
+    describe('resolveStaticRepoConfig()', () => {
       interface MergeRepoEnvTestCase {
         name: string;
         currentConfig: AllConfig;
-        env: NodeJS.ProcessEnv;
+        staticConfig: AllConfig | undefined;
         want: AllConfig;
       }
 
       const testCases: MergeRepoEnvTestCase[] = [
         {
           name: 'it does nothing',
-          env: {},
+          staticConfig: undefined,
           currentConfig: { repositories: ['some/repo'] },
           want: { repositories: ['some/repo'] },
         },
         {
-          name: 'it merges env with the current config',
-          env: { [repoStaticConfigKey]: '{"dependencyDashboard":true}' },
+          name: 'it merges static config with the current config',
+          staticConfig: { dependencyDashboard: true },
           currentConfig: { repositories: ['some/repo'] },
           want: {
             dependencyDashboard: true,
             repositories: ['some/repo'],
           },
         },
-        {
-          name: 'it ignores env with other renovate specific configuration options',
-          env: { RENOVATE_CONFIG: '{"dependencyDashboard":true}' },
-          currentConfig: { repositories: ['some/repo'] },
-          want: { repositories: ['some/repo'] },
-        },
       ];
 
       it.each(testCases)(
         '$name',
-        async ({ env, currentConfig, want }: MergeRepoEnvTestCase) => {
-          const got = await mergeStaticRepoEnvConfig(currentConfig, env);
+        async ({ currentConfig, staticConfig, want }: MergeRepoEnvTestCase) => {
+          const [exitMock] = mockProcessExitOnce();
+          let configFileName: string | undefined;
+
+          if (!isNullOrUndefined(staticConfig)) {
+            configFileName = 'static_config.json5';
+            fs.readSystemFile.mockResolvedValueOnce(
+              JSON.stringify(staticConfig),
+            );
+          }
+
+          const got = await resolveStaticRepoConfig(
+            currentConfig,
+            configFileName,
+          );
 
           expect(got).toEqual(want);
+          expect(exitMock).not.toHaveBeenCalled();
         },
       );
+
+      describe('resolveStaticRepoConfig termination cases', () => {
+        it.each([
+          {
+            name: 'should terminate when static config is missing',
+            setup: () => fs.readSystemFile.mockRejectedValueOnce('missing'),
+          },
+          {
+            name: 'should terminate when static config is invalid JSON',
+            setup: () => fs.readSystemFile.mockResolvedValue('invalid json'),
+          },
+        ])('$name', async ({ setup }) => {
+          const [exitMock, error] = mockProcessExitOnce();
+          setup();
+
+          await expect(
+            resolveStaticRepoConfig({}, 'static_config.json'),
+          ).rejects.toThrow(error);
+
+          expect(exitMock).toHaveBeenCalledExactlyOnceWith(1);
+        });
+
+        it('should log static config validation errors and warnings', async () => {
+          const invalidConfig = { foo: 'bar' };
+
+          fs.readSystemFile.mockResolvedValue(JSON.stringify(invalidConfig));
+
+          const resolved = await resolveStaticRepoConfig(
+            {},
+            'static_config.json',
+          );
+
+          expect(resolved).toStrictEqual(invalidConfig);
+
+          expect(logger.logger.info).toHaveBeenCalledWith(
+            {
+              errors: [
+                {
+                  message: 'Invalid configuration option: foo',
+                  topic: 'Configuration Error',
+                },
+              ],
+              warnings: [],
+            },
+            'Static repo config validation issues detected',
+          );
+        });
+      });
     });
 
     describe('mergeRenovateConfig() with a static repository config', () => {
       beforeEach(() => {
-        delete process.env[repoStaticConfigKey];
-
         scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       });
 
@@ -702,7 +771,8 @@ describe('workers/repository/init/merge', () => {
           fs.readLocalFile.mockResolvedValueOnce(
             JSON.stringify(repoFileConfig),
           );
-          process.env[repoStaticConfigKey] = JSON.stringify(staticConfig);
+          process.env[repoStaticConfigFileKey] = 'static_config.json';
+          fs.readSystemFile.mockResolvedValueOnce(JSON.stringify(staticConfig));
 
           const got = await mergeRenovateConfig(currentConfig);
 

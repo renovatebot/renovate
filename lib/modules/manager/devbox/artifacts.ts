@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts({
-  config: { constraints, isLockFileMaintenance, updateType },
+  config: { constraints, isLockFileMaintenance },
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -46,7 +46,7 @@ export async function updateArtifacts({
     cmd.push(
       supportsNoInstall ? 'devbox update --no-install' : 'devbox update',
     );
-  } else if (is.nonEmptyArray(updatedDeps)) {
+  } else if (isNonEmptyArray(updatedDeps)) {
     if (supportsNoInstall) {
       const updateCommands: string[] = updatedDeps
         .map(

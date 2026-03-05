@@ -1,58 +1,62 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
-import { pkg } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
+} from '../../../../constants/error-messages.ts';
+import { pkg } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type {
   PlatformPrOptions,
   Pr,
   PrDebugData,
   UpdatePrConfig,
-} from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
+} from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
 import {
   getPrBodyStruct,
   hashBody,
-} from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getElapsedHours } from '../../../../util/date';
-import { stripEmojis } from '../../../../util/emoji';
-import { fingerprint } from '../../../../util/fingerprint';
-import { getBranchLastCommitTime } from '../../../../util/git';
-import { memoize } from '../../../../util/memoize';
-import { incCountValue, isLimitReached } from '../../../global/limits';
+} from '../../../../modules/platform/pr-body.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { getElapsedHours } from '../../../../util/date.ts';
+import { stripEmojis } from '../../../../util/emoji.ts';
+import { fingerprint } from '../../../../util/fingerprint.ts';
+import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
+import { memoize } from '../../../../util/memoize.ts';
+import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
   PrBlockedBy,
-} from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import { getNextScheduleTime, isScheduledNow } from '../branch/schedule';
-import { resolveBranchStatus } from '../branch/status-checks';
-import { getPrBody } from './body';
-import { getChangedLabels, prepareLabels, shouldUpdateLabels } from './labels';
-import { addParticipants } from './participants';
-import { getPrCache, setPrCache } from './pr-cache';
+} from '../../../types.ts';
+import { embedChangelogs } from '../../changelog/index.ts';
+import { getNextScheduleTime, isScheduledNow } from '../branch/schedule.ts';
+import { resolveBranchStatus } from '../branch/status-checks.ts';
+import { getPrBody } from './body/index.ts';
+import {
+  getChangedLabels,
+  prepareLabels,
+  shouldUpdateLabels,
+} from './labels.ts';
+import { addParticipants } from './participants.ts';
+import { getPrCache, setPrCache } from './pr-cache.ts';
 import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
-} from './pr-fingerprint';
-import { tryReuseAutoclosedPr } from './pr-reuse';
+} from './pr-fingerprint.ts';
+import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
 ): PlatformPrOptions {
   const usePlatformAutomerge = Boolean(
     config.automerge &&
-      (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-      config.platformAutomerge,
+    (config.automergeType === 'pr' || config.automergeType === 'branch') &&
+    config.platformAutomerge,
   );
 
   const options: PlatformPrOptions = {
@@ -113,7 +117,7 @@ export function updatePrDebugData(
   // When to add:
   // 1. Add it when a new PR is created, i.e., when debugData is undefined.
   // 2. Add it if an existing PR already has labels in the debug data, confirming that we can update its labels.
-  if (!debugData || is.array(debugData.labels)) {
+  if (!debugData || isArray(debugData.labels)) {
     updatedPrDebugData.labels = labels;
   }
 
@@ -122,8 +126,8 @@ export function updatePrDebugData(
 
 function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
   if (
-    is.nonEmptyArray(config.ignoreReviewers) &&
-    is.nonEmptyArray(pr.reviewers)
+    isNonEmptyArray(config.ignoreReviewers) &&
+    isNonEmptyArray(pr.reviewers)
   ) {
     const ignoreReviewers = new Set(config.ignoreReviewers);
     return (
@@ -131,7 +135,39 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
       0
     );
   }
-  return is.nonEmptyArray(pr.reviewers);
+  return isNonEmptyArray(pr.reviewers);
+}
+
+function addPullRequestNoteIfAttestationHasBeenLost(
+  upgrade: BranchUpgradeConfig,
+): void {
+  const { packageName, depName, currentVersion, newVersion } = upgrade;
+  const name = packageName ?? depName;
+
+  const currentRelease = upgrade.releases?.find(
+    (release) => release.version === currentVersion,
+  );
+  const newRelease = upgrade.releases?.find(
+    (release) => release.version === newVersion,
+  );
+
+  if (
+    currentRelease &&
+    newRelease &&
+    currentRelease.attestation === true &&
+    newRelease.attestation !== true
+  ) {
+    upgrade.prBodyNotes ??= [];
+    upgrade.prBodyNotes.push(
+      [
+        '> :stop_sign: **Caution**',
+        '>',
+        `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
+        `> Verify that release ${newVersion} was published by the expected author.`,
+        '\n',
+      ].join('\n'),
+    );
+  }
 }
 
 // Ensures that PR exists with matching title/body
@@ -158,7 +194,7 @@ export async function ensurePr(
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
-    (await tryReuseAutoclosedPr(branchName));
+    (await tryReuseAutoclosedPr(branchName, prTitle));
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
@@ -197,13 +233,13 @@ export async function ensurePr(
       if (
         config.stabilityStatus !== 'yellow' &&
         (await getBranchStatus()) === 'yellow' &&
-        is.number(config.prNotPendingHours)
+        isNumber(config.prNotPendingHours)
       ) {
         logger.debug('Checking how long this branch has been pending');
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
           logger.debug(
-            'Branch exceeds prNotPending hours - forcing PR creation',
+            `Branch exceeds prNotPending=${config.prNotPendingHours}, hours - forcing PR creation`,
           );
           config.forcePr = true;
         }
@@ -236,11 +272,11 @@ export async function ensurePr(
         if (
           !dependencyDashboardCheck &&
           ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-            (is.number(config.prNotPendingHours) &&
+            (isNumber(config.prNotPendingHours) &&
               elapsedHours < config.prNotPendingHours))
         ) {
           logger.debug(
-            `Branch is ${elapsedHours} hours old - skipping PR creation`,
+            `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
           return {
             type: 'without-pr',
@@ -307,8 +343,7 @@ export async function ensurePr(
         }
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
-        upgrade.prBodyNotes = [
-          ...upgrade.prBodyNotes,
+        upgrade.prBodyNotes.push(
           [
             '> :exclamation: **Important**',
             '> ',
@@ -316,9 +351,12 @@ export async function ensurePr(
             '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
             '\n',
           ].join('\n'),
-        ];
+        );
       }
     }
+
+    addPullRequestNoteIfAttestationHasBeenLost(upgrade);
+
     config.upgrades.push(upgrade);
   }
 
@@ -491,7 +529,10 @@ export async function ensurePr(
     }
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+      logger.info(
+        { labels: prepareLabels(config) },
+        'DRY-RUN: Would create PR: ' + prTitle,
+      );
       pr = { number: 0 } as never;
     } else {
       try {
@@ -516,7 +557,10 @@ export async function ensurePr(
 
         incCountValue('ConcurrentPRs');
         incCountValue('HourlyPRs');
-        logger.info({ pr: pr?.number, prTitle }, 'PR created');
+        logger.info(
+          { pr: pr?.number, prTitle, labels: pr?.labels },
+          'PR created',
+        );
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
         if (

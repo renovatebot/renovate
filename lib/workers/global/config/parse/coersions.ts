@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import JSON5 from 'json5';
 
 export const coersions: Record<string, (arg: string) => unknown> = {
@@ -25,7 +25,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       return val
         .split(',')
         .map((el) => el.trim())
-        .filter(is.nonEmptyString);
+        .filter(isNonEmptyString);
     }
   },
   object: (val: string): any => {

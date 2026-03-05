@@ -1,8 +1,10 @@
-import is from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../types';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isArray, isNonEmptyObject, isObject } from '@sindresorhus/is';
+import type { PackageRule } from '../../types.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
-interface DepTypesRule extends PackageRule, PackageRuleInputConfig {}
+interface DepTypesRule extends PackageRule {
+  depType?: string;
+}
 
 export class DepTypesMigration extends AbstractMigration {
   override readonly deprecated = true;
@@ -11,16 +13,16 @@ export class DepTypesMigration extends AbstractMigration {
 
   override run(value: unknown, key: string): void {
     const packageRules: PackageRule[] = this.get('packageRules') ?? [];
-    if (is.nonEmptyObject(value) && !is.array(value)) {
+    if (isNonEmptyObject(value) && !isArray(value)) {
       packageRules.push({
         matchDepTypes: [key],
         ...value,
       });
     }
 
-    if (is.array(value)) {
+    if (isArray(value)) {
       for (const depType of value as DepTypesRule[]) {
-        if (is.object(depType) && !is.array(depType)) {
+        if (isObject(depType) && !isArray(depType)) {
           const depTypeName = depType.depType;
           if (depTypeName) {
             delete depType.depType;

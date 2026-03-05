@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { linkify, sanitizeMarkdown } from './markdown';
+import { linkify, sanitizeMarkdown } from './markdown.ts';
 
 describe('util/markdown', () => {
   describe('.linkify', () => {
@@ -33,6 +33,16 @@ describe('util/markdown', () => {
     it('works', async () => {
       const res = await linkify(before, { repository: 'some/repo' });
       expect(res).toEqual(after);
+    });
+
+    it('works with gitlab', async () => {
+      const res = await linkify(
+        `(https://company.gitlab.local/shared/scanner/-/merge_requests/1177)`,
+        { repository: 'some/repo' },
+      );
+      expect(res.toString()).toEqual(
+        `(<https://company.gitlab.local/shared/scanner/-/merge_requests/1177>)\n`,
+      );
     });
 
     it('sanitizeMarkdown check massaged release notes', () => {

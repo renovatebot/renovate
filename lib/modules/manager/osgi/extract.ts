@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isArray, isNullOrUndefined } from '@sindresorhus/is';
 import json5 from 'json5';
 import { coerce, satisfies } from 'semver';
-import { logger } from '../../../logger';
-import { MavenDatasource } from '../../datasource/maven';
+import { logger } from '../../../logger/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { Bundle, FeatureModel } from './types';
+} from '../types.ts';
+import type { Bundle, FeatureModel } from './types.ts';
 
 export function extractPackageFile(
   content: string,
@@ -32,7 +32,7 @@ export function extractPackageFile(
 
   if (
     // for empty an empty result
-    is.nullOrUndefined(featureModel) ||
+    isNullOrUndefined(featureModel) ||
     // Compendium R8 159.9: resource versioning
     !isSupportedFeatureResourceVersion(featureModel, packageFile)
   ) {
@@ -45,7 +45,7 @@ export function extractPackageFile(
   // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
   const execEnvFramework =
     featureModel['execution-environment:JSON|false']?.framework;
-  if (!is.nullOrUndefined(execEnvFramework)) {
+  if (!isNullOrUndefined(execEnvFramework)) {
     allBundles.push(execEnvFramework);
   }
 
@@ -131,7 +131,7 @@ function extractArtifactList(
   sectionValue: unknown,
 ): Bundle[] {
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
-  if (sectionName.includes(':ARTIFACTS|') && is.array(sectionValue)) {
+  if (sectionName.includes(':ARTIFACTS|') && isArray(sectionValue)) {
     return sectionValue as Bundle[];
   }
 

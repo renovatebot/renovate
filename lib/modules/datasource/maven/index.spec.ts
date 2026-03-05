@@ -5,16 +5,16 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
-import type { Release, ReleaseResult } from '..';
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as hostRules from '../../../util/host-rules';
-import { id as versioning } from '../../versioning/maven';
-import { postprocessRelease } from '../postprocess-release';
-import { MAVEN_REPO } from './common';
-import { MavenDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { id as versioning } from '../../versioning/maven/index.ts';
+import type { Release, ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
+import { postprocessRelease } from '../postprocess-release.ts';
+import { MAVEN_REPO } from './common.ts';
+import { MavenDatasource } from './index.ts';
 
 const googleAuth = vi.mocked(_googleAuth);
 vi.mock('google-auth-library');
@@ -162,6 +162,11 @@ describe('modules/datasource/maven/index', () => {
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [{ version: '1.0.3-SNAPSHOT' }],
+      respectLatest: false,
+      tags: {
+        latest: '1.0.3-SNAPSHOT',
+        release: '1.0.3-SNAPSHOT',
+      },
     });
   });
 
@@ -193,6 +198,11 @@ describe('modules/datasource/maven/index', () => {
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [{ version: '1.0.3-SNAPSHOT' }],
+      respectLatest: false,
+      tags: {
+        latest: '1.0.3-SNAPSHOT',
+        release: '1.0.3-SNAPSHOT',
+      },
     });
   });
 
@@ -446,9 +456,12 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      vi.fn().mockImplementation(() => ({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class {
+          getAccessToken = vi.fn().mockResolvedValue('some-token');
+        },
+      ),
     );
 
     const res = await get('org.example:package', baseUrlAR);
@@ -471,6 +484,11 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      respectLatest: false,
+      tags: {
+        latest: '2.0.0',
+        release: '2.0.0',
+      },
       isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(2);
@@ -491,9 +509,12 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      vi.fn().mockImplementation(() => ({
-        getAccessToken: vi.fn().mockResolvedValue(undefined),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class GoogleAuth {
+          getAccessToken = vi.fn();
+        },
+      ),
     );
 
     const res = await get('org.example:package', baseUrlAR);
@@ -516,6 +537,11 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      respectLatest: false,
+      tags: {
+        latest: '2.0.0',
+        release: '2.0.0',
+      },
       isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(2);

@@ -3,27 +3,28 @@ import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../config/defaults';
-import { GlobalConfig } from '../../config/global';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, platform } from '~test/util.ts';
+import { getConfig } from '../../config/defaults.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../modules/manager/types';
-import type { Platform } from '../../modules/platform';
-import { massageMarkdown } from '../../modules/platform/github';
-import { clone } from '../../util/clone';
-import { regEx } from '../../util/regex';
-import { asTimestamp } from '../../util/timestamp';
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import * as dependencyDashboard from './dependency-dashboard';
-import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
-import { PackageFiles } from './package-files';
-import { Fixtures } from '~test/fixtures';
-import { logger, platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../modules/manager/types.ts';
+import { massageMarkdown } from '../../modules/platform/github/index.ts';
+import type { Platform } from '../../modules/platform/index.ts';
+import { clone } from '../../util/clone.ts';
+import { emojify } from '../../util/emoji.ts';
+import { regEx } from '../../util/regex.ts';
+import { asTimestamp } from '../../util/timestamp.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
+import * as dependencyDashboard from './dependency-dashboard.ts';
+import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
+import { PackageFiles } from './package-files.ts';
 
 const createVulnerabilitiesMock = vi.fn();
-vi.mock('./process/vulnerabilities', () => {
+vi.mock('./process/vulnerabilities.ts', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -39,13 +40,12 @@ type PrUpgrade = BranchUpgradeConfig;
 const massageMdSpy = platform.massageMarkdown;
 const getIssueSpy = platform.getIssue;
 
-let config: RenovateConfig;
+let config: BranchConfig;
 
 beforeEach(() => {
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
-  config = getConfig();
-  config.platform = 'github';
+  config = getConfig() as BranchConfig;
   config.errors = [];
   config.warnings = [];
 });
@@ -108,6 +108,7 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardChecks: {
           configMigrationCheckboxState: 'no-checkbox',
         },
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardIssue: 1,
@@ -131,6 +132,7 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -156,6 +158,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
         checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -189,6 +192,7 @@ describe('workers/repository/dependency-dashboard', () => {
           configMigrationCheckboxState: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
@@ -216,11 +220,40 @@ describe('workers/repository/dependency-dashboard', () => {
           configMigrationCheckboxState: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: true,
+      });
+    });
+
+    it('reads dashboard body open all awaiting schedule', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          '- [ ] <!-- create-all-awaiting-schedule-prs -->',
+          '- [x] <!-- create-all-awaiting-schedule-prs -->',
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName3: 'unschedule',
+          branchName4: 'unschedule',
+          configMigrationCheckboxState: 'no-checkbox',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: true,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
       });
     });
 
@@ -274,6 +307,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(conf).toEqual({
         checkedBranches: ['branch1', 'branch2'],
         dependencyDashboard: false,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -281,6 +315,23 @@ describe('workers/repository/dependency-dashboard', () => {
           branch2: 'global-config',
         },
         dependencyDashboardRebaseAllOpen: false,
+      });
+    });
+
+    it('reads dashboard body and group size not met branches', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: `
+        - [x] <!-- approveGroup-branch=groupedBranch1 -->
+        - [ ] <!-- approveGroup-branch=groupedBranch2 -->
+        `,
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf.dependencyDashboardChecks).toMatchObject({
+        groupedBranch1: 'approveGroup',
       });
     });
   });
@@ -553,6 +604,100 @@ describe('workers/repository/dependency-dashboard', () => {
       await dryRun(branches, platform, 0, 1);
     });
 
+    it('checks an issue with dependency dashboard categories', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr0',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep0' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #2',
+          branchName: 'branchName0',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: 'needs-approval',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #10',
+          branchName: 'branchName2',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr3',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
+          result: 'not-scheduled',
+          branchName: 'branchName3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr4',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
+          result: 'not-scheduled',
+          branchName: 'branchName4',
+          dependencyDashboardCategory: 'Category #1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr5',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName5',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr6',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName6',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr7',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
+          result: 'error',
+          branchName: 'branchName7',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr8',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
+          result: 'error',
+          branchName: 'branchName8',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr9',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
+          result: 'done',
+          prBlockedBy: 'BranchAutomerge',
+          branchName: 'branchName9',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 1);
+    });
+
     it('checks an issue with 2 PR pr-edited', async () => {
       const branches: BranchConfig[] = [
         {
@@ -679,6 +824,47 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt'),
+      );
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 1);
+    });
+
+    it('checks an issue with group size not met branches', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          result: 'minimum-group-size-not-met',
+          branchName: 'groupBranch1',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle,
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body.trim()).toBe(
+        codeBlock`
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Group Size Not Met
+
+The following branches have not met their minimum group size. To create them, click on a checkbox below.
+
+ - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
+
+## Detected Dependencies
+
+None detected
+`,
       );
 
       // same with dry run
@@ -1157,7 +1343,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -1179,7 +1365,7 @@ None detected
     it('forwards configured labels to the ensure issue call', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
-      config.dependencyDashboardLabels = ['RenovateBot', 'Maintenance'];
+      config.dependencyDashboardLabels = ['Renovate', 'Maintenance'];
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -1188,7 +1374,7 @@ None detected
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].labels).toStrictEqual([
-        'RenovateBot',
+        'Renovate',
         'Maintenance',
       ]);
 
@@ -1300,13 +1486,13 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'These dependencies are deprecated',
+            'These dependencies are either deprecated or have replacements available',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            '| npm | `cookie-parser` | ![Unavailable]',
+            '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'npm | `express-handlebars` | ![Available]',
+            'npm | [express-handlebars](https://redirect.github.com/express-handlebars/express-handlebars) | ![Available]',
           );
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1497,9 +1683,10 @@ None detected
       });
 
       describe('PackageFiles.getDashboardMarkdown()', () => {
-        const note =
-          '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
-        const title = `## Detected dependencies\n\n`;
+        const note = emojify(
+          `> :information_source: **Note**\n> \n> Detected dependencies section has been truncated\n\n`,
+        );
+        const title = `## Detected Dependencies\n\n`;
 
         beforeEach(() => {
           PackageFiles.clear();
@@ -1646,10 +1833,14 @@ None detected
         },
         packageFiles,
       );
-      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
-\`1\`/\`2\` CVEs have Renovate fixes.
-<details><summary>npm</summary>
+      const heading =
+        '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
+        '> `1`/`2` CVEs have Renovate fixes.\n\n';
+
+      expect(result.trimEnd()).toBe(
+        heading +
+          codeBlock`<details><summary>npm</summary>
 <blockquote>
 
 <details><summary>undefined</summary>
@@ -1673,7 +1864,8 @@ None detected
 </details>
 
 </blockquote>
-</details>`);
+</details>`,
+      );
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
@@ -1705,6 +1897,12 @@ None detected
           },
         },
       ]);
+
+      const heading =
+        '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
+        '> `1`/`2` CVEs have possible Renovate fixes.\n' +
+        '> See [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
+
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
@@ -1712,11 +1910,9 @@ None detected
         },
         packageFiles,
       );
-      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
-
-\`1\`/\`2\` CVEs have possible Renovate fixes.
-See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
-<details><summary>npm</summary>
+      expect(result.trimEnd()).toBe(
+        heading +
+          codeBlock`<details><summary>npm</summary>
 <blockquote>
 
 <details><summary>undefined</summary>
@@ -1733,7 +1929,8 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 </details>
 
 </blockquote>
-</details>`);
+</details>`,
+      );
     });
   });
 
@@ -1773,8 +1970,8 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
-      expect(result).toContain('> ℹ **Note**');
-      expect(result).toContain('| Datasource | Name | Last Updated |');
+      expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
     });

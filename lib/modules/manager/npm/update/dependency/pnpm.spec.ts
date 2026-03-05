@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import * as npmUpdater from '../..';
+import * as npmUpdater from '../../index.ts';
 
 describe('modules/manager/npm/update/dependency/pnpm', () => {
   it('handles implicit default catalog dependency', () => {

@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import * as packageCache from '../../cache/package';
-import { resolveTtlValues } from '../../cache/package/ttl';
-import type { PackageCacheNamespace } from '../../cache/package/types';
-import { regEx } from '../../regex';
-import { HttpCacheStats } from '../../stats';
-import type { HttpResponse } from '../types';
-import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import type { HttpCache } from './schema';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as packageCache from '../../cache/package/index.ts';
+import { resolveTtlValues } from '../../cache/package/ttl.ts';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
+import { regEx } from '../../regex.ts';
+import { HttpCacheStats } from '../../stats.ts';
+import type { HttpResponse } from '../types.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
@@ -19,9 +19,7 @@ export interface PackageHttpCacheProviderOptions {
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
-
-  private softTtlMinutes: number;
-  private hardTtlMinutes: number;
+  private defaultTtlMinutes: number;
 
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
@@ -34,31 +32,53 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttl.softTtlMinutes;
-    this.hardTtlMinutes = ttl.hardTtlMinutes;
+    this.defaultTtlMinutes = softTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
 
-  async load(url: string): Promise<unknown> {
-    return await packageCache.get(this.namespace, url);
+  private get softTtlMinutes(): number {
+    const { softTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return softTtlMinutes;
   }
 
-  async persist(url: string, data: HttpCache): Promise<void> {
+  private get hardTtlMinutes(): number {
+    const { hardTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return hardTtlMinutes;
+  }
+
+  private cacheKey(method: string, url: string): string {
+    if (method !== 'get') {
+      return `${method}:${url}`;
+    }
+    return url;
+  }
+
+  async load(method: string, url: string): Promise<unknown> {
+    return await packageCache.get(this.namespace, this.cacheKey(method, url));
+  }
+
+  async persist(method: string, url: string, data: HttpCache): Promise<void> {
     await packageCache.setWithRawTtl(
       this.namespace,
-      url,
+      this.cacheKey(method, url),
       data,
       this.hardTtlMinutes,
     );
   }
 
   override async bypassServer<T>(
+    method: string,
     url: string,
     ignoreSoftTtl = false,
   ): Promise<HttpResponse<T> | null> {
-    const cached = await this.get(url);
+    const cached = await this.get(method, url);
     if (!cached) {
       return null;
     }
@@ -90,7 +110,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
     if (
       this.checkCacheControlHeader &&
-      is.string(resp.headers['cache-control'])
+      isString(resp.headers['cache-control'])
     ) {
       const isPublic = resp.headers['cache-control']
         .toLocaleLowerCase()
@@ -110,6 +130,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   override async wrapServerResponse<T>(
+    method: string,
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
@@ -117,6 +138,6 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return resp;
     }
 
-    return await super.wrapServerResponse(url, resp);
+    return await super.wrapServerResponse(method, url, resp);
   }
 }

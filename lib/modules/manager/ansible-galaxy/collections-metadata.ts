@@ -1,6 +1,6 @@
-import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
-import type { PackageDependency } from '../types';
-import { dependencyRegex, galaxyRegEx } from './util';
+import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { dependencyRegex, galaxyRegEx } from './util.ts';
 
 export function extractCollectionsMetaDataFile(
   lines: string[],

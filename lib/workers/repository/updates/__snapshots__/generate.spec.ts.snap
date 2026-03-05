@@ -21,12 +21,14 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
     "b",
   ],
   "manager": "some-manager",
+  "minimumGroupSize": 1,
   "newValue": "0.6.0",
   "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {
@@ -111,12 +113,14 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "isRange": false,
   "labels": [],
   "manager": "some-manager",
+  "minimumGroupSize": 1,
   "newValue": "0.6.0",
   "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {
@@ -192,11 +196,13 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "isLockFileMaintenance": true,
   "labels": [],
   "manager": "some-manager",
+  "minimumGroupSize": 1,
   "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "recreateClosed": true,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {
@@ -236,6 +242,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "labels": [],
   "lockedVersion": "1.0.0",
   "manager": "some-manager",
+  "minimumGroupSize": 1,
   "newValue": "^1.0.0",
   "newVersion": "1.0.1",
   "prBodyColumns": [],
@@ -244,6 +251,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyNewVersion": "v1.0.1",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {

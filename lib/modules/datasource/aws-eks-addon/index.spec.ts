@@ -5,10 +5,10 @@ import {
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getPkgReleases } from '..';
-import { logger } from '../../../../test/util';
+import { logger } from '../../../../test/util.ts';
+import { getPkgReleases } from '../index.ts';
 
-import { AwsEKSAddonDataSource } from '.';
+import { AwsEKSAddonDataSource } from './index.ts';
 
 const datasource = AwsEKSAddonDataSource.id;
 const eksMock = mockClient(EKSClient);
@@ -116,7 +116,14 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         packageName: '{"kubernetesVersion":"1.30"}',
       });
       expect(res).toBeNull();
-      expect(logger.logger.warn).toHaveBeenCalledOnce();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          err: expect.anything(),
+          serializedFilter: '{"kubernetesVersion":"1.30"}',
+        },
+        'Error parsing eks-addons config.',
+      );
     });
 
     it('with addonName only', async () => {

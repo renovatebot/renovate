@@ -1,14 +1,14 @@
-import { configFileNames } from '../../../config/app-strings';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { getConfigFileNames } from '../../../config/app-strings.ts';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const url = '../../../config-presets.md';
 
 export const defaultConfig = {
-  managerFilePatterns: configFileNames.filter(
+  managerFilePatterns: getConfigFileNames().filter(
     (name) => name !== 'package.json',
   ),
 };

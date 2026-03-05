@@ -1,5 +1,4 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import type { Pr } from '../types';
+import type { Pr } from '../types.ts';
 
 export interface GitlabIssue {
   iid: number;
@@ -17,28 +16,6 @@ export interface GitlabComment {
 export interface GitLabUser {
   id: number;
   username: string;
-}
-
-export interface GitLabMergeRequest {
-  iid: number;
-  title: string;
-  state: string;
-  created_at: string;
-  source_branch: string;
-  target_branch: string;
-  description: string;
-  diverged_commits_count: number;
-  merge_status: string;
-  assignee?: GitLabUser;
-  assignees?: GitLabUser[];
-  reviewers?: GitLabUser[];
-  labels: string[];
-  sha: LongCommitSha;
-  head_pipeline?: {
-    status: string;
-    sha: string;
-  };
-  updated_at: string;
 }
 
 export interface GitlabPr extends Pr {
@@ -62,8 +39,8 @@ export interface RepoResponse {
   mirror: boolean;
   default_branch: string;
   empty_repo: boolean;
-  ssh_url_to_repo: string;
-  http_url_to_repo: string;
+  ssh_url_to_repo: string | null;
+  http_url_to_repo: string | null;
   forked_from_project: boolean;
   repository_access_level: 'disabled' | 'private' | 'enabled';
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';

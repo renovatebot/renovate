@@ -5,4 +5,5 @@ nav:
   - 'Pull Requests': 'pull-requests.md'
   - 'Renovate Scheduling': 'scheduling.md'
   - 'Automerge': 'automerge.md'
+  - 'Minimum Release Age': 'minimum-release-age.md'
   - 'Renovate and changelogs': 'changelogs.md'

@@ -1,6 +1,7 @@
-import { logger } from '../../../logger';
-import * as githubHttp from '../../../util/http/github';
-import type { UserDetails } from './types';
+import { logger } from '../../../logger/index.ts';
+import * as githubHttp from '../../../util/http/github.ts';
+import type { EmailAddress } from '../../../util/schema-utils/index.ts';
+import type { UserDetails } from './types.ts';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -54,10 +55,10 @@ export async function getUserDetails(
 export async function getUserEmail(
   endpoint: string,
   token: string,
-): Promise<string | null> {
+): Promise<EmailAddress | null> {
   try {
     const emails = (
-      await githubApi.getJsonUnchecked<{ email: string }[]>(
+      await githubApi.getJsonUnchecked<{ email: EmailAddress }[]>(
         endpoint + 'user/emails',
         {
           token,

@@ -1,12 +1,12 @@
-import type { Category } from '../../../constants';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { MavenDatasource } from '../../datasource/maven';
-import { SbtPackageDatasource } from '../../datasource/sbt-package';
-import { SbtPluginDatasource } from '../../datasource/sbt-plugin';
-import * as ivyVersioning from '../../versioning/ivy';
+import type { Category } from '../../../constants/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { SbtPackageDatasource } from '../../datasource/sbt-package/index.ts';
+import { SbtPluginDatasource } from '../../datasource/sbt-plugin/index.ts';
+import * as ivyVersioning from '../../versioning/ivy/index.ts';
 
-export { extractAllPackageFiles, extractPackageFile } from './extract';
-export { bumpPackageVersion } from './update';
+export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
+export { bumpPackageVersion } from './update.ts';
 
 export const displayName = 'sbt';
 export const url = 'https://www.scala-sbt.org';

@@ -1,12 +1,12 @@
-import { logger } from '../../../logger';
-import { parseYaml } from '../../../util/yaml';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { XPKGSchema } from './schema';
+} from '../types.ts';
+import { XPKG } from './schema.ts';
 
 export function extractPackageFile(
   content: string,
@@ -21,7 +21,7 @@ export function extractPackageFile(
 
   // not try and catching this as failureBehaviour is set to filter and therefore it will not throw
   const list = parseYaml(content, {
-    customSchema: XPKGSchema,
+    customSchema: XPKG,
     failureBehaviour: 'filter',
   });
 

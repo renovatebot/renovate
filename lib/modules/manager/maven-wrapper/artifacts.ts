@@ -1,22 +1,26 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import is from '@sindresorhus/is';
-import { dirname, join } from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
-import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import type { StatusResult } from '../../../util/git/types';
-import { regEx } from '../../../util/regex';
-import mavenVersioning from '../../versioning/maven';
+import { isTruthy } from '@sindresorhus/is';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
+import {
+  chmodLocalFile,
+  readLocalFile,
+  statLocalFile,
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import mavenVersioning from '../../versioning/maven/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
+} from '../types.ts';
 
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
 interface MavenWrapperPaths {
@@ -43,7 +47,6 @@ async function addIfUpdated(
 
 export async function updateArtifacts({
   packageFileName,
-  newPackageFileContent,
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -81,7 +84,7 @@ export async function updateArtifacts({
     );
     const updateArtifactsResult = (
       await getUpdatedArtifacts(status, artifactFileNames)
-    ).filter(is.truthy);
+    ).filter(isTruthy);
 
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
@@ -224,8 +227,11 @@ function mavenWrapperFileName(): string {
 
 function getMavenPaths(packageFileName: string): MavenWrapperPaths {
   const wrapperExecutableFileName = mavenWrapperFileName();
-  const localProjectDir = join(dirname(packageFileName), '../../');
-  const wrapperFullyQualifiedPath = join(
+  const localProjectDir = upath.join(
+    upath.dirname(packageFileName),
+    packageFileName.includes('mvnw') ? '.' : '../../',
+  );
+  const wrapperFullyQualifiedPath = upath.join(
     localProjectDir,
     wrapperExecutableFileName,
   );
@@ -242,13 +248,16 @@ async function prepareCommand(
   pathFileStats: Stats | null,
   args: string | null,
 ): Promise<string | null> {
-  // istanbul ignore if
+  /* v8 ignore next -- hard to test */
   if (pathFileStats?.isFile() === true) {
     // if the file is not executable by others
     if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
       logger.warn('Maven wrapper is missing the executable bit');
-      await chmodLocalFile(join(cwd, fileName), pathFileStats.mode | 0o111);
+      await chmodLocalFile(
+        upath.join(cwd, fileName),
+        pathFileStats.mode | 0o111,
+      );
     }
     if (args === null) {
       return fileName;

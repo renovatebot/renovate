@@ -1,4 +1,4 @@
-import { clone } from './clone';
+import { clone } from './clone.ts';
 
 describe('util/clone', () => {
   test.each`

@@ -1,14 +1,20 @@
-import is from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { anyMatchRegexOrGlobList, matchRegexOrGlobList } from '../string-match';
-import { Matcher } from './base';
+import { isUndefined } from '@sindresorhus/is';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import {
+  anyMatchRegexOrGlobList,
+  matchRegexOrGlobList,
+} from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class DepTypesMatcher extends Matcher {
   override matches(
     { depTypes, depType }: PackageRuleInputConfig,
     { matchDepTypes }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchDepTypes)) {
+    if (isUndefined(matchDepTypes)) {
       return null;
     }
 

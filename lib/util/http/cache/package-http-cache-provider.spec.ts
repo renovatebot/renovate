@@ -1,13 +1,13 @@
 import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { Http, type HttpResponse } from '..';
-import { GlobalConfig } from '../../../config/global';
-import * as _packageCache from '../../cache/package';
-import { PackageHttpCacheProvider } from './package-http-cache-provider';
-import type { HttpCache } from './schema';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _packageCache from '../../cache/package/index.ts';
+import { Http, type HttpResponse } from '../index.ts';
+import { PackageHttpCacheProvider } from './package-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
-vi.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/cache/package/index.ts', () => mockDeep());
 const packageCache = vi.mocked(_packageCache);
 
 const http = new Http('test');
@@ -218,6 +218,158 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
+  });
+
+  describe('HEAD requests', () => {
+    it('handles cache miss for HEAD request', async () => {
+      const cacheProvider = new PackageHttpCacheProvider({
+        namespace: '_test-namespace',
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: false,
+      });
+      httpMock.scope(url).head('').reply(200, '', {
+        etag: 'foobar',
+        'cache-control': 'max-age=180, public',
+      });
+
+      const res = await http.head(url, { cacheProvider });
+
+      expect(res.statusCode).toBe(200);
+      expect(cache).toEqual({
+        'head:http://example.com/foo/bar': {
+          etag: 'foobar',
+          httpResponse: {
+            statusCode: 200,
+            headers: expect.any(Object),
+            body: '',
+          },
+          lastModified: undefined,
+          timestamp: expect.any(String),
+        },
+      });
+    });
+
+    it('loads cache correctly for HEAD request', async () => {
+      mockTime('2024-06-15T00:00:00.000Z');
+
+      cache['head:' + url] = {
+        etag: 'etag-value',
+        lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+        httpResponse: { statusCode: 200, body: '' },
+        timestamp: '2024-06-15T00:00:00.000Z',
+      };
+      const cacheProvider = new PackageHttpCacheProvider({
+        namespace: '_test-namespace',
+        softTtlMinutes: 0,
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: false,
+      });
+      httpMock.scope(url).head('').reply(200, '');
+
+      const res = await http.head(url, { cacheProvider });
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('loads cache bypassing server for HEAD request', async () => {
+      mockTime('2024-06-15T00:14:59.999Z');
+      cache['head:' + url] = {
+        etag: 'etag-value',
+        lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+        httpResponse: { statusCode: 200, body: '' },
+        timestamp: '2024-06-15T00:00:00.000Z',
+      };
+      const cacheProvider = new PackageHttpCacheProvider({
+        namespace: '_test-namespace',
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: false,
+      });
+
+      const res = await http.head(url, { cacheProvider });
+
+      expect(res.statusCode).toBe(200);
+      expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+    });
+
+    it('serves stale HEAD response during revalidation error', async () => {
+      mockTime('2024-06-15T00:15:00.000Z');
+      cache['head:' + url] = {
+        etag: 'etag-value',
+        lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+        httpResponse: { statusCode: 200, body: '' },
+        timestamp: '2024-06-15T00:00:00.000Z',
+      };
+      const cacheProvider = new PackageHttpCacheProvider({
+        namespace: '_test-namespace',
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: false,
+      });
+      httpMock.scope(url).head('').reply(500);
+
+      const res = await http.head(url, { cacheProvider });
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('prevents caching HEAD request when cache-control is private', async () => {
+      mockTime('2024-06-15T00:00:00.000Z');
+
+      const cacheProvider = new PackageHttpCacheProvider({
+        namespace: '_test-namespace',
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: true,
+      });
+
+      httpMock.scope(url).head('').reply(200, '', {
+        'cache-control': 'max-age=180, private',
+      });
+
+      const res = await http.head(url, { cacheProvider });
+
+      expect(res.statusCode).toBe(200);
+      expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+    });
+
+    it('caches HEAD and GET requests separately', async () => {
+      const cacheProvider = new PackageHttpCacheProvider({
+        namespace: '_test-namespace',
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: false,
+      });
+
+      httpMock.scope(url).get('').reply(200, 'get response', {
+        etag: 'get-etag',
+      });
+      httpMock.scope(url).head('').reply(200, '', {
+        etag: 'head-etag',
+      });
+
+      await http.getText(url, { cacheProvider });
+      await http.head(url, { cacheProvider });
+
+      expect(cache).toEqual({
+        'http://example.com/foo/bar': {
+          etag: 'get-etag',
+          httpResponse: {
+            statusCode: 200,
+            headers: expect.any(Object),
+            body: 'get response',
+          },
+          lastModified: undefined,
+          timestamp: expect.any(String),
+        },
+        'head:http://example.com/foo/bar': {
+          etag: 'head-etag',
+          httpResponse: {
+            statusCode: 200,
+            headers: expect.any(Object),
+            body: '',
+          },
+          lastModified: undefined,
+          timestamp: expect.any(String),
+        },
+      });
+    });
   });
 
   describe('cacheAllowed', () => {

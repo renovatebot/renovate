@@ -1,12 +1,13 @@
-import { z } from 'zod';
-import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils';
-import { CondaDatasource } from '../../datasource/conda/';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { PypiDatasource } from '../../datasource/pypi';
-import * as condaVersion from '../../versioning/conda/';
-import { id as gitRefVersionID } from '../../versioning/git';
-import { id as pep440VersionID } from '../../versioning/pep440/';
-import type { PackageDependency } from '../types';
+import { z } from 'zod/v3';
+import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils/index.ts';
+import { CondaDatasource } from '../../datasource/conda//index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import * as condaVersion from '../../versioning/conda//index.ts';
+import { id as gitRefVersionID } from '../../versioning/git/index.ts';
+import { id as pep440VersionID } from '../../versioning/pep440//index.ts';
+import { PyProject } from '../pep621/schema.ts';
+import type { PackageDependency } from '../types.ts';
 
 export type Channels = z.infer<typeof Channel>[];
 
@@ -188,16 +189,25 @@ const PixiProject = z.object({
 /**
  * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
-export const PixiConfigSchema = z
+export const PixiConfig = z
   .union([PixiWorkspace, PixiProject])
   .and(z.object({ feature: Features.default({}) }))
   .and(DependenciesMixin);
 
-export type PixiConfig = z.infer<typeof PixiConfigSchema>;
+export type PixiConfig = z.infer<typeof PixiConfig>;
 
-export const PixiToml = Toml.pipe(PixiConfigSchema);
+export const PixiFile = Toml.pipe(PixiConfig);
 
-export const LockfileYaml = Yaml.pipe(
+export const PixiPyProject = Toml.pipe(
+  PyProject.extend({
+    tool: z
+      .object({ pixi: PixiConfig.optional().catch(undefined) })
+      .optional()
+      .catch(undefined),
+  }),
+);
+
+export const Lockfile = Yaml.pipe(
   z.object({
     version: z.number(),
   }),

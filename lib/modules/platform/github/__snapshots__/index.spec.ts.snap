@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/platform/github/index > getBranchForceRebase > should throw 401 1`] = `[HTTPError: Response code 401 (Unauthorized)]`;
+exports[`modules/platform/github/index > getBranchForceRebase > should throw 401 1`] = `[HTTPError: Request failed with status code 401 (Unauthorized): GET https://api.github.com/repos/undefined/branches/main/protection]`;
 
 exports[`modules/platform/github/index > getRepos > should return an array of repos 1`] = `
 [

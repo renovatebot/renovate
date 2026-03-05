@@ -1,8 +1,8 @@
-import { readLocalFile } from '../../../../util/fs';
-import type { Http } from '../../../../util/http';
-import { newlineRegex } from '../../../../util/regex';
-import type { ReleaseResult } from '../../types';
-import type { CustomDatasourceFetcher } from './types';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import type { Http } from '../../../../util/http/index.ts';
+import { newlineRegex } from '../../../../util/regex.ts';
+import type { ReleaseResult } from '../../types.ts';
+import type { CustomDatasourceFetcher } from './types.ts';
 
 function convertLinesToVersions(content: string): ReleaseResult {
   const lines = content.split(newlineRegex).map((line) => line.trim());

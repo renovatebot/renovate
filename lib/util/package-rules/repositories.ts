@@ -1,18 +1,21 @@
-import is from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { matchRegexOrGlobList } from '../string-match';
-import { Matcher } from './base';
+import { isUndefined } from '@sindresorhus/is';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { matchRegexOrGlobList } from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class RepositoriesMatcher extends Matcher {
   override matches(
     { repository }: PackageRuleInputConfig,
     { matchRepositories }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchRepositories)) {
+    if (isUndefined(matchRepositories)) {
       return null;
     }
 
-    if (is.undefined(repository)) {
+    if (isUndefined(repository)) {
       return false;
     }
 

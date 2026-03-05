@@ -1,5 +1,5 @@
 import type { SemVer } from 'semver';
-import type { RangeStrategy } from '../../types';
+import type { RangeStrategy } from '../../types/index.ts';
 
 export interface NewValueConfig {
   currentValue: string;
@@ -104,6 +104,12 @@ export interface VersioningApi {
    * `rangeStrategy` option, and the current and new version.
    */
   getNewValue(newValueConfig: NewValueConfig): string | null;
+
+  /**
+   * Convert the `newVersion` to a pinned value.
+   * @param newVersion
+   */
+  getPinnedValue?(newVersion: string): string;
 
   /**
    * Compare two versions. Return `0` if `v1 == v2`, or `1` if `v1` is

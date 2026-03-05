@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import upath from 'upath';
-import { Json } from '../../lib/util/schema-utils';
-import { capitalize } from '../../lib/util/string';
-import * as Schemas from '../../tools/schemas/schema';
+import { Json } from '../../lib/util/schema-utils/index.ts';
+import { capitalize } from '../../lib/util/string.ts';
+import * as Schemas from '../../tools/schemas/schema.ts';
 
 describe('other/validate-schemas', () => {
   it('validate json files in lib/data against their schemas', async () => {
@@ -19,11 +19,11 @@ describe('other/validate-schemas', () => {
 
     for (const schemaFile of schemaFiles) {
       const correspondingDataFileName = schemaFile.replace('-schema', '');
-      const schemaName = `${schemaFile
+      const schemaName = correspondingDataFileName
         .replace('.json', '')
         .split('-')
         .map(capitalize)
-        .join('')}` as keyof typeof Schemas;
+        .join('') as keyof typeof Schemas;
       schemasAndJsonFiles.push({
         schemaName,
         dataFileName: correspondingDataFileName,

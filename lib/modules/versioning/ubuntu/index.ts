@@ -1,13 +1,13 @@
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import { DistroInfo } from '../distro';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
+import { DistroInfo } from '../distro.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   getDatedContainerImageCodename,
   getDatedContainerImageSuffix,
   getDatedContainerImageVersion,
   isDatedCodeName,
-} from './common';
+} from './common.ts';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';

@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import parseGithubUrl from 'github-url-from-git';
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
-import { clone } from '../../../util/clone';
-import { regEx } from '../../../util/regex';
-import { BazelDatasource } from '../../datasource/bazel';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import type { PackageDependency } from '../types';
-import { RuleFragmentSchema, StringFragmentSchema } from './parser/fragments';
+import { z } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import type { SkipReason } from '../../../types/index.ts';
+import { clone } from '../../../util/clone.ts';
+import { regEx } from '../../../util/regex.ts';
+import { BazelDatasource } from '../../datasource/bazel/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { RuleFragment, StringFragment } from './parser/fragments.ts';
 
 // Rule Schemas
 
@@ -63,11 +63,11 @@ export function bazelModulePackageDepToPackageDependency(
   return copy;
 }
 
-const BazelDepToPackageDep = RuleFragmentSchema.extend({
+const BazelDepToPackageDep = RuleFragment.extend({
   rule: z.literal('bazel_dep'),
   children: z.object({
-    name: StringFragmentSchema,
-    version: StringFragmentSchema.optional(),
+    name: StringFragment,
+    version: StringFragment.optional(),
   }),
 }).transform(
   ({ rule, children: { name, version } }): BasePackageDep => ({
@@ -79,12 +79,12 @@ const BazelDepToPackageDep = RuleFragmentSchema.extend({
   }),
 );
 
-const GitOverrideToPackageDep = RuleFragmentSchema.extend({
+const GitOverrideToPackageDep = RuleFragment.extend({
   rule: z.literal('git_override'),
   children: z.object({
-    module_name: StringFragmentSchema,
-    remote: StringFragmentSchema,
-    commit: StringFragmentSchema,
+    module_name: StringFragment,
+    remote: StringFragment,
+    commit: StringFragment,
   }),
 }).transform(
   ({
@@ -98,7 +98,7 @@ const GitOverrideToPackageDep = RuleFragmentSchema.extend({
       currentDigest: commit.value,
     };
     const ghPackageName = githubPackageName(remote.value);
-    if (is.nonEmptyString(ghPackageName)) {
+    if (isNonEmptyString(ghPackageName)) {
       override.datasource = GithubTagsDatasource.id;
       override.packageName = ghPackageName;
     } else {
@@ -108,12 +108,12 @@ const GitOverrideToPackageDep = RuleFragmentSchema.extend({
   },
 );
 
-const SingleVersionOverrideToPackageDep = RuleFragmentSchema.extend({
+const SingleVersionOverrideToPackageDep = RuleFragment.extend({
   rule: z.literal('single_version_override'),
   children: z.object({
-    module_name: StringFragmentSchema,
-    version: StringFragmentSchema.optional(),
-    registry: StringFragmentSchema.optional(),
+    module_name: StringFragment,
+    version: StringFragment.optional(),
+    registry: StringFragment.optional(),
   }),
 }).transform(
   ({
@@ -141,10 +141,10 @@ const SingleVersionOverrideToPackageDep = RuleFragmentSchema.extend({
   },
 );
 
-const UnsupportedOverrideToPackageDep = RuleFragmentSchema.extend({
+const UnsupportedOverrideToPackageDep = RuleFragment.extend({
   rule: z.enum(['archive_override', 'local_path_override']),
   children: z.object({
-    module_name: StringFragmentSchema,
+    module_name: StringFragment,
   }),
 }).transform(
   ({ rule, children: { module_name: moduleName } }): OverridePackageDep => {
@@ -238,13 +238,13 @@ export function toPackageDependencies(
   return collectByModule(packageDeps).map(processModulePkgDeps).flat();
 }
 
-export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
+export const GitRepositoryToPackageDep = RuleFragment.extend({
   rule: z.union([z.literal('git_repository'), z.literal('new_git_repository')]),
   children: z.object({
-    name: StringFragmentSchema,
-    remote: StringFragmentSchema,
-    commit: StringFragmentSchema.optional(),
-    tag: StringFragmentSchema.optional(),
+    name: StringFragment,
+    remote: StringFragment,
+    commit: StringFragment.optional(),
+    tag: StringFragment.optional(),
   }),
 }).transform(
   ({ rule, children: { name, remote, commit, tag } }): BasePackageDep => {
@@ -262,7 +262,7 @@ export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
     }
 
     const ghPackageName = githubPackageName(remote.value);
-    if (is.nonEmptyString(ghPackageName)) {
+    if (isNonEmptyString(ghPackageName)) {
       gitRepo.datasource = GithubTagsDatasource.id;
       gitRepo.packageName = ghPackageName;
     } else {

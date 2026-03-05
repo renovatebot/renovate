@@ -1,26 +1,25 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
-import { api as versioning } from '../../versioning/cargo';
+import { isObject, isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getEnv } from '../../../util/env.ts';
+import {
+  findLocalSiblingOrParent,
+  readLocalFile,
+} from '../../../util/fs/index.ts';
+import { api as versioning } from '../../versioning/cargo/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { extractLockFileVersions } from './locked-version';
-import {
-  type CargoConfig,
-  CargoConfigSchema,
-  CargoManifestSchema,
-} from './schema';
+} from '../types.ts';
+import { extractLockFileVersions } from './locked-version.ts';
+import { CargoConfig, CargoManifest } from './schema.ts';
 import type {
   CargoManagerData,
   CargoRegistries,
   CargoRegistryUrl,
-} from './types';
-import { DEFAULT_REGISTRY_URL } from './utils';
+} from './types.ts';
+import { DEFAULT_REGISTRY_URL } from './utils.ts';
 
 const DEFAULT_REGISTRY_ID = 'crates-io';
 
@@ -86,7 +85,7 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
     const path = `.cargo/${configName}`;
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
-      const parsedCargoConfig = CargoConfigSchema.safeParse(payload);
+      const parsedCargoConfig = CargoConfig.safeParse(payload);
       if (parsedCargoConfig.success) {
         return parsedCargoConfig.data;
       } else {
@@ -177,7 +176,7 @@ export async function extractPackageFile(
   const cargoConfig = (await readCargoConfig()) ?? {};
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
-  const parsedCargoManifest = CargoManifestSchema.safeParse(content);
+  const parsedCargoManifest = CargoManifest.safeParse(content);
   if (!parsedCargoManifest.success) {
     logger.debug(
       { err: parsedCargoManifest.error, packageFile },
@@ -250,10 +249,10 @@ export async function extractPackageFile(
   const packageSection = cargoManifest.package;
   let version: string | undefined = undefined;
   if (packageSection) {
-    if (is.string(packageSection.version)) {
+    if (isString(packageSection.version)) {
       version = packageSection.version;
     } else if (
-      is.object(packageSection.version) &&
+      isObject(packageSection.version) &&
       cargoManifest.workspace?.package?.version
     ) {
       // TODO: Support reading from parent workspace manifest?
@@ -284,10 +283,15 @@ export async function extractPackageFile(
     for (const dep of deps) {
       const packageName = dep.packageName ?? dep.depName!;
       const versions = coerceArray(versionsByPackage.get(packageName));
-      const lockedVersion = versioning.getSatisfyingVersion(
-        versions,
-        dep.currentValue!,
-      );
+
+      let lockedVersion: string | null = null;
+      if (dep.currentValue) {
+        lockedVersion = versioning.getSatisfyingVersion(
+          versions,
+          dep.currentValue,
+        );
+      }
+
       if (lockedVersion) {
         dep.lockedVersion = lockedVersion;
       } else {

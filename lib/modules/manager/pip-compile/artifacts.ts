@@ -1,31 +1,31 @@
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
-import { exec } from '../../../util/exec';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import { exec } from '../../../util/exec/index.ts';
 import {
   deleteLocalFile,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common.ts';
 import type {
   PackageFileContent,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../types';
+} from '../types.ts';
 import {
   extractHeaderCommand,
   extractPythonVersion,
   getExecOptions,
   getRegistryCredVarsFromPackageFiles,
   matchManager,
-} from './common';
-import type { PipCompileArgs } from './types';
-import { inferCommandExecDir } from './utils';
+} from './common.ts';
+import type { PipCompileArgs } from './types.ts';
+import { inferCommandExecDir } from './utils.ts';
 
 function haveCredentialsInPipEnvironmentVariables(): boolean {
   const env = getEnv();

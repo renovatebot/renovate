@@ -1,5 +1,5 @@
-import type { HostRule } from '../../../types';
-import { findAll } from '../../../util/host-rules';
+import type { HostRule } from '../../../types/index.ts';
+import { findAll } from '../../../util/host-rules.ts';
 
 function isAuthenticatable(rule: HostRule): boolean {
   return (

@@ -12,7 +12,7 @@
     "default": {
       "extends": [
         "config:recommended",
-        ":assignAndReview(rarkins)",
+        ":assignAndReview(renovate-tests)",
         ":maintainLockFilesWeekly"
       ]
     }

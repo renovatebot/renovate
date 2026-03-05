@@ -1,11 +1,13 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-export { updateArtifacts } from './artifacts';
-export { extractPackageFile } from './extract';
-export { bumpPackageVersion } from './update';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
+export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Chart.lock'];
 
 export const displayName = 'Helm v3';
 export const url = 'https://helm.sh/docs';

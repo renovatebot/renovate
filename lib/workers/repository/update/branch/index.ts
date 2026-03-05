@@ -1,7 +1,11 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import {
+  type MinimumReleaseAgeBehaviour,
+  type RenovateConfig,
+  type UpdateType,
+} from '../../../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -13,43 +17,53 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
   WORKER_FILE_UPDATE_FAILED,
-} from '../../../../constants/error-messages';
-import { logger, removeMeta } from '../../../../logger';
-import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
+} from '../../../../constants/error-messages.ts';
+import { logger, removeMeta } from '../../../../logger/index.ts';
+import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getElapsedMs } from '../../../../util/date';
-import { emojify } from '../../../../util/emoji';
+} from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
+import { emojify } from '../../../../util/emoji.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
-} from '../../../../util/merge-confidence';
-import { coerceNumber } from '../../../../util/number';
-import { toMs } from '../../../../util/pretty-time';
-import * as template from '../../../../util/template';
-import { getCount, isLimitReached } from '../../../global/limits';
-import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import { ensurePr, getPlatformPrOptions } from '../pr';
-import { checkAutoMerge } from '../pr/automerge';
-import { setArtifactErrorStatus } from './artifacts';
-import { tryBranchAutomerge } from './automerge';
-import { bumpVersions } from './bump-versions';
-import { prAlreadyExisted } from './check-existing';
-import { commitFilesToBranch } from './commit';
-import executePostUpgradeCommands from './execute-post-upgrade-commands';
-import { getUpdatedPackageFiles } from './get-updated';
-import { handleClosedPr, handleModifiedPr } from './handle-existing';
-import { shouldReuseExistingBranch } from './reuse';
-import { isScheduledNow } from './schedule';
-import { setConfidence, setStability } from './status-checks';
+} from '../../../../util/merge-confidence/index.ts';
+import { coerceNumber } from '../../../../util/number.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import * as template from '../../../../util/template/index.ts';
+import { getCount, isLimitReached } from '../../../global/limits.ts';
+import type {
+  BranchConfig,
+  BranchResult,
+  PrBlockedBy,
+} from '../../../types.ts';
+import { embedChangelogs } from '../../changelog/index.ts';
+import { checkAutoMerge } from '../pr/automerge.ts';
+import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
+import { setArtifactErrorStatus } from './artifacts.ts';
+import { tryBranchAutomerge } from './automerge.ts';
+import { bumpVersions } from './bump-versions.ts';
+import { prAlreadyExisted } from './check-existing.ts';
+import { commitFilesToBranch } from './commit.ts';
+import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
+import { getUpdatedPackageFiles } from './get-updated.ts';
+import { handleClosedPr, handleModifiedPr } from './handle-existing.ts';
+import { shouldReuseExistingBranch } from './reuse.ts';
+import { isScheduledNow } from './schedule.ts';
+import { setConfidence, setStability } from './status-checks.ts';
+
+async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
+  await setArtifactErrorStatus(config);
+  await setStability(config);
+  await setConfidence(config);
+}
 
 async function rebaseCheck(
   config: RenovateConfig,
@@ -67,7 +81,7 @@ async function rebaseCheck(
     logger.debug(
       `Manual rebase requested via PR labels for #${branchPr.number}`,
     );
-    // istanbul ignore if
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
@@ -93,7 +107,8 @@ async function rebaseCheck(
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
     await scm.deleteBranch(branchName);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* v8 ignore next -- needs test */
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
 }
@@ -117,11 +132,14 @@ export interface ProcessBranchResult {
 
 export async function processBranch(
   branchConfig: BranchConfig,
+  forceRebase = false,
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = await scm.branchExists(config.branchName);
+  const dependencyDashboardCheck =
+    config.dependencyDashboardChecks?.[config.branchName];
   let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
@@ -135,13 +153,26 @@ export async function processBranch(
     }
   }
 
+  if (
+    !branchExists &&
+    branchConfig.minimumGroupSize &&
+    branchConfig.minimumGroupSize > branchConfig.upgrades.length &&
+    !dependencyDashboardCheck
+  ) {
+    logger.debug(
+      `Skipping branch creation as minimumGroupSize: ${branchConfig.minimumGroupSize} is not met`,
+    );
+    return {
+      branchExists: false,
+      result: 'minimum-group-size-not-met',
+    };
+  }
+
   let branchPr = await platform.getBranchPr(
     config.branchName,
     config.baseBranch,
   );
   logger.debug(`branchExists=${branchExists}`);
-  const dependencyDashboardCheck =
-    config.dependencyDashboardChecks?.[config.branchName];
   logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck!}`);
   if (branchPr) {
     config.rebaseRequested = await rebaseCheck(config, branchPr);
@@ -168,7 +199,7 @@ export async function processBranch(
     } else if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
-        'Closed PR already exists. Skipping branch.',
+        `Closed PR #${existingPr.number} already exists. Skipping branch.`,
       );
       await handleClosedPr(config, existingPr);
       return {
@@ -187,7 +218,6 @@ export async function processBranch(
       );
       return {
         branchExists: false,
-        prNo: branchPr?.number,
         result: 'pending',
       };
     }
@@ -198,7 +228,6 @@ export async function processBranch(
         );
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'needs-approval',
         };
       }
@@ -208,14 +237,13 @@ export async function processBranch(
         );
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'needs-approval',
         };
       }
     }
 
     logger.debug(
-      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}, Hourly Commit Count: ${getCount('HourlyCommits')}`,
     );
 
     if (
@@ -227,20 +255,33 @@ export async function processBranch(
       logger.debug('Reached branch limit - skipping branch creation');
       return {
         branchExists,
-        prNo: branchPr?.number,
         result: 'branch-limit-reached',
       };
     }
     if (
+      !branchConfig.rebaseRequested &&
       isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
-      logger.debug('Reached commits limit - skipping branch');
+      logger.debug('Reached commits per run limit - skipping branch');
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: 'commit-limit-reached',
+        result: 'commit-per-run-limit-reached',
+      };
+    }
+    if (
+      !branchConfig.rebaseRequested &&
+      isLimitReached('HourlyCommits', branchConfig) &&
+      !dependencyDashboardCheck &&
+      !config.isVulnerabilityAlert
+    ) {
+      logger.debug('Reached hourly commits limit - skipping branch');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'commit-hourly-limit-reached',
       };
     }
     if (branchExists) {
@@ -251,8 +292,8 @@ export async function processBranch(
 
       const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
 
-      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
-        if (!prRebaseChecked) {
+      if (branchExists && !dependencyDashboardCheck && !prRebaseChecked) {
+        if (config.stopUpdating) {
           logger.info(
             'Branch updating is skipped because stopUpdatingLabel is present in config',
           );
@@ -260,6 +301,17 @@ export async function processBranch(
             branchExists: true,
             prNo: branchPr?.number,
             result: 'no-work',
+          };
+        }
+
+        if (config.pendingChecks) {
+          logger.info(
+            'Branch updating is skipped because internalChecksFilter was not met',
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: 'pending',
           };
         }
       }
@@ -270,7 +322,7 @@ export async function processBranch(
         config.baseBranch,
       );
       if (branchPr) {
-        logger.debug('Found existing branch PR');
+        logger.debug(`Found existing branch PR #${branchPr.number}`);
         if (branchPr.state !== 'open') {
           logger.debug(
             'PR has been closed or merged since this run started - aborting',
@@ -328,7 +380,6 @@ export async function processBranch(
         logger.debug('Skipping branch creation as not within schedule');
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'not-scheduled',
         };
       }
@@ -358,36 +409,70 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          (is.nonEmptyString(upgrade.minimumReleaseAge) &&
-            is.nonEmptyString(upgrade.releaseTimestamp)) ||
+          isNonEmptyString(upgrade.minimumReleaseAge) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!),
       )
     ) {
+      const depNamesWithoutReleaseTimestamp: Record<
+        MinimumReleaseAgeBehaviour,
+        {
+          depName: string;
+          updateType: UpdateType;
+        }[]
+      > = {
+        'timestamp-required': [],
+        'timestamp-optional': [],
+      };
+
       // Only set a stability status check if one or more of the updates contain
       // both a minimumReleaseAge setting and a releaseTimestamp
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (
-          is.nonEmptyString(upgrade.minimumReleaseAge) &&
-          upgrade.releaseTimestamp
-        ) {
-          const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-          if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
-            logger.debug(
-              {
-                depName: upgrade.depName,
-                timeElapsed,
-                minimumReleaseAge: upgrade.minimumReleaseAge,
-              },
-              'Update has not passed minimum release age',
-            );
-            config.stabilityStatus = 'yellow';
-            continue;
+        const minimumReleaseAgeMs = isNonEmptyString(upgrade.minimumReleaseAge)
+          ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
+          : 0;
+
+        if (minimumReleaseAgeMs) {
+          const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
+            upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
+
+          // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
+          if (upgrade.releaseTimestamp) {
+            const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+            if (timeElapsed < minimumReleaseAgeMs) {
+              logger.debug(
+                {
+                  depName: upgrade.depName,
+                  timeElapsed,
+                  minimumReleaseAge: upgrade.minimumReleaseAge,
+                },
+                'Update has not passed minimum release age',
+              );
+              config.stabilityStatus = 'yellow';
+              continue;
+            }
+          } else {
+            // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
+            if (minimumReleaseAgeBehaviour === 'timestamp-required') {
+              depNamesWithoutReleaseTimestamp['timestamp-required'].push({
+                depName: upgrade.depName!,
+                updateType: upgrade.updateType!,
+              });
+              config.stabilityStatus = 'yellow';
+              continue;
+            } else {
+              // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
+              depNamesWithoutReleaseTimestamp['timestamp-optional'].push({
+                depName: upgrade.depName!,
+                updateType: upgrade.updateType!,
+              });
+            }
           }
         }
         const datasource = upgrade.datasource!;
         const depName = upgrade.depName!;
+        const packageName = upgrade.packageName!;
         const minimumConfidence = upgrade.minimumConfidence!;
         const updateType = upgrade.updateType!;
         const currentVersion = upgrade.currentVersion!;
@@ -396,7 +481,7 @@ export async function processBranch(
           const confidence =
             (await getMergeConfidenceLevel(
               datasource,
-              depName,
+              packageName,
               currentVersion,
               newVersion,
               updateType,
@@ -413,6 +498,23 @@ export async function processBranch(
           }
         }
       }
+
+      if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
+        logger.once.debug(
+          { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
+          `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
+        );
+      }
+      if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
+        logger.once.warn(
+          "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+        );
+        logger.once.debug(
+          { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
+          `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+        );
+      }
+
       // Don't create a branch if we know it will be status 'pending'
       if (
         !dependencyDashboardCheck &&
@@ -425,7 +527,6 @@ export async function processBranch(
         );
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'pending',
         };
       }
@@ -437,7 +538,13 @@ export async function processBranch(
       !!config.rebaseRequested;
     const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
     const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
-    if (userRebaseRequested) {
+    const userOpenAllSchedulePendingPR =
+      !!config.dependencyDashboardAllAwaitingSchedule;
+
+    if (forceRebase) {
+      logger.debug('Force rebase because branch needs updating');
+      config.reuseExistingBranch = false;
+    } else if (userRebaseRequested) {
       logger.debug('User has requested rebase');
       config.reuseExistingBranch = false;
     } else if (dependencyDashboardCheck === 'global-config') {
@@ -451,6 +558,10 @@ export async function processBranch(
     } else if (userOpenAllRateLimtedPR) {
       logger.debug(
         'A user manually approved all rate-limited PRs via the Dependency Dashboard.',
+      );
+    } else if (userOpenAllSchedulePendingPR) {
+      logger.debug(
+        'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
       );
     } else if (
       branchExists &&
@@ -492,7 +603,6 @@ export async function processBranch(
     ) {
       await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
-      // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
         res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
       }
@@ -501,6 +611,12 @@ export async function processBranch(
         logger.debug(
           `Updated ${config.updatedPackageFiles.length} package files`,
         );
+        if (config.reuseExistingBranch && !forceRebase) {
+          logger.debug(
+            'Existing branch needs updating. Restarting processBranch() with a clean branch',
+          );
+          return processBranch(branchConfig, true);
+        }
       } else {
         logger.debug('No package files need updating');
       }
@@ -523,6 +639,12 @@ export async function processBranch(
           },
           `Updated ${config.updatedArtifacts.length} lock files`,
         );
+        if (config.reuseExistingBranch && !forceRebase) {
+          logger.debug(
+            'Existing branch needs updating. Restarting processBranch() with a clean branch',
+          );
+          return processBranch(branchConfig, true);
+        }
       } else {
         logger.debug('No updated lock files in branch');
       }
@@ -567,7 +689,6 @@ export async function processBranch(
         }
       } else if (config.updatedArtifacts?.length && branchPr) {
         // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
-        // istanbul ignore if
         if (GlobalConfig.get('dryRun')) {
           logger.info(
             `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`,
@@ -621,15 +742,21 @@ export async function processBranch(
     if (branchPr) {
       const platformPrOptions = getPlatformPrOptions(config);
       if (
+        commitSha &&
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
-        await platform.reattemptPlatformAutomerge({
-          number: branchPr.number,
-          platformPrOptions,
-        });
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
+          );
+        } else {
+          await platform.reattemptPlatformAutomerge({
+            number: branchPr.number,
+            platformPrOptions,
+          });
+        }
       }
-      // istanbul ignore if
       if (platform.refreshPr) {
         await platform.refreshPr(branchPr.number);
       }
@@ -637,7 +764,6 @@ export async function processBranch(
     if (!commitSha && !branchExists) {
       return {
         branchExists,
-        prNo: branchPr?.number,
         result: 'no-work',
       };
     }
@@ -645,11 +771,7 @@ export async function processBranch(
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
     }
-    // Set branch statuses
-    await setArtifactErrorStatus(config);
-    await setStability(config);
-    await setConfidence(config);
-
+    await setBranchStatusChecks(config);
     // new commit means status check are pretty sure pending but maybe not reported yet
     // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
@@ -685,18 +807,23 @@ export async function processBranch(
         return { branchExists: false, result: 'automerged' };
       }
       if (mergeStatus === 'off schedule') {
-        logger.debug(
-          'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
-        );
-        return {
-          branchExists,
-          result: 'not-scheduled',
-          commitSha,
-        };
+        if (userRebaseRequested) {
+          config.forcePr = true;
+        } else {
+          logger.debug(
+            'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
+          );
+          return {
+            branchExists,
+            result: 'not-scheduled',
+            commitSha,
+          };
+        }
       }
       if (
         mergeStatus === 'stale' &&
         ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        /* v8 ignore next -- needs test */
         !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
         logger.warn(
@@ -717,11 +844,13 @@ export async function processBranch(
         config.branchAutomergeFailureMessage = mergeStatus;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* v8 ignore if -- needs test */
     if (err.statusCode === 404) {
       logger.debug({ err }, 'Received a 404 error - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }
+    /* v8 ignore if -- needs test */
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       logger.debug('Passing rate-limit-exceeded error up');
       throw err;
@@ -730,10 +859,12 @@ export async function processBranch(
       logger.debug('Passing repository-changed error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message?.startsWith('remote: Invalid username or password')) {
       logger.debug('Throwing bad credentials');
       throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
+    /* v8 ignore if -- needs test */
     if (
       err.message?.startsWith(
         'ssh_exchange_identification: Connection closed by remote host',
@@ -742,10 +873,12 @@ export async function processBranch(
       logger.debug('Throwing bad credentials');
       throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
+    /* v8 ignore if -- needs test */
     if (err.message === PLATFORM_BAD_CREDENTIALS) {
       logger.debug('Passing bad-credentials error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
       logger.debug('Passing integration-unauthorized error up');
       throw err;
@@ -754,17 +887,21 @@ export async function processBranch(
       logger.debug('Passing lockfile-error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message?.includes('space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
+    /* v8 ignore if -- needs test */
     if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
       logger.debug('Passing disk-space error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message.startsWith('Resource not accessible by integration')) {
       logger.debug('Passing 403 error up');
       throw err;
     }
+    /* v8 ignore next -- needs test */
     if (err.message === WORKER_FILE_UPDATE_FAILED) {
       logger.warn('Error updating branch: update failure');
     } else if (err.message.startsWith('bundler-')) {
@@ -776,10 +913,7 @@ export async function processBranch(
         result: 'error',
         commitSha,
       };
-    } else if (
-      err.messagee &&
-      err.message.includes('fatal: Authentication failed')
-    ) {
+    } else if (err.message?.includes('fatal: Authentication failed')) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     } else if (err.message?.includes('fatal: bad revision')) {
       logger.debug({ err }, 'Aborting job due to bad revision error');
@@ -865,6 +999,11 @@ export async function processBranch(
     if (ensurePrResult.type === 'with-pr') {
       const { pr } = ensurePrResult;
       branchPr = pr;
+      // Retry setting branch statuses after PR/MR creation so that
+      // platforms using MR pipelines (e.g. GitLab) have a pipeline to
+      // associate the status with. The earlier call may have been
+      // skipped if no pipeline existed yet.
+      await setBranchStatusChecks(config);
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
@@ -947,7 +1086,8 @@ export async function processBranch(
         }
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* v8 ignore if -- needs test */
     if (
       err instanceof ExternalHostError ||
       [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
