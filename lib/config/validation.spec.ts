@@ -1230,7 +1230,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('warns when registryUrls is set at the top level', async () => {
+    it('warns when registryUrls is set at the top level of repo config', async () => {
       const config = {
         registryUrls: ['https://registry.npmjs.org'],
       } as any;
@@ -2288,6 +2288,21 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
+    });
+
+    it('warns when registryUrls is set at the top level of global config', async () => {
+      const config = {
+        registryUrls: ['https://registry.npmjs.org'],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].message).toContain(
+        'Setting `registryUrls` at the top level',
+      );
     });
 
     it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
