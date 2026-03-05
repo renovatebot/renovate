@@ -1241,7 +1241,22 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
       expect(warnings[0].message).toContain(
-        'Setting `registryUrls` at the top level',
+        'Setting `registryUrls` at the top level of your config will apply it to all managers',
+      );
+    });
+
+    it('warns when defaultRegistryUrls is set at the top level of repo config', async () => {
+      const config = {
+        defaultRegistryUrls: ['https://registry.npmjs.org'],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].message).toContain(
+        'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers',
       );
     });
 
@@ -2301,7 +2316,22 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
       expect(warnings[0].message).toContain(
-        'Setting `registryUrls` at the top level',
+        'Setting `registryUrls` at the top level of your config will apply it to all managers',
+      );
+    });
+
+    it('warns when defaultRegistryUrls is set at the top level of global config', async () => {
+      const config = {
+        defaultRegistryUrls: ['https://registry.npmjs.org'],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].message).toContain(
+        'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers',
       );
     });
 
