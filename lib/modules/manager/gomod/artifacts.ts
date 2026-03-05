@@ -290,7 +290,7 @@ export async function updateArtifacts({
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + modFileFlag + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
