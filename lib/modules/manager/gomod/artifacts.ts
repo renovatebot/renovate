@@ -123,7 +123,7 @@ export async function updateArtifacts({
   const goModDir = upath.dirname(goModFileName);
   const goModFileBaseName = upath.basename(goModFileName);
   const modFileFlag =
-    goModFileBaseName === 'go.mod' ? '' : ` -modfile=${goModFileBaseName}`;
+    goModFileBaseName === 'go.mod' ? '' : ` -modfile=${quote(goModFileBaseName)}`;
 
   // The "vendor" directory can be next to the go.mod, but also in the parent directory in case
   // the go workspaces are used.
