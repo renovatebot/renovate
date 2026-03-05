@@ -106,8 +106,6 @@ export interface PlatformPrOptions {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
-  automergeSchedule?: string[];
-  timezone?: string;
   merge_after?: string;
 }
 

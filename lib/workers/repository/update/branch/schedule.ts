@@ -199,11 +199,12 @@ export function getNextScheduleTime(
       const parsedSchedule = later.parse.text(fixShortHours(massagedText));
       logger.debug({ parsedSchedule }, `Checking schedule "${scheduleText}"`);
 
-      const nextOccurrence = later.schedule(parsedSchedule).next(1, jsNow);
-      if (Array.isArray(nextOccurrence) && nextOccurrence.length > 0) {
-        const nextRunTime = nextOccurrence[0];
-        if (!earliestNextRun || nextRunTime < earliestNextRun) {
-          earliestNextRun = nextRunTime;
+      const nextOccurrence = later.schedule(parsedSchedule).next(1, jsNow) as
+        | Date
+        | 0;
+      if (nextOccurrence instanceof Date) {
+        if (!earliestNextRun || nextOccurrence < earliestNextRun) {
+          earliestNextRun = nextOccurrence;
         }
       }
     }

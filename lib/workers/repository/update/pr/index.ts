@@ -64,8 +64,6 @@ export function getPlatformPrOptions(
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
     forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
-    automergeSchedule: config.automergeSchedule,
-    timezone: config.timezone,
   };
 
   // Handle automergeSchedule for GitLab merge_after parameter

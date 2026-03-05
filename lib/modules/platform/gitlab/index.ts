@@ -56,7 +56,6 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -696,7 +695,7 @@ async function tryPrAutomerge(
       // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
-          const requestBody: any = {
+          const requestBody: Record<string, unknown> = {
             should_remove_source_branch: true,
             merge_when_pipeline_succeeds: true,
           };

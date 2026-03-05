@@ -1,4 +1,4 @@
-import { dirname } from 'node:path';
+import { dirname } from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
