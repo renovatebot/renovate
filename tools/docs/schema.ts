@@ -17,6 +17,38 @@ type JsonSchemaBasicType =
   | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
+/* These are sorted in priority order, but editors may not suggest in that order */
+const presetsToSuggest = [
+  'config:best-practices',
+  'config:recommended',
+  'mergeConfidence:all-badges',
+  'abandonments:recommended',
+  'group:all',
+  'replacements:all',
+  'security:minimumReleaseAgeNpm',
+  'security:only-security-updates',
+];
+
+/**
+ * When suggesting presets in `extends`, suggest a number of values that users may want to use
+ */
+function createExtendsSchema(items: Record<string, any>): any[] {
+  return [
+    {
+      type: 'array',
+      items: {
+        anyOf: [
+          {
+            enum: presetsToSuggest,
+          },
+          items,
+        ],
+      },
+    },
+    { ...items },
+  ];
+}
+
 function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   const temp: Record<string, any> & {
     type?: JsonSchemaType;
@@ -41,7 +73,11 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
       const items = temp.items;
       delete temp.items;
       delete temp.type;
-      temp.oneOf = [{ type: 'array', items }, { ...items }];
+      if (option.name === 'extends') {
+        temp.oneOf = createExtendsSchema(items);
+      } else {
+        temp.oneOf = [{ type: 'array', items }, { ...items }];
+      }
     }
   } else {
     if (hasKey('format', option) && option.format) {

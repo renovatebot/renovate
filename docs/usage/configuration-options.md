@@ -4781,6 +4781,12 @@ To allow repositories to use _more_ than 512m of heap during any invocations of 
 Initial heap size in MB for Java VMs. Must be less than or equal to `jvmMaxMemory`.
 Defaults to `jvmMaxMemory`.
 
+### nodeMaxMemory
+
+<!-- prettier-ignore -->
+!!! note
+    This does not apply to _every_ Node process created by Renovate, only the managers noted above.
+
 ## updateInternalDeps
 
 Renovate defaults to skipping any internal package dependencies within monorepos.
