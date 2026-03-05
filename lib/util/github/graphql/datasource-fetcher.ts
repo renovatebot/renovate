@@ -11,7 +11,7 @@ import type {
   GithubHttpOptions,
 } from '../../http/github.ts';
 import type { HttpResponse } from '../../http/types.ts';
-import { getApiBaseUrl } from '../url.ts';
+import { getApiBaseUrl, isGithubHost } from '../url.ts';
 import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy.ts';
 import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy.ts';
 import type {
@@ -52,6 +52,13 @@ export class GithubGraphqlDatasourceFetcher<
     http: GithubHttp,
     adapter: GithubGraphqlDatasourceAdapter<T, U>,
   ): Promise<U[]> {
+    if (!isGithubHost(config.registryUrl)) {
+      logger.once.warn(
+        { registryUrl: config.registryUrl },
+        'GitHub GraphQL datasource: configured registryUrl is not a GitHub host — please check your registryUrls config',
+      );
+      return [];
+    }
     const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,
