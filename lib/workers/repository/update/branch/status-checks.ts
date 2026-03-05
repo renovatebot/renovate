@@ -87,7 +87,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
 
   const docsLink = joinUrlParts(
     coerceString(config.productLinks?.documentation),
-    'configuration-options/#minimumreleaseage',
+    'key-concepts/minimum-release-age/',
   );
 
   await setStatusCheck(

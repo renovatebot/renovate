@@ -229,8 +229,11 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
   await program.parseAsync();
 })().catch((e) => {
   if (e instanceof CommanderError) {
-    // Commander throws an error at the end of Action execution i.e. as part of the `help` command, and so we don't want to return an error code in this case
-    if (e.code === 'commander.helpDisplayed') {
+    // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
+    if (
+      e.code === 'commander.helpDisplayed' ||
+      e.code === 'commander.version'
+    ) {
       return;
     }
   }
