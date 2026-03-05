@@ -107,7 +107,7 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         datasourceTemplate: 'java-version',
-        depNameTemplate: 'java-jdk',
+        depNameTemplate: 'java',
         managerFilePatterns: ['**/pom.xml'],
         matchStrings: ['<java\\.version>(?<currentValue>.+?)</java\\.version>'],
       },
