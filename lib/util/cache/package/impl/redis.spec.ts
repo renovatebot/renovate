@@ -42,6 +42,7 @@ describe('util/cache/package/impl/redis', () => {
 
         expect(createClient).toHaveBeenCalledWith({
           pingInterval: 30000,
+          connectTimeout: 5000,
           socket: { reconnectStrategy: expect.any(Function) },
           url: 'redis://host',
         });
@@ -57,7 +58,10 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('rediss://host', '');
 
         expect(createClient).toHaveBeenCalledWith(
-          expect.objectContaining({ url: 'rediss://host' }),
+          expect.objectContaining({
+            url: 'rediss://host',
+            connectTimeout: 5000,
+          }),
         );
       });
 
@@ -68,6 +72,7 @@ describe('util/cache/package/impl/redis', () => {
           rootNodes: [
             {
               pingInterval: 30000,
+              connectTimeout: 5000,
               socket: { reconnectStrategy: expect.any(Function) },
               url: 'redis://host',
             },
@@ -83,6 +88,7 @@ describe('util/cache/package/impl/redis', () => {
           rootNodes: [
             expect.objectContaining({
               url: 'redis://user:pass@host',
+              connectTimeout: 5000,
             }),
           ],
         });
@@ -96,6 +102,7 @@ describe('util/cache/package/impl/redis', () => {
           rootNodes: [
             expect.objectContaining({
               url: 'redis://user@host',
+              connectTimeout: 5000,
             }),
           ],
         });
@@ -109,6 +116,7 @@ describe('util/cache/package/impl/redis', () => {
           rootNodes: [
             expect.objectContaining({
               url: 'redis://:pass@host',
+              connectTimeout: 5000,
             }),
           ],
         });

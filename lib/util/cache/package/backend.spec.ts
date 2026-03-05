@@ -76,6 +76,21 @@ describe('util/cache/package/backend', () => {
     expect(backend.getCacheType()).toBe('redis');
   });
 
+  it('falls back to file backend when redis fails', async () => {
+    vi.mocked(PackageCacheRedis.create).mockRejectedValueOnce(
+      new Error('Redis timeout'),
+    );
+
+    await backend.init({ redisUrl: 'some-url', cacheDir: 'some-dir' });
+
+    expect(PackageCacheRedis.create).toHaveBeenCalledWith(
+      'some-url',
+      undefined,
+    );
+    expect(PackageCacheFile.create).toHaveBeenCalledWith('some-dir');
+    expect(backend.getCacheType()).toBe('file');
+  });
+
   it('initializes sqlite backend', async () => {
     process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE = 'true';
 

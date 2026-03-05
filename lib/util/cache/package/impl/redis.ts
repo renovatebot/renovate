@@ -33,6 +33,7 @@ export class PackageCacheRedis extends PackageCacheBase {
         reconnectStrategy: (retries: number) => Math.min(retries * 100, 3000),
       },
       pingInterval: 30000,
+      connectTimeout: 5000,
     };
 
     let client: RedisClient;
@@ -57,8 +58,13 @@ export class PackageCacheRedis extends PackageCacheBase {
       client = createClient(config);
     }
 
-    await client.connect();
-    logger.debug('Redis cache connected');
+    try {
+      await client.connect();
+      logger.debug('Redis cache connected');
+    } catch (err) {
+      logger.once.warn({ err }, 'Redis cache connection failed');
+      throw err;
+    }
     return new PackageCacheRedis(client, rprefix);
   }
 

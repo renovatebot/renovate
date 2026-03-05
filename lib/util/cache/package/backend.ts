@@ -1,4 +1,5 @@
 import type { AllConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../env.ts';
 import type { PackageCacheBase } from './impl/base.ts';
 import { PackageCacheFile } from './impl/file.ts';
@@ -17,12 +18,19 @@ export async function init(config: AllConfig): Promise<void> {
   await destroy();
 
   if (config.redisUrl) {
-    cacheProxy = await PackageCacheRedis.create(
-      config.redisUrl,
-      config.redisPrefix,
-    );
-    cacheType = 'redis';
-    return;
+    try {
+      cacheProxy = await PackageCacheRedis.create(
+        config.redisUrl,
+        config.redisPrefix,
+      );
+      cacheType = 'redis';
+      return;
+    } catch (err) {
+      logger.once.warn(
+        { err },
+        'Redis cache initialization failed, falling back to alternative cache',
+      );
+    }
   }
 
   if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE && config.cacheDir) {
