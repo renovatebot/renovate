@@ -123,7 +123,9 @@ export async function updateArtifacts({
   const goModDir = upath.dirname(goModFileName);
   const goModFileBaseName = upath.basename(goModFileName);
   const modFileFlag =
-    goModFileBaseName === 'go.mod' ? '' : ` -modfile=${quote(goModFileBaseName)}`;
+    goModFileBaseName === 'go.mod'
+      ? ''
+      : ` -modfile=${quote(goModFileBaseName)}`;
 
   // The "vendor" directory can be next to the go.mod, but also in the parent directory in case
   // the go workspaces are used.
@@ -317,13 +319,13 @@ export async function updateArtifacts({
         logger.debug('using go work sync');
         execCommands.push(`${cmd} ${args}`);
       } else {
-        args = 'mod vendor' + modFileFlag;
+        args = `mod vendor${modFileFlag}`;
         logger.debug('using go mod vendor');
         execCommands.push(`${cmd} ${args}`);
       }
 
       if (isGoModTidyRequired) {
-        args = 'mod tidy' + modFileFlag + tidyOpts;
+        args = `mod tidy${modFileFlag}${tidyOpts}`;
         logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -331,7 +333,7 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + modFileFlag + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
