@@ -4,10 +4,14 @@ exports[`modules/manager/swift/index > extractPackageFile() > parses multiple pa
 {
   "deps": [
     {
-      "currentValue": ""master"
-        ",
+      "currentValue": ""master"",
       "datasource": "github-tags",
       "depName": "0x7fs/CountedSet",
+    },
+    {
+      "currentValue": "from: "1.2.3"",
+      "datasource": "github-tags",
+      "depName": "foo/bar",
     },
     {
       "currentValue": "0.1.0",
@@ -25,8 +29,7 @@ exports[`modules/manager/swift/index > extractPackageFile() > parses multiple pa
       "depName": "apple/swift-argument-parser",
     },
     {
-      "currentValue": ""UpdateSocket"
-        ",
+      "currentValue": ""UpdateSocket"",
       "datasource": "github-tags",
       "depName": "beefon/Shout",
     },
@@ -46,8 +49,7 @@ exports[`modules/manager/swift/index > extractPackageFile() > parses multiple pa
       "depName": "weichsel/ZIPFoundation",
     },
     {
-      "currentValue": ""swift-5.0-branch"
-    ",
+      "currentValue": ""swift-5.0-branch"",
       "datasource": "github-tags",
       "depName": "apple/swift-package-manager",
     },
