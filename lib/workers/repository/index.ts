@@ -171,8 +171,7 @@ export async function renovateRepository(
         );
       }
       await finalizeRepo(config, branchList, repoConfig);
-      // TODO #22198
-      repoResult = processResult(config, res!);
+      repoResult = processResult(config, res ?? 'done');
     }
     printRepositoryProblems(config.repository);
   } catch (err) /* istanbul ignore next */ {
