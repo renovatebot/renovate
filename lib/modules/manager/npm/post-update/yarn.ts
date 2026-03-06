@@ -10,7 +10,7 @@ import {
 import { logger } from '../../../../logger/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getEnv } from '../../../../util/env.ts';
-import { exec } from '../../../../util/exec/index.ts';
+import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
@@ -30,7 +30,11 @@ import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils.ts';
+import {
+  getNodeOptions,
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from './utils.ts';
 
 export async function checkYarnrc(
   lockFileDir: string,
@@ -195,6 +199,11 @@ export async function generateLockFile(
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
+    }
+
+    const { nodeMaxMemory } = getToolSettingsOptions(config.toolSettings);
+    if (nodeMaxMemory) {
+      extraEnv.NODE_OPTIONS = getNodeOptions(nodeMaxMemory);
     }
 
     const execOptions: ExecOptions = {
