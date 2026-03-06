@@ -1,36 +1,12 @@
-import type {
-  ExecaReturnValue,
-  ExecaSyncReturnValue,
-  Options,
-  SyncOptions,
-} from 'execa';
-import { execa, execaSync } from 'execa';
+import type { ExecaReturnValue, Options } from 'execa';
+import { execa } from 'execa';
 
 const maxBuffer = 20 * 1024 * 1024;
 
 /**
- * Execute a command synchronously using execa
- * @param {string} cmd
- * @param {string[]} args
- */
-export function exec(
-  cmd: string,
-  args: string[] = [],
-  opts: SyncOptions = {},
-): ExecaSyncReturnValue<string> {
-  return execaSync(cmd, args, {
-    ...opts,
-    maxBuffer,
-    encoding: 'utf8',
-  });
-}
-
-/**
  * Execute a command asynchronously using execa
- * @param {string} cmd
- * @param {string[]} args
  */
-export async function execAsync(
+export async function exec(
   cmd: string,
   args: string[] = [],
   opts: Options = {},
