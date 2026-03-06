@@ -728,7 +728,13 @@
       {
         "matchDatasources": ["docker"],
         "matchPackageNames": ["/^(?:docker\\.io/)?grafana/grafana-oss$/"],
-        "matchCurrentVersion": "12.1.1",
+        "matchCurrentVersion": "12.3.2",
+        "replacementName": "grafana/grafana"
+      },
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["/^(?:docker\\.io/)?grafana/grafana-oss$/"],
+        "matchCurrentVersion": "12.3.2-ubuntu",
         "replacementName": "grafana/grafana"
       }
     ]
