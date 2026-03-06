@@ -32,15 +32,15 @@ void (async () => {
   await program.parseAsync();
   const opts = program.opts();
   logger.info(`Preparing v${opts.version?.toString()} ...`);
-  build();
+  await build();
   await generateDocs(undefined, undefined, opts.version?.toString());
   await buildMkdocs(opts.version?.toString());
   await bake('build', opts);
 })();
 
-function build(): void {
+async function build(): Promise<void> {
   logger.info('Building ...');
-  const res = exec('pnpm', ['build']);
+  const res = await exec('pnpm', ['build'], { reject: false });
 
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
@@ -61,7 +61,7 @@ async function buildMkdocs(version: string | undefined): Promise<void> {
     mkdocsArgs.push('--version', version);
   }
 
-  const mkdocsRes = exec('pnpm', mkdocsArgs);
+  const mkdocsRes = await exec('pnpm', mkdocsArgs, { reject: false });
 
   if (mkdocsRes.signal) {
     logger.error(`Signal received: ${mkdocsRes.signal}`);
@@ -81,13 +81,11 @@ async function buildMkdocs(version: string | undefined): Promise<void> {
   logger.info('Packaging Mkdocs site ...');
   await fs.ensureDir('tmp');
 
-  const tarRes = exec('tar', [
-    '-czf',
-    'tmp/mkdocs-site.tgz',
-    '-C',
-    'tools/mkdocs/site',
-    '.',
-  ]);
+  const tarRes = await exec(
+    'tar',
+    ['-czf', 'tmp/mkdocs-site.tgz', '-C', 'tools/mkdocs/site', '.'],
+    { reject: false },
+  );
 
   if (tarRes.signal) {
     logger.error(`Signal received: ${tarRes.signal}`);
