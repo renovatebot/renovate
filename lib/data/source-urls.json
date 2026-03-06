@@ -1,9 +1,5 @@
 {
   "$schema": "../../tools/schemas/source-urls-schema.json",
-  "orb": {
-    "cypress-io/cypress": "https://github.com/cypress-io/circleci-orb",
-    "hutson/library-release-workflows": "https://github.com/hyper-expanse/library-release-workflows"
-  },
   "docker": {
     "adminer": "https://github.com/vrana/adminer",
     "amd64/registry": "https://github.com/distribution/distribution",
@@ -53,10 +49,9 @@
   "nvm": {
     "node": "https://github.com/nodejs/node"
   },
-  "pypi": {
-    "mkdocs": "https://github.com/mkdocs/mkdocs",
-    "mkdocs-material": "https://github.com/squidfunk/mkdocs-material",
-    "mypy": "https://github.com/python/mypy"
+  "orb": {
+    "cypress-io/cypress": "https://github.com/cypress-io/circleci-orb",
+    "hutson/library-release-workflows": "https://github.com/hyper-expanse/library-release-workflows"
   },
   "packagist": {
     "api-platform/doctrine-common": "https://github.com/api-platform/core",
@@ -79,5 +74,10 @@
     "api-platform/state": "https://github.com/api-platform/core",
     "api-platform/symfony": "https://github.com/api-platform/core",
     "api-platform/validator": "https://github.com/api-platform/core"
+  },
+  "pypi": {
+    "mkdocs": "https://github.com/mkdocs/mkdocs",
+    "mkdocs-material": "https://github.com/squidfunk/mkdocs-material",
+    "mypy": "https://github.com/python/mypy"
   }
 }
