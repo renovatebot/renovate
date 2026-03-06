@@ -7,14 +7,20 @@ import { getConfig } from '../../../config/defaults.ts';
 import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
 import * as _migrate from '../../../config/migration.ts';
 import type { AllConfig } from '../../../config/types.ts';
+import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import { initRepoCache } from '../../../util/cache/repository/init.ts';
 import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
 import { getUserEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import * as queue from '../../../util/http/queue.ts';
+import * as throttle from '../../../util/http/throttle.ts';
 import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
 import { OnboardingState } from '../onboarding/common.ts';
 import {
+  applyHostRules,
+  applyNpmrc,
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
@@ -500,6 +506,88 @@ describe('workers/repository/init/merge', () => {
       };
       setNpmTokenInNpmrc(config);
       expect(config).toMatchObject({ npmrc: 'something_auth=token\n' });
+    });
+  });
+
+  describe('applyNpmrc', () => {
+    it('does nothing if npmrc is missing after token migration', () => {
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+
+      applyNpmrc({});
+
+      expect(setNpmrcSpy).not.toHaveBeenCalled();
+    });
+
+    it('migrates npmToken and sets npmrc', () => {
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+      const config = {
+        npmToken: 'token',
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+      };
+
+      applyNpmrc(config);
+
+      expect(config.npmToken).toBeUndefined();
+      expect(config.npmrc).toBe('something_authToken=token');
+      expect(setNpmrcSpy).toHaveBeenCalledExactlyOnceWith(
+        'something_authToken=token',
+      );
+    });
+  });
+
+  describe('applyHostRules', () => {
+    it('does nothing when hostRules is not configured', () => {
+      const addSpy = vi.spyOn(hostRules, 'add');
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+
+      applyHostRules({});
+
+      expect(addSpy).not.toHaveBeenCalled();
+      expect(clearQueueSpy).not.toHaveBeenCalled();
+      expect(clearThrottleSpy).not.toHaveBeenCalled();
+    });
+
+    it('adds hostRules and clears queue and throttle', () => {
+      const addSpy = vi
+        .spyOn(hostRules, 'add')
+        .mockImplementation(() => undefined);
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+      const config = {
+        hostRules: [{ matchHost: 'registry.npmjs.org' }],
+      };
+
+      applyHostRules(config);
+
+      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+        matchHost: 'registry.npmjs.org',
+      });
+      expect(clearQueueSpy).toHaveBeenCalledOnce();
+      expect(clearThrottleSpy).toHaveBeenCalledOnce();
+      expect(config.hostRules).toBeUndefined();
+    });
+
+    it('warns on invalid hostRule and continues applying others', () => {
+      const addSpy = vi
+        .spyOn(hostRules, 'add')
+        .mockImplementationOnce(() => {
+          throw new Error('invalid host rule');
+        })
+        .mockImplementation(() => undefined);
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+      const config = {
+        hostRules: [{ matchHost: 'one.example' }, { matchHost: 'two.example' }],
+      };
+
+      applyHostRules(config);
+
+      expect(addSpy).toHaveBeenCalledTimes(2);
+      expect(logger.logger.warn).toHaveBeenCalledOnce();
+      expect(clearQueueSpy).toHaveBeenCalledOnce();
+      expect(clearThrottleSpy).toHaveBeenCalledOnce();
+      expect(config.hostRules).toBeUndefined();
     });
   });
 
