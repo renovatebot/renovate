@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import { logger, partial } from '~test/util.ts';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import * as packageCache from '../../../util/cache/package/index.ts';
+import * as packageCacheBackend from '../../../util/cache/package/backend.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
 import { MAVEN_REPO } from './common.ts';
 import type { MavenFetchError } from './types.ts';
@@ -126,7 +126,7 @@ describe('modules/datasource/maven/util', () => {
     });
 
     describe('429 logging', () => {
-      const getCacheTypeSpy = vi.spyOn(packageCache, 'getCacheType');
+      const getCacheTypeSpy = vi.spyOn(packageCacheBackend, 'getCacheType');
 
       afterAll(() => {
         getCacheTypeSpy.mockRestore();

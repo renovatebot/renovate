@@ -4,7 +4,7 @@ import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { getCacheType } from '../../../util/cache/package/index.ts';
+import { getCacheType } from '../../../util/cache/package/backend.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
