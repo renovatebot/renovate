@@ -45,12 +45,24 @@ const GhOutput = z.array(
 async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
-  const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
-  const execRes = await execAsync(command, [], {
-    env: {
-      GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+  const execRes = await execAsync(
+    'gh',
+    [
+      'issue',
+      'list',
+      '--json',
+      'title,number,url,labels',
+      '--search',
+      `type:${issueType}`,
+      '--limit',
+      '1000',
+    ],
+    {
+      env: {
+        GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+      },
     },
-  });
+  );
   const res = GhOutput.safeParse(JSON.parse(execRes.stdout));
   if (res.error) {
     throw res.error;
