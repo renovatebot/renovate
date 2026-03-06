@@ -26,7 +26,7 @@ export function exec(
 }
 
 /**
- * Execute a command synchronously using execa
+ * Execute a command asynchronously using execa
  * @param {string} cmd
  * @param {string[]} args
  */
