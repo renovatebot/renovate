@@ -29,6 +29,7 @@ export const removedPresets: Record<string, string | null> = {
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,
   'group:jsTestMonMajor': 'group:jsTestNonMajor',
+  'group:kubernetes': 'group:kubernetesMonorepo',
   'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
   'npm:unpublishSafe': 'security:minimumReleaseAgeNpm',
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
@@ -59,6 +60,7 @@ const renamedMonorepos: Record<string, string> = {
   'arcus background-jobs': 'arcus.background-jobs',
   'aspnet AspNetWebStack': 'aspnet aspnetwebstack',
   'aspnet Extensions': 'aspnet extensions',
+  'k8s-io': 'kubernetes',
   'System.IO.Abstractions': 'system.io.abstractions',
   angular1: 'angularjs',
   angularcli: 'angular-cli',
