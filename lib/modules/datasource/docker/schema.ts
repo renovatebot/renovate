@@ -41,6 +41,7 @@ export const OciImageConfig = z.object({
   // This is required by the spec, but probably not present in the wild.
   architecture: z.string().nullish(),
   config: z.object({ Labels: z.record(z.string()).nullish() }).nullish(),
+  created: z.string(),
 });
 export type OciImageConfig = z.infer<typeof OciImageConfig>;
 
