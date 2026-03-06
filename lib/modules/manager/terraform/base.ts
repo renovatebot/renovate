@@ -2,6 +2,8 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import type { TerraformDefinitionFile } from './hcl/types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
@@ -42,6 +44,20 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
 
     if (isNonEmptyString(dep.managerData?.source)) {
       // TODO #22198
+      if (isOCIRegistry(dep.managerData.source)) {
+        const imagePath = removeOCIPrefix(dep.managerData.source);
+        const parsed = getDep(imagePath, false);
+        dep.packageName = parsed.packageName;
+        dep.datasource = parsed.datasource;
+        if (!dep.currentValue && parsed.currentValue) {
+          dep.currentValue = parsed.currentValue;
+        }
+        if (!dep.currentValue) {
+          dep.skipReason = 'unspecified-version';
+        }
+        return dep;
+      }
+
       const source = this.sourceExtractionRegex.exec(dep.managerData.source);
       if (!source?.groups) {
         dep.skipReason = 'unsupported-url';

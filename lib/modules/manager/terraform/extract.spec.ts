@@ -335,6 +335,86 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
+    it('extracts OCI modules and providers', async () => {
+      const src = codeBlock`
+        module "vpc_oci" {
+          source  = "oci://registry.example.com/terraform-modules/vpc"
+          version = "1.2.3"
+        }
+
+        module "storage_oci_tagged" {
+          source = "oci://ghcr.io/terraform-modules/storage:3.1.0"
+        }
+
+        module "no_version_oci" {
+          source = "oci://registry.example.com/terraform-modules/noversion"
+        }
+
+        terraform {
+          required_providers {
+            custom_oci = {
+              source  = "oci://registry.example.com/providers/custom"
+              version = "1.0.0"
+            }
+
+            tagged_oci = {
+              source = "oci://ghcr.io/providers/tagged:4.2.0"
+            }
+
+            no_version_oci = {
+              source = "oci://registry.example.com/providers/noversion"
+            }
+          }
+        }
+      `;
+      const res = await extractPackageFile(src, 'oci.tf', {});
+      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'registry.example.com/terraform-modules/vpc',
+          depType: 'module',
+          packageName: 'registry.example.com/terraform-modules/vpc',
+        },
+        {
+          currentValue: '3.1.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/terraform-modules/storage',
+          depType: 'module',
+          packageName: 'ghcr.io/terraform-modules/storage',
+        },
+        {
+          datasource: 'docker',
+          depName: 'registry.example.com/terraform-modules/noversion',
+          depType: 'module',
+          packageName: 'registry.example.com/terraform-modules/noversion',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'custom_oci',
+          depType: 'required_provider',
+          packageName: 'registry.example.com/providers/custom',
+        },
+        {
+          currentValue: '4.2.0',
+          datasource: 'docker',
+          depName: 'tagged_oci',
+          depType: 'required_provider',
+          packageName: 'ghcr.io/providers/tagged',
+        },
+        {
+          datasource: 'docker',
+          depName: 'no_version_oci',
+          depType: 'required_provider',
+          packageName: 'registry.example.com/providers/noversion',
+          skipReason: 'unspecified-version',
+        },
+      ]);
+    });
+
     it('extracts providers', async () => {
       const res = await extractPackageFile(providers, 'providers.tf', {});
       expect(res?.deps).toHaveLength(15);
