@@ -792,7 +792,15 @@ async function updatePRAndAddReviewers(
         const filteredReviewers = reviewers.filter(
           (name) => !invalidReviewers.includes(name),
         );
-        await updatePRAndAddReviewers(prNo, filteredReviewers);
+        if (filteredReviewers.length < reviewers.length) {
+          await updatePRAndAddReviewers(prNo, filteredReviewers);
+        } else {
+          logger.warn(
+            { invalidReviewers, reviewers },
+            'Could not filter invalid reviewers from list, aborting to prevent infinite recursion',
+          );
+          throw err;
+        }
       } else {
         logger.debug(
           '409 response to adding reviewers - has repository changed?',
