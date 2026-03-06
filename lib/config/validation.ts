@@ -237,6 +237,20 @@ export async function validateConfig(
         });
       }
     }
+    if (key === 'registryUrls' && !parentPath && isNonEmptyArray(val)) {
+      warnings.push({
+        topic: 'Configuration Warning',
+        message:
+          'Setting `registryUrls` at the top level of your config will apply it to all managers and datasources, which can cause the wrong registry URL to be used for some packages. Use `registryUrls` inside `packageRules` to target specific managers or packages.',
+      });
+    }
+    if (key === 'defaultRegistryUrls' && !parentPath && isNonEmptyArray(val)) {
+      warnings.push({
+        topic: 'Configuration Warning',
+        message:
+          'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers and datasources, which can cause the wrong registry URL to be used for some packages. Use `defaultRegistryUrls` inside `packageRules` to target specific managers or packages.',
+      });
+    }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
       !(is as any).function(val) // Ignore all functions
