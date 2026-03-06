@@ -293,11 +293,13 @@ describe('config/presets/internal/custom-managers', () => {
       it.each`
         path                                  | expected
         ${'bitbucket-pipelines.yml'}          | ${true}
-        ${'bitbucket-pipelines.yaml'}         | ${true}
+        ${'bitbucket-pipelines.yaml'}         | ${false}
         ${'foo/bitbucket-pipelines.yml'}      | ${true}
-        ${'foo/bitbucket-pipelines.yaml'}     | ${true}
+        ${'foo/bitbucket-pipelines.yaml'}     | ${false}
         ${'foo/bar/bitbucket-pipelines.yml'}  | ${true}
-        ${'foo/bar/bitbucket-pipelines.yaml'} | ${true}
+        ${'foo/bar/bitbucket-pipelines.yaml'} | ${false}
+        ${'.bitbucket/shared-pipelines.yml'}  | ${true}
+        ${'.bitbucket/shared-pipeline.yaml'}  | ${false}
         ${'bitbucket-pipelines'}              | ${false}
       `('$path', ({ path, expected }) => {
         expect(
