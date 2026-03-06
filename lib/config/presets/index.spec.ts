@@ -638,6 +638,7 @@ describe('config/presets/index', () => {
           'replacements:all',
           'workarounds:all',
           'helpers:githubDigestChangelogs',
+          'helpers:gitlabDigestChangelogs',
           'helpers:goXPackagesChangelogLink',
           'helpers:goXPackagesNameLink',
         ],
