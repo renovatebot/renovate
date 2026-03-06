@@ -353,6 +353,20 @@ exports[`modules/manager/poetry/extract > extractPackageFile() > extracts multip
 {
   "deps": [
     {
+      "currentValue": ">=1.0",
+      "datasource": "pypi",
+      "depName": "poetry",
+      "depType": "build-system.requires",
+      "packageName": "poetry",
+    },
+    {
+      "datasource": "pypi",
+      "depName": "wheel",
+      "depType": "build-system.requires",
+      "packageName": "wheel",
+      "skipReason": "unspecified-version",
+    },
+    {
       "currentValue": "*",
       "datasource": "pypi",
       "depName": "dep1",
@@ -477,6 +491,20 @@ exports[`modules/manager/poetry/extract > extractPackageFile() > extracts multip
 exports[`modules/manager/poetry/extract > extractPackageFile() > extracts multiple dependencies 1`] = `
 [
   {
+    "currentValue": ">=1.0",
+    "datasource": "pypi",
+    "depName": "poetry",
+    "depType": "build-system.requires",
+    "packageName": "poetry",
+  },
+  {
+    "datasource": "pypi",
+    "depName": "wheel",
+    "depType": "build-system.requires",
+    "packageName": "wheel",
+    "skipReason": "unspecified-version",
+  },
+  {
     "currentValue": "0.0.0",
     "datasource": "pypi",
     "depName": "dep1_",
@@ -558,6 +586,27 @@ exports[`modules/manager/poetry/extract > extractPackageFile() > extracts multip
 exports[`modules/manager/poetry/extract > extractPackageFile() > handles multiple constraint dependencies 1`] = `
 {
   "deps": [
+    {
+      "currentValue": ">=1.1.2",
+      "datasource": "pypi",
+      "depName": "poetry",
+      "depType": "build-system.requires",
+      "packageName": "poetry",
+    },
+    {
+      "datasource": "pypi",
+      "depName": "setuptools",
+      "depType": "build-system.requires",
+      "packageName": "setuptools",
+      "skipReason": "unspecified-version",
+    },
+    {
+      "datasource": "pypi",
+      "depName": "poetry-dynamic-versioning",
+      "depType": "build-system.requires",
+      "packageName": "poetry-dynamic-versioning",
+      "skipReason": "unspecified-version",
+    },
     {
       "datasource": "pypi",
       "depName": "foo",
