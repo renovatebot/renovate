@@ -160,6 +160,89 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
   });
 
+  it('skips precise update when manifest range has changed', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    const updatedDeps = [
+      {
+        depName: 'pprof',
+        packageName: 'pprof',
+        lockedVersion: '0.13.0',
+        currentValue: '0.13',
+        newVersion: '0.14.0',
+        newValue: '0.14',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+    ]);
+  });
+
+  it('handles mixed deps where some have range changes and some do not', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    const updatedDeps = [
+      {
+        depName: 'pprof',
+        packageName: 'pprof',
+        lockedVersion: '0.13.0',
+        currentValue: '0.13',
+        newVersion: '0.14.0',
+        newValue: '0.14',
+        datasource: CrateDatasource.id,
+      },
+      {
+        depName: 'serde',
+        packageName: 'serde',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --package serde@1.0.0 --precise 1.0.1',
+      },
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+    ]);
+  });
+
   it('returns an artifact error when cargo update fails', async () => {
     const cmd =
       'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1';
