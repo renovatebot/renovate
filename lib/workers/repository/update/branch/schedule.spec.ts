@@ -479,6 +479,83 @@ describe('workers/repository/update/branch/schedule', () => {
     });
   });
 
+  describe('getNextScheduleTime(config)', () => {
+    let config: RenovateConfig;
+
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    beforeEach(() => {
+      vi.setSystemTime(new Date('2017-06-30T10:50:00.000'));
+      config = {};
+    });
+
+    it('returns null if no schedule defined', () => {
+      expect(schedule.getNextScheduleTime(config)).toBeNull();
+    });
+
+    it('returns null for empty schedule array', () => {
+      config.automergeSchedule = [];
+      expect(schedule.getNextScheduleTime(config)).toBeNull();
+    });
+
+    it('returns null for "at any time"', () => {
+      config.automergeSchedule = ['at any time'];
+      expect(schedule.getNextScheduleTime(config)).toBeNull();
+    });
+
+    it('returns null for invalid schedule', () => {
+      config.automergeSchedule = ['this is not a valid schedule'];
+      expect(schedule.getNextScheduleTime(config)).toBeNull();
+    });
+
+    it('returns null for invalid timezone', () => {
+      config.automergeSchedule = ['after 4:00pm'];
+      config.timezone = 'Not/ATimezone';
+      expect(schedule.getNextScheduleTime(config)).toBeNull();
+    });
+
+    it('returns a future date for a later.js schedule', () => {
+      config.automergeSchedule = ['after 4:00pm'];
+      const res = schedule.getNextScheduleTime(config);
+      expect(res).not.toBeNull();
+      expect(res!.getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('returns a future date for a cron schedule', () => {
+      config.automergeSchedule = ['* 22 * * *'];
+      const res = schedule.getNextScheduleTime(config);
+      expect(res).not.toBeNull();
+      expect(res!.getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('returns the earliest of multiple schedules', () => {
+      const resLater = schedule.getNextScheduleTime({
+        automergeSchedule: ['after 11:00pm'],
+      });
+      const resEarliest = schedule.getNextScheduleTime({
+        automergeSchedule: ['after 11:00pm', 'after 4:00pm'],
+      });
+      expect(resEarliest!.getTime()).toBeLessThan(resLater!.getTime());
+    });
+
+    it('respects timezone', () => {
+      config.automergeSchedule = ['after 4:00pm'];
+      config.timezone = 'Asia/Singapore';
+      const res = schedule.getNextScheduleTime(config);
+      expect(res).not.toBeNull();
+      expect(res!.getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('supports the schedule key parameter', () => {
+      config.schedule = ['after 4:00pm'];
+      const res = schedule.getNextScheduleTime(config, 'schedule');
+      expect(res).not.toBeNull();
+      expect(res!.getTime()).toBeGreaterThan(Date.now());
+    });
+  });
+
   describe('log cron schedules', () => {
     it('should correctly convert "* 22 4 * *" to human-readable format', () => {
       const result = cronstrue.toString('* 22 4 * *');
