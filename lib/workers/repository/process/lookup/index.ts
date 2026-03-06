@@ -196,6 +196,7 @@ export async function lookupUpdates(
       assignKeys(res, dependency, [
         'deprecationMessage',
         'sourceUrl',
+        'sourceTag',
         'registryUrl',
         'sourceDirectory',
         'homepage',
