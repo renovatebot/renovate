@@ -42,7 +42,7 @@ import {
   OnboardingState,
   getDefaultConfigFileName,
 } from '../onboarding/common.ts';
-import type { RepoFileConfig } from './types.ts';
+import type { RepoFileConfig, RepositoryWorkerConfig } from './types.ts';
 
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
@@ -171,6 +171,25 @@ export async function detectRepoFileConfig(
   return { configFileName, configFileParsed };
 }
 
+function applyHostRulesFromConfig(config: RenovateConfig): void {
+  if (!config.hostRules) {
+    return;
+  }
+  logger.debug('Setting hostRules from config');
+  for (const rule of config.hostRules) {
+    try {
+      hostRules.add(rule);
+    } catch (err) {
+      // v8 ignore next -- TODO: add test #40625
+      logger.warn({ err, config: rule }, 'Error setting hostRule from config');
+    }
+  }
+  // host rules can change concurrency
+  queue.clear();
+  throttle.clear();
+  delete config.hostRules;
+}
+
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
   if (!repoConfig.configFileParseError) {
     return;
@@ -184,10 +203,10 @@ export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
 
 // Check for repository config
 export async function mergeRenovateConfig(
-  config: RenovateConfig,
+  config: RepositoryWorkerConfig,
   branchName?: string,
 ): Promise<RenovateConfig> {
-  let returnConfig = { ...config };
+  let returnConfig: RepositoryWorkerConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
   if (config.requireConfig !== 'ignored') {
     repoConfig = await detectRepoFileConfig(branchName);
@@ -207,6 +226,47 @@ export async function mergeRenovateConfig(
     configFileParsed,
     process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
+
+  // Apply the repositories[] object-entry config between global config and
+  // repository file config.
+  // Must run after repository file config is loaded so its `ignorePresets` can
+  // be included when resolving object-entry presets.
+  const repoEntryConfig = returnConfig.repositoryEntryConfig;
+  delete returnConfig.repositoryEntryConfig;
+
+  if (isNonEmptyObject(repoEntryConfig)) {
+    const repoEntry = repoEntryConfig as RenovateConfig;
+    const toResolve: RenovateConfig = {
+      ...repoEntry,
+      extends: [...(returnConfig.extends ?? []), ...(repoEntry.extends ?? [])],
+      ignorePresets: [
+        ...(returnConfig.ignorePresets ?? []),
+        ...(repoEntry.ignorePresets ?? []),
+        ...(resolvedRepoConfig.ignorePresets ?? []),
+      ],
+    };
+    delete returnConfig.extends;
+
+    const { config: resolvedRepoEntry } = await presets.resolveConfigPresets(
+      toResolve,
+      config,
+    );
+
+    setNpmTokenInNpmrc(resolvedRepoEntry);
+    if (isString(resolvedRepoEntry.npmrc)) {
+      npmApi.setNpmrc(resolvedRepoEntry.npmrc);
+    }
+
+    const resolvedRepoEntryWithSecrets = applySecretsAndVariablesToConfig({
+      config: resolvedRepoEntry,
+      secrets: config.secrets,
+      variables: config.variables,
+    });
+
+    applyHostRulesFromConfig(resolvedRepoEntryWithSecrets);
+
+    returnConfig = mergeChildConfig(returnConfig, resolvedRepoEntryWithSecrets);
+  }
 
   if (isNonEmptyArray(returnConfig.extends)) {
     resolvedRepoConfig.extends = [
@@ -279,24 +339,8 @@ export async function mergeRenovateConfig(
     ),
   });
 
-  // istanbul ignore if
-  if (resolvedConfig.hostRules) {
-    logger.debug('Setting hostRules from config');
-    for (const rule of resolvedConfig.hostRules) {
-      try {
-        hostRules.add(rule);
-      } catch (err) {
-        logger.warn(
-          { err, config: rule },
-          'Error setting hostRule from config',
-        );
-      }
-    }
-    // host rules can change concurrency
-    queue.clear();
-    throttle.clear();
-    delete resolvedConfig.hostRules;
-  }
+  applyHostRulesFromConfig(resolvedConfig);
+
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
   ({ config: returnConfig } = await presets.resolveConfigPresets(
     returnConfig,
