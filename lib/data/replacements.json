@@ -11,8 +11,8 @@
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
       "replacements:edb-jdbc-to-enterprisedb",
-      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
+      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-plugin-node-to-maintained-fork",
       "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:express-mung-to-express-response-middleware",
@@ -264,18 +264,6 @@
       }
     ]
   },
-  "eslint-plugin-eslint-comments-to-maintained-fork": {
-    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
-    "packageRules": [
-      {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["eslint-plugin-eslint-comments"],
-        "matchCurrentVersion": "^3.2.0",
-        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
-        "replacementVersion": "3.2.0"
-      }
-    ]
-  },
   "eslint-config-standard-with-typescript-to-eslint-config-love": {
     "description": "`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.",
     "packageRules": [
@@ -285,6 +273,18 @@
         "matchPackageNames": ["eslint-config-standard-with-typescript"],
         "replacementName": "eslint-config-love",
         "replacementVersion": "43.1.0"
+      }
+    ]
+  },
+  "eslint-plugin-eslint-comments-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
+        "replacementVersion": "3.2.0"
       }
     ]
   },
