@@ -18,12 +18,10 @@ export interface ToolingDefinition {
 
 export const asdfTooling = upgradeableTooling;
 
-const shortVersionRegex = regEx(/^\d+(\.\d+)?$/);
-
 function shortJavaVersioning(
   version: string,
 ): { versioning: string } | undefined {
-  if (shortVersionRegex.test(version)) {
+  if (regEx(/^\d+(\.\d+)?$/).test(version)) {
     return { versioning: semverPartialVersioning.id };
   }
   return undefined;
