@@ -8,7 +8,7 @@ import {
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { replaceContent } from './utils.ts';
+import { formatCell, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -56,25 +56,31 @@ function buildHtmlTable(data: string[][]): string {
     return '';
   }
   let table = `<table>\n`;
-  for (const [i, row] of data.entries()) {
-    if (i === 0) {
+  for (const [rowIndex, row] of data.entries()) {
+    if (rowIndex === 0) {
       table += indent`${1}<thead>\n`;
     }
 
-    if (i === 1) {
+    if (rowIndex === 1) {
       table += indent`${1}</thead>\n` + indent`${1}<tbody>\n`;
     }
 
     table += indent`${2}<tr>\n`;
-    for (const col of row) {
-      if (i === 0) {
+    for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      const col = row[colIndex];
+
+      if (rowIndex === 0) {
+        // header row
         table += indent`${3}<th>${col}</th>\n`;
         continue;
       }
+
+      const cellHtml = formatCell(row, colIndex);
+
       table +=
-        indent`${3}<td>${col}` +
+        indent`${3}${cellHtml}` +
         (`${col}`.endsWith('\n') ? indent`${3}` : '') +
-        `</td>\n`;
+        `\n`;
     }
     table += indent`${2}</tr>\n`;
   }
