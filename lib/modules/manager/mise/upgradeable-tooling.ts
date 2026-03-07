@@ -7,6 +7,7 @@ import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
+import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
 
@@ -16,6 +17,17 @@ export interface ToolingDefinition {
 }
 
 export const asdfTooling = upgradeableTooling;
+
+const shortVersionRegex = regEx(/^\d+(\.\d+)?$/);
+
+function shortJavaVersioning(
+  version: string,
+): { versioning: string } | undefined {
+  if (shortVersionRegex.test(version)) {
+    return { versioning: semverPartialVersioning.id };
+  }
+  return undefined;
+}
 
 const miseCoreTooling: Record<string, ToolingDefinition> = {
   bun: {
@@ -67,6 +79,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: versionMatch,
+          ...shortJavaVersioning(versionMatch),
         };
       }
       const openJdkMatches = regEx(/^openjdk-(?<version>\d\S+)/).exec(
@@ -77,8 +90,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: openJdkMatches.version,
-          replaceString: version,
-          autoReplaceStringTemplate: 'openjdk-{{{newValue}}}',
+          ...shortJavaVersioning(openJdkMatches.version),
         };
       }
       const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
@@ -89,8 +101,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: adoptOpenJdkMatches.version,
-          replaceString: version,
-          autoReplaceStringTemplate: 'adoptopenjdk-{{{newValue}}}',
+          ...shortJavaVersioning(adoptOpenJdkMatches.version),
         };
       }
       const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
@@ -101,8 +112,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: temurinJdkMatches.version,
-          replaceString: version,
-          autoReplaceStringTemplate: 'temurin-{{{newValue}}}',
+          ...shortJavaVersioning(temurinJdkMatches.version),
         };
       }
       const correttoJdkMatches = regEx(/^corretto-(?<version>\d\S+)/).exec(
@@ -113,8 +123,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: correttoJdkMatches.version,
-          replaceString: version,
-          autoReplaceStringTemplate: 'corretto-{{{newValue}}}',
+          ...shortJavaVersioning(correttoJdkMatches.version),
         };
       }
       const zuluJdkMatches = regEx(/^zulu-(?<version>\d\S+)/).exec(
@@ -125,8 +134,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: zuluJdkMatches.version,
-          replaceString: version,
-          autoReplaceStringTemplate: 'zulu-{{{newValue}}}',
+          ...shortJavaVersioning(zuluJdkMatches.version),
         };
       }
       const oracleGraalvmJdkMatches = regEx(
@@ -137,8 +145,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: oracleGraalvmJdkMatches.version,
-          replaceString: version,
-          autoReplaceStringTemplate: 'oracle-graalvm-{{{newValue}}}',
+          ...shortJavaVersioning(oracleGraalvmJdkMatches.version),
         };
       }
 
@@ -312,8 +319,6 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
           datasource: GithubTagsDatasource.id,
           packageName: 'apache/kafka',
           currentValue: apacheMatches.version,
-          replaceString: version,
-          autoReplaceStringTemplate: 'apache-{{{newValue}}}',
         };
       }
 
