@@ -186,7 +186,7 @@ export function updateDependency({
         newValue!,
         overrideDepParents,
       );
-      if (upgrade.newName) {
+      if (upgrade.newName && upgrade.newName !== depName) {
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent,
@@ -237,7 +237,7 @@ export function updateDependency({
           // TODO #22198
           newValue!,
         );
-        if (upgrade.newName) {
+        if (upgrade.newName && upgrade.newName !== depName) {
           if (depKey === `**/${depName}`) {
             // handles the case where a replacement is in a resolution
             upgrade.newName = `**/${upgrade.newName}`;
