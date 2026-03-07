@@ -1007,5 +1007,105 @@ describe('modules/manager/mise/extract', () => {
         ],
       });
     });
+
+    it('uses semver-partial versioning for short java versions', () => {
+      const content = codeBlock`
+      [tools]
+      java = "21"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21',
+            datasource: 'java-version',
+            versioning: 'semver-partial',
+          },
+        ],
+      });
+
+      const content2 = codeBlock`
+      [tools]
+      java = "21.0"
+    `;
+      const result2 = extractPackageFile(content2, miseFilename);
+      expect(result2).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0',
+            datasource: 'java-version',
+            versioning: 'semver-partial',
+          },
+        ],
+      });
+
+      const content3 = codeBlock`
+      [tools]
+      java = "temurin-21"
+    `;
+      const result3 = extractPackageFile(content3, miseFilename);
+      expect(result3).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21',
+            datasource: 'java-version',
+            versioning: 'semver-partial',
+          },
+        ],
+      });
+
+      const content4 = codeBlock`
+      [tools]
+      java = "corretto-21.0"
+    `;
+      const result4 = extractPackageFile(content4, miseFilename);
+      expect(result4).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0',
+            datasource: 'java-version',
+            versioning: 'semver-partial',
+          },
+        ],
+      });
+    });
+
+    it('does not use semver-partial for full java versions', () => {
+      const content = codeBlock`
+      [tools]
+      java = "21.0.2"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+      expect(result!.deps[0]).not.toHaveProperty('versioning');
+
+      const content2 = codeBlock`
+      [tools]
+      java = "temurin-21.0.2"
+    `;
+      const result2 = extractPackageFile(content2, miseFilename);
+      expect(result2).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+      expect(result2!.deps[0]).not.toHaveProperty('versioning');
+    });
   });
 });
