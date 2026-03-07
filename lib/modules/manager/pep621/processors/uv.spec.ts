@@ -356,6 +356,62 @@ describe('modules/manager/pep621/processors/uv', () => {
         'No uv lock file found',
       );
     });
+
+    it('resolves to lowest version found', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      [[package]]
+      name = "pytest"
+      version = "8.4.2"
+      source = { registry = "https://pypi.org/simple" }
+      resolution-markers = [
+          "python_full_version < '3.10'",
+      ]
+      dependencies = [
+          { name = "colorama", marker = "python_full_version < '3.10' and sys_platform == 'win32'" },
+          { name = "exceptiongroup", marker = "python_full_version < '3.10'" },
+          { name = "iniconfig", version = "2.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+          { name = "packaging", marker = "python_full_version < '3.10'" },
+          { name = "pluggy", marker = "python_full_version < '3.10'" },
+          { name = "pygments", marker = "python_full_version < '3.10'" },
+          { name = "tomli", marker = "python_full_version < '3.10'" },
+      ]
+      sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
+      wheels = [
+          { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
+      ]
+
+      [[package]]
+      name = "pytest"
+      version = "9.0.2"
+      source = { registry = "https://pypi.org/simple" }
+      resolution-markers = [
+          "python_full_version >= '3.10'",
+      ]
+      dependencies = [
+          { name = "colorama", marker = "python_full_version >= '3.10' and sys_platform == 'win32'" },
+          { name = "exceptiongroup", marker = "python_full_version == '3.10.*'" },
+          { name = "iniconfig", version = "2.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+          { name = "packaging", marker = "python_full_version >= '3.10'" },
+          { name = "pluggy", marker = "python_full_version >= '3.10'" },
+          { name = "pygments", marker = "python_full_version >= '3.10'" },
+          { name = "tomli", marker = "python_full_version == '3.10.*'" },
+      ]
+      sdist = { url = "https://files.pythonhosted.org/packages/d1/db/7ef3487e0fb0049ddb5ce41d3a49c235bf9ad299b6a25d5780a89f19230f/pytest-9.0.2.tar.gz", hash = "sha256:75186651a92bd89611d1d9fc20f0b4345fd827c41ccd5c299a868a05d70edf11", size = 1568901, upload-time = "2025-12-06T21:30:51.014Z" }
+      wheels = [
+          { url = "https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl", hash = "sha256:711ffd45bf766d5264d487b917733b453d917afd2b0ad65223959f59089f875b", size = 374801, upload-time = "2025-12-06T21:30:49.154Z" },
+      ]
+    `);
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [{ packageName: 'pytest' }],
+        'pyproject.toml',
+      );
+      expect(result).toHaveLength(1);
+
+      const dep = result[0];
+      expect(dep.lockedVersion).toBe('8.4.2');
+    });
   });
 
   describe('updateArtifacts()', () => {
