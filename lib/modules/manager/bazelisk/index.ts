@@ -2,6 +2,7 @@ import type { Category } from '../../../constants/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://github.com/bazelbuild/bazelisk';
