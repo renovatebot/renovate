@@ -80,6 +80,48 @@ describe('modules/manager/copier/extract', () => {
       });
     });
 
+    it('extracts and strips git+ prefix from git+https URL', () => {
+      const content = `
+        _commit: v1.0.0
+        _src_path: git+https://bitbucket.some-org/scm/some-project/some-template.git
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName:
+              'git+https://bitbucket.some-org/scm/some-project/some-template.git',
+            packageName:
+              'https://bitbucket.some-org/scm/some-project/some-template.git',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depType: 'template',
+          },
+        ],
+      });
+    });
+
+    it('extracts and strips git+ prefix from git+ssh URL', () => {
+      const content = `
+        _commit: v2.0.0
+        _src_path: git+ssh://git@bitbucket.some-org/some-project/some-template.git
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName:
+              'git+ssh://git@bitbucket.some-org/some-project/some-template.git',
+            packageName:
+              'ssh://git@bitbucket.some-org/some-project/some-template.git',
+            currentValue: 'v2.0.0',
+            datasource: 'git-tags',
+            depType: 'template',
+          },
+        ],
+      });
+    });
+
     it('returns null for invalid .copier-answers.yml', () => {
       const content = `
         not_valid:
