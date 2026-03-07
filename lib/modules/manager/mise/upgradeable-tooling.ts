@@ -18,13 +18,11 @@ export interface ToolingDefinition {
 
 export const asdfTooling = upgradeableTooling;
 
-function shortJavaVersioning(
-  version: string,
-): { versioning: string } | undefined {
+function shortJavaVersioning(version: string): { versioning?: string } {
   if (regEx(/^\d+(\.\d+)?$/).test(version)) {
     return { versioning: semverPartialVersioning.id };
   }
-  return undefined;
+  return {};
 }
 
 const miseCoreTooling: Record<string, ToolingDefinition> = {
