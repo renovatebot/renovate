@@ -219,7 +219,7 @@ export class CrateDatasource extends Datasource {
     // throttling of one request per second.
     const crateUrl = `${apiBaseUrl}crates/${packageName}?include=`;
 
-    logger.debug(
+    logger.trace(
       { crateUrl, packageName, registryUrl: info.rawUrl },
       'downloading crate metadata',
     );
@@ -231,7 +231,7 @@ export class CrateDatasource extends Datasource {
       const response = await this.http.getJsonUnchecked<Response>(crateUrl);
       return response.body.crate;
     } catch (err) {
-      logger.warn(
+      logger.debug(
         { err, packageName, registryUrl: info.rawUrl },
         'failed to download crate metadata',
       );
@@ -272,6 +272,10 @@ export class CrateDatasource extends Datasource {
       packageName.toLowerCase(),
     );
     const crateUrl = joinUrlParts(info.rawUrl, ...packageSuffix);
+    logger.trace(
+      { crateUrl, packageName, registryUrl: info.rawUrl },
+      'fetching crate records from sparse index',
+    );
     try {
       return (await this.http.getText(crateUrl)).body;
     } catch (err) {
@@ -526,6 +530,10 @@ export class CrateDatasource extends Datasource {
 
     const apiBaseUrl = joinUrlParts(config.api, 'api/v1/');
     const url = `${apiBaseUrl}crates/${packageName}/${release.versionOrig ?? release.version}`;
+    logger.trace(
+      { url, packageName, version: release.version, registryUrl },
+      'fetching crate release timestamp',
+    );
     // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
     // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
     const { body: releaseTimestamp } = await this.http.getJson(
