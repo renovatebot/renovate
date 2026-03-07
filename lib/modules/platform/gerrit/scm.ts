@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
 import type {
   CommitFilesConfig,
+  FileChange,
   LongCommitSha,
 } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
@@ -19,7 +20,35 @@ export function configureScm(repo: string, login: string): void {
   username = login;
 }
 
+export function pushForReview(options: {
+  sourceRef: string;
+  targetBranch: string;
+  files: FileChange[];
+  autoApprove?: boolean;
+  labels?: string[];
+}): Promise<boolean> {
+  const pushOptions = ['notify=NONE'];
+  if (options.autoApprove) {
+    pushOptions.push('label=Code-Review+2');
+  }
+  if (options.labels) {
+    for (const label of options.labels) {
+      pushOptions.push(`hashtag=${label}`);
+    }
+  }
+
+  return git.pushCommit({
+    sourceRef: options.sourceRef,
+    targetRef: `refs/for/${options.targetBranch}`,
+    files: options.files,
+    pushOptions,
+  });
+}
+
 export class GerritScm extends DefaultGitScm {
+  /** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
+  private pendingChangeBranches = new Set<string>();
+
   override async branchExists(branchName: string): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
@@ -167,42 +196,44 @@ export class GerritScm extends DefaultGitScm {
         const fetchRefSpec = currentRevision.ref;
         await git.fetchRevSpec(fetchRefSpec); // fetch current ChangeSet for git diff
         hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); // avoid pushing empty patch sets
-      }
-      if (hasChanges || commit.force) {
-        const pushOptions = ['notify=NONE'];
-        if (commit.autoApprove) {
-          pushOptions.push('label=Code-Review+2');
-        }
-        if (commit.labels) {
-          for (const label of commit.labels) {
-            pushOptions.push(`hashtag=${label}`);
+        if (hasChanges || commit.force) {
+          // Since the change already exists, we push to the same target branch to
+          // avoid creating a new change if the base branch has changed.
+          // updatePr() will later take care of moving the existing change to a
+          // different base branch if needed.
+          const pushResult = await pushForReview({
+            sourceRef: commit.branchName,
+            targetBranch: existingChange.branch,
+            files: commit.files,
+            autoApprove: commit.autoApprove,
+          });
+          /* v8 ignore else -- should never happen */
+          if (pushResult) {
+            this.pendingChangeBranches.delete(commit.branchName);
+            return commitSha;
           }
         }
-        // If a change already exists, we push to the same target branch to
-        // avoid creating a new change if the base branch has changed.
-        // updatePr() will take care of moving the existing change to a different base
-        // branch if needed.
-        const changeBranch = existingChange?.branch ?? commit.baseBranch!;
-        const pushResult = await git.pushCommit({
-          sourceRef: commit.branchName,
-          targetRef: `refs/for/${changeBranch}`,
-          files: commit.files,
-          pushOptions,
-        });
-        // v8 ignore else -- TODO: add test #40625
-        if (pushResult) {
-          return commitSha;
-        }
+      } else {
+        logger.debug(`Commit prepared, push deferred to createPr()`);
+        this.pendingChangeBranches.add(commit.branchName);
+        return commitSha;
       }
     }
     return null; // empty commit, no changes in this Gerrit Change
   }
 
   override deleteBranch(branchName: string): Promise<void> {
+    this.pendingChangeBranches.delete(branchName);
     return Promise.resolve();
   }
 
   override async mergeToLocal(branchName: string): Promise<void> {
+    // Unpushed branches can't be fetched from origin, merge locally instead
+    if (this.pendingChangeBranches.has(branchName)) {
+      logger.debug(`Merging local branch ${branchName} (not yet pushed)`);
+      return git.mergeToLocal(branchName, { localBranch: true });
+    }
+
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
       branchName,

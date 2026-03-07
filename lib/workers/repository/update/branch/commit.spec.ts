@@ -21,7 +21,6 @@ describe('workers/repository/update/branch/commit', () => {
         updatedArtifacts: [],
         upgrades: [],
         platformCommit: 'auto',
-        labels: ['label1', 'label2'],
       } satisfies BranchConfig;
       scm.commitAndPush.mockResolvedValueOnce('123test' as LongCommitSha);
       GlobalConfig.reset();
@@ -55,7 +54,6 @@ describe('workers/repository/update/branch/commit', () => {
             force: false,
             message: 'some commit message',
             platformCommit: 'auto',
-            labels: ['label1', 'label2'],
           },
         ],
       ]);

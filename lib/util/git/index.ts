@@ -980,7 +980,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+export async function mergeToLocal(
+  refSpecToMerge: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -994,8 +997,12 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await fetchRevSpec(refSpecToMerge);
-    await gitRetry(() => git.merge(['FETCH_HEAD']));
+    if (options?.localBranch) {
+      await git.merge([refSpecToMerge]);
+    } else {
+      await fetchRevSpec(refSpecToMerge);
+      await git.merge(['FETCH_HEAD']);
+    }
   } catch (err) {
     logger.debug(
       {
