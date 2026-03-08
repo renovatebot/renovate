@@ -607,9 +607,9 @@ export async function ensurePr(
       return { type: 'with-pr', pr };
     }
   } catch (err) {
+    // oxlint-disable-next-line typescript/prefer-optional-chain -- instanceof is not a null guard
     if (
       err instanceof ExternalHostError ||
-      // oxlint-disable-next-line typescript/prefer-optional-chain -- instanceof is not a null guard
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
       err.message === PLATFORM_INTEGRATION_UNAUTHORIZED

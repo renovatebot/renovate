@@ -80,10 +80,12 @@ class DockerVersioningApi extends GenericVersioningApi {
   override isCompatible(version: string, current: string): boolean {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(current);
+    // oxlint-disable-next-line typescript/prefer-optional-chain
     return !!(
       parsed1 &&
-      parsed1.suffix === parsed2?.suffix &&
-      parsed1.release.length === parsed2?.release.length
+      parsed2 &&
+      parsed1.suffix === parsed2.suffix &&
+      parsed1.release.length === parsed2.release.length
     );
   }
 
