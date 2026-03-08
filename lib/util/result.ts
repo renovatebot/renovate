@@ -649,7 +649,6 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
   }
 
   static err<E extends Val>(err: NonNullable<E>): AsyncResult<never, E> {
-    // eslint-disable-next-line promise/no-promise-in-callback
     return new AsyncResult(Promise.resolve(Result.err(err)));
   }
 
@@ -861,7 +860,6 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
   ): AsyncResult<T | U, EE> {
     const caughtAsyncResult: Promise<Result<T, EE>> = this.asyncResult.then(
       (result) =>
-        // eslint-disable-next-line promise/no-nesting
         result.catch(fn as never),
     );
     return AsyncResult.wrap(caughtAsyncResult);

@@ -543,9 +543,6 @@ importers:
       eslint-plugin-oxlint:
         specifier: 1.50.0
         version: 1.50.0
-      eslint-plugin-promise:
-        specifier: 7.2.1
-        version: 7.2.1(eslint@9.39.3)
       expect-more-jest:
         specifier: 5.5.0
         version: 5.5.0
@@ -3632,12 +3629,6 @@ packages:
 
   eslint-plugin-oxlint@1.50.0:
     resolution: {integrity: sha512-QAxeFeUHuekmLkuRLdzHH8Z0JvC7482OaQ3jlUMdEd0gcS6m+MYHei3Favoew9DdvTQT7yHxrm7BL0iXoenb6w==}
-
-  eslint-plugin-promise@7.2.1:
-    resolution: {integrity: sha512-SWKjd+EuvWkYaS+uN2csvj0KoP43YTu7+phKQ5v+xw6+A0gutVX2yqCeCkC3uLCJFiPfR2dD8Es5L7yUsmvEaA==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
 
   eslint-scope@8.4.0:
     resolution: {integrity: sha512-sNXOfKCn74rt8RICKMvJS7XKV/Xk9kA7DyJr8mJik3S7Cwgy3qlkkmyS2uQB3jiJg6VNdZd/pDBJu0nvG2NlTg==}
@@ -10301,11 +10292,6 @@ snapshots:
   eslint-plugin-oxlint@1.50.0:
     dependencies:
       jsonc-parser: 3.3.1
-
-  eslint-plugin-promise@7.2.1(eslint@9.39.3):
-    dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.3)
-      eslint: 9.39.3
 
   eslint-scope@8.4.0:
     dependencies:

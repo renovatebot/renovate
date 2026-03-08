@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript", "vitest"],
+  "plugins": ["import", "promise", "typescript", "vitest"],
   "categories": {},
   "rules": {
     "eqeqeq": "error",
@@ -12,6 +12,10 @@
     "radix": ["error"],
     "import/extensions": ["error", "always", { "ignorePackages": true }],
     "import/no-cycle": "error",
+    "promise/catch-or-return": "error",
+    "promise/no-callback-in-promise": "warn",
+    "promise/no-new-statics": "error",
+    "promise/valid-params": "warn",
     "import/default": "error",
     "import/named": "error",
     "import/namespace": "error",

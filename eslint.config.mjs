@@ -1,7 +1,6 @@
 import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import oxlint from 'eslint-plugin-oxlint';
-import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import renovatePlugin from './tools/lint/rules.js';
@@ -48,7 +47,6 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  eslintPluginPromise.configs['flat/recommended'],
   {
     plugins: { renovate: renovatePlugin },
     rules: {

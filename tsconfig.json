@@ -42,7 +42,6 @@
     "tools/mkdocs/docs",
     "tools/mkdocs/site",
     ".github/workflows/**/*.js",
-    ".worktrees/**/*",
-    "eslint.config.mjs"
+    ".worktrees/**/*"
   ]
 }

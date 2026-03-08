@@ -336,7 +336,6 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
     "eslint-plugin-oxlint": "1.50.0",
-    "eslint-plugin-promise": "7.2.1",
     "expect-more-jest": "5.5.0",
     "globals": "17.4.0",
     "graphql": "16.13.0",
