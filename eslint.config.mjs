@@ -1,12 +1,10 @@
-import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
-import * as importX from 'eslint-plugin-import-x';
 import oxlint from 'eslint-plugin-oxlint';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import renovatePlugin from './tools/lint/rules.js';
 
 const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
@@ -51,11 +49,15 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   eslintPluginPromise.configs['flat/recommended'],
-  eslintContainerbase.configs.all,
+  {
+    plugins: { renovate: renovatePlugin },
+    rules: {
+      'renovate/no-tools-import': 'error',
+      'renovate/test-root-describe': 'error',
+    },
+  },
   {
     ...jsFiles,
-
-    extends: [importX.flatConfigs.recommended, importX.flatConfigs.typescript],
 
     languageOptions: {
       globals: {
@@ -70,37 +72,12 @@ export default tseslint.config(
         projectService: true,
       },
     },
-
-    settings: {
-      'import-x/resolver-next': [
-        createTypeScriptImportResolver({ project: 'tsconfig.json' }),
-      ],
-    },
   },
 
   eslintConfigPrettier,
   {
     ...jsFiles,
     rules: {
-      'import-x/default': 2,
-      'import-x/named': 2,
-      'import-x/namespace': 2,
-      'import-x/no-named-as-default-member': 0,
-
-      'import-x/no-extraneous-dependencies': [
-        'error',
-        {
-          devDependencies: [
-            '*.config.mjs',
-            '*.config.ts',
-            'test/**/*',
-            '**/*.spec.ts',
-          ],
-        },
-      ],
-
-      'import-x/prefer-default-export': 0,
-      'import-x/no-cycle': 2,
       'consistent-return': 0,
       eqeqeq: 'error',
       'no-console': 'error',
@@ -110,28 +87,6 @@ export default tseslint.config(
       radix: ['error', 'as-needed'], // on ES5+ the radix defaults to 10
 
       'sort-imports': 0,
-
-      'import-x/no-unresolved': [
-        'error',
-        {
-          ignore: ['^mdast$'],
-        },
-      ],
-
-      'import-x/order': 0,
-
-      'import-x/no-restricted-paths': [
-        2,
-        {
-          zones: [
-            {
-              target: 'lib/**/*.ts',
-              from: 'tools/**/*.ts',
-              message: 'Importing the `tools/*` files is not allowed',
-            },
-          ],
-        },
-      ],
 
       'no-restricted-imports': [
         2,
@@ -243,7 +198,6 @@ export default tseslint.config(
       'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
-      'import-x/no-dynamic-require': 0,
       'global-require': 0,
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/no-object-literal-type-assertion': 0,
@@ -276,13 +230,6 @@ export default tseslint.config(
     },
 
     rules: {
-      'import-x/no-extraneous-dependencies': [
-        'error',
-        {
-          devDependencies: true,
-        },
-      ],
-
       'no-console': 'off',
     },
   },
@@ -291,13 +238,6 @@ export default tseslint.config(
 
     rules: {
       '@typescript-eslint/no-var-requires': 'off',
-    },
-  },
-  {
-    files: ['**/*.mjs'],
-
-    rules: {
-      'import-x/extensions': 0,
     },
   },
   {
