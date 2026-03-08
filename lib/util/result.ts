@@ -859,8 +859,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
     ) => Result<U, EE> | AsyncResult<U, EE> | Promise<Result<U, EE>>,
   ): AsyncResult<T | U, EE> {
     const caughtAsyncResult: Promise<Result<T, EE>> = this.asyncResult.then(
-      (result) =>
-        result.catch(fn as never),
+      (result) => result.catch(fn as never),
     );
     return AsyncResult.wrap(caughtAsyncResult);
   }
