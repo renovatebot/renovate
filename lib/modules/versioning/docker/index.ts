@@ -82,9 +82,8 @@ class DockerVersioningApi extends GenericVersioningApi {
     const parsed2 = this._parse(current);
     return !!(
       parsed1 &&
-      parsed2 &&
-      parsed1.suffix === parsed2.suffix &&
-      parsed1.release.length === parsed2.release.length
+      parsed1.suffix === parsed2?.suffix &&
+      parsed1.release.length === parsed2?.release.length
     );
   }
 
