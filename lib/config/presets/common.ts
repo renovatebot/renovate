@@ -67,6 +67,7 @@ const renamedMonorepos: Record<string, string> = {
   angularcli: 'angular-cli',
   Fontsource: 'fontsource',
   hamcrest: 'javahamcrest',
+  Hangfire: 'hangfire',
   HotChocolate: 'hotchocolate',
   infrastructure: 'infrastructure-ui',
   junit5: 'junit-framework',
