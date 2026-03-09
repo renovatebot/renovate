@@ -1,6 +1,8 @@
-The APK datasource is designed to work with Alpine Linux package repositories. It can fetch package information from APK repositories and provide version updates for Alpine Linux packages.
+The APK datasource is designed to work with Alpine Linux package repositories.
+It can fetch package information from APK repositories and provide version updates for Alpine Linux packages.
 
-Alpine Linux uses the APK package manager, and packages are distributed through repositories. Each repository contains an `APKINDEX.tar.gz` file that contains metadata about all available packages.
+Alpine Linux uses the APK package manager, and packages are distributed through repositories.
+Each repository contains an `APKINDEX.tar.gz` file that contains metadata about all available packages.
 
 Files are typically located in this structure:
 
