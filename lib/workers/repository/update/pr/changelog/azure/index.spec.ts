@@ -1,4 +1,4 @@
-import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.ts';
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { Fixtures } from '~test/fixtures.ts';
 import { partial } from '~test/util.ts';
 import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper.ts';
