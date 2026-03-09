@@ -1,7 +1,4 @@
-import {
-  GitObjectType,
-  type GitTreeEntryRef,
-} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import upath from 'upath';
 import { logger } from '../../../../../../logger/index.ts';
@@ -60,12 +57,9 @@ export async function getReleaseNotesMd(
     return null;
   }
 
-  let files: GitTreeEntryRef[] = [];
-  if (!files.length) {
-    files = allFiles.filter((f) =>
-      changelogFilenameRegex.test(upath.basename(f.relativePath ?? '')),
-    );
-  }
+  const files = allFiles.filter((f) =>
+    changelogFilenameRegex.test(upath.basename(f.relativePath ?? '')),
+  );
 
   if (!files.length) {
     logger.trace('no changelog file found');
