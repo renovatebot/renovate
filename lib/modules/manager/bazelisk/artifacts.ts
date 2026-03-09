@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
+  deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -39,6 +40,10 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+
+    if (config.isLockFileMaintenance) {
+      await deleteLocalFile(lockFileName);
+    }
 
     const execOptions: ExecOptions = {
       cwdFile: moduleFileName,

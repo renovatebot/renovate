@@ -175,6 +175,7 @@ describe('modules/manager/bazelisk/artifacts', () => {
 
     expect(result).toBeNull();
     expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
   });
 
   it('returns updated lockfile during lockfile maintenance', async () => {
@@ -207,6 +208,7 @@ describe('modules/manager/bazelisk/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
   });
 
   it('returns artifactError on exec failure', async () => {
