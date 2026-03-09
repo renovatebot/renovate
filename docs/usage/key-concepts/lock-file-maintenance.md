@@ -11,13 +11,20 @@ When Renovate performs `lockFileMaintenance` it deletes the lock file and runs t
 That package manager creates a new lock file, where all dependency versions are updated to the latest version.
 Renovate then commits that lock file to the update branch and creates the lock file update PR.
 
-## Waht **??**
+## What is Lock File Maintenance useful for?
 
-## Waht is not for?
+- To update transitive dependencies
+- To keep inexact versions in your configuration (for instance to use a `package.json` with `^1.2.3`), but keep the lockfile updated with the current resolved version of the dependency
+  - This is related to, but different, to using [`rangeStrategy`](../configuration-options.md#rangestrategy)
+
+## What is it not for?
+
+- **??**
+- Updating the inexact versions in your configuration (for instance to update `package.json`'s `^1.2.3` version to `^1.6.0`)
 
 ## What lock files are supported?
 
-Renovate supports updating **??** with the following **??**:
+Renovate supports updating the following lock files:
 
 <!-- lock-file-table-begin -->
 <!-- lock-file-table-end -->
@@ -26,11 +33,10 @@ Renovate supports updating **??** with the following **??**:
 
 ### What happens to transitive dependencies **??**?
 
-<!-- prettier-ignore -->
-!!! note
-    Renovate does not handle transitive dependencies itself.
-    <br> <br>
-    Therefore **??**
+Transitive dependencies will be updated using Lock File Maintenance.
+
+Renovate does not handle transitive dependencies itself.
+However, because Renovate delegates to package managers when executing Lock File Maintenance, they should be updated.
 
 ### Does Lock File Maintenance work with Minimum Release Age?
 
