@@ -1,5 +1,7 @@
-import type { GitTreeEntryRef } from 'azure-devops-node-api/interfaces/GitInterfaces.ts';
-import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.ts';
+import {
+  GitObjectType,
+  type GitTreeEntryRef,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import upath from 'upath';
 import { logger } from '../../../../../../logger/index.ts';
