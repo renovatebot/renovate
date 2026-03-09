@@ -1,11 +1,10 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import { get } from '../../../../modules/manager/index.ts';
+import { extractPackageFile, get } from '../../../../modules/manager/index.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
-  PackageDependency,
   PackageFile,
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -103,7 +102,7 @@ export async function getUpdatedPackageFiles(
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
   const managerPackageFiles: Record<string, Set<string>> = {};
-  const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
+  const packageFileUpdatedDeps: Record<string, BranchUpgradeConfig[]> = {};
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
@@ -348,6 +347,16 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
+        if (isNonEmptyArray(results)) {
+          await checkForPendingVersions(
+            manager,
+            packageFile.path,
+            packageFile.contents!.toString(),
+            updatedDeps,
+            artifactErrors,
+            config,
+          );
+        }
       }
     }
   }
@@ -391,6 +400,14 @@ export async function getUpdatedPackageFiles(
         );
         if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
+          await checkForPendingVersions(
+            manager,
+            packageFile.path,
+            packageFile.contents!.toString(),
+            updatedDeps,
+            artifactErrors,
+            config,
+          );
         }
       }
     }
@@ -508,6 +525,143 @@ function processUpdateArtifactResults(
       if (notice) {
         artifactNotices.push(notice);
       }
+    }
+  }
+}
+
+/**
+ * When using Minimum Release Age, and a package manager that doesn't support being told an explicit version to update to (#41624) it is possible that an artifact update leads to a different version of a dependency being used compared to what Renovate is expecting.
+ *
+ * We should report these cases more explicitly with an Artifact Error, to allow the reviewers to decide what to do with the changes.
+ */
+async function checkForPendingVersions(
+  manager: string,
+  packageFileName: string,
+  packageFileContent: string,
+  updatedDeps: BranchUpgradeConfig[],
+  artifactErrors: ArtifactError[],
+  config: BranchConfig,
+): Promise<void> {
+  const depNameToUpgradeInfo = new Map<
+    string,
+    {
+      pendingVersions: Set<string>;
+      newVersion: string | undefined;
+    }
+  >();
+  for (const dep of updatedDeps) {
+    if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
+      depNameToUpgradeInfo.set(dep.depName, {
+        pendingVersions: new Set(dep.pendingVersions),
+        newVersion: dep.newVersion,
+      });
+    }
+  }
+  if (!depNameToUpgradeInfo.size) {
+    return;
+  }
+
+  const extracted = await extractPackageFile(
+    manager,
+    packageFileContent,
+    packageFileName,
+    config,
+  );
+  if (!extracted) {
+    logger.warn(
+      { packageFile: packageFileName, manager },
+      'Could not re-extract the packageFile after updating it',
+    );
+    return;
+  }
+
+  for (const dep of extracted.deps) {
+    const depName = dep.depName ?? dep.packageName;
+    // shouldn't ever happen
+    if (!depName) {
+      logger.error(
+        {
+          packageFile: packageFileName,
+          manager,
+          branchName: config.branchName,
+          depName: dep.depName,
+        },
+        `No depName found after updating '${packageFileName}'`,
+      );
+      throw new Error(WORKER_FILE_UPDATE_FAILED);
+    }
+
+    const upgradeInfo = depNameToUpgradeInfo.get(depName);
+    if (!upgradeInfo) {
+      continue;
+    }
+    const resolvedVersion =
+      dep.lockedVersion ??
+      dep.newVersion ??
+      dep.currentVersion ??
+      dep.currentValue;
+    if (!resolvedVersion) {
+      logger.error(
+        {
+          packageFile: packageFileName,
+          manager,
+          branchName: config.branchName,
+          depName,
+          newVersion: resolvedVersion,
+        },
+        `No new version found for '${depName}' after updating '${packageFileName}'`,
+      );
+      throw new Error(WORKER_FILE_UPDATE_FAILED);
+    }
+
+    if (resolvedVersion && upgradeInfo.pendingVersions.has(resolvedVersion)) {
+      const expectedVersion = upgradeInfo.newVersion;
+      /* v8 ignore next if -- should not happen */
+      if (!expectedVersion) {
+        logger.error(
+          {
+            packageFile: packageFileName,
+            manager,
+            branchName: config.branchName,
+            depName,
+            newVersion: resolvedVersion,
+            expectedVersion,
+          },
+          `No expectedVersion found for '${depName}' after updating '${packageFileName}'`,
+        );
+        continue;
+      }
+
+      if (config.minimumReleaseAgeBehaviour === 'timestamp-optional') {
+        logger.once.warn(
+          {
+            packageFileName,
+            depName,
+            expectedVersion,
+            resolvedVersion,
+          },
+          "Artifact error would be reported due to a pending version in use which hasn't passed Minimum Release Age, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+        );
+        continue;
+      }
+
+      logger.debug(
+        {
+          packageFileName,
+          depName,
+          expectedVersion,
+          resolvedVersion,
+        },
+        'Artifact update introduced a pending version',
+      );
+      let stderr = `Artifact update for ${depName} resolved to version ${resolvedVersion}, which is a pending version that has not yet passed the Minimum Release Age threshold.`;
+      stderr += `\nRenovate was attempting to update to ${expectedVersion}`;
+      stderr += `\nThis is (likely) not a bug in Renovate, but due to the way your project pins dependencies, _and_ how Renovate calls your package manager to update them.\nUntil Renovate supports specifying an exact update to your package manager (https://github.com/renovatebot/renovate/issues/41624), it is recommended to directly pin your dependencies (with \`rangeStrategy=pin\` for apps, or \`rangeStrategy=widen\` for libraries)\nSee also: https://docs.renovatebot.com/dependency-pinning/`;
+
+      artifactErrors.push({
+        lockFile: packageFileName,
+        stderr,
+      });
     }
   }
 }

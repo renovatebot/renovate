@@ -12,18 +12,16 @@ const configModule = vi.mocked(_config);
 vi.mock('./config.ts');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
-  beforeAll(() => {
-    GlobalConfig.set({
-      localDir: '',
-      platform: 'github',
-    });
-  });
-
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
     const hash = 'hash';
 
     beforeEach(() => {
+      GlobalConfig.set({
+        localDir: '',
+        onboardingConfigFileName: 'renovate.json',
+        platform: 'github',
+      });
       memCache.init();
 
       // using default options
@@ -34,7 +32,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         onboardingConfig: {
           $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         },
-        onboardingConfigFileName: 'renovate.json',
         repository: 'some/repo',
       };
       configModule.getOnboardingConfigContents.mockResolvedValue('');
@@ -53,13 +50,12 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
-      await rebaseOnboardingBranch(
-        {
-          ...config,
-          onboardingConfigFileName: '.github/renovate.json',
-        },
-        hash,
-      );
+      GlobalConfig.set({
+        localDir: '',
+        onboardingConfigFileName: '.github/renovate.json',
+        platform: 'github',
+      });
+      await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
         '.github/renovate.json',
@@ -70,13 +66,8 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      await rebaseOnboardingBranch(
-        {
-          ...config,
-          onboardingConfigFileName: undefined,
-        },
-        hash,
-      );
+      GlobalConfig.set({ localDir: '', platform: 'github' });
+      await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
         'renovate.json',

@@ -213,7 +213,7 @@ export class GoProxyDatasource extends Datasource {
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
     const baseMod = modParts?.baseMod ?? /* v8 ignore next */ packageName;
-    const packageMajor = parseInt(modParts?.majorVersion ?? '0');
+    const packageMajor = parseInt(modParts?.majorVersion ?? '0', 10);
 
     const result: ReleaseResult = { releases: [] };
     for (let major = packageMajor; ; major += 1) {

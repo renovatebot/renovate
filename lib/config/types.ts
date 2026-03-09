@@ -168,6 +168,9 @@ export interface GlobalInheritableConfig {
   onboarding?: boolean;
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
+  onboardingCommitMessage?: string;
+  onboardingConfig?: RenovateConfig;
+  onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
 }
@@ -245,6 +248,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
+  prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
@@ -275,7 +279,6 @@ export interface LegacyAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
-  onboardingCommitMessage?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingConfig?: RenovateConfig;
@@ -302,6 +305,7 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
+  installTools?: Record<string, Record<never, never>>;
 }
 
 export type UpdateConfig<
@@ -810,4 +814,5 @@ export interface BumpVersionConfig {
 export interface ToolSettingsOptions {
   jvmMaxMemory?: number;
   jvmMemory?: number;
+  nodeMaxMemory?: number;
 }
