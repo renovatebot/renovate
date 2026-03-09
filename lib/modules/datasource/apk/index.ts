@@ -1,6 +1,4 @@
-import * as tar from 'tar-stream';
-import { promisify } from 'util';
-import * as zlib from 'zlib';
+import { type ReadEntry, list } from 'tar';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -12,8 +10,6 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { parseApkIndex } from './parser.ts';
 import type { ApkPackage } from './types.ts';
-
-const gunzip = promisify(zlib.gunzip);
 
 export const apkDatasourceId = 'apk';
 
@@ -84,69 +80,36 @@ export class ApkDatasource extends Datasource {
     try {
       logger.debug('Extracting APK index from tar.gz buffer');
 
-      const decompressedBuffer = await gunzip(buffer);
+      let apkIndexContent = '';
 
-      logger.debug(
-        `Decompressed buffer size: ${decompressedBuffer.length} bytes`,
-      );
-
-      // Use tar-stream to extract the APKINDEX file
-      return new Promise((resolve, reject) => {
-        const extract = tar.extract();
-        let apkIndexContent = '';
-        let fileCount = 0;
-
-        extract.on('entry', (header: any, stream: any, next: () => void) => {
-          fileCount++;
-          logger.debug(
-            `Found file in tar: ${header.name} (size: ${header.size})`,
-          );
-
-          if (header.name === 'APKINDEX') {
+      const parser = list({
+        onReadEntry: (entry: ReadEntry) => {
+          if (entry.path === 'APKINDEX') {
             logger.debug('Found APKINDEX file in tar archive');
-
             const chunks: Buffer[] = [];
-            stream.on('data', (chunk: Buffer) => {
+            entry.on('data', (chunk: Buffer) => {
               chunks.push(chunk);
             });
-
-            stream.on('end', () => {
+            entry.on('end', () => {
               apkIndexContent = Buffer.concat(chunks).toString('utf8');
-              next();
             });
-
-            /* v8 ignore next 4 -- hard to test stream errors */
-            stream.on('error', (err: Error) => {
-              logger.warn({ err }, 'Error reading APKINDEX file from tar');
-              next();
-            });
-          } else {
-            // Skip other files
-            stream.resume();
-            next();
           }
-        });
-
-        extract.on('finish', () => {
-          logger.debug(`Processed ${fileCount} files in tar archive`);
-
-          if (apkIndexContent) {
-            logger.debug('Successfully extracted APKINDEX content');
-            resolve(apkIndexContent);
-          } else {
-            logger.warn('APKINDEX file not found in tar archive');
-            resolve('');
-          }
-        });
-
-        extract.on('error', (err: Error) => {
-          logger.warn({ err }, 'Error extracting tar archive');
-          reject(err);
-        });
-
-        // Write the decompressed buffer to the extract stream
-        extract.end(decompressedBuffer);
+        },
       });
+
+      await new Promise<void>((resolve, reject) => {
+        parser.on('end', resolve);
+        parser.on('error', reject);
+        parser.end(buffer);
+      });
+
+      if (apkIndexContent) {
+        logger.debug('Successfully extracted APKINDEX content');
+      } else {
+        logger.warn('APKINDEX file not found in tar archive');
+      }
+
+      return apkIndexContent;
     } catch (err) {
       logger.warn({ err }, 'Error extracting APK index from tar.gz');
       return '';

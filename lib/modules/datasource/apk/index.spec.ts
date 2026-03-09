@@ -1,4 +1,4 @@
-import * as tar from 'tar-stream';
+import { Header, Pack, ReadEntry } from 'tar';
 import { promisify } from 'util';
 import { vi } from 'vitest';
 import * as zlib from 'zlib';
@@ -13,17 +13,27 @@ const gzip = promisify(zlib.gzip);
 async function createTarGz(
   entries: { name: string; content: string }[],
 ): Promise<Buffer> {
-  const pack = tar.pack();
+  const pack = new Pack({ gzip: true });
+
   for (const entry of entries) {
-    pack.entry({ name: entry.name }, entry.content);
+    const data = Buffer.from(entry.content, 'utf8');
+    const header = new Header({
+      path: entry.name,
+      size: data.length,
+      type: 'File',
+    });
+    const readEntry = new ReadEntry(header);
+    readEntry.end(data);
+    pack.add(readEntry);
   }
-  pack.finalize();
+
+  pack.end();
 
   const chunks: Buffer[] = [];
   for await (const chunk of pack) {
-    chunks.push(chunk);
+    chunks.push(chunk as Buffer);
   }
-  return gzip(Buffer.concat(chunks));
+  return Buffer.concat(chunks);
 }
 
 const nginxApkIndex = [
