@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { vi } from 'vitest';
 import { logger } from '../../../logger/index.ts';
 import { parseApkIndex } from './parser.ts';
@@ -5,15 +6,17 @@ import { parseApkIndex } from './parser.ts';
 describe('modules/datasource/apk/parser', () => {
   describe('parseApkIndex', () => {
     it('should parse valid APK index content', () => {
-      const indexContent = codeBlock`P:bash
-V:5.2.15-r0
-U:https://alpinelinux.org/packages/bash
-t:1700000000
+      const indexContent = codeBlock`
+        P:bash
+        V:5.2.15-r0
+        U:https://alpinelinux.org/packages/bash
+        t:1700000000
 
-P:nginx
-V:1.24.0-r0
-U:https://alpinelinux.org/packages/nginx
-t:1700000001`;
+        P:nginx
+        V:1.24.0-r0
+        U:https://alpinelinux.org/packages/nginx
+        t:1700000001
+      `;
 
       const result = parseApkIndex(indexContent);
 
@@ -33,16 +36,18 @@ t:1700000001`;
     });
 
     it('should handle lines without colons', () => {
-      const indexContent = `P:bash
-V:5.2.15-r0
-U:https://alpinelinux.org/packages/bash
-t:1700000000
+      const indexContent = codeBlock`
+        P:bash
+        V:5.2.15-r0
+        U:https://alpinelinux.org/packages/bash
+        t:1700000000
 
-This line has no colon
-Another line without colon
+        This line has no colon
+        Another line without colon
 
-P:nginx
-V:1.24.0-r0`;
+        P:nginx
+        V:1.24.0-r0
+      `;
 
       const result = parseApkIndex(indexContent);
 
@@ -56,22 +61,24 @@ V:1.24.0-r0`;
         .spyOn(logger, 'warn')
         .mockImplementation(() => undefined);
 
-      const indexContent = `P:bash
-V:5.2.15-r0
-U:https://alpinelinux.org/packages/bash
-t:1700000000
+      const indexContent = codeBlock`
+        P:bash
+        V:5.2.15-r0
+        U:https://alpinelinux.org/packages/bash
+        t:1700000000
 
-P:incomplete-package
-U:https://alpinelinux.org/packages/incomplete
-t:1700000000
+        P:incomplete-package
+        U:https://alpinelinux.org/packages/incomplete
+        t:1700000000
 
-P:another-incomplete
-V:1.0.0
+        P:another-incomplete
+        V:1.0.0
 
-P:nginx
-V:1.24.0-r0
-U:https://alpinelinux.org/packages/nginx
-t:1700000001`;
+        P:nginx
+        V:1.24.0-r0
+        U:https://alpinelinux.org/packages/nginx
+        t:1700000001
+      `;
 
       const result = parseApkIndex(indexContent);
 
@@ -131,11 +138,13 @@ t:1700000001`;
     });
 
     it('should handle packages with only name and version', () => {
-      const indexContent = `P:minimal-package
-V:1.0.0
+      const indexContent = codeBlock`
+        P:minimal-package
+        V:1.0.0
 
-P:another-minimal
-V:2.0.0`;
+        P:another-minimal
+        V:2.0.0
+      `;
 
       const result = parseApkIndex(indexContent);
 
@@ -151,15 +160,17 @@ V:2.0.0`;
     });
 
     it('should handle packages with different field orders', () => {
-      const indexContent = `t:1700000000
-U:https://alpinelinux.org/packages/bash
-V:5.2.15-r0
-P:bash
+      const indexContent = codeBlock`
+        t:1700000000
+        U:https://alpinelinux.org/packages/bash
+        V:5.2.15-r0
+        P:bash
 
-P:nginx
-t:1700000001
-V:1.24.0-r0
-U:https://alpinelinux.org/packages/nginx`;
+        P:nginx
+        t:1700000001
+        V:1.24.0-r0
+        U:https://alpinelinux.org/packages/nginx
+      `;
 
       const result = parseApkIndex(indexContent);
 
