@@ -6,6 +6,7 @@ import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
 import * as hostRules from '../../../../../util/host-rules.ts';
 import type { Timestamp } from '../../../../../util/timestamp.ts';
 import type { BranchConfig } from '../../../../types.ts';
+import changelogApi from './api.ts';
 import { getChangeLogJSON } from './index.ts';
 import * as releases from './releases.ts';
 
@@ -69,6 +70,17 @@ describe('workers/repository/update/pr/changelog/index', () => {
           sourceUrl: 'https://unsupported-source.com/unknown-repo',
         }),
       ).toBeNull();
+    });
+
+    it('handles known platform with no changelog source', async () => {
+      const saved = changelogApi.get('github')!;
+      changelogApi.delete('github');
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        }),
+      ).toBeNull();
+      changelogApi.set('github', saved);
     });
 
     it('returns null if no currentVersion', async () => {
