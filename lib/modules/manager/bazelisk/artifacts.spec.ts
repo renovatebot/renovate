@@ -1,16 +1,12 @@
 import upath from 'upath';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
-import * as docker from '../../../util/exec/docker/index.ts';
-import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
-vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
+vi.mock('../bazel-module/lockfile.ts');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
@@ -22,8 +18,6 @@ const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/bazelisk/artifacts', () => {
   beforeEach(() => {
-    env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    docker.resetPrefetchedImages();
     GlobalConfig.set(adminConfig);
   });
 
@@ -41,6 +35,7 @@ describe('modules/manager/bazelisk/artifacts', () => {
   it('returns null if no MODULE.bazel found', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
     fs.readLocalFile.mockResolvedValueOnce(null);
+
     expect(
       await updateArtifacts({
         packageFileName: '.bazelversion',
@@ -56,6 +51,7 @@ describe('modules/manager/bazelisk/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
+
     expect(
       await updateArtifacts({
         packageFileName: '.bazelversion',
@@ -66,17 +62,21 @@ describe('modules/manager/bazelisk/artifacts', () => {
     ).toBeNull();
   });
 
-  it('returns null if lockfile is not modified after exec', async () => {
+  it('writes package file and delegates to updateBazelLockfile', async () => {
+    const { updateBazelLockfile } = await import('../bazel-module/lockfile.ts');
+    vi.mocked(updateBazelLockfile).mockResolvedValueOnce([
+      {
+        file: {
+          type: 'addition',
+          path: 'MODULE.bazel.lock',
+          contents: 'new lock content',
+        },
+      },
+    ]);
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
     fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: [],
-      }),
-    );
 
     const result = await updateArtifacts({
       packageFileName: '.bazelversion',
@@ -85,30 +85,12 @@ describe('modules/manager/bazelisk/artifacts', () => {
       config,
     });
 
-    expect(result).toBeNull();
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
-  });
-
-  it('returns updated lockfile when modified', async () => {
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
-    fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
-    fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    fs.readLocalFile.mockResolvedValueOnce('new lock content');
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['MODULE.bazel.lock'],
-      }),
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('.bazelversion', '7.7.1\n');
+    expect(updateBazelLockfile).toHaveBeenCalledWith(
+      'MODULE.bazel.lock',
+      'MODULE.bazel',
+      undefined,
     );
-
-    const result = await updateArtifacts({
-      packageFileName: '.bazelversion',
-      updatedDeps: [{ depName: 'bazel' }],
-      newPackageFileContent: '7.7.1\n',
-      config,
-    });
-
     expect(result).toEqual([
       {
         file: {
@@ -118,137 +100,27 @@ describe('modules/manager/bazelisk/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
   });
 
-  it('returns updated lockfile when not_added includes lockfile', async () => {
+  it('passes isLockFileMaintenance to updateBazelLockfile', async () => {
+    const { updateBazelLockfile } = await import('../bazel-module/lockfile.ts');
+    vi.mocked(updateBazelLockfile).mockResolvedValueOnce(null);
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
     fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    fs.readLocalFile.mockResolvedValueOnce('new lock content');
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: [],
-        not_added: ['MODULE.bazel.lock'],
-      }),
-    );
 
-    const result = await updateArtifacts({
-      packageFileName: '.bazelversion',
-      updatedDeps: [{ depName: 'bazel' }],
-      newPackageFileContent: '7.7.1\n',
-      config,
-    });
-
-    expect(result).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'MODULE.bazel.lock',
-          contents: 'new lock content',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
-  });
-
-  it('returns null if lockfile maintenance produces no changes', async () => {
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
-    fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
-    fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: [],
-      }),
-    );
-
-    const result = await updateArtifacts({
+    await updateArtifacts({
       packageFileName: '.bazelversion',
       updatedDeps: [],
       newPackageFileContent: '7.7.1\n',
       config: { ...config, isLockFileMaintenance: true },
     });
 
-    expect(result).toBeNull();
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
-    expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
-  });
-
-  it('returns updated lockfile during lockfile maintenance', async () => {
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
-    fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
-    fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    fs.readLocalFile.mockResolvedValueOnce('new lock content');
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['MODULE.bazel.lock'],
-      }),
+    expect(updateBazelLockfile).toHaveBeenCalledWith(
+      'MODULE.bazel.lock',
+      'MODULE.bazel',
+      true,
     );
-
-    const result = await updateArtifacts({
-      packageFileName: '.bazelversion',
-      updatedDeps: [],
-      newPackageFileContent: '7.7.1\n',
-      config: { ...config, isLockFileMaintenance: true },
-    });
-
-    expect(result).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'MODULE.bazel.lock',
-          contents: 'new lock content',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
-    expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
-  });
-
-  it('returns artifactError on exec failure', async () => {
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
-    fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
-    fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    mockExecAll(new Error('bazel mod deps failed'));
-
-    const result = await updateArtifacts({
-      packageFileName: '.bazelversion',
-      updatedDeps: [{ depName: 'bazel' }],
-      newPackageFileContent: '7.7.1\n',
-      config,
-    });
-
-    expect(result).toEqual([
-      {
-        artifactError: {
-          lockFile: 'MODULE.bazel.lock',
-          stderr: 'bazel mod deps failed',
-        },
-      },
-    ]);
-  });
-
-  it('re-throws TEMPORARY_ERROR', async () => {
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
-    fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
-    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
-    fs.readLocalFile.mockResolvedValueOnce('old lock content');
-    mockExecAll(new Error(TEMPORARY_ERROR));
-
-    await expect(
-      updateArtifacts({
-        packageFileName: '.bazelversion',
-        updatedDeps: [{ depName: 'bazel' }],
-        newPackageFileContent: '7.7.1\n',
-        config,
-      }),
-    ).rejects.toThrow(TEMPORARY_ERROR);
   });
 });
