@@ -280,7 +280,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
     "@commander-js/extra-typings": "14.0.0",
-    "@containerbase/eslint-plugin": "1.1.35",
     "@containerbase/istanbul-reports-html": "1.1.34",
     "@containerbase/semantic-release-pnpm": "1.3.24",
     "@eslint/js": "9.39.3",
@@ -336,10 +335,7 @@
     "eslint": "9.39.3",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
-    "eslint-import-resolver-typescript": "4.4.4",
-    "eslint-plugin-import-x": "4.16.1",
     "eslint-plugin-oxlint": "1.51.0",
-    "eslint-plugin-promise": "7.2.1",
     "expect-more-jest": "5.5.0",
     "globals": "17.4.0",
     "graphql": "16.13.0",
