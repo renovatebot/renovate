@@ -1,17 +1,17 @@
-import type { GitTreeEntryRef } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import type { GitTreeEntryRef } from 'azure-devops-node-api/interfaces/GitInterfaces.ts';
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.ts';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import upath from 'upath';
-import { logger } from '../../../../../../logger';
-import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper';
-import { ensureTrailingSlash } from '../../../../../../util/url';
-import { compareChangelogFilePath } from '../common';
+import { logger } from '../../../../../../logger/index.ts';
+import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper.ts';
+import { ensureTrailingSlash } from '../../../../../../util/url.ts';
+import { compareChangelogFilePath } from '../common.ts';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
-} from '../types';
+} from '../types.ts';
 
 export const id = 'azure-changelog';
 

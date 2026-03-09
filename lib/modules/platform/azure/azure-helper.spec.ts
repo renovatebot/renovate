@@ -1,9 +1,11 @@
 import { Readable } from 'node:stream';
-import type { IGitApi } from 'azure-devops-node-api/GitApi';
-import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
-import type { GitRef } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
+import {
+  GitPullRequestMergeStrategy,
+  type GitRef,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { MockedObject } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { partial } from '~test/util.ts';

@@ -1,13 +1,16 @@
-import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import * as azureHelper from '../../../../../modules/platform/azure/azure-helper';
-import { clone } from '../../../../../util/clone';
-import * as githubGraphql from '../../../../../util/github/graphql';
-import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
-import { toBase64 } from '../../../../../util/string';
-import type { Timestamp } from '../../../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../../../types';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { hostRules, partial } from '~test/util.ts';
+import * as azureHelper from '../../../../../modules/platform/azure/azure-helper.ts';
+import { clone } from '../../../../../util/clone.ts';
+import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
+import type { GithubReleaseItem } from '../../../../../util/github/graphql/types.ts';
+import { toBase64 } from '../../../../../util/string.ts';
+import type { Timestamp } from '../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
 import {
   addReleaseNotes,
   getReleaseList,
