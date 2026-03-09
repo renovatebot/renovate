@@ -1,4 +1,4 @@
-import { UpgradeInRangeMigration } from './upgrade-in-range-migration';
+import { UpgradeInRangeMigration } from './upgrade-in-range-migration.ts';
 
 describe('config/migrations/custom/upgrade-in-range-migration', () => {
   it('should migrate upgradeInRange=true to rangeStrategy="bump"', async () => {

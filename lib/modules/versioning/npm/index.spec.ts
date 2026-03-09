@@ -1,4 +1,4 @@
-import { api as semver } from '.';
+import { api as semver } from './index.ts';
 
 describe('modules/versioning/npm/index', () => {
   it.each`

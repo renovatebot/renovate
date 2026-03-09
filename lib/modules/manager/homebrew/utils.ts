@@ -1,4 +1,4 @@
-import { escapeRegExp, regEx } from '../../../util/regex';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 
 // Extract Ruby string value (handles both quote styles)
 export function extractRubyString(

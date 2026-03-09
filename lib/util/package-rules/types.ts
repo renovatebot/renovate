@@ -1,4 +1,7 @@
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
 
 export type MatchType = 'matches' | 'excludes';
 

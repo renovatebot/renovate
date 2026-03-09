@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 const githubRepoPattern = regEx(/^https?:\/\/github\.com\/([^/]+)\/[^/]+$/);
 

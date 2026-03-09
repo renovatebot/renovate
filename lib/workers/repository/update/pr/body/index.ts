@@ -1,20 +1,20 @@
-import type { RenovateConfig } from '../../../../../config/types';
-import type { PrDebugData } from '../../../../../modules/platform';
-import { platform } from '../../../../../modules/platform';
-import { detectPlatform } from '../../../../../util/common';
-import { regEx } from '../../../../../util/regex';
-import { toBase64 } from '../../../../../util/string';
-import * as template from '../../../../../util/template';
-import { joinUrlParts } from '../../../../../util/url';
-import type { BranchConfig } from '../../../../types';
-import { getDepWarningsPR, getWarnings } from '../../../errors-warnings';
-import { getChangelogs } from './changelogs';
-import { getPrConfigDescription } from './config-description';
-import { getControls } from './controls';
-import { getPrFooter } from './footer';
-import { getPrHeader } from './header';
-import { getPrExtraNotes, getPrNotes } from './notes';
-import { getPrUpdatesTable } from './updates-table';
+import type { RenovateConfig } from '../../../../../config/types.ts';
+import type { PrDebugData } from '../../../../../modules/platform/index.ts';
+import { platform } from '../../../../../modules/platform/index.ts';
+import { detectPlatform } from '../../../../../util/common.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import { toBase64 } from '../../../../../util/string.ts';
+import * as template from '../../../../../util/template/index.ts';
+import { joinUrlParts } from '../../../../../util/url.ts';
+import type { BranchConfig } from '../../../../types.ts';
+import { getDepWarningsPR, getWarnings } from '../../../errors-warnings.ts';
+import { getChangelogs } from './changelogs.ts';
+import { getPrConfigDescription } from './config-description.ts';
+import { getControls } from './controls.ts';
+import { getPrFooter } from './footer.ts';
+import { getPrHeader } from './header.ts';
+import { getPrExtraNotes, getPrNotes } from './notes.ts';
+import { getPrUpdatesTable } from './updates-table.ts';
 
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach((upgrade) => {

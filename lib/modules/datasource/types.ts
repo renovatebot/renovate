@@ -1,9 +1,9 @@
 import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
-} from '../../config/types';
-import type { ModuleApi } from '../../types';
-import type { Timestamp } from '../../util/timestamp';
+} from '../../config/types.ts';
+import type { ModuleApi } from '../../types/index.ts';
+import type { Timestamp } from '../../util/timestamp.ts';
 
 export interface GetDigestInputConfig {
   datasource: string;

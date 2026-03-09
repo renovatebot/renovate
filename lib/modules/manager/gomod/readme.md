@@ -42,7 +42,7 @@ You might be interested in the following `postUpdateOptions`:
     - This will not install any additional tools required to run `go generate`, you can use [tools](https://tip.golang.org/doc/go1.24#tools) as one option
     - If `gomodTidy` is not set, you may encounter failures in the Go toolchain due to `missing go.sum entry`
 
-When Renovate is running using `binarySource=docker` (such as in the Mend Renovate App) then it will pick the latest compatible version of Go to run, i.e. the latest `1.x` release.
+When Renovate is running using `binarySource=install` (such as in the Mend Renovate App) then it will pick the latest compatible version of Go to run, i.e. the latest `1.x` release.
 Even if the `go.mod` has a version like `go 1.22`, Renovate will treat it as a `^1.22` constraint and not `=1.22`.
 
 Unless matching `tool` directives exist, indirect updates are disabled by default. To enable them, add a package rule such as:

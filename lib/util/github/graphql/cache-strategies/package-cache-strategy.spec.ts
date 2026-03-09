@@ -1,9 +1,12 @@
 import { DateTime, Settings } from 'luxon';
-import type { Timestamp } from '../../../../util/timestamp';
-import * as packageCache from '../../../cache/package';
-import { clone } from '../../../clone';
-import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import * as packageCache from '../../../cache/package/index.ts';
+import { clone } from '../../../clone.ts';
+import type {
+  GithubDatasourceItem,
+  GithubGraphqlCacheRecord,
+} from '../types.ts';
+import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy.ts';
 
 const isoTs = (t: string) => (t.replace(' ', 'T') + ':00.000Z') as Timestamp;
 

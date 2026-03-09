@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { parseTomlFile } from './utils';
+import { parseTomlFile } from './utils.ts';
 
 const miseFilename = '.mise.toml';
 

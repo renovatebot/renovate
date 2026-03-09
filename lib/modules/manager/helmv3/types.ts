@@ -1,4 +1,4 @@
-import type { HostRule } from '../../../types';
+import type { HostRule } from '../../../types/index.ts';
 
 export interface ChartDefinition {
   dependencies: Repository[];

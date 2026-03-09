@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import { Json } from '../../../util/schema-utils';
-import { api as composer } from '../../versioning/composer';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import { Lockfile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
+import { api as composer } from '../../versioning/composer/index.ts';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
+import { Lockfile } from './schema.ts';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig,

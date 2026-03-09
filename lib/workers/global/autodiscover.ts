@@ -1,8 +1,8 @@
 import { isString } from '@sindresorhus/is';
-import type { AllConfig } from '../../config/types';
-import { logger } from '../../logger';
-import { platform } from '../../modules/platform';
-import { matchRegexOrGlobList } from '../../util/string-match';
+import type { AllConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import { platform } from '../../modules/platform/index.ts';
+import { matchRegexOrGlobList } from '../../util/string-match.ts';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {

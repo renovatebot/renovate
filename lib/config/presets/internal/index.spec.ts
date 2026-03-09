@@ -1,13 +1,13 @@
-import { resolveConfigPresets } from '../';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { regEx } from '../../../util/regex';
-import { massageConfig } from '../../massage';
-import { validateConfig } from '../../validation';
-import * as npm from '../npm';
-import * as internal from '.';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { regEx } from '../../../util/regex.ts';
+import { massageConfig } from '../../massage.ts';
+import { validateConfig } from '../../validation.ts';
+import { resolveConfigPresets } from '../index.ts';
+import * as npm from '../npm/index.ts';
+import * as internal from './index.ts';
 
-vi.mock('../npm');
-vi.mock('../../../modules/datasource/npm');
+vi.mock('../npm/index.ts');
+vi.mock('../../../modules/datasource/npm/index.ts');
 
 const getPresetSpy = vi.spyOn(npm, 'getPreset');
 
@@ -32,7 +32,7 @@ describe('config/presets/internal/index', () => {
       if (presetName !== 'description' && !ignoredPresets.includes(preset)) {
         it(`${preset} validates`, async () => {
           try {
-            const config = await resolveConfigPresets(
+            const { config } = await resolveConfigPresets(
               massageConfig(presetConfig),
             );
             const configType = groupName === 'global' ? 'global' : 'repo';
@@ -63,5 +63,39 @@ describe('config/presets/internal/index', () => {
 
   it('returns undefined for unknown preset', () => {
     expect(internal.getPreset({ repo: 'some/repo' })).toBeUndefined();
+  });
+
+  describe('isInternal', () => {
+    it('returns false for a local> preset', () => {
+      expect(internal.isInternal('local>renovatebot/.github')).toBeFalse();
+    });
+
+    it('returns false for a github> preset', () => {
+      expect(internal.isInternal('github>renovatebot/.github')).toBeFalse();
+    });
+
+    it('returns false for an un-migrated preset', () => {
+      expect(internal.isInternal('config:base')).toBeFalse();
+    });
+
+    it('returns false for an empty string', () => {
+      expect(internal.isInternal('')).toBeFalse();
+    });
+
+    it('returns true for `config:recommended`', () => {
+      expect(internal.isInternal('config:recommended')).toBeTrue();
+    });
+
+    it('returns true for a parameterised preset', () => {
+      expect(internal.isInternal(':assignee(renovate-tests)')).toBeTrue();
+    });
+
+    it('returns true for a parameterised remote preset', () => {
+      expect(
+        internal.isInternal(
+          'local>example/renovate-config-presets:assignee(renovate-tests)',
+        ),
+      ).toBeFalse();
+    });
   });
 });

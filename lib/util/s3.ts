@@ -1,8 +1,8 @@
 // Singleton S3 instance initialized on-demand.
 import { S3Client } from '@aws-sdk/client-s3';
 import { isUndefined } from '@sindresorhus/is';
-import { GlobalConfig } from '../config/global';
-import { parseUrl } from './url';
+import { GlobalConfig } from '../config/global.ts';
+import { parseUrl } from './url.ts';
 
 let s3Instance: S3Client | undefined;
 export function getS3Client(

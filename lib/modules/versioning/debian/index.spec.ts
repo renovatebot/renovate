@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import { DebianVersioningApi } from '.';
+import { logger } from '../../../logger/index.ts';
+import { DebianVersioningApi } from './index.ts';
 
 describe('modules/versioning/debian/index', () => {
   const dt = DateTime.fromISO('2023-07-10');

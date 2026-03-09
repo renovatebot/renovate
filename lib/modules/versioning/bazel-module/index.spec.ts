@@ -1,5 +1,5 @@
-import type { NewValueConfig } from '../types';
-import { api as bzlmod } from '.';
+import type { NewValueConfig } from '../types.ts';
+import { api as bzlmod } from './index.ts';
 
 describe('modules/versioning/bazel-module/index', () => {
   it('getMajor()', () => {

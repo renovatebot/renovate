@@ -1,8 +1,8 @@
 // TODO #22198
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
-import { bumpPackageVersion, updateDependency } from './update';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { bumpPackageVersion, updateDependency } from './update.ts';
 
 const simpleContent = Fixtures.get(`simple.pom.xml`);
 const minimumContent = Fixtures.get(`minimum.pom.xml`);

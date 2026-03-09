@@ -1,5 +1,5 @@
-import type { RenovateConfig } from '../../../config/types';
-import * as template from '../../../util/template';
+import type { RenovateConfig } from '../../../config/types.ts';
+import * as template from '../../../util/template/index.ts';
 
 const migrationBranchTemplate = '{{{branchPrefix}}}migrate-config';
 

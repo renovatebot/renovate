@@ -1,4 +1,4 @@
-import { UnpublishSafeMigration } from './unpublish-safe-migration';
+import { UnpublishSafeMigration } from './unpublish-safe-migration.ts';
 
 describe('config/migrations/custom/unpublish-safe-migration', () => {
   it('should migrate true', async () => {

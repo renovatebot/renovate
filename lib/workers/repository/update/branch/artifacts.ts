@@ -1,7 +1,7 @@
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import type { BranchConfig } from '../../../types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 export async function setArtifactErrorStatus(
   config: BranchConfig,

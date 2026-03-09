@@ -1,4 +1,4 @@
-import { FileMatchMigration } from './file-match-migration';
+import { FileMatchMigration } from './file-match-migration.ts';
 
 describe('config/migrations/custom/file-match-migration', () => {
   it('migrates fileMatch of type string', async () => {

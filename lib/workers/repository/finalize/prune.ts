@@ -1,15 +1,15 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import type { RenovateConfig } from '../../../config/types';
-import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { ensureComment } from '../../../modules/platform/comment';
-import { scm } from '../../../modules/platform/scm';
-import { getBranchList, setUserRepoConfig } from '../../../util/git';
-import { escapeRegExp, regEx } from '../../../util/regex';
-import { uniqueStrings } from '../../../util/string';
-import { getReconfigureBranchName } from '../reconfigure/utils';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { REPOSITORY_CHANGED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ensureComment } from '../../../modules/platform/comment.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { getBranchList, setUserRepoConfig } from '../../../util/git/index.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { uniqueStrings } from '../../../util/string.ts';
+import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
 async function cleanUpBranches(
   config: RenovateConfig,

@@ -1,23 +1,22 @@
-import URL from 'node:url';
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { parseJson } from '../../../util/common';
-import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
-import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
+import { GlobalConfig } from '../../../config/global.ts';
+import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
+import * as git from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { BitbucketHttpOptions } from '../../../util/http/bitbucket.ts';
+import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import {
   aggressiveRepoCacheProvider,
   repoCacheProvider,
-} from '../../../util/http/cache/repository-http-cache-provider';
-import type { HttpOptions } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
-import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match';
+} from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -35,13 +34,13 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import * as comments from './comments';
-import { BitbucketPrCache } from './pr-cache';
-import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
+import * as comments from './comments.ts';
+import { BitbucketPrCache } from './pr-cache.ts';
+import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema.ts';
 import type {
   Account,
   BitbucketStatus,
@@ -51,9 +50,9 @@ import type {
   PagedResult,
   PrResponse,
   RepoBranchingModel,
-} from './types';
-import * as utils from './utils';
-import { mergeBodyTransformer } from './utils';
+} from './types.ts';
+import * as utils from './utils.ts';
+import { mergeBodyTransformer } from './utils.ts';
 
 export const id = 'bitbucket';
 
@@ -194,7 +193,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -216,7 +214,7 @@ export async function initRepo({
 
     mainBranch = info.mainbranch;
 
-    if (bbUseDevelopmentBranch) {
+    if (getInheritedOrGlobal('bbUseDevelopmentBranch')) {
       // Fetch Bitbucket development branch
       const developmentBranch = (
         await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
@@ -248,13 +246,13 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(defaults.endpoint);
+  const { hostname } = new URL(defaults.endpoint);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
   // TODO #22198
-  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
+  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)?.[1];
 
   let auth = '';
   if (opts.token) {
@@ -559,13 +557,14 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
       filters.push(`reporter.uuid="${renovateUserUuid}"`);
     }
     const filter = encodeURIComponent(filters.join(' AND '));
+    // v8 ignore next -- TODO: add test #40625
     return (
       (
         await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
           { cacheProvider: aggressiveRepoCacheProvider },
         )
-      ).body.values /* v8 ignore next */ || []
+      ).body.values || []
     );
   } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error finding issues');
@@ -601,11 +600,18 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
+/**
+ * Remove or transform markdown into Bitbucket supported syntax.
+ *
+ * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
+ */
+/**
+ * Remove or transform markdown into Bitbucket supported syntax.
+ *
+ * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
+ */
 export function massageMarkdown(input: string): string {
-  // Remove any HTML we use
-  // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
-
-  const after = smartTruncate(input, maxBodyLength())
+  let massaged = smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"',
@@ -616,26 +622,57 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /(>.*\*\*Note\*\*\n>\s?\n.*unmaintained:\n\n)<details>\n(<summary>View abandoned dependencies.*<\/summary>)([\s\S]*?)<\/details>/,
+        /<details>\n(<summary>View abandoned dependencies.*<\/summary>\n\n)([\s\S]*?)<\/details>/,
       ),
-      '## Abandoned Dependencies\n$1$3',
+      '$2',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/issues\//g), '](../../issues/')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  return massageCollapsibleSectionsIntoLists(after);
+  massaged = massageDetailSummaryHtmlToNestedLists(massaged);
+
+  return massageCodeblockMarkdown(massaged);
 }
 
 /**
- * Massage collapsible html sections into nested unordered lists
+ * Massage codeblocks indentation to ensure correct rendering in Bitbucket.
+ */
+function massageCodeblockMarkdown(body: string): string {
+  const codeBlockRegex = regEx(
+    /^(?<indent>[ \t]*)```(?<lang>\w*)[^\n]*\n(?<code>[\s\S]*?)\n[ \t]*```/gm,
+  );
+  let codeMatch;
+  let result = body;
+
+  while ((codeMatch = codeBlockRegex.exec(body)) !== null) {
+    const { indent, lang, code } = codeMatch.groups!;
+    const indentLength = indent.length;
+    const lines = code.split('\n');
+    const cleanedLines = lines.map((line) =>
+      // Remove `indentLength` characters from the start of each line
+      line.slice(indentLength),
+    );
+
+    const cleaned = cleanedLines.join('\n');
+    const replacement = `\`\`\`${lang}\n${cleaned}\n\`\`\``;
+
+    result = result.replace(codeMatch[0], replacement);
+  }
+
+  return result;
+}
+
+/**
+ * Massage collapsible html sections into nested unordered lists.
  *
  * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
  */
-function massageCollapsibleSectionsIntoLists(body: string): string {
+function massageDetailSummaryHtmlToNestedLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
-  const detailsParts = body.split('<details>').map((raw, i, arr) => {
+  const detailsParts = body.split('<details>').map((raw) => {
     const partDepth = depth;
 
     depth += 1;
@@ -648,23 +685,40 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
   // Reassemble parts while replacing collapsible html elements with markdown list
   return detailsParts
     .map(({ raw, partDepth }) => {
+      let t = raw;
+
       if (partDepth === 0) {
-        return raw;
+        return t;
       }
 
-      const t = raw
-        .replace(/<\/?summary>/g, partDepth === 1 ? '**' : '`')
-        .replace(/( - `)/g, '\t'.repeat(partDepth) + ' - `')
-        .replace(/(- \[)/g, '\t'.repeat(partDepth) + '- [');
+      const partIndentation = '\t'.repeat(partDepth - 1);
+      const nestedListItemIndentation = '\t'.repeat(partDepth);
 
-      return `${'\t'.repeat(partDepth - 1)} - ${t}`;
+      const rawContainsBlockquote = raw.includes('<blockquote>');
+
+      t = t.replace(regEx(/<\/?summary>/g), partDepth === 1 ? '**' : '`');
+
+      if (partDepth > 1) {
+        t = t.replace(
+          regEx(/^([ \t]*- [`[])/gm),
+          `${nestedListItemIndentation}$1`,
+        );
+      }
+
+      let result = partIndentation;
+      if (rawContainsBlockquote || partDepth > 1) {
+        result += ' - ';
+      }
+      result += t;
+
+      return result;
     })
     .join('')
     .replace(/<\/?(summary|details|blockquote)>/g, '');
 }
 
 export function maxBodyLength(): number {
-  return 50000;
+  return 250000;
 }
 
 export async function ensureIssue({

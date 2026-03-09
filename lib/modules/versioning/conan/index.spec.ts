@@ -1,4 +1,4 @@
-import { api as conan } from '.';
+import { api as conan } from './index.ts';
 
 describe('modules/versioning/conan/index', () => {
   // isValid(version: string): boolean;

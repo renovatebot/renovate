@@ -16,11 +16,13 @@ import {
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
-import { ZodError } from 'zod';
-import { ExecError } from '../util/exec/exec-error';
-import { regEx } from '../util/regex';
-import { redactedFields, sanitize } from '../util/sanitize';
-import type { BunyanRecord, BunyanStream } from './types';
+import { DateTime } from 'luxon';
+import { ZodError } from 'zod/v3';
+import { ExecError } from '../util/exec/exec-error.ts';
+import { regEx } from '../util/regex.ts';
+import { redactedFields, sanitize } from '../util/sanitize.ts';
+import { quickStringify } from '../util/stringify.ts';
+import type { BunyanRecord, BunyanStream } from './types.ts';
 
 const excludeProps = ['pid', 'time', 'v', 'hostname'];
 
@@ -76,6 +78,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   }
 
   let err: null | string | string[] = null;
+  // v8 ignore else -- TODO: add test #40625
   if (isArray(input._errors, isString)) {
     if (input._errors.length === 1) {
       err = input._errors[0];
@@ -95,6 +98,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   const entries = Object.entries(input);
   for (const [key, value] of entries.slice(0, 3)) {
     const child = prepareZodIssues(value);
+    // v8 ignore else -- TODO: add test #40625
     if (child !== null) {
       output[key] = child;
     }
@@ -110,10 +114,11 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
 export function prepareZodError(err: ZodError): Record<string, unknown> {
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    /* v8 ignore next 3 -- TODO: drop set? */
+    /* v8 ignore start -- TODO: drop set? */
     set: () => {
       /* intentionally empty */
     },
+    // v8 ignore stop -- TODO: drop set? */
   });
 
   return {
@@ -166,6 +171,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
     options.method = err.options.method;
     options.http2 = err.options.http2;
 
+    // v8 ignore else -- TODO: add test #40625
     if (err.response) {
       response.response = {
         statusCode: err.response.statusCode,
@@ -200,6 +206,10 @@ export function sanitizeValue(
 
   if (isDate(value)) {
     return value;
+  }
+
+  if (DateTime.isDateTime(value)) {
+    return value.toISO();
   }
 
   if (isFunction(value)) {
@@ -280,10 +290,7 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(
-              regEx(/\n?$/),
-              '\n',
-            );
+          : quickStringify(raw)?.replace(regEx(/\n?$/), '\n');
       stream.write(result, enc, cb);
     };
 

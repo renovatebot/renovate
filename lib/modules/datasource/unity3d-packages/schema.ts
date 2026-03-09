@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 const Upm = z.object({
   changelog: z.string().optional(),

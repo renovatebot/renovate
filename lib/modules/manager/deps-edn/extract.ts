@@ -1,20 +1,20 @@
 import { isPlainObject, isString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { isHttpUrl } from '../../../util/url';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { ClojureDatasource } from '../../datasource/clojure';
-import { CLOJARS_REPO } from '../../datasource/clojure/common';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { MAVEN_REPO } from '../../datasource/maven/common';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { parseDepsEdnFile } from './parser';
+import { regEx } from '../../../util/regex.ts';
+import { isHttpUrl } from '../../../util/url.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { CLOJARS_REPO } from '../../datasource/clojure/common.ts';
+import { ClojureDatasource } from '../../datasource/clojure/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { MAVEN_REPO } from '../../datasource/maven/common.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { parseDepsEdnFile } from './parser.ts';
 import type {
   ParsedEdnData,
   ParsedEdnMetadata,
   ParsedEdnRecord,
-} from './types';
+} from './types.ts';
 
 const dependencyRegex = regEx(
   /^(?<groupId>[a-zA-Z][-_a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-_a-zA-Z0-9]*)*)(?:\/(?<artifactId>[a-zA-Z][-_a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-_a-zA-Z0-9]*)*))?$/,

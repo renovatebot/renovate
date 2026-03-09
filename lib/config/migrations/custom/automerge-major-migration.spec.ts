@@ -1,4 +1,4 @@
-import { AutomergeMajorMigration } from './automerge-major-migration';
+import { AutomergeMajorMigration } from './automerge-major-migration.ts';
 
 describe('config/migrations/custom/automerge-major-migration', () => {
   it('should migrate value to object', async () => {

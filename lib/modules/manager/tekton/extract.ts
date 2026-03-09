@@ -1,18 +1,18 @@
 import { isFalsy, isNullOrUndefined, isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import { parseYaml } from '../../../util/yaml';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type {
   TektonBundle,
   TektonResolverParamsField,
   TektonResource,
   TektonResourceSpec,
-} from './types';
+} from './types.ts';
 
 export function extractPackageFile(
   content: string,

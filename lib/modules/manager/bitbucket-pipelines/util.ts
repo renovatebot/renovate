@@ -1,7 +1,7 @@
-import { regEx } from '../../../util/regex';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { getDep } from '../dockerfile/extract';
-import type { PackageDependency } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { PackageDependency } from '../types.ts';
 
 export const pipeRegex = regEx(`^\\s*-\\s?pipe:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
 export const dockerImageRegex = regEx(

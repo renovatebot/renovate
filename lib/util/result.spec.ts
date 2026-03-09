@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
-/* eslint-disable @typescript-eslint/only-throw-error */
+/* oxlint-disable typescript/prefer-promise-reject-errors */
+/* oxlint-disable typescript/only-throw-error */
 // TODO: fix, should only allow `Error` type
 
-import { z } from 'zod';
-import { AsyncResult, Result } from './result';
-import { logger } from '~test/util';
+import { z } from 'zod/v3';
+import { logger } from '~test/util.ts';
+import { AsyncResult, Result } from './result.ts';
 
 describe('util/result', () => {
   describe('Result', () => {

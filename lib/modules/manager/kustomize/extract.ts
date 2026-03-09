@@ -1,20 +1,20 @@
 import querystring from 'node:querystring';
 import { isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { HelmChart, Image, Kustomize } from './types';
+} from '../types.ts';
+import type { HelmChart, Image, Kustomize } from './types.ts';
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format

@@ -1,5 +1,5 @@
 import { DateTime, Settings } from 'luxon';
-import { api as ubuntu } from '.';
+import { api as ubuntu } from './index.ts';
 
 describe('modules/versioning/ubuntu/index', () => {
   const dt = DateTime.fromISO('2022-04-20');

@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import type { PackageFileContent } from '../types';
-import { findHandler } from './handlers';
-import { extractRubyString } from './utils';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { PackageFileContent } from '../types.ts';
+import { findHandler } from './handlers/index.ts';
+import { extractRubyString } from './utils.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('extractPackageFile()');
@@ -21,6 +21,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const sha256 = extractRubyString(content, 'sha256');
 
   // Validate SHA256
+  // oxlint-disable-next-line typescript/prefer-optional-chain
   if (!sha256 || sha256?.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
     return {

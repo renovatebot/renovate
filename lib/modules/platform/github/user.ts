@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import * as githubHttp from '../../../util/http/github';
-import type { EmailAddress } from '../../../util/schema-utils';
-import type { UserDetails } from './types';
+import { logger } from '../../../logger/index.ts';
+import * as githubHttp from '../../../util/http/github.ts';
+import type { EmailAddress } from '../../../util/schema-utils/index.ts';
+import type { UserDetails } from './types.ts';
 
 const githubApi = new githubHttp.GithubHttp();
 

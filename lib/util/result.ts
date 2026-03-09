@@ -3,10 +3,10 @@ import type {
   input as ZodInput,
   output as ZodOutput,
   ZodType,
-} from 'zod';
-import { NEVER, ZodError, ZodIssueCode } from 'zod';
-import { logger } from '../logger';
-import type { Nullish } from '../types';
+} from 'zod/v3';
+import { NEVER, ZodError, ZodIssueCode } from 'zod/v3';
+import { logger } from '../logger/index.ts';
+import type { Nullish } from '../types/index.ts';
 
 type Val = NonNullable<unknown>;
 
@@ -98,7 +98,11 @@ function fromNullable<
  * - `.unwrap()` is the point of consumption
  */
 export class Result<T extends Val, E extends Val = Error> {
-  private constructor(private readonly res: Res<T, E>) {}
+  private readonly res: Res<T, E>;
+
+  private constructor(res: Res<T, E>) {
+    this.res = res;
+  }
 
   static ok<T extends Val>(val: T): Result<T, never> {
     return new Result({ ok: true, val });
@@ -338,7 +342,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -363,7 +367,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -379,7 +383,7 @@ export class Result<T extends Val, E extends Val = Error> {
     }
 
     // TODO: fix, should only allow `Error` type
-    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    // oxlint-disable-next-line typescript/only-throw-error
     throw this.res.err;
   }
 
@@ -394,7 +398,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -623,10 +627,14 @@ export class Result<T extends Val, E extends Val = Error> {
  *
  * All the methods resemble `Result` methods, but work asynchronously.
  */
-export class AsyncResult<T extends Val, E extends Val>
-  implements PromiseLike<Result<T, E>>
-{
-  private constructor(private asyncResult: Promise<Result<T, E>>) {}
+export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
+  Result<T, E>
+> {
+  private asyncResult: Promise<Result<T, E>>;
+
+  private constructor(asyncResult: Promise<Result<T, E>>) {
+    this.asyncResult = asyncResult;
+  }
 
   then<TResult1 = Result<T, E>>(
     onfulfilled?:
@@ -641,7 +649,6 @@ export class AsyncResult<T extends Val, E extends Val>
   }
 
   static err<E extends Val>(err: NonNullable<E>): AsyncResult<never, E> {
-    // eslint-disable-next-line promise/no-promise-in-callback
     return new AsyncResult(Promise.resolve(Result.err(err)));
   }
 
@@ -852,9 +859,7 @@ export class AsyncResult<T extends Val, E extends Val>
     ) => Result<U, EE> | AsyncResult<U, EE> | Promise<Result<U, EE>>,
   ): AsyncResult<T | U, EE> {
     const caughtAsyncResult: Promise<Result<T, EE>> = this.asyncResult.then(
-      (result) =>
-        // eslint-disable-next-line promise/no-nesting
-        result.catch(fn as never),
+      (result) => result.catch(fn as never),
     );
     return AsyncResult.wrap(caughtAsyncResult);
   }

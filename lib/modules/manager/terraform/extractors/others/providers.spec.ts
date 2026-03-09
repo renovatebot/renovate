@@ -1,4 +1,4 @@
-import { ProvidersExtractor } from './providers';
+import { ProvidersExtractor } from './providers.ts';
 
 describe('modules/manager/terraform/extractors/others/providers', () => {
   const extractor = new ProvidersExtractor();

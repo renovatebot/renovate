@@ -1,10 +1,10 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 
-import { getRangeStrategy } from '../../../../modules/manager';
-import type { LookupUpdate } from '../../../../modules/manager/types';
-import * as allVersioning from '../../../../modules/versioning';
-import * as template from '../../../../util/template';
-import type { LookupUpdateConfig } from './types';
+import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
+import * as allVersioning from '../../../../modules/versioning/index.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { LookupUpdateConfig } from './types.ts';
 
 export function addReplacementUpdateIfValid(
   updates: LookupUpdate[],

@@ -1,7 +1,7 @@
 import * as pep440 from '@renovatebot/pep440';
-import type { RangeStrategy } from '../../../types/versioning';
-import type { VersioningApi } from '../types';
-import { getNewValue, getPinnedValue, isLessThanRange } from './range';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { VersioningApi } from '../types.ts';
+import { getNewValue, getPinnedValue, isLessThanRange } from './range.ts';
 
 export const id = 'pep440';
 export const displayName = 'PEP440';
@@ -28,7 +28,7 @@ const {
 
 function isVersion(input: string | undefined | null): boolean {
   // @renovatebot/pep440 isn't strict null save
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
   return !!valid(input!);
 }
 

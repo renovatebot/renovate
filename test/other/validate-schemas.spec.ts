@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import upath from 'upath';
-import { Json } from '../../lib/util/schema-utils';
-import { capitalize } from '../../lib/util/string';
-import * as Schemas from '../../tools/schemas/schema';
+import { Json } from '../../lib/util/schema-utils/index.ts';
+import { capitalize } from '../../lib/util/string.ts';
+import * as Schemas from '../../tools/schemas/schema.ts';
 
 describe('other/validate-schemas', () => {
   it('validate json files in lib/data against their schemas', async () => {
@@ -38,7 +38,6 @@ describe('other/validate-schemas', () => {
 
         // validate json data against schema: using parse here instead of safeParse so we throw
         // this leads to a better error message when the assertion fails
-        // eslint-disable-next-line import-x/namespace
         Schemas[schemaName].parse(data);
       }),
     );

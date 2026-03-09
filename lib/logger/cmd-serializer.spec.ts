@@ -1,4 +1,4 @@
-import cmdSerializer from './cmd-serializer';
+import cmdSerializer from './cmd-serializer.ts';
 
 describe('logger/cmd-serializer', () => {
   it('returns array', () => {

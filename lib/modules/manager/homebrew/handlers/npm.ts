@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
-import { parseUrl } from '../../../../util/url';
-import { NpmDatasource } from '../../../datasource/npm';
-import type { PackageDependency } from '../../types';
-import { HomebrewUrlHandler } from './base';
+import { logger } from '../../../../logger/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
+import type { PackageDependency } from '../../types.ts';
+import { HomebrewUrlHandler } from './base.ts';
 
 // URL parsing result
 export interface NpmUrlParsedResult {

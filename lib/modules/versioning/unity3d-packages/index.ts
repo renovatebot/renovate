@@ -1,7 +1,7 @@
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'unity3d-packages';
 export const displayName = 'Unity3D Packages';
@@ -24,7 +24,11 @@ class Unity3dPackagesVersioningApi extends GenericVersioningApi {
     }
     const { major, minor, patch, label } = matches.groups;
 
-    const release = [parseInt(major), parseInt(minor), parseInt(patch)];
+    const release = [
+      parseInt(major, 10),
+      parseInt(minor, 10),
+      parseInt(patch, 10),
+    ];
     const isStable = !Unity3dPackagesVersioningApi.unstableRegex.test(label);
 
     return { release, prerelease: isStable ? undefined : label };

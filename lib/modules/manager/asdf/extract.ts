@@ -1,9 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { isSkipComment } from '../../../util/ignore';
-import { regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { upgradeableTooling } from './upgradeable-tooling';
+import { logger } from '../../../logger/index.ts';
+import { isSkipComment } from '../../../util/ignore.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { upgradeableTooling } from './upgradeable-tooling.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`asdf.extractPackageFile()`);
