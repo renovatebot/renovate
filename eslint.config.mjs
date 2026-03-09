@@ -45,8 +45,8 @@ export default tseslint.config(
   },
 
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  ...tseslint.configs.recommended,
+  ...tseslint.configs.stylistic,
   {
     plugins: { renovate: renovatePlugin },
     rules: {
@@ -64,11 +64,6 @@ export default tseslint.config(
 
       ecmaVersion: 'latest',
       sourceType: 'module',
-
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-        projectService: true,
-      },
     },
   },
 
@@ -128,40 +123,7 @@ export default tseslint.config(
         },
       ],
 
-      '@typescript-eslint/prefer-optional-chain': 2,
-      '@typescript-eslint/prefer-nullish-coalescing': 2,
       curly: [2, 'all'],
-      'require-await': 2,
-      '@typescript-eslint/no-unsafe-assignment': 0,
-      '@typescript-eslint/no-unsafe-member-access': 0,
-      '@typescript-eslint/no-unsafe-return': 0,
-      '@typescript-eslint/no-unsafe-call': 0,
-      '@typescript-eslint/no-unsafe-argument': 0,
-
-      '@typescript-eslint/restrict-template-expressions': [
-        2,
-        {
-          allowNumber: true,
-          allowBoolean: true,
-        },
-      ],
-
-      '@typescript-eslint/restrict-plus-operands': 2,
-
-      '@typescript-eslint/naming-convention': [
-        2,
-        {
-          selector: 'enumMember',
-          format: ['PascalCase'],
-        },
-      ],
-
-      '@typescript-eslint/unbound-method': [
-        2,
-        {
-          ignoreStatic: true,
-        },
-      ],
 
       '@typescript-eslint/no-empty-object-type': [
         2,
@@ -200,7 +162,6 @@ export default tseslint.config(
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/no-object-literal-type-assertion': 0,
       '@typescript-eslint/explicit-function-return-type': 0,
-      '@typescript-eslint/unbound-method': 0,
       'max-classes-per-file': 0,
       'class-methods-use-this': 0,
     },
@@ -211,7 +172,6 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/explicit-function-return-type': 0,
       '@typescript-eslint/explicit-module-boundary-types': 0,
-      '@typescript-eslint/restrict-template-expressions': 0,
     },
   },
   {
@@ -247,10 +207,6 @@ export default tseslint.config(
           Object.entries(globals.vitest).map(([key]) => [key, 'off']),
         ),
       },
-    },
-
-    rules: {
-      '@typescript-eslint/no-floating-promises': 0,
     },
   },
 

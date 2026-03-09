@@ -10,16 +10,8 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of these locations:
 
-1. `renovate.json`
-1. `renovate.json5`
-1. `.github/renovate.json`
-1. `.github/renovate.json5`
-1. `.gitlab/renovate.json`
-1. `.gitlab/renovate.json5`
-1. `.renovaterc`
-1. `.renovaterc.json`
-1. `.renovaterc.json5`
-1. `package.json` _(within a `"renovate"` section)_
+<!-- config-filenames-begin -->
+<!-- config-filenames-end -->
 
 Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
 The bot first checks all the files in the `configFileNames` array before checking from the above file list.
