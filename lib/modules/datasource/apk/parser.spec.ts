@@ -5,7 +5,7 @@ import { parseApkIndex } from './parser.ts';
 describe('modules/datasource/apk/parser', () => {
   describe('parseApkIndex', () => {
     it('should parse valid APK index content', () => {
-      const indexContent = `P:bash
+      const indexContent = codeBlock`P:bash
 V:5.2.15-r0
 U:https://alpinelinux.org/packages/bash
 t:1700000000
