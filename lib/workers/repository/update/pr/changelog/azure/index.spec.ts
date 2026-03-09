@@ -4,8 +4,9 @@ import { partial } from '~test/util.ts';
 import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper.ts';
 import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
-import type { ChangeLogProject } from '../index.ts';
+import type { ChangeLogProject, ChangeLogRelease } from '../index.ts';
 import { getReleaseNotesMdFile } from '../release-notes.ts';
+import { getReleaseList } from './index.ts';
 import { AzureChangeLogSource } from './source.ts';
 
 const baseUrl = 'https://dev.azure.com/some-org/some-project/';
@@ -39,6 +40,16 @@ const azureProject = partial<ChangeLogProject>({
 });
 
 describe('workers/repository/update/pr/changelog/azure/index', () => {
+  describe('getReleaseList', () => {
+    it('returns empty array', () => {
+      const res = getReleaseList(
+        partial<ChangeLogProject>({}),
+        partial<ChangeLogRelease>({}),
+      );
+      expect(res).toEqual([]);
+    });
+  });
+
   describe('getReleaseNotesMdFile', () => {
     it('handles release notes', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
@@ -163,7 +174,9 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     });
 
     it('handles missing release notes', async () => {
-      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({});
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+      });
 
       vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
         objectId: 'some-object-id',
