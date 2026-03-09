@@ -1,7 +1,7 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import mavenVersion from '../maven';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import mavenVersion from '../maven/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   TokenType,
   compare,
@@ -11,7 +11,7 @@ import {
   parseMavenBasedRange,
   parsePrefixRange,
   parseSingleVersionRange,
-} from './compare';
+} from './compare.ts';
 
 export const id = 'gradle';
 export const displayName = 'Gradle';
@@ -27,7 +27,7 @@ const getMajor = (version: string): number | null => {
   const tokens = parse(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens?.[0];
-    if (majorToken && majorToken.type === TokenType.Number) {
+    if (majorToken?.type === TokenType.Number) {
       return majorToken.val as number;
     }
   }
@@ -40,10 +40,8 @@ const getMinor = (version: string): number | null => {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     if (
-      majorToken &&
-      majorToken.type === TokenType.Number &&
-      minorToken &&
-      minorToken.type === TokenType.Number
+      majorToken?.type === TokenType.Number &&
+      minorToken?.type === TokenType.Number
     ) {
       return minorToken.val as number;
     }
@@ -59,12 +57,9 @@ const getPatch = (version: string): number | null => {
     const minorToken = tokens[1];
     const patchToken = tokens[2];
     if (
-      majorToken &&
-      majorToken.type === TokenType.Number &&
-      minorToken &&
-      minorToken.type === TokenType.Number &&
-      patchToken &&
-      patchToken.type === TokenType.Number
+      majorToken?.type === TokenType.Number &&
+      minorToken?.type === TokenType.Number &&
+      patchToken?.type === TokenType.Number
     ) {
       return patchToken.val as number;
     }

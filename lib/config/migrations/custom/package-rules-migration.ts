@@ -1,6 +1,6 @@
 import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
-import type { PackageRule } from '../../types';
-import { AbstractMigration } from '../base/abstract-migration';
+import type { PackageRule } from '../../types.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export const renameMap = {
   matchFiles: 'matchFileNames',
@@ -35,6 +35,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
 
     // depName
     if (key === 'matchDepPrefixes') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `${v}{/,}**`));
@@ -43,6 +44,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.matchDepPrefixes;
     }
     if (key === 'matchDepPatterns') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `/${v}/`));
@@ -51,6 +53,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.matchDepPatterns;
     }
     if (key === 'excludeDepNames') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `!${v}`));
@@ -59,6 +62,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.excludeDepNames;
     }
     if (key === 'excludeDepPrefixes') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(
@@ -69,6 +73,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.excludeDepPrefixes;
     }
     if (key === 'excludeDepPatterns') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `!/${v}/`));
@@ -78,6 +83,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     }
     // packageName
     if (key === 'matchPackagePrefixes') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(
@@ -88,6 +94,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.matchPackagePrefixes;
     }
     if (key === 'matchPackagePatterns') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(
@@ -103,6 +110,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.matchPackagePatterns;
     }
     if (key === 'excludePackageNames') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(...patterns.map((v) => `!${v}`));
@@ -111,6 +119,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.excludePackageNames;
     }
     if (key === 'excludePackagePrefixes') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(
@@ -121,6 +130,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.excludePackagePrefixes;
     }
     if (key === 'excludePackagePatterns') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(
@@ -132,6 +142,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     }
     // sourceUrl
     if (key === 'matchSourceUrlPrefixes') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchSourceUrls ??= [];
         newPackageRule.matchSourceUrls.push(
@@ -143,6 +154,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     }
     // repository
     if (key === 'excludeRepositories') {
+      // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchRepositories ??= [];
         newPackageRule.matchRepositories.push(...patterns.map((v) => `!${v}`));
@@ -159,6 +171,7 @@ export class PackageRulesMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     let packageRules = this.get('packageRules')!;
+    // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyArray(packageRules)) {
       packageRules = packageRules.map(renameKeys);
       packageRules = packageRules.map(mergeMatchers);

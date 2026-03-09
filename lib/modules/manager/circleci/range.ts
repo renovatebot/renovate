@@ -1,5 +1,5 @@
-import type { RangeStrategy } from '../../../types';
-import type { RangeConfig } from '../types';
+import type { RangeStrategy } from '../../../types/index.ts';
+import type { RangeConfig } from '../types.ts';
 
 export function getRangeStrategy({
   rangeStrategy,

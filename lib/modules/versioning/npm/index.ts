@@ -1,9 +1,9 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import type { RangeStrategy } from '../../../types/versioning';
-import { isBreaking } from '../semver';
-import type { VersioningApi } from '../types';
-import { getNewValue } from './range';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { isBreaking } from '../semver/index.ts';
+import type { VersioningApi } from '../types.ts';
+import { getNewValue } from './range.ts';
 
 export const id = 'npm';
 export const displayName = 'npm';

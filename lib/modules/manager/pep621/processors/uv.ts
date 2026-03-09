@@ -1,28 +1,34 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { HostRule } from '../../../../types';
-import { exec } from '../../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth';
-import { find } from '../../../../util/host-rules';
-import { Result } from '../../../../util/result';
-import { parseUrl } from '../../../../util/url';
-import { PypiDatasource } from '../../../datasource/pypi';
-import { getGoogleAuthHostRule } from '../../../datasource/util';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { HostRule } from '../../../../types/index.ts';
+import { exec } from '../../../../util/exec/index.ts';
+import type {
+  ExecOptions,
+  ToolConstraint,
+} from '../../../../util/exec/types.ts';
+import {
+  findLocalSiblingOrParent,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { find } from '../../../../util/host-rules.ts';
+import { Result } from '../../../../util/result.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import { PypiDatasource } from '../../../datasource/pypi/index.ts';
+import { getGoogleAuthHostRule } from '../../../datasource/util.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../../types';
-import { applyGitSource } from '../../util';
-import { type PyProject, UvLockfile } from '../schema';
-import { depTypes } from '../utils';
+} from '../../types.ts';
+import { applyGitSource } from '../../util.ts';
+import { type PyProject, UvLockfile } from '../schema.ts';
+import { depTypes } from '../utils.ts';
 
-import { BasePyProjectProcessor } from './abstract';
+import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
 

@@ -1,22 +1,22 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
+import {
+  GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
+  REGISTRY_URLS,
+} from './parser/common.ts';
 import {
   parseGradle,
   parseJavaToolchainVersion,
   parseKotlinSource,
   parseProps,
-} from './parser';
-import {
-  GRADLE_PLUGINS,
-  GRADLE_TEST_SUITES,
-  REGISTRY_URLS,
-} from './parser/common';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+} from './parser.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
-function mockFs(files: Record<string, string>): void {
+function mockFs(): void {
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
       return existingFileNameWithPath
@@ -610,6 +610,19 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
+    describe('dependencySubstitution constructs', () => {
+      it.each`
+        input                                                                   | output
+        ${'substitute module("foo:bar:1.2.3")'}                                 | ${null}
+        ${'substitute(module("foo:bar:1.2.3"))'}                                | ${null}
+        ${'substitute module("foo:bar:1.2.3") with module("bar:qux:4.5.6")'}    | ${{ depName: 'bar:qux', currentValue: '4.5.6' }}
+        ${'substitute(module("foo:bar:1.2.3")).using(module("bar:qux:4.5.6"))'} | ${{ depName: 'bar:qux', currentValue: '4.5.6' }}
+      `('$input', ({ input, output }) => {
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([output].filter(isTruthy));
+      });
+    });
+
     describe('plugins', () => {
       it.each`
         def                 | input                                      | output
@@ -677,6 +690,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'base="https://foo.bar"'} | ${'maven(uri(base + "/baz"))'}                                   | ${'https://foo.bar/baz'}
         ${''}                       | ${'maven(uri(["https://foo.bar/baz"]))'}                         | ${null}
         ${''}                       | ${'maven { ["https://foo.bar/baz"] }'}                           | ${null}
+        ${''}                       | ${'maven { name = "baz" }'}                                      | ${null}
         ${''}                       | ${'maven { url "https://foo.bar/baz" }'}                         | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url base + "/baz" }'}                                 | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url "${base}/baz" }'}                                 | ${'https://foo.bar/baz'}
@@ -943,9 +957,20 @@ describe('modules/manager/gradle/parser', () => {
             mavenCentral()
           }
         }
+        exclusiveContent {
+          forRepository {
+            maven("https://private.repo/packages")
+          }
+          filter {
+            includeVersionByRegex("com.myorg.*", ".+", "^(.(?!-SNAPSHOT))+$")
+          }
+        }
       `;
 
       const { urls } = parseGradle(input);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping exclusive registry https://private.repo/packages with unsupported content descriptors',
+      );
       expect(urls).toMatchObject([
         {
           registryUrl: 'https://foo.bar.com/repository/public/',
@@ -1009,14 +1034,14 @@ describe('modules/manager/gradle/parser', () => {
       ${''}                                         | ${'plugin("foo.bar", "foo").version("1.2.3")'}                  | ${{ depName: 'foo', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").versionRef("baz")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").version("${baz}")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}                            | ${'alias("foo.bar").to("foo", "bar").version("${baz}")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to(f, b).version(v)'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to(f + b, b + f).version(v)'}               | ${{ depName: 'foobar:barfoo', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to("${f}", "${b}").version("$v")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias(["foo.bar"]).to("foo", "bar").version("1.2.3")'}       | ${null}
     `('$def | $str', ({ def, str, output }) => {
       const input = [def, str].join('\n');
-      const { deps } = parseGradle(input);
+      const { deps } = parseGradle(`versionCatalogs { libs { ${input} } }`);
       expect(deps).toMatchObject([output].filter(isTruthy));
     });
   });
@@ -1269,7 +1294,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'base="foo"'}            | ${'apply(from = File(base, "bar.gradle"))'}               | ${validOutput}
       ${'base="foo"'}            | ${'apply(from = File("${base}", "bar.gradle"))'}          | ${validOutput}
     `('$def | $input', ({ def, input, output }) => {
-      mockFs(fileContents);
+      mockFs();
       const { vars } = parseGradle(
         [def, input].join('\n'),
         {},

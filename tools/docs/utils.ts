@@ -1,12 +1,12 @@
-import { logger } from '../../lib/logger';
-import type { ModuleApi } from '../../lib/types';
-import { regEx } from '../../lib/util/regex';
-import { capitalize } from '../../lib/util/string';
-import { readFile } from '../utils';
+import { logger } from '../../lib/logger/index.ts';
+import type { ModuleApi } from '../../lib/types/index.ts';
+import { regEx } from '../../lib/util/regex.ts';
+import { capitalize } from '../../lib/util/string.ts';
+import { readFile } from '../utils/index.ts';
 
-const replaceStart =
+const defaultReplaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
-const replaceStop = '<!-- Autogenerate end -->';
+const defaultReplaceStop = '<!-- Autogenerate end -->';
 const goodUrlRegex = regEx(/\[(.+?)\]\((.+?)\)/);
 
 export function formatName(input: string): string {
@@ -31,9 +31,16 @@ export function getNameWithUrl(
   return displayName;
 }
 
-export function replaceContent(content: string, txt: string): string {
-  const replaceStartIndex = content.indexOf(replaceStart);
-  const replaceStopIndex = content.indexOf(replaceStop);
+export function replaceContent(
+  content: string,
+  txt: string,
+  opts: {
+    replaceStart: string;
+    replaceStop: string;
+  } = { replaceStart: defaultReplaceStart, replaceStop: defaultReplaceStop },
+): string {
+  const replaceStartIndex = content.indexOf(opts.replaceStart);
+  const replaceStopIndex = content.indexOf(opts.replaceStop);
 
   if (replaceStartIndex < 0) {
     logger.error('Missing replace placeholder');
@@ -42,7 +49,7 @@ export function replaceContent(content: string, txt: string): string {
   return (
     content.slice(0, replaceStartIndex) +
     txt +
-    content.slice(replaceStopIndex + replaceStop.length)
+    content.slice(replaceStopIndex + opts.replaceStop.length)
   );
 }
 
@@ -73,4 +80,27 @@ export async function formatDescription(
 
 export function getModuleLink(module: string, title?: string): string {
   return `[${title ?? module}](${module}/index.md)`;
+}
+
+// Helper: format a cell based on row type
+export function formatCell(row: string[], colIndex: number): string {
+  const col = row[colIndex] ?? '';
+
+  const firstCol = (row[0] ?? '').toLowerCase().trim();
+  const isParentsRow = firstCol === 'parents';
+
+  // Special formatting for "parents" row, second column
+  if (isParentsRow && colIndex === 1) {
+    const items = col
+      .split(',')
+      .sort((a, b) => a.localeCompare(b))
+      .map((s) => `<code>${s.trim()}</code>`)
+      .map((item) => `<span>${item}</span>`)
+      .join('')
+      .replace('>.<', '>(the root document)<');
+    return `<td class="parents">${items}</td>`;
+  }
+
+  // Default cell
+  return `<td>${col}</td>`;
 }

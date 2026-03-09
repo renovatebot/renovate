@@ -6,20 +6,20 @@ import {
   isObject,
   isString,
 } from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
-import { logger } from '../../../../../logger';
-import { regEx } from '../../../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import { loadPackageJson } from '../../utils';
-import type { NpmPackage, NpmPackageDependency } from '../types';
+import { CONFIG_VALIDATION } from '../../../../../constants/error-messages.ts';
+import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import type { PackageDependency, PackageFileContent } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { loadPackageJson } from '../../utils.ts';
+import type { NpmPackage, NpmPackageDependency } from '../types.ts';
 import {
   extractDependency,
   getExtractedConstraints,
   parseDepName,
-} from './dependency';
-import { setNodeCommitTopic } from './node';
-import { extractOverrideDepsRec } from './overrides';
+} from './dependency.ts';
+import { setNodeCommitTopic } from './node.ts';
+import { extractOverrideDepsRec } from './overrides.ts';
 
 export function extractPackageJson(
   packageJson: NpmPackage,

@@ -1,5 +1,5 @@
 import { fromCodepointToUnicode, fromHexcodeToCodepoint } from 'emojibase';
-import { emojify, setEmojiConfig, stripEmojis, unemojify } from './emoji';
+import { emojify, setEmojiConfig, stripEmojis, unemojify } from './emoji.ts';
 
 describe('util/emoji', () => {
   beforeEach(() => {

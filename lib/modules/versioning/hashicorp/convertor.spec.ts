@@ -1,4 +1,4 @@
-import { hashicorp2npm, npm2hashicorp } from './convertor';
+import { hashicorp2npm, npm2hashicorp } from './convertor.ts';
 
 describe('modules/versioning/hashicorp/convertor', () => {
   it.each`

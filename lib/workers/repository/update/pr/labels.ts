@@ -1,9 +1,9 @@
 import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import * as template from '../../../../util/template';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import * as template from '../../../../util/template/index.ts';
 
 /**
  * Filter labels that go over the maximum char limit, based on platform limits.

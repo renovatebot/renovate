@@ -1,4 +1,4 @@
-import { GlobalConfig } from './global';
+import { GlobalConfig } from './global.ts';
 
 describe('config/global', () => {
   it('all values in OPTIONS are sorted', () => {

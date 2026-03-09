@@ -2,17 +2,17 @@ import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import * as _hostRules from '../../../util/host-rules';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { getPoetryRequirement, getPythonConstraint } from './artifacts';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs } from '~test/util';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
+import { updateArtifacts } from './index.ts';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
@@ -25,10 +25,10 @@ requires = ["poetry_core>=1.0", "wheel"]
 build-backend = "poetry.masonry.api"
 `;
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('google-auth-library');
 
 process.env.CONTAINERBASE = 'true';
@@ -388,7 +388,7 @@ describe('modules/manager/poetry/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const execSnapshots = mockExecAll();
       fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
@@ -427,7 +427,7 @@ describe('modules/manager/poetry/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -437,7 +437,7 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e PIP_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool python 3.4.2 ' +
             '&& ' +
@@ -453,7 +453,7 @@ describe('modules/manager/poetry/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       hostRules.find.mockReturnValueOnce({
         token: 'some-token',
@@ -503,7 +503,7 @@ describe('modules/manager/poetry/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -526,7 +526,7 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e PIP_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool python 3.4.2 ' +
             '&& ' +
@@ -542,7 +542,7 @@ describe('modules/manager/poetry/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const execSnapshots = mockExecAll();
 
@@ -582,7 +582,7 @@ describe('modules/manager/poetry/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -592,7 +592,7 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e PIP_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool python 2.7.5 ' +
             '&& ' +

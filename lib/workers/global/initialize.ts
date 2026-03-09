@@ -1,18 +1,18 @@
 import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { applySecretsAndVariablesToConfig } from '../../config/secrets';
-import type { AllConfig, RenovateConfig } from '../../config/types';
-import { logger } from '../../logger';
-import { resetGlobalLogLevelRemaps } from '../../logger/remap';
-import { initPlatform } from '../../modules/platform';
-import * as packageCache from '../../util/cache/package';
-import { setEmojiConfig } from '../../util/emoji';
-import { validateGitVersion } from '../../util/git';
-import * as hostRules from '../../util/host-rules';
-import { setHttpRateLimits } from '../../util/http/rate-limits';
-import { initMergeConfidence } from '../../util/merge-confidence';
-import { setMaxLimit } from './limits';
+import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
+import type { AllConfig, RenovateConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
+import { initPlatform } from '../../modules/platform/index.ts';
+import * as packageCache from '../../util/cache/package/index.ts';
+import { setEmojiConfig } from '../../util/emoji.ts';
+import { validateGitVersion } from '../../util/git/index.ts';
+import * as hostRules from '../../util/host-rules.ts';
+import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
+import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
+import { setMaxLimit } from './limits.ts';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };

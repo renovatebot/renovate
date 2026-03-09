@@ -1,4 +1,4 @@
-import { TerraformVersionExtractor } from './terraform-version';
+import { TerraformVersionExtractor } from './terraform-version.ts';
 
 describe('modules/manager/terraform/extractors/terraform-block/terraform-version', () => {
   const extractor = new TerraformVersionExtractor();

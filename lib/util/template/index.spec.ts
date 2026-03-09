@@ -1,8 +1,8 @@
-import { getOptions } from '../../config/options';
-import * as _execUtils from '../exec/utils';
-import * as template from '.';
+import { getOptions } from '../../config/options/index.ts';
+import * as _execUtils from '../exec/utils.ts';
+import * as template from './index.ts';
 
-vi.mock('../exec/utils');
+vi.mock('../exec/utils.ts');
 
 const execUtils = vi.mocked(_execUtils);
 
@@ -212,6 +212,17 @@ describe('util/template/index', () => {
       depName: 'some.github.com/dep',
     });
     expect(output).toBe('ghc/dep');
+  });
+
+  it('add', () => {
+    const userTemplate = '{{add 1 2}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('3');
+  });
+
+  it('add - throws if inputs are invalid', () => {
+    const userTemplate = '{{add undefined null}}';
+    expect(() => template.compile(userTemplate, {})).toThrow();
   });
 
   describe('proxyCompileInput', () => {

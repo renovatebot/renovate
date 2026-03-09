@@ -1,158 +1,69 @@
-import { getOptions } from '../../config/options';
-import { loadModules } from '../../util/modules';
-import { isVersioningApiConstructor } from './common';
-import type { GenericVersion } from './generic';
-import { GenericVersioningApi } from './generic';
-import * as semverVersioning from './semver';
-import * as semverCoercedVersioning from './semver-coerced';
-import type { VersioningApi, VersioningApiConstructor } from './types';
-import * as allVersioning from '.';
-
-const supportedSchemes = getOptions().find(
-  (option) => option.name === 'versioning',
-)?.allowedValues;
+import { z } from 'zod/v4';
+import { getOptions } from '../../config/options/index.ts';
+import { isVersioningApiConstructor } from './common.ts';
+import * as allVersioning from './index.ts';
+import * as semverCoercedVersioning from './semver-coerced/index.ts';
 
 describe('modules/versioning/index', () => {
-  it('has api', () => {
-    expect(Object.keys(allVersioning.get('semver')).sort()).toEqual([
-      'equals',
-      'getMajor',
-      'getMinor',
-      'getNewValue',
-      'getPatch',
-      'getSatisfyingVersion',
-      'isBreaking',
-      'isCompatible',
-      'isGreaterThan',
-      'isLessThanRange',
-      'isSingleVersion',
-      'isStable',
-      'isValid',
-      'isVersion',
-      'matches',
-      'minSatisfyingVersion',
-      'sortVersions',
-    ]);
-  });
-
-  it('validates', async () => {
-    function validate(
-      module: VersioningApi | VersioningApiConstructor,
-      name: string,
-    ): boolean {
-      const mod = isVersioningApiConstructor(module) ? new module() : module;
-
-      // TODO: test required api (#9715)
-      if (!mod.isValid || !mod.isVersion) {
-        throw Error(`Missing api on ${name}`);
-      }
-
-      return true;
-    }
-    const vers = allVersioning.getVersionings();
-
-    const loadedVers = await loadModules(__dirname);
-    expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
-
-    for (const name of vers.keys()) {
-      const ver = vers.get(name)!;
-      expect(validate(ver, name)).toBeTrue();
-    }
-  });
-
   it('should fallback to semver-coerced', () => {
-    expect(allVersioning.get(undefined)).toBe(
-      allVersioning.get(semverCoercedVersioning.id),
-    );
-    expect(allVersioning.get('unknown')).toBe(
-      allVersioning.get(semverCoercedVersioning.id),
-    );
+    const semverCoerced = allVersioning.get(semverCoercedVersioning.id);
+    expect(allVersioning.get(undefined)).toBe(semverCoerced);
+    expect(allVersioning.get('unknown')).toBe(semverCoerced);
   });
 
   it('should accept config', () => {
     expect(allVersioning.get('semver:test')).toBeDefined();
   });
 
-  describe('should return the same interface', () => {
-    const optionalFunctions = [
-      'allowUnstableMajorUpgrades',
-      'isLessThanRange',
-      'valueToVersion',
-      'constructor',
-      'hasOwnProperty',
-      'isPrototypeOf',
-      'isBreaking',
-      'propertyIsEnumerable',
-      'should',
-      'toLocaleString',
-      'toString',
-      'valueOf',
-      'subset',
-      'intersects',
-      'isSame',
-      'getPinnedValue',
-    ];
-    const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
-      .filter((val) => !optionalFunctions.includes(val))
-      .sort();
+  it('matches the API contract', async () => {
+    const versionings = allVersioning.getVersionings();
 
-    function getAllPropertyNames(obj: any): string[] {
-      const props: string[] = [];
-      let o = obj;
+    const VersioningApiSchema = z
+      .string()
+      .refine((name) => versionings.has(name), {
+        error: 'Allowed in config but does not exist in the API',
+      })
+      .transform(async (name) => {
+        const { api } = await import(`./${name}/index.ts`);
+        return isVersioningApiConstructor(api) ? new api() : api;
+      })
+      .pipe(
+        z.object({
+          isValid: z.function(),
+          isVersion: z.function(),
+          isSingleVersion: z.function(),
+          isStable: z.function(),
+          isCompatible: z.function(),
+          equals: z.function(),
+          isGreaterThan: z.function(),
+          getMajor: z.function(),
+          getMinor: z.function(),
+          getPatch: z.function(),
+          getSatisfyingVersion: z.function(),
+          minSatisfyingVersion: z.function(),
+          getNewValue: z.function(),
+          sortVersions: z.function(),
+          matches: z.function(),
+          isBreaking: z.function().optional(),
+          isLessThanRange: z.function().optional(),
+          valueToVersion: z.function().optional(),
+          subset: z.function().optional(),
+          intersects: z.function().optional(),
+          allowUnstableMajorUpgrades: z.boolean().optional(),
+          isSame: z.function().optional(),
+          getPinnedValue: z.function().optional(),
+        }),
+      );
 
-      do {
-        Object.getOwnPropertyNames(o).forEach((prop) => {
-          if (!props.includes(prop)) {
-            props.push(prop);
-          }
-        });
-      } while ((o = Object.getPrototypeOf(o)));
+    const config = getOptions().find(({ name }) => name === 'versioning');
 
-      return props;
-    }
+    const ValidVersioningSchema = z
+      .object({ allowedValues: z.string().array() })
+      .transform(({ allowedValues }) => allowedValues)
+      .pipe(VersioningApiSchema.array());
 
-    for (const supportedScheme of supportedSchemes ?? []) {
-      it(supportedScheme, async () => {
-        const schemeKeys = getAllPropertyNames(
-          allVersioning.get(supportedScheme),
-        )
-          .filter(
-            (val) => !optionalFunctions.includes(val) && !val.startsWith('_'),
-          )
-          .sort();
-
-        expect(schemeKeys).toEqual(npmApi);
-
-        const apiOrCtor = (await import(`./${supportedScheme}/index.ts`)).api;
-        if (isVersioningApiConstructor(apiOrCtor)) {
-          return;
-        }
-
-        expect(Object.keys(apiOrCtor).sort()).toEqual(
-          Object.keys(allVersioning.get(supportedScheme)).sort(),
-        );
-      });
-    }
-
-    it('dummy', () => {
-      class DummyScheme extends GenericVersioningApi {
-        protected override _compare(_version: string, _other: string): number {
-          throw new Error('Method not implemented.');
-        }
-
-        protected _parse(_version: string): GenericVersion {
-          throw new Error('Method not implemented.');
-        }
-      }
-
-      const api = new DummyScheme();
-      const schemeKeys = getAllPropertyNames(api)
-        .filter(
-          (val) => !optionalFunctions.includes(val) && !val.startsWith('_'),
-        )
-        .sort();
-
-      expect(schemeKeys).toEqual(npmApi);
-    });
+    await expect(
+      ValidVersioningSchema.parseAsync(config),
+    ).resolves.toBeDefined();
   });
 });

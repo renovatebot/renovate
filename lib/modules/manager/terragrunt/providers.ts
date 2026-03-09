@@ -1,7 +1,7 @@
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency } from '../types';
-import type { ExtractionResult, TerraformManagerData } from './types';
-import { keyValueExtractionRegex } from './util';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { PackageDependency } from '../types.ts';
+import type { ExtractionResult, TerraformManagerData } from './types.ts';
+import { keyValueExtractionRegex } from './util.ts';
 
 export const sourceExtractionRegex = regEx(
   /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/,

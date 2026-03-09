@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { CurrentAgeMatcher } from './current-age';
+import { CurrentAgeMatcher } from './current-age.ts';
 
 describe('util/package-rules/current-age', () => {
   const matcher = new CurrentAgeMatcher();

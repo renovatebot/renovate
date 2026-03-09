@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { SemVer } from 'semver';
-import { logger } from '../../lib/logger';
+import { logger } from '../../lib/logger/index.ts';
 
 export const newFiles = new Set();
 
@@ -75,7 +75,7 @@ export function parsePositiveInt(val: string | undefined): number {
   if (!val) {
     return 0;
   }
-  const r = Number.parseInt(val);
+  const r = Number.parseInt(val, 10);
   if (!Number.isFinite(r) || r < 0) {
     throw new Error(`Invalid number: ${val}`);
   }

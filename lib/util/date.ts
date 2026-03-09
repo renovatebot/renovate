@@ -2,12 +2,15 @@ import { DateTime } from 'luxon';
 
 const ONE_MINUTE_MS = 60 * 1000;
 
-export function getElapsedDays(timestamp: string): number {
+export function getElapsedDays(timestamp: string, floor = true): number {
   const currentVersionTimestampDate = DateTime.fromISO(timestamp);
   const now = DateTime.now();
   const diffInDays = now.diff(currentVersionTimestampDate, 'days').as('days');
-  const ageInDays = Math.floor(diffInDays);
-  return ageInDays;
+  if (floor) {
+    return Math.floor(diffInDays);
+  }
+
+  return diffInDays;
 }
 
 export function getElapsedMinutes(date: Date): number {

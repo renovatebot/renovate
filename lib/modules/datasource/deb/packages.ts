@@ -1,14 +1,17 @@
-import { nanoid } from 'nanoid';
+import { randomUUID } from 'node:crypto';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import * as fs from '../../../util/fs';
-import { toSha256 } from '../../../util/hash';
-import type { Http } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
-import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
-import { cacheSubDir } from './common';
-import { checkIfModified, getBaseSuiteUrl } from './url';
-import { extract, getFileCreationTime } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as fs from '../../../util/fs/index.ts';
+import { toSha256 } from '../../../util/hash.ts';
+import type { Http } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import {
+  computeFileChecksum,
+  parseChecksumsFromInRelease,
+} from './checksum.ts';
+import { cacheSubDir } from './common.ts';
+import { checkIfModified, getBaseSuiteUrl } from './url.ts';
+import { extract, getFileCreationTime } from './utils.ts';
 
 /**
  * Downloads and extracts a package file from a component URL.
@@ -29,7 +32,7 @@ export async function downloadAndExtractPackage(
   const compression = 'gz';
   const compressedFile = upath.join(
     fullCacheDir,
-    `${nanoid()}_${packageUrlHash}.${compression}`,
+    `${randomUUID()}_${packageUrlHash}.${compression}`,
   );
 
   const wasUpdated = await downloadPackageFile(

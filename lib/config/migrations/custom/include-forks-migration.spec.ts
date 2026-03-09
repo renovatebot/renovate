@@ -1,4 +1,4 @@
-import { IncludeForksMigration } from './include-forks-migration';
+import { IncludeForksMigration } from './include-forks-migration.ts';
 
 describe('config/migrations/custom/include-forks-migration', () => {
   it('should migrate true', async () => {

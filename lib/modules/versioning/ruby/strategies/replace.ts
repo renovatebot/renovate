@@ -1,8 +1,8 @@
-import { logger } from '../../../../logger';
-import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
-import type { Range } from '../range';
-import { parseRanges, satisfiesRange, stringifyRanges } from '../range';
-import { adapt, decrement, floor, increment } from '../version';
+import { logger } from '../../../../logger/index.ts';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator.ts';
+import type { Range } from '../range.ts';
+import { parseRanges, satisfiesRange, stringifyRanges } from '../range.ts';
+import { adapt, decrement, floor, increment } from '../version.ts';
 
 // Common logic for replace, widen, and bump strategies
 // It basically makes the range stick to the new version.

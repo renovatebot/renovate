@@ -1,4 +1,5 @@
-import { extractPackageFile } from '.';
+import { codeBlock } from 'common-tags';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/copier/extract', () => {
   describe('extractPackageFile()', () => {
@@ -79,6 +80,41 @@ describe('modules/manager/copier/extract', () => {
         ],
       });
     });
+
+    it.each([
+      {
+        srcPath:
+          'git+https://bitbucket.some-org/scm/some-project/some-template.git',
+        expectedPackageName:
+          'https://bitbucket.some-org/scm/some-project/some-template.git',
+      },
+      {
+        srcPath:
+          'git+ssh://git@bitbucket.some-org/some-project/some-template.git',
+        expectedPackageName:
+          'ssh://git@bitbucket.some-org/some-project/some-template.git',
+      },
+    ])(
+      'extracts and strips git+ prefix from $srcPath',
+      ({ srcPath, expectedPackageName }) => {
+        const content = codeBlock`
+          _commit: v1.0.0
+          _src_path: ${srcPath}
+        `;
+        const result = extractPackageFile(content);
+        expect(result).toEqual({
+          deps: [
+            {
+              depName: srcPath,
+              packageName: expectedPackageName,
+              currentValue: 'v1.0.0',
+              datasource: 'git-tags',
+              depType: 'template',
+            },
+          ],
+        });
+      },
+    );
 
     it('returns null for invalid .copier-answers.yml', () => {
       const content = `

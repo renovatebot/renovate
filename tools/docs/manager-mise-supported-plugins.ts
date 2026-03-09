@@ -1,9 +1,9 @@
 import {
   asdfTooling,
   miseTooling,
-} from '../../lib/modules/manager/mise/upgradeable-tooling';
-import { readFile, updateFile } from '../utils';
-import { replaceContent } from './utils';
+} from '../../lib/modules/manager/mise/upgradeable-tooling.ts';
+import { readFile, updateFile } from '../utils/index.ts';
+import { replaceContent } from './utils.ts';
 
 function generateMiseTooling(): string {
   return Object.entries(miseTooling)

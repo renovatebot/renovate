@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import { getOptions } from '../../lib/config/options';
-import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces';
-import { regEx } from '../../lib/util/regex';
-import { templateHelperNames } from '../../lib/util/template';
+import { getOptions } from '../../lib/config/options/index.ts';
+import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
+import { regEx } from '../../lib/util/regex.ts';
+import { templateHelperNames } from '../../lib/util/template/index.ts';
 
 const options = getOptions();
 const markdownGlob = '{docs,lib}/**/*.md';

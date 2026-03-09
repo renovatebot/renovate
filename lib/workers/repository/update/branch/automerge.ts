@@ -1,10 +1,10 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { isScheduledNow } from './schedule';
-import { resolveBranchStatus } from './status-checks';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { isScheduledNow } from './schedule.ts';
+import { resolveBranchStatus } from './status-checks.ts';
 
 export type AutomergeResult =
   | 'automerged'

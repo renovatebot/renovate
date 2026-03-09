@@ -10,16 +10,8 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of these locations:
 
-1. `renovate.json`
-1. `renovate.json5`
-1. `.github/renovate.json`
-1. `.github/renovate.json5`
-1. `.gitlab/renovate.json`
-1. `.gitlab/renovate.json5`
-1. `.renovaterc`
-1. `.renovaterc.json`
-1. `.renovaterc.json5`
-1. `package.json` _(within a `"renovate"` section)_
+<!-- config-filenames-begin -->
+<!-- config-filenames-end -->
 
 Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
 The bot first checks all the files in the `configFileNames` array before checking from the above file list.
@@ -50,6 +42,10 @@ A `subtype` in the configuration table specifies what type you're allowed to use
 If a config option has a `parent` defined, it means it's only allowed to configure it within an object with the parent name, such as `packageRules` or `hostRules`.
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
+
+<!-- prettier-ignore -->
+!!! tip
+    This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-schema.json`](renovate-schema.json).
 
 <!-- prettier-ignore -->
 !!! note
@@ -700,6 +696,33 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 ## commitBodyTable
 
+## commitHourlyLimit
+
+This config option limits the number of commits Renovate pushes in an hour.
+It includes commits pushed while creating a new branch or rebasing an existing one.
+
+Use `commitHourlyLimit` to strictly control the rate at which Renovate triggers CI runs.
+Both branch creation and rebasing trigger CI runs, so limiting these operations helps you control your CI load.
+
+For example, with `commitHourlyLimit: 2`, in a given hour Renovate might:
+
+- Create 2 new branches (triggering 2 CI runs), then stop until the next hour, or
+- Create 1 new branch and rebase 1 existing branch (2 CI runs total), then stop
+
+This limit is enforced on a per-repository basis and per hourly period (`:00` through `:59`).
+
+This setting differs from `prHourlyLimit` in an important way:
+
+- `prHourlyLimit` only limits PR _creation_. Renovate can still rebase existing branches, which triggers additional CI runs
+- `commitHourlyLimit` limits both branch creation _and_ automatic rebasing, giving you stricter control over CI usage
+
+If you want strict control over CI load, use `commitHourlyLimit`.
+If you only want to limit the rate of _new_ PRs, use [prHourlyLimit](#prhourlylimit).
+
+<!-- prettier-ignore -->
+!!! tip
+    Manual rebases (requested via checkbox, Dependency Dashboard, or rebase label) always bypass this limit.
+
 ## commitMessage
 
 ## commitMessageAction
@@ -1133,6 +1156,10 @@ Example:
   ]
 }
 ```
+
+<!--prettier-ignore-->
+!!! note
+    You do not need to add leading and trailing slashes in `matchStrings`.
 
 ### matchStringsStrategy
 
@@ -1910,6 +1937,12 @@ For example, to group all non-major devDependencies updates together into a sing
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
+
 ## groupSlug
 
 By default, Renovate will "slugify" the groupName to determine the branch name.
@@ -2578,29 +2611,8 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-| Manager           | Lockfile                                           |
-| ----------------- | -------------------------------------------------- |
-| `bun`             | `bun.lockb`, `bun.lock`                            |
-| `bundler`         | `Gemfile.lock`                                     |
-| `cargo`           | `Cargo.lock`                                       |
-| `composer`        | `composer.lock`                                    |
-| `conan`           | `conan.lock`                                       |
-| `devbox`          | `devbox.lock`                                      |
-| `gleam`           | `manifest.toml`                                    |
-| `gradle`          | `gradle.lockfile`                                  |
-| `helmv3`          | `Chart.lock`                                       |
-| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
-| `mix`             | `mix.lock`                                         |
-| `nix`             | `flake.lock`                                       |
-| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
-| `nuget`           | `packages.lock.json`                               |
-| `pep621`          | `pdm.lock`, `uv.lock`                              |
-| `pip-compile`     | `requirements.txt`                                 |
-| `pipenv`          | `Pipfile.lock`                                     |
-| `pixi`            | `pixi.lock`                                        |
-| `poetry`          | `poetry.lock`                                      |
-| `pub`             | `pubspec.lock`                                     |
-| `terraform`       | `.terraform.lock.hcl`                              |
+<!-- lock-file-maintenance-table-start -->
+<!-- lock-file-maintenance-table-end -->
 
 Support for new lock files may be added via feature request.
 
@@ -2644,6 +2656,42 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## maxMajorIncrement
+
+This is particularly useful for preventing upgrades from [SemVer](https://semver.org/)-based versions to [CalVer](https://calver.org/)-based ones.
+
+For example, if you're on version `19.0.0`, Renovate will upgrade to `22.0.0` but filter out versions like `999.0.0` and `2025.0.0`.
+
+You can use `packageRules` to customize this behavior for specific packages:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Allow to upgrade Home Assistant from 0.x to 2025.x",
+      "matchPackageNames": ["homeassistant"],
+      "maxMajorIncrement": 0
+    }
+  ]
+}
+```
+
+The above allows unlimited major version upgrades by setting `maxMajorIncrement` to `0`.
+
+Alternatively, to limit major upgrades to within 10 versions:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Limit xmldoc major upgrades to within 10 versions",
+      "matchPackageNames": ["xmldoc"],
+      "maxMajorIncrement": 10
+    }
+  ]
+}
+```
 
 ## managerFilePatterns
 
@@ -2989,6 +3037,26 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 ```
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
+
+You can also use the following template fields with `allowedVersions`:
+
+- `currentVersion`
+- `major`
+- `minor`
+- `patch`
+
+For example, if you want to upgrade to Angular to only the next major, you could set `allowedVersions` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["angular"],
+      "allowedVersions": "<={{add major 1}}"
+    }
+  ]
+}
+```
 
 <!-- prettier-ignore -->
 !!! warning
@@ -3341,7 +3409,7 @@ The following example matches any file in directories starting with `app/`:
 }
 ```
 
-The following example matches any `.toml` file in a `v2` or `v3` directory:
+The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory:
 
 ```json
 {
@@ -3657,6 +3725,12 @@ Can be used in combination with `replacementVersion`.
 
 You can suggest a new community package rule by editing [the `replacements.json` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/data/replacements.json) and opening a pull request.
 
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
+
 ### replacementNameTemplate
 
 <!-- prettier-ignore -->
@@ -3814,7 +3888,7 @@ If you have enabled `automerge` and set `automergeType=pr` in the Renovate confi
 On GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure, Forgejo, Gitea, GitHub and GitLab.
+This option is available for Azure, Bitbucket Server, Forgejo, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
@@ -3844,25 +3918,27 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 Table with options:
 
-| Name                         | Description                                                                                                                                                |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
-| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                    |
-| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                            |
-| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
-| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
-| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
-| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
-| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
-| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                         |
-| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                   |
-| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
-| `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
-| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
-| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                           |
-| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
-| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
-| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
+| Name                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies.                                                                                                                                                                                                                                                                                                                         |
+| `composerNoMinimalChanges`   | Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).                                                                                                                                                                                                                                                                                                                                          |
+| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                                                                                                                                                                                                                                                                                                                                            |
+| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                                                                                                                                                                                                                                                                                                                                           |
+| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                                                                                                                                                                                                                                                                                                                                            |
+| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                                                                                                                                                                                                                                                                                                                                           |
+| `goGenerate`                 | Run `go generate ./...` after vendoring (if vendoring was required). This will then commit any files which were added or modified by running `go generate`. Note this will not install any other tools as part of the process. See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process. In order for this option to function, the global configuration option `allowedUnsafeExecutions` must include `goGenerate`. |
+| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                                                                                                                                                                                                                                                                                                                                               |
+| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                                                                                                                                                                                                                                                                                                                                                   |
+| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                           |
 
 ## postUpgradeTasks
 
@@ -3937,6 +4013,47 @@ Dotfiles are included.
 
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
+
+### installTools
+
+Whether to install any additional tools dynamically before executing the `commands`.
+
+These must be known by [Containerbase](https://github.com/containerbase/base).
+
+<!-- prettier-ignore -->
+!!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
+
+For example:
+
+```json title="Adding a tool requirement"
+{
+  "postUpgradeTasks": {
+    "commands": ["make generate"],
+    "installTools": {
+      "golang": {}
+    }
+  }
+}
+```
+
+```json title="Utilising constraints for tool requirements"
+{
+  "constraints": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
+  "postUpgradeTasks": {
+    "commands": ["npm install", "npm run update-readme"],
+    "installTools": {
+      "node": {}
+    }
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    The tool objects inside `installTools` currently do not expose any additional configurability.
 
 ### workingDirTemplate
 
@@ -4261,6 +4378,7 @@ Renovate applies _all_ `registryAliases` objects, from top to bottom.
 This feature works with the following managers:
 
 - [`ansible`](modules/manager/ansible/index.md)
+- [`bazel-module`](modules/manager/bazel-module/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
 - [`crow`](modules/manager/crow/index.md)
@@ -4294,6 +4412,17 @@ This feature works with the following managers:
       "$HARBOR_HOST/$HARBOR_PROJECT": "registry.example.com/proxy",
       "$HARBOR_HOST/tools": "registry.example.com/tools"
     }
+  }
+}
+```
+
+If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
+
+```json title="Using a pull-through cache for public images"
+{
+  "registryAliases": {
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/ghcr.io": "ghcr.io",
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/dockerhub": "docker.io"
   }
 }
 ```
@@ -4614,6 +4743,42 @@ We recommend that you only configure the `timezone` option if _both_ of these ar
 
 Please see the above link for valid timezone names.
 
+## toolSettings
+
+When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle`](./modules/manager/gradle/index.md) or [the `gradle-wrapper`](./modules/manager/gradle-wrapper/index.md) managers, the repository's Gradle Wrapper will be invoked, if present.
+
+The JVM heap size for the Java invocations is 512m by default.
+This can be overridden using the following options.
+
+This option can be used on the repository level and in the [Renovate configuration](./self-hosted-configuration.md) using the following options.
+
+<!-- prettier-ignore -->
+!!! note
+    The JVM memory settings specified in the global self-hosted configuration set by the administrator in [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md) limits the memory settings for all repositories.
+    The default limit for all repositories is 512m.
+
+<!-- prettier-ignore -->
+!!! note
+    The JVM memory settings are considered for the `gradle` and `gradle-wrapper` manager.
+
+### jvmMaxMemory
+
+Maximum heap size in MB for Java VMs.
+Defaults to `512` for both the repository level and self-hosted configuration.
+
+To allow repositories to use _more_ than 512m of heap during any invocations of the Gradle Wrapper, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
+
+### jvmMemory
+
+Initial heap size in MB for Java VMs. Must be less than or equal to `jvmMaxMemory`.
+Defaults to `jvmMaxMemory`.
+
+### nodeMaxMemory
+
+<!-- prettier-ignore -->
+!!! note
+    This does not apply to _every_ Node process created by Renovate, only the managers noted above.
+
 ## updateInternalDeps
 
 Renovate defaults to skipping any internal package dependencies within monorepos.
@@ -4789,7 +4954,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 
 <!-- prettier-ignore -->
 !!! note
-    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
     This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
     In short: vulnerability alerts "skip the line".
 

@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import { GradleVersionDatasource } from '../../datasource/gradle-version';
-import { id as versioning } from '../../versioning/gradle';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { extractGradleVersion } from './utils';
+import { logger } from '../../../logger/index.ts';
+import { GradleVersionDatasource } from '../../datasource/gradle-version/index.ts';
+import { id as versioning } from '../../versioning/gradle/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { extractGradleVersion } from './utils.ts';
 
 export function extractPackageFile(
   fileContent: string,

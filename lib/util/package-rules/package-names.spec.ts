@@ -1,4 +1,4 @@
-import { PackageNameMatcher } from './package-names';
+import { PackageNameMatcher } from './package-names.ts';
 
 describe('util/package-rules/package-names', () => {
   const packageNameMatcher = new PackageNameMatcher();

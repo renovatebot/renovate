@@ -1,8 +1,8 @@
 import { isNonEmptyString, isNumber } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import ms from 'ms';
-import { logger } from '../logger';
-import { regEx } from './regex';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
 
 const splitRegex = regEx(/(.*?[a-z]+)/);
 
@@ -80,8 +80,7 @@ export function satisfiesDateRange(
       return dateMs > rangeMs;
     case '<=':
       return dateMs >= rangeMs;
-    // istanbul ignore next: can never happen
-    default:
-      return dateMs === rangeMs;
   }
+  // v8 ignore next: can never happen
+  return null;
 }

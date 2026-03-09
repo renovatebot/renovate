@@ -1,7 +1,10 @@
 import { isString } from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { satisfiesDateRange } from '../pretty-time';
-import { Matcher } from './base';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { satisfiesDateRange } from '../pretty-time.ts';
+import { Matcher } from './base.ts';
 
 export class CurrentAgeMatcher extends Matcher {
   override matches(

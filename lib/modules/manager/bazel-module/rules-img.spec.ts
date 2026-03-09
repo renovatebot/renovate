@@ -1,4 +1,4 @@
-import { transformRulesImgCalls } from './rules-img';
+import { transformRulesImgCalls } from './rules-img.ts';
 
 describe('modules/manager/bazel-module/rules-img', () => {
   describe('transformRulesImgCalls()', () => {

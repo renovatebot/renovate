@@ -1,10 +1,10 @@
-import { newlineRegex, regEx } from '../../../util/regex';
-import { AzureBicepResourceDatasource } from '../../datasource/azure-bicep-resource';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { AzureBicepResourceDatasource } from '../../datasource/azure-bicep-resource/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 
 const RESOURCE_REGEX = regEx(
   /resource\s+[A-Za-z0-9_]+\s+(?<replaceString>'(?<depName>.+\..+\/.+)@(?<currentValue>.+?)')/,

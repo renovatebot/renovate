@@ -1,6 +1,6 @@
 import semver from 'semver';
-import { regEx } from '../../../util/regex';
-import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns';
+import { regEx } from '../../../util/regex.ts';
+import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns.ts';
 
 interface LetterTag {
   letter: string;
@@ -51,7 +51,7 @@ export function poetry2semver(
   // trim leading zeros from valid numbers
   const releaseParts = matchGroups.release
     .split('.')
-    .map((segment) => parseInt(segment));
+    .map((segment) => parseInt(segment, 10));
   while (padRelease && releaseParts.length < 3) {
     releaseParts.push(0);
   }

@@ -1,5 +1,5 @@
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { ChangeLogSource } from '../source';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { ChangeLogSource } from '../source.ts';
 
 export class GitLabChangeLogSource extends ChangeLogSource {
   constructor() {

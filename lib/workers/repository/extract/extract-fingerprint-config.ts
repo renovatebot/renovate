@@ -1,11 +1,11 @@
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
-import { getEnabledManagersList } from '../../../modules/manager';
-import { isCustomManager } from '../../../modules/manager/custom';
-import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
-import type { CustomExtractConfig } from '../../../modules/manager/custom/types';
-import { validMatchFields } from '../../../modules/manager/custom/utils';
-import type { WorkerExtractConfig } from '../../types';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { isCustomManager } from '../../../modules/manager/custom/index.ts';
+import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types.ts';
+import type { CustomExtractConfig } from '../../../modules/manager/custom/types.ts';
+import { validMatchFields } from '../../../modules/manager/custom/utils.ts';
+import { getEnabledManagersList } from '../../../modules/manager/index.ts';
+import type { WorkerExtractConfig } from '../../types.ts';
 
 export interface FingerprintExtractConfig {
   managerList: Set<string>;

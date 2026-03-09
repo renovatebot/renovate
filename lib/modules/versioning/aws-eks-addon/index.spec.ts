@@ -1,4 +1,4 @@
-import aws from '.';
+import aws from './index.ts';
 
 describe('modules/versioning/aws-eks-addon/index', () => {
   describe('parse(version)', () => {

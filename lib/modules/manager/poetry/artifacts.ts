@@ -1,28 +1,31 @@
 import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { find } from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
-import { massage as massageToml, parse as parseToml } from '../../../util/toml';
-import { parseUrl } from '../../../util/url';
-import { PypiDatasource } from '../../datasource/pypi';
-import { getGoogleAuthHostRule } from '../../datasource/util';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { Lockfile, PoetryPyProject } from './schema';
-import type { PoetryFile, PoetrySource } from './types';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { find } from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import {
+  massage as massageToml,
+  parse as parseToml,
+} from '../../../util/toml.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { getGoogleAuthHostRule } from '../../datasource/util.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { Lockfile, PoetryPyProject } from './schema.ts';
+import type { PoetryFile, PoetrySource } from './types.ts';
 
 export function getPythonConstraint(
   pyProjectContent: string,

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { LooseArray, LooseRecord } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 
 const Translation = z.object({
   changelog: z.string(),

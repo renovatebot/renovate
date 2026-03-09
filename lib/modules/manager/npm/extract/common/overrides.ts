@@ -1,8 +1,8 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
-import type { PackageDependency } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import { extractDependency } from './dependency';
-import { setNodeCommitTopic } from './node';
+import type { PackageDependency } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { extractDependency } from './dependency.ts';
+import { setNodeCommitTopic } from './node.ts';
 
 /**
  * Used when there is a json object as a value in overrides block.
