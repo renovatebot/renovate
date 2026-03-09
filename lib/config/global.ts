@@ -42,6 +42,7 @@ export class GlobalConfig {
     'onboarding',
     'onboardingAutoCloseAge',
     'onboardingBranch',
+    'onboardingCommitMessage',
     'onboardingConfig',
     'onboardingConfigFileName',
     'onboardingNoDeps',
