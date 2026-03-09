@@ -24,8 +24,56 @@ After enough days have passed: Renovate replaces the "pending" status with a "pa
 The following configuration options can be used to enable and tune the functionality of Minimum Release Age:
 
 - [`minimumReleaseAge`](../configuration-options.md#minimumreleaseage) (previously known as `stabilityDays`)
+- [`minimumMinorAge`](../configuration-options.md#minimumminorage)
 - [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour)
 - [`internalChecksFilter`](../configuration-options.md#internalchecksfilter)
+
+## Minimum Minor Age
+
+`minimumMinorAge` is a related feature that allows you to defer adopting new _minor_ versions for a specified period.
+Unlike `minimumReleaseAge`, which checks the age of each individual release, `minimumMinorAge` checks the age of the **first release in the minor version group** (e.g., `x.y.0`).
+Once the minor version is considered mature (i.e., the first release in that minor group has been available for at least the specified duration), Renovate will suggest upgrading to the **latest patch** within that minor version.
+
+### Example
+
+Given the following releases:
+
+| Version | Release date |
+| ------- | ------------ |
+| 1.0.0   | July 1st     |
+| 1.1.0   | August 1st   |
+| 1.1.1   | August 2nd   |
+| 1.1.3   | August 8th   |
+
+And the following configuration:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "minimumMinorAge": "7 days"
+    }
+  ]
+}
+```
+
+- **Run on August 2nd:** Renovate will keep the repo on `1.0.0`, because the minor version `1.1` was introduced on August 1st (only 1 day ago), which does not meet the 7-day threshold.
+- **Run on August 9th:** Renovate will suggest upgrading to `1.1.3`, because the minor version `1.1` was introduced on August 1st (8 days ago), which meets the 7-day threshold, and `1.1.3` is the latest patch in that minor line.
+
+### Combining with `minimumReleaseAge`
+
+`minimumMinorAge` can be used alongside `minimumReleaseAge`.
+When both are configured, **both** checks must pass for a release to be suggested.
+This means the minor version must be old enough _and_ the individual release must be old enough.
+
+### Behavior with missing timestamps
+
+`minimumMinorAge` respects the [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour) setting.
+If the first release in a minor version group does not have a `releaseTimestamp`:
+
+- With `minimumReleaseAgeBehaviour=timestamp-required` (default): the minor version is treated as not yet mature and updates are marked as pending.
+- With `minimumReleaseAgeBehaviour=timestamp-optional`: the minor version is allowed regardless of missing timestamp.
 
 ## FAQs
 
