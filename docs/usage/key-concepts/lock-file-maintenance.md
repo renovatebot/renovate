@@ -56,6 +56,10 @@ However, you can use groups to separate out distinct Lock File Maintenance PRs, 
 
 If you're still unsure, [raise a "Request Help" Discussion](https://github.com/renovatebot/renovate/discussions/new?category=request-help) **??**
 
+#### Self-hosted **??**
+
+If you're running self-hosted, it might be worth **??** https://github.com/renovatebot/renovate/issues/40777#issuecomment-4024430413
+
 ### Why is the update showing as `no-work`?
 
 If you see **??**:
@@ -93,6 +97,10 @@ DEBUG: branches info extended
 
 This means that there is **??**.
 
+### **??**
+
+---
+
 You can use `lockFileMaintenance` to refresh lock files to keep them up-to-date.
 
 When Renovate performs `lockFileMaintenance` it deletes the lock file and runs the relevant package manager.
@@ -114,7 +122,3 @@ To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"b
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
 Renove **??**
-
-## Transitive dependencies
-
-Renovate intentionally **??**does not
