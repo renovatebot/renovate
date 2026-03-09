@@ -79,6 +79,9 @@ export function commitFilesToBranch(
     }
 
     logger.info(
+      `DRY-RUN: Would commit files to branch ${config.branchName}. See debug logs for raw commit information`,
+    );
+    logger.debug(
       { ...logExtra },
       `DRY-RUN: Would commit files to branch ${config.branchName}`,
     );
