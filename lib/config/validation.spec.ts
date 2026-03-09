@@ -1,4 +1,3 @@
-import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
@@ -1621,78 +1620,86 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
-    it('errors if no bumpVersion filePattern is provided', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-          bumpType: 'patch',
-        },
+    it('errors if no bumpVersions filePattern is provided', async () => {
+      const config: RenovateConfig = {
+        bumpVersions: [
+          {
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            bumpType: 'patch',
+            filePatterns: [],
+          },
+        ],
         packageRules: [
           {
             matchPackageNames: ['foo'],
-            bumpVersion: {
-              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-              bumpType: 'patch',
-            },
+            bumpVersions: [
+              {
+                matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+                bumpType: 'patch',
+                filePatterns: [],
+              },
+            ],
           },
         ],
-      });
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
         true,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'bumpVersions[0]: invalid bumpVersions configuration: filePatterns must not be empty',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'packageRules[0].bumpVersions[0]: invalid bumpVersions configuration: filePatterns must not be empty',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
 
     it('errors if no matchStrings are provided for bumpVersion', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
+      const config: RenovateConfig = {
+        bumpVersions: [
+          {
+            filePatterns: ['foo'],
+            matchStrings: [],
+          },
+        ],
         packageRules: [
           {
             matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
+            bumpVersions: [
+              {
+                filePatterns: ['bar'],
+                matchStrings: [],
+              },
+            ],
           },
         ],
-      });
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
         true,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
-    it('allow bumpVersion', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
+      expect(errors).toMatchObject([
+        {
+          message:
+            'bumpVersions[0]: invalid bumpVersions configuration: matchStrings must not be empty',
+          topic: 'Configuration Error',
         },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+        {
+          message:
+            'packageRules[0].bumpVersions[0]: invalid bumpVersions configuration: matchStrings must not be empty',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
   });
 
@@ -2376,7 +2383,7 @@ describe('config/validation', () => {
     });
 
     it('errors if no bumpVersions filePattern is provided', async () => {
-      const config: Partial<RenovateConfig> = {
+      const config: RenovateConfig = {
         bumpVersions: [
           {
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
@@ -2398,7 +2405,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
+        'global',
         config,
         true,
       );
@@ -2411,7 +2418,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'packageRules[0].bumpVersions: invalid bumpVersions configuration: filePatterns must not be empty',
+            'packageRules[0].bumpVersions[0]: invalid bumpVersions configuration: filePatterns must not be empty',
           topic: 'Configuration Error',
         },
       ]);
@@ -2438,7 +2445,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
+        'global',
         config,
         true,
       );
@@ -2455,35 +2462,6 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
-    });
-
-    it('allows bumpVersion', async () => {
-      const config: RenovateConfig = {
-        bumpVersions: [
-          // @ts-expect-error -- invalid config
-          {
-            filePatterns: ['foo'],
-          },
-        ],
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersions: [
-              // @ts-expect-error -- invalid config
-              {
-                filePatterns: ['bar'],
-              },
-            ],
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
     });
   });
 });
