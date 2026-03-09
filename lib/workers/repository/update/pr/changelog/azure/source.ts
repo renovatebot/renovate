@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../../../../../../util/regex';
-import { parseUrl } from '../../../../../../util/url';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { ChangeLogSource } from '../source';
+import { regEx } from '../../../../../../util/regex.ts';
+import { parseUrl } from '../../../../../../util/url.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { ChangeLogSource } from '../source.ts';
 
 export class AzureChangeLogSource extends ChangeLogSource {
   constructor() {

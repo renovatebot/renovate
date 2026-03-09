@@ -1,20 +1,18 @@
-import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import type { ChangeLogProject } from '..';
-import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper';
-import * as semverVersioning from '../../../../../../modules/versioning/semver';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { getReleaseNotesMdFile } from '../release-notes';
-import { AzureChangeLogSource } from './source';
-import { Fixtures } from '~test/fixtures';
-import { partial } from '~test/util';
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { partial } from '~test/util.ts';
+import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper.ts';
+import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import type { ChangeLogProject } from '../index.ts';
+import { getReleaseNotesMdFile } from '../release-notes.ts';
+import { AzureChangeLogSource } from './source.ts';
 
 const baseUrl = 'https://dev.azure.com/some-org/some-project/';
 const apiBaseUrl = 'https://dev.azure.com/some-org/some-project/_apis/';
 
 const upgrade = partial<BranchUpgradeConfig>({
-  manager: 'some-manager',
   branchName: '',
-  endpoint: apiBaseUrl,
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
