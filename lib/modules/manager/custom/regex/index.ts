@@ -1,5 +1,5 @@
+import { posix as path } from 'node:path';
 import { isTruthy } from '@sindresorhus/is';
-import upath from 'upath';
 import type { Category } from '../../../../constants/index.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { MaybePromise } from '../../../../types/index.ts';
@@ -33,8 +33,8 @@ export function extractPackageFile(
 
   // till this stage, packageFile is the full path
   // so we need to extract filename and dir before passing it for template.compile
-  const packageFileName = upath.basename(packageFile);
-  const packageFileDir = upath.dirname(packageFile);
+  const packageFileName = path.basename(packageFile);
+  const packageFileDir = path.dirname(packageFile);
   const packageFileInfo: PackageFileInfo = {
     packageFileDir,
     packageFileName,
