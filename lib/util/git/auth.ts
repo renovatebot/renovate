@@ -51,6 +51,26 @@ export function getGitAuthenticatedEnvironmentVariables(
       );
       gitConfigCount = 0;
     }
+
+    if (gitConfigCount > 0) {
+      for (let i = 0; i < gitConfigCount; i++) {
+        let envKey = `GIT_CONFIG_KEY_${i}`;
+        if (env[envKey] === undefined) {
+          logger.once.warn(
+            `GIT_CONFIG_COUNT=${gitConfigCount}, but there was no value for ${envKey}. Setting it to the empty string, which may break Git`,
+          );
+          env[envKey] = '';
+        }
+
+        envKey = `GIT_CONFIG_VALUE_${i}`;
+        if (env[envKey] === undefined) {
+          logger.once.warn(
+            `GIT_CONFIG_COUNT=${gitConfigCount}, but there was no value for ${envKey}. Setting it to the empty string, which may break Git`,
+          );
+          env[envKey] = '';
+        }
+      }
+    }
   }
   let authenticationRules: AuthenticationRule[];
   if (token) {
@@ -79,21 +99,9 @@ export function getGitAuthenticatedEnvironmentVariables(
     for (let i = 0; i < gitConfigCount; i++) {
       let envKey = `GIT_CONFIG_KEY_${i}`;
       newEnvironmentVariables[envKey] ??= env[envKey];
-      if (newEnvironmentVariables[envKey] === undefined) {
-        logger.once.warn(
-          `GIT_CONFIG_COUNT=${gitConfigCount}, but there was no value for ${envKey}. Setting it to the empty string, which may break git`,
-        );
-        newEnvironmentVariables[envKey] = '';
-      }
 
       envKey = `GIT_CONFIG_VALUE_${i}`;
       newEnvironmentVariables[envKey] ??= env[envKey];
-      if (newEnvironmentVariables[envKey] === undefined) {
-        logger.once.warn(
-          `GIT_CONFIG_COUNT=${gitConfigCount}, but there was no value for ${envKey}. Setting it to the empty string, which may break git`,
-        );
-        newEnvironmentVariables[envKey] = '';
-      }
     }
   }
 
