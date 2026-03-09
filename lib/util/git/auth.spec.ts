@@ -415,10 +415,10 @@ describe('util/git/auth', () => {
         });
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          'GIT_CONFIG_COUNT=1, but there was no value for GIT_CONFIG_KEY_0. Setting it to the empty string, which may break git',
+          'GIT_CONFIG_COUNT=1, but there was no value for GIT_CONFIG_KEY_0. Setting it to the empty string, which may break Git',
         );
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          'GIT_CONFIG_COUNT=1, but there was no value for GIT_CONFIG_VALUE_0. Setting it to the empty string, which may break git',
+          'GIT_CONFIG_COUNT=1, but there was no value for GIT_CONFIG_VALUE_0. Setting it to the empty string, which may break Git',
         );
       });
     });
