@@ -96,7 +96,8 @@ export function formatCell(row: string[], colIndex: number): string {
       .sort((a, b) => a.localeCompare(b))
       .map((s) => `<code>${s.trim()}</code>`)
       .map((item) => `<span>${item}</span>`)
-      .join('');
+      .join('')
+      .replace('>.<', '>(the root document)<');
     return `<td class="parents">${items}</td>`;
   }
 

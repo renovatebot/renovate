@@ -35,6 +35,32 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowShellExecutorForPostUpgradeCommands
 
+Enabling this allows `postUpgradeTasks`' `commands` to execute as if they're in a shell.
+
+This takes effect if you are using shell semantics, such as:
+
+```json title="allowShellExecutorForPostUpgradeCommands=true will allow this to run as expected"
+{
+  "postUpgradeTasks": {
+    "commands": ["echo '...' > go.mod", "go mod tidy || true"],
+    "fileFilters": ["**/*.go"],
+    "executionMode": "branch"
+  }
+}
+```
+
+This will not affect calling a script like:
+
+```json title="allowShellExecutorForPostUpgradeCommands=true will have not effect"
+{
+  "postUpgradeTasks": {
+    "commands": ["bash .scripts/post-yarn-update.sh"],
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "update"
+  }
+}
+```
+
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.

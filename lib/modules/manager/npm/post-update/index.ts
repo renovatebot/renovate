@@ -557,7 +557,7 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         lockFile: yarnLock,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
     } else {
@@ -629,7 +629,7 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
     } else {
