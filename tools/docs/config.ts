@@ -231,7 +231,7 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   return indexed;
 }
 
-function generateLockFileTable(): string {
+export function generateLockFileTable(): string {
   const allManagers = getManagers();
   const rows: { name: string; lockFiles: string[] }[] = [];
 
