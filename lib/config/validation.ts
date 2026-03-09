@@ -839,16 +839,6 @@ export async function validateConfig(
             message: `${currentPath}[${index}]: invalid bumpVersions configuration: matchStrings must not be empty`,
           });
         }
-
-        // for (const expression of val) {
-        //   const res = getExpression(expression);
-        //   if (res instanceof Error) {
-        //     errors.push({
-        //       topic: 'Configuration Error',
-        //       message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
-        //     });
-        //   }
-        // }
       }
     }
   }
