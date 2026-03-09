@@ -1,4 +1,4 @@
-import { PackagesMigration } from './packages-migration';
+import { PackagesMigration } from './packages-migration.ts';
 
 describe('config/migrations/custom/packages-migration', () => {
   it('should migrate to package rules', async () => {

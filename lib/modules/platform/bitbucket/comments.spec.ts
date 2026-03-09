@@ -1,6 +1,6 @@
-import { setBaseUrl } from '../../../util/http/bitbucket';
-import * as comments from './comments';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { setBaseUrl } from '../../../util/http/bitbucket.ts';
+import * as comments from './comments.ts';
 
 const baseUrl = 'https://api.bitbucket.org';
 

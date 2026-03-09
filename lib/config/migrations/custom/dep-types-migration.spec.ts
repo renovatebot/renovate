@@ -1,4 +1,4 @@
-import { DepTypesMigration } from './dep-types-migration';
+import { DepTypesMigration } from './dep-types-migration.ts';
 
 describe('config/migrations/custom/dep-types-migration', () => {
   it('should only add depTypes to packageRules', async () => {

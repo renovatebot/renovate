@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 export const BazelModuleMetadata = z.object({
   homepage: z.string().optional().nullable(),

@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import { presets } from './monorepos';
+import { regEx } from '../../../util/regex.ts';
+import { presets } from './monorepos.preset.ts';
 
 const todo = new Set([
   'arcus.background-jobs',
@@ -13,7 +13,6 @@ const todo = new Set([
   'azure azure-libraries-for-net',
   'azure azure-sdk-for-net',
   'azure azure-storage-net',
-  'Hangfire',
   'system.io.abstractions',
   'vaadinWebComponents',
 ]);

@@ -1,5 +1,5 @@
-import { getDefault } from './defaults';
-import type { RenovateOptions } from './types';
+import { getDefault } from './defaults.ts';
+import type { RenovateOptions } from './types.ts';
 
 describe('config/defaults', () => {
   describe('getDefault()', () => {

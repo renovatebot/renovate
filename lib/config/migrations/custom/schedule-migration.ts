@@ -1,7 +1,7 @@
 import later from '@breejs/later';
 import { isArray, isString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { AbstractMigration } from '../base/abstract-migration';
+import { regEx } from '../../../util/regex.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 const shortHoursRegex = regEx(/( \d?\d)((a|p)m)/g);
 const afterBeforeRegex = regEx(

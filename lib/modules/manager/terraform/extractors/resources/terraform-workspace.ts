@@ -1,7 +1,7 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import type { PackageDependency } from '../../../types';
-import type { TerraformDefinitionFile } from '../../hcl/types';
-import { TerraformVersionExtractor } from '../terraform-block/terraform-version';
+import type { PackageDependency } from '../../../types.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import { TerraformVersionExtractor } from '../terraform-block/terraform-version.ts';
 
 export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
   override getCheckList(): string[] {

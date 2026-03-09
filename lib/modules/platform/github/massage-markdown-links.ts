@@ -1,9 +1,9 @@
 import type { RootContent } from 'mdast';
 import { remark } from 'remark';
 import type { Plugin, Transformer } from 'unified';
-import { logger } from '../../../logger';
-import { coerceNumber } from '../../../util/number';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { coerceNumber } from '../../../util/number.ts';
+import { regEx } from '../../../util/regex.ts';
 
 interface UrlMatch {
   start: number;
@@ -27,6 +27,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
     const startOffset = coerceNumber(tree.position?.start.offset);
     const endOffset = coerceNumber(tree.position?.end.offset);
 
+    // v8 ignore else -- TODO: add test #40625
     if (tree.type === 'link') {
       const substr = input.slice(startOffset, endOffset);
       const url: string = tree.url;
@@ -69,8 +70,8 @@ export function massageMarkdownLinks(content: string): string {
       return leftPart + replaceTo + rightPart;
     }, content);
     return result.trimEnd() + rightSpaces;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, `Unable to massage markdown text`);
     return content;
-  } /* v8 ignore stop */
+  }
 }

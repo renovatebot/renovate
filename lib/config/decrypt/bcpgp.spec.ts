@@ -1,10 +1,10 @@
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { decryptConfig, setPrivateKeys } from '../decrypt';
-import { GlobalConfig } from '../global';
-import type { RenovateConfig } from '../types';
-import { tryDecryptBcPgp } from './bcpgp';
-import { Fixtures } from '~test/fixtures';
-import { logger } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
+import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
+import { decryptConfig, setPrivateKeys } from '../decrypt.ts';
+import { GlobalConfig } from '../global.ts';
+import type { AllConfig } from '../types.ts';
+import { tryDecryptBcPgp } from './bcpgp.ts';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const privateKeyEcc = `
@@ -28,7 +28,7 @@ const repository = 'abc/def';
 
 describe('config/decrypt/bcpgp', () => {
   describe('decryptConfig()', () => {
-    let config: RenovateConfig;
+    let config: AllConfig;
 
     beforeEach(() => {
       config = {};
@@ -47,7 +47,7 @@ describe('config/decrypt/bcpgp', () => {
       ).toBeNull();
       expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
         { runtime: 'invalid-runtime' },
-        'Unknown PGP runtime, using wasm-dotnet',
+        'Unknown PGP runtime, using wasm-java',
       );
     });
 
@@ -69,9 +69,10 @@ describe('config/decrypt/bcpgp', () => {
       );
     });
 
-    it('fails with ECC and AEAD', async () => {
+    it('fails with ECC and AEAD (wasm-dotnet', async () => {
       // not supported by bouncycastle C# implementation
       // https://github.com/bcgit/bc-csharp/issues/497
+      process.env.RENOVATE_X_PGP_RUNTIME = 'wasm-dotnet';
       expect(
         await tryDecryptBcPgp(
           privateKeyEcc,
@@ -83,7 +84,24 @@ describe('config/decrypt/bcpgp', () => {
         ),
       ).toBeNull(); // '{"o":"abc","r":"","v":"123"}'
       expect(logger.logger.trace).toHaveBeenCalledExactlyOnceWith(
-        'Using default PGP runtime: wasm-dotnet',
+        { runtime: 'wasm-dotnet' },
+        'Using configured PGP runtime',
+      );
+    });
+
+    it('works with ECC and AEAD (wasm-java)', async () => {
+      expect(
+        await tryDecryptBcPgp(
+          privateKeyEcc,
+          'hF4DdO67WRkDWjwSAQdAmRs+snKu04B3aKLNCF1ePqnXDQskj/Mj+neZbd0ucQgw' +
+            'TvchqMgVWv20RqhLKEdhyCp/iqnhCzDTRpbPyqjqPZ49kxDZqq9EhwvmBldiSBb5' +
+            '1F0BCQIQsycgt62mxOWtYITs3GGBnDS5s7iMxbxgOg5BlEMu2EQvgxvGETdz6n76' +
+            'h7t+FpU4y1ljrsNSLY36QPD4Jg2cGR48vMLVnPS6+eg3gFz3WfP5BAX3c6jQIOA=\n' +
+            '=C3oS',
+        ),
+      ).toBe('{"o":"abc","r":"","v":"123"}');
+      expect(logger.logger.trace).toHaveBeenCalledExactlyOnceWith(
+        'Using default PGP runtime: wasm-java',
       );
     });
 
@@ -143,7 +161,7 @@ describe('config/decrypt/bcpgp', () => {
     });
 
     it('handles PGP multi-org constraint', async () => {
-      setPrivateKeys(privateKey, undefined);
+      setPrivateKeys('invalid', privateKey);
       config.encrypted = {
         token:
           'wcFMAw+4H7SgaqGOAQ//Yk4RTQoLEhO0TKxN2IUBrCi88ts+CG1SXKeL06sJ2qikN/3n2JYAGGKgkHRICfu5dOnsjyFdLJ1XWUrbsM3XgVWikMbrmzD1Xe7N5DsoZXlt4Wa9pZ+IkZuE6XcKKu9whIJ22ciEwCzFwDmk/CBshdCCVVQ3IYuM6uibEHn/AHQ8K15XhraiSzF6DbJpevs5Cy7b5YHFyE936H25CVnouUQnMPsirpQq3pYeMq/oOtV/m4mfRUUQ7MUxvtrwE4lq4hLjFu5n9rwlcqaFPl7I7BEM++1c9LFpYsP5mTS7hHCZ9wXBqER8fa3fKYx0bK1ihCpjP4zUkR7P/uhWDArXamv7gHX2Kj/Qsbegn7KjTdZlggAmaJl/CuSgCbhySy+E55g3Z1QFajiLRpQ5+RsWFDbbI08YEgzyQ0yNCaRvrkgo7kZ1D95rEGRfY96duOQbjzOEqtvYmFChdemZ2+f9Kh/JH1+X9ynxY/zYe/0p/U7WD3QNTYN18loc4aXiB1adXD5Ka2QfNroLudQBmLaJpJB6wASFfuxddsD5yRnO32NSdRaqIWC1x6ti3ZYJZ2RsNwJExPDzjpQTuMOH2jtpu3q7NHmW3snRKy2YAL2UjI0YdeKIlhc/qLCJt9MRcOxWYvujTMD/yGprhG44qf0jjMkJBu7NjuVIMONujabl9b7SUQGfO/t+3rMuC68bQdCGLlO8gf3hvtD99utzXphi6idjC0HKSW/9KzuMkm+syGmIAYq/0L3EFvpZ38uq7z8KzwFFQHI3sBA34bNEr5zpU5OMWg',

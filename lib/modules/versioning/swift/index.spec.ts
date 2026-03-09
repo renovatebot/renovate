@@ -1,4 +1,4 @@
-import swift from '.';
+import swift from './index.ts';
 
 const {
   getNewValue,

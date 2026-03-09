@@ -1,10 +1,10 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import * as gradleVersioning from '../../versioning/gradle';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { GradleRelease } from './types';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as gradleVersioning from '../../versioning/gradle/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { GradleRelease } from './types.ts';
 
 export class GradleVersionDatasource extends Datasource {
   static readonly id = 'gradle-version';
@@ -28,12 +28,7 @@ export class GradleVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/gradle/gradle.';
 
-  @cache({
-    namespace: `datasource-${GradleVersionDatasource.id}`,
-    // TODO: types (#22198)
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next 3 -- should never happen */
@@ -75,6 +70,18 @@ export class GradleVersionDatasource extends Datasource {
       return res;
     }
     return null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GradleVersionDatasource.id}`,
+        // TODO: types (#22198)
+        key: `${config.registryUrl}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 
   /**

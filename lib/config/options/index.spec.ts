@@ -1,13 +1,13 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import * as manager from '../../modules/manager';
-import * as platform from '../../modules/platform';
-import { getOptions } from '.';
+import * as manager from '../../modules/manager/index.ts';
+import * as platform from '../../modules/platform/index.ts';
+import { getOptions } from './index.ts';
 
 vi.unmock('../../modules/platform');
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
-    vi.doMock('../../modules/manager', () => ({
+    vi.doMock('../../modules/manager/index.ts', () => ({
       getManagers: vi.fn(() => new Map().set('testManager', {})),
     }));
 
@@ -63,6 +63,30 @@ describe('config/options/index', () => {
             expect(option.allowedValues).toContain(defVal);
           }
         });
+      }
+    }
+  });
+
+  describe('every option with a siblingProperties has a `property` that matches a known option', () => {
+    const opts = getOptions();
+    const optionNames = new Set(opts.map((o) => o.name));
+
+    for (const option of opts) {
+      if (option.requiredIf) {
+        for (const req of option.requiredIf) {
+          for (const prop of req.siblingProperties) {
+            it(`${option.name}'s reference to ${prop.property} is valid`, () => {
+              expect(optionNames).toContain(prop.property);
+            });
+
+            const foundOption = opts.filter((o) => o.name === prop.property);
+            if (foundOption?.length && foundOption[0].allowedValues) {
+              it(`${option.name}'s value for ${prop.property} is valid, according to allowedValues`, () => {
+                expect(foundOption[0].allowedValues).toContain(prop.value);
+              });
+            }
+          }
+        }
       }
     }
   });

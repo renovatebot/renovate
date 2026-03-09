@@ -1,9 +1,9 @@
-import * as _cache from '../../util/cache/repository';
-import type { RepoCacheData } from '../../util/cache/repository/types';
-import { ensureComment, ensureCommentRemoval } from './comment';
-import { platform } from '~test/util';
+import { platform } from '~test/util.ts';
+import * as _cache from '../../util/cache/repository/index.ts';
+import type { RepoCacheData } from '../../util/cache/repository/types.ts';
+import { ensureComment, ensureCommentRemoval } from './comment.ts';
 
-vi.mock('../../util/cache/repository');
+vi.mock('../../util/cache/repository/index.ts');
 
 const cache = vi.mocked(_cache);
 

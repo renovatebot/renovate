@@ -1,21 +1,22 @@
-import { getConfig } from '../../../config/defaults';
+import type { RenovateConfig } from '~test/util.ts';
+import { platform } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
-} from '../../../constants/error-messages';
-import { initApis } from './apis';
-import { platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import { initApis } from './apis.ts';
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
+      GlobalConfig.reset();
       config = { ...getConfig() };
       config.errors = [];
       config.warnings = [];
-      config.token = 'some-token';
       delete config.optimizeForDisabled;
       delete config.forkProcessing;
     });
@@ -121,6 +122,7 @@ describe('workers/repository/init/apis', () => {
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
+      GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,

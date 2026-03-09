@@ -1,4 +1,5 @@
-import { defaultVersioning } from '../versioning';
+import { logger } from '~test/util.ts';
+import { defaultVersioning } from '../versioning/index.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
@@ -8,11 +9,10 @@ import {
   getDefaultVersioning,
   isGetPkgReleasesConfig,
   sortAndRemoveDuplicates,
-} from './common';
-import { CustomDatasource } from './custom';
-import { NpmDatasource } from './npm';
-import type { ReleaseResult } from './types';
-import { logger } from '~test/util';
+} from './common.ts';
+import { CustomDatasource } from './custom/index.ts';
+import { NpmDatasource } from './npm/index.ts';
+import type { ReleaseResult } from './types.ts';
 
 describe('modules/datasource/common', () => {
   describe('getDatasourceFor', () => {
@@ -261,6 +261,7 @@ describe('modules/datasource/common', () => {
           { version: '1.0.0' },
           { version: '2.0.0' },
           { version: '2.0.0-alpine' },
+          { version: 'v3.0.0-alpine' },
         ],
       };
     });
@@ -275,7 +276,10 @@ describe('modules/datasource/common', () => {
       expect(
         applyVersionCompatibility(input, versionCompatibility, undefined),
       ).toMatchObject({
-        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+        releases: [
+          { version: '1.0.0', versionOrig: '1.0.0' },
+          { version: '2.0.0', versionOrig: '2.0.0' },
+        ],
       });
     });
 
@@ -284,7 +288,20 @@ describe('modules/datasource/common', () => {
       expect(
         applyVersionCompatibility(input, versionCompatibility, '-alpine'),
       ).toMatchObject({
-        releases: [{ version: '2.0.0' }],
+        releases: [
+          { version: '2.0.0', versionOrig: '2.0.0-alpine' },
+          { version: 'v3.0.0', versionOrig: 'v3.0.0-alpine' },
+        ],
+      });
+    });
+
+    it('does not override versionOrig from extractVersion', () => {
+      const versionCompatibility = '^(?<version>[^-]+)(?<compatibility>.*)?$';
+      const res = applyExtractVersion(input, '^v(?<version>.+)$');
+      expect(
+        applyVersionCompatibility(res, versionCompatibility, '-alpine'),
+      ).toMatchObject({
+        releases: [{ version: '3.0.0', versionOrig: 'v3.0.0-alpine' }],
       });
     });
   });

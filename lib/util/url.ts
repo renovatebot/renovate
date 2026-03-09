@@ -7,8 +7,8 @@ import {
 // eslint-disable-next-line no-restricted-imports
 import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
-import { logger } from '../logger';
-import { regEx } from './regex';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);

@@ -1,4 +1,4 @@
-import { ZodError } from 'zod';
+import { ZodError } from 'zod/v3';
 import {
   DistributionListManifest,
   DistributionManifest,
@@ -6,7 +6,7 @@ import {
   OciHelmConfig,
   OciImageIndexManifest,
   OciImageManifest,
-} from './schema';
+} from './schema.ts';
 
 describe('modules/datasource/docker/schema', () => {
   it('parses OCI image manifest', () => {

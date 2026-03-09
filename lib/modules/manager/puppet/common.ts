@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 
 export const RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT = regEx(
   /^git@[^:]*:(?<repository>.+)$/,

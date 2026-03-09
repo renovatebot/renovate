@@ -1,4 +1,4 @@
-import { updateCode } from './common';
+import { updateCode } from './common.ts';
 
 describe('modules/manager/bazel/common', () => {
   describe('updateCode', () => {

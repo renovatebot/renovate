@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import * as projectUpdater from '.';
+import * as projectUpdater from './index.ts';
 
 describe('modules/manager/cargo/update', () => {
   describe('bumpPackageVersion()', () => {

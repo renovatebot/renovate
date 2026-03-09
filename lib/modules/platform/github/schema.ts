@@ -1,18 +1,28 @@
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import { LooseArray } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+
+const Ecosystem = z.enum([
+  'actions',
+  'composer',
+  'go',
+  'maven',
+  'npm',
+  'nuget',
+  'pip',
+  'rubygems',
+  'rust',
+]);
+export type Ecosystem = z.infer<typeof Ecosystem>;
 
 const Package = z.object({
-  ecosystem: z.union([
-    z.literal('maven'),
-    z.literal('npm'),
-    z.literal('nuget'),
-    z.literal('pip'),
-    z.literal('rubygems'),
-    z.literal('rust'),
-    z.literal('composer'),
-    z.literal('go'),
-  ]),
+  ecosystem: Ecosystem.catch((ctx) => {
+    logger.debug(
+      { ecosystem: ctx.input },
+      'Skipping vulnerability alert with unsupported ecosystem',
+    );
+    return undefined as any;
+  }),
   name: z.string(),
 });
 
@@ -45,15 +55,15 @@ export const GithubVulnerabilityAlert = LooseArray(
     }),
   }),
   {
-    /* v8 ignore start */
     onError: ({ error }) => {
       logger.debug(
         { error },
         'Vulnerability Alert: Failed to parse some alerts',
       );
     },
-    /* v8 ignore stop */
   },
+).transform((alerts) =>
+  alerts.filter((alert) => alert.security_vulnerability?.package?.ecosystem),
 );
 export type GithubVulnerabilityAlert = z.infer<typeof GithubVulnerabilityAlert>;
 

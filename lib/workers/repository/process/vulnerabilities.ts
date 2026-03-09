@@ -8,30 +8,36 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import { fromVector } from 'ae-cvss-calculator';
-import { z } from 'zod';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { PackageRule, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultVersioning } from '../../../modules/datasource/common';
+import * as _aeCvss from 'ae-cvss-calculator';
+import { z } from 'zod/v3';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
+import { instrument } from '../../../instrumentation/index.ts';
+import { logger } from '../../../logger/index.ts';
+import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../../modules/manager/types';
-import type { VersioningApi } from '../../../modules/versioning';
-import { get as getVersioning } from '../../../modules/versioning';
-import { sanitizeMarkdown } from '../../../util/markdown';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { titleCase } from '../../../util/string';
+} from '../../../modules/manager/types.ts';
+import type { VersioningApi } from '../../../modules/versioning/index.ts';
+import { get as getVersioning } from '../../../modules/versioning/index.ts';
+import { sanitizeMarkdown } from '../../../util/markdown.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { titleCase } from '../../../util/string.ts';
 import type {
   DependencyVulnerabilities,
   SeverityDetails,
   Vulnerability,
-} from './types';
+} from './types.ts';
+
+const { fromVector } = (_aeCvss as unknown as { default: typeof _aeCvss })
+  .default;
 
 export class Vulnerabilities {
-  private osvOffline: OsvOffline | undefined;
+  private static osvOffline: Promise<OsvOffline> | undefined;
+
+  private osvOffline: OsvOffline;
 
   private static readonly datasourceEcosystemMap: Record<
     string,
@@ -49,17 +55,21 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  private constructor() {
-    // private constructor
+  private constructor(osvOffline: OsvOffline) {
+    this.osvOffline = osvOffline;
   }
 
-  private async initialize(): Promise<void> {
-    this.osvOffline = await OsvOffline.create();
+  private static initialize(): Promise<OsvOffline> {
+    // no async here, so osv promise will only be created once
+    Vulnerabilities.osvOffline ??= OsvOffline.create();
+    return Vulnerabilities.osvOffline;
   }
 
   static async create(): Promise<Vulnerabilities> {
-    const instance = new Vulnerabilities();
-    await instance.initialize();
+    // intialize osv only once
+    const osvOffline = await Vulnerabilities.initialize();
+
+    const instance = new Vulnerabilities(osvOffline);
     return instance;
   }
 
@@ -174,9 +184,15 @@ export class Vulnerabilities {
     }
 
     try {
-      const osvVulnerabilities = await this.osvOffline?.getVulnerabilities(
-        ecosystem,
-        packageName,
+      const osvVulnerabilities = await instrument(
+        'get OSV vulnerabilities',
+        () => this.osvOffline.getVulnerabilities(ecosystem, packageName),
+        {
+          attributes: {
+            packageName,
+            ecosystem,
+          },
+        },
       );
       if (
         isNullOrUndefined(osvVulnerabilities) ||
@@ -260,13 +276,13 @@ export class Vulnerabilities {
   ): void {
     const versionsCleaned: Record<string, string> = {};
     for (const rule of packageRules) {
-      const version = rule.allowedVersions as string;
+      const version = rule.allowedVersions!;
       versionsCleaned[version] = version.replace(regEx(/[(),=> ]+/g), '');
     }
     packageRules.sort((a, b) =>
       versioningApi.sortVersions(
-        versionsCleaned[a.allowedVersions as string],
-        versionsCleaned[b.allowedVersions as string],
+        versionsCleaned[a.allowedVersions!],
+        versionsCleaned[b.allowedVersions!],
       ),
     );
   }

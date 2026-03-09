@@ -1,4 +1,4 @@
-import { AutomergeMigration } from './automerge-migration';
+import { AutomergeMigration } from './automerge-migration.ts';
 
 describe('config/migrations/custom/automerge-migration', () => {
   it('should migrate none', async () => {

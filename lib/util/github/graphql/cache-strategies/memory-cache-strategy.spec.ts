@@ -1,9 +1,12 @@
 import { DateTime, Settings } from 'luxon';
-import * as memCache from '../../../cache/memory';
-import { clone } from '../../../clone';
-import type { Timestamp } from '../../../timestamp';
-import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy';
+import * as memCache from '../../../cache/memory/index.ts';
+import { clone } from '../../../clone.ts';
+import type { Timestamp } from '../../../timestamp.ts';
+import type {
+  GithubDatasourceItem,
+  GithubGraphqlCacheRecord,
+} from '../types.ts';
+import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy.ts';
 
 // const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO()!;
 

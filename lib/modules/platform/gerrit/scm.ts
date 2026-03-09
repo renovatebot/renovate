@@ -1,11 +1,16 @@
 import { randomUUID } from 'crypto';
-import { logger } from '../../../logger';
-import * as git from '../../../util/git';
-import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import { hash } from '../../../util/hash';
-import { DefaultGitScm } from '../default-scm';
-import { client } from './client';
-import type { GerritFindPRConfig } from './types';
+import { DateTime } from 'luxon';
+import { logger } from '../../../logger/index.ts';
+import * as git from '../../../util/git/index.ts';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+} from '../../../util/git/types.ts';
+import { hash } from '../../../util/hash.ts';
+import { DefaultGitScm } from '../default-scm.ts';
+import { client } from './client.ts';
+import type { GerritFindPRConfig } from './types.ts';
+import { convertGerritDateToISO } from './utils.ts';
 
 let repository: string;
 let username: string;
@@ -42,6 +47,26 @@ export class GerritScm extends DefaultGitScm {
       return change.current_revision as LongCommitSha;
     }
     return git.getBranchCommit(branchName);
+  }
+
+  override async getBranchUpdateDate(
+    branchName: string,
+  ): Promise<DateTime | null> {
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName,
+      singleChange: true,
+      refreshCache: true,
+      requestDetails: ['CURRENT_REVISION'],
+    };
+    const change = (await client.findChanges(repository, searchConfig)).pop();
+    if (change) {
+      const date = convertGerritDateToISO(
+        change.revisions![change.current_revision!].created,
+      );
+      return DateTime.fromISO(date).toUTC();
+    }
+    return git.getBranchUpdateDate(branchName);
   }
 
   override async isBranchBehindBase(
@@ -109,22 +134,19 @@ export class GerritScm extends DefaultGitScm {
     commit: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
+    const existingChange = await client.getBranchChange(repository, {
       branchName: commit.branchName,
+      state: 'open',
       targetBranch: commit.baseBranch,
-      singleChange: true,
       requestDetails: ['CURRENT_REVISION'],
-    };
-    const existingChange = (
-      await client.findChanges(repository, searchConfig)
-    ).pop();
+    });
 
     let hasChanges = true;
     const message =
       typeof commit.message === 'string' ? [commit.message] : commit.message;
 
     // In Gerrit, the change subject/title is the first line of the commit message
+    // v8 ignore else -- TODO: add test #40625
     if (commit.prTitle) {
       const firstMessageLines = message[0].split('\n');
       firstMessageLines[0] = commit.prTitle;
@@ -156,12 +178,18 @@ export class GerritScm extends DefaultGitScm {
             pushOptions.push(`hashtag=${label}`);
           }
         }
+        // If a change already exists, we push to the same target branch to
+        // avoid creating a new change if the base branch has changed.
+        // updatePr() will take care of moving the existing change to a different base
+        // branch if needed.
+        const changeBranch = existingChange?.branch ?? commit.baseBranch!;
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}`,
+          targetRef: `refs/for/${changeBranch}`,
           files: commit.files,
           pushOptions,
         });
+        // v8 ignore else -- TODO: add test #40625
         if (pushResult) {
           return commitSha;
         }

@@ -1,7 +1,7 @@
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'perl';
 export const displayName = 'Perl';
@@ -38,9 +38,9 @@ class PerlVersioningApi extends GenericVersioningApi {
           while (component.length < 3) {
             component += '0';
           }
-          return Number.parseInt(component);
+          return Number.parseInt(component, 10);
         }) ?? /* istanbul ignore next */ [];
-    const release = [Number.parseInt(intPart), ...decimalComponents];
+    const release = [Number.parseInt(intPart, 10), ...decimalComponents];
     return { release, prerelease };
   }
 

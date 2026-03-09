@@ -1,13 +1,13 @@
-import type { lexer, parser } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
-import { clone } from '../../../../util/clone';
-import { regEx } from '../../../../util/regex';
+import type { lexer, parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { clone } from '../../../../util/clone.ts';
+import { regEx } from '../../../../util/regex.ts';
 import type {
   Ctx,
   NonEmptyArray,
   PackageVariables,
   VariableData,
-} from '../types';
+} from '../types.ts';
 
 export const REGISTRY_URLS = {
   google: 'https://dl.google.com/android/maven2/',

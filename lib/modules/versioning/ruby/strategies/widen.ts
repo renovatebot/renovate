@@ -1,8 +1,8 @@
-import { GTE, LT, PGTE } from '../operator';
-import type { Range } from '../range';
-import { parseRanges, satisfiesRange, stringifyRanges } from '../range';
-import { increment, pgteUpperBound } from '../version';
-import { replacePart } from './replace';
+import { GTE, LT, PGTE } from '../operator.ts';
+import type { Range } from '../range.ts';
+import { parseRanges, satisfiesRange, stringifyRanges } from '../range.ts';
+import { increment, pgteUpperBound } from '../version.ts';
+import { replacePart } from './replace.ts';
 
 export default ({ range, to }: { range: string; to: string }): string => {
   const parts = parseRanges(range).flatMap((part): Range[] => {

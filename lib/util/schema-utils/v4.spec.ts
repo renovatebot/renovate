@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { Json, Json5, Jsonc, MultidocYaml, Toml, Yaml } from './v4';
+import { Json, Json5, Jsonc, MultidocYaml, Toml, Yaml } from './v4.ts';
 
 describe('util/schema-utils/v4', () => {
   describe('Json', () => {

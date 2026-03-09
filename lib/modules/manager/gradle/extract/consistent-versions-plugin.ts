@@ -1,10 +1,10 @@
-import { logger } from '../../../../logger';
-import * as fs from '../../../../util/fs';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import { coerceString } from '../../../../util/string';
-import type { PackageDependency } from '../../types';
-import type { GradleManagerData } from '../types';
-import { isDependencyString, versionLikeSubstring } from '../utils';
+import { logger } from '../../../../logger/index.ts';
+import * as fs from '../../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { coerceString } from '../../../../util/string.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { GradleManagerData } from '../types.ts';
+import { isDependencyString, versionLikeSubstring } from '../utils.ts';
 
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';

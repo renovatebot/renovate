@@ -1,5 +1,5 @@
-import type { RenovateConfig } from '../../types';
-import { AbstractMigration } from './abstract-migration';
+import type { RenovateConfig } from '../../types.ts';
+import { AbstractMigration } from './abstract-migration.ts';
 
 export class RemovePropertyMigration extends AbstractMigration {
   override readonly propertyName: string;

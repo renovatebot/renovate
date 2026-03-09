@@ -1,9 +1,13 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { GitDatasource } from './base';
-import type { RawRefs } from './types';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { GitDatasource } from './base.ts';
+import type { RawRefs } from './types.ts';
 
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
@@ -21,11 +25,7 @@ export class GitRefsDatasource extends GitDatasource {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  @cache({
-    namespace: `datasource-${GitRefsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  override async getReleases({
+  private async _getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let rawRefs: RawRefs[] | null = null;
@@ -60,6 +60,19 @@ export class GitRefsDatasource extends GitDatasource {
     };
 
     return result;
+  }
+
+  override getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GitRefsDatasource.id}`,
+        key: config.packageName,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 
   override async getDigest(

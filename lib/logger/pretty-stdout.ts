@@ -3,10 +3,9 @@
 
 import { Stream } from 'node:stream';
 import * as util from 'node:util';
-import chalk from 'chalk';
 import stringify from 'json-stringify-pretty-compact';
-import { regEx } from '../util/regex';
-import type { BunyanRecord } from './types';
+import { regEx } from '../util/regex.ts';
+import type { BunyanRecord } from './types.ts';
 
 const bunyanFields = [
   'name',
@@ -29,12 +28,12 @@ const metaFields = [
 ];
 
 const levels: Record<number, string> = {
-  10: chalk.gray('TRACE'),
-  20: chalk.blue('DEBUG'),
-  30: chalk.green(' INFO'),
-  40: chalk.magenta(' WARN'),
-  50: chalk.red('ERROR'),
-  60: chalk.bgRed('FATAL'),
+  10: util.styleText('gray', 'TRACE'),
+  20: util.styleText('blue', 'DEBUG'),
+  30: util.styleText('green', ' INFO'),
+  40: util.styleText('magenta', ' WARN'),
+  50: util.styleText('red', 'ERROR'),
+  60: util.styleText('bgRed', 'FATAL'),
 };
 
 export function indent(str: string, leading = false): string {
@@ -55,7 +54,7 @@ export function getMeta(rec: BunyanRecord): string {
     .map((field) => `${field}=${String(rec[field])}`)
     .join(', ');
   res = ` (${metaStr})${res}`;
-  return chalk.gray(res);
+  return util.styleText('gray', res);
 }
 
 export function getDetails(rec: BunyanRecord): string {

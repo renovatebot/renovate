@@ -1,4 +1,7 @@
-import type { EnsureIssueConfig, RepoParams } from '..';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -8,11 +11,13 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
-import * as memCache from '../../../util/cache/memory';
-import * as repoCache from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import * as helper from './gitea-helper';
+} from '../../../constants/error-messages.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { EnsureIssueConfig, RepoParams } from '../index.ts';
+import * as helper from './gitea-helper.ts';
+import * as gitea from './index.ts';
 import type {
   Comment,
   CommitStatus,
@@ -23,10 +28,7 @@ import type {
   Repo,
   RepoPermission,
   User,
-} from './types';
-import * as gitea from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger, partial } from '~test/util';
+} from './types.ts';
 
 /**
  * latest tested gitea version.
@@ -231,6 +233,7 @@ describe('modules/platform/gitea/index', () => {
   ];
 
   beforeEach(() => {
+    GlobalConfig.reset();
     gitea.resetPlatform();
     memCache.init();
     repoCache.resetCache();
@@ -254,12 +257,13 @@ describe('modules/platform/gitea/index', () => {
   async function initFakeRepo(
     scope: httpMock.Scope,
     repo?: Partial<Repo>,
-    config?: Partial<RepoParams>,
+    config?: RepoGlobalConfig,
   ): Promise<void> {
     const repoResult = { ...mockRepo, ...repo };
     const repository = repoResult.full_name;
     scope.get(`/repos/${repository}`).reply(200, repoResult);
-    await gitea.initRepo({ repository, ignorePrAuthor: true, ...config });
+    GlobalConfig.set({ ignorePrAuthor: true, ...config });
+    await gitea.initRepo({ repository });
   }
 
   describe('initPlatform()', () => {
@@ -2919,6 +2923,15 @@ describe('modules/platform/gitea/index', () => {
 
       expect(gitea.massageMarkdown(body)).toBe(
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](issues/123) [#124](issues/124) [#125](issues/125)',
       );
     });
   });

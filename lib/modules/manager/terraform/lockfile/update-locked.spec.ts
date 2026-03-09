@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import type { UpdateLockedConfig } from '../../types';
-import { updateLockedDependency } from './update-locked';
-import * as utilFns from './util';
+import type { UpdateLockedConfig } from '../../types.ts';
+import { updateLockedDependency } from './update-locked.ts';
+import * as utilFns from './util.ts';
 
 const lockFile = 'terraform.hcl';
 

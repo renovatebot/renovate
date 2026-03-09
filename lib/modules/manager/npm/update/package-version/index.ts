@@ -1,8 +1,8 @@
 import type { ReleaseType } from 'semver';
 import semver from 'semver';
-import { logger } from '../../../../../logger';
-import { regEx } from '../../../../../util/regex';
-import type { BumpPackageVersionResult } from '../../../types';
+import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import type { BumpPackageVersionResult } from '../../../types.ts';
 
 type MirrorBumpVersion = `mirror:${string}`;
 
@@ -29,13 +29,13 @@ export function bumpPackageVersion(
     if (isMirrorBumpVersion(bumpVersion)) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
-      /* v8 ignore start -- needs test */
+      /* v8 ignore next -- needs test */
       newPjVersion =
         parsedContent.dependencies?.[mirrorPackage] ??
         parsedContent.devDependencies?.[mirrorPackage] ??
         parsedContent.optionalDependencies?.[mirrorPackage] ??
         parsedContent.peerDependencies?.[mirrorPackage];
-      /* v8 ignore stop -- needs test */
+
       if (!newPjVersion) {
         logger.warn({ mirrorPackage }, 'bumpVersion mirror package not found');
         return { bumpedContent };

@@ -6,14 +6,14 @@ import {
   satisfies,
   valid,
 } from '@renovatebot/ruby-semver';
-import { logger } from '../../../logger';
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import type { NewValueConfig, VersioningApi } from '../types';
-import { isSingleOperator, isValidOperator } from './operator';
-import { ltr, parse as parseRange } from './range';
-import { bump, replace, widen } from './strategies';
-import { parse as parseVersion } from './version';
+import { logger } from '../../../logger/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { isSingleOperator, isValidOperator } from './operator.ts';
+import { ltr, parse as parseRange } from './range.ts';
+import { bump, replace, widen } from './strategies/index.ts';
+import { parse as parseVersion } from './version.ts';
 
 export const id = 'ruby';
 export const displayName = 'Ruby';

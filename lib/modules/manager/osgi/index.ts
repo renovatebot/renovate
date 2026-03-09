@@ -1,6 +1,6 @@
-import { MavenDatasource } from '../../datasource/maven';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'OSGi';
 

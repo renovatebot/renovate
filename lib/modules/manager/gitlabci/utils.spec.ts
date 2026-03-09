@@ -1,5 +1,5 @@
-import type { PackageDependency } from '../types';
-import { getGitlabDep } from './utils';
+import type { PackageDependency } from '../types.ts';
+import { getGitlabDep } from './utils.ts';
 
 describe('modules/manager/gitlabci/utils', () => {
   describe('getGitlabDep', () => {

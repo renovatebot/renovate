@@ -9,9 +9,12 @@ export const PLATFORM_HOST_TYPES = [
   'github',
   'gitlab',
   'local',
+  'scm-manager',
 ] as const;
 
 export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
+
+export const AZURE_API_USING_HOST_TYPES = ['azure', 'azure-tags'];
 
 export const GITEA_API_USING_HOST_TYPES = [
   'gitea',

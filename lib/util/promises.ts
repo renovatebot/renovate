@@ -2,8 +2,8 @@ import type { Options as PAllOptions } from 'p-all';
 import pAll from 'p-all';
 import type { Mapper, Options as PMapOptions } from 'p-map';
 import pMap from 'p-map';
-import { logger } from '../logger';
-import { ExternalHostError } from '../types/errors/external-host-error';
+import { logger } from '../logger/index.ts';
+import { ExternalHostError } from '../types/errors/external-host-error.ts';
 
 type PromiseFactory<T> = () => Promise<T>;
 

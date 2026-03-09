@@ -1,7 +1,7 @@
-import { CacheFactory } from './impl/cache-factory';
-import { RepoCacheNull } from './impl/null';
-import type { RepoCacheConfig } from './types';
-import { resetCache, setCache } from '.';
+import { CacheFactory } from './impl/cache-factory.ts';
+import { RepoCacheNull } from './impl/null.ts';
+import { resetCache, setCache } from './index.ts';
+import type { RepoCacheConfig } from './types.ts';
 
 /**
  * Extracted to separate file in order to avoid circular module dependencies.

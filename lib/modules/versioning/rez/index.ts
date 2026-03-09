@@ -1,9 +1,9 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import { api as npm } from '../npm';
-import { api as pep440 } from '../pep440';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
+import { api as npm } from '../npm/index.ts';
+import { api as pep440 } from '../pep440/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 import {
   ascendingRange,
@@ -13,14 +13,14 @@ import {
   lowerBound,
   upperBound,
   versionGroup,
-} from './pattern';
+} from './pattern.ts';
 import {
   npm2rezplus,
   padZeroes,
   pep4402rezInclusiveBound,
   rez2npm,
   rez2pep440,
-} from './transform';
+} from './transform.ts';
 
 export const id = 'rez';
 export const displayName = 'rez';
