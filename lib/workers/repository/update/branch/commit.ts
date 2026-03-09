@@ -80,7 +80,7 @@ export function commitFilesToBranch(
 
     logger.info(
       { ...logExtra },
-      'DRY-RUN: Would commit files to branch ' + config.branchName,
+      `DRY-RUN: Would commit files to branch ${config.branchName}`,
     );
     return Promise.resolve(null);
   }
