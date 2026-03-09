@@ -342,7 +342,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -367,7 +367,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -383,7 +383,7 @@ export class Result<T extends Val, E extends Val = Error> {
     }
 
     // TODO: fix, should only allow `Error` type
-    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    // oxlint-disable-next-line typescript/only-throw-error
     throw this.res.err;
   }
 
@@ -398,7 +398,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 

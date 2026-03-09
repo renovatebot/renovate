@@ -690,6 +690,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'base="https://foo.bar"'} | ${'maven(uri(base + "/baz"))'}                                   | ${'https://foo.bar/baz'}
         ${''}                       | ${'maven(uri(["https://foo.bar/baz"]))'}                         | ${null}
         ${''}                       | ${'maven { ["https://foo.bar/baz"] }'}                           | ${null}
+        ${''}                       | ${'maven { name = "baz" }'}                                      | ${null}
         ${''}                       | ${'maven { url "https://foo.bar/baz" }'}                         | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url base + "/baz" }'}                                 | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url "${base}/baz" }'}                                 | ${'https://foo.bar/baz'}
@@ -956,9 +957,20 @@ describe('modules/manager/gradle/parser', () => {
             mavenCentral()
           }
         }
+        exclusiveContent {
+          forRepository {
+            maven("https://private.repo/packages")
+          }
+          filter {
+            includeVersionByRegex("com.myorg.*", ".+", "^(.(?!-SNAPSHOT))+$")
+          }
+        }
       `;
 
       const { urls } = parseGradle(input);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping exclusive registry https://private.repo/packages with unsupported content descriptors',
+      );
       expect(urls).toMatchObject([
         {
           registryUrl: 'https://foo.bar.com/repository/public/',

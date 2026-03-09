@@ -1,6 +1,5 @@
 import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
-import vitest from '@vitest/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import * as importX from 'eslint-plugin-import-x';
@@ -35,6 +34,11 @@ export default tseslint.config(
       '.github/workflows/**/*.js',
       '.worktrees/**/*',
       '.markdownlint-cli2.mjs',
+      '**/.agents/**',
+      '**/.claude/**',
+      '**/.opencode/**',
+      '**/AGENTS.md',
+      '**/CLAUDE.md',
     ],
   },
   {
@@ -44,8 +48,8 @@ export default tseslint.config(
   },
 
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  ...tseslint.configs.recommended,
+  ...tseslint.configs.stylistic,
   eslintPluginPromise.configs['flat/recommended'],
   eslintContainerbase.configs.all,
   {
@@ -60,11 +64,6 @@ export default tseslint.config(
 
       ecmaVersion: 'latest',
       sourceType: 'module',
-
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-        projectService: true,
-      },
     },
 
     settings: {
@@ -171,40 +170,7 @@ export default tseslint.config(
         },
       ],
 
-      '@typescript-eslint/prefer-optional-chain': 2,
-      '@typescript-eslint/prefer-nullish-coalescing': 2,
       curly: [2, 'all'],
-      'require-await': 2,
-      '@typescript-eslint/no-unsafe-assignment': 0,
-      '@typescript-eslint/no-unsafe-member-access': 0,
-      '@typescript-eslint/no-unsafe-return': 0,
-      '@typescript-eslint/no-unsafe-call': 0,
-      '@typescript-eslint/no-unsafe-argument': 0,
-
-      '@typescript-eslint/restrict-template-expressions': [
-        2,
-        {
-          allowNumber: true,
-          allowBoolean: true,
-        },
-      ],
-
-      '@typescript-eslint/restrict-plus-operands': 2,
-
-      '@typescript-eslint/naming-convention': [
-        2,
-        {
-          selector: 'enumMember',
-          format: ['PascalCase'],
-        },
-      ],
-
-      '@typescript-eslint/unbound-method': [
-        2,
-        {
-          ignoreStatic: true,
-        },
-      ],
 
       '@typescript-eslint/no-empty-object-type': [
         2,
@@ -229,22 +195,13 @@ export default tseslint.config(
   {
     files: ['**/*.spec.ts', 'test/**'],
 
-    plugins: { vitest },
-
     languageOptions: {
       globals: {
         ...globals.vitest,
       },
     },
 
-    settings: {
-      vitest: {
-        typecheck: true,
-      },
-    },
-
     rules: {
-      ...vitest.configs.recommended.rules,
       'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
@@ -253,7 +210,6 @@ export default tseslint.config(
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/no-object-literal-type-assertion': 0,
       '@typescript-eslint/explicit-function-return-type': 0,
-      '@typescript-eslint/unbound-method': 0,
       'max-classes-per-file': 0,
       'class-methods-use-this': 0,
     },
@@ -264,7 +220,6 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/explicit-function-return-type': 0,
       '@typescript-eslint/explicit-module-boundary-types': 0,
-      '@typescript-eslint/restrict-template-expressions': 0,
     },
   },
   {
@@ -314,10 +269,6 @@ export default tseslint.config(
           Object.entries(globals.vitest).map(([key]) => [key, 'off']),
         ),
       },
-    },
-
-    rules: {
-      '@typescript-eslint/no-floating-promises': 0,
     },
   },
 

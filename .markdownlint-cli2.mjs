@@ -39,5 +39,10 @@ export default {
     '.venv/**',
     'tools/mkdocs/docs/**',
     'tools/mkdocs/site/**',
+    '.agents/**',
+    '.claude/**',
+    '.opencode/**',
+    'AGENTS.md',
+    'CLAUDE.md',
   ],
 };

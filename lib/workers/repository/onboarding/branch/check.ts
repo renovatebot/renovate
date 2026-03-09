@@ -81,7 +81,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // Also if there is a closed pr skip using cache as it is outdated
   if (
     getInheritedOrGlobal('requireConfig') === 'optional' &&
-    config.onboarding === false
+    getInheritedOrGlobal('onboarding') === false
   ) {
     // Return early and avoid checking for config files
     return true;
@@ -97,7 +97,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // if onboarding cache is present and base branch has not been updated; branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
-    config.onboarding &&
+    getInheritedOrGlobal('onboarding') &&
     !closedOnboardingPr &&
     isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha ===
@@ -149,7 +149,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // repository has not been onboarded yet
   if (
     getInheritedOrGlobal('requireConfig') === 'required' &&
-    config.onboarding === false
+    getInheritedOrGlobal('onboarding') === false
   ) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
