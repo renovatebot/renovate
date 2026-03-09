@@ -1,6 +1,6 @@
 import jsonata from 'jsonata';
-import * as memCache from './cache/memory';
-import { toSha256 } from './hash';
+import * as memCache from './cache/memory/index.ts';
+import { toSha256 } from './hash.ts';
 
 export interface JsonataExpression {
   evaluate(data: unknown, bindings?: Record<string, unknown>): Promise<unknown>;

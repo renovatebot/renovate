@@ -1,8 +1,8 @@
 import { isNumericString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'rpm';
 export const displayName = 'RPM version';
@@ -61,7 +61,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     if (epochIndex !== -1) {
       const epochStr = remainingVersion.slice(0, epochIndex);
       if (epochPattern.test(epochStr)) {
-        epoch = parseInt(epochStr);
+        epoch = parseInt(epochStr, 10);
       } else {
         return null;
       }
@@ -111,7 +111,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
 
     const release = [...remainingVersion.matchAll(regEx(/\d+/g))].map((m) =>
-      parseInt(m[0]),
+      parseInt(m[0], 10),
     );
 
     return {

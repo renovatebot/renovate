@@ -1,4 +1,4 @@
-import unity3dPackages from '.';
+import unity3dPackages from './index.ts';
 
 describe('modules/versioning/unity3d-packages/index', () => {
   it.each`

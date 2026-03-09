@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { CopierAnswersFile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { CopierAnswersFile } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

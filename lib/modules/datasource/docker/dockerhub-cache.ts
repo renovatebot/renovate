@@ -1,7 +1,7 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import * as packageCache from '../../../util/cache/package';
-import type { DockerHubTag } from './schema';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import type { DockerHubTag } from './schema.ts';
 
 export interface DockerHubCacheData {
   items: Record<number, DockerHubTag>;
@@ -13,11 +13,13 @@ const cacheNamespace = 'datasource-docker-hub-cache';
 export class DockerHubCache {
   private isChanged = false;
   private reconciledIds = new Set<number>();
+  private dockerRepository: string;
+  private cache: DockerHubCacheData;
 
-  private constructor(
-    private dockerRepository: string,
-    private cache: DockerHubCacheData,
-  ) {}
+  private constructor(dockerRepository: string, cache: DockerHubCacheData) {
+    this.dockerRepository = dockerRepository;
+    this.cache = cache;
+  }
 
   static async init(dockerRepository: string): Promise<DockerHubCache> {
     let repoCache = await packageCache.get<DockerHubCacheData>(
@@ -71,7 +73,7 @@ export class DockerHubCache {
 
     if (earliestDate && latestDate) {
       for (const [key, item] of Object.entries(this.cache.items)) {
-        const id = parseInt(key);
+        const id = parseInt(key, 10);
 
         const itemDate = DateTime.fromISO(item.last_updated);
 

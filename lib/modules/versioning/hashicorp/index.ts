@@ -1,9 +1,9 @@
-import { logger } from '../../../logger';
-import type { RangeStrategy } from '../../../types/versioning';
-import { getExcludedVersions, getFilteredRange } from '../common';
-import { api as npm } from '../npm';
-import type { NewValueConfig, VersioningApi } from '../types';
-import { hashicorp2npm, npm2hashicorp } from './convertor';
+import { logger } from '../../../logger/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { getExcludedVersions, getFilteredRange } from '../common.ts';
+import { api as npm } from '../npm/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { hashicorp2npm, npm2hashicorp } from './convertor.ts';
 
 export const id = 'hashicorp';
 export const displayName = 'Hashicorp';

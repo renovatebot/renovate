@@ -1,7 +1,7 @@
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { RepoCacheNull } from './impl/null';
-import type { RepoCache, RepoCacheData } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { RepoCacheNull } from './impl/null.ts';
+import type { RepoCache, RepoCacheData } from './types.ts';
 
 // This will be overwritten with initRepoCache()
 // Used primarily as a placeholder and for testing

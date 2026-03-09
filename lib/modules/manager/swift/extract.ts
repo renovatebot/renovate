@@ -1,10 +1,10 @@
-import { detectPlatform } from '../../../util/common';
-import { regEx } from '../../../util/regex';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { MatchResult } from './types';
+import { detectPlatform } from '../../../util/common.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { MatchResult } from './types.ts';
 
 const regExps = {
   wildcard: regEx(/^.*?/),

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 function splitFirstFrom(
   str: string,
@@ -231,6 +231,21 @@ const usesLineRegex = regEx(
   /^(?<prefix>\s+(?:-\s+)?uses\s*:\s*)(?<remainder>.+)$/,
 );
 
+/**
+ * Parses a GitHub Actions `uses:` line into its components.
+ *
+ * Expected line format:
+ * ```
+ * <indentation>[- ]uses: [quote]<action-reference>[quote][ # <comment>]
+ * ```
+ *
+ * Examples:
+ * - `      uses: actions/checkout@v4`
+ * - `      - uses: "owner/repo@abc123" # v1.0.0`
+ * - `      uses: docker://alpine:3.18`
+ *
+ * @returns Parsed components or `null` if the line doesn't match `uses:` pattern
+ */
 export function parseUsesLine(line: string): ParsedUsesLine | null {
   const match = usesLineRegex.exec(line);
   if (!match?.groups) {

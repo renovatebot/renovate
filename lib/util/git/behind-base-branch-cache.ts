@@ -1,7 +1,7 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { getCache } from '../cache/repository';
-import type { LongCommitSha } from './types';
+import { logger } from '../../logger/index.ts';
+import { getCache } from '../cache/repository/index.ts';
+import type { LongCommitSha } from './types.ts';
 
 export function getCachedBehindBaseResult(
   branchName: string,

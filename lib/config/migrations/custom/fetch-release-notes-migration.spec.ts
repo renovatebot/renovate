@@ -1,4 +1,4 @@
-import { FetchReleaseNotesMigration } from './fetch-release-notes-migration';
+import { FetchReleaseNotesMigration } from './fetch-release-notes-migration.ts';
 
 describe('config/migrations/custom/fetch-release-notes-migration', () => {
   it('migrates', async () => {

@@ -1,4 +1,4 @@
-import { PackageFilesMigration } from './package-files-migration';
+import { PackageFilesMigration } from './package-files-migration.ts';
 
 describe('config/migrations/custom/package-files-migration', () => {
   it('should migrate value to array', async () => {

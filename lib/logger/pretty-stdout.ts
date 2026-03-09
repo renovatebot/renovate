@@ -4,8 +4,8 @@
 import { Stream } from 'node:stream';
 import * as util from 'node:util';
 import stringify from 'json-stringify-pretty-compact';
-import { regEx } from '../util/regex';
-import type { BunyanRecord } from './types';
+import { regEx } from '../util/regex.ts';
+import type { BunyanRecord } from './types.ts';
 
 const bunyanFields = [
   'name',

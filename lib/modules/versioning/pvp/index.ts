@@ -1,9 +1,9 @@
-import { logger } from '../../../logger';
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import type { NewValueConfig, VersioningApi } from '../types';
-import { parseRange } from './range';
-import { compareIntArray, extractAllParts, getParts, plusOne } from './util';
+import { logger } from '../../../logger/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { parseRange } from './range.ts';
+import { compareIntArray, extractAllParts, getParts, plusOne } from './util.ts';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';

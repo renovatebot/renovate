@@ -1,14 +1,14 @@
 import upath from 'upath';
 import type { DeepMockProxy } from 'vitest-mock-extended';
-import type { RenovateConfig } from '../lib/config/types';
-import * as _logger from '../lib/logger';
-import type { Platform } from '../lib/modules/platform';
-import { platform as _platform } from '../lib/modules/platform';
-import { scm as _scm } from '../lib/modules/platform/scm';
-import * as _env from '../lib/util/exec/env';
-import * as _fs from '../lib/util/fs';
-import * as _git from '../lib/util/git';
-import * as _hostRules from '../lib/util/host-rules';
+import type { RenovateConfig } from '../lib/config/types.ts';
+import * as _logger from '../lib/logger/index.ts';
+import type { Platform } from '../lib/modules/platform/index.ts';
+import { platform as _platform } from '../lib/modules/platform/index.ts';
+import { scm as _scm } from '../lib/modules/platform/scm.ts';
+import * as _env from '../lib/util/exec/env.ts';
+import * as _fs from '../lib/util/fs/index.ts';
+import * as _git from '../lib/util/git/index.ts';
+import * as _hostRules from '../lib/util/host-rules.ts';
 
 /**
  * Simple wrapper for getting mocked version of a module

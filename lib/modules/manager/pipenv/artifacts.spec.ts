@@ -1,25 +1,25 @@
 import * as _fsExtra from 'fs-extra';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import * as docker from '../../../util/exec/docker';
-import type { ExtraEnv, Opt } from '../../../util/exec/types';
-import type { StatusResult } from '../../../util/git/types';
-import { find as _find } from '../../../util/host-rules';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, git, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import type { ExtraEnv, Opt } from '../../../util/exec/types.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { find as _find } from '../../../util/host-rules.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
 import {
   addExtraEnvVariable,
   extractEnvironmentVariableName,
   getMatchingHostRule,
-} from './artifacts';
-import type { PipfileLock } from './types';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, git, partial } from '~test/util';
+} from './artifacts.ts';
+import { updateArtifacts } from './index.ts';
+import type { PipfileLock } from './types.ts';
 
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134
@@ -29,11 +29,11 @@ vi.hoisted(() => {
   } as never;
 });
 vi.mock('fs-extra', () => fixtures.fsExtra());
-vi.mock('../../../util/exec/env', () => mockDeep());
-vi.mock('../../../util/git', () => mockDeep());
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http', () => mockDeep());
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env.ts', () => mockDeep());
+vi.mock('../../../util/git/index.ts', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/index.ts', () => mockDeep());
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const datasource = vi.mocked(_datasource);
 const find = vi.mocked(_find);
@@ -50,7 +50,7 @@ const adminConfig: RepoGlobalConfig = {
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 } satisfies RepoGlobalConfig;
 
 const config: UpdateArtifactsConfig = {};
@@ -556,7 +556,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -568,7 +568,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.7.6' +
           ' && ' +
@@ -859,7 +859,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -871,7 +871,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.10.2' +
           ' && ' +
@@ -946,7 +946,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -958,7 +958,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.10.2' +
           ' && ' +
@@ -1032,7 +1032,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -1044,7 +1044,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.10.2' +
           ' && ' +

@@ -1,13 +1,13 @@
-import { GlobalConfig } from '../../config/global';
-import * as _datasource from '../../modules/datasource';
+import { GlobalConfig } from '../../config/global.ts';
+import * as _datasource from '../../modules/datasource/index.ts';
 import {
   generateInstallCommands,
   isDynamicInstall,
   resolveConstraint,
-} from './containerbase';
-import type { ToolConstraint } from './types';
+} from './containerbase.ts';
+import type { ToolConstraint } from './types.ts';
 
-vi.mock('../../modules/datasource');
+vi.mock('../../modules/datasource/index.ts');
 
 const datasource = vi.mocked(_datasource);
 

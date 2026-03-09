@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import type { UpdateArtifactsConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
 
 export function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,

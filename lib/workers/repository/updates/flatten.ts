@@ -2,19 +2,19 @@ import {
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
-} from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultConfig } from '../../../modules/datasource';
-import { get } from '../../../modules/manager';
-import type { PackageFile } from '../../../modules/manager/types';
-import { detectSemanticCommits } from '../../../util/git/semantic';
-import { applyPackageRules } from '../../../util/package-rules';
-import { regEx } from '../../../util/regex';
-import * as template from '../../../util/template';
-import { parseUrl } from '../../../util/url';
-import type { BranchUpgradeConfig } from '../../types';
-import { generateBranchName } from './branch-name';
+} from '../../../config/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { getDefaultConfig } from '../../../modules/datasource/index.ts';
+import { get } from '../../../modules/manager/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { detectSemanticCommits } from '../../../util/git/semantic.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as template from '../../../util/template/index.ts';
+import { parseUrl } from '../../../util/url.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import { generateBranchName } from './branch-name.ts';
 
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substring(1);

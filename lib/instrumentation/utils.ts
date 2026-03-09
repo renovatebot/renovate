@@ -1,5 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { getEnv } from '../util/env';
+import { getEnv } from '../util/env.ts';
 
 export function isTracingEnabled(): boolean {
   return isTraceDebuggingEnabled() || isTraceSendingEnabled();

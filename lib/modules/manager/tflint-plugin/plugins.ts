@@ -1,10 +1,10 @@
 import { isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import type { PackageDependency } from '../types';
-import type { ExtractionResult } from './types';
-import { keyValueExtractionRegex } from './util';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { ExtractionResult } from './types.ts';
+import { keyValueExtractionRegex } from './util.ts';
 
 export function extractTFLintPlugin(
   startingLine: number,

@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as helmVersioning from '../../versioning/helm';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { HelmRepositoryData } from './schema';
-import { HelmRepository } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as helmVersioning from '../../versioning/helm/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { HelmRepositoryData } from './schema.ts';
+import { HelmRepository } from './schema.ts';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';
@@ -29,11 +29,9 @@ export class HelmDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `home` field or the `sources` field in the results.';
 
-  @cache({
-    namespace: `datasource-${HelmDatasource.id}`,
-    key: (helmRepository: string) => `repository-data:${helmRepository}`,
-  })
-  async getRepositoryData(helmRepository: string): Promise<HelmRepositoryData> {
+  private async _getRepositoryData(
+    helmRepository: string,
+  ): Promise<HelmRepositoryData> {
     const { val, err } = await this.http
       .getYamlSafe(
         'index.yaml',
@@ -47,6 +45,16 @@ export class HelmDatasource extends Datasource {
     }
 
     return val;
+  }
+
+  getRepositoryData(helmRepository: string): Promise<HelmRepositoryData> {
+    return withCache(
+      {
+        namespace: `datasource-${HelmDatasource.id}`,
+        key: `repository-data:${helmRepository}`,
+      },
+      () => this._getRepositoryData(helmRepository),
+    );
   }
 
   async getReleases({

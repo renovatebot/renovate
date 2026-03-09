@@ -1,5 +1,5 @@
-import * as memCache from './cache/memory';
-import { getExpression } from './jsonata';
+import * as memCache from './cache/memory/index.ts';
+import { getExpression } from './jsonata.ts';
 
 describe('util/jsonata', () => {
   describe('getExpression', () => {

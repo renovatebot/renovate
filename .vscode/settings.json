@@ -1,21 +1,10 @@
 {
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[json]": {
+  "[javascript][typescript][json][jsonc][yaml][md]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[md]": {
     "editor.wordBasedSuggestions": "off"
   },
-  "files.associations": {
-    "Dockerfile.*": "dockerfile",
-    ".releaserc": "json"
-  },
-  "omnisharp.autoStart": false,
   "vitest.nodeEnv": {
     "LOG_LEVEL": "trace",
     "GIT_ALLOW_PROTOCOL": "file"

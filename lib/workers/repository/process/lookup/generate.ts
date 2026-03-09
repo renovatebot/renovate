@@ -1,13 +1,13 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import type { Release } from '../../../../modules/datasource';
-import type { LookupUpdate } from '../../../../modules/manager/types';
-import type { VersioningApi } from '../../../../modules/versioning';
-import type { RangeStrategy } from '../../../../types';
-import { getElapsedDays } from '../../../../util/date';
-import { getMergeConfidenceLevel } from '../../../../util/merge-confidence';
-import type { LookupUpdateConfig } from './types';
-import { getUpdateType } from './update-type';
+import { logger } from '../../../../logger/index.ts';
+import type { Release } from '../../../../modules/datasource/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
+import type { VersioningApi } from '../../../../modules/versioning/index.ts';
+import type { RangeStrategy } from '../../../../types/index.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
+import type { LookupUpdateConfig } from './types.ts';
+import { getUpdateType } from './update-type.ts';
 
 export async function generateUpdate(
   config: LookupUpdateConfig,

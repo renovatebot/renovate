@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { parseCatalog } from './catalog';
+import { parseCatalog } from './catalog.ts';
 
 describe('modules/manager/gradle/extract/catalog', () => {
   it('supports versions declared as single string', () => {

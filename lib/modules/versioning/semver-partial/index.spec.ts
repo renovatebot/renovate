@@ -1,4 +1,4 @@
-import semverPartial from '.';
+import semverPartial from './index.ts';
 
 describe('modules/versioning/semver-partial/index', () => {
   describe('.isValid()', () => {

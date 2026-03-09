@@ -1,9 +1,9 @@
 import { Version, VersionSpec } from '@baszalmstra/rattler';
 import type { SemVer } from 'semver';
 
-import type { RangeStrategy } from '../../../types/versioning';
-import * as pep440 from '../pep440';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import * as pep440 from '../pep440/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 function parse(v: string): Version | null {
   try {

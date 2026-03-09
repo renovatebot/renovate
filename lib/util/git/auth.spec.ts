@@ -1,9 +1,9 @@
-import { add, clear } from '../host-rules';
+import { logger } from '~test/util.ts';
+import { add, clear } from '../host-rules.ts';
 import {
   getGitAuthenticatedEnvironmentVariables,
   getGitEnvironmentVariables,
-} from './auth';
-import { logger } from '~test/util';
+} from './auth.ts';
 
 describe('util/git/auth', () => {
   afterEach(() => {

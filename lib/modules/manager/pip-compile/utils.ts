@@ -1,8 +1,8 @@
 import { Graph, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import type { PackageFile } from '../types';
-import type { DependencyBetweenFiles, PipCompileArgs } from './types';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFile } from '../types.ts';
+import type { DependencyBetweenFiles, PipCompileArgs } from './types.ts';
 
 export function sortPackageFiles(
   depsBetweenFiles: DependencyBetweenFiles[],

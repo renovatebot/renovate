@@ -5,7 +5,7 @@ import {
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
   hostnameMatchRegex,
-} from './modules';
+} from './modules.ts';
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
   const extractor = new ModuleExtractor();

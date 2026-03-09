@@ -1,4 +1,4 @@
-import type { DEFAULT_REGISTRY_URL } from './utils';
+import type { DEFAULT_REGISTRY_URL } from './utils.ts';
 
 /**
  * null means a registry was defined, but we couldn't find a valid URL

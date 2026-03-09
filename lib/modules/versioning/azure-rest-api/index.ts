@@ -1,7 +1,7 @@
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'azure-rest-api';
 export const displayName = 'azure-rest-api';
@@ -31,7 +31,7 @@ class AzureRestApiVersioningApi extends GenericVersioningApi {
     const { year, month, day, prerelease } = matchGroups;
 
     return {
-      release: [parseInt(`${year}${month}${day}`), 0, 0],
+      release: [parseInt(`${year}${month}${day}`, 10), 0, 0],
       prerelease,
     };
   }

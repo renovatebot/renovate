@@ -1,14 +1,14 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { NugetDatasource } from '../../datasource/nuget';
-import { parseRegistryUrl } from '../../datasource/nuget/common';
-import type { ParsedRegistryUrl } from '../../datasource/nuget/types';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseRegistryUrl } from '../../datasource/nuget/common.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
+import type { ParsedRegistryUrl } from '../../datasource/nuget/types.ts';
 import type {
   PackageSourceCredential,
   PackageSourceMap,
   Registry,
-} from './types';
+} from './types.ts';
 
 export function createNuGetConfigXml(registries: Registry[]): string {
   let contents = `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n<packageSources>\n`;
@@ -16,8 +16,15 @@ export function createNuGetConfigXml(registries: Registry[]): string {
 
   const credentials: PackageSourceCredential[] = [];
   const packageSourceMaps: PackageSourceMap[] = [];
+  const seenUrls = new Set<string>();
 
   for (const registry of registries) {
+    // Skip if we've already seen this URL
+    if (seenUrls.has(registry.url)) {
+      continue;
+    }
+    seenUrls.add(registry.url);
+
     const registryName =
       registry.name ?? `Package source ${++unnamedRegistryCount}`;
     const registryInfo = parseRegistryUrl(registry.url);

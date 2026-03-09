@@ -18,12 +18,17 @@ You need the following dependencies for local development:
 We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
 Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
 
+For building the documentation, you also need:
+
+- Python `>=3.11`
+- PDM `>=2.26.0`
+
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
 npm install -g pnpm
@@ -147,6 +152,14 @@ We test all PRs using the same tests, run on GitHub Actions.
 `pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
+
+### Quick Local CI
+
+For fast iteration during development, use `pnpm check`, which runs all checks in parallel and only tests the shards affected by your changes:
+
+```bash
+pnpm check
+```
 
 ### Vitest
 

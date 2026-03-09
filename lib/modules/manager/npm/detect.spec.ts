@@ -1,7 +1,7 @@
-import { detectGlobalConfig } from '.';
-import { fs } from '~test/util';
+import { fs } from '~test/util.ts';
+import { detectGlobalConfig } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/npm/detect', () => {
   describe('.detectGlobalConfig()', () => {

@@ -1,5 +1,5 @@
-import type { ReleaseResult } from '..';
-import type { PackageDescription } from './types';
+import type { ReleaseResult } from '../index.ts';
+import type { PackageDescription } from './types.ts';
 
 /**
  * Checks if two release metadata objects match.

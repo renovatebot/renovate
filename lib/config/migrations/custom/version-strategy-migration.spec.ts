@@ -1,4 +1,4 @@
-import { VersionStrategyMigration } from './version-strategy-migration';
+import { VersionStrategyMigration } from './version-strategy-migration.ts';
 
 describe('config/migrations/custom/version-strategy-migration', () => {
   it('should migrate versionStrategy="widen" to rangeStrategy="widen"', async () => {

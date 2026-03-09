@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { logger } from '../lib/logger';
-import { generateDocs } from './docs';
+import { logger } from '../lib/logger/index.ts';
+import { generateDocs } from './docs/index.ts';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"

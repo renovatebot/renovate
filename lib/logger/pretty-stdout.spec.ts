@@ -1,6 +1,6 @@
 import * as util from 'node:util';
-import * as prettyStdout from './pretty-stdout';
-import type { BunyanRecord } from './types';
+import * as prettyStdout from './pretty-stdout.ts';
+import type { BunyanRecord } from './types.ts';
 
 describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {

@@ -1,8 +1,8 @@
 import { isUndefined } from '@sindresorhus/is';
 import type { SemVer } from 'semver';
 import semver from 'semver';
-import { regEx } from '../../../util/regex';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver-partial';
 export const displayName = 'Partial Semantic Versioning';

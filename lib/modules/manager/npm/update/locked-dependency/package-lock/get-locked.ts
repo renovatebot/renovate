@@ -1,5 +1,5 @@
-import { logger } from '../../../../../../logger';
-import type { PackageLockDependency, PackageLockOrEntry } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import type { PackageLockDependency, PackageLockOrEntry } from './types.ts';
 
 // Finds matching dependencies withing a package lock file of sub-entry
 export function getLockedDependencies(

@@ -1,27 +1,27 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { getCacheType } from '../../../util/cache/package';
-import { type Http, HttpError } from '../../../util/http';
-import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
-import type { HttpOptions, HttpResponse } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
-import { getS3Client, parseS3Url } from '../../../util/s3';
-import { streamToString } from '../../../util/streams';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url';
-import { getGoogleAuthToken } from '../util';
-import { MAVEN_REPO } from './common';
+import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { getCacheType } from '../../../util/cache/package/index.ts';
+import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
+import { type Http, HttpError } from '../../../util/http/index.ts';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import { getS3Client, parseS3Url } from '../../../util/s3.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
+import { getGoogleAuthToken } from '../util.ts';
+import { MAVEN_REPO } from './common.ts';
 import type {
   DependencyInfo,
   MavenDependency,
   MavenFetchResult,
   MavenFetchSuccess,
-} from './types';
+} from './types.ts';
 
 function getHost(url: string): string | undefined {
   return parseUrl(url)?.host;

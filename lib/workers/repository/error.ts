@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../config/types';
+import type { RenovateConfig } from '../../config/types.ts';
 
 import {
   CONFIG_SECRETS_EXPOSED,
@@ -33,14 +33,14 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
+} from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
-} from './error-config';
-import type { RepositoryResult } from './result';
+} from './error-config.ts';
+import type { RepositoryResult } from './result.ts';
 
 export default async function handleError(
   config: RenovateConfig,

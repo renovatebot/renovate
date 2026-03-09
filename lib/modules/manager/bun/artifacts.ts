@@ -1,22 +1,22 @@
 import { isEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { processHostRules } from '../npm/post-update/rules';
+} from '../../../util/fs/index.ts';
+import { processHostRules } from '../npm/post-update/rules.ts';
 import {
   getNpmrcContent,
   resetNpmrcContent,
   updateNpmrcContent,
-} from '../npm/utils';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../npm/utils.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -66,7 +66,7 @@ export async function updateArtifacts(
     }
 
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile: lockFileName,
       docker: {},
       toolConstraints: [
         {

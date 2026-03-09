@@ -1,6 +1,6 @@
 import * as semver from 'semver';
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
 
 export function makeVersion(
   version: string,
@@ -10,7 +10,7 @@ export function makeVersion(
   const prerelease = semver.prerelease(version, options);
 
   if (prerelease && !options.includePrerelease) {
-    if (!Number.isNaN(parseInt(prerelease.toString()[0]))) {
+    if (!Number.isNaN(parseInt(prerelease.toString()[0], 10))) {
       const stringVersion = `${splitVersion[0]}.${splitVersion[1]}.${splitVersion[2]}`;
       return semver.valid(stringVersion, options);
     }

@@ -1,4 +1,4 @@
-import { AbstractMigration } from './abstract-migration';
+import { AbstractMigration } from './abstract-migration.ts';
 
 describe('config/migrations/base/abstract-migration', () => {
   it('should not allow to use method rewrite', () => {

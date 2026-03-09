@@ -1,4 +1,4 @@
-import type { MatchStringsStrategy } from '../../../../config/types';
+import type { MatchStringsStrategy } from '../../../../config/types.ts';
 
 export interface ExtractionTemplate {
   groups: Record<string, string>;

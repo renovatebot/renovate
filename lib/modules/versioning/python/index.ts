@@ -1,6 +1,6 @@
-import { api as pep440 } from '../pep440';
-import { api as poetry } from '../poetry';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { api as pep440 } from '../pep440/index.ts';
+import { api as poetry } from '../poetry/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'python';
 export const displayName = 'Python';

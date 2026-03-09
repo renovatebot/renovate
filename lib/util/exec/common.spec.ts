@@ -1,19 +1,19 @@
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { execa as _execa } from 'execa';
-import * as _instrumentation from '../../instrumentation';
-import { regEx } from '../regex';
+import { logger, partial } from '~test/util.ts';
+import * as _instrumentation from '../../instrumentation/index.ts';
+import { regEx } from '../regex.ts';
 import {
   addSecretForSanitizing,
   clearGlobalSanitizedSecretsList,
   clearRepoSanitizedSecretsList,
-} from '../sanitize';
-import { exec, rawExec } from './common';
-import { ExecError } from './exec-error';
-import type { DataListener, RawExecOptions } from './types';
-import { logger, partial } from '~test/util';
+} from '../sanitize.ts';
+import { exec, rawExec } from './common.ts';
+import { ExecError } from './exec-error.ts';
+import type { DataListener, RawExecOptions } from './types.ts';
 
-vi.mock('../../instrumentation');
+vi.mock('../../instrumentation/index.ts');
 vi.mock('node:child_process');
 vi.mock('execa');
 vi.unmock('./common');
@@ -188,6 +188,27 @@ describe('util/exec/common', () => {
         stderr,
         stdout,
       });
+    });
+
+    // GHSA-8wc6-vgrq-x6cf
+    it('never extends the process environment', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await exec(cmd, partial<RawExecOptions>());
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ extendEnv: false }),
+      );
     });
 
     it('throws if an error occurs, when using CommandWithOptions', async () => {
@@ -700,6 +721,27 @@ describe('util/exec/common', () => {
         stderr,
         stdout,
       });
+    });
+
+    // GHSA-8wc6-vgrq-x6cf
+    it('never extends the process environment', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await rawExec(cmd, partial<RawExecOptions>());
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ extendEnv: false }),
+      );
     });
 
     describe('is instrumented', () => {

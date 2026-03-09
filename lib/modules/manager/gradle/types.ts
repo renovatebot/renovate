@@ -1,5 +1,5 @@
-import type { lexer } from 'good-enough-parser';
-import type { PackageDependency } from '../types';
+import type { lexer } from '@renovatebot/good-enough-parser';
+import type { PackageDependency } from '../types.ts';
 
 export interface GradleManagerData {
   fileReplacePosition?: number;

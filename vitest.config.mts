@@ -6,11 +6,11 @@ import {
   defineConfig,
   mergeConfig,
 } from 'vitest/config';
-import { testShards } from './tools/test/shards.js';
+import { testShards } from './tools/test/shards.ts';
 import {
   getCoverageIgnorePatterns,
   normalizePattern,
-} from './tools/test/utils.js';
+} from './tools/test/utils.ts';
 
 const ci = !!process.env.CI;
 
@@ -110,7 +110,6 @@ export default defineConfig(() =>
             'lib/constants/category.ts',
             'lib/modules/datasource/hex/v2/package.ts',
             'lib/modules/datasource/hex/v2/signed.ts',
-            'lib/util/cache/package/redis.ts',
             'lib/util/http/legacy.ts',
             'lib/workers/repository/cache.ts',
           ],

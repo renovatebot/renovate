@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import { LooseArray } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 const BitbucketSourceType = z.enum(['commit_directory', 'commit_file']);
 

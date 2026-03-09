@@ -1,26 +1,26 @@
 // TODO #22198
-import { mergeChildConfig } from '../../../config';
-import { GlobalConfig } from '../../../config/global';
-import { migrateAndValidate } from '../../../config/migrate-validate';
-import { resolveConfigPresets } from '../../../config/presets';
-import type { RenovateConfig } from '../../../config/types';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { instrument } from '../../../instrumentation';
-import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types';
-import { addMeta, logger, removeMeta } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
-import { getBranchList } from '../../../util/git';
-import { addSplit } from '../../../util/split';
-import { getRegexPredicate } from '../../../util/string-match';
-import type { BranchConfig } from '../../types';
-import { readDashboardBody } from '../dependency-dashboard';
-import type { ExtractResult } from './extract-update';
-import { extract, lookup, update } from './extract-update';
-import type { WriteUpdateResult } from './write';
+import { GlobalConfig } from '../../../config/global.ts';
+import { mergeChildConfig } from '../../../config/index.ts';
+import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import { resolveConfigPresets } from '../../../config/presets/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { instrument } from '../../../instrumentation/index.ts';
+import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types.ts';
+import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { clone } from '../../../util/clone.ts';
+import { getBranchList } from '../../../util/git/index.ts';
+import { addSplit } from '../../../util/split.ts';
+import { getRegexPredicate } from '../../../util/string-match.ts';
+import type { BranchConfig } from '../../types.ts';
+import { readDashboardBody } from '../dependency-dashboard.ts';
+import type { ExtractResult } from './extract-update.ts';
+import { extract, lookup, update } from './extract-update.ts';
+import type { WriteUpdateResult } from './write.ts';
 
 export async function getBaseBranchConfig(
   baseBranch: string,

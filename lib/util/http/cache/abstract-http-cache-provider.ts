@@ -1,10 +1,10 @@
 import { isPlainObject } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { HttpCacheStats } from '../../stats';
-import type { GotOptions, HttpResponse } from '../types';
-import { copyResponse } from '../util';
-import { HttpCache } from './schema';
-import type { HttpCacheProvider } from './types';
+import { logger } from '../../../logger/index.ts';
+import { HttpCacheStats } from '../../stats.ts';
+import type { GotOptions, HttpResponse } from '../types.ts';
+import { copyResponse } from '../util.ts';
+import { HttpCache } from './schema.ts';
+import type { HttpCacheProvider } from './types.ts';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   protected abstract load(method: string, url: string): Promise<unknown>;
@@ -21,6 +21,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (isPlainObject(httpCache.httpResponse)) {
       httpCache.httpResponse.cached = true;
     }
@@ -49,6 +50,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
+  // v8 ignore next -- TODO: add test #40625
   bypassServer<T>(
     _method: string,
     _url: string,

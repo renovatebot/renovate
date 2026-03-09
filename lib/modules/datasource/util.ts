@@ -1,9 +1,9 @@
 import { isString } from '@sindresorhus/is';
 import { GoogleAuth } from 'google-auth-library';
-import { logger } from '../../logger';
-import type { HostRule } from '../../types';
-import type { HttpResponse } from '../../util/http/types';
-import { addSecretForSanitizing } from '../../util/sanitize';
+import { logger } from '../../logger/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import type { HttpResponse } from '../../util/http/types.ts';
+import { addSecretForSanitizing } from '../../util/sanitize.ts';
 
 const JFROG_ARTIFACTORY_RES_HEADER = 'x-jfrog-version';
 

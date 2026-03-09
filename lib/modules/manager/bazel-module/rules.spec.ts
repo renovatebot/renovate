@@ -1,22 +1,22 @@
 import { codeBlock } from 'common-tags';
 import deepmerge from 'deepmerge';
-import { BazelDatasource } from '../../datasource/bazel';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import type { PackageDependency } from '../types';
-import { parse } from './parser';
+import { BazelDatasource } from '../../datasource/bazel/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { parse } from './parser/index.ts';
 import type {
   BasePackageDep,
   BazelModulePackageDep,
   MergePackageDep,
   OverridePackageDep,
-} from './rules';
+} from './rules.ts';
 import {
   GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
   bazelModulePackageDepToPackageDependency,
   processModulePkgDeps,
   toPackageDependencies,
-} from './rules';
+} from './rules.ts';
 
 const customRegistryUrl = 'https://example.com/custom_registry';
 
