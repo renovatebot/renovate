@@ -66,7 +66,14 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         temp.items.format = option.format;
       }
       if (option.allowedValues) {
-        temp.items.enum = option.allowedValues;
+        if (option.allowString) {
+          temp.items.oneOf = [
+            { enum: option.allowedValues },
+            { type: 'string' },
+          ];
+        } else {
+          temp.items.enum = option.allowedValues;
+        }
       }
     }
     if (option.subType === 'string' && option.allowString === true) {
@@ -89,7 +96,11 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         { type: 'string', pattern: '^regex:' },
       ];
     } else if (option.allowedValues) {
-      temp.enum = option.allowedValues;
+      if (option.allowString) {
+        temp.oneOf = [{ enum: option.allowedValues }, { type: 'string' }];
+      } else {
+        temp.enum = option.allowedValues;
+      }
     }
   }
   if (option.default !== undefined) {

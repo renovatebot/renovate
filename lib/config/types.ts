@@ -169,6 +169,7 @@ export interface GlobalInheritableConfig {
   onboarding?: boolean;
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
+  onboardingCommitMessage?: string;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
@@ -279,7 +280,6 @@ export interface LegacyAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
-  onboardingCommitMessage?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingConfig?: RenovateConfig;
