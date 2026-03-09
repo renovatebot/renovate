@@ -190,6 +190,7 @@ some-package==0.3.1`;
             datasource: 'pypi',
             depName: 'Django',
             packageName: 'django',
+            skipReason: 'unspecified-version',
           },
         ],
       });

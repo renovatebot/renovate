@@ -86,7 +86,9 @@ export function extractPackageFile(
         currentValue,
         datasource: PypiDatasource.id,
       };
-      if (currentValue?.startsWith('==')) {
+      if (!currentValue && !dep.skipReason) {
+        dep.skipReason = 'unspecified-version';
+      } else if (currentValue?.startsWith('==')) {
         dep.currentVersion = currentValue.replace(/^==\s*/, '');
       }
       return dep;

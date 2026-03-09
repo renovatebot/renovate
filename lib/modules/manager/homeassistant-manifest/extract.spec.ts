@@ -221,6 +221,7 @@ describe('modules/manager/homeassistant-manifest/extract', () => {
             datasource: 'pypi',
             depName: 'package',
             packageName: 'package',
+            skipReason: 'unspecified-version',
           },
           {
             datasource: 'pypi',
