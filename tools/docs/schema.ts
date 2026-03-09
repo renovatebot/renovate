@@ -67,7 +67,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
       }
       if (option.allowedValues) {
         if (option.allowString) {
-          temp.items.oneOf = [
+          temp.items.anyOf = [
             { enum: option.allowedValues },
             { type: 'string' },
           ];
@@ -97,7 +97,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
       ];
     } else if (option.allowedValues) {
       if (option.allowString) {
-        temp.oneOf = [{ enum: option.allowedValues }, { type: 'string' }];
+        temp.anyOf = [{ enum: option.allowedValues }, { type: 'string' }];
       } else {
         temp.enum = option.allowedValues;
       }
