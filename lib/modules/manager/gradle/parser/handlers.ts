@@ -379,9 +379,17 @@ export function handleRegistryUrl(ctx: Ctx): Ctx {
     registryUrl = registryUrl.replace(regEx(/\\/g), '');
     const url = parseUrl(registryUrl);
     if (url?.host && url.protocol) {
+      const registryType = isExclusiveRegistry(ctx) ? 'exclusive' : 'regular';
+      if (registryType === 'exclusive' && !ctx.tmpRegistryContent.length) {
+        logger.debug(
+          `Skipping exclusive registry ${registryUrl} with unsupported content descriptors`,
+        );
+        return ctx;
+      }
+
       ctx.registryUrls.push({
         registryUrl,
-        registryType: isExclusiveRegistry(ctx) ? 'exclusive' : 'regular',
+        registryType,
         scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
         content: ctx.tmpRegistryContent,
       });

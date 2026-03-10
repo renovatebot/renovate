@@ -10,16 +10,8 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of these locations:
 
-1. `renovate.json`
-1. `renovate.json5`
-1. `.github/renovate.json`
-1. `.github/renovate.json5`
-1. `.gitlab/renovate.json`
-1. `.gitlab/renovate.json5`
-1. `.renovaterc`
-1. `.renovaterc.json`
-1. `.renovaterc.json5`
-1. `package.json` _(within a `"renovate"` section)_
+<!-- config-filenames-begin -->
+<!-- config-filenames-end -->
 
 Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
 The bot first checks all the files in the `configFileNames` array before checking from the above file list.
@@ -2619,8 +2611,8 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-<!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->
+<!-- lock-file-maintenance-table-start -->
+<!-- lock-file-maintenance-table-end -->
 
 Support for new lock files may be added via feature request.
 
@@ -4780,6 +4772,12 @@ To allow repositories to use _more_ than 512m of heap during any invocations of 
 
 Initial heap size in MB for Java VMs. Must be less than or equal to `jvmMaxMemory`.
 Defaults to `jvmMaxMemory`.
+
+### nodeMaxMemory
+
+<!-- prettier-ignore -->
+!!! note
+    This does not apply to _every_ Node process created by Renovate, only the managers noted above.
 
 ## updateInternalDeps
 

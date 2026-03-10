@@ -16,7 +16,7 @@ type OmitFn = (...args: any[]) => any;
 function getCallSite(omitFn: OmitFn): string | null {
   const stackTraceLimitOrig = Error.stackTraceLimit;
   // We don't use `Error.captureStackTrace` directly, we simply restore it later.
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   const prepareStackTraceOrig = Error.prepareStackTrace;
 
   let result: string | null = null;

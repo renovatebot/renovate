@@ -10,8 +10,9 @@
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
-      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
+      "replacements:edb-jdbc-to-enterprisedb",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
+      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-plugin-node-to-maintained-fork",
       "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:express-mung-to-express-response-middleware",
@@ -30,7 +31,6 @@
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:ojdbc-to-ojdbc11",
-      "replacements:ojdbc10-to-ojdbc11",
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
@@ -246,15 +246,20 @@
       }
     ]
   },
-  "eslint-plugin-eslint-comments-to-maintained-fork": {
-    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+  "edb-jdbc-to-enterprisedb": {
+    "description": "`com.edb:edb-jdbc` and `com.edb:edb-jdbc18` were moved to `com.enterprisedb:edb-jdbc`.",
     "packageRules": [
       {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["eslint-plugin-eslint-comments"],
-        "matchCurrentVersion": "^3.2.0",
-        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
-        "replacementVersion": "3.2.0"
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
+      },
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc18"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
       }
     ]
   },
@@ -267,6 +272,18 @@
         "matchPackageNames": ["eslint-config-standard-with-typescript"],
         "replacementName": "eslint-config-love",
         "replacementVersion": "43.1.0"
+      }
+    ]
+  },
+  "eslint-plugin-eslint-comments-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
+        "replacementVersion": "3.2.0"
       }
     ]
   },
@@ -838,19 +855,14 @@
     ]
   },
   "ojdbc-to-ojdbc11": {
-    "description": "`ojdbc:ojdbc` was moved to `com.oracle.database.jdbc:ojdbc11`.",
+    "description": "`ojdbc:ojdbc` and `com.oracle.database.jdbc:ojdbc10` were moved to `com.oracle.database.jdbc:ojdbc11`.",
     "packageRules": [
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["ojdbc:ojdbc"],
         "replacementName": "com.oracle.database.jdbc:ojdbc11",
         "replacementVersion": "21.1.0.0"
-      }
-    ]
-  },
-  "ojdbc10-to-ojdbc11": {
-    "description": "`com.oracle.database.jdbc:ojdbc10` was moved to `com.oracle.database.jdbc:ojdbc11`.",
-    "packageRules": [
+      },
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["com.oracle.database.jdbc:ojdbc10"],

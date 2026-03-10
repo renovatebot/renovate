@@ -240,6 +240,31 @@ const SetupHatch = z
     };
   });
 
+const SetupGolangciLint = z
+  .object({
+    uses: matchAction('golangci/golangci-lint-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: GithubReleasesDatasource.id,
+      depName: 'golangci/golangci-lint',
+      packageName: 'golangci/golangci-lint',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -256,4 +281,5 @@ export const CommunityActions = z.union([
   SetupDeno,
   SetupRuby,
   SetupHatch,
+  SetupGolangciLint,
 ]);

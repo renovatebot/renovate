@@ -87,3 +87,4 @@ Renovate also supports some commonly used community actions:
 - `sigoden/install-binary`
 - `prefix-dev/setup-pixi`
 - `pypa/hatch@install`
+- `golangci/golangci-lint-action`
