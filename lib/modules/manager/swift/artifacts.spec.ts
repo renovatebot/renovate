@@ -590,6 +590,52 @@ describe('modules/manager/swift/artifacts', () => {
     expect(result).toBeNull();
   });
 
+  it('strips v prefix from newVersion when updating Package.resolved', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    // version in Package.resolved should NOT have the v prefix
+    expect(contents).toContain('"version": "5.10.0"');
+    expect(contents).not.toContain('"version": "v5.10.0"');
+    expect(contents).toContain('"revision": "newsha"');
+  });
+
+  it('skips already up-to-date pin even with v-prefixed newVersion', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.9.1', // same as fixture but with v prefix
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toBeNull();
+  });
+
   it('handles getDigest throwing an error', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2Fixture);

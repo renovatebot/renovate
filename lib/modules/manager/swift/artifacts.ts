@@ -186,6 +186,9 @@ export async function updateArtifacts({
         continue;
       }
 
+      // Package.resolved stores pure semver versions without the "v" prefix
+      const resolvedVersion = newVersion.replace(regEx(/^v/i), '');
+
       const pin = matchPinForDep(dep, parsed.pins);
       if (!pin) {
         logger.debug(
@@ -196,7 +199,7 @@ export async function updateArtifacts({
       }
 
       // Skip if already up-to-date
-      if (pin.state.version === newVersion) {
+      if (pin.state.version === resolvedVersion) {
         logger.debug(
           { depName: dep.depName, newVersion },
           'swift: pin already at target version',
@@ -205,7 +208,7 @@ export async function updateArtifacts({
       }
 
       const newRevision = await resolveCommitSha(dep, newVersion);
-      updated = updatePinInJson(updated, pin, newVersion, newRevision);
+      updated = updatePinInJson(updated, pin, resolvedVersion, newRevision);
     }
 
     if (updated !== content) {
