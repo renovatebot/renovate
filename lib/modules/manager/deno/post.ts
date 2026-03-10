@@ -1,8 +1,12 @@
-import is from '@sindresorhus/is';
-import { Minimatch } from 'minimatch';
+import {
+  isEmptyObject,
+  isNonEmptyArray,
+  isNonEmptyObject,
+} from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { minimatch } from '../../../util/minimatch.ts';
 import { api as semver } from '../../versioning/deno/index.ts';
 import type { PackageDependency, PackageFile } from '../types.ts';
 import {
@@ -165,15 +169,14 @@ export function normalizeWorkspace(
 
   for (const pkg of packageFiles) {
     const workspaces = pkg.managerData?.workspaces;
-    if (is.nonEmptyArray(workspaces)) {
+    if (isNonEmptyArray(workspaces)) {
       const rootDir = upath.dirname(pkg.packageFile);
-      const matchers = workspaces.map(
-        (pattern) =>
-          // allow ./sub/* to match sub
-          minimatch(upath.normalize(pattern), {
-            dot: true,
-            partial: true,
-          }),
+      const matchers = workspaces.map((pattern) =>
+        // allow ./sub/* to match sub
+        minimatch(upath.normalize(pattern), {
+          dot: true,
+          partial: true,
+        }),
       );
       workspaceContexts.push({
         lockFiles: pkg.lockFiles,
@@ -226,7 +229,7 @@ export function normalizeWorkspace(
   const workspaceRootFiles = new Set<string>();
   for (const pkg of packageFiles) {
     const workspaces = pkg.managerData?.workspaces;
-    if (is.nonEmptyArray(workspaces)) {
+    if (isNonEmptyArray(workspaces)) {
       workspaceRootFiles.add(pkg.packageFile);
     }
   }
@@ -256,7 +259,7 @@ async function applyLockedVersion(
   // use cache to avoid reading the same lock file multiple times
   const lockFileCache = new Map<string, LockFile>();
   for (const pkg of packageFiles) {
-    if (is.nonEmptyArray(pkg.lockFiles)) {
+    if (isNonEmptyArray(pkg.lockFiles)) {
       const lockFile = pkg.lockFiles[0];
       let lockFileContent: LockFile;
 
