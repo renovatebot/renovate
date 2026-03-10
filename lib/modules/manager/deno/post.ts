@@ -215,12 +215,6 @@ export function normalizeWorkspace(
   }
   for (const packageFile of invalidPackageFiles) {
     const pkg = packageMap.get(packageFile);
-    // packageFile always exists in packageMap since invalidPackageFiles comes from workspaceContexts
-    // which is built from packageFiles. This check is defensive programming.
-    /* v8 ignore next 3: hard to test - packageFile always exists in packageMap */
-    if (!pkg) {
-      continue;
-    }
     // remove invalid workspace
     delete pkg?.managerData?.workspaces;
   }
