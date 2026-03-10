@@ -5,6 +5,7 @@
     "extends": [
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
+      "replacements:base-ui-components-to-base-ui",
       "replacements:babel-eslint-to-eslint-parser",
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
@@ -128,6 +129,17 @@
         "matchPackageNames": ["apollo-reporting-protobuf"],
         "replacementName": "@apollo/usage-reporting-protobuf",
         "replacementVersion": "4.0.0"
+      }
+    ]
+  },
+  "base-ui-components-to-base-ui": {
+    "description": "`@base-ui-components/react` was renamed to `@base-ui/react`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@base-ui-components/react"],
+        "replacementName": "@base-ui/react",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
