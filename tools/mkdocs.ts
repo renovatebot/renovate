@@ -26,13 +26,14 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
+    const res = await exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
       env: {
         ...process.env,
         RENOVATE_VERSION: opts.version ?? '',
       },
+      reject: false,
     });
     checkResult(res);
   });
@@ -50,9 +51,10 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
+    const res = await exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
+      reject: false,
     });
     checkResult(res);
   });

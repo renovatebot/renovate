@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
 import { logger } from '../../lib/logger/index.ts';
-import { execAsync } from '../utils/exec.ts';
+import { exec } from '../utils/exec.ts';
 
 export interface ItemsEntity {
   url: string;
@@ -45,7 +45,7 @@ const GhOutput = z.array(
 async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
-  const execRes = await execAsync(
+  const execRes = await exec(
     'gh',
     [
       'issue',
