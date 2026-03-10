@@ -1,3 +1,4 @@
+import { logger, scm } from '~test/util.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
@@ -12,7 +13,6 @@ import {
   lookup,
   update,
 } from './extract-update.ts';
-import { logger, scm } from '~test/util.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 

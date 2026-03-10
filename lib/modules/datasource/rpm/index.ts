@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { gunzip } from 'node:zlib';
-import { promisify } from 'util';
 import sax from 'sax';
+import { promisify } from 'util';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';

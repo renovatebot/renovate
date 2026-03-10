@@ -1,4 +1,5 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/util.ts';
 import { logger } from '../../../logger/index.ts';
 import {
   allowedOptions,
@@ -8,7 +9,6 @@ import {
   matchManager,
 } from './common.ts';
 import { inferCommandExecDir } from './utils.ts';
-import { hostRules } from '~test/util.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 

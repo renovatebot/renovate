@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
 import type { FindPRConfig } from '../types.ts';
@@ -9,8 +11,6 @@ import type {
   GerritMergeableInfo,
 } from './types.ts';
 import { MIN_GERRIT_VERSION } from './utils.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };

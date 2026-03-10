@@ -1,5 +1,5 @@
 import parseGithubUrl from 'github-url-from-git';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../../logger/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { isHttpUrl } from '../../../../util/url.ts';

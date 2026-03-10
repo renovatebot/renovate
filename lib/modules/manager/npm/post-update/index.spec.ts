@@ -1,5 +1,7 @@
 // TODO: add tests
 import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type { PostUpdateConfig } from '../../types.ts';
@@ -9,14 +11,12 @@ import {
   updateYarnBinary,
   writeExistingFiles,
   writeUpdatedPackageFiles,
-} from './/index.ts';
+} from './index.ts';
 import * as npm from './npm.ts';
 import * as pnpm from './pnpm.ts';
 import * as rules from './rules.ts';
 import type { AdditionalPackageFiles } from './types.ts';
 import * as yarn from './yarn.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, git, logger, partial, scm } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 vi.mock('./npm.ts');
@@ -624,7 +624,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [
-          { lockFile: 'package-lock.json', stderr: 'some-error' },
+          { fileName: 'package-lock.json', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
       });
@@ -638,7 +638,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalFiles,
         ),
       ).toStrictEqual({
-        artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
+        artifactErrors: [{ fileName: 'yarn.lock', stderr: 'some-error' }],
         updatedArtifacts: [],
       });
     });
@@ -660,7 +660,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [
-          { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
+          { fileName: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
       });

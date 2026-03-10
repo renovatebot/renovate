@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

@@ -1,6 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { codeBlock } from 'common-tags';
+import { fs, partial } from '~test/util.ts';
 import {
   extractGradleVersion,
   getJavaConstraint,
@@ -9,7 +10,6 @@ import {
   gradleWrapperFileName,
   prepareGradleCommand,
 } from './utils.ts';
-import { fs, partial } from '~test/util.ts';
 
 const platform = vi.spyOn(os, 'platform');
 vi.mock('../../../util/fs/index.ts');

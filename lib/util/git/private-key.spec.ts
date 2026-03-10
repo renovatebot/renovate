@@ -3,6 +3,8 @@ import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger, mockedExtended } from '~test/util.ts';
 import * as exec_ from '../exec/index.ts';
 import * as sanitize_ from '../sanitize.ts';
 import { toBase64 } from '../string.ts';
@@ -11,8 +13,6 @@ import {
   setPrivateKey,
   writePrivateKey,
 } from './private-key.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger, mockedExtended } from '~test/util.ts';
 
 vi.mock('fs-extra', async () =>
   (

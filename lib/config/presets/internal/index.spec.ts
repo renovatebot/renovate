@@ -1,8 +1,8 @@
-import { resolveConfigPresets } from '..//index.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
 import { massageConfig } from '../../massage.ts';
 import { validateConfig } from '../../validation.ts';
+import { resolveConfigPresets } from '../index.ts';
 import * as npm from '../npm/index.ts';
 import * as internal from './index.ts';
 

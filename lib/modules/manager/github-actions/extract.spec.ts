@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const runnerTestWorkflow = codeBlock`
 jobs:
@@ -1239,6 +1239,37 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pypa/hatch',
           depType: 'uses-with',
           packageName: 'pypa/hatch',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'golangci/golangci-lint-action@v9',
+        with: { version: 'v2.5.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.5.0',
+          datasource: 'github-releases',
+          depName: 'golangci/golangci-lint',
+          depType: 'uses-with',
+          packageName: 'golangci/golangci-lint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'golangci/golangci-lint-action@v9',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'golangci/golangci-lint',
+          depType: 'uses-with',
+          packageName: 'golangci/golangci-lint',
         },
       ],
     },

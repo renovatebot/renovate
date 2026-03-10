@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());

@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { logger } from '../../lib/logger/index.ts';
-import { exec } from '../../lib/util/exec/index.ts';
+import { execAsync } from '../utils/exec.ts';
 
 export interface ItemsEntity {
   url: string;
@@ -45,12 +45,24 @@ const GhOutput = z.array(
 async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
-  const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
-  const execRes = await exec(command, {
-    extraEnv: {
-      GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+  const execRes = await execAsync(
+    'gh',
+    [
+      'issue',
+      'list',
+      '--json',
+      'title,number,url,labels',
+      '--search',
+      `type:${issueType}`,
+      '--limit',
+      '1000',
+    ],
+    {
+      env: {
+        GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+      },
     },
-  });
+  );
   const res = GhOutput.safeParse(JSON.parse(execRes.stdout));
   if (res.error) {
     throw res.error;

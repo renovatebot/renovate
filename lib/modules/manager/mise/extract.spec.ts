@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -61,6 +61,7 @@ describe('modules/manager/mise/extract', () => {
       committed = "1.1.7"
       conan = "2.24.0"
       consul = "1.14.3"
+      gh = "2.87.0"
       dotenv-linter = "3.3.0"
       hivemind = "1.1.0"
       hk = "1.1.2"
@@ -158,6 +159,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'consul',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'hashicorp/consul',
+          },
+          {
+            currentValue: '2.87.0',
+            datasource: 'github-releases',
+            depName: 'gh',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'cli/cli',
           },
           {
             currentValue: '3.3.0',
@@ -679,6 +687,47 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'cargo-bins/cargo-binstall',
             datasource: 'github-releases',
             extractVersion: '^v?(?<version>\\d+\\.)',
+          },
+        ],
+      });
+    });
+
+    it('extracts github backend tools', () => {
+      const content = codeBlock`
+      [tools]
+      "github:BurntSushi/ripgrep" = "14.1.1"
+      "github:cli/cli" = "v2.64.0"
+      "github:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "github:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'github:BurntSushi/ripgrep',
+            currentValue: '14.1.1',
+            packageName: 'BurntSushi/ripgrep',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:cli/cli',
+            currentValue: 'v2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'github-releases',
+            extractVersion: '^release\\-(?<version>.+)',
+          },
+          {
+            depName: 'github:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'github-releases',
+            extractVersion: '^v(?<version>.+)',
           },
         ],
       });

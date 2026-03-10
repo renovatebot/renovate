@@ -3,6 +3,9 @@ import { copyFile, stat } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { hashStream, toSha256 } from '../../../util/hash.ts';
 import { getPkgReleases } from '../index.ts';
@@ -15,9 +18,6 @@ import {
   getPackageUrl,
   getRegistryUrl,
 } from './url.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { fs } from '~test/util.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 

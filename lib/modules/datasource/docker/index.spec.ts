@@ -3,14 +3,14 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { DockerDatasource } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
 
 const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);

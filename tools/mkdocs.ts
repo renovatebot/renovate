@@ -1,5 +1,5 @@
-import type { SpawnSyncReturns } from 'child_process';
 import { Command } from 'commander';
+import type { ExecaSyncReturnValue } from 'execa';
 import fs from 'fs-extra';
 import { logger } from '../lib/logger/index.ts';
 import { generateDocs } from './docs/index.ts';
@@ -16,6 +16,7 @@ const program = new Command('pnpm mkdocs').description('Run mkdocs');
 program
   .command('build', { isDefault: true })
   .description('Build mkdocs')
+  .option('--version <version>', 'the current version of the Renovate CLI')
   .option('--no-build', 'do not build docs from source')
   .option('--no-strict', 'do not build in strict mode')
   .action(async (opts) => {
@@ -28,6 +29,10 @@ program
     const res = exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
+      env: {
+        ...process.env,
+        RENOVATE_VERSION: opts.version ?? '',
+      },
     });
     checkResult(res);
   });
@@ -56,20 +61,20 @@ async function prepareDocs(opts: any): Promise<void> {
   logger.info('Building docs');
   if (opts.build) {
     logger.info('* generate docs');
-    await generateDocs('tools/mkdocs', false);
+    await generateDocs('tools/mkdocs', false, opts.version);
   } else {
     logger.info('* using prebuild docs from build step');
     await fs.copy('tmp/docs', 'tools/mkdocs/docs');
   }
 }
 
-function checkResult(res: SpawnSyncReturns<string>): void {
+function checkResult(res: ExecaSyncReturnValue<string>): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);
-  } else if (res.status && res.status !== 0) {
+  } else if (res.exitCode) {
     logger.error(`Error occured:\n${res.stderr || res.stdout}`);
-    process.exit(res.status);
+    process.exit(res.exitCode);
   } else {
     logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
   }

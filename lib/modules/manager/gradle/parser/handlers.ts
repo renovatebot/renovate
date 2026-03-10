@@ -352,6 +352,10 @@ function isExclusiveRegistry(ctx: Ctx): boolean {
 export function handleRegistryUrl(ctx: Ctx): Ctx {
   let localVariables = ctx.globalVars;
 
+  if (!ctx.tokenMap.registryUrl) {
+    return ctx;
+  }
+
   if (ctx.tokenMap.name) {
     const nameTokens = loadFromTokenMap(ctx, 'name');
     const nameValue = interpolateString(nameTokens, ctx, localVariables);
@@ -375,9 +379,17 @@ export function handleRegistryUrl(ctx: Ctx): Ctx {
     registryUrl = registryUrl.replace(regEx(/\\/g), '');
     const url = parseUrl(registryUrl);
     if (url?.host && url.protocol) {
+      const registryType = isExclusiveRegistry(ctx) ? 'exclusive' : 'regular';
+      if (registryType === 'exclusive' && !ctx.tmpRegistryContent.length) {
+        logger.debug(
+          `Skipping exclusive registry ${registryUrl} with unsupported content descriptors`,
+        );
+        return ctx;
+      }
+
       ctx.registryUrls.push({
         registryUrl,
-        registryType: isExclusiveRegistry(ctx) ? 'exclusive' : 'regular',
+        registryType,
         scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
         content: ctx.tmpRegistryContent,
       });
