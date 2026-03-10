@@ -42,7 +42,7 @@ export function getLockedVersion(
   deps: PackageDependency<DenoManagerData>,
   lockFileContent: LockFile,
 ): string | undefined | null {
-  if (is.emptyObject(lockFileContent)) {
+  if (isEmptyObject(lockFileContent)) {
     return null;
   }
   const { datasource, currentRawValue, currentValue, depName } = deps;
@@ -68,7 +68,7 @@ export function getLockedVersion(
       currentValue && depName ? `${depName}@${currentValue}` : depName;
     if (
       lockFileContent.redirectVersions &&
-      is.nonEmptyObject(lockFileContent.redirectVersions) &&
+      isNonEmptyObject(lockFileContent.redirectVersions) &&
       key &&
       lockFileContent.redirectVersions[key]
     ) {
@@ -84,7 +84,7 @@ export function getLockedVersion(
   if (datasource === 'jsr' || datasource === 'npm') {
     if (
       !lockFileContent.lockedVersions ||
-      is.emptyObject(lockFileContent.lockedVersions)
+      isEmptyObject(lockFileContent.lockedVersions)
     ) {
       return null;
     }
@@ -129,7 +129,7 @@ export async function collectPackageJsonAsWorkspaceMember(
   // detect package.json as members of a deno workspace
   const workspaceRoots = packageFiles.filter(
     (pkg) =>
-      is.nonEmptyArray(pkg.managerData?.workspaces) &&
+      isNonEmptyArray(pkg.managerData?.workspaces) &&
       upath.basename(pkg.packageFile).startsWith('deno.json'),
   );
   for (const workspaceRoot of workspaceRoots) {
@@ -170,7 +170,7 @@ export function normalizeWorkspace(
       const matchers = workspaces.map(
         (pattern) =>
           // allow ./sub/* to match sub
-          new Minimatch(upath.normalize(pattern), {
+          minimatch(upath.normalize(pattern), {
             dot: true,
             partial: true,
           }),
@@ -219,7 +219,7 @@ export function normalizeWorkspace(
       continue;
     }
     // remove invalid workspace
-    delete pkg.managerData?.workspaces;
+    delete pkg?.managerData?.workspaces;
   }
 
   // supply lock files to workspace members from their root
