@@ -403,7 +403,7 @@ function trimTrailingZeros(numbers: number[]): number[] {
 function divideCompatibleReleaseRange(currentRange: Range): Range[] {
   const currentVersionUpperBound = currentRange.version
     .split('.')
-    .map((num) => parseInt(num));
+    .map((num) => parseInt(num, 10));
   if (currentVersionUpperBound.length > 1) {
     currentVersionUpperBound.splice(-1);
   }

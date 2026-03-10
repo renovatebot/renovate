@@ -44,7 +44,7 @@ function artifactError(
   return [
     {
       artifactError: {
-        lockFile: packageFileName,
+        fileName: packageFileName,
         stderr: message,
       },
     },

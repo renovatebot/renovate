@@ -1,3 +1,4 @@
+import * as apk from './apk/index.ts';
 import * as awsEksAddon from './aws-eks-addon/index.ts';
 import * as amazonMachineImage from './aws-machine-image/index.ts';
 import * as azureRestApi from './azure-rest-api/index.ts';
@@ -8,6 +9,7 @@ import * as conan from './conan/index.ts';
 import * as conda from './conda/index.ts';
 import * as deb from './deb/index.ts';
 import * as debian from './debian/index.ts';
+import * as deno from './deno/index.ts';
 import * as devbox from './devbox/index.ts';
 import * as docker from './docker/index.ts';
 import * as elm from './elm/index.ts';
@@ -53,6 +55,7 @@ import * as unity3dPackages from './unity3d-packages/index.ts';
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
 
+api.set(apk.id, apk.api);
 api.set(awsEksAddon.id, awsEksAddon.api);
 api.set(amazonMachineImage.id, amazonMachineImage.api);
 api.set(azureRestApi.id, azureRestApi.api);
@@ -63,6 +66,7 @@ api.set(conan.id, conan.api);
 api.set(conda.id, conda.api);
 api.set(deb.id, deb.api);
 api.set(debian.id, debian.api);
+api.set(deno.id, deno.api);
 api.set(devbox.id, devbox.api);
 api.set(docker.id, docker.api);
 api.set(elm.id, elm.api);

@@ -927,7 +927,7 @@ describe('modules/manager/composer/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'composer.lock',
+          fileName: 'composer.lock',
           stderr: 'not found',
         },
       },
@@ -950,7 +950,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([{ artifactError: { lockFile: 'composer.lock', stderr } }]);
+    ).toEqual([{ artifactError: { fileName: 'composer.lock', stderr } }]);
     expect(execSnapshots).toBeEmptyArray();
   });
 

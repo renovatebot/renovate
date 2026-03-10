@@ -20,9 +20,15 @@ describe('instrumentation/index', () => {
   beforeEach(() => {
     api.trace.disable(); // clear global components
     process.env = { ...oldEnv };
-    delete process.env.OTEL_LOG_LEVEL;
-    delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+
+    // remove any otel env
+    for (const key in process.env) {
+      if (key.startsWith('OTEL_')) {
+        delete process.env[key];
+      }
+    }
     delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
+    delete process.env.RENOVATE_USE_CLOUD_METADATA_SERVICES;
   });
 
   afterAll(() => {

@@ -1020,7 +1020,7 @@ describe('modules/platform/codecommit/index', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: 'repositoryName', prNo: 42, topic: 'some-subject' },
-        'Comment is already update-to-date',
+        'Comment is already up-to-date',
       );
     });
 
@@ -1053,7 +1053,7 @@ describe('modules/platform/codecommit/index', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: 'repositoryName', prNo: 42, topic: null },
-        'Comment is already update-to-date',
+        'Comment is already up-to-date',
       );
     });
 

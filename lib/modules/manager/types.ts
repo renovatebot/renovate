@@ -227,7 +227,6 @@ export interface ArtifactNotice {
 
 export interface ArtifactError {
   fileName?: string;
-  lockFile?: string;
   stderr?: string;
 }
 
@@ -349,6 +348,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
+  toolSettings?: ToolSettingsOptions;
 
   isLockFileMaintenance?: boolean;
 }

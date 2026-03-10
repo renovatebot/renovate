@@ -10,6 +10,11 @@ exports[`modules/manager/swift/index > extractPackageFile() > parses multiple pa
       "depName": "0x7fs/CountedSet",
     },
     {
+      "currentValue": "from: "1.2.3"",
+      "datasource": "github-tags",
+      "depName": "foo/bar",
+    },
+    {
       "currentValue": "0.1.0",
       "datasource": "github-tags",
       "depName": "avito-tech/GraphiteClient",

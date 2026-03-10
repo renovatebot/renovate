@@ -411,7 +411,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'helmfile.lock',
+          fileName: 'helmfile.lock',
           stderr: errorMessage,
         },
       },

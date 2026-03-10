@@ -15,7 +15,7 @@ describe('workers/repository/update/branch/artifacts', () => {
       manager: 'some-manager',
       branchName: 'renovate/pin',
       upgrades: [],
-      artifactErrors: [{ lockFile: 'some' }],
+      artifactErrors: [{ fileName: 'some' }],
       statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         artifactError: 'renovate/artifact',
       }),

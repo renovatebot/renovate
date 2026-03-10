@@ -82,6 +82,11 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
+## `RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE`
+
+If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
+This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
