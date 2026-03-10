@@ -49,7 +49,8 @@ export const DenoLock = Json.pipe(
     lockedVersions,
     redirectVersions,
     remoteVersions,
-    lockfileVersion: parseInt(version),
+    // oxlint-disable-next-line Redundant radix parameter
+    lockfileVersion: parseInt(version, 10),
   };
 });
 
