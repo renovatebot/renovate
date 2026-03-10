@@ -10,7 +10,6 @@ void (async (): Promise<void> => {
   (await import('./proxy.ts')).bootstrap();
 
   const logger = await import('./logger/index.ts');
-  // TODO: consider removal ?
   /* v8 ignore next 3 -- not easily testable */
   process.on('unhandledRejection', (err) => {
     logger.logger.error({ err }, 'unhandledRejection');
