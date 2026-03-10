@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -268,7 +268,7 @@ export function updateDependency(
 
     if (
       depType === 'compilerOptions.types' &&
-      is.nonEmptyArray(parsedContents.compilerOptions?.types)
+      isNonEmptyArray(parsedContents.compilerOptions?.types)
     ) {
       const index = parsedContents.compilerOptions.types.findIndex(
         (value: string) => value === searchCurrentValue,
@@ -325,7 +325,7 @@ export function updateDependency(
 
     if (
       depType === 'lint.plugins' &&
-      is.nonEmptyArray(parsedContents.lint?.plugins)
+      isNonEmptyArray(parsedContents.lint?.plugins)
     ) {
       const index = parsedContents.lint.plugins.findIndex(
         (value: string) => value === searchCurrentValue,
