@@ -13,7 +13,7 @@ export interface AdditionalPackageFiles {
 }
 
 export interface ArtifactError {
-  lockFile: string;
+  fileName: string;
   stderr?: string;
 }
 

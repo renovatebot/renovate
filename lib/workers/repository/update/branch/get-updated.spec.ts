@@ -456,14 +456,14 @@ describe('workers/repository/update/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            lockFile: 'composer.lock',
+            fileName: 'composer.lock',
             stderr: 'some error',
           },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+        artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
 
@@ -478,14 +478,14 @@ describe('workers/repository/update/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            lockFile: 'composer.lock',
+            fileName: 'composer.lock',
             stderr: 'some error',
           },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+        artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
 
@@ -1269,7 +1269,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         const res = await getUpdatedPackageFiles(config);
         expect(res.artifactErrors).toHaveLength(1);
         expect(res.artifactErrors[0]).toMatchObject({
-          lockFile: 'composer.json',
+          fileName: 'composer.json',
           stderr: expect.stringContaining('1.3.0'),
         });
         expect(res.artifactErrors[0].stderr).toContain(
@@ -1336,7 +1336,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         const res = await getUpdatedPackageFiles(config);
         expect(res.artifactErrors).toHaveLength(1);
         expect(res.artifactErrors[0]).toMatchObject({
-          lockFile: 'composer.json',
+          fileName: 'composer.json',
           stderr: expect.stringContaining('1.3.0'),
         });
       });
@@ -1778,7 +1778,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res.artifactErrors).toHaveLength(1);
       expect(res.artifactErrors[0]).toMatchObject({
-        lockFile: 'composer.json',
+        fileName: 'composer.json',
         stderr: expect.stringContaining('1.3.0'),
       });
     });

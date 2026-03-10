@@ -288,7 +288,7 @@ describe('modules/manager/pub/artifacts', () => {
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
         }),
-      ).toEqual([{ artifactError: { lockFile, stderr } }]);
+      ).toEqual([{ artifactError: { fileName: lockFile, stderr } }]);
     });
   });
 

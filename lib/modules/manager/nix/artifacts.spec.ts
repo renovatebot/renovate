@@ -266,7 +266,7 @@ describe('modules/manager/nix/artifacts', () => {
 
     expect(res).toEqual([
       {
-        artifactError: { lockFile: 'flake.lock', stderr: 'exec error' },
+        artifactError: { fileName: 'flake.lock', stderr: 'exec error' },
       },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);

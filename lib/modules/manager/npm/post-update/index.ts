@@ -469,7 +469,7 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: npmLock,
+        fileName: npmLock,
         stderr: res.stderr,
       });
     } else if (res.lockFile) {
@@ -556,7 +556,7 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: yarnLock,
+        fileName: yarnLock,
         // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
@@ -628,7 +628,7 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: pnpmShrinkwrap,
+        fileName: pnpmShrinkwrap,
         // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
