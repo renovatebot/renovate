@@ -259,6 +259,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  gh: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'cli/cli',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   'dotenv-linter': {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
