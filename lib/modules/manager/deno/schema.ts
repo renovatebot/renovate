@@ -49,7 +49,7 @@ export const DenoLock = Json.pipe(
     lockedVersions,
     redirectVersions,
     remoteVersions,
-    lockfileVersion: parseInt(version, 10),
+    lockfileVersion: parseInt(version),
   };
 });
 
