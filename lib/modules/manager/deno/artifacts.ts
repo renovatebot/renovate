@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray } from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -19,7 +19,7 @@ export async function updateArtifacts(
   logger.debug(`deno.updateArtifacts(${packageFileName})`);
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
 
-  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated deno deps - returning null');
     return null;
   }

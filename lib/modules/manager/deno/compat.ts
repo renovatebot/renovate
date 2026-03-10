@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -55,7 +55,7 @@ export async function detectNodeCompatWorkspaces({
   let filters: string[] | undefined;
 
   // npm workspace
-  if (is.nonEmptyArray(managerData?.workspaces)) {
+  if (isNonEmptyArray(managerData?.workspaces)) {
     filters = managerData?.workspaces;
   }
 
