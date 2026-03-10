@@ -54,7 +54,6 @@ function replaceAsString(
       }
     }
   }
-  /* v8 ignore next -- needs test */
   throw new Error();
 }
 

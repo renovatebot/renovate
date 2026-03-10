@@ -33,6 +33,30 @@ describe('modules/manager/deno/update', () => {
         );
       });
 
+      it('throws when multiple imports require more than one replacement', () => {
+        const fileContent = JSON.stringify(
+          {
+            imports: {
+              fs: 'https://deno.land/std@0.223.0/fs/mod.ts',
+              path: 'https://deno.land/std@0.223.0/path/mod.ts',
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'https://deno.land/std',
+          depType: 'imports',
+          currentValue: '0.223.0',
+          newValue: '0.224.0',
+          datasource: 'deno',
+          packageFile: 'deno.json',
+        };
+
+        expect(() => updateDependency({ fileContent, upgrade })).toThrow();
+      });
+
       it('updates dependency in scopes', () => {
         const fileContent = JSON.stringify(
           {
