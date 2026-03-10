@@ -49,10 +49,7 @@ export async function detectNodeCompatWorkspaces({
 }: Pick<PackageFile<DenoManagerData>, 'managerData' | 'packageFile'>): Promise<{
   workspaces?: string[];
   packagePaths: string[];
-} | null> {
-  if (!packageFile) {
-    return null;
-  }
+}> {
   logger.debug(`Detecting deno's node compat Workspaces`);
 
   let filters: string[] | undefined;
@@ -96,10 +93,6 @@ export async function collectPackageJson(
 
     // detect node compat workspaces
     const result = await detectNodeCompatWorkspaces(rootPackageFile);
-    /* v8 ignore next 3: hard to test */
-    if (!result) {
-      return null;
-    }
     const { workspaces, packagePaths } = result;
     rootPackageFile.managerData = {
       packageName: rootPackageFile.managerData?.packageName,

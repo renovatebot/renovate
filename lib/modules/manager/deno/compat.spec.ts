@@ -3,7 +3,6 @@ import { fs } from '../../../../test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   collectPackageJson,
-  detectNodeCompatWorkspaces,
   extractDenoCompatiblePackageJson,
 } from './compat.ts';
 
@@ -33,15 +32,6 @@ describe('modules/manager/deno/compat', () => {
         }),
       );
       const result = await extractDenoCompatiblePackageJson('package.json');
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('detectNodeCompatWorkspaces()', () => {
-    it('returns null if no packageFile', async () => {
-      const result = await detectNodeCompatWorkspaces({
-        packageFile: undefined,
-      });
       expect(result).toBeNull();
     });
   });
