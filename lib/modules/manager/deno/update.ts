@@ -237,19 +237,22 @@ export function updateDependency(
     }
 
     if (depType === 'tasks.command' && parsedContents.tasks) {
+      const hasCommand = (value: unknown): value is { command: string } =>
+        !!value &&
+        typeof value === 'object' &&
+        'command' in value &&
+        typeof (value as { command: unknown }).command === 'string' &&
+        (value as { command: string }).command.includes(searchCurrentValue);
+
       const matches = Object.entries(parsedContents.tasks).flatMap(
-        ([key, value]) =>
-          value &&
-          typeof value === 'object' &&
-          'command' in value &&
-          typeof value.command === 'string' &&
-          value.command.includes(searchCurrentValue)
-            ? [[key, value.command]]
-            : [],
+        ([key, value]) => (hasCommand(value) ? [[key, value.command]] : []),
       );
       for (const [key, command] of matches) {
+        const task = parsedContents.tasks[key];
+        const taskObject = task && typeof task === 'object' ? task : {};
+
         parsedContents.tasks[key] = {
-          ...parsedContents.tasks[key],
+          ...taskObject,
           command: command.replace(searchCurrentValue, newString),
         };
         newFileContent = replaceAsString(
