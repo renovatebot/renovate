@@ -978,104 +978,56 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('uses semver-partial versioning for short java versions', () => {
-      const content = codeBlock`
-      [tools]
-      java = "21"
-    `;
-      const result = extractPackageFile(content, miseFilename);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'java',
-            currentValue: '21',
-            datasource: 'java-version',
-            versioning: 'semver-partial',
-          },
-        ],
-      });
+    it.each`
+      version            | currentValue | versioning
+      ${'21'}            | ${'21'}      | ${'semver-partial'}
+      ${'21.0'}          | ${'21.0'}    | ${'semver-partial'}
+      ${'temurin-21'}    | ${'21'}      | ${'semver-partial'}
+      ${'corretto-21.0'} | ${'21.0'}    | ${'semver-partial'}
+    `(
+      'uses semver-partial versioning for short java version $version',
+      ({ version, currentValue, versioning }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+              versioning,
+            },
+          ],
+        });
+      },
+    );
 
-      const content2 = codeBlock`
-      [tools]
-      java = "21.0"
-    `;
-      const result2 = extractPackageFile(content2, miseFilename);
-      expect(result2).toMatchObject({
-        deps: [
-          {
-            depName: 'java',
-            currentValue: '21.0',
-            datasource: 'java-version',
-            versioning: 'semver-partial',
-          },
-        ],
-      });
-
-      const content3 = codeBlock`
-      [tools]
-      java = "temurin-21"
-    `;
-      const result3 = extractPackageFile(content3, miseFilename);
-      expect(result3).toMatchObject({
-        deps: [
-          {
-            depName: 'java',
-            currentValue: '21',
-            datasource: 'java-version',
-            versioning: 'semver-partial',
-          },
-        ],
-      });
-
-      const content4 = codeBlock`
-      [tools]
-      java = "corretto-21.0"
-    `;
-      const result4 = extractPackageFile(content4, miseFilename);
-      expect(result4).toMatchObject({
-        deps: [
-          {
-            depName: 'java',
-            currentValue: '21.0',
-            datasource: 'java-version',
-            versioning: 'semver-partial',
-          },
-        ],
-      });
-    });
-
-    it('does not use semver-partial for full java versions', () => {
-      const content = codeBlock`
-      [tools]
-      java = "21.0.2"
-    `;
-      const result = extractPackageFile(content, miseFilename);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'java',
-            currentValue: '21.0.2',
-            datasource: 'java-version',
-          },
-        ],
-      });
-      expect(result!.deps[0]).not.toHaveProperty('versioning');
-
-      const content2 = codeBlock`
-      [tools]
-      java = "temurin-21.0.2"
-    `;
-      const result2 = extractPackageFile(content2, miseFilename);
-      expect(result2).toMatchObject({
-        deps: [
-          {
-            depName: 'java',
-            currentValue: '21.0.2',
-            datasource: 'java-version',
-          },
-        ],
-      });
-      expect(result2!.deps[0]).not.toHaveProperty('versioning');
-    });
+    it.each`
+      version             | currentValue
+      ${'21.0.2'}         | ${'21.0.2'}
+      ${'temurin-21.0.2'} | ${'21.0.2'}
+    `(
+      'does not use semver-partial for full java version $version',
+      ({ version, currentValue }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+            },
+          ],
+        });
+        expect(result?.deps[0]).not.toHaveProperty('versioning');
+      },
+    );
   });
 });
