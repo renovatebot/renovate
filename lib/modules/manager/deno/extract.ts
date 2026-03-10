@@ -1,3 +1,4 @@
+import { isObject } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import {
