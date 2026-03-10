@@ -253,29 +253,30 @@ async function applyLockedVersion(
   // use cache to avoid reading the same lock file multiple times
   const lockFileCache = new Map<string, LockFile>();
   for (const pkg of packageFiles) {
-    if (isNonEmptyArray(pkg.lockFiles)) {
-      const lockFile = pkg.lockFiles[0];
-      let lockFileContent: LockFile;
-
-      if (lockFileCache.has(lockFile)) {
-        lockFileContent = lockFileCache.get(lockFile)!;
-      } else {
-        lockFileContent = await getDenoLock(lockFile);
-        lockFileCache.set(lockFile, lockFileContent);
-      }
-
-      const withLockedVersionDeps = pkg.deps.map((dep) => {
-        const lockedVersion = getLockedVersion(dep, lockFileContent);
-        return lockedVersion
-          ? {
-              ...dep,
-              lockedVersion,
-            }
-          : dep;
-      });
-
-      pkg.deps = withLockedVersionDeps;
+    if (!isNonEmptyArray(pkg.lockFiles)) {
+      continue;
     }
+    const lockFile = pkg.lockFiles[0];
+    let lockFileContent: LockFile;
+
+    if (lockFileCache.has(lockFile)) {
+      lockFileContent = lockFileCache.get(lockFile)!;
+    } else {
+      lockFileContent = await getDenoLock(lockFile);
+      lockFileCache.set(lockFile, lockFileContent);
+    }
+
+    const withLockedVersionDeps = pkg.deps.map((dep) => {
+      const lockedVersion = getLockedVersion(dep, lockFileContent);
+      return lockedVersion
+        ? {
+            ...dep,
+            lockedVersion,
+          }
+        : dep;
+    });
+
+    pkg.deps = withLockedVersionDeps;
   }
 }
 
