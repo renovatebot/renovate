@@ -125,9 +125,9 @@ export async function processDenoExtract(
     packageFile: fileName,
     managerData: content.managerData,
     lockFiles,
-  } satisfies PackageFile<DenoManagerData>;
+  };
 
   return [packageFile, importMapPackageFile].filter(
-    Boolean,
+    isObject,
   ) as PackageFile<DenoManagerData>[];
 }
