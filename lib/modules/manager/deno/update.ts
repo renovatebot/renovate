@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isObject, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -216,7 +216,7 @@ export function updateDependency(
     if (depType === 'tasks' && parsedContents.tasks) {
       const matches = Object.entries(parsedContents.tasks).flatMap(
         ([key, value]) =>
-          typeof value === 'string' && value.includes(searchCurrentValue)
+          isString(value) && value.includes(searchCurrentValue)
             ? [[key, value]]
             : [],
       );
@@ -236,19 +236,14 @@ export function updateDependency(
     }
 
     if (depType === 'tasks.command' && parsedContents.tasks) {
-      const hasCommandMatch = (
-        value: unknown,
-      ): value is Record<string, unknown> & { command: string } =>
-        !!value &&
-        typeof value === 'object' &&
+      const hasCommandMatch = (value: unknown): value is { command: string } =>
+        isObject(value) &&
         'command' in value &&
-        typeof (value as { command: unknown }).command === 'string' &&
-        (value as { command: string }).command.includes(searchCurrentValue);
+        isString(value.command) &&
+        value.command.includes(searchCurrentValue);
 
       const matches = Object.entries(parsedContents.tasks).filter(
-        (
-          entry,
-        ): entry is [string, Record<string, unknown> & { command: string }] =>
+        (entry): entry is [string, { command: string }] =>
           hasCommandMatch(entry[1]),
       );
       for (const [key, task] of matches) {
