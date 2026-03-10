@@ -8,7 +8,7 @@ import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
-vi.mock('fs-extra');
+vi.mock('../../../util/fs/index.ts');
 
 const fs = vi.mocked(_fs);
 
