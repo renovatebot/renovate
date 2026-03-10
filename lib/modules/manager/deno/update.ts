@@ -215,17 +215,17 @@ export function updateDependency(
     );
 
     if (depType === 'tasks' && parsedContents.tasks) {
-      const matches = Object.entries(parsedContents.tasks).filter(
-        ([, value]) => {
-          if (typeof value === 'string') {
-            return value.includes(searchCurrentValue);
-          }
-          return false;
-        },
+      const matches = Object.entries(parsedContents.tasks).flatMap(
+        ([key, value]) =>
+          typeof value === 'string' && value.includes(searchCurrentValue)
+            ? [[key, value]]
+            : [],
       );
-      for (const [key] of matches) {
-        // prettier-ignore
-        parsedContents.tasks[key] = (parsedContents.tasks[key] as string).replace(searchCurrentValue, newString);
+      for (const [key, value] of matches) {
+        parsedContents.tasks[key] = value.replace(
+          searchCurrentValue,
+          newString,
+        );
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,
@@ -237,22 +237,21 @@ export function updateDependency(
     }
 
     if (depType === 'tasks.command' && parsedContents.tasks) {
-      const matches = Object.entries(parsedContents.tasks).filter(
-        ([, value]) => {
-          if (value && typeof value === 'object' && 'command' in value) {
-            return value.command?.includes(searchCurrentValue);
-          }
-          return false;
-        },
+      const matches = Object.entries(parsedContents.tasks).flatMap(
+        ([key, value]) =>
+          value &&
+          typeof value === 'object' &&
+          'command' in value &&
+          typeof value.command === 'string' &&
+          value.command.includes(searchCurrentValue)
+            ? [[key, value.command]]
+            : [],
       );
-      for (const [key] of matches) {
-        // prettier-ignore
-        (parsedContents.tasks[key] as {
-                      command: string;
-                  }).command =
-                      (parsedContents.tasks[key] as {
-                          command: string;
-                      }).command.replace(searchCurrentValue, newString);
+      for (const [key, command] of matches) {
+        parsedContents.tasks[key] = {
+          ...parsedContents.tasks[key],
+          command: command.replace(searchCurrentValue, newString),
+        };
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,
