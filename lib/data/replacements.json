@@ -768,10 +768,7 @@
     "packageRules": [
       {
         "matchCurrentVersion": ">=1.18.6",
-        "matchDatasources": [
-          "helm",
-          "docker"
-        ],
+        "matchDatasources": ["helm", "docker"],
         "matchPackageNames": ["ghcr.io/home-operations/charts-mirror/cilium"],
         "replacementName": "quay.io/cilium/charts/cilium",
         "replacementVersion": "1.18.6"
