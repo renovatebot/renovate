@@ -1,6 +1,8 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { removeOCIPrefix } from '../helmv3/oci.ts';
 import type { PackageDependency } from '../types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util.ts';
@@ -47,6 +49,21 @@ export function getLockedVersion(
     return foundLock.version;
   }
   return undefined;
+}
+
+export function applyOciDependency(
+  dep: PackageDependency,
+  source: string,
+): void {
+  const parsed = getDep(removeOCIPrefix(source), false);
+  dep.packageName = parsed.packageName;
+  dep.datasource = parsed.datasource;
+  if (!dep.currentValue && parsed.currentValue) {
+    dep.currentValue = parsed.currentValue;
+  }
+  if (!dep.currentValue) {
+    dep.skipReason = 'unspecified-version';
+  }
 }
 
 export async function extractLocksForPackageFile(

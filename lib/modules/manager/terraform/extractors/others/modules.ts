@@ -5,11 +5,11 @@ import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags/i
 import { GitTagsDatasource } from '../../../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.ts';
 import { TerraformModuleDatasource } from '../../../../datasource/terraform-module/index.ts';
-import { getDep } from '../../../dockerfile/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci.ts';
+import { isOCIRegistry } from '../../../helmv3/oci.ts';
 import type { PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import { applyOciDependency } from '../../util.ts';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
@@ -68,16 +68,8 @@ export class ModuleExtractor extends DependencyExtractor {
     const source = dep.managerData!.source as string;
 
     if (isOCIRegistry(source)) {
-      const parsed = getDep(removeOCIPrefix(source), false);
-      dep.depName = parsed.packageName;
-      dep.packageName = parsed.packageName;
-      dep.datasource = parsed.datasource;
-      if (!dep.currentValue && parsed.currentValue) {
-        dep.currentValue = parsed.currentValue;
-      }
-      if (!dep.currentValue) {
-        dep.skipReason = 'unspecified-version';
-      }
+      applyOciDependency(dep, source);
+      dep.depName = dep.packageName;
       return dep;
     }
 
