@@ -247,10 +247,8 @@ export function updateDependency(
           hasCommandMatch(entry[1]),
       );
       for (const [key, task] of matches) {
-        parsedContents.tasks[key] = {
-          ...task,
-          command: task.command.replace(searchCurrentValue, newString),
-        };
+        task.command = task.command.replace(searchCurrentValue, newString);
+        parsedContents.tasks[key] = task;
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,
