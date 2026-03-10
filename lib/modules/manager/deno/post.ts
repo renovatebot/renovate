@@ -138,9 +138,6 @@ export async function collectPackageJsonAsWorkspaceMember(
   );
   for (const workspaceRoot of workspaceRoots) {
     const result = await detectNodeCompatWorkspaces(workspaceRoot);
-    if (!result) {
-      continue;
-    }
     const { packagePaths } = result;
     for (const packagePath of packagePaths) {
       const packageFile = await extractDenoCompatiblePackageJson(packagePath);
