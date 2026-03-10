@@ -1,5 +1,5 @@
 import type { FileChange } from '../../../../util/git/types.ts';
-import type { PackageFile } from '../../types.ts';
+import type { ArtifactError, PackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 
 export interface DetermineLockFileDirsResult {
@@ -10,11 +10,6 @@ export interface DetermineLockFileDirsResult {
 
 export interface AdditionalPackageFiles {
   npm?: Partial<PackageFile<NpmManagerData>>[];
-}
-
-export interface ArtifactError {
-  fileName: string;
-  stderr?: string;
 }
 
 export interface WriteExistingFilesResult {
