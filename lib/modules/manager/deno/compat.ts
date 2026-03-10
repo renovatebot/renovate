@@ -4,7 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { parseJson } from '../../../util/common.ts';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import { ensureLocalPath, getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import type { PackageFile } from '../types.ts';
@@ -45,7 +45,7 @@ export async function extractDenoCompatiblePackageJson(
 export async function detectNodeCompatWorkspaces({
   managerData,
   packageFile,
-}: Partial<PackageFile<DenoManagerData>>): Promise<{
+}: Pick<PackageFile<DenoManagerData>, 'managerData' | 'packageFile'>): Promise<{
   workspaces?: string[];
   packagePaths: string[];
 } | null> {
@@ -64,7 +64,7 @@ export async function detectNodeCompatWorkspaces({
   // SAFETY: localDir should always be defined
   const localDir = GlobalConfig.get('localDir')!;
   const packages = await findPackages(
-    upath.dirname(upath.join(localDir, packageFile)),
+    upath.dirname(ensureLocalPath(packageFile)),
     {
       patterns: filters,
       // Match the ignores used in @pnpm/find-workspace-packages
