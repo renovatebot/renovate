@@ -1,6 +1,6 @@
-import _fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
+import { fs } from '~test/util.ts';
 import { mockExecAll } from '../../../../test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -9,8 +9,6 @@ import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/fs/index.ts');
-
-const fs = vi.mocked(_fs);
 
 const updateArtifact: UpdateArtifact = {
   config: {
@@ -61,8 +59,8 @@ describe('modules/manager/deno/artifacts', () => {
     it('returns null if lock content unchanged', async () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
@@ -70,9 +68,9 @@ describe('modules/manager/deno/artifacts', () => {
     it('returns updated lock content', async () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
@@ -95,9 +93,9 @@ describe('modules/manager/deno/artifacts', () => {
         },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
@@ -114,9 +112,9 @@ describe('modules/manager/deno/artifacts', () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       updateArtifact.config.updateType = 'lockFileMaintenance';
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
@@ -138,7 +136,7 @@ describe('modules/manager/deno/artifacts', () => {
       });
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
         TEMPORARY_ERROR,
@@ -154,7 +152,7 @@ describe('modules/manager/deno/artifacts', () => {
       });
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll(execError);
       expect(await updateArtifacts(updateArtifact)).toEqual([
         { artifactError: { lockFile: 'deno.lock', stderr: 'nope' } },
@@ -172,9 +170,9 @@ describe('modules/manager/deno/artifacts', () => {
       ],
     };
     const oldLock = Buffer.from('old');
-    fs.readFile.mockResolvedValueOnce(oldLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
-    fs.readFile.mockResolvedValueOnce(newLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
     expect(await updateArtifacts(updateArtifact)).toEqual([
       {
@@ -196,9 +194,9 @@ describe('modules/manager/deno/artifacts', () => {
       ],
     };
     const oldLock = Buffer.from('old');
-    fs.readFile.mockResolvedValueOnce(oldLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
-    fs.readFile.mockResolvedValueOnce(newLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
     expect(await updateArtifacts(updateArtifact)).toEqual([
       {
@@ -215,9 +213,9 @@ describe('modules/manager/deno/artifacts', () => {
     updateArtifact.config.lockFiles = ['deno.lock'];
     updateArtifact.config.isLockFileMaintenance = true;
     const oldLock = Buffer.from('old');
-    fs.readFile.mockResolvedValueOnce(oldLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
-    fs.readFile.mockResolvedValueOnce(newLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(newLock as never);
     mockExecAll();
     expect(await updateArtifacts(updateArtifact)).toEqual([
       {
@@ -239,9 +237,9 @@ describe('modules/manager/deno/artifacts', () => {
     };
 
     const oldLock = Buffer.from('old');
-    fs.readFile.mockResolvedValueOnce(oldLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
-    fs.readFile.mockResolvedValueOnce(newLock as never);
+    fs.readLocalFile.mockResolvedValueOnce(newLock as never);
     const execSnapshots = mockExecAll();
 
     await updateArtifacts(updateArtifact);
