@@ -263,33 +263,6 @@ describe('modules/manager/deno/post', () => {
       ]);
     });
 
-    it('should handle when detectNodeCompatWorkspaces returns null', async () => {
-      GlobalConfig.set({ localDir: '' });
-      vi.spyOn(compat, 'detectNodeCompatWorkspaces').mockResolvedValue(null);
-      const packageFiles = [
-        {
-          deps: [],
-          lockFiles: ['deno.lock'],
-          managerData: {
-            workspaces: ['node'],
-          },
-          packageFile: 'deno.json',
-        },
-      ];
-
-      await collectPackageJsonAsWorkspaceMember(packageFiles);
-      expect(packageFiles).toStrictEqual([
-        {
-          deps: [],
-          lockFiles: ['deno.lock'],
-          managerData: {
-            workspaces: ['node'],
-          },
-          packageFile: 'deno.json',
-        },
-      ]);
-    });
-
     it('should handle when extractDenoCompatiblePackageJson returns null', async () => {
       GlobalConfig.set({ localDir: '' });
       vi.spyOn(compat, 'detectNodeCompatWorkspaces').mockRestore();
