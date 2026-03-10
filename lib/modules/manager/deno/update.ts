@@ -236,23 +236,25 @@ export function updateDependency(
     }
 
     if (depType === 'tasks.command' && parsedContents.tasks) {
-      const hasCommand = (value: unknown): value is { command: string } =>
+      const hasCommandMatch = (
+        value: unknown,
+      ): value is Record<string, unknown> & { command: string } =>
         !!value &&
         typeof value === 'object' &&
         'command' in value &&
         typeof (value as { command: unknown }).command === 'string' &&
         (value as { command: string }).command.includes(searchCurrentValue);
 
-      const matches = Object.entries(parsedContents.tasks).flatMap(
-        ([key, value]) => (hasCommand(value) ? [[key, value.command]] : []),
+      const matches = Object.entries(parsedContents.tasks).filter(
+        (
+          entry,
+        ): entry is [string, Record<string, unknown> & { command: string }] =>
+          hasCommandMatch(entry[1]),
       );
-      for (const [key, command] of matches) {
-        const task = parsedContents.tasks[key];
-        const taskObject = task && typeof task === 'object' ? task : {};
-
+      for (const [key, task] of matches) {
         parsedContents.tasks[key] = {
-          ...taskObject,
-          command: command.replace(searchCurrentValue, newString),
+          ...task,
+          command: task.command.replace(searchCurrentValue, newString),
         };
         newFileContent = replaceAsString(
           parsedContents,
