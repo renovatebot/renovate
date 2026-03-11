@@ -327,7 +327,7 @@
     "aws-sdk-client-mock": "4.1.0",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
-    "conventional-changelog-conventionalcommits": "9.2.0",
+    "conventional-changelog-conventionalcommits": "9.3.0",
     "emojibase-data": "17.0.0",
     "esbuild": "0.27.3",
     "eslint": "9.39.3",
