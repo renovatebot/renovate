@@ -979,14 +979,14 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it.each`
-      version            | currentValue | versioning
-      ${'21'}            | ${'21'}      | ${'semver-partial'}
-      ${'21.0'}          | ${'21.0'}    | ${'semver-partial'}
-      ${'temurin-21'}    | ${'21'}      | ${'semver-partial'}
-      ${'corretto-21.0'} | ${'21.0'}    | ${'semver-partial'}
+      version            | currentValue
+      ${'21'}            | ${'21'}
+      ${'21.0'}          | ${'21.0'}
+      ${'temurin-21'}    | ${'21'}
+      ${'corretto-21.0'} | ${'21.0'}
     `(
       'uses semver-partial versioning for short java version $version',
-      ({ version, currentValue, versioning }) => {
+      ({ version, currentValue }) => {
         const content = codeBlock`
         [tools]
         java = "${version}"
@@ -998,7 +998,7 @@ describe('modules/manager/mise/extract', () => {
               depName: 'java',
               currentValue,
               datasource: 'java-version',
-              versioning,
+              versioning: 'semver-partial',
             },
           ],
         });
