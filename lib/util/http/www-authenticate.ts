@@ -1,7 +1,5 @@
 /**
  * Inspired by https://github.com/alexdutton/www-authenticate
- * Copyright 2026 The Renovate Authors
- * SPDX-License-Identifier: MIT
  */
 import { regEx } from '../regex.ts';
 
