@@ -49,7 +49,7 @@ describe('modules/manager/deno/artifacts', () => {
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           artifactError: {
-            lockFile: 'deno.lock',
+            fileName: 'deno.lock',
             stderr: `Failed to read "deno.lock"`,
           },
         },
@@ -155,7 +155,7 @@ describe('modules/manager/deno/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll(execError);
       expect(await updateArtifacts(updateArtifact)).toEqual([
-        { artifactError: { lockFile: 'deno.lock', stderr: 'nope' } },
+        { artifactError: { fileName: 'deno.lock', stderr: 'nope' } },
       ]);
     });
   });
@@ -177,7 +177,7 @@ describe('modules/manager/deno/artifacts', () => {
     expect(await updateArtifacts(updateArtifact)).toEqual([
       {
         artifactError: {
-          lockFile: 'deno.lock',
+          fileName: 'deno.lock',
           stderr: `depType: "tasks", depName: "dep1" can't be updated with a lock file: "deno.lock"`,
         },
       },
@@ -201,7 +201,7 @@ describe('modules/manager/deno/artifacts', () => {
     expect(await updateArtifacts(updateArtifact)).toEqual([
       {
         artifactError: {
-          lockFile: 'deno.lock',
+          fileName: 'deno.lock',
           stderr: `depType: "tasks.command", depName: "dep1" can't be updated with a lock file: "deno.lock"`,
         },
       },
