@@ -1,5 +1,4 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { parse } from 'auth-header';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -18,6 +17,8 @@ import type {
   HttpResponse,
   OutgoingHttpHeaders,
 } from '../../../util/http/types.ts';
+import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
+import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
 import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import {
@@ -86,10 +87,6 @@ export async function getAuthHeaders(
       return null;
     }
 
-    const authenticateHeader = parse(
-      apiCheckResponse.headers['www-authenticate'],
-    );
-
     const rule = hostRules.find({
       hostType: dockerDatasourceId,
       url: apiCheckUrl,
@@ -149,6 +146,11 @@ export async function getAuthHeaders(
       opts.headers = { authorization: `${authType} ${rule.token}` };
     }
 
+    const challenges = parse(apiCheckResponse.headers['www-authenticate']);
+    const authenticateHeader = challenges.find(
+      (c): c is ParamsChallenge => c.scheme === BearerScheme,
+    );
+
     // If realm isn't an url, we should directly use auth header
     // Can happen when we get a Basic auth or some other auth type
     // * WWW-Authenticate: Basic realm="Artifactory Realm"
@@ -156,8 +158,8 @@ export async function getAuthHeaders(
     // * www-authenticate: Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
     // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
     if (
-      authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
-      !isString(authenticateHeader.params.realm) ||
+      !authenticateHeader ||
+      !isString(authenticateHeader.params?.realm) ||
       parseUrl(authenticateHeader.params.realm) === null
     ) {
       logger.once.debug(`hostRules: testing direct auth for ${registryHost}`);
