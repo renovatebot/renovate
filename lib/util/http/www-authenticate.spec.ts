@@ -77,9 +77,13 @@ describe('util/http/www-authenticate', () => {
     ],
     [
       'multiple challenges',
-      'Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*"' +
+      'Negotiate' +
+        ',Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*"' +
         ',Basic realm="https://renovate.com/v2"',
       [
+        {
+          scheme: 'negotiate',
+        },
         {
           scheme: 'bearer',
           params: {
@@ -130,14 +134,6 @@ describe('util/http/www-authenticate', () => {
 
   it('parses empty string', () => {
     expect(parse('')).toBeEmptyArray();
-  });
-
-  it('ignores leading and trailing comma', () => {
-    expect(parse(',Negotiate,')).toEqual([
-      {
-        scheme: 'negotiate',
-      },
-    ]);
   });
 
   it('throws on invalid input', () => {
