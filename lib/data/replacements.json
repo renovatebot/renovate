@@ -6,6 +6,7 @@
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
+      "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
@@ -140,6 +141,17 @@
         "matchPackageNames": ["babel-eslint"],
         "replacementName": "@babel/eslint-parser",
         "replacementVersion": "7.11.0"
+      }
+    ]
+  },
+  "base-ui-components-to-base-ui": {
+    "description": "`@base-ui-components/react` was renamed to `@base-ui/react`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@base-ui-components/react"],
+        "replacementName": "@base-ui/react",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
