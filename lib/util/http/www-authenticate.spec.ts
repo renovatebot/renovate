@@ -86,10 +86,14 @@ describe('util/http/www-authenticate', () => {
     [
       'multiple header',
       [
+        'Negotiate',
         'Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*"',
         'Basic realm="https://renovate.com/v2"',
       ],
       [
+        {
+          scheme: 'negotiate',
+        },
         {
           scheme: 'bearer',
           params: {
