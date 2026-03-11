@@ -31,7 +31,7 @@ export function incLimitedValue(key: Limit, incBy = 1): void {
 function handleCommitsLimit(): boolean {
   const limit = limits.get('Commits');
   // TODO: fix me?
-  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+  // oxlint-disable-next-line typescript/prefer-optional-chain
   if (!limit || limit.max === null) {
     return false;
   }

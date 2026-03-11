@@ -25,16 +25,17 @@ export const presets: Record<string, Preset> = {
   eslint: {
     description: 'All ESLint packages.',
     matchPackageNames: [
-      '@types/eslint',
-      'babel-eslint',
+      '*/eslint-plugin',
       '@babel/eslint-parser',
       '@eslint/**',
       '@eslint-community/**',
       '@stylistic/eslint-plugin**',
+      '@types/eslint',
       '@types/eslint__**',
       '@typescript-eslint/**',
-      'typescript-eslint',
+      'babel-eslint',
       'eslint**',
+      'typescript-eslint',
     ],
   },
   gatsby: {

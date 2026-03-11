@@ -626,11 +626,7 @@ export async function checkoutBranch(
     // v8 ignore else -- TODO: add test #40625
     if (latestCommitDate) {
       logger.debug(
-        {
-          branchName,
-          latestCommitDate: latestCommitDate.toISO(),
-          sha: config.currentBranchSha,
-        },
+        { branchName, latestCommitDate, sha: config.currentBranchSha },
         'latest commit',
       );
     }

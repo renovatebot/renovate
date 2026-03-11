@@ -54,8 +54,8 @@ export class ForgejoHttp extends HttpBase<ForgejoHttpOptions> {
       opts.httpOptions.memCache = false;
 
       delete opts.httpOptions.paginate;
-      const total = parseInt(res.headers['x-total-count'] as string);
-      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1');
+      const total = parseInt(res.headers['x-total-count'] as string, 10);
+      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
 
       while (total && pc.length < total) {
         nextPage += 1;

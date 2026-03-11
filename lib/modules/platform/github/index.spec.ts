@@ -1771,6 +1771,51 @@ describe('modules/platform/github/index', () => {
         );
       });
 
+      it('stops at custom max sync pages', async () => {
+        GlobalConfig.set({ prCacheSyncMaxPages: 2 });
+        const scope = httpMock.scope(githubApiHost);
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — 2 pages of non-Renovate PRs all newer than lastModified
+        initRepoMock(scope, 'some/repo');
+        for (let i = 1; i <= 2; i++) {
+          scope.get(pagePath(i, 20)).reply(
+            200,
+            [
+              {
+                ...pr1,
+                number: 100 + i,
+                updated_at: t4,
+                user: { login: 'other' },
+              },
+            ],
+            { link: pageLink(i + 1) },
+          );
+        }
+        // Page 3 NOT mocked — must stop at 2
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { repo: 'some/repo', pages: 2 },
+          'PR cache: hit max sync pages, stopping',
+        );
+      });
+
       it('reconciles mixed pages with both Renovate and non-Renovate PRs', async () => {
         const scope = httpMock.scope(githubApiHost);
 

@@ -17,6 +17,8 @@ package.json
 
 # generated code
 **/*.generated.ts
+lib/modules/datasource/hex/v2/package.ts
+lib/modules/datasource/hex/v2/signed.ts
 /tools/dist
 /patches
 **/tmp/
