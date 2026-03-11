@@ -44,11 +44,11 @@ export interface UnknownChallenge {
 export type Challenge = SimpleChallenge | ParamsChallenge | UnknownChallenge;
 
 const tokenizer: Tokenizer[] = [
-  { type: 'token', matcher: regEx(/^([a-zA-Z0-9!#$%&'*+.^_`|~-]+)/g) }, // token
-  { type: 'token', matcher: regEx(/^"((?:[^"\\]|\\\\|\\")+)"/g) }, // quoted-string
-  { matcher: regEx(/^\s+/g) }, // whitespace (ignored)
-  { type: 'equals', matcher: /^(=)/g }, // equals
-  { type: 'comma', matcher: /^(,)/g }, // comma
+  { type: 'token', matcher: regEx(/^([a-zA-Z0-9!#$%&'*+.^_`|~-]+)/) }, // token
+  { type: 'token', matcher: regEx(/^"((?:[^"\\]|\\\\|\\")*)"/) }, // quoted-string
+  { matcher: regEx(/^\s+/) }, // whitespace (ignored)
+  { type: 'equals', matcher: regEx(/^(=)/) }, // equals
+  { type: 'comma', matcher: regEx(/^(,)/) }, // comma
 ];
 
 function tokenize(input: string): Token[] {
@@ -56,15 +56,20 @@ function tokenize(input: string): Token[] {
   let remaining = input;
 
   while (remaining.length > 0) {
+    let matched = false;
     for (const t of tokenizer) {
       const match = t.matcher.exec(remaining);
       if (match) {
+        matched = true;
         remaining = remaining.slice(match[0].length);
         if (t.type) {
           result.push({ type: t.type, value: match[1] });
         }
         break;
       }
+    }
+    if (!matched) {
+      throw new Error(`Failed to parse value`);
     }
   }
 

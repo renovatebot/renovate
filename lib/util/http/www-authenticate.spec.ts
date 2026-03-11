@@ -17,6 +17,19 @@ describe('util/http/www-authenticate', () => {
       ],
     ],
     [
+      'bearer with empty scope',
+      'Bearer realm="https://renovate.com/v2/token",scope=""',
+      [
+        {
+          scheme: 'bearer',
+          params: {
+            realm: 'https://renovate.com/v2/token',
+            scope: '',
+          },
+        },
+      ],
+    ],
+    [
       'basic',
       'Basic realm="https://renovate.com/v2"',
       [
@@ -113,5 +126,25 @@ describe('util/http/www-authenticate', () => {
   ])('parses: %s', (_, value, result) => {
     const parsed = parse(value);
     expect(parsed).toEqual(result);
+  });
+
+  it('parses empty string', () => {
+    expect(parse('')).toBeEmptyArray();
+  });
+
+  it('ignores leading and trailing comma', () => {
+    expect(parse(',Negotiate,')).toEqual([
+      {
+        scheme: 'negotiate',
+      },
+    ]);
+  });
+
+  it('throws on invalid input', () => {
+    expect(() =>
+      parse(
+        'Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*',
+      ),
+    ).toThrow('Failed to parse value');
   });
 });
