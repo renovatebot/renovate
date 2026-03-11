@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 

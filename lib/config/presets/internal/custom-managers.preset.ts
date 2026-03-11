@@ -135,7 +135,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         managerFilePatterns: ['**/*.tfvars'],
         matchStrings: [
-          '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?(?: extractVersion=(?<extractVersion>.*?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
+          '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?(?: extractVersion=(?<extractVersion>.*?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
         ],
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },

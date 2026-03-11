@@ -39,6 +39,11 @@ let package = Package(
         .package(url: "foo", .exact("1.2.3.4")),
         .package(url: "bar", "1.2.3.4.5"...),
         .package(url: "baz", from: "1.2.3.4"),
+        .package(
+            url: "https://github.com/foo/bar",
+            from: "1.2.3",
+            traits: [.trait(name: "CUSTOM_TRAIT", condition: .when(traits: ["MY_FLAG"]))]
+        ),
         .package(url: "https://github.com/avito-tech/GraphiteClient.git", .exact(   "0.1.0"   )),
         .package(url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.16")),
         .package(url: "https://github.com/apple/swift-argument-parser", exact: "1.2.1"),

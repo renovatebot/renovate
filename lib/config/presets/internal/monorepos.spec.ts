@@ -13,7 +13,6 @@ const todo = new Set([
   'azure azure-libraries-for-net',
   'azure azure-sdk-for-net',
   'azure azure-storage-net',
-  'Hangfire',
   'system.io.abstractions',
   'vaadinWebComponents',
 ]);

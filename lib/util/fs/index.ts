@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
+import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
 export const pipeline = util.promisify(stream.pipeline);
@@ -36,6 +37,9 @@ export async function readLocalFile(
     const fileContent = encoding
       ? await fs.readFile(localFileName, encoding)
       : await fs.readFile(localFileName);
+
+    logWarningIfUnicodeHiddenCharactersInPackageFile(fileName, fileContent);
+
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');

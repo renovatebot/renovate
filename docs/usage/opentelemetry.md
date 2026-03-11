@@ -53,6 +53,18 @@ The following resource detectors are used:
 - `GcpDetector` from [@opentelemetry/resource-detector-gcp](https://www.npmjs.com/package/@opentelemetry/resource-detector-gcp) Users hosting on GCP
 - `AzureDetector` from [@opentelemetry/resource-detector-azure](https://www.npmjs.com/package/@opentelemetry/resource-detector-azure) Users hosting on Azure
 
+You can disable all cloud detectors by setting the `RENOVATE_USE_CLOUD_METADATA_SERVICES` environment variable to `false`.
+Then only the `EnvDetector` will be used.
+
+Additionally you can use `OTEL_NODE_RESOURCE_DETECTORS` environment variable to control which resource detectors are used.
+The default values is `all`, which means all of the above detectors are used. Set it to `none` to disable all detectors, or a comma-separated list of the following values to specify which detectors to use:
+
+- `aws`
+- `azure`
+- `gcp`
+- `github`
+- `env`
+
 ## Supported OTLP data
 
 ### Traces
@@ -83,6 +95,8 @@ Renovate does not currently support logging in an OTLP format.
 
 To help you debug, you can print the telemetry to the console.
 Use the environment variable `RENOVATE_TRACING_CONSOLE_EXPORTER`.
+
+You can also set `OTEL_LOG_LEVEL` to control the log level of OpenTelemetry's internal [diagnostics](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/#troubleshooting), which can be helpful for debugging.
 
 ## Help wanted
 

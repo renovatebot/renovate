@@ -149,9 +149,9 @@ async function bumpVersion(
         if (parts?.groups) {
           const { major, minor } = parts.groups;
           if (bumpType === 'major') {
-            newVersion = `${parseInt(major) + 1}${minor ? `.0` : ''}`;
+            newVersion = `${parseInt(major, 10) + 1}${minor ? `.0` : ''}`;
           } else if (bumpType === 'minor') {
-            newVersion = `${major}.${parseInt(minor) + 1}`;
+            newVersion = `${major}.${parseInt(minor, 10) + 1}`;
           } else {
             throw new Error(
               `Unsupported bump type for {major}.{minor} version: ${bumpType}`,

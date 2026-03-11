@@ -59,3 +59,38 @@ pull(
     tag = "24.04",
 )
 ```
+
+### Crate
+
+It also supports Rust crate dependencies initialized with [rules_rust crate_universe](https://github.com/bazelbuild/rules_rust/tree/main/crate_universe). For simplicity the name of extension variable is limited to `crate*`. E.g.:
+
+```starlark
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+```
+
+```starlark
+crate_1 = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+```
+
+The `spec` method is supported:
+
+```starlark
+crate.spec(
+    package = "axum",
+    version = "0.8.4",
+)
+
+crate.spec(
+    package = "tokio",
+    version = "1.45.1",
+    features = [
+        "full",
+    ],
+)
+
+crate.spec(
+    package = "custom_crate",
+    git = "https://github.com/example/custom_crate.git",
+    tag = "v1.0.0",
+)
+```
