@@ -78,7 +78,7 @@ export abstract class GitDatasource extends Datasource {
     for (const ref of allRefs) {
       if (ref.value.endsWith('^{}')) {
         // Store the commit hash for the base tag name (without ^{})
-        dereferencedTag[ref.value.slice(0, -3)] = ref.hash;
+        dereferencedTags[ref.value.slice(0, -3)] = ref.hash;
       }
     }
 
