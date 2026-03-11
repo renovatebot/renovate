@@ -157,6 +157,7 @@ export async function getAuthHeaders(
     // * Www-Authenticate: Basic realm="https://123456789.dkr.ecr.eu-central-1.amazonaws.com/",service="ecr.amazonaws.com"
     // * www-authenticate: Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
     // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+    // * www-authenticate: Bearer realm="https://codeberg.org/v2/token",service="container_registry",scope="*",Basic realm="https://codeberg.org/v2",service="container_registry",scope="*"
     if (
       !authenticateHeader ||
       !isString(authenticateHeader.params?.realm) ||
