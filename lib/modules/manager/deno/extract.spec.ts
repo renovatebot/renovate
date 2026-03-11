@@ -355,8 +355,11 @@ describe('modules/manager/deno/extract', () => {
 
     // workspace tests
     describe('workspaces', () => {
-      it('npm workspace compatible', async () => {
+      beforeAll(() => {
         GlobalConfig.set({ localDir: '' });
+      });
+
+      it('npm workspace compatible', async () => {
         vi.mocked(findPackages).mockResolvedValue([
           {
             dir: 'sub',

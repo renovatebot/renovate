@@ -37,8 +37,11 @@ describe('modules/manager/deno/compat', () => {
   });
 
   describe('collectPackageJson()', () => {
-    it('node-compat package.json', async () => {
+    beforeAll(() => {
       GlobalConfig.set({ localDir: '' });
+    });
+
+    it('node-compat package.json', async () => {
       vi.mocked(findPackages).mockResolvedValue([
         { dir: '.', manifest: {}, writeProjectManifest: Promise.resolve },
       ]);
@@ -72,7 +75,6 @@ describe('modules/manager/deno/compat', () => {
     });
 
     it('handles workspaces with valid workspace member', async () => {
-      GlobalConfig.set({ localDir: '' });
       vi.mocked(findPackages).mockResolvedValue([
         {
           dir: 'packages/pkg1',
@@ -137,7 +139,6 @@ describe('modules/manager/deno/compat', () => {
     });
 
     it('returns empty array when rootPackageFile is null', async () => {
-      GlobalConfig.set({ localDir: '' });
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.readLocalFile.mockResolvedValueOnce(null);
       const result = await collectPackageJson('deno.lock');
@@ -145,7 +146,6 @@ describe('modules/manager/deno/compat', () => {
     });
 
     it('handles null packageFile in workspace members', async () => {
-      GlobalConfig.set({ localDir: '' });
       vi.mocked(findPackages).mockResolvedValue([
         {
           dir: 'workspace',

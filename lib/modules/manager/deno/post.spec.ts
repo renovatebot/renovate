@@ -204,8 +204,11 @@ describe('modules/manager/deno/post', () => {
   });
 
   describe('collectPackageJsonAsWorkspaceMember()', () => {
-    it('should collect package.json files as deno workspace members', async () => {
+    beforeAll(() => {
       GlobalConfig.set({ localDir: '' });
+    });
+
+    it('should collect package.json files as deno workspace members', async () => {
       vi.mocked(findPackages).mockResolvedValue([
         {
           dir: 'node',
@@ -264,7 +267,6 @@ describe('modules/manager/deno/post', () => {
     });
 
     it('should handle when extractDenoCompatiblePackageJson returns null', async () => {
-      GlobalConfig.set({ localDir: '' });
       vi.spyOn(compat, 'detectNodeCompatWorkspaces').mockRestore();
       vi.mocked(findPackages).mockResolvedValue([
         {
