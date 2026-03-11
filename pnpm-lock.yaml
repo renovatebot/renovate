@@ -134,9 +134,6 @@ importers:
       async-mutex:
         specifier: 0.5.0
         version: 0.5.0
-      auth-header:
-        specifier: 1.0.0
-        version: 1.0.0
       aws4:
         specifier: 1.13.2
         version: 1.13.2
@@ -399,9 +396,6 @@ importers:
       '@smithy/util-stream':
         specifier: 4.5.16
         version: 4.5.16
-      '@types/auth-header':
-        specifier: 1.0.6
-        version: 1.0.6
       '@types/aws4':
         specifier: 1.11.6
         version: 1.11.6
@@ -2581,9 +2575,6 @@ packages:
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
-  '@types/auth-header@1.0.6':
-    resolution: {integrity: sha512-TjQyS7b+msxND/uuvza7FWSiBBLtI5y9vB55rpTeMcO2M5DSs4ony9WNKDvZLJL2w5aJH2A4C+ht1c9MPHhJWQ==}
-
   '@types/aws4@1.11.6':
     resolution: {integrity: sha512-5CnVUkHNyLGpD9AnOcK66YyP0qvIh6nhJJoeK8zSl5YKikUcUbdB7SlHevUYVqicgeh6j5AJa1qa/h08dSZHoA==}
 
@@ -3006,9 +2997,6 @@ packages:
 
   async-mutex@0.5.0:
     resolution: {integrity: sha512-1A94B18jkJ3DYq284ohPxoXbfTA5HsQ7/Mf4DEhcyLx3Bz27Rh59iScbB6EPiP+B+joue6YCxcMXSbFC1tZKwA==}
-
-  auth-header@1.0.0:
-    resolution: {integrity: sha512-CPPazq09YVDUNNVWo4oSPTQmtwIzHusZhQmahCKvIsk0/xH6U3QsMAv3sM+7+Q0B1K2KJ/Q38OND317uXs4NHA==}
 
   aws-sdk-client-mock@4.1.0:
     resolution: {integrity: sha512-h/tOYTkXEsAcV3//6C1/7U4ifSpKyJvb6auveAepqqNJl6TdZaPFEtKjBQNf8UxQdDP850knB2i/whq4zlsxJw==}
@@ -9177,8 +9165,6 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@types/auth-header@1.0.6': {}
-
   '@types/aws4@1.11.6':
     dependencies:
       '@types/node': 24.11.0
@@ -9654,8 +9640,6 @@ snapshots:
   async-mutex@0.5.0:
     dependencies:
       tslib: 2.8.1
-
-  auth-header@1.0.0: {}
 
   aws-sdk-client-mock@4.1.0:
     dependencies:
