@@ -427,12 +427,14 @@ export async function getSubmodules(): Promise<string[]> {
 
 export async function cloneSubmodules(
   shouldClone: boolean,
+  cloneSubmodulesRecursive: boolean | undefined,
   cloneSubmodulesFilter: string[] | undefined,
 ): Promise<void> {
   if (!shouldClone || submodulesInitizialized) {
     return;
   }
   submodulesInitizialized = true;
+  const recursive = cloneSubmodulesRecursive ?? true;
   const gitEnv = getChildEnv({ env: getGitEnvironmentVariables() });
   await syncGit();
   const submodules = await getSubmodules();
@@ -445,9 +447,18 @@ export async function cloneSubmodules(
       continue;
     }
     try {
-      logger.debug(`Cloning git submodule at ${submodule}`);
+      if (recursive) {
+        logger.debug(`Recursively cloning git submodule at ${submodule}`);
+      } else {
+        logger.debug(`Cloning git submodule at ${submodule}`);
+      }
+
       await gitRetry(() =>
-        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
+        recursive
+          ? git
+              .env(gitEnv)
+              .submoduleUpdate(['--init', '--recursive', submodule])
+          : git.env(gitEnv).submoduleUpdate(['--init', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
@@ -572,7 +583,11 @@ export const syncGit = withInstrumenting(
     }
     // This will only happen now if set in global config
     await instrument('cloneSubmodules', () =>
-      cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter),
+      cloneSubmodules(
+        !!config.cloneSubmodules,
+        config.cloneSubmodulesRecursive,
+        config.cloneSubmodulesFilter,
+      ),
     );
     try {
       const latestCommit = (await git.log({ n: 1 })).latest;

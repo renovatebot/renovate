@@ -67,6 +67,7 @@ interface ForgejoRepoConfig {
   labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
+  cloneSubmodulesRecursive: boolean;
   cloneSubmodulesFilter: string[] | undefined;
   hasIssuesEnabled: boolean;
   isOrgRepo: boolean;
@@ -274,6 +275,7 @@ const platform: Platform = {
   async initRepo({
     repository,
     cloneSubmodules,
+    cloneSubmodulesRecursive,
     cloneSubmodulesFilter,
     gitUrl,
   }: RepoParams): Promise<RepoResult> {
@@ -282,6 +284,7 @@ const platform: Platform = {
     config = {} as any;
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
+    config.cloneSubmodulesRecursive = !!cloneSubmodulesRecursive;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
     config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 

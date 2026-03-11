@@ -43,6 +43,7 @@ export interface RepoParams {
   forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
+  cloneSubmodulesRecursive?: boolean;
   cloneSubmodulesFilter?: string[];
   /** Azure only: work item type to use when creating issues. */
   azureWorkItemType?: string;

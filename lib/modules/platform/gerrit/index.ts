@@ -134,6 +134,7 @@ export async function getRepos(): Promise<string[]> {
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesRecursive,
   cloneSubmodulesFilter,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
@@ -201,6 +202,7 @@ export async function initRepo({
   await git.initRepo({
     url,
     cloneSubmodules,
+    cloneSubmodulesRecursive,
     cloneSubmodulesFilter,
     virtualBranches,
   });
