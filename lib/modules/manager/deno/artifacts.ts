@@ -38,7 +38,7 @@ export async function updateArtifacts(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: `Failed to read "${lockFileName}"`,
         },
       },
@@ -56,7 +56,7 @@ export async function updateArtifacts(
       return [
         {
           artifactError: {
-            lockFile: lockFileName,
+            fileName: lockFileName,
             stderr: `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
           },
         },
@@ -117,7 +117,7 @@ export async function updateArtifacts(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },
