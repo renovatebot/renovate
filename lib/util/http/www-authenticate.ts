@@ -32,7 +32,7 @@ export interface SimpleChallenge {
   params?: string;
 }
 export interface ParamsChallenge {
-  scheme: 'bearer' | ' digest';
+  scheme: 'bearer' | 'digest';
   params?: Record<string, string>;
 }
 
