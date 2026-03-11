@@ -266,12 +266,27 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     describe('submodules', () => {
+      let nestedSubmodule: tmp.DirectoryResult;
+
       beforeEach(async () => {
         const repo = simpleGit(base.path);
 
         auth.getGitEnvironmentVariables.mockReturnValue({
           GIT_ALLOW_PROTOCOL: 'file',
         });
+
+        // A separate repository referenced as a submodule of the submodule
+        // below, so recursion behaviour can be observed.
+        nestedSubmodule = await tmp.dir({ unsafeCleanup: true });
+        const nested = simpleGit(nestedSubmodule.path);
+        await nested.init();
+        await disableGitAutoMaintenance(nested);
+        await nested.addConfig('user.email', 'Jest@example.com');
+        await nested.addConfig('user.name', 'Jest');
+        await nested.addConfig('commit.gpgsign', 'false');
+        await fs.writeFile(`${nestedSubmodule.path}/nested_file`, 'nested');
+        await nested.add('nested_file');
+        await nested.commit('init nested submodule');
 
         const submoduleBasePath = `${base.path}/submodule`;
         await fs.mkdir(submoduleBasePath);
@@ -285,6 +300,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await fs.writeFile(`${submoduleBasePath}/init_file`, 'init');
         await submodule.add('init_file');
         await submodule.commit('init submodule');
+
+        await submodule.submoduleAdd(nestedSubmodule.path, './nested');
+        await submodule.commit('add nested submodule');
 
         await repo.submoduleAdd('./submodule', './submodule');
         await repo.commit('add submodule');
@@ -307,11 +325,35 @@ describe('util/git/index', { timeout: 30000 }, () => {
       it('sets non-master base branch with submodule update', async () => {
         await git.initRepo({
           cloneSubmodules: true,
+          cloneSubmodulesRecursive: true,
           url: base.path,
         });
         expect((await git.getRepoStatus()).isClean()).toBeTrue();
         await git.checkoutBranch('stable');
         expect((await git.getRepoStatus()).isClean()).toBeTrue();
+        expect(
+          await fs.pathExists(`${tmpDir.path}/submodule/init_file`),
+        ).toBeTrue();
+        expect(
+          await fs.pathExists(`${tmpDir.path}/submodule/nested/nested_file`),
+        ).toBeTrue();
+      });
+
+      it('clones submodules non-recursively when cloneSubmodulesRecursive is false', async () => {
+        await git.initRepo({
+          cloneSubmodules: true,
+          cloneSubmodulesRecursive: false,
+          url: base.path,
+        });
+        expect((await git.getRepoStatus()).isClean()).toBeTrue();
+        await git.checkoutBranch('stable');
+        expect((await git.getRepoStatus()).isClean()).toBeTrue();
+        expect(
+          await fs.pathExists(`${tmpDir.path}/submodule/init_file`),
+        ).toBeTrue();
+        expect(
+          await fs.pathExists(`${tmpDir.path}/submodule/nested/nested_file`),
+        ).toBeFalse();
       });
 
       afterEach(async () => {
@@ -322,6 +364,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await repo.reset(['--hard', 'HEAD~2']);
         await repo.branch(['-D', 'stable']);
         await fs.rm(`${base.path}/submodule`, { recursive: true });
+        await nestedSubmodule?.cleanup();
       });
     });
   });
@@ -342,6 +385,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await repo.commit('Add submodules');
       await git.initRepo({
         cloneSubmodules: true,
+        cloneSubmodulesRecursive: true,
         cloneSubmodulesFilter: ['file'],
         url: base.path,
       });
@@ -1303,6 +1347,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
+        cloneSubmodulesRecursive: true,
         url: base.path,
       });
       await git.syncGit();
