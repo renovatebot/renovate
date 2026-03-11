@@ -74,11 +74,11 @@ export abstract class GitDatasource extends Datasource {
     // We need to use the dereferenced commit hash (^{}) for annotated tags
     // to match what `git submodule status` returns (the actual commit hash).
     // This prevents false-positive updates that result in empty commits.
-    const dereferencedTags = new Map<string, string>();
+    const dereferencedTags: Record<string, string> = {};
     for (const ref of allRefs) {
       if (ref.value.endsWith('^{}')) {
         // Store the commit hash for the base tag name (without ^{})
-        dereferencedTags.set(ref.value.slice(0, -3), ref.hash);
+        dereferencedTag[ref.value.slice(0, -3)] = ref.hash;
       }
     }
 
@@ -86,7 +86,7 @@ export abstract class GitDatasource extends Datasource {
       .filter((ref) => !ref.value.endsWith('^{}'))
       .map((ref) => {
         // For annotated tags, use the dereferenced commit hash
-        const dereferencedHash = dereferencedTags.get(ref.value);
+        const dereferencedHash = dereferencedTags[ref.value];
         if (dereferencedHash) {
           return { ...ref, hash: dereferencedHash };
         }
