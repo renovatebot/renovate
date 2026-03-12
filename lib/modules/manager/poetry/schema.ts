@@ -342,37 +342,34 @@ export const PoetryPyProject = Toml.pipe(
 
       const deps: PackageDependency[] = [];
 
-      const projectDependencies = project?.dependencies;
-      if (projectDependencies) {
-        deps.push(...projectDependencies);
-      }
+      const projectDependencies = project?.dependencies ?? [];
+      deps.push(...projectDependencies);
 
-      const projectOptionalDependencies = project?.['optional-dependencies'];
-      if (projectOptionalDependencies) {
-        deps.push(...projectOptionalDependencies);
-      }
+      const projectOptionalDependencies =
+        project?.['optional-dependencies'] ?? [];
+      deps.push(...projectOptionalDependencies);
 
       deps.push(...dependencyGroups);
 
       const projectDepsByName: Record<string, PackageDependency> = {};
       for (const dep of [
-        ...(projectDependencies ?? []),
-        ...(dependencyGroups ?? []),
-        ...(projectOptionalDependencies ?? []),
+        ...projectDependencies,
+        ...dependencyGroups,
+        ...projectOptionalDependencies,
       ]) {
         projectDepsByName[dep.depName!] = dep;
       }
 
-      const poetryDependencies = tool?.poetry?.dependencies;
+      const poetryDependencies = tool?.poetry?.dependencies ?? [];
 
-      const poetryDevDependencies = tool?.poetry?.['dev-dependencies'];
+      const poetryDevDependencies = tool?.poetry?.['dev-dependencies'] ?? [];
 
-      const poetryGroupDependencies = tool?.poetry?.group;
+      const poetryGroupDependencies = tool?.poetry?.group ?? [];
 
       for (const poetryDep of [
-        ...(poetryDependencies ?? []),
-        ...(poetryDevDependencies ?? []),
-        ...(poetryGroupDependencies ?? []),
+        ...poetryDependencies,
+        ...poetryDevDependencies,
+        ...poetryGroupDependencies,
       ]) {
         // When the same dep exists in project.dependencies or dependency-groups,
         // Poetry just uses the Poetry dep for enrichment with source info.
