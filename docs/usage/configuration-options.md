@@ -1060,6 +1060,26 @@ Example:
 If the `datasource` for a dependency is not captured with a named group, then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### defaultRegistryUrlTemplate
+
+This field is used to build a `registryUrl` for the dependency.
+It is not needed if either:
+
+- The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
+- The matching groups you specified as part of the matching already include a `registryUrl` group
+  As this is a template it can be dynamically set.
+  E.g. add the `packageName` as part of the URL:
+
+```json5
+{
+  customDatasources: {
+    foo: {
+      defaultRegistryUrlTemplate: 'https://example.foo.bar/v1/{{ packageName }}',
+    },
+  },
+}
+```
+
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
@@ -1131,6 +1151,11 @@ Only the `json`, `toml` and `yaml` formats are supported.
   ]
 }
 ```
+
+### format
+
+Defines which format the API is returning.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
 
 ### matchStrings
 
@@ -1324,6 +1349,11 @@ It will default to the value of `depName` if left unconfigured/undefined.
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### transformTemplates
+
+`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
+Use this if the API does not return a Renovate compatible schema.
+
 ### versioningTemplate
 
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -1336,36 +1366,6 @@ You may use the `customizeDashboard` object to customize the Dependency Dashboar
 Supported fields:
 
 - `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
-
-### defaultRegistryUrlTemplate
-
-This field is used to build a `registryUrl` for the dependency.
-It is not needed if either:
-
-- The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
-- The matching groups you specified as part of the matching already include a `registryUrl` group
-  As this is a template it can be dynamically set.
-  E.g. add the `packageName` as part of the URL:
-
-```json5
-{
-  customDatasources: {
-    foo: {
-      defaultRegistryUrlTemplate: 'https://example.foo.bar/v1/{{ packageName }}',
-    },
-  },
-}
-```
-
-### format
-
-Defines which format the API is returning.
-Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
-
-### transformTemplates
-
-`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
-Use this if the API does not return a Renovate compatible schema.
 
 ## defaultRegistryUrls
 
