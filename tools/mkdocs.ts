@@ -1,9 +1,11 @@
 import { Command } from 'commander';
 import type { ExecaSyncReturnValue } from 'execa';
 import fs from 'fs-extra';
-import { logger } from '../lib/logger/index.ts';
+import { init, logger } from '../lib/logger/index.ts';
 import { generateDocs } from './docs/index.ts';
 import { exec } from './utils/exec.ts';
+
+await init();
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
