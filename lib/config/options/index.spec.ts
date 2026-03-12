@@ -1,4 +1,4 @@
-import { isNullOrUndefined } from '@sindresorhus/is';
+import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { getOptions } from './index.ts';
@@ -85,6 +85,21 @@ describe('config/options/index', () => {
                 expect(foundOption[0].allowedValues).toContain(prop.value);
               });
             }
+          }
+        }
+      }
+    }
+  });
+
+  describe('options with a parent cannot be cli=true', () => {
+    const opts = getOptions();
+    for (const option of opts) {
+      if (option.name !== 'enabled' && option.name !== 'managerFilePatterns') {
+        if (!isUndefined(option.parents)) {
+          for (const parent of option.parents) {
+            it(`${parent}.${option.name}: cli=false`, () => {
+              expect(option.cli).toBeFalse();
+            });
           }
         }
       }
