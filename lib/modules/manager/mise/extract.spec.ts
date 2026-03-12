@@ -985,5 +985,57 @@ describe('modules/manager/mise/extract', () => {
         ],
       });
     });
+
+    it.each`
+      version            | currentValue
+      ${'21'}            | ${'21'}
+      ${'21.0'}          | ${'21.0'}
+      ${'temurin-21'}    | ${'21'}
+      ${'corretto-21.0'} | ${'21.0'}
+    `(
+      'uses semver-partial versioning for short java version $version',
+      ({ version, currentValue }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+              versioning: 'semver-partial',
+            },
+          ],
+        });
+      },
+    );
+
+    it.each`
+      version             | currentValue
+      ${'21.0.2'}         | ${'21.0.2'}
+      ${'temurin-21.0.2'} | ${'21.0.2'}
+    `(
+      'does not use semver-partial for full java version $version',
+      ({ version, currentValue }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+            },
+          ],
+        });
+        expect(result?.deps[0]).not.toHaveProperty('versioning');
+      },
+    );
   });
 });
