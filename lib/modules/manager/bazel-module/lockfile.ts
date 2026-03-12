@@ -10,6 +10,7 @@ export async function updateBazelLockfile(
   lockFileName: string,
   cwdFile: string,
   isLockFileMaintenance: boolean | undefined,
+  bazeliskConstraint: string | undefined,
 ): Promise<UpdateArtifactsResult[] | null> {
   try {
     if (isLockFileMaintenance) {
@@ -19,7 +20,9 @@ export async function updateBazelLockfile(
     const execOptions: ExecOptions = {
       cwdFile,
       docker: {},
-      toolConstraints: [{ toolName: 'bazelisk' }],
+      toolConstraints: [
+        { toolName: 'bazelisk', constraint: bazeliskConstraint },
+      ],
     };
     await exec('bazel mod deps', execOptions);
 

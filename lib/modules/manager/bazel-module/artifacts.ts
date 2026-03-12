@@ -35,5 +35,6 @@ export async function updateArtifacts({
     lockFileName,
     packageFileName,
     isLockFileMaintenance,
+    config.constraints?.bazelisk,
   );
 }

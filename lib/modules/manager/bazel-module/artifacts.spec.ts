@@ -76,6 +76,7 @@ describe('modules/manager/bazel-module/artifacts', () => {
       'MODULE.bazel.lock',
       'MODULE.bazel',
       undefined,
+      undefined,
     );
     expect(result).toEqual([
       {
@@ -105,6 +106,28 @@ describe('modules/manager/bazel-module/artifacts', () => {
       'MODULE.bazel.lock',
       'MODULE.bazel',
       true,
+      undefined,
+    );
+  });
+
+  it('passes bazelisk constraint to updateBazelLockfile', async () => {
+    const { updateBazelLockfile } = await import('./lockfile.ts');
+    vi.mocked(updateBazelLockfile).mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
+    fs.readLocalFile.mockResolvedValueOnce('old lock content');
+
+    await updateArtifacts({
+      packageFileName: 'MODULE.bazel',
+      updatedDeps: [{ depName: 'rules_go' }],
+      newPackageFileContent: 'bazel_dep(name = "rules_go", version = "0.42.0")',
+      config: { ...config, constraints: { bazelisk: '>=1.18.0' } },
+    });
+
+    expect(updateBazelLockfile).toHaveBeenCalledWith(
+      'MODULE.bazel.lock',
+      'MODULE.bazel',
+      undefined,
+      '>=1.18.0',
     );
   });
 
@@ -132,6 +155,7 @@ describe('modules/manager/bazel-module/artifacts', () => {
     expect(updateBazelLockfile).toHaveBeenCalledWith(
       'subdir/MODULE.bazel.lock',
       'subdir/MODULE.bazel',
+      undefined,
       undefined,
     );
     expect(result).toEqual([

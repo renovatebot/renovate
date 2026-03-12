@@ -37,6 +37,7 @@ describe('modules/manager/bazel-module/lockfile', () => {
       'MODULE.bazel.lock',
       'MODULE.bazel',
       undefined,
+      undefined,
     );
 
     expect(result).toEqual([
@@ -66,6 +67,7 @@ describe('modules/manager/bazel-module/lockfile', () => {
       'MODULE.bazel.lock',
       'MODULE.bazel',
       undefined,
+      undefined,
     );
 
     expect(result).toEqual([
@@ -92,6 +94,7 @@ describe('modules/manager/bazel-module/lockfile', () => {
       'MODULE.bazel.lock',
       'MODULE.bazel',
       undefined,
+      undefined,
     );
 
     expect(result).toBeNull();
@@ -111,6 +114,7 @@ describe('modules/manager/bazel-module/lockfile', () => {
       'MODULE.bazel.lock',
       'MODULE.bazel',
       true,
+      undefined,
     );
 
     expect(result).toEqual([
@@ -134,7 +138,12 @@ describe('modules/manager/bazel-module/lockfile', () => {
       }),
     );
 
-    await updateBazelLockfile('MODULE.bazel.lock', 'MODULE.bazel', false);
+    await updateBazelLockfile(
+      'MODULE.bazel.lock',
+      'MODULE.bazel',
+      false,
+      undefined,
+    );
 
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
   });
@@ -143,7 +152,12 @@ describe('modules/manager/bazel-module/lockfile', () => {
     mockExecAll(new Error(TEMPORARY_ERROR));
 
     await expect(
-      updateBazelLockfile('MODULE.bazel.lock', 'MODULE.bazel', undefined),
+      updateBazelLockfile(
+        'MODULE.bazel.lock',
+        'MODULE.bazel',
+        undefined,
+        undefined,
+      ),
     ).rejects.toThrow(TEMPORARY_ERROR);
   });
 
@@ -153,6 +167,7 @@ describe('modules/manager/bazel-module/lockfile', () => {
     const result = await updateBazelLockfile(
       'MODULE.bazel.lock',
       'MODULE.bazel',
+      undefined,
       undefined,
     );
 
