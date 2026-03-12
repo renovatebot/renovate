@@ -6,6 +6,7 @@
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
+      "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
@@ -22,6 +23,7 @@
       "replacements:google-github-action-release-please-to-googleapis",
       "replacements:grafana-oss-to-grafana",
       "replacements:hapi-to-scoped",
+      "replacements:home-operations-to-official",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -140,6 +142,17 @@
         "matchPackageNames": ["babel-eslint"],
         "replacementName": "@babel/eslint-parser",
         "replacementVersion": "7.11.0"
+      }
+    ]
+  },
+  "base-ui-components-to-base-ui": {
+    "description": "`@base-ui-components/react` was renamed to `@base-ui/react`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@base-ui-components/react"],
+        "replacementName": "@base-ui/react",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
@@ -759,6 +772,18 @@
         "matchPackageNames": ["hapi"],
         "replacementName": "@hapi/hapi",
         "replacementVersion": "18.2.0"
+      }
+    ]
+  },
+  "home-operations-to-official": {
+    "description": "`home-operations` only builts these until official versions are released",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.18.6",
+        "matchDatasources": ["helm", "docker"],
+        "matchPackageNames": ["ghcr.io/home-operations/charts-mirror/cilium"],
+        "replacementName": "quay.io/cilium/charts/cilium",
+        "replacementVersion": "1.18.6"
       }
     ]
   },

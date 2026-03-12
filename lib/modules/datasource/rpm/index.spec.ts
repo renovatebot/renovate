@@ -27,6 +27,26 @@ describe('modules/datasource/rpm/index', () => {
       );
     });
 
+    it('returns the correct primary.xml URL when repomd.xml omits xml declaration', async () => {
+      const repomdXml = `<repomd xmlns="http://linux.duke.edu/metadata/repo"
+  xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+  <data type="primary">
+    <location href="repodata/somesha256-primary.xml.gz"/>
+  </data>
+</repomd>`;
+
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+
+      const primaryXmlUrl = await rpmDatasource.getPrimaryGzipUrl(registryUrl);
+
+      expect(primaryXmlUrl).toBe(
+        'https://example.com/repo/repodata/somesha256-primary.xml.gz',
+      );
+    });
+
     it('throws an error if repomd.xml is missing', async () => {
       httpMock.scope(registryUrl).get('/repomd.xml').reply(404, 'Not Found');
 

@@ -221,7 +221,7 @@ async function updateArtifactsImpl(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

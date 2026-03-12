@@ -19,6 +19,11 @@ import { getEnv } from '../env.ts';
 import type { Opt, ToolConfig, ToolConstraint } from './types.ts';
 
 const allToolConfig: Record<string, ToolConfig> = {
+  bazelisk: {
+    datasource: 'github-releases',
+    packageName: 'bazelbuild/bazelisk',
+    versioning: semverVersioningId,
+  },
   bun: {
     datasource: 'github-releases',
     packageName: 'oven-sh/bun',

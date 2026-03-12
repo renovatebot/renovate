@@ -2811,7 +2811,7 @@ describe('modules/datasource/docker/index', () => {
         .twice()
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull',
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"',
         })
         .get('/visualon/drone-git/tags/list?n=10000')
         .reply(401, '', {

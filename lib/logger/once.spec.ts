@@ -1,7 +1,10 @@
-import { logger } from './index.ts';
+import { init, logger } from './index.ts';
 import { once, reset } from './once.ts';
 
 vi.unmock('.');
+
+// init logger
+await init();
 
 describe('logger/once', () => {
   afterEach(() => {

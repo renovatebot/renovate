@@ -238,6 +238,7 @@ export async function generateSchema(
 
   const schema = {
     // may be overridden based on `isGlobal` and `isInherit`
+    $id: 'https://docs.renovatebot.com/renovate-schema.json',
     title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
     $schema: 'http://json-schema.org/draft-07/schema#',
     'x-renovate-version': `${version}`,
@@ -257,8 +258,10 @@ export async function generateSchema(
   };
 
   if (isGlobal) {
+    schema.$id = 'https://docs.renovatebot.com/renovate-global-schema.json';
     schema.title = `JSON schema for Renovate ${version} global self-hosting configuration (https://renovatebot.com/)`;
   } else if (isInherit) {
+    schema.$id = 'https://docs.renovatebot.com/renovate-inherited-schema.json';
     schema.title = `JSON schema for Renovate ${version} config files (with Inherit Config options) (https://renovatebot.com/)`;
   }
 
