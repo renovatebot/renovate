@@ -55,7 +55,7 @@ export async function updateBazelLockfile(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

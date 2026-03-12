@@ -174,7 +174,7 @@ describe('modules/manager/bazel-module/lockfile', () => {
     expect(result).toEqual([
       {
         artifactError: {
-          lockFile: 'MODULE.bazel.lock',
+          fileName: 'MODULE.bazel.lock',
           stderr: 'bazel mod deps failed',
         },
       },
