@@ -265,7 +265,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toEqual([
       {
         artifactError: {
-          lockFile: 'maven',
+          fileName: 'maven',
           stderr: 'temporary-error',
         },
       },
