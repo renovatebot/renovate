@@ -460,7 +460,7 @@ function rangeToStr(fullRange: Range[] | null): string | null {
 }
 
 function tokensToStr(tokens: Token[]): string {
-  return tokens.reduce((result: string, token: Token, idx) => {
+  return tokens.reduce((result: string, token: Token) => {
     const prefix =
       token.prefix === PREFIX_DOT
         ? '.'
