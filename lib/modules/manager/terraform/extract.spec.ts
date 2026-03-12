@@ -338,12 +338,15 @@ describe('modules/manager/terraform/extract', () => {
     it('extracts OCI modules and providers', async () => {
       const src = codeBlock`
         module "vpc_oci" {
-          source  = "oci://registry.example.com/terraform-modules/vpc"
-          version = "1.2.3"
+          source = "oci://registry.example.com/terraform-modules/vpc?tag=1.2.3"
         }
 
         module "storage_oci_tagged" {
-          source = "oci://ghcr.io/terraform-modules/storage:3.1.0"
+          source = "oci://ghcr.io/terraform-modules/storage?tag=3.1.0"
+        }
+
+        module "digest_oci" {
+          source = "oci://ghcr.io/terraform-modules/pinned?digest=sha256:abc123"
         }
 
         module "no_version_oci" {
@@ -353,12 +356,11 @@ describe('modules/manager/terraform/extract', () => {
         terraform {
           required_providers {
             custom_oci = {
-              source  = "oci://registry.example.com/providers/custom"
-              version = "1.0.0"
+              source = "oci://registry.example.com/providers/custom?tag=1.0.0"
             }
 
             tagged_oci = {
-              source = "oci://ghcr.io/providers/tagged:4.2.0"
+              source = "oci://ghcr.io/providers/tagged?tag=4.2.0"
             }
 
             no_version_oci = {
@@ -368,7 +370,7 @@ describe('modules/manager/terraform/extract', () => {
         }
       `;
       const res = await extractPackageFile(src, 'oci.tf', {});
-      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps).toHaveLength(7);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: '1.2.3',
@@ -383,6 +385,13 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'ghcr.io/terraform-modules/storage',
           depType: 'module',
           packageName: 'ghcr.io/terraform-modules/storage',
+        },
+        {
+          currentValue: 'sha256:abc123',
+          datasource: 'docker',
+          depName: 'ghcr.io/terraform-modules/pinned',
+          depType: 'module',
+          packageName: 'ghcr.io/terraform-modules/pinned',
         },
         {
           datasource: 'docker',

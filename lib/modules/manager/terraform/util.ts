@@ -55,12 +55,20 @@ export function applyOciDependency(
   dep: PackageDependency,
   source: string,
 ): void {
-  const parsed = getDep(removeOCIPrefix(source), false);
+  // OCI sources only support versioning via `?tag=` or `?digest=` query params.
+  // See: https://opentofu.org/docs/language/modules/sources/#selecting-a-tag-or-digest
+  const [pathPart, queryPart] = removeOCIPrefix(source).split('?');
+
+  // Strip optional `//subfolder` sub-path (e.g. `example.com/repo//modules/vpc`)
+  const imageRef = pathPart.replace(/\/\/.*$/, '');
+  const params = new URLSearchParams(queryPart);
+  const tag = params.get('tag') ?? params.get('digest') ?? undefined;
+
+  const parsed = getDep(imageRef, false);
   dep.packageName = parsed.packageName;
   dep.datasource = parsed.datasource;
-  if (!dep.currentValue && parsed.currentValue) {
-    dep.currentValue = parsed.currentValue;
-  }
+  dep.currentValue = tag;
+
   if (!dep.currentValue) {
     dep.skipReason = 'unspecified-version';
   }
