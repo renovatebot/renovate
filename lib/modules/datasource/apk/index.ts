@@ -138,7 +138,7 @@ export class ApkDatasource extends Datasource {
     }
   }
 
-  getPackages(registryUrl: string): Promise<ApkPackage[]> {
+  private getPackages(registryUrl: string): Promise<ApkPackage[]> {
     return withCache(
       {
         namespace: `datasource-${ApkDatasource.id}`,
