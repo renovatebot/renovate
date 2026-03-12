@@ -6,9 +6,10 @@ import { GitTagsDatasource } from '../../../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.ts';
 import { TerraformModuleDatasource } from '../../../../datasource/terraform-module/index.ts';
 import { isOCIRegistry } from '../../../helmv3/oci.ts';
-import type { PackageDependency } from '../../../types.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
 import { applyOciDependency } from '../../util.ts';
 
 export const githubRefMatchRegex = regEx(
@@ -33,7 +34,11 @@ export class ModuleExtractor extends DependencyExtractor {
     return ['module'];
   }
 
-  extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
+  extract(
+    hclRoot: TerraformDefinitionFile,
+    _locks: ProviderLock[],
+    config: ExtractConfig,
+  ): PackageDependency[] {
     const modules = hclRoot.module;
     if (isNullOrUndefined(modules)) {
       return [];
@@ -56,19 +61,22 @@ export class ModuleExtractor extends DependencyExtractor {
             source: moduleElement.source,
           },
         };
-        dependencies.push(this.analyseTerraformModule(dep));
+        dependencies.push(this.analyseTerraformModule(dep, config));
       }
     }
 
     return dependencies;
   }
 
-  private analyseTerraformModule(dep: PackageDependency): PackageDependency {
+  private analyseTerraformModule(
+    dep: PackageDependency,
+    config: ExtractConfig,
+  ): PackageDependency {
     // TODO #22198
     const source = dep.managerData!.source as string;
 
     if (isOCIRegistry(source)) {
-      applyOciDependency(dep, source);
+      applyOciDependency(dep, source, config.registryAliases);
       dep.depName = dep.packageName;
       return dep;
     }

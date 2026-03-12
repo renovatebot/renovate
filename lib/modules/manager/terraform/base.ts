@@ -40,6 +40,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
     dep: PackageDependency,
     locks: ProviderLock[],
     depType: string,
+    config: ExtractConfig,
   ): PackageDependency {
     dep.depType = depType;
     dep.depName = dep.managerData?.moduleName;
@@ -48,7 +49,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
     if (isNonEmptyString(dep.managerData?.source)) {
       // TODO #22198
       if (isOCIRegistry(dep.managerData.source)) {
-        applyOciDependency(dep, dep.managerData.source);
+        applyOciDependency(dep, dep.managerData.source, config.registryAliases);
         return dep;
       }
 

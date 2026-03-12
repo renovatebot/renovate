@@ -335,6 +335,26 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
+    it('resolves OCI registry aliases', async () => {
+      const src = codeBlock`
+        module "aliased_oci" {
+          source = "oci://hub.proxy.test/terraform-modules/vpc?tag=1.0.0"
+        }
+      `;
+      const res = await extractPackageFile(src, 'oci.tf', {
+        registryAliases: { 'hub.proxy.test': 'index.docker.io' },
+      });
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'index.docker.io/terraform-modules/vpc',
+          depType: 'module',
+          packageName: 'index.docker.io/terraform-modules/vpc',
+        },
+      ]);
+    });
+
     it('extracts OCI modules and providers', async () => {
       const src = codeBlock`
         module "vpc_oci" {

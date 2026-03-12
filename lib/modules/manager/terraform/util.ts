@@ -54,6 +54,7 @@ export function getLockedVersion(
 export function applyOciDependency(
   dep: PackageDependency,
   source: string,
+  registryAliases?: Record<string, string>,
 ): void {
   // OCI sources only support versioning via `?tag=` or `?digest=` query params.
   // See: https://opentofu.org/docs/language/modules/sources/#selecting-a-tag-or-digest
@@ -64,7 +65,7 @@ export function applyOciDependency(
   const params = new URLSearchParams(queryPart);
   const tag = params.get('tag') ?? params.get('digest') ?? undefined;
 
-  const parsed = getDep(imageRef, false);
+  const parsed = getDep(imageRef, false, registryAliases);
   dep.packageName = parsed.packageName;
   dep.datasource = parsed.datasource;
   dep.currentValue = tag;
