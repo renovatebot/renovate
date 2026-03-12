@@ -679,6 +679,12 @@ export interface RenovateOptionBase {
    * Conditions that must be met for this option to be required.
    */
   requiredIf?: RenovateRequiredOption[];
+
+  /**
+   * If true, the option's value supports Renovate templating.
+   * @see https://docs.renovatebot.com/templates/
+   */
+  supportsTemplating?: boolean;
 }
 
 export interface RenovateRequiredOption {
