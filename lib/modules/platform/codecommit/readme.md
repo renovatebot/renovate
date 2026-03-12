@@ -8,10 +8,6 @@
     The Renovate maintainers have decided that we will not add any new features unless a company is willing to contribute feature(s) for CodeCommit **and maintain them**.
     For more details [see Discussion 39741](https://github.com/renovatebot/renovate/discussions/39741#discussioncomment-15172240).
 
-<!-- prettier-ignore -->
-!!! warning "This feature is flagged as experimental"
-    Experimental features might be changed or even removed at any time.
-
 ## Authentication
 
 ### IAM Role

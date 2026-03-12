@@ -10,16 +10,8 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of these locations:
 
-1. `renovate.json`
-1. `renovate.json5`
-1. `.github/renovate.json`
-1. `.github/renovate.json5`
-1. `.gitlab/renovate.json`
-1. `.gitlab/renovate.json5`
-1. `.renovaterc`
-1. `.renovaterc.json`
-1. `.renovaterc.json5`
-1. `package.json` _(within a `"renovate"` section)_
+<!-- config-filenames-begin -->
+<!-- config-filenames-end -->
 
 Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
 The bot first checks all the files in the `configFileNames` array before checking from the above file list.
@@ -704,6 +696,33 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 ## commitBodyTable
 
+## commitHourlyLimit
+
+This config option limits the number of commits Renovate pushes in an hour.
+It includes commits pushed while creating a new branch or rebasing an existing one.
+
+Use `commitHourlyLimit` to strictly control the rate at which Renovate triggers CI runs.
+Both branch creation and rebasing trigger CI runs, so limiting these operations helps you control your CI load.
+
+For example, with `commitHourlyLimit: 2`, in a given hour Renovate might:
+
+- Create 2 new branches (triggering 2 CI runs), then stop until the next hour, or
+- Create 1 new branch and rebase 1 existing branch (2 CI runs total), then stop
+
+This limit is enforced on a per-repository basis and per hourly period (`:00` through `:59`).
+
+This setting differs from `prHourlyLimit` in an important way:
+
+- `prHourlyLimit` only limits PR _creation_. Renovate can still rebase existing branches, which triggers additional CI runs
+- `commitHourlyLimit` limits both branch creation _and_ automatic rebasing, giving you stricter control over CI usage
+
+If you want strict control over CI load, use `commitHourlyLimit`.
+If you only want to limit the rate of _new_ PRs, use [prHourlyLimit](#prhourlylimit).
+
+<!-- prettier-ignore -->
+!!! tip
+    Manual rebases (requested via checkbox, Dependency Dashboard, or rebase label) always bypass this limit.
+
 ## commitMessage
 
 ## commitMessageAction
@@ -1041,6 +1060,26 @@ Example:
 If the `datasource` for a dependency is not captured with a named group, then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### defaultRegistryUrlTemplate
+
+This field is used to build a `registryUrl` for the dependency.
+It is not needed if either:
+
+- The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
+- The matching groups you specified as part of the matching already include a `registryUrl` group
+  As this is a template it can be dynamically set.
+  E.g. add the `packageName` as part of the URL:
+
+```json5
+{
+  customDatasources: {
+    foo: {
+      defaultRegistryUrlTemplate: 'https://example.foo.bar/v1/{{ packageName }}',
+    },
+  },
+}
+```
+
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
@@ -1112,6 +1151,11 @@ Only the `json`, `toml` and `yaml` formats are supported.
   ]
 }
 ```
+
+### format
+
+Defines which format the API is returning.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
 
 ### matchStrings
 
@@ -1305,6 +1349,11 @@ It will default to the value of `depName` if left unconfigured/undefined.
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### transformTemplates
+
+`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
+Use this if the API does not return a Renovate compatible schema.
+
 ### versioningTemplate
 
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -1317,36 +1366,6 @@ You may use the `customizeDashboard` object to customize the Dependency Dashboar
 Supported fields:
 
 - `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
-
-### defaultRegistryUrlTemplate
-
-This field is used to build a `registryUrl` for the dependency.
-It is not needed if either:
-
-- The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
-- The matching groups you specified as part of the matching already include a `registryUrl` group
-  As this is a template it can be dynamically set.
-  E.g. add the `packageName` as part of the URL:
-
-```json5
-{
-  customDatasources: {
-    foo: {
-      defaultRegistryUrlTemplate: 'https://example.foo.bar/v1/{{ packageName }}',
-    },
-  },
-}
-```
-
-### format
-
-Defines which format the API is returning.
-Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
-
-### transformTemplates
-
-`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
-Use this if the API does not return a Renovate compatible schema.
 
 ## defaultRegistryUrls
 
@@ -1920,7 +1939,9 @@ For example, to group all non-major devDependencies updates together into a sing
 
 <!-- prettier-ignore -->
 !!! note
-    Replacement updates and lock file maintenance will never be grouped.
+    Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
 
 ## groupSlug
 
@@ -2590,30 +2611,8 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-| Manager           | Lockfile                                           |
-| ----------------- | -------------------------------------------------- |
-| `bun`             | `bun.lockb`, `bun.lock`                            |
-| `bundler`         | `Gemfile.lock`                                     |
-| `cargo`           | `Cargo.lock`                                       |
-| `composer`        | `composer.lock`                                    |
-| `conan`           | `conan.lock`                                       |
-| `devbox`          | `devbox.lock`                                      |
-| `gleam`           | `manifest.toml`                                    |
-| `gradle`          | `gradle.lockfile`                                  |
-| `helmv3`          | `Chart.lock`                                       |
-| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
-| `mix`             | `mix.lock`                                         |
-| `nix`             | `flake.lock`                                       |
-| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
-| `nuget`           | `packages.lock.json`                               |
-| `pep621`          | `pdm.lock`, `uv.lock`                              |
-| `pip-compile`     | `requirements.txt`                                 |
-| `pipenv`          | `Pipfile.lock`                                     |
-| `pixi`            | `pixi.lock`                                        |
-| `poetry`          | `poetry.lock`                                      |
-| `pub`             | `pubspec.lock`                                     |
-| `terraform`       | `.terraform.lock.hcl`                              |
-| `uv`              | `uv.lock`                                          |
+<!-- lock-file-maintenance-table-start -->
+<!-- lock-file-maintenance-table-end -->
 
 Support for new lock files may be added via feature request.
 
@@ -3410,7 +3409,7 @@ The following example matches any file in directories starting with `app/`:
 }
 ```
 
-The following example matches any `.toml` file in a `v2` or `v3` directory:
+The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory:
 
 ```json
 {
@@ -3440,9 +3439,14 @@ $exists(deprecationMessage)
 $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
+$detectPlatform(sourceUrl) = "github"
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
+
+Renovate provides the following custom JSONata functions:
+
+- `$detectPlatform(url)` - Takes a URL string and returns the detected platform (`azure`, `bitbucket`, `bitbucket-server`, `forgejo`, `gitea`, `github`, `gitlab`) or `null`.
 
 ### matchManagers
 
@@ -3728,7 +3732,9 @@ You can suggest a new community package rule by editing [the `replacements.json`
 
 <!-- prettier-ignore -->
 !!! note
-    Replacement updates and lock file maintenance will never be grouped.
+    Replacement updates will never be grouped.
+    <br>
+    Lock file maintenance will never be grouped with other dependency updates.
 
 ### replacementNameTemplate
 
@@ -4012,6 +4018,47 @@ Dotfiles are included.
 
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
+
+### installTools
+
+Whether to install any additional tools dynamically before executing the `commands`.
+
+These must be known by [Containerbase](https://github.com/containerbase/base).
+
+<!-- prettier-ignore -->
+!!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
+
+For example:
+
+```json title="Adding a tool requirement"
+{
+  "postUpgradeTasks": {
+    "commands": ["make generate"],
+    "installTools": {
+      "golang": {}
+    }
+  }
+}
+```
+
+```json title="Utilising constraints for tool requirements"
+{
+  "constraints": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
+  "postUpgradeTasks": {
+    "commands": ["npm install", "npm run update-readme"],
+    "installTools": {
+      "node": {}
+    }
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    The tool objects inside `installTools` currently do not expose any additional configurability.
 
 ### workingDirTemplate
 
@@ -4374,6 +4421,17 @@ This feature works with the following managers:
 }
 ```
 
+If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
+
+```json title="Using a pull-through cache for public images"
+{
+  "registryAliases": {
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/ghcr.io": "ghcr.io",
+    "12345612312.dkr.ecr.us-east-1.amazonaws.com/public-images-go-here/dockerhub": "docker.io"
+  }
+}
+```
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
@@ -4692,7 +4750,7 @@ Please see the above link for valid timezone names.
 
 ## toolSettings
 
-When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle-wrapper` manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
+When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle`](./modules/manager/gradle/index.md) or [the `gradle-wrapper`](./modules/manager/gradle-wrapper/index.md) managers, the repository's Gradle Wrapper will be invoked, if present.
 
 The JVM heap size for the Java invocations is 512m by default.
 This can be overridden using the following options.
@@ -4706,19 +4764,25 @@ This option can be used on the repository level and in the [Renovate configurati
 
 <!-- prettier-ignore -->
 !!! note
-    The JVM memory settings are considered for the `gradle-wrapper` manager.
+    The JVM memory settings are considered for the `gradle` and `gradle-wrapper` manager.
 
 ### jvmMaxMemory
 
 Maximum heap size in MB for Java VMs.
 Defaults to `512` for both the repository level and self-hosted configuration.
 
-To allow repositories to use _more_ than 512m of heap during the Gradle Wrapper update, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
+To allow repositories to use _more_ than 512m of heap during any invocations of the Gradle Wrapper, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
 
 ### jvmMemory
 
 Initial heap size in MB for Java VMs. Must be less than or equal to `jvmMaxMemory`.
 Defaults to `jvmMaxMemory`.
+
+### nodeMaxMemory
+
+<!-- prettier-ignore -->
+!!! note
+    This does not apply to _every_ Node process created by Renovate, only the managers noted above.
 
 ## updateInternalDeps
 
@@ -4895,7 +4959,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 
 <!-- prettier-ignore -->
 !!! note
-    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
     This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
     In short: vulnerability alerts "skip the line".
 

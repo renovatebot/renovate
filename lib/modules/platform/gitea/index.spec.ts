@@ -2925,6 +2925,15 @@ describe('modules/platform/gitea/index', () => {
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
       );
     });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](issues/123) [#124](issues/124) [#125](issues/125)',
+      );
+    });
   });
 
   it('maxBodyLength', () => {

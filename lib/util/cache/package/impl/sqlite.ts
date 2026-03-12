@@ -3,10 +3,11 @@ import zlib, { constants } from 'node:zlib';
 import type { Database, Statement } from 'better-sqlite3';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { sqlite } from '../../../expose.ts';
-import { logger } from '../../../logger/index.ts';
-import { ensureDir } from '../../fs/index.ts';
-import type { PackageCacheNamespace } from './types.ts';
+import { sqlite } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ensureDir } from '../../../fs/index.ts';
+import type { PackageCacheNamespace } from '../types.ts';
+import { PackageCacheBase } from './base.ts';
 
 const { exists } = fs;
 const brotliCompress = promisify(zlib.brotliCompress);
@@ -28,14 +29,8 @@ async function decompress<T>(input: Buffer): Promise<T> {
   return JSON.parse(jsonStr) as T;
 }
 
-export class SqlitePackageCache {
-  private readonly upsertStatement: Statement<unknown[]>;
-  private readonly getStatement: Statement<unknown[]>;
-  private readonly deleteExpiredRows: Statement<unknown[]>;
-  private readonly countStatement: Statement<unknown[]>;
-
-  static async init(cacheDir: string): Promise<SqlitePackageCache> {
-    // simply let it throw if it fails, so no test coverage needed
+export class PackageCacheSqlite extends PackageCacheBase {
+  static async create(cacheDir: string): Promise<PackageCacheSqlite> {
     const Sqlite = await sqlite();
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
@@ -48,14 +43,20 @@ export class SqlitePackageCache {
     }
 
     const client = new Sqlite(sqliteFile);
-    const res = new SqlitePackageCache(client);
-    return res;
+    return new PackageCacheSqlite(client);
   }
 
-  private client: Database;
+  private readonly upsertStatement: Statement<unknown[]>;
+  private readonly getStatement: Statement<unknown[]>;
+  private readonly deleteExpiredRows: Statement<unknown[]>;
+  private readonly countStatement: Statement<unknown[]>;
+
+  private readonly client: Database;
 
   private constructor(client: Database) {
+    super();
     this.client = client;
+
     client.pragma('journal_mode = WAL');
     client.pragma("encoding = 'UTF-8'");
 
@@ -74,11 +75,6 @@ export class SqlitePackageCache {
       .run();
     client
       .prepare('CREATE INDEX IF NOT EXISTS expiry ON package_cache (expiry)')
-      .run();
-    client
-      .prepare(
-        'CREATE INDEX IF NOT EXISTS namespace_key ON package_cache (namespace, key)',
-      )
       .run();
 
     this.upsertStatement = client.prepare(`
@@ -109,19 +105,23 @@ export class SqlitePackageCache {
       .pluck(true);
   }
 
-  async set(
+  override async set(
     namespace: PackageCacheNamespace,
     key: string,
     value: unknown,
-    hardTtlMinutes = 5,
+    hardTtlMinutes: number,
   ): Promise<void> {
-    const data = await compress(value);
+    const compressedData = await compress(value);
     const ttlSeconds = hardTtlMinutes * 60;
-    this.upsertStatement.run({ namespace, key, data, ttlSeconds });
-    return Promise.resolve();
+    this.upsertStatement.run({
+      namespace,
+      key,
+      data: compressedData,
+      ttlSeconds,
+    });
   }
 
-  async get<T = unknown>(
+  override async get<T = unknown>(
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
@@ -136,19 +136,14 @@ export class SqlitePackageCache {
     return await decompress<T>(data);
   }
 
-  private cleanupExpired(): void {
-    const start = Date.now();
+  override destroy(): Promise<void> {
+    const startTime = Date.now();
     const totalCount = this.countStatement.get() as number;
     const { changes: deletedCount } = this.deleteExpiredRows.run();
-    const finish = Date.now();
-    const durationMs = finish - start;
+    const durationMs = Date.now() - startTime;
     logger.debug(
       `SQLite package cache: deleted ${deletedCount} of ${totalCount} entries in ${durationMs}ms`,
     );
-  }
-
-  cleanup(): Promise<void> {
-    this.cleanupExpired();
     this.client.close();
     return Promise.resolve();
   }

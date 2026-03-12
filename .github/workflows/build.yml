@@ -127,7 +127,7 @@ jobs:
           FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
-          echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          pnpm -s schedule-test-shards >> "$GITHUB_OUTPUT"
 
   setup-build:
     runs-on: ubuntu-latest
@@ -267,7 +267,7 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm prettier --write --cache-location .cache/prettier
+          pnpm prettier-fix --cache-location .cache/prettier
           git diff --quiet || {
             echo "[ERROR] Please apply the changes prettier suggests:"
             git diff --color=always
@@ -361,6 +361,24 @@ jobs:
       - name: Lint other
         run: pnpm lint-other
 
+  lint-actions:
+    needs:
+      - setup-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: false
+          sparse-checkout: .github/workflows
+
+      - name: Check workflow files
+        uses: docker://rhysd/actionlint:1.7.11@sha256:6f03470d0152251d7f07f7c4dc019dbe7024c72cd952f839544c7798843efa8f
+        with:
+          args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+
   test:
     needs: [setup, prefetch]
 
@@ -441,7 +459,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: success() && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -464,7 +482,7 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: coverage-*
           path: coverage
@@ -501,7 +519,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: coverage-*
           path: coverage
@@ -516,10 +534,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --statements 99.86 \
-            --branches 97.53 \
-            --functions 99.94 \
-            --lines 99.85 \
+            --statements 99.88 \
+            --branches 97.84 \
+            --functions 99.96 \
+            --lines 99.87 \
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -528,6 +546,7 @@ jobs:
       - test
       - codecov
       - coverage-threshold
+      - lint-actions
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -571,6 +590,19 @@ jobs:
           needs.coverage-threshold.result == 'skipped'
         run: exit 1
 
+      - name: Fail for failed or cancelled Actions linting
+        if: |
+          needs.lint-actions.result == 'failure' ||
+          needs.lint-actions.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped Actions linting when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.lint-actions.result == 'skipped'
+        run: exit 1
+
   build:
     needs:
       - setup-build
@@ -593,7 +625,7 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: renovate-dist
           path: dist/
@@ -621,7 +653,7 @@ jobs:
           show-progress: false
 
       - name: Download dist
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: renovate-dist
           path: dist/
@@ -687,7 +719,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: docs
           path: tmp/docs/
@@ -717,7 +749,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: renovate-dist
           path: dist/
@@ -793,7 +825,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@dff12516229cac81a6f2611f8971a0df5376176e # v4.1.4
+        uses: containerbase/internal-tools@eb77ce0cc5c5e56aa99d06750357db0d68969ce2 # v4.1.23
         with:
           command: docker-config
 
@@ -806,12 +838,22 @@ jobs:
       - name: Install newer npm
         run: npm install -g npm
 
-      - uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      - uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
 
       - name: Docker registry login
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
+        with:
+          python-version-file: .python-version
+          version: ${{ env.PDM_VERSION }}
+          cache: true
+
+      - name: Install pdm dependencies
+        run: pdm install
 
       - name: Check dry run
         run: |
@@ -828,11 +870,34 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
 
+      - name: Build mkdocs site for deployment (when no release)
+        if: github.ref_name == 'main'
+        run: |
+          # If there wasn't a release, we won't have executed `tools/prepare-release.ts`, and the mkdocs site won't be built, but we do want it built regardless, so we can update the docs site
+          if [[ ! -f tmp/mkdocs-site.tgz ]]; then
+            latest_tag=$(gh release view --json tagName -q .tagName)
+            pnpm mkdocs build --version "$latest_tag"
+            mkdir -p tmp
+            tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload docs artifact for deployment
+        if: github.ref_name == 'main'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: mkdocs-site
+          path: tmp/mkdocs-site.tgz
+          retention-days: 1
+
       - run: df -h
 
-  build-deploy-docs-site:
+  deploy-docs-site:
     if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}
-    needs: release
+    needs:
+      - setup-build
+      - release
 
     permissions:
       pages: write
@@ -844,40 +909,16 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download mkdocs site from release
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          show-progress: false
+          name: mkdocs-site
+          path: tmp
 
-      - name: Setup Node.js
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ needs.setup-build.outputs.node-version }}
-          os: ${{ runner.os }}
-
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
-        with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
-
-      - name: Install pdm dependencies
-        run: pdm install
-
-      - name: Determine latest release tag (whether we've released as part of this build or not)
-        id: latest_release
+      - name: Extract docs site
         run: |
-          latest_release=$(gh release view --json tagName -q .tagName)
-          echo "release_tag=$latest_release" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      # Rebuild the docs site to make sure that we have the version specified in the JSON Schema and page footer
-      - name: Build mkdocs for Renovate ${{ steps.latest_release.outputs.release_tag }}
-        run: pnpm mkdocs build --version ${{ steps.latest_release.outputs.release_tag }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          mkdir -p tools/mkdocs/site
+          tar -xzf tmp/mkdocs-site.tgz -C tools/mkdocs/site
 
       # Per https://github.com/renovatebot/helm-charts/issues/3752, when we migrated the docs site from renovatebot/renovatebot.github.io to renovatebot/renovate, the `/helm-charts/` repository would no longer work as a subdomain, due to a known GitHub Pages limitation
       - name: Mirror helm-charts/index.yaml from helm-charts' GitHub Pages site
@@ -891,6 +932,7 @@ jobs:
           path: tools/mkdocs/site
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
   notify-release-failure:
@@ -912,3 +954,23 @@ jobs:
                 text:
                   type: "mrkdwn"
                   text: "*Release from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+
+  notify-docs-failure:
+    runs-on: ubuntu-latest
+    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.deploy-docs-site.result == 'failure' || needs.deploy-docs-site.result == 'timed_out') }}
+    needs:
+      - deploy-docs-site
+    steps:
+      - name: Post to Slack
+        id: slack
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"

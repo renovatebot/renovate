@@ -74,6 +74,54 @@ describe('workers/global/index', () => {
       expect(repoConfig.parentOrg).toBe('a');
       expect(repoConfig.repository).toBe('a/b');
     });
+
+    it('should resolve repository-level presets before merging with global config', async () => {
+      const globalConfigWithPackageRules: RenovateConfig = {
+        baseDir: '/tmp/base',
+        packageRules: [
+          {
+            description: 'global rule',
+            matchManagers: ['npm'],
+            enabled: false,
+          },
+        ],
+      };
+      const repository = {
+        repository: 'test/repo',
+        // :approveMajorUpdates has packageRules with dependencyDashboardApproval
+        extends: [':approveMajorUpdates'],
+        packageRules: [
+          {
+            description: 'repo rule',
+            matchPackageNames: ['lodash'],
+            enabled: true,
+          },
+        ],
+      };
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        globalConfigWithPackageRules,
+        repository,
+      );
+
+      // Verify packageRules exist and have the correct merge order:
+      // 1. Global config packageRules
+      // 2. Preset packageRules (from :approveMajorUpdates)
+      // 3. Repository packageRules
+      expect(repoConfig.packageRules).toMatchObject([
+        {
+          description: 'global rule',
+          matchManagers: ['npm'],
+        },
+        {
+          dependencyDashboardApproval: true,
+          matchUpdateTypes: ['major'],
+        },
+        {
+          description: 'repo rule',
+          matchPackageNames: ['lodash'],
+        },
+      ]);
+    });
   });
 
   it('handles config warnings and errors', async () => {

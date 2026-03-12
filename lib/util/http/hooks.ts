@@ -1,6 +1,8 @@
 // Renovate issue: https://github.com/renovatebot/renovate/issues/12127
 // Got issue: https://github.com/sindresorhus/got/issues/1489
 // From here: https://github.com/sindresorhus/got/issues/1489#issuecomment-805485731
+// fixed in https://github.com/sindresorhus/got/releases/tag/v14.6.0
+// TODO: remove when got is upgraded to v14.6.0+
 import type { Hooks, Response } from 'got';
 
 export function isResponseOk(response: Response): boolean {
@@ -20,6 +22,6 @@ export function hook(response: Response): Response {
   return response;
 }
 
-export const hooks: Hooks = {
+export const hooks: Partial<Hooks> = {
   afterResponse: [hook],
 };

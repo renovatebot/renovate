@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
 import type { Http } from '../../../util/http/index.ts';

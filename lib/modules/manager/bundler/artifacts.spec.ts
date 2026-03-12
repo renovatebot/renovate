@@ -509,7 +509,7 @@ describe('modules/manager/bundler/artifacts', () => {
             isLockFileMaintenance: true,
           },
         }),
-      ).toMatchObject([{ artifactError: { lockFile: 'Gemfile.lock' } }]);
+      ).toMatchObject([{ artifactError: { fileName: 'Gemfile.lock' } }]);
       expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock --update' }]);
     });
 
@@ -566,7 +566,7 @@ describe('modules/manager/bundler/artifacts', () => {
         ).toMatchObject([
           {
             artifactError: {
-              lockFile: 'Gemfile.lock',
+              fileName: 'Gemfile.lock',
             },
           },
         ]);
@@ -614,7 +614,7 @@ describe('modules/manager/bundler/artifacts', () => {
               isLockFileMaintenance: true,
             },
           }),
-        ).toMatchObject([{ artifactError: { lockFile: 'Gemfile.lock' } }]);
+        ).toMatchObject([{ artifactError: { fileName: 'Gemfile.lock' } }]);
       });
 
       it('throws on authentication errors', async () => {

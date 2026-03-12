@@ -809,6 +809,40 @@ describe('config/presets/internal/custom-managers', () => {
     });
   });
 
+  describe('Update `*_version` variables in `.tfvars` files', () => {
+    const customManager = presets.tfvarsVersions.customManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        # renovate: datasource=docker depName=python registryUrl=https://index.docker.io
+        python_version = "3.14.0-alpine"
+        # renovate: datasource=npm depName=pnpm
+        pnpm_version = "10.19.0"
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'terraform.tfvars',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '3.14.0-alpine',
+          datasource: 'docker',
+          depName: 'python',
+          registryUrls: ['https://index.docker.io/'],
+        },
+        {
+          currentValue: '10.19.0',
+          datasource: 'npm',
+          depName: 'pnpm',
+        },
+      ]);
+    });
+  });
+
   describe('Update `tsconfig/node` version in tsconfig.json', () => {
     const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
 

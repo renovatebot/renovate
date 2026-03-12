@@ -1,5 +1,5 @@
 import { isPlainObject } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
