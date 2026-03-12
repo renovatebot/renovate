@@ -132,7 +132,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         el[1] = `<code>${el[1]}</code>`;
       }
       if (el[0] === 'supportsTemplating' && el[1]) {
-        el[1] = `<a href="https://docs.renovatebot.com/templates/">true</a>`;
+        el[1] = `<a href="/templates/">true</a>`;
       }
       if (
         // objects and arrays should be printed in JSON notation
@@ -207,7 +207,7 @@ function genExperimentalMsg(el: Record<string, any>): string {
 function genTemplatingMsg(): string {
   return (
     '\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate\'s template syntax"\n' +
-    indent`${2}See [templates](https://docs.renovatebot.com/templates/) for available variables and helpers.` +
+    indent`${2}See [templates](/templates/) for available variables and helpers.` +
     '\n'
   );
 }
