@@ -91,13 +91,13 @@ describe('config/options/index', () => {
     }
   });
 
-  describe('options with a parent cannot be cli=true', () => {
+  describe('options with a parent cannot be set on the command-line', () => {
     const opts = getOptions();
     for (const option of opts) {
       if (option.name !== 'enabled' && option.name !== 'managerFilePatterns') {
         if (!isUndefined(option.parents)) {
           for (const parent of option.parents) {
-            it(`${parent}.${option.name}: cli=false`, () => {
+            it(`${parent}.${option.name}: should be cli=false`, () => {
               expect(option.cli).toBeFalse();
             });
           }
