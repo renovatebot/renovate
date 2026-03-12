@@ -1726,7 +1726,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'go.sum',
+          fileName: 'go.sum',
           stderr: 'This update totally doesnt work',
         },
       },
@@ -2671,7 +2671,7 @@ describe('modules/manager/gomod/artifacts', () => {
         },
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },
+      { artifactError: { fileName: 'go.sum', stderr: 'Invalid goGetDirs' } },
     ]);
     expect(execSnapshots).toMatchObject([]);
   });
