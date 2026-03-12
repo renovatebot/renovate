@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import { api as semverCoerced } from '../semver-coerced';
-import type { VersioningApi } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { api as semverCoerced } from '../semver-coerced/index.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'same-major';
 export const displayName = 'Same Major Versioning';

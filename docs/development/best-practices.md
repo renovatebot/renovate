@@ -29,7 +29,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 - Prefer `interface` over `type` for TypeScript type declarations
 - Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use unions or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
 - Always add unit tests for full code coverage
-  - Only use `v8` comments for unreachable code coverage that is needed for `codecov` completion
+  - Only use [`v8` comments](https://github.com/AriPerkkio/ast-v8-to-istanbul?tab=readme-ov-file#ignore-hints) for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `v8` comments
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
 - Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more

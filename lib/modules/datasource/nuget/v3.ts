@@ -1,31 +1,31 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import extract from 'extract-zip';
 import semver from 'semver';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
-import { cache } from '../../../util/cache/package/decorator';
-import { getEnv } from '../../../util/env';
-import * as fs from '../../../util/fs';
-import { ensureCacheDir } from '../../../util/fs';
-import type { Http } from '../../../util/http';
-import { HttpError } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash } from '../../../util/url';
-import { api as versioning } from '../../versioning/nuget';
-import type { Release, ReleaseResult } from '../types';
-import { massageUrl, removeBuildMeta, sortNugetVersions } from './common';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as fs from '../../../util/fs/index.ts';
+import { ensureCacheDir } from '../../../util/fs/index.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { Http } from '../../../util/http/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { api as versioning } from '../../versioning/nuget/index.ts';
+import type { Release, ReleaseResult } from '../types.ts';
+import { massageUrl, removeBuildMeta, sortNugetVersions } from './common.ts';
 import type {
   CatalogEntry,
   CatalogPage,
   PackageRegistration,
   ServicesIndexRaw,
-} from './types';
+} from './types.ts';
 
 export class NugetV3Api {
   static readonly cacheNamespace = 'datasource-nuget-v3';
@@ -222,7 +222,7 @@ export class NugetV3Api {
         registryUrl,
         'PackageBaseAddress',
       );
-      if (is.nonEmptyString(packageBaseAddress)) {
+      if (isNonEmptyString(packageBaseAddress)) {
         const nuspecUrl = `${ensureTrailingSlash(
           packageBaseAddress,
         )}${pkgName.toLowerCase()}/${
@@ -282,18 +282,7 @@ export class NugetV3Api {
     return dep;
   }
 
-  @cache({
-    namespace: NugetV3Api.cacheNamespace,
-    key: (
-      _http: Http,
-      registryUrl: string,
-      packageName: string,
-      _packageVersion: string | null,
-      _nupkgUrl: string,
-    ) => `source-url:${registryUrl}:${packageName}`,
-    ttlMinutes: 10080, // 1 week
-  })
-  async getSourceUrlFromNupkg(
+  private async _getSourceUrlFromNupkg(
     http: Http,
     _registryUrl: string,
     packageName: string,
@@ -328,6 +317,30 @@ export class NugetV3Api {
       await fs.rmCache(nupkgFile);
       await fs.rmCache(nupkgContentsDir);
     }
+  }
+
+  getSourceUrlFromNupkg(
+    http: Http,
+    registryUrl: string,
+    packageName: string,
+    packageVersion: string | null,
+    nupkgUrl: string,
+  ): Promise<string | null> {
+    return withCache(
+      {
+        namespace: NugetV3Api.cacheNamespace,
+        key: `source-url:${registryUrl}:${packageName}`,
+        ttlMinutes: 10080, // 1 week
+      },
+      () =>
+        this._getSourceUrlFromNupkg(
+          http,
+          registryUrl,
+          packageName,
+          packageVersion,
+          nupkgUrl,
+        ),
+    );
   }
 
   getDeprecationMessage(packageName: string): string {

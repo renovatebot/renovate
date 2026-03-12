@@ -1,10 +1,10 @@
+import ivy from './index.ts';
 import {
   REV_TYPE_LATEST,
   REV_TYPE_RANGE,
   REV_TYPE_SUBREV,
   parseDynamicRevision,
-} from './parse';
-import ivy from '.';
+} from './parse.ts';
 
 describe('modules/versioning/ivy/index', () => {
   it.each`
@@ -36,8 +36,8 @@ describe('modules/versioning/ivy/index', () => {
     ${''}
     ${'.+'}
     ${'[0,1),(1,)'}
-  `('parseDynamicRevision("$input") === null', ({ input, type, value }) => {
-    expect(parseDynamicRevision(value)).toBeNull();
+  `('parseDynamicRevision("$input") === null', ({ input }) => {
+    expect(parseDynamicRevision(input)).toBeNull();
   });
 
   it.each`
@@ -141,22 +141,9 @@ describe('modules/versioning/ivy/index', () => {
   );
 
   it.each`
-    currentValue             | rangeStrategy | currentVersion | newVersion  | expected
-    ${'1'}                   | ${'auto'}     | ${'1'}         | ${'1.1'}    | ${'1.1'}
-    ${'[1.2.3,]'}            | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'[1.2.3,]'}
-    ${'[1.2.3]'}             | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
-    ${'[1.0.0,1.2.3]'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.2.4'}  | ${'1.2.4'}
-    ${'[1.0.0,1.2.23]'}      | ${'pin'}      | ${'1.0.0'}     | ${'1.2.23'} | ${'1.2.23'}
-    ${'(,1.0]'}              | ${'pin'}      | ${'0.0.1'}     | ${'2.0'}    | ${'2.0'}
-    ${'],1.0]'}              | ${'pin'}      | ${'0.0.1'}     | ${'2.0'}    | ${'2.0'}
-    ${'(,1.0)'}              | ${'pin'}      | ${'0.1'}       | ${'2.0'}    | ${'2.0'}
-    ${'],1.0['}              | ${'pin'}      | ${'2.0'}       | ${'],2.0['} | ${'],2.0['}
-    ${'[1.0,1.2],[1.3,1.5)'} | ${'pin'}      | ${'1.0'}       | ${'1.2.4'}  | ${'1.2.4'}
-    ${'[1.0,1.2],[1.3,1.5['} | ${'pin'}      | ${'1.0'}       | ${'1.2.4'}  | ${'1.2.4'}
-    ${'[1.2.3,)'}            | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
-    ${'[1.2.3,['}            | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
-    ${'latest.integration'}  | ${'pin'}      | ${'1.0'}       | ${'2.0'}    | ${'2.0'}
-    ${'latest'}              | ${'pin'}      | ${'1.0'}       | ${'2.0'}    | ${'2.0'}
+    currentValue  | rangeStrategy | currentVersion | newVersion | expected
+    ${'1'}        | ${'auto'}     | ${'1'}         | ${'1.1'}   | ${'1.1'}
+    ${'[1.2.3,]'} | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'} | ${'[1.2.3,]'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

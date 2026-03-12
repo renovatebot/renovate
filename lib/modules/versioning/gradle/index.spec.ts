@@ -1,5 +1,5 @@
-import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
-import { api } from '.';
+import { compare, parseMavenBasedRange, parsePrefixRange } from './compare.ts';
+import { api } from './index.ts';
 
 describe('modules/versioning/gradle/index', () => {
   describe('compare', () => {

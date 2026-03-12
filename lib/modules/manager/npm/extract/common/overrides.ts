@@ -1,8 +1,8 @@
-import is from '@sindresorhus/is';
-import type { PackageDependency } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import { extractDependency } from './dependency';
-import { setNodeCommitTopic } from './node';
+import { isEmptyObject, isString } from '@sindresorhus/is';
+import type { PackageDependency } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { extractDependency } from './dependency.ts';
+import { setNodeCommitTopic } from './node.ts';
 
 /**
  * Used when there is a json object as a value in overrides block.
@@ -15,11 +15,11 @@ export function extractOverrideDepsRec(
   child: NpmManagerData,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  if (!child || is.emptyObject(child)) {
+  if (!child || isEmptyObject(child)) {
     return deps;
   }
   for (const [overrideName, versionValue] of Object.entries(child)) {
-    if (is.string(versionValue)) {
+    if (isString(versionValue)) {
       // special handling for "." override dependency name
       // "." means the constraint is applied to the parent dep
       const currDepName =

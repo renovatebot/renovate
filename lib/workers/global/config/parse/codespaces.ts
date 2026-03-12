@@ -1,8 +1,8 @@
 import readline from 'node:readline';
-import type { AllConfig } from '../../../../config/types';
-import { getEnv } from '../../../../util/env';
+import type { AllConfig } from '../../../../config/types.ts';
+import { getEnv } from '../../../../util/env.ts';
 
-/* v8 ignore start */
+/* v8 ignore next */
 export async function setConfig(config: AllConfig): Promise<AllConfig> {
   const env = getEnv();
   if (env.CODESPACES !== 'true') {
@@ -24,4 +24,3 @@ export async function setConfig(config: AllConfig): Promise<AllConfig> {
 
   return config;
 }
-/* v8 ignore stop */

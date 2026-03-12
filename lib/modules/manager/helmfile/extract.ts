@@ -1,22 +1,22 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import { parseYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { isEmptyArray, isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { Doc, HelmRepository } from './schema';
-import { Doc as Document } from './schema';
+} from '../types.ts';
+import type { Doc, HelmRepository } from './schema.ts';
+import { Doc as Document } from './schema.ts';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,
-} from './utils';
+} from './utils.ts';
 
 function isValidChartName(name: string | undefined, oci: boolean): boolean {
   if (oci) {
@@ -106,7 +106,7 @@ export async function extractPackageFile(
         }
       }
 
-      if (!is.string(dep.version)) {
+      if (!isString(dep.version)) {
         deps.push({
           depName,
           skipReason: 'invalid-version',
@@ -127,7 +127,7 @@ export async function extractPackageFile(
       } else if (repoName) {
         res.registryUrls = [registryData[repoName]?.url]
           .concat([config.registryAliases?.[repoName]] as string[])
-          .filter(is.string);
+          .filter(isString);
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
@@ -146,7 +146,7 @@ export async function extractPackageFile(
       // Skip in case we cannot locate the registry
       if (
         res.datasource !== DockerDatasource.id &&
-        is.emptyArray(res.registryUrls)
+        isEmptyArray(res.registryUrls)
       ) {
         res.skipReason = 'unknown-registry';
       }

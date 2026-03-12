@@ -16,14 +16,14 @@ You must set `platform=forgejo` in your Renovate config file.
 
 The PAT should have these permissions:
 
-| Scope          | Permission       | Valid for Forgejo versions     | Notes                         |
-| -------------- | ---------------- | ------------------------------ | ----------------------------- |
-| `repo`         | `Read and Write` | all                            |                               |
-| `user`         | `Read`           | all                            |                               |
-| `issue`        | `Read and Write` | `>= 1.20.0`                    |                               |
-| `organization` | `Read`           | `>= 1.20.0`                    | Required to read group labels |
-| `email`        | `Read`           | `<= 1.19.3`                    |                               |
-| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                               |
+| Scope          | Permission       | Valid for Forgejo versions     | Notes                                 |
+| -------------- | ---------------- | ------------------------------ | ------------------------------------- |
+| `repo`         | `Read and Write` | all                            |                                       |
+| `user`         | `Read`           | all                            |                                       |
+| `issue`        | `Read and Write` | `>= 1.20.0`                    |                                       |
+| `organization` | `Read`           | `>= 1.20.0`                    | Required to read org labels and teams |
+| `email`        | `Read`           | `<= 1.19.3`                    |                                       |
+| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                                       |
 
 If you use Forgejo packages, add the `read:packages` scope.
 

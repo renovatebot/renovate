@@ -1,4 +1,4 @@
-import { MaybeTimestamp, asTimestamp } from './timestamp';
+import { MaybeTimestamp, asTimestamp } from './timestamp.ts';
 
 describe('util/timestamp', () => {
   describe('asTimestamp', () => {

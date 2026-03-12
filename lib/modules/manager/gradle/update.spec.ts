@@ -1,4 +1,4 @@
-import { updateDependency } from '.';
+import { updateDependency } from './index.ts';
 
 describe('modules/manager/gradle/update', () => {
   it('replaces', () => {

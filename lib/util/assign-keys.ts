@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 
 /**
  * Assigns non-nullish values from `right` to `left` for the given `keys`.
@@ -10,7 +10,7 @@ export function assignKeys<
 >(left: Left, right: Right, keys: K[]): Left {
   for (const key of keys) {
     const val = right[key];
-    if (!is.nullOrUndefined(val)) {
+    if (!isNullOrUndefined(val)) {
       left[key] = val as unknown as Left[typeof key];
     }
   }

@@ -1,6 +1,6 @@
 import { gzipSync } from 'node:zlib';
-import { RpmDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { RpmDatasource } from './index.ts';
 
 describe('modules/datasource/rpm/index', () => {
   describe('getPrimaryGzipUrl', () => {
@@ -27,12 +27,34 @@ describe('modules/datasource/rpm/index', () => {
       );
     });
 
+    it('returns the correct primary.xml URL when repomd.xml omits xml declaration', async () => {
+      const repomdXml = `<repomd xmlns="http://linux.duke.edu/metadata/repo"
+  xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+  <data type="primary">
+    <location href="repodata/somesha256-primary.xml.gz"/>
+  </data>
+</repomd>`;
+
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+
+      const primaryXmlUrl = await rpmDatasource.getPrimaryGzipUrl(registryUrl);
+
+      expect(primaryXmlUrl).toBe(
+        'https://example.com/repo/repodata/somesha256-primary.xml.gz',
+      );
+    });
+
     it('throws an error if repomd.xml is missing', async () => {
       httpMock.scope(registryUrl).get('/repomd.xml').reply(404, 'Not Found');
 
       await expect(
         rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow(`Response code 404 (Not Found)`);
+      ).rejects.toThrow(
+        `Request failed with status code 404 (Not Found): GET https://example.com/repo/repodata/repomd.xml`,
+      );
     });
 
     it('throws an error if http.getText fails', async () => {
@@ -192,7 +214,9 @@ describe('modules/datasource/rpm/index', () => {
 
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
-      ).rejects.toThrow(`Response code 404 (Not Found)`);
+      ).rejects.toThrow(
+        `Request failed with status code 404 (Not Found): GET https://example.com/repo/repodata/somesha256-primary.xml.gz`,
+      );
     });
 
     it('throws an error if response.body is empty', async () => {

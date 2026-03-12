@@ -1,15 +1,15 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { simpleGit } from 'simple-git';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { getChildEnv } from '../../../util/exec/utils';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { simpleGitConfig } from '../../../util/git/config';
-import { getRemoteUrlWithToken } from '../../../util/git/url';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig } from '../types';
-import type { RawRefs } from './types';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { getChildEnv } from '../../../util/exec/utils.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { simpleGitConfig } from '../../../util/git/config.ts';
+import { getRemoteUrlWithToken } from '../../../util/git/url.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig } from '../types.ts';
+import type { RawRefs } from './types.ts';
 
 const refMatch = regEx(/(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/);
 const headMatch = regEx(/(?<hash>.*?)\s+HEAD/);
@@ -24,11 +24,7 @@ export abstract class GitDatasource extends Datasource {
     super(id);
   }
 
-  @cache({
-    namespace: `datasource-${gitId}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  async getRawRefs({
+  private async _getRawRefs({
     packageName,
   }: GetReleasesConfig): Promise<RawRefs[] | null> {
     const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
@@ -45,7 +41,7 @@ export abstract class GitDatasource extends Datasource {
       return null;
     }
 
-    const refs = lsRemote
+    const allRefs = lsRemote
       .trim()
       .split(newlineRegex)
       .map((line) => line.trim())
@@ -69,9 +65,44 @@ export abstract class GitDatasource extends Datasource {
         logger.trace(`malformed ref: ${line}`);
         return null;
       })
-      .filter(is.truthy)
-      .filter((ref) => ref.type !== 'pull' && !ref.value.endsWith('^{}'));
+      .filter(isTruthy)
+      .filter((ref) => ref.type !== 'pull');
+
+    // For annotated tags, git ls-remote returns two entries:
+    // 1. The tag object hash: refs/tags/v1.0.0
+    // 2. The dereferenced commit hash: refs/tags/v1.0.0^{}
+    // We need to use the dereferenced commit hash (^{}) for annotated tags
+    // to match what `git submodule status` returns (the actual commit hash).
+    // This prevents false-positive updates that result in empty commits.
+    const dereferencedTags: Record<string, string> = {};
+    for (const ref of allRefs) {
+      if (ref.value.endsWith('^{}')) {
+        // Store the commit hash for the base tag name (without ^{})
+        dereferencedTags[ref.value.slice(0, -3)] = ref.hash;
+      }
+    }
+
+    const refs = allRefs
+      .filter((ref) => !ref.value.endsWith('^{}'))
+      .map((ref) => {
+        // For annotated tags, use the dereferenced commit hash
+        const dereferencedHash = dereferencedTags[ref.value];
+        if (dereferencedHash) {
+          return { ...ref, hash: dereferencedHash };
+        }
+        return ref;
+      });
 
     return refs;
+  }
+
+  getRawRefs(config: GetReleasesConfig): Promise<RawRefs[] | null> {
+    return withCache(
+      {
+        namespace: `datasource-${gitId}`,
+        key: config.packageName,
+      },
+      () => this._getRawRefs(config),
+    );
   }
 }

@@ -1,5 +1,5 @@
-import type { NugetFloatingRange, NugetRange, NugetVersion } from './types';
-import { compare, versionToString } from './version';
+import type { NugetFloatingRange, NugetRange, NugetVersion } from './types.ts';
+import { compare, versionToString } from './version.ts';
 
 export function getFloatingRangeLowerBound(
   range: NugetFloatingRange,

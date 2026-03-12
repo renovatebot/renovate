@@ -1,10 +1,12 @@
-import type { Category } from '../../../constants';
-import { PypiDatasource } from '../../datasource/pypi';
-export { bumpPackageVersion } from './update';
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
+import type { Category } from '../../../constants/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
+export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['pdm.lock', 'uv.lock'];
 
 export const displayName = 'PEP 621';
 export const url = 'https://peps.python.org/pep-0621';

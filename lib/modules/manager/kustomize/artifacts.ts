@@ -1,22 +1,22 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { generateHelmEnvs } from './common';
-import { parseKustomize } from './extract';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { generateHelmEnvs } from './common.ts';
+import { parseKustomize } from './extract.ts';
 
 async function localExistingChartPath(
   chartHome: string,
@@ -62,7 +62,7 @@ async function inflateHelmChart(
     currentVersion,
   );
 
-  if (!flagEnabled && is.nullOrUndefined(currentChartExistingPath)) {
+  if (!flagEnabled && isNullOrUndefined(currentChartExistingPath)) {
     logger.debug(
       `Not inflating Helm chart for ${depName} as kustomizeInflateHelmCharts is not enabled and the current version isn't inflated`,
     );
@@ -70,8 +70,8 @@ async function inflateHelmChart(
   }
 
   if (
-    is.nonEmptyString(currentChartExistingPath) &&
-    is.nonEmptyString(newVersion)
+    isNonEmptyString(currentChartExistingPath) &&
+    isNonEmptyString(newVersion)
   ) {
     logger.debug(`Deleting previous helm chart: ${currentChartExistingPath}`);
     await deleteLocalFile(currentChartExistingPath);
@@ -84,7 +84,7 @@ async function inflateHelmChart(
     versionToPull,
   );
 
-  if (is.nonEmptyString(versionToPullExistingPath)) {
+  if (isNonEmptyString(versionToPullExistingPath)) {
     logger.debug(
       `Helm chart ${depName} version ${versionToPull} already exists at ${versionToPullExistingPath}`,
     );
@@ -114,7 +114,7 @@ export async function updateArtifacts({
   const project = parseKustomize(newPackageFileContent);
   const isUpdateOptionInflateChartArchives =
     config.postUpdateOptions?.includes('kustomizeInflateHelmCharts') === true;
-  if (is.nullOrUndefined(project)) {
+  if (isNullOrUndefined(project)) {
     return [
       {
         artifactError: {
@@ -150,7 +150,7 @@ export async function updateArtifacts({
         continue;
       }
 
-      if (!is.nonEmptyString(dependency.depName)) {
+      if (!isNonEmptyString(dependency.depName)) {
         continue;
       }
 
@@ -169,7 +169,7 @@ export async function updateArtifacts({
           break;
       }
 
-      if (is.nullOrUndefined(repository)) {
+      if (isNullOrUndefined(repository)) {
         continue;
       }
 

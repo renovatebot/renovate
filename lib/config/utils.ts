@@ -1,8 +1,8 @@
-import { logger } from '../logger';
-import { clone } from '../util/clone';
-import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils';
-import * as options from './options';
-import type { RenovateConfig } from './types';
+import { logger } from '../logger/index.ts';
+import { clone } from '../util/clone.ts';
+import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils.ts';
+import * as options from './options/index.ts';
+import type { RenovateConfig } from './types.ts';
 
 export function mergeChildConfig<
   T extends Record<string, any>,

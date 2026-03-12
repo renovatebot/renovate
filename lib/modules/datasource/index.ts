@@ -1,20 +1,20 @@
-import is from '@sindresorhus/is';
+import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { GlobalConfig } from '../../config/global';
-import { HOST_DISABLED } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { coerceArray } from '../../util/array';
-import * as memCache from '../../util/cache/memory';
-import * as packageCache from '../../util/cache/package';
-import type { PackageCacheNamespace } from '../../util/cache/package/types';
-import { clone } from '../../util/clone';
-import { filterMap } from '../../util/filter-map';
-import { AsyncResult, Result } from '../../util/result';
-import { DatasourceCacheStats } from '../../util/stats';
-import { trimTrailingSlash } from '../../util/url';
-import * as versioning from '../versioning';
-import datasources from './api';
+import { GlobalConfig } from '../../config/global.ts';
+import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../util/array.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
+import * as packageCache from '../../util/cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
+import { clone } from '../../util/clone.ts';
+import { filterMap } from '../../util/filter-map.ts';
+import { AsyncResult, Result } from '../../util/result.ts';
+import { DatasourceCacheStats } from '../../util/stats.ts';
+import { trimTrailingSlash } from '../../util/url.ts';
+import * as versioning from '../versioning/index.ts';
+import datasources from './api.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
@@ -22,10 +22,10 @@ import {
   filterValidVersions,
   getDatasourceFor,
   sortAndRemoveDuplicates,
-} from './common';
-import { addMetaData } from './metadata';
-import { setNpmrc } from './npm';
-import { resolveRegistryUrl } from './npm/npmrc';
+} from './common.ts';
+import { addMetaData } from './metadata.ts';
+import { setNpmrc } from './npm/index.ts';
+import { resolveRegistryUrl } from './npm/npmrc.ts';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -33,10 +33,10 @@ import type {
   GetPkgReleasesConfig,
   GetReleasesConfig,
   ReleaseResult,
-} from './types';
+} from './types.ts';
 
-export * from './types';
-export { isGetPkgReleasesConfig } from './common';
+export { isGetPkgReleasesConfig } from './common.ts';
+export * from './types.ts';
 
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
@@ -211,9 +211,9 @@ async function mergeRegistries(
           for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
-            if (is.string(newTag) && releaseVersioning.isVersion(newTag)) {
+            if (isString(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
-                is.string(existingTag) &&
+                isString(existingTag) &&
                 releaseVersioning.isVersion(existingTag)
               ) {
                 // We need to compare them
@@ -281,9 +281,9 @@ function resolveRegistryUrls(
 ): string[] {
   if (!datasource.customRegistrySupport) {
     if (
-      is.nonEmptyArray(registryUrls) ||
-      is.nonEmptyArray(defaultRegistryUrls) ||
-      is.nonEmptyArray(additionalRegistryUrls)
+      isNonEmptyArray(registryUrls) ||
+      isNonEmptyArray(defaultRegistryUrls) ||
+      isNonEmptyArray(additionalRegistryUrls)
     ) {
       logger.warn(
         {
@@ -295,21 +295,21 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return is.function(datasource.defaultRegistryUrls)
+    return isFunction(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];
-  if (is.nonEmptyArray(customUrls)) {
+  if (isNonEmptyArray(customUrls)) {
     resolvedUrls = [...customUrls];
-  } else if (is.nonEmptyArray(defaultRegistryUrls)) {
+  } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.function(datasource.defaultRegistryUrls)) {
+  } else if (isFunction(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
+  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   }
@@ -339,10 +339,10 @@ async function fetchReleases(
     return null;
   }
   if (datasourceName === 'npm') {
-    if (is.string(config.npmrc)) {
+    if (isString(config.npmrc)) {
       setNpmrc(config.npmrc);
     }
-    if (!is.nonEmptyArray(registryUrls)) {
+    if (!isNonEmptyArray(registryUrls)) {
       registryUrls = [resolveRegistryUrl(config.packageName)];
     }
   }
@@ -362,7 +362,7 @@ async function fetchReleases(
   const registryStrategy =
     config.registryStrategy ?? datasource.registryStrategy ?? 'hunt';
   try {
-    if (is.nonEmptyArray(registryUrls)) {
+    if (isNonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {

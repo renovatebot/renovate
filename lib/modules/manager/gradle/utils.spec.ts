@@ -1,4 +1,4 @@
-import type { PackageVariables, VariableRegistry } from './types';
+import type { PackageVariables, VariableRegistry } from './types.ts';
 import {
   getVars,
   isDependencyString,
@@ -13,7 +13,7 @@ import {
   toAbsolutePath,
   updateVars,
   versionLikeSubstring,
-} from './utils';
+} from './utils.ts';
 
 describe('modules/manager/gradle/utils', () => {
   describe('versionLikeSubstring', () => {

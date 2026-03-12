@@ -1,14 +1,14 @@
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import type { Pr } from '../../../modules/platform/types';
-import type { LongCommitSha } from '../../../util/git/types';
-import { validateReconfigureBranch } from './validate';
-import { git, partial, platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial, platform } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import type { Pr } from '../../../modules/platform/types.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { validateReconfigureBranch } from './validate.ts';
 
-vi.mock('../../../util/git');
-vi.mock('../init/merge');
+vi.mock('../../../util/git/index.ts');
+vi.mock('../init/merge.ts');
 
 describe('workers/repository/reconfigure/validate', () => {
   const config: RenovateConfig = {
@@ -39,7 +39,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
       'Validation Errors',
@@ -59,7 +59,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       mock<Pr>({ number: 1 }),
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
       'Validation Errors',
@@ -95,7 +95,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Status check is null or an empty string, skipping status check addition.',
     );
@@ -114,7 +114,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Status check is null or an empty string, skipping status check addition.',
     );
@@ -129,7 +129,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Skipping validation check because status check already exists.',
     );
@@ -139,6 +139,21 @@ describe('workers/repository/reconfigure/validate', () => {
     await validateReconfigureBranch(
       config,
       { ...reconfigureConfig, enabledManagers: ['npm'] },
+      configFileName,
+      null,
+    );
+    expect(platform.setBranchStatus).toHaveBeenCalledExactlyOnceWith({
+      branchName: 'prefix/reconfigure',
+      context: 'renovate/config-validation',
+      description: 'Validation Successful',
+      state: 'green',
+    });
+  });
+
+  it('migrates config before validating', async () => {
+    await validateReconfigureBranch(
+      config,
+      { ...reconfigureConfig, baseBranches: ['main'] },
       configFileName,
       null,
     );

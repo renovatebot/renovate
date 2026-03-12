@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { extractDefinition } from './extract';
-import type { ProfileDefinition } from './schema';
-import { extractPackageFile } from '.';
+import { extractDefinition } from './extract.ts';
+import { extractPackageFile } from './index.ts';
+import type { ProfileDefinition } from './schema.ts';
 
 const validProfile = codeBlock`
 ---

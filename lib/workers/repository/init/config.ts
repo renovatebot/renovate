@@ -1,7 +1,7 @@
-import type { RenovateConfig } from '../../../config/types';
-import { checkOnboardingBranch } from '../onboarding/branch';
-import { mergeInheritedConfig } from './inherited';
-import { mergeRenovateConfig } from './merge';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { checkOnboardingBranch } from '../onboarding/branch/index.ts';
+import { mergeInheritedConfig } from './inherited.ts';
+import { mergeRenovateConfig } from './merge.ts';
 
 // istanbul ignore next
 export async function getRepoConfig(

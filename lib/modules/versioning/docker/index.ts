@@ -1,8 +1,8 @@
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'docker';
 export const displayName = 'Docker';
@@ -80,12 +80,14 @@ class DockerVersioningApi extends GenericVersioningApi {
   override isCompatible(version: string, current: string): boolean {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(current);
+    /* oxlint-disable typescript/prefer-optional-chain */
     return !!(
       parsed1 &&
       parsed2 &&
       parsed1.suffix === parsed2.suffix &&
       parsed1.release.length === parsed2.release.length
     );
+    /* oxlint-enable typescript/prefer-optional-chain */
   }
 
   valueToVersion(value: string): string {

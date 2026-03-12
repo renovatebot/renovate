@@ -1,8 +1,8 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
-import { Result } from '../../../../util/result';
-import { YarnConfig } from '../schema';
+import { isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../../logger/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { Result } from '../../../../util/result.ts';
+import { YarnConfig } from '../schema.ts';
 
 const registryRegEx = regEx(
   /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,
@@ -13,7 +13,7 @@ export function loadConfigFromLegacyYarnrc(
 ): YarnConfig | null {
   const registryMatches = [...legacyYarnrc.matchAll(registryRegEx)]
     .map((m) => m.groups)
-    .filter(is.truthy);
+    .filter(isTruthy);
 
   const yarnrcConfig: YarnConfig = {};
   for (const registryMatch of registryMatches) {

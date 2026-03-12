@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import type { PackageFileContent } from '../types';
-import { ComposerExtract } from './schema';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFileContent } from '../types.ts';
+import { ComposerExtract } from './schema.ts';
 
 export async function extractPackageFile(
   content: string,

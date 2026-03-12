@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
@@ -64,7 +64,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val),
+        val: parseInt(val, 10),
         isTransition: transition,
       });
     } else {

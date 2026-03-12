@@ -1,10 +1,10 @@
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { MavenDatasource } from '../../datasource/maven';
-import { id as versioning } from '../../versioning/maven';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { MavenVersionExtract, Version } from './types';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { id as versioning } from '../../versioning/maven/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { MavenVersionExtract, Version } from './types.ts';
 
 // https://regex101.com/r/IcOs7P/1
 const DISTRIBUTION_URL_REGEX = regEx(

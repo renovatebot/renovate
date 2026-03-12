@@ -1,6 +1,6 @@
-import is from '@sindresorhus/is';
-import { get } from '../../../modules/manager';
-import type { ExtractResults } from './types';
+import { isNonEmptyArray } from '@sindresorhus/is';
+import { get } from '../../../modules/manager/index.ts';
+import type { ExtractResults } from './types.ts';
 
 export function processSupersedesManagers(extracts: ExtractResults[]): void {
   const rejected: Record<string, string[]> = {};
@@ -8,7 +8,7 @@ export function processSupersedesManagers(extracts: ExtractResults[]): void {
   for (const primaryExtract of extracts) {
     const primaryManager = primaryExtract.manager;
     const secondaryManagers = get(primaryExtract.manager, 'supersedesManagers');
-    if (!is.nonEmptyArray(secondaryManagers)) {
+    if (!isNonEmptyArray(secondaryManagers)) {
       continue;
     }
 
@@ -30,7 +30,7 @@ export function processSupersedesManagers(extracts: ExtractResults[]): void {
       }
 
       for (const { packageFile, lockFiles } of secondaryExtract.packageFiles) {
-        if (is.nonEmptyArray(lockFiles)) {
+        if (isNonEmptyArray(lockFiles)) {
           rejected[primaryManager] ??= [];
           rejected[primaryManager].push(packageFile);
           continue;
@@ -46,7 +46,7 @@ export function processSupersedesManagers(extracts: ExtractResults[]): void {
 
   for (const extract of extracts) {
     const rejectedFiles = rejected[extract.manager];
-    if (!is.nonEmptyArray(rejectedFiles) || !extract.packageFiles) {
+    if (!isNonEmptyArray(rejectedFiles) || !extract.packageFiles) {
       continue;
     }
 

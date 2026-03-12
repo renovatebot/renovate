@@ -1,8 +1,9 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import { getOptions } from '../../lib/config/options';
-import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces';
-import { regEx } from '../../lib/util/regex';
+import { getOptions } from '../../lib/config/options/index.ts';
+import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
+import { regEx } from '../../lib/util/regex.ts';
+import { templateHelperNames } from '../../lib/util/template/index.ts';
 
 const options = getOptions();
 const markdownGlob = '{docs,lib}/**/*.md';
@@ -28,7 +29,9 @@ describe('docs/documentation', () => {
       const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
       const reg = regEx(`##\\s${configOption}[\\s\\S]+?\n##\\s`);
       const match = reg.exec(content);
-      const subHeadersMatch = match?.[0]?.matchAll(/\n###\s(?<child>\w+)\n/g);
+      const subHeadersMatch = match?.[0]?.matchAll(
+        /\n###\s(?<child>[\w.]+)\n/g,
+      );
       if (subHeadersMatch) {
         for (const subHeaderStr of subHeadersMatch) {
           if (subHeaderStr?.groups?.child) {
@@ -85,10 +88,15 @@ describe('docs/documentation', () => {
           .filter((option) => option.stage !== 'global')
           .filter((option) => !option.globalOnly)
           .filter((option) => option.parents)
-          .map((option) => option.name)
           .filter(
-            (header) =>
-              header !== 'managerFilePatterns' && header !== 'enabled',
+            (option) =>
+              option.name !== 'managerFilePatterns' &&
+              option.name !== 'enabled',
+          )
+          .flatMap((option) =>
+            (option.parents ?? [])
+              .filter((parent) => parent !== '.')
+              .map((parent) => `${parent}.${option.name}`),
           )
           .sort();
       }
@@ -220,6 +228,31 @@ describe('docs/documentation', () => {
               'self-hosted-experimental.md',
             )
           ).sort(),
+        );
+      });
+    });
+
+    describe('docs/usage/templates.md', async () => {
+      async function getAdditionalHandlebarsHelpersHeaders(): Promise<
+        string[]
+      > {
+        const content = await fs.readFile(`docs/usage/templates.md`, 'utf8');
+        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        return matches.map((match) => match.substring(5, match.length - 1));
+      }
+
+      const additionalHandlebarsHelpers =
+        await getAdditionalHandlebarsHelpersHeaders();
+
+      it('has headers sorted alphabetically', () => {
+        expect(additionalHandlebarsHelpers).toEqual(
+          additionalHandlebarsHelpers.toSorted(),
+        );
+      });
+
+      it('documents all added Handlebars helpers', () => {
+        expect(additionalHandlebarsHelpers).toEqual(
+          templateHelperNames.toSorted(),
         );
       });
     });

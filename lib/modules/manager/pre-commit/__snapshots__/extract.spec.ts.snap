@@ -109,6 +109,19 @@ exports[`modules/manager/pre-commit/extract > extractPackageFile() > extracts fr
       "depType": "repository",
       "packageName": "pre-commit/mirrors-prettier",
     },
+    {
+      "currentValue": "v0.10.0",
+      "datasource": "go",
+      "depName": "github.com/wasilibs/go-shellcheck/cmd/shellcheck",
+      "depType": "pre-commit-golang",
+    },
+    {
+      "currentValue": "v1.7.7",
+      "datasource": "github-tags",
+      "depName": "rhysd/actionlint",
+      "depType": "repository",
+      "packageName": "rhysd/actionlint",
+    },
   ],
 }
 `;

@@ -2,10 +2,10 @@ import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
-import { getPkgReleases } from '..';
-import { add, clear } from '../../../util/host-rules';
-import { GitTagsDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { add, clear } from '../../../util/host-rules.ts';
+import { getPkgReleases } from '../index.ts';
+import { GitTagsDatasource } from './index.ts';
 
 vi.mock('simple-git');
 const simpleGitFactoryMock = vi.mocked(simpleGit);
@@ -81,7 +81,7 @@ describe('modules/datasource/git-tags/index', () => {
         { packageName: 'a tag to look up' },
         'v1.0.2',
       );
-      expect(digest).toBe('9cb93e0b236385a4e2efd089d7c6a458f5ff321f');
+      expect(digest).toBe('3936a6bced3587dc9fd464b0a910e0dfd4cfe10d');
     });
 
     it('returns digest for HEAD', async () => {

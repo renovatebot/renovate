@@ -1,13 +1,13 @@
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import { DistroInfo } from '../distro';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
+import { DistroInfo } from '../distro.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   getDatedContainerImageCodename,
   getDatedContainerImageSuffix,
   getDatedContainerImageVersion,
   isDatedCodeName,
-} from './common';
+} from './common.ts';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
@@ -74,7 +74,7 @@ function getMajor(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [major] = ver.split('.');
-    return parseInt(major);
+    return parseInt(major, 10);
   }
   return null;
 }
@@ -83,7 +83,7 @@ function getMinor(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, minor] = ver.split('.');
-    return parseInt(minor);
+    return parseInt(minor, 10);
   }
   return null;
 }
@@ -92,7 +92,7 @@ function getPatch(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, , patch] = ver.split('.');
-    return patch ? parseInt(patch) : null;
+    return patch ? parseInt(patch, 10) : null;
   }
   return null;
 }

@@ -1,4 +1,4 @@
-import { SeparateMultipleMajorMigration } from './separate-multiple-major-migration';
+import { SeparateMultipleMajorMigration } from './separate-multiple-major-migration.ts';
 
 describe('config/migrations/custom/separate-multiple-major-migration', () => {
   it('should remove if separateMajorReleases exists', async () => {

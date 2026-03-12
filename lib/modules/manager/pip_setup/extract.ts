@@ -1,14 +1,14 @@
+import type { lexer, parser } from '@renovatebot/good-enough-parser';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import type { lexer, parser } from 'good-enough-parser';
-import { lang, query as q } from 'good-enough-parser';
-import { regEx } from '../../../util/regex';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
+import { regEx } from '../../../util/regex.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 
 interface ManagerData {
   lineNumber: number;

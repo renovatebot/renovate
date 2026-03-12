@@ -1,8 +1,13 @@
-import is from '@sindresorhus/is';
+import {
+  isEmptyStringOrWhitespace,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isUndefined,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
-import type { AllConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { getParsedContent, migrateAndValidateConfig } from './util';
+import type { AllConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { getParsedContent, migrateAndValidateConfig } from './util.ts';
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   let config: AllConfig = {};
@@ -50,10 +55,10 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     logger.debug('Error reading or parsing additional config file - skipping');
   }
 
-  if (is.nonEmptyObject(config.processEnv)) {
+  if (isNonEmptyObject(config.processEnv)) {
     const exportedKeys = [];
     for (const [key, value] of Object.entries(config.processEnv)) {
-      if (!is.nonEmptyString(value)) {
+      if (!isNonEmptyString(value)) {
         logger.error({ key }, 'processEnv value is not a string.');
         continue;
       }
@@ -77,7 +82,7 @@ export async function deleteNonDefaultConfig(
 ): Promise<void> {
   const configFile = env.RENOVATE_ADDITIONAL_CONFIG_FILE;
 
-  if (is.undefined(configFile) || is.emptyStringOrWhitespace(configFile)) {
+  if (isUndefined(configFile) || isEmptyStringOrWhitespace(configFile)) {
     return;
   }
 

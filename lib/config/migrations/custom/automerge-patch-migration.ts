@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isObject } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class AutomergePatchMigration extends AbstractMigration {
   override readonly deprecated = true;
@@ -8,7 +8,7 @@ export class AutomergePatchMigration extends AbstractMigration {
   override run(value: unknown): void {
     const patch = this.get('patch');
 
-    const newPatch = is.object(patch) ? patch : {};
+    const newPatch = isObject(patch) ? patch : {};
     newPatch.automerge = Boolean(value);
     this.setHard('patch', newPatch);
   }

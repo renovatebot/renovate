@@ -1,10 +1,10 @@
 import { HTTPError } from 'got';
-import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
-import * as hostRules from '../host-rules';
-import { GitlabHttp, setBaseUrl } from './gitlab';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
+import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { GitlabHttp, setBaseUrl } from './gitlab.ts';
 
 hostRules.add({
   hostType: 'gitlab',
@@ -53,7 +53,7 @@ describe('util/http/gitlab', () => {
       paginate: true,
     });
     expect(res.body).toHaveLength(4);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { err: expect.any(Error) },
       'Pagination error',
@@ -124,7 +124,7 @@ describe('util/http/gitlab', () => {
       await expect(
         gitlabApi.get('some-url'),
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `[HTTPError: Response code 403 (Forbidden)]`,
+        `[HTTPError: Request failed with status code 403 (Forbidden): GET https://gitlab.com/api/v4/some-url]`,
       );
     });
 
@@ -133,7 +133,7 @@ describe('util/http/gitlab', () => {
       await expect(
         gitlabApi.get('some-url'),
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `[HTTPError: Response code 404 (Not Found)]`,
+        `[HTTPError: Request failed with status code 404 (Not Found): GET https://gitlab.com/api/v4/some-url]`,
       );
     });
 

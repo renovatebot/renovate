@@ -1,6 +1,6 @@
-import { newlineRegex } from '../../../util/regex';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { newlineRegex } from '../../../util/regex.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
