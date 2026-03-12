@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
-import type { PackageDependency } from '../types';
-import type { ProviderLock } from './lockfile/types';
-import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
+import { isNonEmptyArray } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
+import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { ProviderLock } from './lockfile/types.ts';
+import { extractLocks, findLockFile, readLockFile } from './lockfile/util.ts';
 
 export function checkFileContainsDependency(
   content: string,
@@ -58,7 +58,7 @@ export async function extractLocksForPackageFile(
     const lockFileContent = await readLockFile(lockFilePath);
     if (lockFileContent) {
       const extractedLocks = extractLocks(lockFileContent);
-      if (is.nonEmptyArray(extractedLocks)) {
+      if (isNonEmptyArray(extractedLocks)) {
         locks.push(...extractedLocks);
       }
     }

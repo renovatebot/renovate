@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 
 // Taken from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string. Licensed under CC BY 3.0
 // Removed the ^ and $.

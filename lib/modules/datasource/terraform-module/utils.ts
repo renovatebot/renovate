@@ -1,8 +1,8 @@
-import { isHttpUrl, joinUrlParts } from '../../../util/url';
+import { isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import type {
   ServiceDiscoveryEndpointType,
   ServiceDiscoveryResult,
-} from './types';
+} from './types.ts';
 
 export function createSDBackendURL(
   registryURL: string,

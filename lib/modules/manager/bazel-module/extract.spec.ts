@@ -1,14 +1,15 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { BazelDatasource } from '../../datasource/bazel';
-import { DockerDatasource } from '../../datasource/docker';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { MavenDatasource } from '../../datasource/maven';
-import * as parser from './parser';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { BazelDatasource } from '../../datasource/bazel/index.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { extractPackageFile } from './index.ts';
+import * as parser from './parser/index.ts';
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('lib/modules/manager/bazel-module/__fixtures__'),
@@ -130,6 +131,8 @@ describe('modules/manager/bazel-module/extract', () => {
         registryUrls: [
           'https://example.com/custom_registry.git',
           'https://github.com/bazelbuild/bazel-central-registry',
+          'http://example.com/registry-with-single-quotes.git',
+          'http://example.com/registry-with-double-quotes.git',
         ],
         deps: [
           {
@@ -371,6 +374,82 @@ describe('modules/manager/bazel-module/extract', () => {
       });
     });
 
+    it('returns crate.spec dependencies', async () => {
+      const input = codeBlock`
+        crate.spec(
+            package = "axum",
+            version = "0.8.4",
+        )
+        crate.spec(
+            package = "tokio",
+            version = "1.45.1",
+            features = [
+                "full",
+            ],
+        )
+        crate.spec(
+            package = "custom_crate",
+            git = "https://github.com/example/custom_crate.git",
+            tag = "v1.0.0",
+        )
+        crate.spec(
+            package = "local_crate",
+            path = "/var/crate",
+        )
+        crate.spec(
+            package = "no_version_crate",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: CrateDatasource.id,
+            depType: 'crate_spec',
+            depName: 'axum',
+            currentValue: '0.8.4',
+            managerData: { nestedVersion: true },
+          },
+          {
+            datasource: CrateDatasource.id,
+            depType: 'crate_spec',
+            depName: 'tokio',
+            currentValue: '1.45.1',
+            managerData: { nestedVersion: true },
+          },
+          {
+            datasource: 'github-tags',
+            depType: 'crate_spec',
+            depName: 'custom_crate',
+            currentValue: 'v1.0.0',
+            packageName: 'example/custom_crate',
+            registryUrls: ['https://github.com'],
+            managerData: { nestedVersion: false },
+          },
+          {
+            datasource: CrateDatasource.id,
+            depType: 'crate_spec',
+            depName: 'local_crate',
+            currentValue: '',
+            managerData: { nestedVersion: false },
+            skipReason: 'path-dependency',
+          },
+          {
+            datasource: CrateDatasource.id,
+            currentValue: '',
+            depName: 'no_version_crate',
+            depType: 'crate_spec',
+            managerData: {
+              nestedVersion: false,
+            },
+            skipReason: 'invalid-dependency-specification',
+          },
+        ],
+      });
+    });
+
     it('returns maven.install and maven.artifact dependencies', async () => {
       const input = codeBlock`
         maven.artifact(
@@ -489,6 +568,151 @@ describe('modules/manager/bazel-module/extract', () => {
                 digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
                 image = "index.docker.io/library/nginx",
                 platforms = ["linux/amd64"],
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns oci.pull dependencies with tag only (no digest)', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+          tag = "1.27.1",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'oci_pull',
+            depName: 'nginx_image',
+            packageName: 'index.docker.io/library/nginx',
+            currentValue: '1.27.1',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "nginx_image",
+                image = "index.docker.io/library/nginx",
+                platforms = ["linux/amd64"],
+                tag = "1.27.1",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns oci.pull dependencies without tag or digest', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'oci_pull',
+            depName: 'nginx_image',
+            packageName: 'index.docker.io/library/nginx',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "nginx_image",
+                image = "index.docker.io/library/nginx",
+                platforms = ["linux/amd64"],
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns oci.pull dependencies with registryAliases', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+          tag = "1.27.1",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel', {
+        registryAliases: {
+          'index.docker.io': 'my-docker-mirror.registry.com',
+        },
+      });
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'oci_pull',
+            depName: 'nginx_image',
+            packageName: 'my-docker-mirror.registry.com/library/nginx',
+            currentValue: '1.27.1',
+            currentDigest:
+              'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "nginx_image",
+                digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+                image = "index.docker.io/library/nginx",
+                platforms = ["linux/amd64"],
+                tag = "1.27.1",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns oci.pull dependencies with registryAliases with multiple segments', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "custom_image",
+          digest = "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+          image = "quay.io/myorg/myapp",
+          platforms = ["linux/amd64"],
+          tag = "v2.0.0",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel', {
+        registryAliases: {
+          'quay.io': 'my-registry.com/mirror/quay.io',
+        },
+      });
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'oci_pull',
+            depName: 'custom_image',
+            packageName: 'my-registry.com/mirror/quay.io/myorg/myapp',
+            currentValue: 'v2.0.0',
+            currentDigest:
+              'sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "custom_image",
+                digest = "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                image = "quay.io/myorg/myapp",
+                platforms = ["linux/amd64"],
+                tag = "v2.0.0",
               )
             `,
           },

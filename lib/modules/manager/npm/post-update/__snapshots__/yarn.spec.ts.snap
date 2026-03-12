@@ -6,7 +6,6 @@ exports[`modules/manager/npm/post-update/yarn > allows and ignore scripts 1`] = 
     "cmd": "yarn install --mode=update-lockfile",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -14,6 +13,9 @@ exports[`modules/manager/npm/post-update/yarn > allows and ignore scripts 1`] = 
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -26,11 +28,13 @@ exports[`modules/manager/npm/post-update/yarn > catches errors 1`] = `
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -43,7 +47,6 @@ exports[`modules/manager/npm/post-update/yarn > does not use global cache if zer
     "cmd": "yarn install",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
@@ -51,6 +54,9 @@ exports[`modules/manager/npm/post-update/yarn > does not use global cache if zer
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -63,12 +69,14 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -76,12 +84,14 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "npx yarn-deduplicate --strategy fewer",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -89,12 +99,14 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -102,12 +114,14 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "npx yarn-deduplicate --strategy highest",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -115,12 +129,14 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -133,7 +149,6 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn install",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -143,6 +158,9 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -155,7 +173,6 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn install",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -165,6 +182,9 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -172,7 +192,6 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn dedupe --strategy highest",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -182,6 +201,9 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -194,7 +216,6 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn install --mode=update-lockfile",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -203,6 +224,9 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -210,7 +234,6 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
     "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
     "options": {
       "cwd": "/some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -219,6 +242,9 @@ exports[`modules/manager/npm/post-update/yarn > generates lock files using yarn 
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -231,7 +257,6 @@ exports[`modules/manager/npm/post-update/yarn > only skips build if skipInstalls
     "cmd": "yarn install --mode=skip-build",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -239,6 +264,9 @@ exports[`modules/manager/npm/post-update/yarn > only skips build if skipInstalls
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -246,7 +274,6 @@ exports[`modules/manager/npm/post-update/yarn > only skips build if skipInstalls
     "cmd": "yarn dedupe --strategy highest --mode=skip-build",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -254,6 +281,9 @@ exports[`modules/manager/npm/post-update/yarn > only skips build if skipInstalls
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -266,11 +296,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -278,11 +310,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "npx yarn-deduplicate --strategy fewer",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -290,11 +324,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -302,11 +338,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "npx yarn-deduplicate --strategy highest",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -314,11 +352,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -331,7 +371,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn install",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -340,6 +379,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -352,7 +394,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn install",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -361,6 +402,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -368,7 +412,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn dedupe --strategy highest",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -377,6 +420,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -389,7 +435,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn install --mode=update-lockfile",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -397,6 +442,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -404,7 +452,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
     "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
     "options": {
       "cwd": "some-dir/sub_workspace",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -412,6 +459,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance i
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -424,11 +474,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -436,11 +488,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "npx yarn-deduplicate --strategy fewer",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -448,11 +502,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -460,11 +516,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "npx yarn-deduplicate --strategy highest",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -472,11 +530,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -489,7 +549,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "yarn install",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -498,6 +557,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -510,7 +572,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "yarn install",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -519,6 +580,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -526,7 +590,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
     "cmd": "yarn dedupe --strategy highest",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -535,6 +598,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file maintenance u
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -547,11 +613,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates and f
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -559,11 +627,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates and f
     "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -576,11 +646,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -588,11 +660,13 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
     "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -605,7 +679,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
     "cmd": "yarn install",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -614,6 +687,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -621,7 +697,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
     "cmd": "yarn up -R some-dep",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -630,6 +705,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -642,7 +720,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
     "cmd": "yarn install --mode=update-lockfile",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -650,6 +727,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -657,7 +737,6 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
     "cmd": "yarn up -R some-dep --mode=update-lockfile",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -665,6 +744,9 @@ exports[`modules/manager/npm/post-update/yarn > performs lock file updates using
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -677,7 +759,6 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
     "cmd": "yarn set version 3.0.1",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -685,6 +766,9 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -692,7 +776,6 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
     "cmd": "yarn install --mode=update-lockfile",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -700,6 +783,9 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -712,7 +798,6 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
     "cmd": "yarn set version 3.0.1",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -720,6 +805,9 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -727,7 +815,6 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
     "cmd": "yarn install --mode=update-lockfile",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "CI": "true",
         "YARN_ENABLE_GLOBAL_CACHE": "1",
@@ -735,6 +822,9 @@ exports[`modules/manager/npm/post-update/yarn > performs yarn binary update usin
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },

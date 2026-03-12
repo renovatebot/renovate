@@ -1,14 +1,17 @@
-import is from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { getRegexOrGlobPredicate } from '../string-match';
-import { Matcher } from './base';
+import { isUndefined } from '@sindresorhus/is';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { getRegexOrGlobPredicate } from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class NewValueMatcher extends Matcher {
   override matches(
     { newValue }: PackageRuleInputConfig,
     { matchNewValue }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchNewValue)) {
+    if (isUndefined(matchNewValue)) {
       return null;
     }
     const matchNewValuePred = getRegexOrGlobPredicate(matchNewValue);

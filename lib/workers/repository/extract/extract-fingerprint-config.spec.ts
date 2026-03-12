@@ -1,7 +1,7 @@
-import { mergeChildConfig } from '../../../config';
-import { getConfig } from '../../../config/defaults';
-import { allManagersList } from '../../../modules/manager';
-import { generateFingerprintConfig } from './extract-fingerprint-config';
+import { getConfig } from '../../../config/defaults.ts';
+import { mergeChildConfig } from '../../../config/index.ts';
+import { allManagersList } from '../../../modules/manager/index.ts';
+import { generateFingerprintConfig } from './extract-fingerprint-config.ts';
 
 describe('workers/repository/extract/extract-fingerprint-config', () => {
   it('filter with enabledManagers', () => {

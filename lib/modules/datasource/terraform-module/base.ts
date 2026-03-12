@@ -1,9 +1,9 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import type { HttpError } from '../../../util/http';
-import { ensureTrailingSlash } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { ServiceDiscoveryResult } from './types';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { ServiceDiscoveryResult } from './types.ts';
 
 const terraformId = 'terraform';
 
@@ -11,13 +11,7 @@ const terraformId = 'terraform';
 export abstract class TerraformDatasource extends Datasource {
   static id = terraformId;
 
-  @cache({
-    namespace: `datasource-${terraformId}`,
-    key: (registryUrl: string) =>
-      TerraformDatasource.getDiscoveryUrl(registryUrl),
-    ttlMinutes: 1440,
-  })
-  async getTerraformServiceDiscoveryResult(
+  private async _getTerraformServiceDiscoveryResult(
     registryUrl: string,
   ): Promise<ServiceDiscoveryResult> {
     const discoveryURL = TerraformDatasource.getDiscoveryUrl(registryUrl);
@@ -25,6 +19,19 @@ export abstract class TerraformDatasource extends Datasource {
       await this.http.getJsonUnchecked<ServiceDiscoveryResult>(discoveryURL)
     ).body;
     return serviceDiscovery;
+  }
+
+  getTerraformServiceDiscoveryResult(
+    registryUrl: string,
+  ): Promise<ServiceDiscoveryResult> {
+    return withCache(
+      {
+        namespace: `datasource-${terraformId}`,
+        key: TerraformDatasource.getDiscoveryUrl(registryUrl),
+        ttlMinutes: 1440,
+      },
+      () => this._getTerraformServiceDiscoveryResult(registryUrl),
+    );
   }
 
   private static getDiscoveryUrl(registryUrl: string): string {

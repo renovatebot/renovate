@@ -1,5 +1,5 @@
-import { HttpBase } from './http';
-import type { HttpOptions } from './types';
+import { HttpBase } from './http.ts';
+import type { HttpOptions } from './types.ts';
 
 let baseUrl: string;
 

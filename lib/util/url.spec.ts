@@ -12,7 +12,7 @@ import {
   resolveBaseUrl,
   trimSlashes,
   trimTrailingSlash,
-} from './url';
+} from './url.ts';
 
 describe('util/url', () => {
   it.each`

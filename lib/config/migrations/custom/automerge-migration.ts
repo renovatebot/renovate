@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isObject } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class AutomergeMigration extends AbstractMigration {
   override readonly propertyName = 'automerge';
@@ -9,9 +9,9 @@ export class AutomergeMigration extends AbstractMigration {
     const minor = this.get('minor');
     const major = this.get('major');
 
-    const newPatch = is.object(patch) ? patch : {};
-    const newMinor = is.object(minor) ? minor : {};
-    const newMajor = is.object(major) ? major : {};
+    const newPatch = isObject(patch) ? patch : {};
+    const newMinor = isObject(minor) ? minor : {};
+    const newMajor = isObject(major) ? major : {};
 
     switch (value) {
       case 'none':

@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
-import type { Category } from '../../../../constants';
-import { logger } from '../../../../logger';
-import { parseJson } from '../../../../util/common';
-import { parse as parseToml } from '../../../../util/toml';
-import { parseYaml } from '../../../../util/yaml';
-import type { PackageFileContent } from '../../types';
-import { validMatchFields } from '../utils';
-import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
-import { handleMatching } from './utils';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import type { Category } from '../../../../constants/index.ts';
+import { logger } from '../../../../logger/index.ts';
+import { parseJson } from '../../../../util/common.ts';
+import { parse as parseToml } from '../../../../util/toml.ts';
+import { parseYaml } from '../../../../util/yaml.ts';
+import type { PackageFileContent } from '../../types.ts';
+import { validMatchFields } from '../utils.ts';
+import type { JSONataManagerTemplates, JsonataExtractConfig } from './types.ts';
+import { handleMatching } from './utils.ts';
 
 export const categories: Category[] = ['custom'];
 
@@ -43,7 +43,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  if (is.nullOrUndefined(json)) {
+  if (isNullOrUndefined(json)) {
     return null;
   }
 

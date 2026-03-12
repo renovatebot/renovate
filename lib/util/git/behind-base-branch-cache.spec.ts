@@ -1,13 +1,13 @@
-import * as _repositoryCache from '../cache/repository';
-import type { BranchCache, RepoCacheData } from '../cache/repository/types';
+import { logger, partial } from '~test/util.ts';
+import * as _repositoryCache from '../cache/repository/index.ts';
+import type { BranchCache, RepoCacheData } from '../cache/repository/types.ts';
 import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
-} from './behind-base-branch-cache';
-import type { LongCommitSha } from './types';
-import { logger, partial } from '~test/util';
+} from './behind-base-branch-cache.ts';
+import type { LongCommitSha } from './types.ts';
 
-vi.mock('../cache/repository');
+vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 describe('util/git/behind-base-branch-cache', () => {
@@ -195,7 +195,7 @@ describe('util/git/behind-base-branch-cache', () => {
     it('returns without updating when cache not populated', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setCachedBehindBaseResult(): Branch cache not present',
       );
@@ -204,7 +204,7 @@ describe('util/git/behind-base-branch-cache', () => {
     it('returns without updating when branch not found', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setCachedBehindBaseResult(): Branch cache not present',
       );

@@ -1,7 +1,10 @@
-import { regEx } from '../../../util/regex';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { MatchResult } from './types';
+import { detectPlatform } from '../../../util/common.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { MatchResult } from './types.ts';
 
 const regExps = {
   wildcard: regEx(/^.*?/),
@@ -18,6 +21,10 @@ const regExps = {
   rangeOp: regEx(/\.\.[.<]/),
   exactVersion: regEx(/\.\s*exact\s*\(\s*/),
   exactVersionLabel: regEx(/\s*exact:/),
+  traitsLabel: regEx(/\s*traits\s*:/),
+  // This pattern consumes any `traits` content until the next package declaration,
+  // as the traits syntax can be quite complex and does not need to be parsed in detail for package extraction.
+  traitsConsumeToNextPackage: regEx(/.*\.\s*package\s*\(\s*/),
 };
 
 const WILDCARD = 'wildcard';
@@ -34,6 +41,8 @@ const FROM = 'from';
 const RANGE_OP = 'rangeOp';
 const EXACT_VERSION = 'exactVersion';
 const EXACT_VERSION_LABEL = 'exactVersionLabel';
+const TRAITS_LABEL = 'traitsLabel';
+const TRAITS_CONSUME_TO_NEXT_PACKAGE = 'traitsConsumeToNextPackage';
 
 const searchLabels = {
   wildcard: WILDCARD,
@@ -50,6 +59,8 @@ const searchLabels = {
   rangeOp: RANGE_OP,
   exactVersion: EXACT_VERSION,
   exactVersionLabel: EXACT_VERSION_LABEL,
+  traitsLabel: TRAITS_LABEL,
+  traitsConsumeToNextPackage: TRAITS_CONSUME_TO_NEXT_PACKAGE,
 };
 
 function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
@@ -59,7 +70,7 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
     case 'dependencies:':
       return [SPACE, BEGIN_SECTION, WILDCARD];
     case 'dependencies: [':
-      return [SPACE, PACKAGE, END_SECTION];
+      return [SPACE, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(':
       return [SPACE, URL_KEY, PACKAGE, END_SECTION];
     case '.package(url':
@@ -80,17 +91,19 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
         END_SECTION,
       ];
     case '.package(url: [depName], .exact(':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], exact:':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], from':
-      return [SPACE, COLON, PACKAGE, END_SECTION];
+      return [SPACE, COLON, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], from:':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], [value]':
-      return [SPACE, RANGE_OP, PACKAGE, END_SECTION];
+      return [SPACE, RANGE_OP, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], [rangeFrom][rangeOp]':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
+    case 'traits:':
+      return [SPACE, TRAITS_CONSUME_TO_NEXT_PACKAGE];
     default:
       return [DEPS];
   }
@@ -117,20 +130,38 @@ function getMatch(str: string, state: string | null): MatchResult | null {
   return result;
 }
 
-function getDepName(url: string | null): string | null {
+function parseUrl(
+  url: string | null,
+): { depName: string; datasource: string; registryUrls?: string[] } | null {
   // istanbul ignore if
   if (!url) {
     return null;
   }
   try {
-    const { host, pathname } = new URL(url);
-    if (host === 'github.com' || host === 'gitlab.com') {
-      return pathname
+    const parsedUrl = new URL(url);
+    const { host, pathname, protocol } = parsedUrl;
+    const platform = detectPlatform(url);
+    if (platform === 'github' || platform === 'gitlab') {
+      const depName = pathname
         .replace(regEx(/^\//), '')
         .replace(regEx(/\.git$/), '')
         .replace(regEx(/\/$/), '');
+      const datasource =
+        platform === 'github'
+          ? GithubTagsDatasource.id
+          : GitlabTagsDatasource.id;
+
+      const isGitHubPublic = host === 'github.com';
+      const isGitLabPublic = host === 'gitlab.com';
+
+      if (!isGitHubPublic && !isGitLabPublic) {
+        const baseUrl = `${protocol}//${host}`;
+        return { depName, datasource, registryUrls: [baseUrl] };
+      }
+
+      return { depName, datasource };
     }
-    return url;
+    return { depName: url, datasource: GitTagsDatasource.id };
   } catch {
     return null;
   }
@@ -158,13 +189,15 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     if (!packageName) {
       return;
     }
-    const depName = getDepName(packageName);
-    if (depName && currentValue) {
+    const parsedUrl = parseUrl(packageName);
+    if (parsedUrl && currentValue) {
+      const { depName, datasource, registryUrls } = parsedUrl;
+
       const dep: PackageDependency = {
-        datasource: GitTagsDatasource.id,
+        datasource,
         depName,
-        packageName,
         currentValue,
+        ...(registryUrls?.length && { registryUrls }),
       };
 
       deps.push(dep);
@@ -206,6 +239,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
+        } else if (label === TRAITS_LABEL) {
+          state = 'traits:';
         }
         break;
       case '.package(':
@@ -354,6 +389,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         } else if (label === SPACE) {
           currentValue += substr;
         } else if (label === PACKAGE) {
+          yieldDep();
+          state = '.package(';
+        }
+        break;
+      case 'traits:':
+        if (label === TRAITS_CONSUME_TO_NEXT_PACKAGE) {
           yieldDep();
           state = '.package(';
         }

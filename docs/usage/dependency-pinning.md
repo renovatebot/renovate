@@ -123,7 +123,7 @@ With this approach, updates will be essentially "silent" - causing no notificati
 ### Scheduling
 
 Although it can feel satisfying to get updates "immediately" when they're available, the reality is that you usually don't _need_ updates so frequently.
-And worse still, npm package versions that are less than 24 hours [can be unpublished](https://blog.npmjs.org/post/141905368000/changes-to-npms-unpublish-policy), which would really break your build if you've pinned to a version that no longer exists.
+And worse still, npm package versions that are less than 72 hours [can be unpublished](https://docs.npmjs.com/policies/unpublish), which would really break your build if you've pinned to a version that no longer exists.
 
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 

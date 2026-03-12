@@ -1,14 +1,14 @@
 import type {
   RenovateConfig,
   ValidationMessage,
-} from '../../../../config/types';
+} from '../../../../config/types.ts';
 import type {
   LookupUpdate,
   RangeConfig,
-} from '../../../../modules/manager/types';
-import type { SkipReason } from '../../../../types';
-import type { MergeConfidence } from '../../../../util/merge-confidence/types';
-import type { Timestamp } from '../../../../util/timestamp';
+} from '../../../../modules/manager/types.ts';
+import type { SkipReason } from '../../../../types/index.ts';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -16,33 +16,28 @@ export interface FilterConfig {
   followTag?: string;
   ignoreDeprecated?: boolean;
   ignoreUnstable?: boolean;
+  maxMajorIncrement?: number;
   respectLatest?: boolean;
   updatePinnedDependencies?: boolean;
-  versioning: string;
+  versioning?: string;
 }
 
 export interface RollbackConfig {
   currentValue?: string;
   depName?: string;
   packageFile?: string;
-  versioning: string;
+  versioning?: string;
 }
 
 export interface LookupUpdateConfig
-  extends RollbackConfig,
-    FilterConfig,
-    RangeConfig,
-    RenovateConfig {
-  separateMinorPatch?: boolean;
+  extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
+  currentVersion?: string;
+
   digestOneAndOnly?: boolean;
-  pinDigests?: boolean;
   rollbackPrs?: boolean;
   currentDigest?: string;
   lockedVersion?: string;
   isVulnerabilityAlert?: boolean;
-  separateMajorMinor?: boolean;
-  separateMultipleMajor?: boolean;
-  separateMultipleMinor?: boolean;
   datasource: string;
   packageName: string;
   minimumConfidence?: MergeConfidence | undefined;

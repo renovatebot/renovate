@@ -26,6 +26,24 @@ Renovate updates `HelmRelease` resources coming from `GitRepository` by updating
 
 Renovate updates Docker dependencies inside `HelmRelease` `values` like the [`helm-values`](../helm-values/index.md) manager.
 
+When a referenced `HelmRepository` resource is not present in the scanned manifests (for example, it is defined in another repository or as a cluster-global resource), you can statically map the `sourceRef.name` of the `HelmRelease` (or `HelmChart`) to a registry URL using `registryAliases` in your `flux` configuration:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["flux"],
+      "matchDatasources": ["helm"],
+      "registryAliases": {
+        "podinfo-repo": "https://stefanprodan.github.io/podinfo"
+      }
+    }
+  ]
+}
+```
+
+In this example, a `HelmRelease` whose `spec.chart.spec.sourceRef.name` is `podinfo-repo` will be treated as if it were backed by a `HelmRepository` with URL `https://stefanprodan.github.io/podinfo`.
+
 ### GitRepository support
 
 Renovate can update `git` references from `GitRepository` resources.

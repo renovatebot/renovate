@@ -26,6 +26,8 @@ hooks:
 # General site info
 
 # Metadata
+extra:
+  version: !ENV RENOVATE_VERSION
 
 # Set the main title for the project.
 # Required setting.

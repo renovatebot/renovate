@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
-import { getRegexPredicate, isRegexMatch } from '../../util/string-match';
-import type { ValidationMessage } from '../types';
-import type { CheckMatcherArgs } from './types';
+import { isArray, isString } from '@sindresorhus/is';
+import { getRegexPredicate, isRegexMatch } from '../../util/string-match.ts';
+import type { ValidationMessage } from '../types.ts';
+import type { CheckMatcherArgs } from './types.ts';
 
 /**
  * Only if type condition or context condition violated then errors array will be mutated to store metadata
@@ -12,7 +12,7 @@ export function check({
 }: CheckMatcherArgs): ValidationMessage[] {
   const res: ValidationMessage[] = [];
 
-  if (is.array(matchers, is.string)) {
+  if (isArray(matchers, isString)) {
     if (
       (matchers.includes('*') || matchers.includes('**')) &&
       matchers.length > 1

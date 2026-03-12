@@ -1,4 +1,4 @@
-import type { Pr } from '../types';
+import type { Pr } from '../types.ts';
 
 export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
 

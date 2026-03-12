@@ -1,11 +1,16 @@
-import is from '@sindresorhus/is';
-import slugify from 'slugify';
-import { mergeChildConfig } from '../../config';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { StageName } from '../../types/skip-reason';
-import { compile } from '../template';
-import matchers from './matchers';
+import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
+import _slugify from 'slugify';
+import { mergeChildConfig } from '../../config/index.ts';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { StageName } from '../../types/skip-reason.ts';
+import { compile } from '../template/index.ts';
+import matchers from './matchers.ts';
+
+const slugify = _slugify as unknown as typeof _slugify.default;
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -15,11 +20,11 @@ async function matchesRule(
     const isMatch = await matcher.matches(inputConfig, packageRule);
 
     // no rules are defined
-    if (is.nullOrUndefined(isMatch)) {
+    if (isNullOrUndefined(isMatch)) {
       continue;
     }
 
-    if (!is.truthy(isMatch)) {
+    if (!isTruthy(isMatch)) {
       return false;
     }
   }
@@ -59,7 +64,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         delete config.skipStage;
       }
       if (
-        is.string(toApply.overrideDatasource) &&
+        isString(toApply.overrideDatasource) &&
         toApply.overrideDatasource !== config.datasource
       ) {
         logger.debug(
@@ -68,7 +73,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         config.datasource = toApply.overrideDatasource;
       }
       if (
-        is.string(toApply.overrideDepName) &&
+        isString(toApply.overrideDepName) &&
         toApply.overrideDepName !== config.depName
       ) {
         logger.debug(
@@ -77,7 +82,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         config.depName = compile(toApply.overrideDepName, config);
       }
       if (
-        is.string(toApply.overridePackageName) &&
+        isString(toApply.overridePackageName) &&
         toApply.overridePackageName !== config.packageName
       ) {
         logger.debug(
@@ -94,8 +99,8 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
   return config;
 }
 
-function removeMatchers(
-  packageRule: PackageRule & PackageRuleInputConfig,
+function removeMatchers<T extends Record<string, unknown>>(
+  packageRule: T,
 ): Record<string, unknown> {
   for (const key of Object.keys(packageRule)) {
     if (key.startsWith('match') || key.startsWith('exclude')) {

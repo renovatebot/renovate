@@ -1,7 +1,7 @@
-import type { parser } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
-import type { Ctx } from '../types';
-import { qKotlinMultiMapOfVarAssignment } from './assignments';
+import type { parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import type { Ctx } from '../types.ts';
+import { qKotlinMultiMapOfVarAssignment } from './assignments.ts';
 import {
   cleanupTempVars,
   coalesceVariable,
@@ -12,9 +12,9 @@ import {
   reduceNestingDepth,
   storeInTokenMap,
   storeVarToken,
-} from './common';
-import { qDependencyStrings } from './dependencies';
-import { handleAssignment } from './handlers';
+} from './common.ts';
+import { qDependencyStrings } from './dependencies.ts';
+import { handleAssignment } from './handlers.ts';
 
 const qKotlinListOfAssignment = q.sym<Ctx>('listOf').tree({
   type: 'wrapped-tree',

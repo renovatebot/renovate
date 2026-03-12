@@ -1,5 +1,5 @@
-import type { NewValueConfig, VersioningApi } from '../types';
-import { BzlmodVersion } from './bzlmod-version';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { BzlmodVersion } from './bzlmod-version.ts';
 
 export const id = 'bazel-module';
 export const displayName = 'Bazel Module';
@@ -116,7 +116,7 @@ function matches(version: string, range: string): boolean {
  * Check whether the `version` is compatible with the `current` value
  * constraint.
  */
-function isCompatible(version: string, current?: string): boolean {
+function isCompatible(version: string, _current?: string): boolean {
   return isValid(version);
 }
 

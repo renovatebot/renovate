@@ -1,5 +1,5 @@
-import { query as q } from 'good-enough-parser';
-import type { Ctx } from '../types';
+import { query as q } from '@renovatebot/good-enough-parser';
+import type { Ctx } from '../types.ts';
 import {
   cleanupTempVars,
   qArtifactId,
@@ -9,8 +9,14 @@ import {
   qValueMatcher,
   storeInTokenMap,
   storeVarToken,
-} from './common';
-import { handleLibraryDep, handlePlugin } from './handlers';
+} from './common.ts';
+import {
+  handleCatalogDepString,
+  handleCatalogLongFormDep,
+  handlePlugin,
+} from './handlers.ts';
+
+const qAlias = qStringValue.handler((ctx) => storeInTokenMap(ctx, 'alias'));
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
@@ -33,9 +39,8 @@ const qVersionCatalogVersion = q
   .handler((ctx) => storeInTokenMap(ctx, 'version'));
 
 // library("foo.bar", "foo", "bar")
-const qVersionCatalogDependencies = q
-  .sym<Ctx>('library', storeVarToken)
-  .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
+const qVersionCatalogLongFormDependencies = q
+  .sym<Ctx>('library')
   .tree({
     type: 'wrapped-tree',
     maxDepth: 1,
@@ -43,8 +48,7 @@ const qVersionCatalogDependencies = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .join(qStringValue)
-      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
+      .join(qAlias)
       .op(',')
       .join(qGroupId)
       .op(',')
@@ -52,7 +56,26 @@ const qVersionCatalogDependencies = q
       .end(),
   })
   .opt(qVersionCatalogVersion)
-  .handler(handleLibraryDep)
+  .handler(handleCatalogLongFormDep)
+  .handler(cleanupTempVars);
+
+// library("foo.bar", "foo:bar:1.2.3")
+const qVersionCatalogShortDependencies = q
+  .sym<Ctx>('library')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .join(qAlias)
+      .op(',')
+      .join(qValueMatcher)
+      .handler((ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
+      .end(),
+  })
+  .handler(handleCatalogDepString)
   .handler(cleanupTempVars);
 
 // plugin("foo.bar", "foo:bar")
@@ -66,10 +89,9 @@ const qVersionCatalogPlugins = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .join(qStringValue)
-      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
+      .join(qAlias)
       .op(',')
-      .alt(qStringValue)
+      .alt(qValueMatcher)
       .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
       .end(),
   })
@@ -85,11 +107,7 @@ const qVersionCatalogAliasDependencies = q
     maxDepth: 1,
     startsWith: '(',
     endsWith: ')',
-    search: q
-      .begin<Ctx>()
-      .join(qStringValue)
-      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
-      .end(),
+    search: q.begin<Ctx>().join(qAlias).end(),
   })
   .op('.')
   .sym('to')
@@ -101,11 +119,12 @@ const qVersionCatalogAliasDependencies = q
     search: q.begin<Ctx>().join(qGroupId).op(',').join(qArtifactId).end(),
   })
   .opt(qVersionCatalogVersion)
-  .handler(handleLibraryDep)
+  .handler(handleCatalogLongFormDep)
   .handler(cleanupTempVars);
 
 export const qVersionCatalogs = q.alt(
-  qVersionCatalogDependencies,
+  qVersionCatalogLongFormDependencies,
+  qVersionCatalogShortDependencies,
   qVersionCatalogPlugins,
   qVersionCatalogAliasDependencies,
 );

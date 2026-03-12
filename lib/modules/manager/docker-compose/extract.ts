@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import { DockerComposeFile } from './schema';
+import { isString, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import { DockerComposeFile } from './schema.ts';
 
 class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];
@@ -64,7 +64,7 @@ export function extractPackageFile(
       services || /* istanbul ignore next: can never happen */ {},
     )
       .concat(Object.values(extensions))
-      .filter((service) => is.string(service?.image) && !service?.build)
+      .filter((service) => isString(service?.image) && !service?.build)
       .map((service) => {
         const dep = getDep(service.image, true, extractConfig.registryAliases);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
@@ -74,7 +74,7 @@ export function extractPackageFile(
         }
         return dep;
       })
-      .filter(is.truthy);
+      .filter(isTruthy);
 
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };

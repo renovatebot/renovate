@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractLocks } from './util';
+import { extractLocks } from './util.ts';
 
 describe('modules/manager/terraform/lockfile/util', () => {
   describe('extractLocks()', () => {

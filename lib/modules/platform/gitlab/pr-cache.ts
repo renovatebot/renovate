@@ -1,22 +1,30 @@
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
-import type { GitlabHttp, GitlabHttpOptions } from '../../../util/http/gitlab';
-import { regEx } from '../../../util/regex';
-import { getQueryString } from '../../../util/url';
-import type { GitLabMergeRequest, GitlabPr, GitlabPrCacheData } from './types';
-import { prInfo } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type {
+  GitlabHttp,
+  GitlabHttpOptions,
+} from '../../../util/http/gitlab.ts';
+import { regEx } from '../../../util/regex.ts';
+import { getQueryString } from '../../../util/url.ts';
+import { GitLabMergeRequestsSchema } from './schema.ts';
+import type { GitlabPr, GitlabPrCacheData } from './types.ts';
+import { prInfo } from './utils.ts';
 
 export class GitlabPrCache {
   private items: GitlabPr[] = [];
   private cache: GitlabPrCacheData;
+  private repo: string;
+  private ignorePrAuthor: boolean;
 
   private constructor(
-    private repo: string,
+    repo: string,
     author: string | null,
-    private ignorePrAuthor: boolean,
+    ignorePrAuthor: boolean,
   ) {
+    this.repo = repo;
+    this.ignorePrAuthor = ignorePrAuthor;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.gitlab ??= {};
@@ -130,9 +138,10 @@ export class GitlabPrCache {
     }
 
     const query: string | null = getQueryString(searchParams);
-    const { body: items } = await http.getJsonUnchecked<GitLabMergeRequest[]>(
+    const { body: items } = await http.getJson(
       `/projects/${this.repo}/merge_requests?${query}`,
       opts,
+      GitLabMergeRequestsSchema,
     );
 
     if (items.length) {

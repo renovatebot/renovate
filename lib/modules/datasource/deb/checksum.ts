@@ -1,6 +1,6 @@
-import { createCacheReadStream } from '../../../util/fs';
-import { hashStream } from '../../../util/hash';
-import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
+import { createCacheReadStream } from '../../../util/fs/index.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex.ts';
 
 /**
  * Parses the SHA256 checksum for a specified package path from the InRelease content.

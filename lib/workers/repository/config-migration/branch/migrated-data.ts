@@ -1,16 +1,16 @@
-import is from '@sindresorhus/is';
+import { isNumber } from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
 import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
-import { migrateConfig } from '../../../../config/migration';
-import { prettier } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { readLocalFile } from '../../../../util/fs';
-import { EditorConfig } from '../../../../util/json-writer';
-import { detectRepoFileConfig } from '../../init/merge';
+import { migrateConfig } from '../../../../config/migration.ts';
+import { prettier } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { EditorConfig } from '../../../../util/json-writer/index.ts';
+import { detectRepoFileConfig } from '../../init/merge.ts';
 
 export interface MigratedData {
   content: string;
@@ -85,7 +85,7 @@ export async function applyPrettierFormatting(
 
       // https://github.com/prettier/prettier/blob/bab892242a1f9d8fcae50514b9304bf03f2e25ab/src/config/editorconfig/editorconfig-to-prettier.js#L47
       if (editorconf.maxLineLength) {
-        options.printWidth = is.number(editorconf.maxLineLength)
+        options.printWidth = isNumber(editorconf.maxLineLength)
           ? editorconf.maxLineLength
           : Number.POSITIVE_INFINITY;
       }

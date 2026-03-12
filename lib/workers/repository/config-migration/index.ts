@@ -1,8 +1,8 @@
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { checkConfigMigrationBranch } from './branch';
-import { MigratedDataFactory } from './branch/migrated-data';
-import { ensureConfigMigrationPr } from './pr';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { checkConfigMigrationBranch } from './branch/index.ts';
+import { MigratedDataFactory } from './branch/migrated-data.ts';
+import { ensureConfigMigrationPr } from './pr/index.ts';
 
 export type ConfigMigrationResult =
   | { result: 'no-migration' }

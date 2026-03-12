@@ -1,4 +1,4 @@
-import { api as semver } from '.';
+import { api as semver } from './index.ts';
 
 describe('modules/versioning/composer/index', () => {
   it.each`
@@ -198,8 +198,6 @@ describe('modules/versioning/composer/index', () => {
 
   it.each`
     currentValue              | rangeStrategy        | currentVersion    | newVersion       | expected
-    ${'~1.0'}                 | ${'pin'}             | ${'1.0'}          | ${'V1.1'}        | ${'V1.1'}
-    ${'^1.0'}                 | ${'pin'}             | ${'1.0'}          | ${'V1.1'}        | ${'V1.1'}
     ${'v1.0'}                 | ${'replace'}         | ${'1.0'}          | ${'1.1'}         | ${'v1.1'}
     ${'^1.0'}                 | ${'bump'}            | ${'1.0.0'}        | ${'1.0.7'}       | ${'^1.0.7'}
     ${'^9.4'}                 | ${'bump'}            | ${'9.4.3'}        | ${'9.4.8'}       | ${'^9.4.8'}

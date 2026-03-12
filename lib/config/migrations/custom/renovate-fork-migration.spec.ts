@@ -1,4 +1,4 @@
-import { RenovateForkMigration } from './renovate-fork-migration';
+import { RenovateForkMigration } from './renovate-fork-migration.ts';
 
 describe('config/migrations/custom/renovate-fork-migration', () => {
   it('should migrate true', async () => {

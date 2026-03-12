@@ -1,4 +1,4 @@
-import { SemanticPrefixMigration } from './semantic-prefix-migration';
+import { SemanticPrefixMigration } from './semantic-prefix-migration.ts';
 
 describe('config/migrations/custom/semantic-prefix-migration', () => {
   it('should work', async () => {

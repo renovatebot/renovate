@@ -1,12 +1,12 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { isSkipComment } from '../../../util/ignore';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
-import * as mavenVersioning from '../../versioning/maven';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { JenkinsPlugin, JenkinsPlugins } from './types';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { isSkipComment } from '../../../util/ignore.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins/index.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { JenkinsPlugin, JenkinsPlugins } from './types.ts';
 
 const YamlExtension = regEx(/\.ya?ml$/);
 
@@ -19,7 +19,7 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
 
   if (plugin.source?.version) {
     dep.currentValue = plugin.source.version.toString();
-    if (!is.string(plugin.source.version)) {
+    if (!isString(plugin.source.version)) {
       dep.skipReason = 'invalid-version';
       logger.warn(
         { dep },
@@ -59,7 +59,7 @@ function extractYaml(
   try {
     // TODO: use schema (#9610)
     const doc = parseSingleYaml<JenkinsPlugins>(content);
-    if (is.nonEmptyArray(doc?.plugins)) {
+    if (isNonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
           const dep = getDependency(plugin);

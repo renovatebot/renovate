@@ -34,7 +34,7 @@ Set to `off` if changelog fetching is causing a problem.
 
 Set to `branch` if you have an advanced use case where you're embedding changelogs in the Git commit itself, we don't recommend this due to its potential size.
 
-### [`changelogUrl`](../configuration-options.md#changelogurl)
+### [`changelogUrl`](../configuration-options.md#packageruleschangelogurl)
 
 This doesn't help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
 
@@ -49,7 +49,7 @@ Fetching changelogs from github.com requires a GitHub token because GitHub block
 
 This means that if you run Renovate on self-hosted GitHub Enterprise Server, or any non-GitHub platform which Renovate supports, then you need to configure a github.com Personal Access Token in Renovate in order to fetch changelogs.
 
-Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs) to learn more.
+Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
 
 ## Troubleshooting missing changelogs
 

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 const UnityReleaseNote = z.object({
   url: z.string(),

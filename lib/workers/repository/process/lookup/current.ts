@@ -1,6 +1,6 @@
-import is from '@sindresorhus/is';
-import type { VersioningApi } from '../../../../modules/versioning/types';
-import { regEx } from '../../../../util/regex';
+import { isString } from '@sindresorhus/is';
+import type { VersioningApi } from '../../../../modules/versioning/types.ts';
+import { regEx } from '../../../../util/regex.ts';
 
 export function getCurrentVersion(
   currentValue: string,
@@ -11,7 +11,7 @@ export function getCurrentVersion(
   allVersions: string[],
 ): string | null {
   // istanbul ignore if
-  if (!is.string(currentValue)) {
+  if (!isString(currentValue)) {
     return null;
   }
   let useVersions = allVersions.filter((v) =>

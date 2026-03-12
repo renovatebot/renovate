@@ -1,4 +1,4 @@
-import { BranchNameMigration } from './branch-name-migration';
+import { BranchNameMigration } from './branch-name-migration.ts';
 
 describe('config/migrations/custom/branch-name-migration', () => {
   it('should replace pattern', async () => {

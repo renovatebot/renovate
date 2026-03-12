@@ -1,4 +1,4 @@
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/typst/extract', () => {
   describe('extractPackageFile()', () => {

@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import * as hostRules from '../../../../util/host-rules';
-import { regEx } from '../../../../util/regex';
-import { toBase64 } from '../../../../util/string';
-import { isHttpUrl } from '../../../../util/url';
-import type { YarnRcYmlFile } from './types';
+import { isString } from '@sindresorhus/is';
+import { logger } from '../../../../logger/index.ts';
+import * as hostRules from '../../../../util/host-rules.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { toBase64 } from '../../../../util/string.ts';
+import { isHttpUrl } from '../../../../util/url.ts';
+import type { YarnRcYmlFile } from './types.ts';
 
 export interface HostRulesResult {
   additionalNpmrcContent: string[];
@@ -84,7 +84,7 @@ export function processHostRules(): HostRulesResult {
       continue;
     }
 
-    if (is.string(hostRule.username) && is.string(hostRule.password)) {
+    if (isString(hostRule.username) && isString(hostRule.password)) {
       logger.debug(
         `Adding npmrc entry for ${cleanedUri} with username/password`,
       );

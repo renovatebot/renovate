@@ -60,7 +60,7 @@
 // - Replace (?P<...>) -> (?<...>)
 // - Replace ?(...) -> \k<...>
 
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 // - Replace single \ -> double \
 export const versionGroup = '([0-9a-zA-Z_]+(?:[.-][0-9a-zA-Z_]+)*)';

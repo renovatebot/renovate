@@ -1,7 +1,7 @@
-import { ZodError } from 'zod';
-import { DenoDatasource } from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+import { ZodError } from 'zod/v3';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
+import { DenoDatasource } from './index.ts';
 
 describe('modules/datasource/deno/index', () => {
   const deno = new DenoDatasource();
@@ -63,7 +63,6 @@ describe('modules/datasource/deno/index', () => {
         },
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({
           err: expect.any(ZodError),

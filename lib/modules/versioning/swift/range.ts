@@ -1,6 +1,6 @@
 import semver from 'semver';
-import { regEx } from '../../../util/regex';
-import type { NewValueConfig } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { NewValueConfig } from '../types.ts';
 
 const fromParam = regEx(/^\s*from\s*:\s*"([^"]+)"\s*$/);
 const fromRange = regEx(/^\s*"([^"]+)"\s*\.\.\.\s*$/);

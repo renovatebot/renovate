@@ -1,19 +1,19 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import { asTimestamp } from '../../../util/timestamp';
-import { isHttpUrl } from '../../../util/url';
-import * as hashicorpVersioning from '../../versioning/hashicorp';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { TerraformDatasource } from './base';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { isHttpUrl } from '../../../util/url.ts';
+import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { TerraformDatasource } from './base.ts';
 import type {
   RegistryRepository,
   ServiceDiscoveryResult,
   TerraformModuleVersions,
   TerraformRelease,
-} from './types';
-import { createSDBackendURL } from './utils';
+} from './types.ts';
+import { createSDBackendURL } from './utils.ts';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-module';
@@ -43,12 +43,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
    *  - `sourceUrl` is supported if "source" field is set
    *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
    */
-  @cache({
-    namespace: `datasource-${TerraformModuleDatasource.id}`,
-    key: (getReleasesConfig: GetReleasesConfig) =>
-      TerraformModuleDatasource.getCacheKey(getReleasesConfig),
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -79,6 +74,17 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       serviceDiscovery,
       registryUrlNormalized,
       repository,
+    );
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformModuleDatasource.id}`,
+        key: TerraformModuleDatasource.getCacheKey(config),
+        fallback: true,
+      },
+      () => this._getReleases(config),
     );
   }
 

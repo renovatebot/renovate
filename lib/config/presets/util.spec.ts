@@ -1,5 +1,5 @@
-import type { FetchPresetConfig, Preset } from './types';
-import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util';
+import type { FetchPresetConfig, Preset } from './types.ts';
+import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util.ts';
 
 const config: FetchPresetConfig = {
   repo: 'some/repo',
@@ -43,7 +43,7 @@ describe('config/presets/util', () => {
     await expect(fetchPreset({ ...config, fetch })).rejects.toThrow('fails');
   });
 
-  it(PRESET_DEP_NOT_FOUND, async () => {
+  it('dep not found', async () => {
     fetch.mockResolvedValueOnce(null);
     await expect(fetchPreset({ ...config, fetch })).rejects.toThrow(
       PRESET_DEP_NOT_FOUND,
@@ -56,7 +56,7 @@ describe('config/presets/util', () => {
     );
   });
 
-  it(PRESET_NOT_FOUND, async () => {
+  it('preset not found', async () => {
     fetch.mockResolvedValueOnce({});
     await expect(
       fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch }),

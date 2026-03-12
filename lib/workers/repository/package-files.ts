@@ -1,7 +1,8 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
-import { clone } from '../../util/clone';
+import { isEmptyArray, isEmptyObject, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../logger/index.ts';
+import type { PackageFile } from '../../modules/manager/types.ts';
+import { clone } from '../../util/clone.ts';
+import { emojify } from '../../util/emoji.ts';
 
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
@@ -32,9 +33,10 @@ export class PackageFiles {
    * @param setHeader
    */
   static getDashboardMarkdown(maxLength: number, setHeader = true): string {
-    const note =
-      '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
-    const title = `## Detected dependencies\n\n`;
+    const note = emojify(
+      `> :information_source: **Note**\n> \n> Detected dependencies section has been truncated\n\n`,
+    );
+    const title = `## Detected Dependencies\n\n`;
 
     // exclude header length from the available space
     const maxHeaderLen = setHeader ? (title + note).length : 0;
@@ -48,10 +50,10 @@ export class PackageFiles {
     const data = new Map(clone(Array.from(this.data)));
 
     // filter all deps with skip reason
-    for (const managers of [...data.values()].filter(is.truthy)) {
-      for (const files of Object.values(managers).filter(is.truthy)) {
-        for (const file of files.filter((f) => is.truthy(f.deps))) {
-          file.deps = file.deps.filter(is.truthy).filter((d) => !d.skipReason);
+    for (const managers of [...data.values()].filter(isTruthy)) {
+      for (const files of Object.values(managers).filter(isTruthy)) {
+        for (const file of files.filter((f) => isTruthy(f.deps))) {
+          file.deps = file.deps.filter(isTruthy).filter((d) => !d.skipReason);
         }
       }
     }
@@ -105,11 +107,12 @@ export class PackageFiles {
       }
 
       for (const manager of managers) {
-        deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
-        for (const packageFile of Array.from(packageFiles[manager]).sort(
+        const managerPackageFiles = Array.from(packageFiles[manager]).sort(
           (a, b) => a.packageFile.localeCompare(b.packageFile),
-        )) {
-          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
+        );
+        deps += `<details><summary>${manager} (${managerPackageFiles.length})</summary>\n<blockquote>\n\n`;
+        for (const packageFile of managerPackageFiles) {
+          deps += `<details><summary>${packageFile.packageFile}${packageFile.deps.length > 0 ? ` (${packageFile.deps.length})` : ''}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
@@ -122,8 +125,17 @@ export class PackageFiles {
             } else {
               version = 'unknown version';
             }
+            let updates = '';
+            const uniqueUpdates = [
+              ...new Set(
+                dep.updates?.map((update) => `\`${update.newValue}\``),
+              ),
+            ];
+            if (uniqueUpdates.length > 0) {
+              updates = ` → [Updates: ${uniqueUpdates.join(', ')}]`;
+            }
             // TODO: types (#22198)
-            deps += ` - \`${dep.depName!} ${version}\`\n`;
+            deps += ` - \`${dep.depName!} ${version}\`${updates}\n`;
           }
           deps += '\n</details>\n\n';
         }
@@ -152,7 +164,7 @@ export class PackageFiles {
     }
 
     // delete base branch listing if it has no managers left
-    if (!managers || is.emptyObject(managers)) {
+    if (!managers || isEmptyObject(managers)) {
       return data.delete(branch);
     }
 
@@ -160,13 +172,13 @@ export class PackageFiles {
     const [manager, packageFiles] = Object.entries(managers).pop()!;
 
     // delete current manager if it has no manifest files left
-    if (!packageFiles || is.emptyArray(packageFiles)) {
+    if (!packageFiles || isEmptyArray(packageFiles)) {
       return delete managers[manager];
     }
 
     // delete manifest file if it has no deps left
     const len = packageFiles.length - 1;
-    if (is.emptyArray(packageFiles[len].deps)) {
+    if (isEmptyArray(packageFiles[len].deps)) {
       return !!packageFiles.pop();
     }
 
