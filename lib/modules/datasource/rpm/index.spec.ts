@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 import Database from 'better-sqlite3';
+import { codeBlock } from 'common-tags';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir as tmpDir } from 'tmp-promise';
 import * as httpMock from '~test/http-mock.ts';
@@ -25,31 +26,38 @@ function buildRepomdXml({
   primaryDbHref?: string;
   primaryHref?: string;
 }): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  ${
-    primaryHref
-      ? `<data type="primary">
-    <location href="${primaryHref}"/>
-  </data>`
-      : ''
-  }
-  ${
-    primaryDbHref
-      ? `<data type="primary_db">
-    <location href="${primaryDbHref}"/>
-  </data>`
-      : ''
-  }
-</repomd>`;
+  return codeBlock`
+    <?xml version="1.0" encoding="UTF-8"?>
+    <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+      ${
+        primaryHref
+          ? codeBlock`
+              <data type="primary">
+                <location href="${primaryHref}"/>
+              </data>
+            `
+          : ''
+      }
+      ${
+        primaryDbHref
+          ? codeBlock`
+              <data type="primary_db">
+                <location href="${primaryDbHref}"/>
+              </data>
+            `
+          : ''
+      }
+    </repomd>
+  `;
 }
 
 function buildPrimaryXml(packageEntries: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://linux.duke.edu/metadata/common">
-${packageEntries}
-</metadata>
-`;
+  return codeBlock`
+    <?xml version="1.0" encoding="UTF-8"?>
+    <metadata xmlns="http://linux.duke.edu/metadata/common">
+      ${packageEntries}
+    </metadata>
+  `;
 }
 
 async function createPrimaryDbGzip(
@@ -159,12 +167,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns the correct primary.xml URL when repomd.xml omits xml declaration', async () => {
-      const repomdXml = `<repomd xmlns="http://linux.duke.edu/metadata/repo"
-  xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <repomd xmlns="http://linux.duke.edu/metadata/repo"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -199,12 +209,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if repomdXml is not in XML format', async () => {
-      const repomdXml = `<?invalidxml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?invalidxml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -217,12 +229,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if no primary data is found', async () => {
-      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="non-primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="non-primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -246,12 +260,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if no location element is found', async () => {
-      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <non-location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <non-location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -266,12 +282,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if location href is missing', async () => {
-      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location non-href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location non-href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -284,15 +302,17 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('ignores primary_db entries without a location element', async () => {
-      mockRawRepomdResponse(`<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-  <data type="primary_db">
-    <non-location href="repodata/somesha256-primary.sqlite.gz"/>
-  </data>
-</repomd>`);
+      mockRawRepomdResponse(codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+          <data type="primary_db">
+            <non-location href="repodata/somesha256-primary.sqlite.gz"/>
+          </data>
+        </repomd>
+      `);
 
       await expect(rpmDatasource.getPrimaryGzipUrl(registryUrl)).resolves.toBe(
         primaryXmlUrl,
@@ -300,15 +320,17 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('ignores primary_db entries without an href attribute', async () => {
-      mockRawRepomdResponse(`<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-  <data type="primary_db">
-    <location non-href="repodata/somesha256-primary.sqlite.gz"/>
-  </data>
-</repomd>`);
+      mockRawRepomdResponse(codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+          <data type="primary_db">
+            <location non-href="repodata/somesha256-primary.sqlite.gz"/>
+          </data>
+        </repomd>
+      `);
 
       await expect(rpmDatasource.getPrimaryGzipUrl(registryUrl)).resolves.toBe(
         primaryXmlUrl,
@@ -321,26 +343,28 @@ describe('modules/datasource/rpm/index', () => {
 
     it('returns the correct releases', async () => {
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.1" rel="1.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.1" rel="2.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.2"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1" rel="1.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.2"/>
+          </package>
+        `),
       );
 
       const releases = await rpmDatasource.getReleasesByPackageName(
@@ -399,11 +423,13 @@ describe('modules/datasource/rpm/index', () => {
 
     it('returns null if no element package is found in primary.xml', async () => {
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <nonpackage type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-  </nonpackage>`),
+        buildPrimaryXml(codeBlock`
+          <nonpackage type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </nonpackage>
+        `),
       );
 
       const result = await rpmDatasource.getReleasesByPackageName(
@@ -416,11 +442,13 @@ describe('modules/datasource/rpm/index', () => {
 
     it('returns null if the specific packageName is not found in primary.xml', async () => {
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>wrong-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>wrong-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+        `),
       );
 
       expect(
@@ -433,11 +461,13 @@ describe('modules/datasource/rpm/index', () => {
 
     it('returns null if version is not found in a version element', async () => {
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <non-version epoch="0" ver="1.0" rel="2.azl3"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <non-version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+        `),
       );
 
       const releases = await rpmDatasource.getReleasesByPackageName(
@@ -450,11 +480,13 @@ describe('modules/datasource/rpm/index', () => {
 
     it('returns null if version element is missing the ver attribute', async () => {
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" rel="2.azl3"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" rel="2.azl3"/>
+          </package>
+        `),
       );
 
       const releases = await rpmDatasource.getReleasesByPackageName(
@@ -467,16 +499,18 @@ describe('modules/datasource/rpm/index', () => {
 
     it('returns an array of releases without duplicate versionWithRel', async () => {
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="dulp.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="dulp.azl3"/>
+          </package>
+        `),
       );
 
       const releases = await rpmDatasource.getReleasesByPackageName(
@@ -490,14 +524,16 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('handles parser error event in getReleasesByPackageName', async () => {
-      mockPrimaryXmlResponse(`<?xml version="1.0" encoding="UTF-8"?>
-<%$#metadata xmlns="http://linux.duke.edu/metadata/common">
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
-  </package>
-</metadata>`);
+      mockPrimaryXmlResponse(codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <%$#metadata xmlns="http://linux.duke.edu/metadata/common">
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="dulp.azl3"/>
+          </package>
+        </metadata>
+      `);
 
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
@@ -604,11 +640,13 @@ describe('modules/datasource/rpm/index', () => {
         ]),
       );
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="9.9" rel="1.azl3"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="9.9" rel="1.azl3"/>
+          </package>
+        `),
       );
 
       const autoReleases = await rpmDatasource.getReleases({
@@ -710,16 +748,18 @@ describe('modules/datasource/rpm/index', () => {
     it('falls back to primary.xml.gz when primary_db is absent', async () => {
       mockRepomdResponse({ primaryHref: 'repodata/somesha256-primary.xml.gz' });
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.1"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1"/>
+          </package>
+        `),
       );
 
       const releases = await rpmDatasource.getReleases({
@@ -738,11 +778,13 @@ describe('modules/datasource/rpm/index', () => {
       });
       mockPrimaryDbResponse(gzipSync('not-a-sqlite-database'));
       mockPrimaryXmlResponse(
-        buildPrimaryXml(`  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="2.0" rel="1.azl3"/>
-  </package>`),
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="2.0" rel="1.azl3"/>
+          </package>
+        `),
       );
 
       const releases = await rpmDatasource.getReleases({
