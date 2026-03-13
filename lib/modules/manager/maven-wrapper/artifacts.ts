@@ -75,8 +75,8 @@ function getDistributionType(content: string): string | null {
 }
 
 function getChecksumValue(content: string, key: string): string | null {
-  const match = regEx(`^${key}\\s*=\\s*(.+)$`, 'm').exec(content);
-  return match ? match[1].trim() : null;
+  const match = regEx(`^${key}\\s*=\\s*(?<value>.+)$`, 'm').exec(content);
+  return match?.groups?.value?.trim() ?? null;
 }
 
 function addChecksumAfterLine(
