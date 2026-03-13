@@ -196,7 +196,10 @@ export const presets: Record<string, Preset> = {
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
       },
     ],
   },
@@ -219,7 +222,10 @@ export const presets: Record<string, Preset> = {
         description: 'Liberica JDK Lite version optimized for the Cloud',
         matchCurrentValue: '/^jdk-[^a][^l]{2}/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
         versioning:
           'regex:^jdk-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
       },
@@ -228,7 +234,10 @@ export const presets: Record<string, Preset> = {
           'Liberica JDK that can be used to create a custom runtime with a help of jlink tool',
         matchCurrentValue: '/^jdk-all/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
         versioning:
           'regex:^jdk-all-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
       },
@@ -237,7 +246,10 @@ export const presets: Record<string, Preset> = {
           'Liberica JRE (only the runtime without the rest of JDK tools) for running Java applications',
         matchCurrentValue: '/^jre-/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
         versioning:
           'regex:^jre-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
       },

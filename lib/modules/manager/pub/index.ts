@@ -7,6 +7,7 @@ export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['pubspec.lock'];
 
 export const displayName = 'pub';
 export const url = 'https://dart.dev/tools/pub/packages';

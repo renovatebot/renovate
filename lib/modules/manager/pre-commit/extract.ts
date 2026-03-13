@@ -7,7 +7,7 @@ import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { find } from '../../../util/host-rules.ts';
-import { regEx } from '../../../util/regex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -84,17 +84,46 @@ function determineDatasource(
 
 const gitUrlRegex = regEx(/\.git$/i);
 
-function extractDependency(
-  tag: string,
-  repository: string,
-): {
-  depName?: string;
-  depType?: string;
-  datasource?: string;
-  packageName?: string;
-  skipReason?: SkipReason;
-  currentValue?: string;
-} {
+// Matches: rev: <digest><whitespace># frozen: <version>
+const revLineWithFrozenCommentRegex = regEx(
+  /^\s*rev:\s*(?<replaceString>(?<currentDigest>[a-f0-9]{40})(?<commentWhiteSpaces>\s+)#\s*frozen:\s*(?<currentValue>\S+))/,
+);
+
+interface RegexDep {
+  currentDigest: string;
+  currentValue: string;
+  replaceString: string;
+  autoReplaceStringTemplate: string;
+}
+
+function extractWithRegex(content: string): Map<string, RegexDep> {
+  logger.trace('pre-commit.extractWithRegex()');
+  const regexDeps = new Map<string, RegexDep>();
+
+  for (const line of content.split(newlineRegex)) {
+    if (line.trim().startsWith('#')) {
+      continue;
+    }
+
+    const match = revLineWithFrozenCommentRegex.exec(line);
+    if (match?.groups) {
+      const { currentDigest, currentValue, replaceString, commentWhiteSpaces } =
+        match.groups;
+
+      // Store by digest to correlate with YAML-extracted deps later
+      regexDeps.set(currentDigest, {
+        currentDigest,
+        currentValue,
+        replaceString,
+        autoReplaceStringTemplate: `{{newDigest}}${commentWhiteSpaces}# frozen: {{newValue}}`,
+      });
+    }
+  }
+
+  return regexDeps;
+}
+
+function extractDependency(tag: string, repository: string): PackageDependency {
   logger.debug(`Found version ${tag}`);
 
   const urlMatchers = [
@@ -140,17 +169,22 @@ function extractDependency(
  * Find all supported dependencies in the pre-commit yaml object.
  *
  * @param precommitFile the parsed yaml config file
+ * @param regexDeps Map of regex-extracted deps keyed by digest for enrichment
  */
-function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
+function findDependencies(
+  precommitFile: PreCommitConfig,
+  regexDeps: Map<string, RegexDep>,
+): PackageDependency[] {
   if (!precommitFile.repos) {
     logger.debug(`No repos section found, skipping file`);
     return [];
   }
   const packageDependencies: PackageDependency[] = [];
-  precommitFile.repos.forEach((item) => {
+
+  for (const item of precommitFile.repos) {
     // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
     if (item.repo !== 'meta') {
-      item.hooks?.forEach((hook) => {
+      for (const hook of item.hooks ?? []) {
         // normally language are not defined in yaml
         // only support it when it's explicitly defined.
         // this avoid to parse hooks from pre-commit-hooks.yaml from git repo
@@ -195,7 +229,7 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
             }
           });
         }
-      });
+      }
     }
 
     if (matchesPrecommitDependencyHeuristic(item)) {
@@ -204,11 +238,21 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
       const tag = String(item.rev);
       const dep = extractDependency(tag, repository);
 
+      // Check if this rev has regex-extracted formatting info
+      const regexDep = regexDeps.get(tag);
+      if (regexDep) {
+        // Enrich with formatting info from regex extraction
+        dep.currentDigest = regexDep.currentDigest;
+        dep.currentValue = regexDep.currentValue;
+        dep.replaceString = regexDep.replaceString;
+        dep.autoReplaceStringTemplate = regexDep.autoReplaceStringTemplate;
+      }
+
       packageDependencies.push(dep);
     } else {
       logger.trace(item, 'Did not find pre-commit repo spec');
     }
-  });
+  }
   return packageDependencies;
 }
 
@@ -243,7 +287,8 @@ export function extractPackageFile(
     return null;
   }
   try {
-    const deps = findDependencies(parsedContent);
+    const regexDeps = extractWithRegex(content);
+    const deps = findDependencies(parsedContent, regexDeps);
     if (deps.length) {
       logger.trace({ deps }, 'Found dependencies in pre-commit config');
       return { deps };

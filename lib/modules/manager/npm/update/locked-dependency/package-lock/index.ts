@@ -116,9 +116,9 @@ export async function updateLockedDependency(
       /* v8 ignore next -- too hard to replicate */
       if (isParentUpdate) {
         const files: Record<string, string> = {};
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
         files[packageFile!] = packageFileContent!;
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
         files[lockFile!] = lockFileContent!;
         return { status, files };
       } /* v8 ignore stop -- too hard to replicate */

@@ -13,4 +13,5 @@ export const defaultConfig = {
 };
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['manifest.toml'];
 export const supportedDatasources = [HexDatasource.id];

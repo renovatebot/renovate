@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import type { SkipReason } from '../../../types/index.ts';
 import { Toml, withDepType } from '../../../util/schema-utils/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';

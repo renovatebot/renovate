@@ -113,30 +113,32 @@ interface DatasourceCacheDataPoint {
   action: 'hit' | 'miss' | 'set' | 'skip';
 }
 
-/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
-export interface DatasourceCacheReport {
-  long: {
-    [datasource in string]: {
-      [registryUrl in string]: {
-        [packageName in string]: {
-          read?: 'hit' | 'miss';
-          write?: 'set' | 'skip';
-        };
-      };
-    };
-  };
-  short: {
-    [datasource in string]: {
-      [registryUrl in string]: {
-        hit: number;
-        miss: number;
-        set: number;
-        skip: number;
-      };
-    };
-  };
+interface DatasourceCacheLongEntry {
+  read?: 'hit' | 'miss';
+  write?: 'set' | 'skip';
 }
-/* eslint-enable @typescript-eslint/consistent-indexed-object-style */
+
+interface DatasourceCacheShortEntry {
+  hit: number;
+  miss: number;
+  set: number;
+  skip: number;
+}
+
+type DatasourceCacheLong = Record<
+  string,
+  Record<string, Record<string, DatasourceCacheLongEntry>>
+>;
+
+type DatasourceCacheShort = Record<
+  string,
+  Record<string, DatasourceCacheShortEntry>
+>;
+
+export interface DatasourceCacheReport {
+  long: DatasourceCacheLong;
+  short: DatasourceCacheShort;
+}
 
 export class DatasourceCacheStats {
   private static getData(): DatasourceCacheDataPoint[] {

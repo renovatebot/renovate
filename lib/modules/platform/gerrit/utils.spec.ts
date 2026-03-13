@@ -361,4 +361,12 @@ describe('modules/platform/gerrit/utils', () => {
       },
     );
   });
+
+  describe('convertGerritDateToISO()', () => {
+    it('converts Gerrit date format to ISO format', () => {
+      expect(
+        utils.convertGerritDateToISO('2023-05-20 14:25:30.123456789'),
+      ).toBe('2023-05-20T14:25:30.123456789');
+    });
+  });
 });
