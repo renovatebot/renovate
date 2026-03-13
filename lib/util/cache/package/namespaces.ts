@@ -14,6 +14,8 @@ export const packageCacheNamespaces = [
   'changelog-bitbucket-server-release',
   'changelog-forgejo-notes@v2',
   'changelog-forgejo-release',
+  'changelog-generic-notes@v2',
+  'changelog-generic-release',
   'changelog-gitea-notes@v2',
   'changelog-gitea-release',
   'changelog-github-notes@v2',

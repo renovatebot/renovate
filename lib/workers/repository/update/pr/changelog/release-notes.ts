@@ -14,6 +14,7 @@ import type { BranchUpgradeConfig } from '../../../../types.ts';
 import * as bitbucket from './bitbucket/index.ts';
 import * as bitbucketServer from './bitbucket-server/index.ts';
 import * as forgejo from './forgejo/index.ts';
+import * as generic from './generic/index.ts';
 import * as gitea from './gitea/index.ts';
 import * as github from './github/index.ts';
 import * as gitlab from './gitlab/index.ts';
@@ -212,7 +213,9 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  if (detectPlatform(baseUrl) === 'gitlab') {
+  if (detectPlatform(baseUrl) === 'generic') {
+    releaseNotes.url = baseUrl;
+  } else if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
     releaseNotes.url = releaseMatch.url
@@ -290,6 +293,8 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory,
         );
+      case 'generic':
+        return await generic.getReleaseNotesMd(apiBaseUrl);
       case 'gitea':
         return await gitea.getReleaseNotesMd(
           repository,

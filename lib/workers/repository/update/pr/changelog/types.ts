@@ -27,6 +27,7 @@ export type ChangeLogPlatform =
   | 'bitbucket'
   | 'bitbucket-server'
   | 'forgejo'
+  | 'generic'
   | 'gitea'
   | 'github'
   | 'gitlab';
