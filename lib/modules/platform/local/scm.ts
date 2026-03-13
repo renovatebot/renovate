@@ -63,7 +63,7 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve('' as LongCommitSha);
   }
 
-  mergeAndPush(_branchName: string): Promise<void> {
+  mergeAndPush(_branchName: string, _allowBehindBase: boolean): Promise<void> {
     return Promise.resolve();
   }
 

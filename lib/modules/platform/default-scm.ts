@@ -46,8 +46,8 @@ export class DefaultGitScm implements PlatformScm {
     return git.checkoutBranch(branchName);
   }
 
-  mergeAndPush(branchName: string): Promise<void> {
-    return git.mergeBranch(branchName);
+  mergeAndPush(branchName: string, allowBehindBase: boolean): Promise<void> {
+    return git.mergeBranch(branchName, allowBehindBase);
   }
 
   mergeToLocal(branchName: string): Promise<void> {
