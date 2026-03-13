@@ -50,6 +50,7 @@ export interface UpdateArtifactsConfig {
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
   toolSettings?: ToolSettingsOptions;
+  minimumReleaseAge?: string | null;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
