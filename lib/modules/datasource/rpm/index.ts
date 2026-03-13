@@ -13,6 +13,8 @@ interface RpmRepositoryMetadata {
   primaryGzipUrl?: string;
 }
 
+type ResolvedRpmMetadataSource = 'auto' | 'primary' | 'primary_db';
+
 export class RpmDatasource extends Datasource {
   static readonly id = 'rpm';
 
@@ -54,6 +56,7 @@ export class RpmDatasource extends Datasource {
   private async _getReleases({
     registryUrl,
     packageName,
+    rpmMetadataSource,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (!registryUrl || !packageName) {
       return null;
@@ -61,15 +64,22 @@ export class RpmDatasource extends Datasource {
 
     try {
       const metadata = await this.getRepositoryMetadata(registryUrl);
+      const metadataSource = this.resolveMetadataSource(rpmMetadataSource);
+
+      if (metadataSource === 'primary') {
+        return await this.getPrimaryReleases(metadata, packageName);
+      }
+
+      if (metadataSource === 'primary_db') {
+        return await this.getPrimaryDbReleases(metadata, packageName);
+      }
+
       const { primaryDbUrl, primaryGzipUrl } = metadata;
       let sqliteError: Error | undefined;
 
       if (primaryDbUrl) {
         try {
-          return await this.sqliteProvider.getReleases(
-            primaryDbUrl,
-            packageName,
-          );
+          return await this.getPrimaryDbReleases(metadata, packageName);
         } catch (err) {
           sqliteError = err as Error;
           logger.debug(
@@ -87,7 +97,7 @@ export class RpmDatasource extends Datasource {
       }
 
       if (primaryGzipUrl) {
-        return await this.xmlProvider.getReleases(primaryGzipUrl, packageName);
+        return await this.getPrimaryReleases(metadata, packageName);
       }
 
       if (sqliteError) {
@@ -101,14 +111,54 @@ export class RpmDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const metadataSource = this.resolveMetadataSource(config.rpmMetadataSource);
+
     return withCache(
       {
         namespace: `datasource-${RpmDatasource.id}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: `${config.registryUrl}:${config.packageName}:${metadataSource}`,
         ttlMinutes: 1440,
         fallback: true,
       },
       () => this._getReleases(config),
+    );
+  }
+
+  private resolveMetadataSource(
+    rpmMetadataSource?: GetReleasesConfig['rpmMetadataSource'],
+  ): ResolvedRpmMetadataSource {
+    if (rpmMetadataSource === 'primary' || rpmMetadataSource === 'primary_db') {
+      return rpmMetadataSource;
+    }
+
+    return 'auto';
+  }
+
+  private async getPrimaryDbReleases(
+    metadata: RpmRepositoryMetadata,
+    packageName: string,
+  ): Promise<ReleaseResult | null> {
+    if (!metadata.primaryDbUrl) {
+      throw new Error(`No primary_db data found in ${metadata.repomdUrl}`);
+    }
+
+    return await this.sqliteProvider.getReleases(
+      metadata.primaryDbUrl,
+      packageName,
+    );
+  }
+
+  private async getPrimaryReleases(
+    metadata: RpmRepositoryMetadata,
+    packageName: string,
+  ): Promise<ReleaseResult | null> {
+    if (!metadata.primaryGzipUrl) {
+      throw new Error(`No primary data found in ${metadata.repomdUrl}`);
+    }
+
+    return await this.xmlProvider.getReleases(
+      metadata.primaryGzipUrl,
+      packageName,
     );
   }
 

@@ -707,7 +707,6 @@ describe('modules/datasource/rpm/index', () => {
         }),
       ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
     });
-
     it('falls back to primary.xml.gz when primary_db is absent', async () => {
       mockRepomdResponse({ primaryHref: 'repodata/somesha256-primary.xml.gz' });
       mockPrimaryXmlResponse(

@@ -635,6 +635,14 @@ export async function validateConfig(
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
+          } else if (
+            key === 'rpmMetadataSource' &&
+            !['auto', 'primary', 'primary_db'].includes(val)
+          ) {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['auto', 'primary', 'primary_db'].join(', ')}.`,
+            });
           }
         } else if (
           type === 'object' &&
@@ -921,6 +929,14 @@ async function validateGlobalConfig(
           warnings.push({
             topic: 'Configuration Error',
             message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
+          });
+        } else if (
+          key === 'rpmMetadataSource' &&
+          !['auto', 'primary', 'primary_db'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['auto', 'primary', 'primary_db'].join(', ')}.`,
           });
         }
 
