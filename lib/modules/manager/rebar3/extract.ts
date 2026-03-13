@@ -299,6 +299,7 @@ export async function extractPackageFile(
   for (const section of depSections) {
     // Determine if this section is inside a test profile
     // by checking if it appears after the test profile marker
+    /* v8 ignore next: split always returns at least one element */
     const sectionFirstLine = section.split(newlineRegex)[0] ?? '';
     const sectionIdx = content.indexOf(sectionFirstLine);
     if (testProfileStart >= 0) {

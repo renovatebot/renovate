@@ -284,5 +284,17 @@ describe('modules/manager/rebar3/extract', () => {
       const res = await extractPackageFile(config, 'rebar.config');
       expect(res).toBeDefined();
     });
+
+    it('ignores lock entries not in deps', async () => {
+      GlobalConfig.set({
+        localDir: 'lib/modules/manager/rebar3/__fixtures__',
+      });
+      // Only extract cowlib, but lock file has many more entries
+      const config = `{deps, [{cowlib, "~> 2.13"}]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].depName).toBe('cowlib');
+      expect(res?.deps[0].lockedVersion).toBe('2.13.0');
+    });
   });
 });

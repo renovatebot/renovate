@@ -171,6 +171,17 @@ describe('modules/manager/rebar3/artifacts', () => {
       ]);
     });
 
+    it('returns null when parent lock path found but file does not exist', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'rebar3' }];
+      fs.readLocalFile.mockResolvedValueOnce(null); // sibling
+      fs.getSiblingFileName.mockReturnValueOnce('rebar.lock');
+      fs.localPathExists.mockResolvedValueOnce(false); // sibling doesn't exist
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('parent/rebar.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null); // parent can't be read
+      fs.localPathExists.mockResolvedValueOnce(false); // parent doesn't exist either
+      expect(await updateArtifacts(updateArtifact)).toBeNull();
+    });
+
     it('uses parent lock file when sibling not found', async () => {
       updateArtifact.updatedDeps = [{ manager: 'rebar3', depName: 'cowboy' }];
       fs.readLocalFile.mockResolvedValueOnce(null); // sibling

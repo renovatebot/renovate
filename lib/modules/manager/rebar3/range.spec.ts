@@ -36,4 +36,13 @@ describe('modules/manager/rebar3/range', () => {
       }),
     ).toBe('update-lockfile');
   });
+
+  it('returns update-lockfile when currentValue is undefined', () => {
+    expect(
+      getRangeStrategy({
+        currentValue: undefined,
+        rangeStrategy: 'auto',
+      }),
+    ).toBe('update-lockfile');
+  });
 });
