@@ -42,6 +42,7 @@
       "replacements:read-pkg-up-rename",
       "replacements:redux-devtools-extension-to-scope",
       "replacements:renovate-pep440-to-renovatebot-pep440",
+      "replacements:rolldown-vite-to-vite",
       "replacements:rollup-babel-to-scoped",
       "replacements:rollup-json-to-scoped",
       "replacements:rollup-node-resolve-to-scoped",
@@ -1005,6 +1006,17 @@
         "matchPackageNames": ["@renovate/pep440"],
         "replacementName": "@renovatebot/pep440",
         "replacementVersion": "1.0.0"
+      }
+    ]
+  },
+  "rolldown-vite-to-vite": {
+    "description": "`rolldown-vite` was merged to `vite` in version 8.0.0.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rolldown-vite"],
+        "replacementName": "vite",
+        "replacementVersion": "8.0.0"
       }
     ]
   },
