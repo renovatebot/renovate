@@ -153,6 +153,7 @@ export class MigratedDataFactory {
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
       let content: string;
+
       if (filename.endsWith('.json5')) {
         content = JSON5.stringify(migratedConfig, undefined, indentSpace);
       } else if (raw) {
