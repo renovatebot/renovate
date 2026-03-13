@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import type { DependenciesFile, DependenciesFileGroup } from '../types.ts';
 
@@ -6,8 +6,11 @@ interface ReduceState {
   groups: DependenciesFileGroup[];
   currentGroup: DependenciesFileGroup;
 }
+
 function analyzeLine(state: ReduceState, line: string): ReduceState {
-  const lineParts = line.split(regEx(/\s+/)).filter(isNonEmptyString);
+  const lineParts = line
+    .split(regEx(/\s+/))
+    .filter(isNonEmptyStringAndNotWhitespace);
   if (lineParts.length < 2) {
     return state;
   }

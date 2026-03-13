@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import type { LockFileDependency, LockFileSourceType } from '../types.ts';
 
@@ -13,7 +13,7 @@ function extractLines(content: string): Line[] {
       text: line.trim(),
       indent: regEx(/^(\s*)/).exec(line)![1].length,
     }))
-    .filter((line) => isNonEmptyString(line.text));
+    .filter((line) => isNonEmptyStringAndNotWhitespace(line.text));
 }
 
 interface ReduceState {
