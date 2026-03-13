@@ -22,7 +22,6 @@ exports[`modules/manager/pip_requirements/extract > extractPackageFile() > extra
       "datasource": "pypi",
       "depName": "sphinx",
       "packageName": "sphinx",
-      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "==1.9",

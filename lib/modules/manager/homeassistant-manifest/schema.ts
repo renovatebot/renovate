@@ -9,6 +9,9 @@ const Requirement = z.string().transform((requirement) => {
   const pipResult = extractPipRequirements(requirement);
   const dep = pipResult?.deps?.[0];
   if (dep) {
+    if (!dep.currentValue && !dep.skipReason) {
+      dep.skipReason = 'unspecified-version';
+    }
     return dep;
   }
   logger.debug({ requirement }, 'Unable to parse requirement version');
