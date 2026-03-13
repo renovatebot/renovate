@@ -266,5 +266,23 @@ describe('modules/manager/rebar3/extract', () => {
       const res = await extractPackageFile(config, 'rebar.config');
       expect(res?.deps).toHaveLength(2);
     });
+
+    it('handles nested brackets in deps opening line', async () => {
+      // Tests bracket depth tracking on the {deps, [...]} opening line
+      const config = `{deps, [[{cowboy, "2.13.0"}]
+      ]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      // Parsing may not extract valid deps from malformed config, but shouldn't crash
+      expect(res).toBeDefined();
+    });
+
+    it('handles brackets in dep body lines', async () => {
+      // Triggers bracketDepth++ on body lines (line 216)
+      const config = `{deps, [
+        [{cowboy, "2.13.0"}]
+      ]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res).toBeDefined();
+    });
   });
 });
