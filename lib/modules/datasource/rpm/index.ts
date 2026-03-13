@@ -1,17 +1,45 @@
+import { logger } from '../../../logger/index.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
+import { RpmSqliteMetadataProvider } from './providers/sqlite.ts';
 import { RpmXmlMetadataProvider } from './providers/xml.ts';
-import { fetchPrimaryUrl } from './repomd.ts';
+import {
+  type RpmRepositoryMetadata,
+  fetchPrimaryUrl,
+  fetchRepositoryMetadata,
+} from './repomd.ts';
+
+type RpmMetadataSource = 'primary' | 'primary_db';
+type ResolvedRpmMetadataSource = 'auto' | RpmMetadataSource;
+
+interface ParsedRpmRegistryUrl {
+  metadataSource: ResolvedRpmMetadataSource;
+  registryUrl: string;
+}
+
+interface RpmMetadataProvider {
+  readonly metadataType: RpmMetadataSource;
+  getReleases(
+    metadataUrl: string,
+    packageName: string,
+  ): Promise<ReleaseResult | null>;
+}
 
 export class RpmDatasource extends Datasource {
   static readonly id = datasource;
 
-  private readonly xmlProvider: RpmXmlMetadataProvider;
+  private readonly providers: Record<RpmMetadataSource, RpmMetadataProvider>;
 
   constructor() {
     super(RpmDatasource.id);
-    this.xmlProvider = new RpmXmlMetadataProvider(this.http);
+    const xmlProvider = new RpmXmlMetadataProvider(this.http);
+    const sqliteProvider = new RpmSqliteMetadataProvider(this.http);
+    this.providers = {
+      [xmlProvider.metadataType]: xmlProvider,
+      [sqliteProvider.metadataType]: sqliteProvider,
+    };
   }
 
   /**
@@ -48,17 +76,38 @@ export class RpmDatasource extends Datasource {
     }
 
     try {
-      const primaryUrl = await this.getPrimaryUrl(registryUrl);
-      return await this.getReleasesByPackageName(primaryUrl, packageName);
+      const parsedRegistryUrl = this.parseRegistryUrl(registryUrl);
+      const metadata = await this.getRepositoryMetadata(
+        parsedRegistryUrl.registryUrl,
+      );
+
+      if (parsedRegistryUrl.metadataSource !== 'auto') {
+        return await this.getProviderReleases(
+          parsedRegistryUrl.metadataSource,
+          metadata,
+          packageName,
+        );
+      }
+
+      return await this.getAutoReleases(
+        metadata,
+        packageName,
+        parsedRegistryUrl.registryUrl,
+      );
     } catch (err) {
       this.handleGenericErrors(err);
     }
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const parsedRegistryUrl = config.registryUrl
+      ? this.parseRegistryUrl(config.registryUrl)
+      : undefined;
+    const metadataSource = parsedRegistryUrl?.metadataSource ?? 'auto';
+
     return this.cached(
       {
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: `${parsedRegistryUrl?.registryUrl}:${config.packageName}:${metadataSource}`,
         ttlMinutes: 1440,
         fallback: true,
       },
@@ -66,13 +115,117 @@ export class RpmDatasource extends Datasource {
     );
   }
 
-  getPrimaryUrl(registryUrl: string): Promise<string> {
+  private parseRegistryUrl(registryUrl: string): ParsedRpmRegistryUrl {
+    const parsedUrl = parseUrl(registryUrl);
+    if (!parsedUrl) {
+      return { metadataSource: 'auto', registryUrl };
+    }
+
+    const rpmMetadataSource = new URLSearchParams(parsedUrl.hash.slice(1)).get(
+      'rpmMetadataSource',
+    );
+
+    if (rpmMetadataSource === null) {
+      return { metadataSource: 'auto', registryUrl };
+    }
+
+    if (rpmMetadataSource === 'primary' || rpmMetadataSource === 'primary_db') {
+      parsedUrl.hash = '';
+      return {
+        metadataSource: rpmMetadataSource,
+        registryUrl: parsedUrl.href,
+      };
+    }
+
+    if (rpmMetadataSource !== 'auto') {
+      throw new Error(
+        `Invalid rpmMetadataSource in RPM registry URL: ${rpmMetadataSource}`,
+      );
+    }
+
+    parsedUrl.hash = '';
+    return {
+      metadataSource: 'auto',
+      registryUrl: parsedUrl.href,
+    };
+  }
+
+  private async getAutoReleases(
+    metadata: RpmRepositoryMetadata,
+    packageName: string,
+    registryUrl: string,
+  ): Promise<ReleaseResult | null> {
+    const { primaryDbUrl, primaryUrl } = metadata;
+    let sqliteError: Error | undefined;
+
+    if (primaryDbUrl) {
+      try {
+        return await this.getProviderReleases(
+          'primary_db',
+          metadata,
+          packageName,
+        );
+      } catch (err) {
+        sqliteError = err instanceof Error ? err : new Error(String(err));
+        logger.debug(
+          {
+            datasource: RpmDatasource.id,
+            err,
+            packageName,
+            registryUrl,
+            repodataType: 'primary_db',
+            url: primaryDbUrl,
+          },
+          'Failed to query primary_db metadata, falling back to primary.xml.gz',
+        );
+      }
+    }
+
+    if (primaryUrl) {
+      return await this.getProviderReleases('primary', metadata, packageName);
+    }
+
+    if (sqliteError) {
+      throw sqliteError;
+    }
+
+    return null;
+  }
+
+  private async getProviderReleases(
+    metadataType: RpmMetadataSource,
+    metadata: RpmRepositoryMetadata,
+    packageName: string,
+  ): Promise<ReleaseResult | null> {
+    const metadataUrl = this.getMetadataUrlOrThrow(metadata, metadataType);
+
+    return await this.providers[metadataType].getReleases(
+      metadataUrl,
+      packageName,
+    );
+  }
+
+  private getRepositoryMetadata(
+    registryUrl: string,
+  ): Promise<RpmRepositoryMetadata> {
     return this.cached(
       {
-        key: registryUrl,
+        key: `repomd:${registryUrl}`,
         ttlMinutes: 1440,
       },
-      () => fetchPrimaryUrl(this.http, registryUrl),
+      () => fetchRepositoryMetadata(this.http, registryUrl),
+    );
+  }
+
+  getPrimaryUrl(registryUrl: string): Promise<string> {
+    const parsedRegistryUrl = this.parseRegistryUrl(registryUrl);
+
+    return this.cached(
+      {
+        key: parsedRegistryUrl.registryUrl,
+        ttlMinutes: 1440,
+      },
+      () => fetchPrimaryUrl(this.http, parsedRegistryUrl.registryUrl),
     );
   }
 
@@ -80,6 +233,22 @@ export class RpmDatasource extends Datasource {
     primaryUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    return this.xmlProvider.getReleases(primaryUrl, packageName);
+    return this.providers.primary.getReleases(primaryUrl, packageName);
+  }
+
+  private getMetadataUrlOrThrow(
+    metadata: RpmRepositoryMetadata,
+    metadataType: RpmMetadataSource,
+  ): string {
+    const metadataUrl =
+      metadataType === 'primary'
+        ? metadata.primaryUrl
+        : metadata.primaryDbUrl;
+
+    if (!metadataUrl) {
+      throw new Error(`No ${metadataType} data found in ${metadata.repomdUrl}`);
+    }
+
+    return metadataUrl;
   }
 }
