@@ -1,0 +1,50 @@
+name: MyProject
+packages:
+  Yams:
+    url: https://github.com/jpsim/Yams
+    from: 2.0.0
+  Ink:
+    github: JohnSundell/Ink
+    from: 0.5.0
+  Alamofire:
+    url: https://github.com/Alamofire/Alamofire
+    majorVersion: 5.0.0
+  SnapKit:
+    url: https://github.com/SnapKit/SnapKit
+    minorVersion: 5.6.0
+  SwiftLint:
+    url: https://github.com/realm/SwiftLint
+    exactVersion: 0.50.3
+  Moya:
+    url: https://github.com/Moya/Moya
+    version: 15.0.0
+  RxClient:
+    path: ../RxClient
+  AppFeature:
+    path: ../Packages
+    group: Domains/AppFeature
+  SwiftPM:
+    url: https://github.com/apple/swift-package-manager
+    branch: swift-5.0-branch
+  SomeRevisionPkg:
+    url: https://github.com/example/some-revision-pkg
+    revision: abc123def456
+  SomeRangePkg:
+    url: https://github.com/example/some-range-pkg
+    minVersion: 1.0.0
+    maxVersion: 2.0.0
+  GitLabPkg:
+    url: https://gitlab.com/some-group/some-project
+    from: 1.0.0
+  GenericGitPkg:
+    url: https://example.com/some/repo.git
+    from: 3.0.0
+targets:
+  App:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    dependencies:
+      - package: Yams
+      - package: Ink
