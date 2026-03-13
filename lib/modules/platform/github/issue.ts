@@ -9,28 +9,40 @@ const GithubIssueBase = z.object({
   state: z.string().transform((val) => val.toLowerCase()),
   title: z.string(),
   body: z.string(),
+  node_id: z.string().optional(),
 });
 
+interface TransformedIssue {
+  number: number;
+  state: string;
+  title: string;
+  body: string;
+  lastModified: string;
+  node_id?: string;
+}
+
 const GithubGraphqlIssue = GithubIssueBase.extend({
+  id: z.string().optional(),
   updatedAt: z.string(),
-}).transform((issue) => {
+}).transform((issue): TransformedIssue => {
   const lastModified = issue.updatedAt;
-  const { number, state, title, body } = issue;
-  return { number, state, title, body, lastModified };
+  const { number, state, title, body, id } = issue;
+  const node_id = id ?? issue.node_id;
+  return { number, state, title, body, lastModified, node_id };
 });
 
 const GithubRestIssue = GithubIssueBase.extend({
   updated_at: z.string(),
-}).transform((issue) => {
+}).transform((issue): TransformedIssue => {
   const lastModified = issue.updated_at;
-  const { number, state, title, body } = issue;
-  return { number, state, title, body, lastModified };
+  const { number, state, title, body, node_id } = issue;
+  return { number, state, title, body, lastModified, node_id };
 });
 
 export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
 export type GithubIssue = z.infer<typeof GithubIssue>;
 
-type CacheData = Record<number, GithubIssue>;
+interface CacheData extends Record<number, GithubIssue> {}
 
 export class GithubIssueCache {
   private static reset(cacheData: CacheData | null): void {
