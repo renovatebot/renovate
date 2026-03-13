@@ -179,5 +179,92 @@ describe('modules/manager/rebar3/extract', () => {
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].depName).toBe('real');
     });
+
+    it('handles == version prefix', async () => {
+      const config = `{deps, [{cowboy, "== 2.13.0"}]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'cowboy',
+        currentValue: '== 2.13.0',
+        currentVersion: '2.13.0',
+        datasource: 'hex',
+      });
+    });
+
+    it('skips erlang keywords in bare atom position', async () => {
+      const config = `{deps, [
+        {real_dep, "1.0.0"}
+      ]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].depName).toBe('real_dep');
+    });
+
+    it('handles deps on a single line', async () => {
+      const config = `{deps, [{cowboy, "2.13.0"}]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].depName).toBe('cowboy');
+    });
+
+    it('handles non-github git url', async () => {
+      const config = `{deps, [{myapp, {git, "https://gitlab.com/org/myapp.git", {tag, "1.0.0"}}}]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'myapp',
+        currentValue: '1.0.0',
+        datasource: 'git-tags',
+        packageName: 'https://gitlab.com/org/myapp.git',
+      });
+    });
+
+    it('handles non-github git url without ref', async () => {
+      const config = `{deps, [{myapp, {git, "https://gitlab.com/org/myapp.git"}}]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'myapp',
+        datasource: 'git-tags',
+        packageName: 'https://gitlab.com/org/myapp.git',
+        skipReason: 'unspecified-version',
+      });
+    });
+
+    it('handles nested brackets in deps', async () => {
+      const config = `{deps, [
+        {cowboy, "2.13.0"},
+        {ranch, "~> 2.0"}
+      ]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps).toHaveLength(2);
+    });
+
+    it('returns null when all deps are erlang keywords', async () => {
+      const config = `{deps, []}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res).toBeNull();
+    });
+
+    it('filters erlang keywords from bare atom deps', async () => {
+      const config = `{deps, [
+        end,
+        true,
+        false,
+        undefined,
+        {real_dep, "1.0.0"}
+      ]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].depName).toBe('real_dep');
+    });
+
+    it('handles nested tuples in deps section', async () => {
+      const config = `{deps, [
+        {cowboy, "2.13.0"},
+        {ranch, "~> 2.0"}
+      ]}.
+      {plugins, [{rebar3_hex, "~> 7.0"}]}.`;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps).toHaveLength(2);
+    });
   });
 });

@@ -137,5 +137,83 @@ describe('modules/manager/rebar3/artifacts', () => {
         },
       ]);
     });
+
+    it('returns error if lock file exists but cannot be read', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'rebar3' }];
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.getSiblingFileName.mockReturnValueOnce('rebar.lock');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        {
+          artifactError: {
+            fileName: 'rebar.lock',
+            stderr: 'Error reading rebar.lock',
+          },
+        },
+      ]);
+    });
+
+    it('returns error if parent lock file exists but cannot be read', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'rebar3' }];
+      fs.readLocalFile.mockResolvedValueOnce(null); // sibling
+      fs.getSiblingFileName.mockReturnValueOnce('rebar.lock');
+      fs.localPathExists.mockResolvedValueOnce(false); // sibling doesn't exist
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('parent/rebar.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null); // parent can't be read
+      fs.localPathExists.mockResolvedValueOnce(true); // parent exists
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        {
+          artifactError: {
+            fileName: 'parent/rebar.lock',
+            stderr: 'Error reading parent/rebar.lock',
+          },
+        },
+      ]);
+    });
+
+    it('uses parent lock file when sibling not found', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'rebar3', depName: 'cowboy' }];
+      fs.readLocalFile.mockResolvedValueOnce(null); // sibling
+      fs.getSiblingFileName.mockReturnValueOnce('rebar.lock');
+      fs.localPathExists.mockResolvedValueOnce(false); // sibling doesn't exist
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('parent/rebar.lock');
+      fs.readLocalFile.mockResolvedValueOnce('old'); // parent content
+      fs.readLocalFile.mockResolvedValueOnce('new'); // updated content
+      const execSnapshots = mockExecAll();
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        {
+          file: {
+            path: 'parent/rebar.lock',
+            type: 'addition',
+            contents: 'new',
+          },
+        },
+      ]);
+      expect(execSnapshots).toBeArrayOfSize(1);
+    });
+
+    it('returns null for lockFileMaintenance without lock file', async () => {
+      updateArtifact.config.isLockFileMaintenance = true;
+      updateArtifact.updatedDeps = [{ manager: 'rebar3' }];
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.getSiblingFileName.mockReturnValueOnce('rebar.lock');
+      fs.localPathExists.mockResolvedValueOnce(false);
+      expect(await updateArtifacts(updateArtifact)).toBeNull();
+    });
+
+    it('returns error if rebar.config write fails', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'rebar3' }];
+      fs.readLocalFile.mockResolvedValueOnce('old');
+      fs.getSiblingFileName.mockReturnValueOnce('rebar.lock');
+      fs.writeLocalFile.mockRejectedValueOnce(new Error('write failed'));
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        {
+          artifactError: {
+            fileName: 'rebar.lock',
+            stderr: 'write failed',
+          },
+        },
+      ]);
+    });
   });
 });
