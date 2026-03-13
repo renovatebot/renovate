@@ -98,7 +98,7 @@ describe('modules/manager/paket/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: lockFileName,
+            fileName: lockFileName,
             stderr: 'Cmd error',
           },
         },
