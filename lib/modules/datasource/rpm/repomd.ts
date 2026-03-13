@@ -5,24 +5,48 @@ import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { datasource, repomdXmlFileName } from './common.ts';
 
-function getPrimaryRepodataUrl(
+export interface RpmRepositoryMetadata {
+  repomdUrl: string;
+  primaryDbUrl?: string;
+  primaryUrl?: string;
+}
+
+function getRepodataUrl(
   xml: XmlDocument,
   registryUrl: string,
   repomdUrl: string,
-): string {
-  const primaryData = xml.childWithAttribute('type', 'primary');
+  type: 'primary' | 'primary_db',
+  optional = false,
+): string | undefined {
+  const data = xml.childWithAttribute('type', type);
 
-  if (!primaryData) {
-    throw new Error(`No primary data found in ${repomdUrl}`);
+  if (!data) {
+    return undefined;
   }
 
-  const locationElement = primaryData.childNamed('location');
+  const locationElement = data.childNamed('location');
   if (!locationElement) {
+    if (optional) {
+      logger.debug(
+        { datasource, repomdUrl, type },
+        'Optional repomd entry does not contain a location element',
+      );
+      return undefined;
+    }
+
     throw new Error(`No location element found in ${repomdUrl}`);
   }
 
   const href = locationElement.attr.href;
   if (!href) {
+    if (optional) {
+      logger.debug(
+        { datasource, repomdUrl, type },
+        'Optional repomd entry does not contain an href attribute',
+      );
+      return undefined;
+    }
+
     throw new Error(`No href found in ${repomdUrl}`);
   }
 
@@ -36,10 +60,11 @@ function getPrimaryRepodataUrl(
   return joinUrlParts(registryUrlWithoutRepodata, href);
 }
 
-export async function fetchPrimaryUrl(
+export async function fetchRepositoryMetadata(
   http: Http,
   registryUrl: string,
-): Promise<string> {
+  { primaryRequired = false }: { primaryRequired?: boolean } = {},
+): Promise<RpmRepositoryMetadata> {
   const repomdUrl = joinUrlParts(registryUrl, repomdXmlFileName);
   const response = await http.getText(repomdUrl.toString());
   const repomdBody = response.body.trimStart();
@@ -53,19 +78,46 @@ export async function fetchPrimaryUrl(
   }
 
   const xml = new XmlDocument(repomdBody);
+  const primaryUrl = getRepodataUrl(
+    xml,
+    registryUrl,
+    repomdUrl.toString(),
+    'primary',
+    !primaryRequired,
+  );
+  const primaryDbUrl = getRepodataUrl(
+    xml,
+    registryUrl,
+    repomdUrl.toString(),
+    'primary_db',
+    true,
+  );
 
-  try {
-    return getPrimaryRepodataUrl(xml, registryUrl, repomdUrl.toString());
-  } catch (err) {
-    if (
-      err instanceof Error &&
-      err.message.startsWith('No primary data found')
-    ) {
-      logger.debug(
-        `No primary data found in ${repomdUrl}, xml contents: ${response.body}`,
-      );
-    }
-
-    throw err;
+  if (!primaryUrl && !primaryDbUrl) {
+    logger.debug(
+      `No primary data found in ${repomdUrl}, xml contents: ${response.body}`,
+    );
+    throw new Error(`No primary data found in ${repomdUrl}`);
   }
+
+  return {
+    primaryDbUrl,
+    primaryUrl,
+    repomdUrl: repomdUrl.toString(),
+  };
+}
+
+export async function fetchPrimaryUrl(
+  http: Http,
+  registryUrl: string,
+): Promise<string> {
+  const metadata = await fetchRepositoryMetadata(http, registryUrl, {
+    primaryRequired: true,
+  });
+
+  if (!metadata.primaryUrl) {
+    throw new Error(`No primary data found in ${metadata.repomdUrl}`);
+  }
+
+  return metadata.primaryUrl;
 }
