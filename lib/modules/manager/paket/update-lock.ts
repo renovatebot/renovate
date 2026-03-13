@@ -14,6 +14,7 @@ export async function updateLockedDependency(
     filePath: config.lockFile,
     packageName: config.depName,
     version: config.newVersion,
+    toolConstraints: [{ toolName: 'dotnet' }],
   });
 
   const newLockFileContent = await readLocalFile(config.lockFile, 'utf8');

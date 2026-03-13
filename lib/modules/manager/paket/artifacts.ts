@@ -15,7 +15,15 @@ export async function updateArtifacts(
   const existingLockFileContent = await readLocalFile(lockFileName);
 
   try {
-    await runPaketUpdate({ filePath: lockFileName });
+    await runPaketUpdate({
+      filePath: lockFileName,
+      toolConstraints: [
+        {
+          toolName: 'dotnet',
+          constraint: updateArtifact.config.constraints?.dotnet,
+        },
+      ],
+    });
 
     const newLockFileContent = await readLocalFile(lockFileName);
 

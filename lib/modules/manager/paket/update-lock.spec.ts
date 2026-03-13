@@ -38,15 +38,12 @@ describe('modules/manager/paket/update-lock', () => {
 
       const result = await updateLockedDependency(config);
 
-      expect(toolSpy.mock.calls).toEqual([
-        [
-          {
-            filePath: lockFileName,
-            packageName: config.depName,
-            version: config.newVersion,
-          },
-        ],
-      ]);
+      expect(toolSpy).toHaveBeenCalledWith({
+        filePath: lockFileName,
+        packageName: config.depName,
+        version: config.newVersion,
+        toolConstraints: [{ toolName: 'dotnet' }],
+      });
       expect(result).toEqual({
         files: { [lockFileName]: newContentLockFile },
         status: 'updated',

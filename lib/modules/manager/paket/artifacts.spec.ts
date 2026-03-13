@@ -51,7 +51,10 @@ describe('modules/manager/paket/artifacts', () => {
 
       const result = await updateArtifacts(updateArtifact);
 
-      expect(toolSpy.mock.calls).toEqual([[{ filePath: lockFileName }]]);
+      expect(toolSpy).toHaveBeenCalledWith({
+        filePath: lockFileName,
+        toolConstraints: [{ toolName: 'dotnet', constraint: undefined }],
+      });
       expect(result).toEqual([
         {
           file: {

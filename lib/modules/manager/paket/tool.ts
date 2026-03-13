@@ -14,6 +14,8 @@ import type { UpdatePackage } from './types.ts';
 export async function runPaketUpdate(command: UpdatePackage): Promise<void> {
   const execOptions: ExecOptions = {
     cwdFile: command.filePath,
+    docker: {},
+    toolConstraints: command.toolConstraints,
   };
   const groupFilter = command.group ? ` --group ${quote(command.group)} ` : '';
   const packageFilter = command.packageName
