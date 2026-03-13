@@ -57,11 +57,6 @@ export class ElmPackageDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    /* v8 ignore if -- defensive check, result is null only if schema validation fails */
-    if (!result) {
-      return null;
-    }
-
     // Elm packages must be published from GitHub - the package name IS the GitHub repo path
     // (e.g., "elm/core" is published from github.com/elm/core)
     // This is enforced by the `elm publish` command
