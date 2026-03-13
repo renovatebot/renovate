@@ -1,16 +1,17 @@
-import { Readable } from 'node:stream';
-import { gunzip } from 'node:zlib';
-import sax from 'sax';
-import { promisify } from 'util';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import type { HttpResponse } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RpmSqliteMetadataProvider } from './providers/sqlite.ts';
+import { RpmXmlMetadataProvider } from './providers/xml.ts';
 
-const gunzipAsync = promisify(gunzip);
+interface RpmRepositoryMetadata {
+  repomdUrl: string;
+  primaryDbUrl?: string;
+  primaryGzipUrl?: string;
+}
 
 export class RpmDatasource extends Datasource {
   static readonly id = 'rpm';
@@ -18,8 +19,13 @@ export class RpmDatasource extends Datasource {
   // repomd.xml is a standard file name in RPM repositories which contains metadata about the repository
   static readonly repomdXmlFileName = 'repomd.xml';
 
+  private readonly sqliteProvider: RpmSqliteMetadataProvider;
+  private readonly xmlProvider: RpmXmlMetadataProvider;
+
   constructor() {
     super(RpmDatasource.id);
+    this.sqliteProvider = new RpmSqliteMetadataProvider(this.http);
+    this.xmlProvider = new RpmXmlMetadataProvider(this.http);
   }
 
   /**
@@ -52,14 +58,45 @@ export class RpmDatasource extends Datasource {
     if (!registryUrl || !packageName) {
       return null;
     }
+
     try {
-      const primaryGzipUrl = await this.getPrimaryGzipUrl(registryUrl);
-      if (!primaryGzipUrl) {
-        return null;
+      const metadata = await this.getRepositoryMetadata(registryUrl);
+      const { primaryDbUrl, primaryGzipUrl } = metadata;
+      let sqliteError: Error | undefined;
+
+      if (primaryDbUrl) {
+        try {
+          return await this.sqliteProvider.getReleases(
+            primaryDbUrl,
+            packageName,
+          );
+        } catch (err) {
+          sqliteError = err as Error;
+          logger.debug(
+            {
+              datasource: RpmDatasource.id,
+              err,
+              packageName,
+              registryUrl,
+              repodataType: 'primary_db',
+              url: primaryDbUrl,
+            },
+            'Failed to query primary_db metadata, falling back to primary.xml.gz',
+          );
+        }
       }
-      return await this.getReleasesByPackageName(primaryGzipUrl, packageName);
+
+      if (primaryGzipUrl) {
+        return await this.xmlProvider.getReleases(primaryGzipUrl, packageName);
+      }
+
+      if (sqliteError) {
+        throw sqliteError;
+      }
+
+      return null;
     } catch (err) {
-      this.handleGenericErrors(err);
+      this.handleGenericErrors(err as Error);
     }
   }
 
@@ -75,10 +112,57 @@ export class RpmDatasource extends Datasource {
     );
   }
 
-  // Fetches the primary.xml.gz URL from the repomd.xml file.
-  private async _getPrimaryGzipUrl(
+  private getRepodataUrl(
+    xml: XmlDocument,
     registryUrl: string,
-  ): Promise<string | null> {
+    repomdUrl: string,
+    type: 'primary' | 'primary_db',
+    optional = false,
+  ): string | undefined {
+    const data = xml.childWithAttribute('type', type);
+
+    if (!data) {
+      return undefined;
+    }
+
+    const locationElement = data.childNamed('location');
+    if (!locationElement) {
+      if (optional) {
+        logger.debug(
+          { datasource: RpmDatasource.id, repomdUrl, type },
+          'Optional repomd entry does not contain a location element',
+        );
+        return undefined;
+      }
+
+      throw new Error(`No location element found in ${repomdUrl}`);
+    }
+
+    const href = locationElement.attr.href;
+    if (!href) {
+      if (optional) {
+        logger.debug(
+          { datasource: RpmDatasource.id, repomdUrl, type },
+          'Optional repomd entry does not contain an href attribute',
+        );
+        return undefined;
+      }
+
+      throw new Error(`No href found in ${repomdUrl}`);
+    }
+
+    // replace trailing "repodata/" from registryUrl, if it exists, with a "/" because href includes "repodata/"
+    const registryUrlWithoutRepodata = registryUrl.replace(
+      /\/repodata\/?$/,
+      '/',
+    );
+
+    return joinUrlParts(registryUrlWithoutRepodata, href);
+  }
+
+  private async _getRepositoryMetadata(
+    registryUrl: string,
+  ): Promise<RpmRepositoryMetadata> {
     const repomdUrl = joinUrlParts(
       registryUrl,
       RpmDatasource.repomdXmlFileName,
@@ -98,147 +182,62 @@ export class RpmDatasource extends Datasource {
       );
     }
 
-    // parse repomd.xml using XmlDocument
     const xml = new XmlDocument(repomdBody);
+    const primaryGzipUrl = this.getRepodataUrl(
+      xml,
+      registryUrl,
+      repomdUrl.toString(),
+      'primary',
+    );
+    const primaryDbUrl = this.getRepodataUrl(
+      xml,
+      registryUrl,
+      repomdUrl.toString(),
+      'primary_db',
+      true,
+    );
 
-    const primaryData = xml.childWithAttribute('type', 'primary');
-
-    if (!primaryData) {
+    if (!primaryGzipUrl && !primaryDbUrl) {
       logger.debug(
         `No primary data found in ${repomdUrl}, xml contents: ${response.body}`,
       );
       throw new Error(`No primary data found in ${repomdUrl}`);
     }
 
-    const locationElement = primaryData.childNamed('location');
-    if (!locationElement) {
-      throw new Error(`No location element found in ${repomdUrl}`);
-    }
-    const href = locationElement.attr.href;
-    if (!href) {
-      throw new Error(`No href found in ${repomdUrl}`);
-    }
-    // replace trailing "repodata/" from registryUrl, if it exists, with a "/" because href includes "repodata/"
-    const registryUrlWithoutRepodata = registryUrl.replace(
-      /\/repodata\/?$/,
-      '/',
-    );
-    return joinUrlParts(registryUrlWithoutRepodata, href);
+    return {
+      primaryDbUrl,
+      primaryGzipUrl,
+      repomdUrl: repomdUrl.toString(),
+    };
   }
 
-  getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
+  private getRepositoryMetadata(
+    registryUrl: string,
+  ): Promise<RpmRepositoryMetadata> {
     return withCache(
       {
         namespace: `datasource-${RpmDatasource.id}`,
-        key: registryUrl,
+        key: `repomd:${registryUrl}`,
         ttlMinutes: 1440,
       },
-      () => this._getPrimaryGzipUrl(registryUrl),
+      () => this._getRepositoryMetadata(registryUrl),
     );
+  }
+
+  async getPrimaryGzipUrl(registryUrl: string): Promise<string> {
+    const metadata = await this.getRepositoryMetadata(registryUrl);
+
+    if (!metadata.primaryGzipUrl) {
+      throw new Error(`No primary data found in ${metadata.repomdUrl}`);
+    }
+
+    return metadata.primaryGzipUrl;
   }
 
   async getReleasesByPackageName(
     primaryGzipUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    let response: HttpResponse<Buffer>;
-    let decompressedBuffer: Buffer;
-    try {
-      // primaryGzipUrl is a .gz file, need to extract it before parsing
-      response = await this.http.getBuffer(primaryGzipUrl);
-      if (response.body.length === 0) {
-        logger.debug(`Empty response body from getting ${primaryGzipUrl}.`);
-        throw new Error(`Empty response body from getting ${primaryGzipUrl}.`);
-      }
-      // decompress the gzipped file
-      decompressedBuffer = await gunzipAsync(response.body);
-    } catch (err) {
-      logger.debug(
-        `Failed to fetch or decompress ${primaryGzipUrl}: ${
-          err instanceof Error ? err.message : err
-        }`,
-      );
-      throw err;
-    }
-
-    // Use sax streaming parser to handle large XML files efficiently
-    // This allows us to parse the XML file without loading the entire file into memory.
-    const releases: Record<string, Release> = {};
-    let insidePackage = false;
-    let isTargetPackage = false;
-    let insideName = false;
-
-    // Create a SAX parser in strict mode
-    const saxParser = sax.createStream(true, {
-      lowercase: true, // normalize tag names to lowercase
-      trim: true,
-    });
-
-    saxParser.on('opentag', (node: sax.Tag) => {
-      if (node.name === 'package' && node.attributes.type === 'rpm') {
-        insidePackage = true;
-        isTargetPackage = false;
-      }
-      if (insidePackage && node.name === 'name') {
-        insideName = true;
-      }
-      if (insidePackage && isTargetPackage && node.name === 'version') {
-        // rel is optional
-        if (node.attributes.rel === undefined) {
-          const version = `${node.attributes.ver}`;
-          releases[version] = { version };
-        } else {
-          const version = `${node.attributes.ver}-${node.attributes.rel}`;
-          releases[version] = { version };
-        }
-      }
-    });
-    saxParser.on('text', (text: string) => {
-      if (insidePackage && insideName) {
-        if (text.trim() === packageName) {
-          isTargetPackage = true;
-        }
-      }
-    });
-    saxParser.on('closetag', (tag: string) => {
-      if (tag === 'name' && insidePackage) {
-        insideName = false;
-      }
-      if (tag === 'package') {
-        insidePackage = false;
-        isTargetPackage = false;
-      }
-    });
-
-    await new Promise<void>((resolve, reject) => {
-      let settled = false;
-      saxParser.on('error', (err: Error) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        logger.debug(`SAX parsing error in ${primaryGzipUrl}: ${err.message}`);
-        setImmediate(() => saxParser.removeAllListeners());
-        reject(err);
-      });
-      saxParser.on('end', () => {
-        settled = true;
-        setImmediate(() => saxParser.removeAllListeners());
-        resolve();
-      });
-      Readable.from(decompressedBuffer).pipe(saxParser);
-    });
-
-    if (Object.keys(releases).length === 0) {
-      logger.trace(
-        `No releases found for package ${packageName} in ${primaryGzipUrl}`,
-      );
-      return null;
-    }
-    return {
-      releases: Object.values(releases).map((release) => ({
-        version: release.version,
-      })),
-    };
+    return await this.xmlProvider.getReleases(primaryGzipUrl, packageName);
   }
 }
