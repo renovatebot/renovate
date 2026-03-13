@@ -36,6 +36,24 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  gitlabDigestChangelogs: {
+    description:
+      'Ensure that every dependency pinned by digest and sourced from GitLab.com contains a link to the commit-to-commit diff',
+    packageRules: [
+      {
+        changelogUrl:
+          '{{sourceUrl}}/-/compare/{{currentDigest}}...{{newDigest}}',
+        matchDatasources: [
+          'git-refs',
+          'git-tags',
+          'gitlab-releases',
+          'gitlab-tags',
+        ],
+        matchSourceUrls: ['https://gitlab.com/**'],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
   goXPackagesChangelogLink: {
     description: 'Correctly link to the source code for golang.org/x packages',
     packageRules: [
