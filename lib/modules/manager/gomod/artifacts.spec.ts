@@ -1726,7 +1726,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'go.sum',
+          fileName: 'go.sum',
           stderr: 'This update totally doesnt work',
         },
       },
@@ -2671,7 +2671,7 @@ describe('modules/manager/gomod/artifacts', () => {
         },
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },
+      { artifactError: { fileName: 'go.sum', stderr: 'Invalid goGetDirs' } },
     ]);
     expect(execSnapshots).toMatchObject([]);
   });
@@ -2691,5 +2691,143 @@ describe('modules/manager/gomod/artifacts', () => {
         },
       }),
     ).rejects.toThrow(TEMPORARY_ERROR);
+  });
+
+  it('uses -modfile flag for non-default go.mod filename', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockResolvedValueOnce('Current tools.sum');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['tools.sum'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New tools.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'tools.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New tools.sum',
+          path: 'tools.sum',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -modfile=tools.mod -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('uses -modfile flag with go mod tidy for non-default go.mod filename', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockResolvedValueOnce('Current tools.sum');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['tools.sum'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New tools.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'tools.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New tools.sum',
+          path: 'tools.sum',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -modfile=tools.mod -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -modfile=tools.mod',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -modfile=tools.mod',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('uses -modfile flag with go mod vendor for non-default go.mod filename', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    fs.readLocalFile.mockResolvedValueOnce('Current tools.sum');
+    fs.readLocalFile.mockResolvedValueOnce('vendor modules'); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['tools.sum'],
+        not_added: [],
+        deleted: [],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New tools.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'tools.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New tools.sum',
+          path: 'tools.sum',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -modfile=tools.mod -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -modfile=tools.mod',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod vendor -modfile=tools.mod',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -modfile=tools.mod',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -modfile=tools.mod',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 });

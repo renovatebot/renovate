@@ -6,12 +6,14 @@
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
+      "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
-      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
+      "replacements:edb-jdbc-to-enterprisedb",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
+      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-plugin-node-to-maintained-fork",
       "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:express-mung-to-express-response-middleware",
@@ -21,6 +23,7 @@
       "replacements:google-github-action-release-please-to-googleapis",
       "replacements:grafana-oss-to-grafana",
       "replacements:hapi-to-scoped",
+      "replacements:home-operations-to-official",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -30,7 +33,6 @@
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:ojdbc-to-ojdbc11",
-      "replacements:ojdbc10-to-ojdbc11",
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
@@ -40,6 +42,7 @@
       "replacements:read-pkg-up-rename",
       "replacements:redux-devtools-extension-to-scope",
       "replacements:renovate-pep440-to-renovatebot-pep440",
+      "replacements:rolldown-vite-to-vite",
       "replacements:rollup-babel-to-scoped",
       "replacements:rollup-json-to-scoped",
       "replacements:rollup-node-resolve-to-scoped",
@@ -51,6 +54,7 @@
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
@@ -140,6 +144,17 @@
         "matchPackageNames": ["babel-eslint"],
         "replacementName": "@babel/eslint-parser",
         "replacementVersion": "7.11.0"
+      }
+    ]
+  },
+  "base-ui-components-to-base-ui": {
+    "description": "`@base-ui-components/react` was renamed to `@base-ui/react`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@base-ui-components/react"],
+        "replacementName": "@base-ui/react",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
@@ -246,15 +261,20 @@
       }
     ]
   },
-  "eslint-plugin-eslint-comments-to-maintained-fork": {
-    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+  "edb-jdbc-to-enterprisedb": {
+    "description": "`com.edb:edb-jdbc` and `com.edb:edb-jdbc18` were moved to `com.enterprisedb:edb-jdbc`.",
     "packageRules": [
       {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["eslint-plugin-eslint-comments"],
-        "matchCurrentVersion": "^3.2.0",
-        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
-        "replacementVersion": "3.2.0"
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
+      },
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc18"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
       }
     ]
   },
@@ -267,6 +287,18 @@
         "matchPackageNames": ["eslint-config-standard-with-typescript"],
         "replacementName": "eslint-config-love",
         "replacementVersion": "43.1.0"
+      }
+    ]
+  },
+  "eslint-plugin-eslint-comments-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
+        "replacementVersion": "3.2.0"
       }
     ]
   },
@@ -745,6 +777,18 @@
       }
     ]
   },
+  "home-operations-to-official": {
+    "description": "`home-operations` only builts these until official versions are released",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.18.6",
+        "matchDatasources": ["helm", "docker"],
+        "matchPackageNames": ["ghcr.io/home-operations/charts-mirror/cilium"],
+        "replacementName": "quay.io/cilium/charts/cilium",
+        "replacementVersion": "1.18.6"
+      }
+    ]
+  },
   "jade-to-pug": {
     "description": "Jade was renamed to Pug.",
     "packageRules": [
@@ -838,19 +882,14 @@
     ]
   },
   "ojdbc-to-ojdbc11": {
-    "description": "`ojdbc:ojdbc` was moved to `com.oracle.database.jdbc:ojdbc11`.",
+    "description": "`ojdbc:ojdbc` and `com.oracle.database.jdbc:ojdbc10` were moved to `com.oracle.database.jdbc:ojdbc11`.",
     "packageRules": [
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["ojdbc:ojdbc"],
         "replacementName": "com.oracle.database.jdbc:ojdbc11",
         "replacementVersion": "21.1.0.0"
-      }
-    ]
-  },
-  "ojdbc10-to-ojdbc11": {
-    "description": "`com.oracle.database.jdbc:ojdbc10` was moved to `com.oracle.database.jdbc:ojdbc11`.",
-    "packageRules": [
+      },
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["com.oracle.database.jdbc:ojdbc10"],
@@ -967,6 +1006,17 @@
         "matchPackageNames": ["@renovate/pep440"],
         "replacementName": "@renovatebot/pep440",
         "replacementVersion": "1.0.0"
+      }
+    ]
+  },
+  "rolldown-vite-to-vite": {
+    "description": "`rolldown-vite` was merged to `vite` in version 8.0.0.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rolldown-vite"],
+        "replacementName": "vite",
+        "replacementVersion": "8.0.0"
       }
     ]
   },
@@ -1134,6 +1184,18 @@
         "matchPackageNames": ["typeorm-seeding"],
         "replacementName": "@jorgebodega/typeorm-seeding",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "vitest-coverage-c8-to-coverage-v8": {
+    "description": "`@vitest/coverage-c8` was renamed to `@vitest/coverage-v8`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.32.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@vitest/coverage-c8"],
+        "replacementName": "@vitest/coverage-v8",
+        "replacementVersion": "0.33.0"
       }
     ]
   },

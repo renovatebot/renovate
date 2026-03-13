@@ -649,7 +649,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.14.1',
+    default: 'ghcr.io/renovatebot/base-image:13.22.0',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1122,6 +1122,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
     default: null,
+    supportedManagers: ['npm'],
   },
   {
     name: 'autodiscover',
@@ -3439,6 +3440,16 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'integer',
     parents: ['toolSettings'],
     supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'nodeMaxMemory',
+    description:
+      'Maximum memory in MiB for Node child processes invoked by Renovate. If unset, the Node process will automagically determine the memory limit to use. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.nodeMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['npm'],
     cli: false,
     env: false,
   },

@@ -5,13 +5,14 @@ import { DateTime } from 'luxon';
 import { partial } from '~test/util.ts';
 import { add } from '../util/host-rules.ts';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
+import { createDefaultStreams } from './bunyan.ts';
 import {
   addMeta,
   addStream,
   clearProblems,
-  createDefaultStreams,
   getContext,
   getProblems,
+  init,
   levels,
   logLevel,
   logger,
@@ -20,8 +21,8 @@ import {
   setMeta,
   withMeta,
 } from './index.ts';
+import { ProblemStream } from './problem-stream.ts';
 import type { RenovateLogger } from './renovate-logger.ts';
-import { ProblemStream } from './utils.ts';
 
 const logContext = 'initial_context';
 
@@ -31,6 +32,9 @@ vi.mock('node:crypto', () => ({
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
+
+// init logger
+await init();
 
 describe('logger/index', () => {
   beforeEach(() => {
@@ -478,6 +482,7 @@ describe('logger/index', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someDate: new Date('2021-04-05T06:07Z'),
       someFn: () => 'secret"password',
       someLuxonDate: DateTime.fromISO('2020-02-29'),
       someLuxonDateTime: DateTime.fromISO('2020-02-29T01:40:21.345+00:00'),
@@ -495,6 +500,7 @@ describe('logger/index', () => {
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe(prBody);
     expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someDate).toBe('2021-04-05T06:07:00.000Z');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someLuxonDate).toBe('2020-02-29T00:00:00.000+00:00');
     expect(logged.someLuxonDateTime).toBe('2020-02-29T01:40:21.345+00:00');

@@ -17,12 +17,45 @@ type JsonSchemaBasicType =
   | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
+/* These are sorted in priority order, but editors may not suggest in that order */
+const presetsToSuggest = [
+  'config:best-practices',
+  'config:recommended',
+  'mergeConfidence:all-badges',
+  'abandonments:recommended',
+  'group:all',
+  'replacements:all',
+  'security:minimumReleaseAgeNpm',
+  'security:only-security-updates',
+];
+
+/**
+ * When suggesting presets in `extends`, suggest a number of values that users may want to use
+ */
+function createExtendsSchema(items: Record<string, any>): any[] {
+  return [
+    {
+      type: 'array',
+      items: {
+        anyOf: [
+          {
+            enum: presetsToSuggest,
+          },
+          items,
+        ],
+      },
+    },
+    { ...items },
+  ];
+}
+
 function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   const temp: Record<string, any> & {
     type?: JsonSchemaType;
   } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
     temp.description = option.description;
+    temp.markdownDescription = option.description;
   }
   temp.type = option.type;
   if (option.type === 'array') {
@@ -34,14 +67,25 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         temp.items.format = option.format;
       }
       if (option.allowedValues) {
-        temp.items.enum = option.allowedValues;
+        if (option.allowString) {
+          temp.items.anyOf = [
+            { enum: option.allowedValues },
+            { type: 'string' },
+          ];
+        } else {
+          temp.items.enum = option.allowedValues;
+        }
       }
     }
     if (option.subType === 'string' && option.allowString === true) {
       const items = temp.items;
       delete temp.items;
       delete temp.type;
-      temp.oneOf = [{ type: 'array', items }, { ...items }];
+      if (option.name === 'extends') {
+        temp.oneOf = createExtendsSchema(items);
+      } else {
+        temp.oneOf = [{ type: 'array', items }, { ...items }];
+      }
     }
   } else {
     if (hasKey('format', option) && option.format) {
@@ -53,7 +97,11 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         { type: 'string', pattern: '^regex:' },
       ];
     } else if (option.allowedValues) {
-      temp.enum = option.allowedValues;
+      if (option.allowString) {
+        temp.anyOf = [{ enum: option.allowedValues }, { type: 'string' }];
+      } else {
+        temp.enum = option.allowedValues;
+      }
     }
   }
   if (option.default !== undefined) {
@@ -191,6 +239,7 @@ export async function generateSchema(
 
   const schema = {
     // may be overridden based on `isGlobal` and `isInherit`
+    $id: 'https://docs.renovatebot.com/renovate-schema.json',
     title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
     $schema: 'http://json-schema.org/draft-07/schema#',
     'x-renovate-version': `${version}`,
@@ -210,8 +259,10 @@ export async function generateSchema(
   };
 
   if (isGlobal) {
+    schema.$id = 'https://docs.renovatebot.com/renovate-global-schema.json';
     schema.title = `JSON schema for Renovate ${version} global self-hosting configuration (https://renovatebot.com/)`;
   } else if (isInherit) {
+    schema.$id = 'https://docs.renovatebot.com/renovate-inherited-schema.json';
     schema.title = `JSON schema for Renovate ${version} config files (with Inherit Config options) (https://renovatebot.com/)`;
   }
 
