@@ -6,14 +6,14 @@ describe('modules/manager/paket/parsers/lock-file', () => {
   describe('parse()', () => {
     it('should return all nuget package version on main group', () => {
       const result = parse(codeBlock`
-      RESTRICTION: == net8.0
-      NUGET
-        remote: https://api.nuget.org/v3/index.json
-          dotnet-fable (2.0.11) - clitool: true
-            Dotnet.ProjInfo (>= 0.20)
-            FSharp.Core (>= 4.5.2)
-          Dotnet.ProjInfo (0.44)
-            FSharp.Core (>= 4.6.2)
+        RESTRICTION: == net8.0
+        NUGET
+          remote: https://api.nuget.org/v3/index.json
+            dotnet-fable (2.0.11) - clitool: true
+              Dotnet.ProjInfo (>= 0.20)
+              FSharp.Core (>= 4.5.2)
+            Dotnet.ProjInfo (0.44)
+              FSharp.Core (>= 4.6.2)
       `);
 
       expect(result).toEqual<LockFileDependency[]>([
@@ -36,14 +36,14 @@ describe('modules/manager/paket/parsers/lock-file', () => {
 
     it('should return all nuget sources on main group', () => {
       const result = parse(codeBlock`
-      RESTRICTION: == net8.0
-      NUGET
-        remote: https://api.nuget.org/v3/index.json
-          dotnet-fable (2.0.11) - clitool: true
-            Dotnet.ProjInfo (>= 0.20)
-            FSharp.Core (>= 4.5.2)
-        remote: https://example.com/v3/index.json
-          FSharp.Core (9.0.300)
+        RESTRICTION: == net8.0
+        NUGET
+          remote: https://api.nuget.org/v3/index.json
+            dotnet-fable (2.0.11) - clitool: true
+              Dotnet.ProjInfo (>= 0.20)
+              FSharp.Core (>= 4.5.2)
+          remote: https://example.com/v3/index.json
+            FSharp.Core (9.0.300)
       `);
 
       expect(result).toEqual<LockFileDependency[]>([
@@ -66,15 +66,15 @@ describe('modules/manager/paket/parsers/lock-file', () => {
 
     it('should ignore other package line', () => {
       const result = parse(codeBlock`
-      RESTRICTION: == net8.0
-      NUGET
-        remote: https://api.nuget.org/v3/index.json
-          comment: impossible case normally
-          dotnet-fable (2.0.11) - clitool: true
-            Dotnet.ProjInfo (>= 0.20)
-            FSharp.Core (>= 4.5.2)
-        remote: https://example.com/v3/index.json
-          FSharp.Core (9.0.300)
+        RESTRICTION: == net8.0
+        NUGET
+          remote: https://api.nuget.org/v3/index.json
+            comment: impossible case normally
+            dotnet-fable (2.0.11) - clitool: true
+              Dotnet.ProjInfo (>= 0.20)
+              FSharp.Core (>= 4.5.2)
+          remote: https://example.com/v3/index.json
+            FSharp.Core (9.0.300)
       `);
 
       expect(result.length).toEqual<number>(2);
@@ -82,25 +82,25 @@ describe('modules/manager/paket/parsers/lock-file', () => {
 
     it('should return all nuget sources of all groups', () => {
       const result = parse(codeBlock`
-      RESTRICTION: == net8.0
-      NUGET
-        remote: https://api.nuget.org/v3/index.json
-          FSharp.Core (9.0.300)
-      GROUP GroupA
-      NUGET
-        remote: https://api.nuget.org/v3/index.json
-          FAKE (5.16)
-      GITHUB
-        remote: forki/FsUnit
-          FsUnit.fs (fa4eb37288d355eb855261be6c0b3945fba68432)
-      GROUP GroupB
-      NUGET
-        remote: https://api.nuget.org/v3/index.json
-          dotnet-fable (2.0.11) - clitool: true
-            Dotnet.ProjInfo (>= 0.20)
-            FSharp.Core (>= 4.5.2)
-        remote: https://example.com/v3/index.json
-          FSharp.Core (9.0.300)
+        RESTRICTION: == net8.0
+        NUGET
+          remote: https://api.nuget.org/v3/index.json
+            FSharp.Core (9.0.300)
+        GROUP GroupA
+        NUGET
+          remote: https://api.nuget.org/v3/index.json
+            FAKE (5.16)
+        GITHUB
+          remote: forki/FsUnit
+            FsUnit.fs (fa4eb37288d355eb855261be6c0b3945fba68432)
+        GROUP GroupB
+        NUGET
+          remote: https://api.nuget.org/v3/index.json
+            dotnet-fable (2.0.11) - clitool: true
+              Dotnet.ProjInfo (>= 0.20)
+              FSharp.Core (>= 4.5.2)
+          remote: https://example.com/v3/index.json
+            FSharp.Core (9.0.300)
       `);
 
       expect(result).toEqual<LockFileDependency[]>([

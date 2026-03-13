@@ -5,12 +5,12 @@ describe('modules/manager/paket/parsers/dependencies-file', () => {
   describe('parse()', () => {
     it('should return all packages on main group', () => {
       const result = parse(codeBlock`
-      source https://api.nuget.org/v3/index.json
+        source https://api.nuget.org/v3/index.json
 
-      framework: net8.0
+        framework: net8.0
 
-      nuget Fsharp.Core
-      nuget xunit > 3 prerelease
+        nuget Fsharp.Core
+        nuget xunit > 3 prerelease
       `);
 
       expect(result).toEqual({
@@ -28,21 +28,21 @@ describe('modules/manager/paket/parsers/dependencies-file', () => {
 
     it('should return all groups', () => {
       const result = parse(codeBlock`
-      source https://api.nuget.org/v3/index.json
-
-      framework: net8.0
-
-      nuget Fsharp.Core
-
-      group GroupA
         source https://api.nuget.org/v3/index.json
-        nuget Fake
 
-      group GroupB
-        source https://api.nuget.org/v3/index.json
+        framework: net8.0
 
         nuget Fsharp.Core
-        nuget xunit
+
+        group GroupA
+          source https://api.nuget.org/v3/index.json
+          nuget Fake
+
+        group GroupB
+          source https://api.nuget.org/v3/index.json
+
+          nuget Fsharp.Core
+          nuget xunit
       `);
 
       expect(result).toEqual({

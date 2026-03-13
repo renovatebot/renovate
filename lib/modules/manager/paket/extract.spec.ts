@@ -27,27 +27,27 @@ describe('modules/manager/paket/extract', () => {
   describe('extractPackageFile()', () => {
     const config: ExtractConfig = {};
     const packageFileContent = codeBlock`
-    source https://api.nuget.org/v3/index.json
-
-    nuget Fsharp.Core
-    nuget xunit
-
-    group GroupA
       source https://api.nuget.org/v3/index.json
-      nuget Fake
+
+      nuget Fsharp.Core
       nuget xunit
+
+      group GroupA
+        source https://api.nuget.org/v3/index.json
+        nuget Fake
+        nuget xunit
     `;
     const lockFileName = '/app/test/paket.lock';
     const lockFileContent = codeBlock`
-    NUGET
-      remote: https://api.nuget.org/v3/index.json
-        FSharp.Core (9.0.300)
-        xunit (2.9.3)
-    GROUP GroupA
-    NUGET
-      remote: https://api.nuget.org/v3/index.json
-        FAKE (5.16)
-        xunit (2.9.2)
+      NUGET
+        remote: https://api.nuget.org/v3/index.json
+          FSharp.Core (9.0.300)
+          xunit (2.9.3)
+      GROUP GroupA
+      NUGET
+        remote: https://api.nuget.org/v3/index.json
+          FAKE (5.16)
+          xunit (2.9.2)
     `;
 
     it('return all packages', async () => {
@@ -125,17 +125,17 @@ describe('modules/manager/paket/extract', () => {
         (filename: string, _encoding: 'utf8') => {
           expect(filename).equals(lockFileName);
           return Promise.resolve(codeBlock`
-          NUGET
-            remote: https://api.nuget.org/v3/index.json
-              FSharp.Core (9.0.300)
+            NUGET
+              remote: https://api.nuget.org/v3/index.json
+                FSharp.Core (9.0.300)
           `);
         },
       );
       const packageFileContent = codeBlock`
-      source https://api.nuget.org/v3/index.json
+        source https://api.nuget.org/v3/index.json
 
-      nuget Fsharp.Core
-      nuget xunit
+        nuget Fsharp.Core
+        nuget xunit
       `;
 
       const result = await extractPackageFile(
