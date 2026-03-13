@@ -27,6 +27,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:helmDocs',
       'workarounds:guavaVariants',
       'workarounds:aospTagVersioning',
+      'workarounds:byteBuddyMavenArtifactVersioning',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
@@ -59,6 +60,20 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
+      },
+    ],
+  },
+  byteBuddyMavenArtifactVersioning: {
+    description: 'Use custom regex versioning for byte-buddy maven artifact',
+    packageRules: [
+      {
+        description: 'byte-buddy artifact specifies compatibility in version string',
+        matchDatasources: ['maven'],
+        matchPackageNames: [
+          'net.bytebuddy:byte-buddy',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+))?$',
       },
     ],
   },
