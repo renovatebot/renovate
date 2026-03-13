@@ -41,7 +41,7 @@ describe('modules/manager/paket/update-lock', () => {
         filePath: lockFileName,
         packageName: config.depName,
         version: config.newVersion,
-        toolConstraints: [{ toolName: 'dotnet' }],
+        toolConstraints: [{ toolName: 'dotnet' }, { toolName: 'paket' }],
       });
       expect(result).toEqual({
         files: { [lockFileName]: newContentLockFile },

@@ -52,7 +52,10 @@ describe('modules/manager/paket/artifacts', () => {
 
       expect(toolSpy).toHaveBeenCalledWith({
         filePath: lockFileName,
-        toolConstraints: [{ toolName: 'dotnet', constraint: undefined }],
+        toolConstraints: [
+          { toolName: 'dotnet', constraint: undefined },
+          { toolName: 'paket', constraint: undefined },
+        ],
       });
       expect(result).toEqual([
         {

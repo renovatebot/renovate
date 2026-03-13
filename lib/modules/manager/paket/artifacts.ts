@@ -22,6 +22,10 @@ export async function updateArtifacts(
           toolName: 'dotnet',
           constraint: updateArtifact.config.constraints?.dotnet,
         },
+        {
+          toolName: 'paket',
+          constraint: updateArtifact.config.constraints?.paket,
+        },
       ],
     });
 
