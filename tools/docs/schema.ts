@@ -55,6 +55,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
     temp.description = option.description;
+    temp.markdownDescription = option.description;
   }
   temp.type = option.type;
   if (option.type === 'array') {
