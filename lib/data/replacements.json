@@ -53,6 +53,7 @@
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
@@ -1171,6 +1172,18 @@
         "matchPackageNames": ["typeorm-seeding"],
         "replacementName": "@jorgebodega/typeorm-seeding",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "vitest-coverage-c8-to-coverage-v8": {
+    "description": "`@vitest/coverage-c8` was renamed to `@vitest/coverage-v8`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.32.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@vitest/coverage-c8"],
+        "replacementName": "@vitest/coverage-v8",
+        "replacementVersion": "0.33.0"
       }
     ]
   },
