@@ -161,7 +161,7 @@ describe('config/validation', () => {
             rpmMetadataSource: 'primary',
           },
         ],
-      };
+      } satisfies RenovateConfig;
       const { errors, warnings } = await configValidation.validateConfig(
         'repo',
         config,
