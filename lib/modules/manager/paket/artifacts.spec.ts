@@ -1,4 +1,3 @@
-import { beforeEach, describe } from 'vitest';
 import { fs } from '~test/util.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';

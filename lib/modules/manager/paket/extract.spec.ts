@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { beforeEach, describe } from 'vitest';
 import { fs } from '~test/util.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type { ExtractConfig } from '../types.ts';

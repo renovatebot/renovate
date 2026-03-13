@@ -1,4 +1,3 @@
-import { describe } from 'vitest';
 import { fs } from '~test/util.ts';
 import type { UpdateLockedConfig } from '../types.ts';
 import * as tool from './tool.ts';
