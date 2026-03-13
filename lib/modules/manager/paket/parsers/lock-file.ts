@@ -6,6 +6,7 @@ interface Line {
   text: string;
   indent: number;
 }
+
 function extractLines(content: string): Line[] {
   return content
     .split(newlineRegex)
@@ -22,6 +23,7 @@ interface ReduceState {
   currentGroupName: string;
   currentRemote: string;
 }
+
 function parseLine(line: Line, state: ReduceState): ReduceState {
   if (line.indent === 0) {
     if (line.text.startsWith('GROUP ')) {
