@@ -29,7 +29,7 @@ describe('modules/platform/utils/pr-body', () => {
       it('handles 4-backtick fence containing triple backticks', () => {
         // ```` opens a fence that ``` cannot close
         const input = '````testa\n```test\n```\n```\nmore content';
-        const expected = '````testa\n```test\n```\n```\nmore content\n```\n';
+        const expected = '````testa\n```test\n```\n```\nmore content\n````\n';
         const result = closeUnclosedStructures(input, 200);
         expect(result).toBe(expected);
         expect(result).toHaveLength(expected.length);
@@ -37,7 +37,7 @@ describe('modules/platform/utils/pr-body', () => {
 
       it('handles 5-backtick fence', () => {
         const input = '`````markdown\nsome code\n````\n```';
-        const expected = '`````markdown\nsome code\n````\n```\n```\n';
+        const expected = '`````markdown\nsome code\n````\n```\n`````\n';
         const result = closeUnclosedStructures(input, 200);
         expect(result).toBe(expected);
         expect(result).toHaveLength(expected.length);
@@ -99,6 +99,28 @@ describe('modules/platform/utils/pr-body', () => {
         const result = closeUnclosedStructures(input, 200);
         expect(result).toBe(expected);
       });
+
+      it('ignores HTML tags inside a balanced code fence', () => {
+        const input = 'before\n```html\n<div>\n<table>\n```\nafter';
+        const result = closeUnclosedStructures(input, 500);
+        expect(result).toBe(input);
+      });
+
+      it('ignores HTML tags inside an unclosed code fence', () => {
+        const input = 'before\n```html\n<div>\n<table>';
+        const expected = 'before\n```html\n<div>\n<table>\n```\n';
+        const result = closeUnclosedStructures(input, 500);
+        expect(result).toBe(expected);
+      });
+
+      it('closes real HTML tags outside fences while ignoring ones inside', () => {
+        const input =
+          '<details>\n<summary>Title</summary>\n```html\n<div>\n```\nContent';
+        const expected =
+          '<details>\n<summary>Title</summary>\n```html\n<div>\n```\nContent\n</details>\n';
+        const result = closeUnclosedStructures(input, 500);
+        expect(result).toBe(expected);
+      });
     });
 
     describe('case 2: closing tag exceeds limit, trim back', () => {
@@ -118,6 +140,17 @@ describe('modules/platform/utils/pr-body', () => {
       it('trims content inside code fence to fit closing fence', () => {
         const input = 'text before\n```bash\necho hello';
         const closeFence = '\n```\n';
+        const maxLen = input.length;
+        const expected =
+          input.slice(0, maxLen - closeFence.length) + closeFence;
+        const result = closeUnclosedStructures(input, maxLen);
+        expect(result).toBe(expected);
+        expect(result).toHaveLength(maxLen);
+      });
+
+      it('trims content inside 4-backtick fence to fit closing fence', () => {
+        const input = 'text before\n````bash\necho hello';
+        const closeFence = '\n````\n';
         const maxLen = input.length;
         const expected =
           input.slice(0, maxLen - closeFence.length) + closeFence;

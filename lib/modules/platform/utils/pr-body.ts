@@ -12,12 +12,52 @@ const re = regEx(
 const htmlTags = ['summary', 'table', 'div', 'blockquote', 'details'] as const;
 
 /**
+ * Returns [start, end] ranges for every fenced code block in the text.
+ * For a balanced fence the range covers opener through closer (inclusive).
+ * For an unclosed fence the range extends to the end of the text.
+ */
+function findCodeFenceRanges(text: string): [number, number][] {
+  const ranges: [number, number][] = [];
+  let openPos = -1;
+  let openLen = 0;
+  let inside = false;
+  let match;
+  const fenceRe = regEx(/^(`{3,})(\S*)/gm);
+  while ((match = fenceRe.exec(text)) !== null) {
+    const backtickLen = match[1].length;
+    const infoString = match[2];
+    if (!inside) {
+      openPos = match.index;
+      openLen = backtickLen;
+      inside = true;
+    } else if (!infoString && backtickLen >= openLen) {
+      ranges.push([openPos, match.index + match[0].length]);
+      inside = false;
+    }
+  }
+  if (inside) {
+    ranges.push([openPos, text.length]);
+  }
+  return ranges;
+}
+
+function isInsideCodeFence(
+  position: number,
+  ranges: [number, number][],
+): boolean {
+  return ranges.some(([start, end]) => position >= start && position < end);
+}
+
+/**
  * Returns the stack of all unclosed opening tags in the text
  * (outermost first, innermost last), or an empty array if balanced.
+ * Tags inside fenced code blocks are ignored.
  */
 function findAllUnclosedTags(
   text: string,
 ): { tag: string; position: number }[] {
+  const fenceRanges = findCodeFenceRanges(text);
+
   // Collect all open/close tag positions
   const events: { tag: string; type: 'open' | 'close'; position: number }[] =
     [];
@@ -26,11 +66,15 @@ function findAllUnclosedTags(
     const openRe = regEx(new RegExp(`<${tag}[\\s>]`, 'gi'));
     let match;
     while ((match = openRe.exec(text)) !== null) {
-      events.push({ tag, type: 'open', position: match.index });
+      if (!isInsideCodeFence(match.index, fenceRanges)) {
+        events.push({ tag, type: 'open', position: match.index });
+      }
     }
     const closeRe = regEx(new RegExp(`</${tag}>`, 'gi'));
     while ((match = closeRe.exec(text)) !== null) {
-      events.push({ tag, type: 'close', position: match.index });
+      if (!isInsideCodeFence(match.index, fenceRanges)) {
+        events.push({ tag, type: 'close', position: match.index });
+      }
     }
   }
 
@@ -55,7 +99,9 @@ function findAllUnclosedTags(
  * - A closing fence must have >= the same number of backticks, no info string
  * - Content inside a code block (even if it looks like ```lang) is not a fence
  */
-function findUnclosedCodeFence(text: string): number {
+function findUnclosedCodeFence(
+  text: string,
+): { position: number; backtickLen: number } | null {
   let openPos = -1;
   let openLen = 0;
   let inside = false;
@@ -79,7 +125,7 @@ function findUnclosedCodeFence(text: string): number {
     }
     // Otherwise it's just content inside the code block
   }
-  return inside ? openPos : -1;
+  return inside ? { position: openPos, backtickLen: openLen } : null;
 }
 
 /**
@@ -91,17 +137,17 @@ export function closeUnclosedStructures(text: string, maxLen: number): string {
   let result = text;
 
   // Close unclosed fenced code blocks
-  const unclosedFencePos = findUnclosedCodeFence(result);
-  if (unclosedFencePos >= 0) {
-    const closeFence = '\n```\n';
+  const fence = findUnclosedCodeFence(result);
+  if (fence) {
+    const closeFence = '\n' + '`'.repeat(fence.backtickLen) + '\n';
     if (result.length + closeFence.length <= maxLen) {
       result += closeFence;
     } else {
       const trimmedLen = maxLen - closeFence.length;
-      if (trimmedLen > unclosedFencePos) {
+      if (trimmedLen > fence.position) {
         result = result.slice(0, trimmedLen) + closeFence;
       } else {
-        result = result.slice(0, unclosedFencePos);
+        result = result.slice(0, fence.position);
       }
     }
   }
