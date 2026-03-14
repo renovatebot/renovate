@@ -109,6 +109,7 @@ import * as unity3d from './unity3d/index.ts';
 import * as velaci from './velaci/index.ts';
 import * as vendir from './vendir/index.ts';
 import * as woodpecker from './woodpecker/index.ts';
+import * as xcodegen from './xcodegen/index.ts';
 
 const api = new Map<string, ManagerApi>();
 export default api;
@@ -223,3 +224,4 @@ api.set('unity3d', unity3d);
 api.set('velaci', velaci);
 api.set('vendir', vendir);
 api.set('woodpecker', woodpecker);
+api.set('xcodegen', xcodegen);
