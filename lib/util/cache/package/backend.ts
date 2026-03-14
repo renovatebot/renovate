@@ -1,4 +1,5 @@
 import type { AllConfig } from '../../../config/types.ts';
+import { instrument } from '../../../instrumentation/index.ts';
 import { getEnv } from '../../env.ts';
 import type { PackageCacheBase } from './impl/base.ts';
 import { PackageCacheFile } from './impl/file.ts';
@@ -14,28 +15,30 @@ export function getCacheType(): typeof cacheType {
 }
 
 export async function init(config: AllConfig): Promise<void> {
-  await destroy();
+  await instrument('package-cache.init', async () => {
+    await destroy();
 
-  if (config.redisUrl) {
-    cacheProxy = await PackageCacheRedis.create(
-      config.redisUrl,
-      config.redisPrefix,
-    );
-    cacheType = 'redis';
-    return;
-  }
+    if (config.redisUrl) {
+      cacheProxy = await PackageCacheRedis.create(
+        config.redisUrl,
+        config.redisPrefix,
+      );
+      cacheType = 'redis';
+      return;
+    }
 
-  if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE && config.cacheDir) {
-    cacheProxy = await PackageCacheSqlite.create(config.cacheDir);
-    cacheType = 'sqlite';
-    return;
-  }
+    if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE && config.cacheDir) {
+      cacheProxy = await PackageCacheSqlite.create(config.cacheDir);
+      cacheType = 'sqlite';
+      return;
+    }
 
-  if (config.cacheDir) {
-    cacheProxy = PackageCacheFile.create(config.cacheDir);
-    cacheType = 'file';
-    return;
-  }
+    if (config.cacheDir) {
+      cacheProxy = PackageCacheFile.create(config.cacheDir);
+      cacheType = 'file';
+      return;
+    }
+  });
 }
 
 export async function get<T = unknown>(
@@ -55,10 +58,12 @@ export async function set(
 }
 
 export async function destroy(): Promise<void> {
-  cacheType = undefined;
-  try {
-    await cacheProxy?.destroy();
-  } finally {
-    cacheProxy = undefined;
-  }
+  await instrument('package-cache.destroy', async () => {
+    cacheType = undefined;
+    try {
+      await cacheProxy?.destroy();
+    } finally {
+      cacheProxy = undefined;
+    }
+  });
 }

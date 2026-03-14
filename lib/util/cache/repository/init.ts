@@ -1,3 +1,4 @@
+import { instrument } from '../../../instrumentation/index.ts';
 import { CacheFactory } from './impl/cache-factory.ts';
 import { RepoCacheNull } from './impl/null.ts';
 import { resetCache, setCache } from './index.ts';
@@ -23,14 +24,14 @@ export async function initRepoCache(config: RepoCacheConfig): Promise<void> {
 
   if (repositoryCache === 'enabled') {
     const cache = CacheFactory.get(repository!, repoFingerprint, type);
-    await cache.load();
+    await instrument('repository-cache.load', () => cache.load());
     setCache(cache);
     return;
   }
 
   if (repositoryCache === 'reset') {
     const cache = CacheFactory.get(repository!, repoFingerprint, type);
-    await cache.save();
+    await instrument('repository-cache.save', () => cache.save());
     setCache(cache);
     return;
   }
