@@ -13,7 +13,6 @@ describe('modules/platform/utils/pr-body', () => {
         const expected = 'some text\n```bash\necho hello\n```\n';
         const result = closeUnclosedStructures(input, 100);
         expect(result).toBe(expected);
-        expect(result).toHaveLength(expected.length);
       });
 
       it('does not treat inner fence-like content as a new fence', () => {
@@ -23,7 +22,6 @@ describe('modules/platform/utils/pr-body', () => {
         const expected = '```golang\n```typescript\nfunc main()\n```\n';
         const result = closeUnclosedStructures(input, 200);
         expect(result).toBe(expected);
-        expect(result).toHaveLength(expected.length);
       });
 
       it('handles 4-backtick fence containing triple backticks', () => {
@@ -32,7 +30,6 @@ describe('modules/platform/utils/pr-body', () => {
         const expected = '````testa\n```test\n```\n```\nmore content\n````\n';
         const result = closeUnclosedStructures(input, 200);
         expect(result).toBe(expected);
-        expect(result).toHaveLength(expected.length);
       });
 
       it('handles 5-backtick fence', () => {
@@ -40,7 +37,6 @@ describe('modules/platform/utils/pr-body', () => {
         const expected = '`````markdown\nsome code\n````\n```\n`````\n';
         const result = closeUnclosedStructures(input, 200);
         expect(result).toBe(expected);
-        expect(result).toHaveLength(expected.length);
       });
 
       it('closes unclosed details tag', () => {
@@ -128,35 +124,28 @@ describe('modules/platform/utils/pr-body', () => {
         // maxLen = input.length, no room to append </details>
         // but we can trim content and still close the tag
         const input = '<details>\n<summary>Title</summary>\nContent';
+        const expected = '<details>\n<summary\n</details>\n';
         const maxLen = input.length;
         const result = closeUnclosedStructures(input, maxLen);
         // Trimming cuts into </summary>, leaving <summary as partial
         // (not matched as an open tag), so only </details> is needed
-        expect(result).toBe('<details>\n<summary\n</details>\n');
-        expect(result).toHaveLength(result.length);
-        expect(result.length).toBeLessThanOrEqual(maxLen);
+        expect(result).toBe(expected);
       });
 
       it('trims content inside code fence to fit closing fence', () => {
         const input = 'text before\n```bash\necho hello';
-        const closeFence = '\n```\n';
+        const expected = 'text before\n```bash\necho \n```\n';
         const maxLen = input.length;
-        const expected =
-          input.slice(0, maxLen - closeFence.length) + closeFence;
         const result = closeUnclosedStructures(input, maxLen);
         expect(result).toBe(expected);
-        expect(result).toHaveLength(maxLen);
       });
 
       it('trims content inside 4-backtick fence to fit closing fence', () => {
         const input = 'text before\n````bash\necho hello';
-        const closeFence = '\n````\n';
+        const expected = 'text before\n````bash\necho\n````\n';
         const maxLen = input.length;
-        const expected =
-          input.slice(0, maxLen - closeFence.length) + closeFence;
         const result = closeUnclosedStructures(input, maxLen);
         expect(result).toBe(expected);
-        expect(result).toHaveLength(maxLen);
       });
 
       it('removes tag entirely when opening tag + closing tag exceeds limit', () => {
@@ -164,7 +153,6 @@ describe('modules/platform/utils/pr-body', () => {
         const input = '<details>\nContent';
         const result = closeUnclosedStructures(input, 5);
         expect(result).toBe('');
-        expect(result).toHaveLength(0);
       });
     });
 
@@ -173,7 +161,6 @@ describe('modules/platform/utils/pr-body', () => {
         const input = 'some text\n```bash\necho hello\n```\nmore text';
         const result = closeUnclosedStructures(input, 1000);
         expect(result).toBe(input);
-        expect(result).toHaveLength(input.length);
       });
 
       it('does not modify text with balanced details tags', () => {
@@ -181,7 +168,6 @@ describe('modules/platform/utils/pr-body', () => {
           '<details>\n<summary>Title</summary>\nContent\n</details>';
         const result = closeUnclosedStructures(input, 1000);
         expect(result).toBe(input);
-        expect(result).toHaveLength(input.length);
       });
 
       it('does not modify text with balanced tags', () => {
@@ -189,13 +175,11 @@ describe('modules/platform/utils/pr-body', () => {
           '<table>\n<tr><td>Cell</td></tr>\n</table>\n<div>Content</div>';
         const result = closeUnclosedStructures(input, 1000);
         expect(result).toBe(input);
-        expect(result).toHaveLength(input.length);
       });
 
       it('returns empty string unchanged', () => {
         const result = closeUnclosedStructures('', 1000);
         expect(result).toBe('');
-        expect(result).toHaveLength(0);
       });
     });
   });
