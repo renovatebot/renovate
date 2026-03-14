@@ -679,6 +679,7 @@ export async function lookupUpdates(
           ) {
             delete getDigestConfig.lookupName;
             delete getDigestConfig.currentDigest;
+            getDigestConfig.replacementName = update.newName;
           }
 
           // TODO #22198
