@@ -69,9 +69,7 @@ export const presets: Record<string, Preset> = {
       {
         description: 'byte-buddy artifact specifies compatibility in version string',
         matchDatasources: ['maven'],
-        matchPackageNames: [
-          'net.bytebuddy:byte-buddy',
-        ],
+        matchPackageNames: ['net.bytebuddy:byte-buddy'],
         versioning:
           'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+))?$',
       },
