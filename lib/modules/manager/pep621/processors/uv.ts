@@ -14,6 +14,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
 import { find } from '../../../../util/host-rules.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -215,6 +216,20 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
+
+      if (config.minimumReleaseAge) {
+        const ms = toMs(config.minimumReleaseAge);
+        if (ms !== null && ms !== undefined) {
+          const excludeNewer = new Date(Date.now() - ms).toISOString();
+          cmd += ` --exclude-newer=${excludeNewer}`;
+        } else {
+          logger.debug(
+            { minimumReleaseAge: config.minimumReleaseAge },
+            'Invalid minimumReleaseAge value, skipping --exclude-newer for uv lock',
+          );
+        }
+      }
+
       await exec(cmd, execOptions);
 
       // check for changes

@@ -891,5 +891,213 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
+
+    describe('--exclude-newer with minimumReleaseAge', () => {
+      beforeEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it('adds --exclude-newer on lockfile maintenance with minimumReleaseAge', async () => {
+        vi.spyOn(Date, 'now').mockReturnValue(
+          new Date('2026-03-13T00:00:00.000Z').getTime(),
+        );
+        const execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+        // python
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '3.11.1' }],
+        });
+        // uv
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '0.2.35' }],
+        });
+
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade --exclude-newer=2026-03-10T00:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('adds --exclude-newer on per-package update with minimumReleaseAge', async () => {
+        vi.spyOn(Date, 'now').mockReturnValue(
+          new Date('2026-03-13T00:00:00.000Z').getTime(),
+        );
+        const execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+        // python
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '3.11.1' }],
+        });
+        // uv
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '0.2.35' }],
+        });
+
+        const updatedDeps = [
+          { packageName: 'dep1', depType: depTypes.dependencies },
+        ];
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              minimumReleaseAge: '7 days',
+            },
+            updatedDeps,
+          },
+          parsePyProject('')!,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer=2026-03-06T00:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('does not add --exclude-newer when no minimumReleaseAge', async () => {
+        const execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+        // python
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '3.11.1' }],
+        });
+        // uv
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '0.2.35' }],
+        });
+
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade',
+          },
+        ]);
+        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
+      });
+
+      it('skips --exclude-newer on invalid minimumReleaseAge', async () => {
+        const execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+        // python
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '3.11.1' }],
+        });
+        // uv
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '0.2.35' }],
+        });
+
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: 'invalid garbage',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade',
+          },
+        ]);
+        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { minimumReleaseAge: 'invalid garbage' },
+          'Invalid minimumReleaseAge value, skipping --exclude-newer for uv lock',
+        );
+      });
+
+      it('skips --exclude-newer on empty string minimumReleaseAge', async () => {
+        const execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+        // python
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '3.11.1' }],
+        });
+        // uv
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '0.2.35' }],
+        });
+
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade',
+          },
+        ]);
+        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
+      });
+    });
   });
 });
