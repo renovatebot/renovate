@@ -51,7 +51,8 @@ export const presets: Record<string, Preset> = {
     description: 'Use custom regex versioning for byte-buddy maven artifact',
     packageRules: [
       {
-        description: 'byte-buddy artifact specifies compatibility in version string',
+        description:
+          'byte-buddy artifact specifies compatibility in version string',
         matchDatasources: ['maven'],
         matchPackageNames: ['net.bytebuddy:byte-buddy'],
         versioning:
