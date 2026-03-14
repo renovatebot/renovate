@@ -2,8 +2,10 @@ import { logger } from '../../../logger/index.ts';
 import { emojify } from '../../../util/emoji.ts';
 import { regEx } from '../../../util/regex.ts';
 
+// This structure is guaranteed by the changelog template
+// (lib/workers/repository/update/pr/changelog/hbs-template.ts)
 const re = regEx(
-  `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
+  `(?<preNotes>.*### Release Notes\\n\\n<details>)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
   's',
 );
 
@@ -85,11 +87,7 @@ function findUnclosedCodeFence(text: string): number {
  * length budget. If a closing tag would exceed maxLen, the text is
  * trimmed back to before the unclosed opening tag instead.
  */
-export function closeUnclosedStructures(
-  text: string,
-  maxLen: number,
-  externalClosingTags?: Partial<Record<string, number>>,
-): string {
+export function closeUnclosedStructures(text: string, maxLen: number): string {
   let result = text;
 
   // Close unclosed fenced code blocks
@@ -99,57 +97,42 @@ export function closeUnclosedStructures(
     if (result.length + closeFence.length <= maxLen) {
       result += closeFence;
     } else {
-      result = result.slice(0, unclosedFencePos);
-    }
-  }
-
-  // Track how many unclosed tags can be left for external closing
-  const externalBudget: Record<string, number> = {};
-  if (externalClosingTags) {
-    for (const [tag, count] of Object.entries(externalClosingTags)) {
-      if (count && count > 0) {
-        externalBudget[tag] = count;
+      const trimmedLen = maxLen - closeFence.length;
+      if (trimmedLen > unclosedFencePos) {
+        result = result.slice(0, trimmedLen) + closeFence;
+      } else {
+        result = result.slice(0, unclosedFencePos);
       }
     }
   }
 
   // Close unclosed HTML tags iteratively.
-  // Re-scan after each modification since trimming changes the stack.
+  // We calculate the total space needed for all closing tags, then
+  // trim the content once to make room, and append all closing tags.
   let stack = findAllUnclosedTags(result);
-
-  // Consume external budget from the outermost (first) entries
   while (stack.length > 0) {
-    const outermost = stack[0];
-    if ((externalBudget[outermost.tag] ?? 0) > 0) {
-      externalBudget[outermost.tag]--;
-      stack.shift();
-    } else {
-      break;
+    // Calculate total suffix needed for all unclosed tags (innermost first)
+    let suffix = '';
+    for (let i = stack.length - 1; i >= 0; i--) {
+      suffix += `\n</${stack[i].tag}>\n`;
     }
-  }
 
-  // Process remaining unclosed tags from innermost to outermost
-  while (stack.length > 0) {
-    const innermost = stack[stack.length - 1];
-    const closeTag = `\n</${innermost.tag}>\n`;
-    if (result.length + closeTag.length <= maxLen) {
-      result += closeTag;
-    } else {
-      result = result.slice(0, innermost.position);
+    if (result.length + suffix.length <= maxLen) {
+      // All closing tags fit, append them all
+      return result + suffix;
     }
-    // Re-scan and re-apply external budget since text changed
-    stack = findAllUnclosedTags(result);
-    // Re-consume external budget from outermost
-    const budgetCopy = { ...externalClosingTags };
-    while (stack.length > 0) {
-      const outer = stack[0];
-      const remaining = budgetCopy[outer.tag] ?? 0;
-      if (remaining > 0) {
-        budgetCopy[outer.tag] = remaining - 1;
-        stack.shift();
-      } else {
-        break;
-      }
+
+    // Trim content to make room for all closing tags
+    const availableForContent = maxLen - suffix.length;
+    if (availableForContent > 0) {
+      result = result.slice(0, availableForContent);
+      // Re-scan: trimming may have changed which tags are unclosed
+      stack = findAllUnclosedTags(result);
+    } else {
+      // Not enough room even for closing tags alone,
+      // remove the outermost unclosed tag entirely
+      result = result.slice(0, stack[0].position);
+      stack = findAllUnclosedTags(result);
     }
   }
 
@@ -188,7 +171,6 @@ export function smartTruncate(input: string, len: number): string {
     const truncatedNotes = closeUnclosedStructures(
       releaseNotes.slice(0, availableLength),
       availableLength,
-      { details: 1 },
     );
     return preNotes + truncatedNotes + divider + postNotes;
   }

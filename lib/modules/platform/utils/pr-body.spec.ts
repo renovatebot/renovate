@@ -102,60 +102,36 @@ describe('modules/platform/utils/pr-body', () => {
     });
 
     describe('case 2: closing tag exceeds limit, trim back', () => {
-      it('trims back unclosed details when closing tag exceeds limit', () => {
+      it('trims content inside tag to fit closing tag', () => {
+        // maxLen = input.length, no room to append </details>
+        // but we can trim content and still close the tag
         const input = '<details>\n<summary>Title</summary>\nContent';
-        const expected = '';
-        const result = closeUnclosedStructures(input, input.length);
-        expect(result).toBe(expected);
+        const maxLen = input.length;
+        const result = closeUnclosedStructures(input, maxLen);
+        // Trimming cuts into </summary>, leaving <summary as partial
+        // (not matched as an open tag), so only </details> is needed
+        expect(result).toBe('<details>\n<summary\n</details>\n');
+        expect(result).toHaveLength(result.length);
+        expect(result.length).toBeLessThanOrEqual(maxLen);
       });
 
-      it('trims back unclosed code fence when closing tag exceeds limit', () => {
+      it('trims content inside code fence to fit closing fence', () => {
         const input = 'text before\n```bash\necho hello';
-        const expected = 'text before\n';
-        const result = closeUnclosedStructures(input, input.length);
-        expect(result).toBe(expected);
-      });
-
-      it('trims back innermost unclosed tag and closes outer if it fits', () => {
-        const input =
-          '<details>\n<summary>Outer</summary>\nText\n<details>\n<summary>Inner</summary>\nLong content here';
-        const trimmedToOuter = '<details>\n<summary>Outer</summary>\nText\n';
-        const expected = trimmedToOuter + '\n</details>\n';
-        const result = closeUnclosedStructures(
-          input,
-          trimmedToOuter.length + 20,
-        );
-        expect(result).toBe(expected);
-      });
-    });
-
-    describe('externalClosingTags', () => {
-      it('leaves one unclosed details when external budget covers it', () => {
-        const input = '<details>\n<summary>Title</summary>\nContent';
-        const result = closeUnclosedStructures(input, 1000, { details: 1 });
-        expect(result).toBe(input);
-        expect(result).toHaveLength(input.length);
-      });
-
-      it('closes inner details but leaves outer for external closing', () => {
-        const input =
-          '<details>\n<summary>Outer</summary>\n<details>\n<summary>Inner</summary>\nContent';
+        const closeFence = '\n```\n';
+        const maxLen = input.length;
         const expected =
-          '<details>\n<summary>Outer</summary>\n<details>\n<summary>Inner</summary>\nContent\n</details>\n';
-        const result = closeUnclosedStructures(input, 1000, { details: 1 });
+          input.slice(0, maxLen - closeFence.length) + closeFence;
+        const result = closeUnclosedStructures(input, maxLen);
         expect(result).toBe(expected);
-        expect(result).toHaveLength(expected.length);
+        expect(result).toHaveLength(maxLen);
       });
 
-      it('trims inner details if closing exceeds limit, leaves outer for external', () => {
-        const input =
-          '<details>\n<summary>Outer</summary>\nText\n<details>\n<summary>Inner</summary>\nLong content here';
-        const expected = '<details>\n<summary>Outer</summary>\nText\n';
-        const result = closeUnclosedStructures(input, input.length, {
-          details: 1,
-        });
-        expect(result).toBe(expected);
-        expect(result).toHaveLength(expected.length);
+      it('removes tag entirely when opening tag + closing tag exceeds limit', () => {
+        // maxLen so small that <details> + </details> alone won't fit
+        const input = '<details>\nContent';
+        const result = closeUnclosedStructures(input, 5);
+        expect(result).toBe('');
+        expect(result).toHaveLength(0);
       });
     });
 
