@@ -151,6 +151,7 @@ export interface PackageDependency<
   packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string | null;
+  sourceTag?: string;
   pinDigests?: boolean;
   currentRawValue?: string;
   major?: { enabled?: boolean };
