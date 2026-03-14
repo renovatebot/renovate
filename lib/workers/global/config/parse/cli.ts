@@ -58,6 +58,7 @@ export function getConfig(input: string[]): AllConfig {
         optionString,
         option.description,
         coersions[option.type],
+        option.default,
       );
     }
   });
