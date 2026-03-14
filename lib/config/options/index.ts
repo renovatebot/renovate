@@ -2060,6 +2060,13 @@ const options: Readonly<RenovateOptions>[] = [
     default: null,
   },
   {
+    name: 'minimumMinorAge',
+    description:
+      'Time required before a new minor version release is considered stable. When set, checks the age of the first release in the minor version group rather than each individual release.',
+    type: 'string',
+    default: null,
+  },
+  {
     name: 'minimumReleaseAgeBehaviour',
     description:
       'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
