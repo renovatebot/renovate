@@ -16,4 +16,4 @@ export const BunfigSchema = z.object({
 });
 
 export const BunfigConfig = Toml.pipe(BunfigSchema);
-export type BunfigConfig = z.infer<typeof BunfigSchema>;
+export type BunfigConfig = z.infer<typeof BunfigConfig>;
