@@ -414,10 +414,10 @@ describe('modules/manager/bun/extract', () => {
         'bunfig.toml',
       );
       // Valid TOML but invalid schema (registry should be string or object with url)
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(`
-[install]
-registry = 123
-`);
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
+        [install]
+        registry = 123
+      `);
 
       const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
 
