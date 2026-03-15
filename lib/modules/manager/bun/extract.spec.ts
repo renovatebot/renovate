@@ -260,8 +260,13 @@ describe('modules/manager/bun/extract', () => {
           dependencies: { lodash: '1.0.0' },
         }),
       );
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
-        'bunfig.toml',
+      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
+        (_packageFile, configFile): Promise<string | null> => {
+          if (configFile === 'bunfig.toml') {
+            return Promise.resolve('bunfig.toml');
+          }
+          return Promise.resolve(null);
+        },
       );
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
         [install]
@@ -287,8 +292,13 @@ describe('modules/manager/bun/extract', () => {
           },
         }),
       );
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
-        'bunfig.toml',
+      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
+        (_packageFile, configFile): Promise<string | null> => {
+          if (configFile === 'bunfig.toml') {
+            return Promise.resolve('bunfig.toml');
+          }
+          return Promise.resolve(null);
+        },
       );
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
         [install]
@@ -320,7 +330,9 @@ describe('modules/manager/bun/extract', () => {
           dependencies: { lodash: '1.0.0' },
         }),
       );
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(null);
+      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(() =>
+        Promise.resolve(null),
+      );
 
       const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
 
@@ -336,8 +348,13 @@ describe('modules/manager/bun/extract', () => {
           dependencies: { lodash: '1.0.0' },
         }),
       );
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
-        'bunfig.toml',
+      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
+        (_packageFile, configFile): Promise<string | null> => {
+          if (configFile === 'bunfig.toml') {
+            return Promise.resolve('bunfig.toml');
+          }
+          return Promise.resolve(null);
+        },
       );
       // bunfig.toml exists but is empty/null
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce(null);
@@ -359,8 +376,13 @@ describe('modules/manager/bun/extract', () => {
             dependencies: { lodash: '1.0.0' },
           }),
         );
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
-        'bunfig.toml',
+      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
+        (_packageFile, configFile): Promise<string | null> => {
+          if (configFile === 'bunfig.toml') {
+            return Promise.resolve('bunfig.toml');
+          }
+          return Promise.resolve(null);
+        },
       );
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
         [install]
@@ -410,8 +432,13 @@ describe('modules/manager/bun/extract', () => {
           dependencies: { lodash: '1.0.0' },
         }),
       );
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
-        'bunfig.toml',
+      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
+        (_packageFile, configFile): Promise<string | null> => {
+          if (configFile === 'bunfig.toml') {
+            return Promise.resolve('bunfig.toml');
+          }
+          return Promise.resolve(null);
+        },
       );
       // Valid TOML but invalid schema (registry should be string or object with url)
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`

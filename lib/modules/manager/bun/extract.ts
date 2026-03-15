@@ -12,11 +12,8 @@ import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
-import {
-  type BunfigConfig,
-  loadBunfigToml,
-  resolveRegistryUrl,
-} from './bunfig.ts';
+import { loadBunfigToml, resolveRegistryUrl } from './bunfig.ts';
+import type { BunfigConfig } from './schema.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
