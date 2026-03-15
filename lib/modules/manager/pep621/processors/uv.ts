@@ -218,16 +218,35 @@ export class UvProcessor extends BasePyProjectProcessor {
         cmd = generateCMD(updatedDeps);
       }
 
+      // See https://docs.astral.sh/uv/guides/integration/dependency-bots/#dependency-cooldown
       if (config.minimumReleaseAge) {
         const ms = toMs(config.minimumReleaseAge);
         if (isNullOrUndefined(ms)) {
           logger.debug(
             { minimumReleaseAge: config.minimumReleaseAge },
-            'Invalid minimumReleaseAge value, skipping --exclude-newer for uv lock',
+            'Invalid minimumReleaseAge value, skipping UV_EXCLUDE_NEWER for uv lock',
           );
         } else {
-          const excludeNewer = DateTime.now().minus(ms).toUTC().toISO();
-          cmd += ` --exclude-newer=${excludeNewer}`;
+          let excludeNewerDate = DateTime.now().minus(ms).toUTC();
+
+          const pyprojectExcludeNewer = project.tool?.uv?.['exclude-newer'];
+          if (pyprojectExcludeNewer) {
+            const pyprojectDate = DateTime.fromISO(pyprojectExcludeNewer, {
+              zone: 'utc',
+            });
+            if (pyprojectDate.isValid) {
+              if (pyprojectDate < excludeNewerDate) {
+                excludeNewerDate = pyprojectDate;
+              }
+            } else {
+              logger.debug(
+                { excludeNewer: pyprojectExcludeNewer },
+                'Invalid exclude-newer value in pyproject.toml, ignoring',
+              );
+            }
+          }
+
+          extraEnv.UV_EXCLUDE_NEWER = excludeNewerDate.toISO()!;
         }
       }
 
