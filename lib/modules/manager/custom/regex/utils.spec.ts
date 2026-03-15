@@ -11,4 +11,16 @@ describe('modules/manager/custom/regex/utils', () => {
       ),
     ).toBeArray();
   });
+
+  it('parses extractVersion JSON arrays', () => {
+    expect(
+      utils.parseExtractVersionValue('["^(?<version>.*)$","v{{version}}"]'),
+    ).toEqual(['^(?<version>.*)$', 'v{{version}}']);
+  });
+
+  it('falls back to legacy single-element array for invalid input', () => {
+    expect(utils.parseExtractVersionValue('^v(?<version>.*)$')).toEqual([
+      '^v(?<version>.*)$',
+    ]);
+  });
 });

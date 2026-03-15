@@ -5,7 +5,7 @@ import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
 import type { PackageDependency } from '../../types';
 import type { ValidMatchFields } from '../utils';
-import { validMatchFields } from '../utils';
+import { parseExtractVersionValue, validMatchFields } from '../utils';
 import type {
   ExtractionTemplate,
   PackageFileInfo,
@@ -35,8 +35,7 @@ function updateDependency(
       dependency.indentation = isEmptyStringOrWhitespace(value) ? value : '';
       break;
     case 'extractVersion':
-      // Convert extractVersion to array format
-      dependency.extractVersion = [value];
+      dependency.extractVersion = parseExtractVersionValue(value);
       break;
     default:
       dependency[field] = value;
@@ -59,11 +58,14 @@ export function createDependency(
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {
-        const compiled = template.compile(
-          tmpl,
-          { ...groups, packageFile: packageFileName, packageFileDir },
-          false,
-        );
+        const compiled =
+          field === 'extractVersion'
+            ? tmpl
+            : template.compile(
+                tmpl,
+                { ...groups, packageFile: packageFileName, packageFileDir },
+                false,
+              );
         updateDependency(dependency, field, compiled);
       } catch {
         logger.warn(

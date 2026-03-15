@@ -446,4 +446,43 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
     });
   });
+
+  it('allows extractVersion transformation arrays via templates', async () => {
+    const json = codeBlock`
+    {
+      "packages": [
+        {
+          "dep_name": "foo",
+          "current_value": "1.2.3"
+        }
+      ]
+    }
+    `;
+    const config = {
+      fileFormat: 'json',
+      matchStrings: [
+        `packages.{
+            "depName": dep_name,
+            "currentValue": current_value
+        }`,
+      ],
+      datasourceTemplate: 'npm',
+      extractVersionTemplate:
+        '["^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$","{{major}}-{{minor}}-{{patch}}"]',
+    } as JsonataExtractConfig;
+
+    const res = await extractPackageFile(json, 'unused', config);
+
+    expect(res?.deps).toEqual([
+      {
+        currentValue: '1.2.3',
+        datasource: 'npm',
+        depName: 'foo',
+        extractVersion: [
+          '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+          '{{major}}-{{minor}}-{{patch}}',
+        ],
+      },
+    ]);
+  });
 });

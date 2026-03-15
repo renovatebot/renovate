@@ -100,6 +100,32 @@ describe('modules/manager/custom/regex/index', () => {
     ).toEqual(['^v(?<version>.*)$']);
   });
 
+  it('supports extractVersion transformation arrays via templates', async () => {
+    const config = {
+      matchStrings: [
+        'dep (?<depName>\\w+) (?<currentValue>(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+))',
+      ],
+      datasourceTemplate: 'npm',
+      extractVersionTemplate:
+        '["^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$","{{major}}-{{minor}}-{{patch}}"]',
+    };
+
+    const res = await extractPackageFile('dep foo 1.2.3', 'file.txt', config);
+
+    expect(res?.deps).toEqual([
+      {
+        currentValue: '1.2.3',
+        datasource: 'npm',
+        depName: 'foo',
+        extractVersion: [
+          '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+          '{{major}}-{{minor}}-{{patch}}',
+        ],
+        replaceString: 'dep foo 1.2.3',
+      },
+    ]);
+  });
+
   it('extracts registryUrl', async () => {
     const config = {
       matchStrings: [

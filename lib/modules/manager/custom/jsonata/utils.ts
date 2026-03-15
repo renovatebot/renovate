@@ -6,7 +6,11 @@ import * as template from '../../../../util/template';
 import { parseUrl } from '../../../../util/url';
 import type { PackageDependency } from '../../types';
 import type { ValidMatchFields } from '../utils';
-import { checkIsValidDependency, validMatchFields } from '../utils';
+import {
+  checkIsValidDependency,
+  parseExtractVersionValue,
+  validMatchFields,
+} from '../utils';
 import { QueryResultZod } from './schema';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
 
@@ -67,7 +71,10 @@ export function createDependency(
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {
-        const compiled = template.compile(tmpl, queryResult, false);
+        const compiled =
+          field === 'extractVersion'
+            ? tmpl
+            : template.compile(tmpl, queryResult, false);
         updateDependency(field, compiled, dependency);
       } catch {
         logger.debug(
@@ -102,8 +109,7 @@ function updateDependency(
       dependency.datasource = migrateDatasource(value);
       break;
     case 'extractVersion':
-      // Convert extractVersion to array format
-      dependency.extractVersion = [value];
+      dependency.extractVersion = parseExtractVersionValue(value);
       break;
     default:
       dependency[field] = value;
