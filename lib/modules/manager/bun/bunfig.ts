@@ -1,30 +1,6 @@
-import { z } from 'zod';
 import { logger } from '../../../logger';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
-import { Result } from '../../../util/result';
-import { parse as parseToml } from '../../../util/toml';
-
-/**
- * Schema for bunfig.toml registry configuration.
- * Supports both string URLs and object with url.
- * Transforms to extract just the URL string.
- * See: https://bun.sh/docs/runtime/bunfig#install-registry
- */
-const BunfigRegistrySchema = z.union([
-  z.string(),
-  z.object({ url: z.string() }).transform((val) => val.url),
-]);
-
-const BunfigInstallSchema = z.object({
-  registry: BunfigRegistrySchema.optional(),
-  scopes: z.record(z.string(), BunfigRegistrySchema).optional(),
-});
-
-const BunfigSchema = z.object({
-  install: BunfigInstallSchema.optional(),
-});
-
-export type BunfigConfig = z.infer<typeof BunfigSchema>;
+import { BunfigConfig } from './schema';
 
 /**
  * Resolves the registry URL for a given package name based on bunfig.toml config.
@@ -86,15 +62,11 @@ export async function loadBunfigToml(
  * Parses bunfig.toml content string into a typed config object.
  */
 export function parseBunfigToml(content: string): BunfigConfig | null {
-  try {
-    const parsed = parseToml(content);
-    return Result.parse(parsed, BunfigSchema)
-      .onError((err) => {
-        logger.debug({ err }, 'Failed to parse bunfig.toml');
-      })
-      .unwrapOrNull();
-  } catch (err) {
-    logger.debug({ err }, 'Failed to parse bunfig.toml TOML syntax');
-    return null;
+  const res = BunfigConfig.safeParse(content);
+  if (res.success) {
+    return res.data;
   }
+
+  logger.debug({ err: res.error }, 'Failed to parse bunfig.toml');
+  return null;
 }

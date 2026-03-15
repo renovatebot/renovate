@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { parseBunfigToml, resolveRegistryUrl } from './bunfig';
 
 describe('modules/manager/bun/bunfig', () => {
@@ -12,18 +13,18 @@ describe('modules/manager/bun/bunfig', () => {
 
     it('returns null for valid TOML with invalid schema', () => {
       // Valid TOML but registry is not a string or valid object
-      const toml = `
-[install]
-registry = 123
-`;
+      const toml = codeBlock`
+        [install]
+        registry = 123
+      `;
       expect(parseBunfigToml(toml)).toBeNull();
     });
 
     it('parses simple string registry', () => {
-      const toml = `
-[install]
-registry = "https://registry.example.com"
-`;
+      const toml = codeBlock`
+        [install]
+        registry = "https://registry.example.com"
+      `;
       expect(parseBunfigToml(toml)).toEqual({
         install: {
           registry: 'https://registry.example.com',
@@ -32,10 +33,10 @@ registry = "https://registry.example.com"
     });
 
     it('parses registry object with url and extracts url', () => {
-      const toml = `
-[install]
-registry = { url = "https://registry.example.com", token = "abc123" }
-`;
+      const toml = codeBlock`
+        [install]
+        registry = { url = "https://registry.example.com", token = "abc123" }
+      `;
       expect(parseBunfigToml(toml)).toEqual({
         install: {
           registry: 'https://registry.example.com',
@@ -44,10 +45,10 @@ registry = { url = "https://registry.example.com", token = "abc123" }
     });
 
     it('parses scoped registries', () => {
-      const toml = `
-[install.scopes]
-myorg = "https://registry.myorg.com"
-`;
+      const toml = codeBlock`
+        [install.scopes]
+        myorg = "https://registry.myorg.com"
+      `;
       expect(parseBunfigToml(toml)).toEqual({
         install: {
           scopes: {
@@ -58,14 +59,14 @@ myorg = "https://registry.myorg.com"
     });
 
     it('parses mixed default and scoped registries', () => {
-      const toml = `
-[install]
-registry = "https://registry.example.com"
+      const toml = codeBlock`
+        [install]
+        registry = "https://registry.example.com"
 
-[install.scopes]
-myorg = "https://registry.myorg.com"
-otherorg = { url = "https://registry.other.com", token = "secret" }
-`;
+        [install.scopes]
+        myorg = "https://registry.myorg.com"
+        otherorg = { url = "https://registry.other.com", token = "secret" }
+      `;
       expect(parseBunfigToml(toml)).toEqual({
         install: {
           registry: 'https://registry.example.com',
@@ -78,13 +79,13 @@ otherorg = { url = "https://registry.other.com", token = "secret" }
     });
 
     it('ignores unrelated TOML sections', () => {
-      const toml = `
-[run]
-shell = "zsh"
+      const toml = codeBlock`
+        [run]
+        shell = "zsh"
 
-[install]
-registry = "https://registry.example.com"
-`;
+        [install]
+        registry = "https://registry.example.com"
+      `;
       expect(parseBunfigToml(toml)).toEqual({
         install: {
           registry: 'https://registry.example.com',

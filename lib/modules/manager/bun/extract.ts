@@ -5,7 +5,6 @@ import {
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/fs/index.ts';
-} from '../../../util/fs/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
