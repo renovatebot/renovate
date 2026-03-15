@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { parseBunfigToml, resolveRegistryUrl } from './bunfig';
+import { parseBunfigToml, resolveRegistryUrl } from './bunfig.ts';
 
 describe('modules/manager/bun/bunfig', () => {
   describe('parseBunfigToml', () => {
