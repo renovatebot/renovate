@@ -1,6 +1,6 @@
-import { getPkgReleases } from '..';
-import { NextcloudDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { getPkgReleases } from '../index.ts';
+import { NextcloudDatasource } from './index.ts';
 
 describe('modules/datasource/nextcloud/index', () => {
   it('no registryUrl', async () => {

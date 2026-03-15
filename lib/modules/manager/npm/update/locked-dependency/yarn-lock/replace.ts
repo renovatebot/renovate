@@ -1,5 +1,5 @@
-import { logger } from '../../../../../../logger';
-import { regEx } from '../../../../../../util/regex';
+import { logger } from '../../../../../../logger/index.ts';
+import { regEx } from '../../../../../../util/regex.ts';
 
 export function replaceConstraintVersion(
   lockFileContent: string,

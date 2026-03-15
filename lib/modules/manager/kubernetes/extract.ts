@@ -1,19 +1,19 @@
 import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { parseYaml } from '../../../util/yaml';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseYaml } from '../../../util/yaml.ts';
 import {
   KubernetesApiDatasource,
   supportedApis,
-} from '../../datasource/kubernetes-api';
-import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
-import { getDep } from '../dockerfile/extract';
+} from '../../datasource/kubernetes-api/index.ts';
+import * as kubernetesApiVersioning from '../../versioning/kubernetes-api/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { KubernetesConfiguration } from './types';
+} from '../types.ts';
+import type { KubernetesConfiguration } from './types.ts';
 
 export function extractPackageFile(
   content: string,

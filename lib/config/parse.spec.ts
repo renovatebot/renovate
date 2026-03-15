@@ -1,5 +1,5 @@
 import jsonValidator from 'json-dup-key-validator';
-import { parseFileConfig } from './parse';
+import { parseFileConfig } from './parse.ts';
 
 vi.mock('json-dup-key-validator', { spy: true });
 

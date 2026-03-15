@@ -1,6 +1,6 @@
-import type { PlatformCommitOptions } from '../../config/types';
-import type { GitOptions } from '../../types/git';
-import type { EmailAddress } from '../schema-utils';
+import type { PlatformCommitOptions } from '../../config/types.ts';
+import type { GitOptions } from '../../types/git.ts';
+import type { EmailAddress } from '../schema-utils/index.ts';
 
 export type { DiffResult, StatusResult } from 'simple-git';
 

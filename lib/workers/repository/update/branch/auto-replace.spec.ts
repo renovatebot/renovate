@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { extractPackageFile } from '../../../../modules/manager/html';
-import type { BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
+import { doAutoReplace } from './auto-replace.ts';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
   `../../../../modules/manager/html`,
 );
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -1358,6 +1358,78 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('jsonata: update currentValue', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.newValue = '1.2.4';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.4", "digest": "abcdef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentDigest', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentValue and currentDigest', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.newValue = '1.2.4';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.4", "digest": "badbeef", "package": "foo" } ]',
+      );
+    });
+
     it('github-actions: updates with newValue only', async () => {
       const githubAction = codeBlock`
         jobs:
@@ -1543,6 +1615,37 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: some-other-action/checkout@2485f4 # tag=v2.0.0
+        `,
+      );
+    });
+
+    it('docker: replacement with same digest should not corrupt digest via currentDigestShort', async () => {
+      // Regression test for https://github.com/renovatebot/renovate/discussions/38703
+      // When doing a replacement where currentDigest === newDigest, the currentDigestShort
+      // should not be used to incorrectly replace part of the correct digest
+      const dockerfile = codeBlock`
+        FROM redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'redis';
+      upgrade.currentValue = '8.2.1';
+      upgrade.currentDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.currentDigestShort = '5fa2edb';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.newName = 'docker.io/library/redis';
+      upgrade.newValue = '8.2.1';
+      // Same digest as currentDigest - this is the key scenario
+      upgrade.newDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM docker.io/library/redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
         `,
       );
     });

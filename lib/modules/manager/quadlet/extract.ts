@@ -1,12 +1,12 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { QuadletFile } from './schema';
+} from '../types.ts';
+import { QuadletFile } from './schema.ts';
 
 function startsWithAny(image: string, prefixes: string[]): boolean {
   return !!prefixes.find((prefix) => image.startsWith(prefix));

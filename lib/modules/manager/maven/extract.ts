@@ -2,21 +2,25 @@ import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { MavenDatasource } from '../../datasource/maven';
-import { MAVEN_REPO } from '../../datasource/maven/common';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { MAVEN_REPO } from '../../datasource/maven/common.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import {
   BUILDPACK_REGISTRY_PREFIX,
   DOCKER_PREFIX,
   getDep as getBuildpackDep,
   isBuildpackRegistryRef,
   isDockerRef,
-} from '../buildpacks/extract';
-import { getDep as getDockerDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { MavenProp } from './types';
+} from '../buildpacks/extract.ts';
+import { getDep as getDockerDep } from '../dockerfile/extract.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+} from '../types.ts';
+import type { MavenProp } from './types.ts';
 
 const supportedNamespaces = [
   'http://maven.apache.org/SETTINGS/1.0.0',

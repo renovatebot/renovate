@@ -1,17 +1,17 @@
-import { logger } from '../../../logger';
-import { parseYaml } from '../../../util/yaml';
-import { id as dockerVersioning } from '../../versioning/docker';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { id as dockerVersioning } from '../../versioning/docker/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { HelmDockerImageDependency } from './types';
+} from '../types.ts';
+import type { HelmDockerImageDependency } from './types.ts';
 import {
   matchesHelmValuesDockerHeuristic,
   matchesHelmValuesInlineImage,
-} from './util';
+} from './util.ts';
 
 function getHelmDep(
   registry: string,

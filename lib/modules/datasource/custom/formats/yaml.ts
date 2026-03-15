@@ -1,7 +1,7 @@
-import { readLocalFile } from '../../../../util/fs';
-import type { Http } from '../../../../util/http';
-import { parseSingleYaml } from '../../../../util/yaml';
-import type { CustomDatasourceFetcher } from './types';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import type { Http } from '../../../../util/http/index.ts';
+import { parseSingleYaml } from '../../../../util/yaml.ts';
+import type { CustomDatasourceFetcher } from './types.ts';
 
 export class YamlFetcher implements CustomDatasourceFetcher {
   async fetch(http: Http, registryURL: string): Promise<unknown> {

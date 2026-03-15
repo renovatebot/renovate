@@ -1,4 +1,4 @@
-import loose from '.';
+import loose from './index.ts';
 
 describe('modules/versioning/loose/index', () => {
   it.each`

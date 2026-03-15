@@ -1,5 +1,5 @@
-import { regEx } from '../../util/regex';
-import { allManagersList, hashMap } from '.';
+import { regEx } from '../../util/regex.ts';
+import { allManagersList, hashMap } from './index.ts';
 
 describe('modules/manager/fingerprint', () => {
   it('validate manager hash', () => {

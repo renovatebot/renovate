@@ -1,4 +1,4 @@
-import { Repos, ReposArray, ReposRecord } from './schema';
+import { Repos, ReposArray, ReposRecord } from './schema.ts';
 
 describe('modules/manager/composer/schema', () => {
   describe('ReposRecord', () => {

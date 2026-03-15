@@ -1,4 +1,4 @@
-import git from '.';
+import git from './index.ts';
 
 describe('modules/versioning/git/index', () => {
   it.each`

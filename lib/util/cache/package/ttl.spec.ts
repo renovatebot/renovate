@@ -1,6 +1,6 @@
-import { GlobalConfig } from '../../../config/global';
-import { getTtlOverride, resolveTtlValues } from './ttl';
-import type { PackageCacheNamespace } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { getTtlOverride, resolveTtlValues } from './ttl.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 describe('util/cache/package/ttl', () => {
   beforeEach(() => {
@@ -11,13 +11,17 @@ describe('util/cache/package/ttl', () => {
     describe('No configuration', () => {
       it('returns undefined when no cacheTtlOverride config exists', () => {
         GlobalConfig.set({});
+
         const res = getTtlOverride('datasource-npm' as never);
+
         expect(res).toBeUndefined();
       });
 
       it('returns undefined when cacheTtlOverride is empty', () => {
         GlobalConfig.set({ cacheTtlOverride: {} });
+
         const res = getTtlOverride('datasource-npm' as never);
+
         expect(res).toBeUndefined();
       });
     });
@@ -45,7 +49,9 @@ describe('util/cache/package/ttl', () => {
             'datasource-npm': 'invalid',
           },
         });
+
         const res = getTtlOverride('datasource-npm' as never);
+
         expect(res).toBeUndefined();
       });
 
@@ -55,7 +61,9 @@ describe('util/cache/package/ttl', () => {
             'datasource-npm': 120,
           },
         });
+
         const res = getTtlOverride('datasource-docker' as never);
+
         expect(res).toBeUndefined();
       });
     });

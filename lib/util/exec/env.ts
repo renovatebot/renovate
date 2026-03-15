@@ -1,4 +1,4 @@
-import { GlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global.ts';
 
 const basicEnvVars = [
   'CI',

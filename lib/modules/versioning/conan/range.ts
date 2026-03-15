@@ -1,16 +1,16 @@
 import * as semver from 'semver';
 import type { SemVer } from 'semver-utils';
 import { parseRange } from 'semver-utils';
-import { logger } from '../../../logger';
-import { coerceString } from '../../../util/string';
-import type { NewValueConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { coerceString } from '../../../util/string.ts';
+import type { NewValueConfig } from '../types.ts';
 import {
   cleanVersion,
   containsOperators,
   getOptions,
   makeVersion,
   matchesWithOptions,
-} from './common';
+} from './common.ts';
 
 // always include prereleases
 export function getMajor(version: string): null | number {

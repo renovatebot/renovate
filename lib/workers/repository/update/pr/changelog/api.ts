@@ -1,10 +1,10 @@
-import { BitbucketChangeLogSource } from './bitbucket/source';
-import { BitbucketServerChangeLogSource } from './bitbucket-server/source';
-import { ForgejoChangeLogSource } from './forgejo/source';
-import { GiteaChangeLogSource } from './gitea/source';
-import { GitHubChangeLogSource } from './github/source';
-import { GitLabChangeLogSource } from './gitlab/source';
-import type { ChangeLogSource } from './source';
+import { BitbucketChangeLogSource } from './bitbucket/source.ts';
+import { BitbucketServerChangeLogSource } from './bitbucket-server/source.ts';
+import { ForgejoChangeLogSource } from './forgejo/source.ts';
+import { GiteaChangeLogSource } from './gitea/source.ts';
+import { GitHubChangeLogSource } from './github/source.ts';
+import { GitLabChangeLogSource } from './gitlab/source.ts';
+import type { ChangeLogSource } from './source.ts';
 
 const api = new Map<string, ChangeLogSource>();
 export default api;

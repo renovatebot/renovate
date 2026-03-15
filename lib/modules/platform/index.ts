@@ -1,16 +1,20 @@
-import URL from 'node:url';
-import type { AllConfig } from '../../config/types';
-import type { PlatformId } from '../../constants';
-import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import type { HostRule } from '../../types';
-import { setGitAuthor, setNoVerify, setPrivateKey } from '../../util/git';
-import * as hostRules from '../../util/host-rules';
-import platforms from './api';
-import { setPlatformScmApi } from './scm';
-import type { Platform } from './types';
+import type { AllConfig } from '../../config/types.ts';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import type { PlatformId } from '../../constants/index.ts';
+import { logger } from '../../logger/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import {
+  setGitAuthor,
+  setNoVerify,
+  setPrivateKey,
+} from '../../util/git/index.ts';
+import * as hostRules from '../../util/host-rules.ts';
+import { parseUrl } from '../../util/url.ts';
+import platforms from './api.ts';
+import { setPlatformScmApi } from './scm.ts';
+import type { Platform } from './types.ts';
 
-export type * from './types';
+export type * from './types.ts';
 
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
 
@@ -54,6 +58,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       ...(config.hostRules ?? []),
     ],
   };
+  // v8 ignore else -- TODO: add test #40625
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     returnConfig.gitAuthor = config.gitAuthor;
@@ -64,8 +69,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    // TODO: null check (#22198)
-    matchHost: URL.parse(returnConfig.endpoint).hostname!,
+    matchHost: parseUrl(returnConfig.endpoint)?.hostname,
   };
   // There might have been platform-specific modifications to the token
   if (returnConfig.token) {

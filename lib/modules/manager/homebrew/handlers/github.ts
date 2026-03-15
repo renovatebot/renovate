@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { parseUrl } from '../../../../util/url';
-import { GithubReleasesDatasource } from '../../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import type { PackageDependency } from '../../types';
-import { HomebrewUrlHandler } from './base';
+import { parseUrl } from '../../../../util/url.ts';
+import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
+import type { PackageDependency } from '../../types.ts';
+import { HomebrewUrlHandler } from './base.ts';
 
 export type GitHubUrlType = 'archive' | 'releases';
 

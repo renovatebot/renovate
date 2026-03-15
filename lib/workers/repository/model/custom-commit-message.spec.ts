@@ -1,4 +1,4 @@
-import { CustomCommitMessage } from './custom-commit-message';
+import { CustomCommitMessage } from './custom-commit-message.ts';
 
 describe('workers/repository/model/custom-commit-message', () => {
   describe('CustomCommitMessage', () => {

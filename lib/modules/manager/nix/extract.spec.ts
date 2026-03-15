@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import { extractPackageFile } from '.';
-import { fs } from '~test/util';
+import { fs } from '~test/util.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { id as nixpkgsVersioning } from '../../versioning/nixpkgs/index.ts';
+import { extractPackageFile } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/nix/extract', () => {
   it('returns null when no nixpkgs input exists', async () => {

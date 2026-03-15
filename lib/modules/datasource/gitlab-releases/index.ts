@@ -1,9 +1,9 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import { asTimestamp } from '../../../util/timestamp';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { GitlabRelease } from './types';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { GitlabRelease } from './types.ts';
 
 export class GitlabReleasesDatasource extends Datasource {
   static readonly id = 'gitlab-releases';
@@ -24,13 +24,7 @@ export class GitlabReleasesDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabReleasesDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${GitlabReleasesDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}/${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -62,5 +56,17 @@ export class GitlabReleasesDatasource extends Datasource {
     } catch (e) {
       this.handleGenericErrors(e);
     }
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GitlabReleasesDatasource.id}`,
+        // TODO: types (#22198)
+        key: `${config.registryUrl}/${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

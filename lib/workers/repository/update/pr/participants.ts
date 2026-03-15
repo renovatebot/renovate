@@ -1,12 +1,12 @@
-import { isArray, isNumber } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { noLeadingAtSymbol } from '../../../../util/common';
-import { sampleSize } from '../../../../util/sample';
-import { codeOwnersForPr } from './code-owners';
+import { isArray, isNonEmptyString, isNumber } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { noLeadingAtSymbol } from '../../../../util/common.ts';
+import { sampleSize } from '../../../../util/sample.ts';
+import { codeOwnersForPr } from './code-owners.ts';
 
 async function addCodeOwners(
   config: RenovateConfig,
@@ -36,7 +36,9 @@ function prepareParticipants(
   config: RenovateConfig,
   usernames: string[],
 ): Promise<string[]> {
-  const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
+  const normalizedUsernames = [
+    ...new Set(usernames.map(noLeadingAtSymbol).filter(isNonEmptyString)),
+  ];
   return filterUnavailableUsers(config, normalizedUsernames);
 }
 

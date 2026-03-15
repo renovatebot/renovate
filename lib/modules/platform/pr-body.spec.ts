@@ -1,5 +1,5 @@
-import { toSha256 } from '../../util/hash';
-import { getPrBodyStruct, hashBody } from './pr-body';
+import { toSha256 } from '../../util/hash.ts';
+import { getPrBodyStruct, hashBody } from './pr-body.ts';
 
 describe('modules/platform/pr-body', () => {
   describe('getPrBodyStruct', () => {

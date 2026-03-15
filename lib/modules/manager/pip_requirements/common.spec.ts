@@ -1,4 +1,4 @@
-import { extractPackageFileFlags } from './common';
+import { extractPackageFileFlags } from './common.ts';
 
 describe('modules/manager/pip_requirements/common', () => {
   describe('extractPackageFileFlags()', () => {

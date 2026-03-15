@@ -1,3 +1,4 @@
+// v8 ignore file
 /* IMPORTANT:
  * These namespaces below are used as part of the cacheTtlOverride feature
  * It's OK to add to them (e.g. for new datasources) but we should avoid
@@ -58,6 +59,7 @@ export const packageCacheNamespaces = [
   'datasource-forgejo-tags',
   'datasource-gitea-releases',
   'datasource-gitea-tags',
+  'datasource-github-digest',
   'datasource-github-release-attachments',
   'datasource-gitlab-packages',
   'datasource-gitlab-releases',
@@ -94,9 +96,10 @@ export const packageCacheNamespaces = [
   'datasource-terraform-provider',
   'datasource-terraform',
   'datasource-typst:cache-provider',
-  'datasource-typst:releases',
+  'datasource-typst:registry-releases',
   'datasource-unity3d',
   'datasource-unity3d-packages',
+  'github-branches-datasource-v1',
   'github-releases-datasource-v2',
   'github-tags-datasource-v2',
   'merge-confidence',

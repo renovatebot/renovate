@@ -1,14 +1,14 @@
 import * as semver from 'semver';
-import type { RangeStrategy } from '../../../types/versioning';
-import { api as looseAPI } from '../loose';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { api as looseAPI } from '../loose/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   cleanVersion,
   findSatisfyingVersion,
   getOptions,
   makeVersion,
   matchesWithOptions,
-} from './common';
+} from './common.ts';
 import {
   bumpRange,
   getMajor,
@@ -16,7 +16,7 @@ import {
   getPatch,
   replaceRange,
   widenRange,
-} from './range';
+} from './range.ts';
 
 export const id = 'conan';
 export const displayName = 'conan';

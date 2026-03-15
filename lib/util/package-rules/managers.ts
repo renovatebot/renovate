@@ -1,8 +1,11 @@
 import { isUndefined } from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { isCustomManager } from '../../modules/manager/custom';
-import { matchRegexOrGlobList } from '../string-match';
-import { Matcher } from './base';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { isCustomManager } from '../../modules/manager/custom/index.ts';
+import { matchRegexOrGlobList } from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class ManagersMatcher extends Matcher {
   override matches(

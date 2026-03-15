@@ -1,18 +1,18 @@
 import { isTruthy } from '@sindresorhus/is';
-import { regEx } from '../../../../util/regex';
-import type { PackageDependency } from '../../types';
-import { checkIsValidDependency } from '../utils';
+import { regEx } from '../../../../util/regex.ts';
+import type { PackageDependency } from '../../types.ts';
+import { checkIsValidDependency } from '../utils.ts';
 import type {
   PackageFileInfo,
   RecursionParameter,
   RegexManagerConfig,
-} from './types';
+} from './types.ts';
 import {
   createDependency,
   mergeExtractionTemplate,
   mergeGroups,
   regexMatchAll,
-} from './utils';
+} from './utils.ts';
 
 export function handleAny(
   config: RegexManagerConfig,

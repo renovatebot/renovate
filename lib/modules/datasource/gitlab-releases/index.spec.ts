@@ -1,6 +1,6 @@
-import { getPkgReleases } from '..';
-import { GitlabReleasesDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { getPkgReleases } from '../index.ts';
+import { GitlabReleasesDatasource } from './index.ts';
 
 describe('modules/datasource/gitlab-releases/index', () => {
   describe('getReleases', () => {

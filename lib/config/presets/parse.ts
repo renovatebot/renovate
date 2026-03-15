@@ -1,8 +1,8 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { regEx } from '../../util/regex';
-import { isHttpUrl } from '../../util/url';
-import type { ParsedPreset } from './types';
-import { PRESET_INVALID, PRESET_PROHIBITED_SUBPRESET } from './util';
+import { regEx } from '../../util/regex.ts';
+import { isHttpUrl } from '../../util/url.ts';
+import type { ParsedPreset } from './types.ts';
+import { PRESET_INVALID, PRESET_PROHIBITED_SUBPRESET } from './util.ts';
 
 const nonScopedPresetWithSubdirRegex = regEx(
   /^(?<repo>~?[\w\-. /%]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,

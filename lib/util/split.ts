@@ -1,4 +1,4 @@
-import type { RenovateSplit } from '../config/types';
+import type { RenovateSplit } from '../config/types.ts';
 
 let startTime = 0;
 let lastTime = 0;

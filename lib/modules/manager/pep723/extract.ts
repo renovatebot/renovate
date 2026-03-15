@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageFileContent } from '../types';
-import { Pep723 } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { PackageFileContent } from '../types.ts';
+import { Pep723 } from './schema.ts';
 
 // Adapted regex from the Python reference implementation: https://packaging.python.org/en/latest/specifications/inline-script-metadata/#reference-implementation
 const regex = regEx(

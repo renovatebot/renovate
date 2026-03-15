@@ -1,8 +1,8 @@
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApiConstructor } from '../types';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'regex';
 export const displayName = 'Regular Expression';
@@ -64,15 +64,15 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const { major, minor, patch, build, revision, prerelease, compatibility } =
       groups;
     const release = [
-      typeof major === 'undefined' ? 0 : Number.parseInt(major),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch),
+      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
     ];
 
     if (build) {
-      release.push(Number.parseInt(build));
+      release.push(Number.parseInt(build, 10));
       if (revision) {
-        release.push(Number.parseInt(revision));
+        release.push(Number.parseInt(revision, 10));
       }
     }
 
@@ -88,8 +88,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const parsedCurrent = this._parse(current);
     return !!(
       parsedVersion &&
-      parsedCurrent &&
-      parsedVersion.compatibility === parsedCurrent.compatibility
+      parsedVersion.compatibility === parsedCurrent?.compatibility
     );
   }
 }

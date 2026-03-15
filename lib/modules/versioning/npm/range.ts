@@ -1,10 +1,10 @@
 import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { isSemVerXRange } from '../semver/common';
-import type { NewValueConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isSemVerXRange } from '../semver/common.ts';
+import type { NewValueConfig } from '../types.ts';
 
 const {
   inc: increment,

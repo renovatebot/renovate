@@ -8,3 +8,8 @@
 .md-typeset a {
   text-decoration: underline;
 }
+
+.md-typeset .parents {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}

@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/mint/extract', () => {
   describe('extractPackageFile()', () => {

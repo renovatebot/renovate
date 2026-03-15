@@ -1,4 +1,4 @@
-import { Lazy } from './lazy';
+import { Lazy } from './lazy.ts';
 
 describe('util/lazy', () => {
   describe('.getValue()', () => {

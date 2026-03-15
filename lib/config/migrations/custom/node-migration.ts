@@ -1,11 +1,12 @@
-import type { RenovateConfig } from '../../types';
-import { AbstractMigration } from '../base/abstract-migration';
+import type { RenovateConfig } from '../../types.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class NodeMigration extends AbstractMigration {
   override readonly propertyName = 'node';
 
   override run(value: unknown): void {
     const node = this.get('node')!;
+    // v8 ignore else -- TODO: add test #40625
     if ((value as RenovateConfig).enabled === true) {
       // validated non-null
       delete node.enabled;

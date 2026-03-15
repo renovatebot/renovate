@@ -1,11 +1,16 @@
 import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
-import slugify from 'slugify';
-import { mergeChildConfig } from '../../config';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { StageName } from '../../types/skip-reason';
-import { compile } from '../template';
-import matchers from './matchers';
+import _slugify from 'slugify';
+import { mergeChildConfig } from '../../config/index.ts';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { StageName } from '../../types/skip-reason.ts';
+import { compile } from '../template/index.ts';
+import matchers from './matchers.ts';
+
+const slugify = _slugify as unknown as typeof _slugify.default;
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,

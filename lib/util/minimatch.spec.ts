@@ -1,4 +1,4 @@
-import { minimatch, minimatchFilter } from './minimatch';
+import { minimatch, minimatchFilter } from './minimatch.ts';
 
 describe('util/minimatch', () => {
   describe('minimatch', () => {

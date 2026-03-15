@@ -1,10 +1,10 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { logger } from '../logger';
-import * as configMassage from './massage';
-import * as configMigration from './migration';
-import type { RenovateConfig, ValidationMessage } from './types';
-import * as configValidation from './validation';
+import { logger } from '../logger/index.ts';
+import * as configMassage from './massage.ts';
+import * as configMigration from './migration.ts';
+import type { RenovateConfig, ValidationMessage } from './types.ts';
+import * as configValidation from './validation.ts';
 
 export async function migrateAndValidate(
   config: RenovateConfig,

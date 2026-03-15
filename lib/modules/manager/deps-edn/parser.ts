@@ -1,6 +1,6 @@
 import { isPlainObject } from '@sindresorhus/is';
 import moo from 'moo';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import type {
   EdnMetadata,
   ParsedEdnArray,
@@ -9,7 +9,7 @@ import type {
   ParsedEdnResult,
   ParserState,
   TokenTypes,
-} from './types';
+} from './types.ts';
 
 const lexerStates = {
   main: {

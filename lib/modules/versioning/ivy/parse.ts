@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import { isSingleVersion, parseRange, rangeToStr } from '../maven/compare';
+import { regEx } from '../../../util/regex.ts';
+import { isSingleVersion, parseRange, rangeToStr } from '../maven/compare.ts';
 
 const REV_TYPE_LATEST = 'REV_TYPE_LATEST';
 const REV_TYPE_SUBREV = 'REV_TYPE_SUBREVISION';

@@ -1,11 +1,11 @@
 import { Command } from 'commander';
-import { getOptions } from '../../../../config/options';
-import type { AllConfig } from '../../../../config/types';
-import { pkg } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
-import { coersions } from './coersions';
-import type { ParseConfigOptions } from './types';
+import { getOptions } from '../../../../config/options/index.ts';
+import type { AllConfig } from '../../../../config/types.ts';
+import { pkg } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { coersions } from './coersions.ts';
+import type { ParseConfigOptions } from './types.ts';
 
 export function getCliName(option: ParseConfigOptions): string {
   if (option.cli === false) {
@@ -62,7 +62,7 @@ export function getConfig(input: string[]): AllConfig {
     }
   });
 
-  /* eslint-disable no-console */
+  /* oxlint-disable no-console -- intentional: CLI help output */
   /* istanbul ignore next */
   function helpConsole(): void {
     console.log('  Examples:');
@@ -75,7 +75,7 @@ export function getConfig(input: string[]): AllConfig {
     console.log(
       `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:recommended"]}'`,
     );
-    /* eslint-enable no-console */
+    /* oxlint-enable no-console */
   }
 
   program = program

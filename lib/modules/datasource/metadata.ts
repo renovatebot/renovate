@@ -5,14 +5,14 @@ import {
   isUndefined,
 } from '@sindresorhus/is';
 import parse from 'github-url-from-git';
-import { detectPlatform } from '../../util/common';
-import { parseGitUrl } from '../../util/git/url';
-import * as hostRules from '../../util/host-rules';
-import { regEx } from '../../util/regex';
-import { asTimestamp } from '../../util/timestamp';
-import { isHttpUrl, parseUrl, trimTrailingSlash } from '../../util/url';
-import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
-import type { ReleaseResult } from './types';
+import { detectPlatform } from '../../util/common.ts';
+import { parseGitUrl } from '../../util/git/url.ts';
+import * as hostRules from '../../util/host-rules.ts';
+import { regEx } from '../../util/regex.ts';
+import { asTimestamp } from '../../util/timestamp.ts';
+import { isHttpUrl, parseUrl, trimTrailingSlash } from '../../util/url.ts';
+import { manualChangelogUrls, manualSourceUrls } from './metadata-manual.ts';
+import type { ReleaseResult } from './types.ts';
 
 const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPrefix = regEx('^git:/?/?');

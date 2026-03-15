@@ -1,4 +1,4 @@
-import { parseLine } from './line-parser';
+import { parseLine } from './line-parser.ts';
 
 describe('modules/manager/gomod/line-parser', () => {
   it('should return null for invalid input', () => {
@@ -76,6 +76,21 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'foo/foo',
       depType: 'require',
       digestOneAndOnly: true,
+      versioning: 'loose',
+    });
+  });
+
+  it('should parse require definition with placeholder pseudo-version', () => {
+    const line = 'require foo/foo v0.0.0-00010101000000-000000000000';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentDigest: '000000000000',
+      currentValue: 'v0.0.0-00010101000000-000000000000',
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'require',
+      digestOneAndOnly: true,
+      skipReason: 'invalid-version',
       versioning: 'loose',
     });
   });
@@ -246,6 +261,22 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'bar/bar',
       depType: 'replace',
       digestOneAndOnly: true,
+      versioning: 'loose',
+    });
+  });
+
+  it('should parse replace definition with placeholder pseudo-version', () => {
+    const line =
+      'replace foo/foo => bar/bar v0.0.0-00010101000000-000000000000';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentDigest: '000000000000',
+      currentValue: 'v0.0.0-00010101000000-000000000000',
+      datasource: 'go',
+      depName: 'bar/bar',
+      depType: 'replace',
+      digestOneAndOnly: true,
+      skipReason: 'invalid-version',
       versioning: 'loose',
     });
   });
