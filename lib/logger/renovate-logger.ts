@@ -28,6 +28,7 @@ export class RenovateLogger implements Logger {
   readonly logger: Logger = { once: { reset: onceReset } } as any;
   readonly once = this.logger.once;
   private bunyanLogger: BunyanLogger | undefined;
+  private uninitializedWarningFired: boolean;
   private context: string;
   private meta: Record<string, unknown>;
 
@@ -43,6 +44,7 @@ export class RenovateLogger implements Logger {
       this.logger[level] = this.logFactory(level) as never;
       this.logger.once[level] = this.logOnceFn(level);
     }
+    this.uninitializedWarningFired = false;
   }
 
   trace(p1: string): void;
@@ -195,6 +197,13 @@ export class RenovateLogger implements Logger {
     if (!this.bunyanLogger) {
       // defer logging until bunyan logger is initialized, to avoid losing logs during initialization
       this.queue.push(() => this.log(level, p1, p2));
+      if (!this.uninitializedWarningFired) {
+        // oxlint-disable-next-line no-console -- intentional: display warning when bunyan isn't initialized
+        console.warn(
+          `⚠️ NOTE ⚠️: Renovate's logger has not yet been initialized. If you see no other output, this is a bug`,
+        );
+        this.uninitializedWarningFired = true;
+      }
       return;
     }
     const logFn = this.logger[level];
