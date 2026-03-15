@@ -1,7 +1,8 @@
 import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class ExtractVersionMigration extends AbstractMigration {
+  override readonly deprecated = true;
   override readonly propertyName = 'extractVersion';
 
   override run(value: unknown): void {
