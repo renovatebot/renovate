@@ -980,6 +980,45 @@ describe('modules/platform/bitbucket-server/index', () => {
         await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
       });
 
+      it('aborts instead of infinite recursion when invalid reviewers cannot be filtered', async () => {
+        const scope = await initRepo();
+        scope
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .once()
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .put(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .once()
+          .reply(409, {
+            errors: [
+              {
+                context: 'reviewers',
+                message:
+                  'Errors encountered while adding some reviewers to this pull request.',
+                exceptionName:
+                  'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
+                reviewerErrors: [{ context: '', message: ' is not a user.' }],
+                validReviewers: [
+                  { user: { name: 'user1' } },
+                  { user: { name: 'user2' } },
+                ],
+              },
+            ],
+          });
+
+        await expect(
+          bitbucket.addReviewers(5, ['user1', 'user2', '']),
+        ).rejects.toThrow();
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          expect.anything(),
+          'Could not filter invalid reviewers from list, aborting to prevent infinite recursion',
+        );
+      });
+
       it('deals correctly with resolving reviewers', async () => {
         const scope = await initRepo();
         scope
