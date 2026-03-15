@@ -1,4 +1,5 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -219,14 +220,14 @@ export class UvProcessor extends BasePyProjectProcessor {
 
       if (config.minimumReleaseAge) {
         const ms = toMs(config.minimumReleaseAge);
-        if (ms !== null && ms !== undefined) {
-          const excludeNewer = new Date(Date.now() - ms).toISOString();
-          cmd += ` --exclude-newer=${excludeNewer}`;
-        } else {
+        if (isNullOrUndefined(ms)) {
           logger.debug(
             { minimumReleaseAge: config.minimumReleaseAge },
             'Invalid minimumReleaseAge value, skipping --exclude-newer for uv lock',
           );
+        } else {
+          const excludeNewer = DateTime.now().minus(ms).toUTC().toISO();
+          cmd += ` --exclude-newer=${excludeNewer}`;
         }
       }
 
