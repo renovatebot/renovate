@@ -34,6 +34,7 @@ import type {
   PrBlockedBy,
 } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
+import { getNextScheduleTime, isScheduledNow } from '../branch/schedule.ts';
 import { resolveBranchStatus } from '../branch/status-checks.ts';
 import { getPrBody } from './body/index.ts';
 import {
@@ -58,7 +59,7 @@ export function getPlatformPrOptions(
     config.platformAutomerge,
   );
 
-  return {
+  const options: PlatformPrOptions = {
     autoApprove: !!config.autoApprove,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
@@ -68,6 +69,22 @@ export function getPlatformPrOptions(
     forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
+
+  // Handle automergeSchedule for GitLab merge_after parameter
+  if (
+    usePlatformAutomerge &&
+    config.automergeSchedule &&
+    config.automergeSchedule.length > 0
+  ) {
+    if (!isScheduledNow(config)) {
+      const nextScheduleTime = getNextScheduleTime(config);
+      if (nextScheduleTime) {
+        options.merge_after = nextScheduleTime.toISOString();
+      }
+    }
+  }
+
+  return options;
 }
 
 export interface ResultWithPr {

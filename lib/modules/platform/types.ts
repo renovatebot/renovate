@@ -107,6 +107,7 @@ export interface PlatformPrOptions {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
+  merge_after?: string;
 }
 
 export interface CreatePRConfig {
