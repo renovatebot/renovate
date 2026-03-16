@@ -1,4 +1,5 @@
 import { regEx } from '../../../../util/regex.ts';
+import { parseExtractVersionValue } from '../utils.ts';
 import * as utils from './utils.ts';
 
 describe('modules/manager/custom/regex/utils', () => {
@@ -14,12 +15,12 @@ describe('modules/manager/custom/regex/utils', () => {
 
   it('parses extractVersion JSON arrays', () => {
     expect(
-      utils.parseExtractVersionValue('["^(?<version>.*)$","v{{version}}"]'),
+      parseExtractVersionValue('["^(?<version>.*)$","v{{version}}"]'),
     ).toEqual(['^(?<version>.*)$', 'v{{version}}']);
   });
 
   it('falls back to legacy single-element array for invalid input', () => {
-    expect(utils.parseExtractVersionValue('^v(?<version>.*)$')).toEqual([
+    expect(parseExtractVersionValue('^v(?<version>.*)$')).toEqual([
       '^v(?<version>.*)$',
     ]);
   });

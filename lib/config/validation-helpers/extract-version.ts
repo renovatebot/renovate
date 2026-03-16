@@ -1,5 +1,5 @@
-import { regEx } from '../../util/regex';
-import type { ValidationMessage } from '../types';
+import { regEx } from '../../util/regex.ts';
+import type { ValidationMessage } from '../types.ts';
 
 /**
  * Extracts named capture groups from a regex pattern.
@@ -137,7 +137,7 @@ export function extractHandlebarsVariables(template: string): string[] {
 export function validateExtractVersion(
   extractVersion: string | [string] | [string, string],
   configPath: string,
-): ValidationMessage | null {
+): ValidationMessage | undefined {
   // Only validate the [regex, template] format
   if (
     !Array.isArray(extractVersion) ||
@@ -145,7 +145,7 @@ export function validateExtractVersion(
     typeof extractVersion[0] !== 'string' ||
     typeof extractVersion[1] !== 'string'
   ) {
-    return null;
+    return undefined;
   }
 
   const [regexPattern, template] = extractVersion;
@@ -171,8 +171,8 @@ export function validateExtractVersion(
   } catch {
     // If we can't parse the regex or template, let it fail at runtime
     // This validation is best-effort
-    return null;
+    return undefined;
   }
 
-  return null;
+  return undefined;
 }

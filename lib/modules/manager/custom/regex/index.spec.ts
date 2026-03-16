@@ -107,7 +107,7 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       datasourceTemplate: 'npm',
       extractVersionTemplate:
-        '["^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$","{{major}}-{{minor}}-{{patch}}"]',
+        '["^(?<major>\\\\d+)\\\\.(?<minor>\\\\d+)\\\\.(?<patch>\\\\d+)$","{{major}}-{{minor}}-{{patch}}"]',
     };
 
     const res = await extractPackageFile('dep foo 1.2.3', 'file.txt', config);

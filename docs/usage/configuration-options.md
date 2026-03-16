@@ -1725,7 +1725,7 @@ Provide just a regex pattern with a named capture group to extract part of a ver
   "packageRules": [
     {
       "matchPackageNames": ["my-package"],
-      "extractVersion": ["^(?<version>v\\d+\\.\\d+)"]
+      "extractVersion": ["^(?<version>v\\\\d+\\\\.\\\\d+)"]
     }
   ]
 }
@@ -1760,7 +1760,7 @@ Use multiple named capture groups and handlebars logic for advanced transformati
     {
       "matchPackageNames": ["my-package"],
       "extractVersion": [
-        "^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>.*))?$",
+        "^(?<major>\\\\d+)\\\\.(?<minor>\\\\d+)\\\\.(?<patch>\\\\d+)(?:-(?<prerelease>.*))?$",
         "{{major}}-{{minor}}-{{patch}}{{#if prerelease}}-{{prerelease}}{{/if}}"
       ]
     }

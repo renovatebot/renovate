@@ -1,32 +1,32 @@
-import { validateExtractVersion } from './extract-version';
+import { validateExtractVersion } from './extract-version.ts';
 
 describe('config/validation-helpers/extract-version', () => {
   describe('validateExtractVersion', () => {
-    it('returns null for string format (legacy)', () => {
+    it('returns undefined for string format (legacy)', () => {
       const result = validateExtractVersion(
         '^v(?<version>.+)$',
         'extractVersion',
       );
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
-    it('returns null for single-element array format', () => {
+    it('returns undefined for single-element array format', () => {
       const result = validateExtractVersion(
         ['(?<version>.+)'],
         'extractVersion',
       );
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
-    it('returns null when all template variables are captured', () => {
+    it('returns undefined when all template variables are captured', () => {
       const result = validateExtractVersion(
         ['^(?<version>\\d+\\.\\d+)', '{{version}}'],
         'extractVersion',
       );
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
-    it('returns null when multiple template variables are all captured', () => {
+    it('returns undefined when multiple template variables are all captured', () => {
       const result = validateExtractVersion(
         [
           '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)',
@@ -34,10 +34,10 @@ describe('config/validation-helpers/extract-version', () => {
         ],
         'extractVersion',
       );
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
-    it('returns null when template uses conditionals with captured variables', () => {
+    it('returns undefined when template uses conditionals with captured variables', () => {
       const result = validateExtractVersion(
         [
           '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>.*))?$',
@@ -45,7 +45,7 @@ describe('config/validation-helpers/extract-version', () => {
         ],
         'extractVersion',
       );
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
     it('returns warning when template variable is not captured', () => {
@@ -104,12 +104,12 @@ describe('config/validation-helpers/extract-version', () => {
       expect(result?.message).toContain('Available capture groups: [none]');
     });
 
-    it('returns null for invalid array format (not our concern)', () => {
+    it('returns undefined for invalid array format (not our concern)', () => {
       const result = validateExtractVersion(
         ['regex', 'template', 'extra'] as any,
         'extractVersion',
       );
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
     it('detects missing variable even with malformed regex', () => {
@@ -133,7 +133,7 @@ describe('config/validation-helpers/extract-version', () => {
         ],
         'extractVersion',
       );
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
     it('detects missing variable in complex template', () => {

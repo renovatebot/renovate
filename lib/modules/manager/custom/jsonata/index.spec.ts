@@ -468,7 +468,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
       datasourceTemplate: 'npm',
       extractVersionTemplate:
-        '["^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$","{{major}}-{{minor}}-{{patch}}"]',
+        '["^(?<major>\\\\d+)\\\\.(?<minor>\\\\d+)\\\\.(?<patch>\\\\d+)$","{{major}}-{{minor}}-{{patch}}"]',
     } as JsonataExtractConfig;
 
     const res = await extractPackageFile(json, 'unused', config);
