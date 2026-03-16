@@ -54,9 +54,26 @@ export function getConfig(input: string[]): AllConfig {
     if (option.cli !== false) {
       const param = `<${option.type}>`.replace('<boolean>', '[boolean]');
       const optionString = `${getCliName(option)} ${param}`;
+      let description = option.description;
+      if (option.allowedValues) {
+        if (option.patternMatch) {
+          description =
+            description +
+            ` (Allowed values: ${JSON.stringify(option.allowedValues)}, or RegEx (\`re2\`) and glob patterns)`;
+        } else if (option.allowString) {
+          description =
+            description +
+            ` (Allowed values: ${JSON.stringify(option.allowedValues)}, or a string)`;
+        } else {
+          description =
+            description +
+            ` (Allowed values: ${JSON.stringify(option.allowedValues)})`;
+        }
+      }
+
       program = program.option(
         optionString,
-        option.description,
+        description,
         coersions[option.type],
       );
     }
