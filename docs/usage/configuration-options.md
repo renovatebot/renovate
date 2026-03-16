@@ -3896,7 +3896,7 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
-On GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
+On GitHub, GitLab, and Bitbucket Server, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure, Bitbucket Server, Forgejo, Gitea, GitHub and GitLab.
