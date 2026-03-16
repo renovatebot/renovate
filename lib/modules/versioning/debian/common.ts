@@ -35,7 +35,7 @@ export function getDatedContainerImageVersion(version: string): null | number {
     return null;
   }
 
-  return parseInt(match.groups.date);
+  return parseInt(match.groups.date, 10);
 }
 
 export function getDatedContainerImageSuffix(version: string): null | string {
