@@ -105,3 +105,26 @@ A limited set of approved `postUpgradeTasks` commands are allowed in the app.
 The commands are not documented, as they may change over time.
 
 You can find the allowed `postUpgradeTasks` commands in Renovate's log output, when searching for a log line which references [`allowedCommands`](../self-hosted-configuration.md#allowedcommands).
+
+## Validating configuration
+
+As noted in [Validation of Renovate config change PRs](../config-validation.md#validation-of-renovate-config-change-prs), Renovate will automagically validate your configuration changes when pushing to the "reconfigure" branch.
+
+<!-- prettier-ignore -->
+!!! tip
+    When using a Mend-hosted app, the "reconfigure" branch is `renovate/reconfigure`.
+
+When pushing to this specific branch name, Renovate will run its validation and report a status check to the Platform whether this passes/fails validation.
+
+If you have a Pull Request open from this branch (including draft PRs), Renovate will comment on the PR to note:
+
+- If there are any failures, and if so, what's wrong
+- If the configuration passed validation, and if so, what the new configuration will do
+
+[For example](https://github.com/JamieTanna-Mend-testing/mend-reconfigure/pull/2), when failing validation:
+
+![A view of a GitHub Pull Request, showing a commit that breaks the build, with a red status check next to the commit, and a comment from Renovate below noting that the configuration is broken, as it has an invalid configuration option](../assets/images/mend-hosted-reconfigure-failed.png){ loading=lazy }
+
+And when the PR then passes validation:
+
+![A similar view of the same Pull Request, but with a new commit reverting the 'broken' changes. We can see a green tick status check showing that Renovate's config validation passed the commit, and below there is a lengthy comment from Renovate summarising the configuration presets (as it would do when performing an onboarding PR - in this case, taking the description of all presets used. Additionally, there is a 'what to expect' section which notes that the repo is up-to-date so no new PRs would be raised by Renovate](../assets/images/mend-hosted-reconfigure-passed.png){ loading=lazy }
