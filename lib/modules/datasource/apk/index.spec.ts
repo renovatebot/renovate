@@ -1,9 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { Header, Pack, ReadEntry } from 'tar';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { promisify } from 'util';
 import { vi } from 'vitest';
 import * as zlib from 'zlib';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
@@ -46,11 +49,22 @@ const nginxApkIndex = [
 
 describe('modules/datasource/apk/index', () => {
   let apkIndexArchive: Buffer;
+  let cacheDir: DirectoryResult | null;
 
   beforeAll(async () => {
     apkIndexArchive = await createTarGz([
       { name: 'APKINDEX', content: nginxApkIndex },
     ]);
+  });
+
+  beforeEach(async () => {
+    cacheDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ cacheDir: cacheDir.path });
+  });
+
+  afterEach(async () => {
+    await cacheDir?.cleanup();
+    cacheDir = null;
   });
 
   const apkDatasource = new ApkDatasource();

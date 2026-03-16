@@ -1,7 +1,10 @@
-import { type ReadEntry, list } from 'tar';
+import { randomUUID } from 'node:crypto';
+import { extract as tarExtract } from 'tar';
+import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import * as fs from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -77,42 +80,32 @@ export class ApkDatasource extends Datasource {
    * Extracts the APK index content from a tar.gz buffer
    */
   private async extractApkIndexFromTarGz(buffer: Buffer): Promise<string> {
+    const extractId = randomUUID();
+    const cacheDir = await fs.ensureCacheDir(upath.join('apk', extractId));
+    const tarFile = upath.join(cacheDir, 'APKINDEX.tar.gz');
+    const extractedFile = upath.join(cacheDir, 'APKINDEX');
+
     try {
-      logger.debug('Extracting APK index from tar.gz buffer');
+      await fs.outputCacheFile(tarFile, buffer);
 
-      let apkIndexContent = '';
-
-      const parser = list({
-        onReadEntry: (entry: ReadEntry) => {
-          if (entry.path === 'APKINDEX') {
-            logger.debug('Found APKINDEX file in tar archive');
-            const chunks: Buffer[] = [];
-            entry.on('data', (chunk: Buffer) => {
-              chunks.push(chunk);
-            });
-            entry.on('end', () => {
-              apkIndexContent = Buffer.concat(chunks).toString('utf8');
-            });
-          }
-        },
+      await tarExtract({
+        file: tarFile,
+        cwd: cacheDir,
+        filter: (path) => path === 'APKINDEX',
       });
 
-      await new Promise<void>((resolve, reject) => {
-        parser.on('end', resolve);
-        parser.on('error', reject);
-        parser.end(buffer);
-      });
-
-      if (apkIndexContent) {
+      if (await fs.cachePathExists(extractedFile)) {
         logger.debug('Successfully extracted APKINDEX content');
-      } else {
-        logger.warn('APKINDEX file not found in tar archive');
+        return await fs.readCacheFile(extractedFile, 'utf8');
       }
 
-      return apkIndexContent;
+      logger.warn('APKINDEX file not found in tar archive');
+      return '';
     } catch (err) /* v8 ignore next 3 -- hard to test tar parser errors */ {
       logger.warn({ err }, 'Error extracting APK index from tar.gz');
       return '';
+    } finally {
+      await fs.rmCache(cacheDir);
     }
   }
 
