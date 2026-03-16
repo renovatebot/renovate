@@ -95,6 +95,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
   }
 
   const response: Record<string, unknown> = {
+    // We want to loose class information, but keep enumerable properties of the error
+    // oxlint-disable-next-line typescript/no-misused-spread
     ...err,
   };
 
