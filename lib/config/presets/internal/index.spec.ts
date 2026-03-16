@@ -27,26 +27,29 @@ describe('config/presets/internal/index', () => {
   });
 
   for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
-    for (const [presetName, presetConfig] of Object.entries(groupPresets)) {
-      const preset = `${groupName}:${presetName}`;
-      if (presetName !== 'description' && !ignoredPresets.includes(preset)) {
-        it(`${preset} validates`, async () => {
-          try {
-            const { config } = await resolveConfigPresets(
-              massageConfig(presetConfig),
-            );
-            const configType = groupName === 'global' ? 'global' : 'repo';
-            const res = await validateConfig(configType, config, true);
-            expect(res.errors).toHaveLength(0);
-            expect(res.warnings).toHaveLength(0);
-          } catch (err) {
-            if (err.validationError) {
-              throw new Error(err.validationError);
-            }
-            throw err;
+    for (const [presetName, presetConfig] of Object.entries(
+      groupPresets,
+    ).filter(
+      ([key]) =>
+        key !== 'description' &&
+        !ignoredPresets.includes(`${groupName}:${key}`),
+    )) {
+      it(`${`${groupName}:${presetName}`} validates`, async () => {
+        try {
+          const { config } = await resolveConfigPresets(
+            massageConfig(presetConfig),
+          );
+          const configType = groupName === 'global' ? 'global' : 'repo';
+          const res = await validateConfig(configType, config, true);
+          expect(res.errors).toHaveLength(0);
+          expect(res.warnings).toHaveLength(0);
+        } catch (err) {
+          if (err.validationError) {
+            throw new Error(err.validationError);
           }
-        });
-      }
+          throw err;
+        }
+      });
     }
   }
 

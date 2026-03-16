@@ -113,6 +113,33 @@ describe('workers/repository/finalize/prune', () => {
       );
     });
 
+    it('uses defaultBranch when baseBranchPatterns exist but baseBranches are not computed yet', async () => {
+      config.branchList = [];
+      config.baseBranchPatterns = ['/^release\\/.*/'];
+      config.defaultBranch = 'main';
+      git.getBranchList.mockReturnValueOnce([
+        'renovate/release/1.x-dependency',
+      ]);
+      platform.findPr.mockResolvedValueOnce(null);
+
+      await expect(
+        cleanup.pruneStaleBranches(config, config.branchList),
+      ).resolves.not.toThrow();
+
+      expect(platform.findPr).toHaveBeenCalledExactlyOnceWith({
+        branchName: 'renovate/release/1.x-dependency',
+        state: 'open',
+        targetBranch: 'main',
+      });
+      expect(scm.isBranchModified).toHaveBeenCalledExactlyOnceWith(
+        'renovate/release/1.x-dependency',
+        'main',
+      );
+      expect(scm.deleteBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/release/1.x-dependency',
+      );
+    });
+
     it('does nothing on dryRun', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       GlobalConfig.set({ dryRun: 'full' });

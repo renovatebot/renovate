@@ -468,7 +468,7 @@ describe('modules/manager/devbox/artifacts', () => {
       ).toEqual([
         {
           artifactError: {
-            lockFile: 'devbox.lock',
+            fileName: 'devbox.lock',
             stderr: "Cannot read properties of undefined (reading 'stdout')",
           },
         },

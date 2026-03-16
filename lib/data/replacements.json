@@ -6,6 +6,7 @@
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
+      "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
@@ -22,6 +23,7 @@
       "replacements:google-github-action-release-please-to-googleapis",
       "replacements:grafana-oss-to-grafana",
       "replacements:hapi-to-scoped",
+      "replacements:home-operations-to-official",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -40,6 +42,7 @@
       "replacements:read-pkg-up-rename",
       "replacements:redux-devtools-extension-to-scope",
       "replacements:renovate-pep440-to-renovatebot-pep440",
+      "replacements:rolldown-vite-to-vite",
       "replacements:rollup-babel-to-scoped",
       "replacements:rollup-json-to-scoped",
       "replacements:rollup-node-resolve-to-scoped",
@@ -51,6 +54,7 @@
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
@@ -140,6 +144,17 @@
         "matchPackageNames": ["babel-eslint"],
         "replacementName": "@babel/eslint-parser",
         "replacementVersion": "7.11.0"
+      }
+    ]
+  },
+  "base-ui-components-to-base-ui": {
+    "description": "`@base-ui-components/react` was renamed to `@base-ui/react`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@base-ui-components/react"],
+        "replacementName": "@base-ui/react",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
@@ -762,6 +777,18 @@
       }
     ]
   },
+  "home-operations-to-official": {
+    "description": "`home-operations` only builts these until official versions are released",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.18.6",
+        "matchDatasources": ["helm", "docker"],
+        "matchPackageNames": ["ghcr.io/home-operations/charts-mirror/cilium"],
+        "replacementName": "quay.io/cilium/charts/cilium",
+        "replacementVersion": "1.18.6"
+      }
+    ]
+  },
   "jade-to-pug": {
     "description": "Jade was renamed to Pug.",
     "packageRules": [
@@ -982,6 +1009,17 @@
       }
     ]
   },
+  "rolldown-vite-to-vite": {
+    "description": "`rolldown-vite` was merged to `vite` in version 8.0.0.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rolldown-vite"],
+        "replacementName": "vite",
+        "replacementVersion": "8.0.0"
+      }
+    ]
+  },
   "rollup-babel-to-scoped": {
     "description": "The babel plugin for rollup became scoped.",
     "packageRules": [
@@ -1146,6 +1184,18 @@
         "matchPackageNames": ["typeorm-seeding"],
         "replacementName": "@jorgebodega/typeorm-seeding",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "vitest-coverage-c8-to-coverage-v8": {
+    "description": "`@vitest/coverage-c8` was renamed to `@vitest/coverage-v8`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.32.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@vitest/coverage-c8"],
+        "replacementName": "@vitest/coverage-v8",
+        "replacementVersion": "0.33.0"
       }
     ]
   },

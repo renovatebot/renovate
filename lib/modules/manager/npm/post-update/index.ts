@@ -19,7 +19,12 @@ import { ensureTrailingSlash } from '../../../../util/url.ts';
 import { dump, parseSingleYaml } from '../../../../util/yaml.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import { scm } from '../../../platform/scm.ts';
-import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types.ts';
+import type {
+  ArtifactError,
+  PackageFile,
+  PostUpdateConfig,
+  Upgrade,
+} from '../../types.ts';
 import {
   NPM_CACHE_DIR,
   PNPM_CACHE_BASE_DIR,
@@ -40,7 +45,6 @@ import * as pnpm from './pnpm.ts';
 import { processHostRules } from './rules.ts';
 import type {
   AdditionalPackageFiles,
-  ArtifactError,
   DetermineLockFileDirsResult,
   WriteExistingFilesResult,
   YarnRcYmlFile,
@@ -469,7 +473,7 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: npmLock,
+        fileName: npmLock,
         stderr: res.stderr,
       });
     } else if (res.lockFile) {
@@ -556,7 +560,7 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: yarnLock,
+        fileName: yarnLock,
         // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
@@ -628,7 +632,7 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: pnpmShrinkwrap,
+        fileName: pnpmShrinkwrap,
         // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
