@@ -41,6 +41,7 @@ export async function processPackageFile(
     return null;
   }
 
+  // TODO deprecated: now performed in mergeRenovateConfig() in lib/workers/repository/init/merge.ts
   const { npmrc } = await resolveNpmrc(packageFile, config);
 
   return {
