@@ -3568,6 +3568,24 @@ The above will set a replaceStrategy for any npm package which starts with `@ang
 
 The above will group together any npm package which starts with the string `angular`.
 
+### packageRules.matchRegistryUrls
+
+Use this option to filter packages based on their `registryUrls`.
+Any package whose `registryUrls` array contains at least one URL matching any of the provided patterns will be selected.
+
+Here's an example of where you use this to disable updates from a specific private registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchRegistryUrls": ["https://private.registry.example.com/**"],
+      "enabled": false
+    }
+  ]
+}
+```
+
 ### packageRules.matchRepositories
 
 ### packageRules.matchSourceUrls

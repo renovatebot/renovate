@@ -673,6 +673,74 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
+  it('handles matchRegistryUrls when missing registryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com/**',
+            'https://private.registry.com/**',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://private.registry.com/npm'],
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+
+  it('non-matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://registry.npmjs.org'],
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
   describe('matchConfidence', () => {
     const hostRule: HostRule = {
       hostType: 'merge-confidence',
