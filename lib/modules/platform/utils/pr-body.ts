@@ -175,13 +175,12 @@ export function closeUnclosedStructures(text: string, maxLen: number): string {
     if (availableForContent > 0) {
       result = result.slice(0, availableForContent);
       // Re-scan: trimming may have changed which tags are unclosed
-      stack = findAllUnclosedTags(result);
     } else {
       // Not enough room even for closing tags alone,
       // remove the outermost unclosed tag entirely
       result = result.slice(0, stack[0].position);
-      stack = findAllUnclosedTags(result);
     }
+    stack = findAllUnclosedTags(result);
   }
 
   return result;
