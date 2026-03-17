@@ -65,10 +65,10 @@ async function checkIfModified(
   try {
     const response = await http.head(url, options);
     return response.statusCode !== 304;
-  } catch (error) {
+  } catch (err) {
     logger.warn(
       {
-        errorMessage: error instanceof Error ? error.message : error,
+        err,
         lastDownloadTimestamp,
         url,
       },
@@ -152,11 +152,11 @@ export async function getCachedGunzippedFile(
         try {
           await extractGzipFile(compressedFile, extractedFile);
           lastTimestamp = await getFileCreationTime(extractedFile);
-        } catch (error) {
+        } catch (err) {
           logger.warn(
             {
               compressedFile,
-              error: error instanceof Error ? error.message : error,
+              err,
               extension,
               extractedFile,
               url,
