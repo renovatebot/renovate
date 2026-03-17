@@ -1,16 +1,12 @@
-import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource } from './common.ts';
 import { RpmXmlMetadataProvider } from './providers/xml.ts';
+import { fetchPrimaryGzipUrl } from './repomd.ts';
 
 export class RpmDatasource extends Datasource {
-  static readonly id = 'rpm';
-
-  // repomd.xml is a standard file name in RPM repositories which contains metadata about the repository
-  static readonly repomdXmlFileName = 'repomd.xml';
+  static readonly id = datasource;
 
   private readonly xmlProvider: RpmXmlMetadataProvider;
 
@@ -70,74 +66,6 @@ export class RpmDatasource extends Datasource {
     );
   }
 
-  private getPrimaryRepodataUrl(
-    xml: XmlDocument,
-    registryUrl: string,
-    repomdUrl: string,
-  ): string {
-    const primaryData = xml.childWithAttribute('type', 'primary');
-
-    if (!primaryData) {
-      throw new Error(`No primary data found in ${repomdUrl}`);
-    }
-
-    const locationElement = primaryData.childNamed('location');
-    if (!locationElement) {
-      throw new Error(`No location element found in ${repomdUrl}`);
-    }
-
-    const href = locationElement.attr.href;
-    if (!href) {
-      throw new Error(`No href found in ${repomdUrl}`);
-    }
-
-    // replace trailing "repodata/" from registryUrl, if it exists, with a "/" because href includes "repodata/"
-    const registryUrlWithoutRepodata = registryUrl.replace(
-      /\/repodata\/?$/,
-      '/',
-    );
-
-    return joinUrlParts(registryUrlWithoutRepodata, href);
-  }
-
-  private async _getPrimaryGzipUrl(registryUrl: string): Promise<string> {
-    const repomdUrl = joinUrlParts(
-      registryUrl,
-      RpmDatasource.repomdXmlFileName,
-    );
-    const response = await this.http.getText(repomdUrl.toString());
-
-    const repomdBody = response.body.trimStart();
-
-    // repomd.xml may omit the XML declaration and start directly with the root element
-    if (!(repomdBody.startsWith('<?xml') || repomdBody.startsWith('<repomd'))) {
-      logger.debug(
-        { datasource: RpmDatasource.id, url: repomdUrl },
-        'Invalid response format',
-      );
-      throw new Error(
-        `${repomdUrl} is not in XML format. Response body: ${response.body}`,
-      );
-    }
-
-    const xml = new XmlDocument(repomdBody);
-
-    try {
-      return this.getPrimaryRepodataUrl(xml, registryUrl, repomdUrl.toString());
-    } catch (err) {
-      if (
-        err instanceof Error &&
-        err.message.startsWith('No primary data found')
-      ) {
-        logger.debug(
-          `No primary data found in ${repomdUrl}, xml contents: ${response.body}`,
-        );
-      }
-
-      throw err;
-    }
-  }
-
   getPrimaryGzipUrl(registryUrl: string): Promise<string> {
     return withCache(
       {
@@ -145,14 +73,14 @@ export class RpmDatasource extends Datasource {
         key: registryUrl,
         ttlMinutes: 1440,
       },
-      () => this._getPrimaryGzipUrl(registryUrl),
+      () => fetchPrimaryGzipUrl(this.http, registryUrl),
     );
   }
 
-  async getReleasesByPackageName(
+  getReleasesByPackageName(
     primaryGzipUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    return await this.xmlProvider.getReleases(primaryGzipUrl, packageName);
+    return this.xmlProvider.getReleases(primaryGzipUrl, packageName);
   }
 }
