@@ -1,9 +1,13 @@
-import { BranchUpgradeConfig } from '../../../../../types.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { ChangeLogSource } from '../source.ts';
 
 export class GenericChangeLogSource extends ChangeLogSource {
   constructor() {
     super('generic', null!);
+  }
+
+  override getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return config.changelogUrl!;
   }
 
   override getCompareURL(
@@ -13,10 +17,6 @@ export class GenericChangeLogSource extends ChangeLogSource {
     nextHead: string,
   ): string {
     throw new Error('Method not implemented.');
-  }
-
-  override getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return config.changelogUrl!;
   }
 
   override hasValidRepository(repository: string): boolean {
