@@ -54,7 +54,7 @@ export class RpmDatasource extends Datasource {
       const primaryGzipUrl = await this.getPrimaryGzipUrl(registryUrl);
       return await this.getReleasesByPackageName(primaryGzipUrl, packageName);
     } catch (err) {
-      this.handleGenericErrors(err as Error);
+      this.handleGenericErrors(err);
     }
   }
 
