@@ -49,7 +49,9 @@ describe('modules/manager/bazel-module/lockfile', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'bazel mod deps --lockfile_mode=update' },
+    ]);
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
   });
 
@@ -79,7 +81,9 @@ describe('modules/manager/bazel-module/lockfile', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'bazel mod deps --lockfile_mode=update' },
+    ]);
   });
 
   it('returns null when lockfile is not modified', async () => {
@@ -98,7 +102,9 @@ describe('modules/manager/bazel-module/lockfile', () => {
     );
 
     expect(result).toBeNull();
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'bazel mod deps --lockfile_mode=update' },
+    ]);
   });
 
   it('deletes lockfile during maintenance', async () => {
@@ -126,7 +132,9 @@ describe('modules/manager/bazel-module/lockfile', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'bazel mod deps' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'bazel mod deps --lockfile_mode=update' },
+    ]);
     expect(fs.deleteLocalFile).toHaveBeenCalledWith('MODULE.bazel.lock');
   });
 
