@@ -1,6 +1,6 @@
-import type { ChangeLogFile } from '../types.ts';
-import { Http } from '../../../../../../util/http/index.ts';
 import { logger } from '../../../../../../logger/index.ts';
+import { Http } from '../../../../../../util/http/index.ts';
+import type { ChangeLogFile } from '../types.ts';
 
 export const id = 'generic-changelog';
 const http = new Http(id);
