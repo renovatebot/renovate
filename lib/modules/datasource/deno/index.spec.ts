@@ -1,4 +1,4 @@
-import { ZodError } from 'zod';
+import { ZodError } from 'zod/v3';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { DenoDatasource } from './index.ts';

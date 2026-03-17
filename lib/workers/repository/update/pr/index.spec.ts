@@ -511,6 +511,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
 
         expect(logger.logger.info).toHaveBeenCalledWith(
+          { labels: ['new_label'] },
           `DRY-RUN: Would create PR: ${prTitle}`,
         );
       });
@@ -629,7 +630,7 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           automerge: true,
           automergeType: 'branch',
-          artifactErrors: [{ lockFile: 'foo', stderr: 'bar' }],
+          artifactErrors: [{ fileName: 'foo', stderr: 'bar' }],
         });
 
         expect(res).toEqual({ type: 'with-pr', pr });

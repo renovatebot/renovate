@@ -1,5 +1,5 @@
 import { isEmptyArray, isEmptyObject } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { filterMap } from '../../../util/filter-map.ts';
 import { newlineRegex } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';

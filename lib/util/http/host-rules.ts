@@ -32,7 +32,6 @@ export type HostRulesGotOptions = Pick<
   | 'abortOnError'
   | 'abortIgnoreStatusCodes'
   | 'timeout'
-  | 'lookup'
   | 'agent'
   | 'http2'
   | 'https'

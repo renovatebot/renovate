@@ -227,7 +227,8 @@ const platform: Platform = {
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
+      // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
+      gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
       const env = getEnv();
@@ -674,6 +675,7 @@ const platform: Platform = {
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
+        // v8 ignore else -- TODO: add test #40625
         if (pr?.bodyStruct) {
           if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
             logger.debug(
@@ -1022,6 +1024,7 @@ const platform: Platform = {
     const commentList = await helper.getComments(config.repository, issue);
 
     let comment: Comment | null = null;
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       comment = findCommentByTopic(commentList, deleteConfig.topic);
     } else if (deleteConfig.type === 'by-content') {
@@ -1094,7 +1097,7 @@ export function maxBodyLength(): number {
   return 1000000;
 }
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method */
 export const {
   addAssignees,
   addReviewers,

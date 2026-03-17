@@ -1,3 +1,4 @@
+import type { DateTime } from 'luxon';
 import type { MergeStrategy } from '../../config/types.ts';
 import type {
   BranchStatus,
@@ -231,6 +232,12 @@ export interface FileOwnerRule {
 }
 
 export interface Platform {
+  /**
+   * Whether this is an experimental Platform.
+   *
+   * Experimental features might be changed or even removed at any time.
+   */
+  experimental?: true;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
@@ -323,6 +330,7 @@ export interface PlatformScm {
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
+  getBranchUpdateDate(branchName: string): Promise<DateTime | null>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;

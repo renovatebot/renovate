@@ -1,4 +1,4 @@
-import { isArray, isNumber } from '@sindresorhus/is';
+import { isArray, isNonEmptyString, isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -36,7 +36,9 @@ function prepareParticipants(
   config: RenovateConfig,
   usernames: string[],
 ): Promise<string[]> {
-  const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
+  const normalizedUsernames = [
+    ...new Set(usernames.map(noLeadingAtSymbol).filter(isNonEmptyString)),
+  ];
   return filterUnavailableUsers(config, normalizedUsernames);
 }
 

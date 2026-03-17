@@ -1,9 +1,5 @@
 # Gerrit
 
-<!-- prettier-ignore -->
-!!! warning "This feature is flagged as experimental"
-    Experimental features might be changed or even removed at any time.
-
 ## Supported Gerrit versions
 
 Renovate supports all Gerrit 3.x versions.

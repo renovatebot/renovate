@@ -36,7 +36,11 @@ describe('workers/repository/onboarding/pr/index', () => {
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>());
-      GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate', // default value
+      });
+      InheritConfig.reset();
     });
 
     it('returns if onboarded', async () => {

@@ -91,6 +91,7 @@ export async function getFile(
           logger.warn({ filePath }, 'Unable to find file');
           return null;
         }
+        // v8 ignore else -- TODO: add test #40625
         if (result.data.typeKey === 'GitUnresolvableToCommitException') {
           logger.warn({ branchName }, 'Unable to find branch');
           return null;
