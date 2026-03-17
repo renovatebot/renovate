@@ -39,6 +39,25 @@ describe('modules/platform/utils/pr-body', () => {
         expect(result).toBe(expected);
       });
 
+      it('does not treat backticks with trailing content as closing fence', () => {
+        // https://github.com/Shion1305/renovate-bug-discussion-41912/issues/14
+        // Per CommonMark, a closing fence must have no content after backticks.
+        // ````` markdown` (space before "markdown") is NOT a valid closer for `````.
+        const input = '`````\nsome code\n````` markdown\nmore code';
+        const expected = '`````\nsome code\n````` markdown\nmore code\n`````\n';
+        const result = closeUnclosedStructures(input, 200);
+        expect(result).toBe(expected);
+      });
+
+      it('does not close a fenced code block when the closing fence has trailing content', () => {
+        // A closing fence is valid when whitespace follows.
+        // https://github.com/Shion1305/renovate-bug-discussion-41912/issues/16
+        const input = '``` lang\nsome code\n```  \nmore code';
+        const expected = input;
+        const result = closeUnclosedStructures(input, 200);
+        expect(result).toBe(expected);
+      });
+
       it('closes unclosed details tag', () => {
         // https://github.com/Shion1305/renovate-bug-discussion-41912/issues/2
         const input = '<details>\n<summary>Title</summary>\nContent';

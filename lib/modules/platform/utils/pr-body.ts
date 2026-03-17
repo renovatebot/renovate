@@ -22,15 +22,17 @@ function findCodeFenceRanges(text: string): [number, number][] {
   let openLen = 0;
   let inside = false;
   let match;
-  const fenceRe = regEx(/^(`{3,})(\S*)/gm);
+  const fenceRe = regEx(/^(`{3,})(.*$)/gm);
   while ((match = fenceRe.exec(text)) !== null) {
     const backtickLen = match[1].length;
-    const infoString = match[2];
+    const trailing = match[2];
     if (!inside) {
       openPos = match.index;
       openLen = backtickLen;
       inside = true;
-    } else if (!infoString && backtickLen >= openLen) {
+    } else if (!trailing.trim() && backtickLen >= openLen) {
+      // Per CommonMark, a closing fence must have no content after backticks
+      // (only optional whitespace). ``` markdown` is NOT a valid closer.
       ranges.push([openPos, match.index + match[0].length]);
       inside = false;
     }
@@ -96,7 +98,7 @@ function findAllUnclosedTags(
  * Finds the position of the last unclosed opening code fence, or -1 if
  * all fences are balanced. Per CommonMark:
  * - An opening fence is 3+ backticks, optionally followed by an info string
- * - A closing fence must have >= the same number of backticks, no info string
+ * - A closing fence must have >= the same number of backticks, no trailing content
  * - Content inside a code block (even if it looks like ```lang) is not a fence
  */
 function findUnclosedCodeFence(
@@ -107,18 +109,18 @@ function findUnclosedCodeFence(
   let inside = false;
   let match;
   // Matches 3+ backticks at the start of a line, capturing the backticks
-  // and any trailing info string
-  const re = regEx(/^(`{3,})(\S*)/gm);
+  // and the rest of the line
+  const re = regEx(/^(`{3,})(.*$)/gm);
   while ((match = re.exec(text)) !== null) {
     const backtickLen = match[1].length;
-    const infoString = match[2];
+    const trailing = match[2];
     if (!inside) {
-      // Any 3+ backticks opens a fence
+      // Any 3+ backticks opens a fence (trailing content is the info string)
       openPos = match.index;
       openLen = backtickLen;
       inside = true;
-    } else if (!infoString && backtickLen >= openLen) {
-      // Closes only if: no info string AND at least as many backticks
+    } else if (!trailing.trim() && backtickLen >= openLen) {
+      // Closes only if: no content after backticks AND at least as many backticks
       inside = false;
       openPos = -1;
       openLen = 0;
