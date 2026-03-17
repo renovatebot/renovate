@@ -384,7 +384,7 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get();
 
-    expect(res?.sourceTag).toBeUndefined();
+    expect(res).not.toHaveProperty('sourceTag');
   });
 
   it('does not set sourceTag when scm.tag is HEAD', async () => {
@@ -401,7 +401,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get();
 
     expect(res?.sourceUrl).toBe('https://github.com/example/test');
-    expect(res?.sourceTag).toBeUndefined();
+    expect(res).not.toHaveProperty('sourceTag');
   });
 
   describe('supports relocation', () => {
