@@ -1608,6 +1608,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     allowString: true,
     stage: 'package',
+    patternMatch: true,
     parents: ['packageRules'],
     mergeable: true,
     cli: false,
