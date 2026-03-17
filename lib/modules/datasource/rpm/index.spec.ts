@@ -331,6 +331,84 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
+    it('re-downloads primary.xml if the freshness check fails', async () => {
+      const primaryXml = buildPrimaryXml(codeBlock`
+        <package type="rpm">
+          <name>bash</name>
+          <arch>x86_64</arch>
+          <version epoch="0" ver="5.2.15" rel="1.azl3"/>
+        </package>
+        <package type="rpm">
+          <name>curl</name>
+          <arch>x86_64</arch>
+          <version epoch="0" ver="8.5.0" rel="2.azl3"/>
+        </package>
+      `);
+
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .get('/somesha256-primary.xml.gz')
+        .twice()
+        .reply(200, gzipSync(primaryXml), {
+          'Content-Type': 'application/gzip',
+        });
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .head('/somesha256-primary.xml.gz')
+        .once()
+        .replyWithError('Unexpected Error');
+
+      const bashReleases = await rpmDatasource.getReleasesByPackageName(
+        primaryXmlUrl,
+        'bash',
+      );
+      const curlReleases = await rpmDatasource.getReleasesByPackageName(
+        primaryXmlUrl,
+        'curl',
+      );
+
+      expect(bashReleases).toEqual({
+        releases: [{ version: '5.2.15-1.azl3' }],
+      });
+      expect(curlReleases).toEqual({
+        releases: [{ version: '8.5.0-2.azl3' }],
+      });
+    });
+
+    it('throws if extracting primary.xml fails without an existing cache file', async () => {
+      const originalPipeline = cacheFs.pipeline;
+
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .get('/somesha256-primary.xml.gz')
+        .reply(
+          200,
+          gzipSync(
+            buildPrimaryXml(codeBlock`
+              <package type="rpm">
+                <name>example-package</name>
+                <arch>x86_64</arch>
+                <version epoch="0" ver="1.0" rel="2.azl3"/>
+              </package>
+            `),
+          ),
+          {
+            'Content-Type': 'application/gzip',
+          },
+        );
+
+      vi.spyOn(cacheFs, 'pipeline')
+        .mockImplementationOnce(
+          (...args: Parameters<typeof cacheFs.pipeline>) =>
+            originalPipeline(...args),
+        )
+        .mockRejectedValueOnce('extract failed');
+
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).rejects.toThrow('Missing metadata in extracted RPM metadata file!');
+    });
+
     it('returns null if no element package is found in primary.xml', async () => {
       mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
