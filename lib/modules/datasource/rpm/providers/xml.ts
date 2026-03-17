@@ -1,12 +1,12 @@
-import { Readable } from 'node:stream';
 import sax from 'sax';
 import { logger } from '../../../../logger/index.ts';
+import * as fs from '../../../../util/fs/index.ts';
 import type { Http } from '../../../../util/http/index.ts';
 import type { ReleaseResult } from '../../types.ts';
 import {
   buildReleaseResult,
   formatRpmVersion,
-  getGunzippedBuffer,
+  getCachedGunzippedFile,
 } from './common.ts';
 
 export class RpmXmlMetadataProvider {
@@ -20,9 +20,10 @@ export class RpmXmlMetadataProvider {
     primaryGzipUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    const decompressedBuffer = await getGunzippedBuffer(
+    const primaryXmlFile = await getCachedGunzippedFile(
       this.http,
       primaryGzipUrl,
+      'xml',
     );
     const releases = new Set<string>();
     let insidePackage = false;
@@ -83,7 +84,7 @@ export class RpmXmlMetadataProvider {
         setImmediate(() => saxParser.removeAllListeners());
         resolve();
       });
-      Readable.from(decompressedBuffer).pipe(saxParser);
+      fs.createCacheReadStream(primaryXmlFile).pipe(saxParser);
     });
 
     const result = buildReleaseResult(releases);
