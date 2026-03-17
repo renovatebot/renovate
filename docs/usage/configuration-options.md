@@ -3570,7 +3570,7 @@ The above will group together any npm package which starts with the string `angu
 
 ### packageRules.matchRegistryUrls
 
-Use this option to filter packages based on their `registryUrls`.
+Use this option to match packages based on their `registryUrls`.
 Any package whose `registryUrls` array contains at least one URL matching any of the provided patterns will be selected.
 
 Here's an example of where you use this to disable updates from a specific private registry:
