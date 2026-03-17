@@ -211,6 +211,111 @@ describe('modules/datasource/docker/common', () => {
       expect(headers).toBeNull();
     });
 
+    it('falls back to per-repo credentials when API URL does not match', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://quay.io/v2/auth",service="quay.io",scope="repository:myorg/myrepo:pull"',
+        })
+        .get(
+          '/v2/auth?scope=repository%3Amyorg%2Fmyrepo%3Apull&service=quay.io',
+        )
+        .reply(200, { token: 'some-token' });
+
+      // API URL doesn't match per-repo matchHost, but repo URL does
+      hostRules.find.mockImplementation((search) => {
+        if (search?.url === 'https://quay.io/myorg/myrepo') {
+          return {
+            username: 'repo-user',
+            password: 'repo-password',
+          };
+        }
+        return {};
+      });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://quay.io',
+        'myorg/myrepo',
+      );
+
+      expect(hostRules.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hostType: 'docker',
+          url: 'https://quay.io/v2/',
+        }),
+      );
+      expect(hostRules.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hostType: 'docker',
+          url: 'https://quay.io/myorg/myrepo',
+        }),
+      );
+      expect(headers).toMatchObject({
+        authorization: 'Bearer some-token',
+      });
+    });
+
+    it('does not fall back to per-repo credentials when API URL already matches', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
+
+      hostRules.find.mockReturnValue({
+        username: 'registry-user',
+        password: 'registry-password',
+      });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'org/repo',
+      );
+
+      // Should never call find with the repo URL — no fallback needed
+      expect(hostRules.find).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://my.local.registry/org/repo',
+        }),
+      );
+      expect(headers).toMatchObject({
+        authorization: expect.stringMatching(/^Basic /),
+      });
+    });
+
+    it('falls back to per-repo token credentials', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
+
+      hostRules.find.mockImplementation((search) => {
+        if (search?.url === 'https://quay.io/myorg/myrepo') {
+          return { token: 'repo-token' };
+        }
+        return {};
+      });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://quay.io',
+        'myorg/myrepo',
+      );
+
+      expect(hostRules.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hostType: 'docker',
+          url: 'https://quay.io/myorg/myrepo',
+        }),
+      );
+      expect(headers).toMatchObject({
+        authorization: 'Bearer repo-token',
+      });
+    });
+
     it('use resources URL and resolve scope in www-authenticate header', async () => {
       httpMock
         .scope('https://my.local.registry')

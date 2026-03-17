@@ -87,10 +87,25 @@ export async function getAuthHeaders(
       return null;
     }
 
-    const rule = hostRules.find({
+    let rule = hostRules.find({
       hostType: dockerDatasourceId,
       url: apiCheckUrl,
     });
+
+    // If no credentials found with the API URL, try the repository path URL.
+    // This supports per-repo matchHost like "quay.io/org/repo" where the
+    // matchHost path doesn't match Docker v2 API URLs (e.g. /v2/...).
+    if (!rule.username && !rule.password && !rule.token) {
+      const repoUrl = `${registryHost}/${dockerRepository}`;
+      const repoRule = hostRules.find({
+        hostType: dockerDatasourceId,
+        url: repoUrl,
+      });
+      if (repoRule.username || repoRule.password || repoRule.token) {
+        rule = { ...rule, ...repoRule };
+      }
+    }
+
     const opts: HttpOptions = {};
 
     if (ecrRegex.test(registryHost)) {
