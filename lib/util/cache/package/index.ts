@@ -1,33 +1,18 @@
 import type { AllConfig } from '../../../config/types.ts';
-import { PackageCacheStats } from '../../stats.ts';
-import * as memCache from '../memory/index.ts';
+import { logger } from '../../../logger/index.ts';
 import * as backend from './backend.ts';
-import { getCombinedKey } from './key.ts';
-import { getTtlOverride } from './ttl.ts';
+import { PackageCache } from './package-cache.ts';
 import type { PackageCacheNamespace } from './types.ts';
 
-export function getCacheType(): ReturnType<typeof backend.getCacheType> {
-  return backend.getCacheType();
-}
+export { PackageCache } from './package-cache.ts';
+
+export let packageCache = new PackageCache();
 
 export async function get<T = any>(
   namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
-  if (!backend.getCacheType()) {
-    return undefined;
-  }
-
-  const combinedKey = getCombinedKey(namespace, key);
-  let cachedPromise = memCache.get(combinedKey);
-  if (!cachedPromise) {
-    cachedPromise = PackageCacheStats.wrapGet(() =>
-      backend.get(namespace, key),
-    );
-    memCache.set(combinedKey, cachedPromise);
-  }
-
-  return await cachedPromise;
+  return await packageCache.get<T>(namespace, key);
 }
 
 /**
@@ -39,8 +24,7 @@ export async function set(
   value: unknown,
   hardTtlMinutes: number,
 ): Promise<void> {
-  const rawTtl = getTtlOverride(namespace) ?? hardTtlMinutes;
-  await setWithRawTtl(namespace, key, value, rawTtl);
+  await packageCache.set(namespace, key, value, hardTtlMinutes);
 }
 
 /**
@@ -53,23 +37,19 @@ export async function setWithRawTtl(
   value: unknown,
   hardTtlMinutes: number,
 ): Promise<void> {
-  if (!backend.getCacheType()) {
-    return;
-  }
-
-  await PackageCacheStats.wrapSet(() =>
-    backend.set(namespace, key, value, hardTtlMinutes),
-  );
-
-  const combinedKey = getCombinedKey(namespace, key);
-  const p = Promise.resolve(value);
-  memCache.set(combinedKey, p);
+  await packageCache.setWithRawTtl(namespace, key, value, hardTtlMinutes);
 }
 
 export async function init(config: AllConfig): Promise<void> {
   await backend.init(config);
+  packageCache = new PackageCache(backend.getBackend());
 }
 
 export async function cleanup(_config: AllConfig): Promise<void> {
-  await backend.destroy();
+  try {
+    await packageCache.destroy();
+  } catch (err) {
+    logger.warn({ err }, 'Package cache destroy failed');
+  }
+  packageCache = new PackageCache();
 }

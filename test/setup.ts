@@ -32,7 +32,26 @@ declare global {
   const fixtures: typeof _fixtures;
 }
 
+vi.mock('../lib/util/cache/package/index.ts', () => ({
+  packageCache: mockDeep(),
+  PackageCache: vi.fn(),
+  get: vi.fn().mockResolvedValue(undefined),
+  set: vi.fn().mockResolvedValue(undefined),
+  setWithRawTtl: vi.fn().mockResolvedValue(undefined),
+  getCacheType: vi.fn().mockReturnValue(undefined),
+  init: vi.fn().mockResolvedValue(undefined),
+  cleanup: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('../lib/util/mutex.ts', () => ({
-  initMutexes: () => vi.fn(),
-  acquireLock: () => vi.fn().mockImplementation(() => () => undefined),
+  initMutexes: vi.fn(),
+  acquireLock: vi.fn(() => () => undefined),
+  getMutex: vi.fn(() => ({
+    acquire: vi.fn().mockResolvedValue(() => undefined),
+    runExclusive: vi.fn(<T>(fn: () => T) => fn()),
+    isLocked: vi.fn().mockReturnValue(false),
+    waitForUnlock: vi.fn().mockResolvedValue(undefined),
+    release: vi.fn(),
+    cancel: vi.fn(),
+  })),
 }));
