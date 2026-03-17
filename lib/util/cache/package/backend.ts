@@ -15,9 +15,8 @@ export function getCacheType(): typeof cacheType {
 }
 
 export async function init(config: AllConfig): Promise<void> {
+  await destroy();
   await instrument('package-cache.init', async () => {
-    await destroy();
-
     if (config.redisUrl) {
       cacheProxy = await PackageCacheRedis.create(
         config.redisUrl,
