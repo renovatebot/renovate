@@ -1,16 +1,44 @@
+import { Readable } from 'node:stream';
 import { gzipSync } from 'node:zlib';
 import { codeBlock } from 'common-tags';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir as tmpDir } from 'tmp-promise';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import * as cacheFs from '../../../util/fs/index.ts';
 import { RpmDatasource } from './index.ts';
 
 const registryUrl = 'https://example.com/repo/repodata/';
 const primaryXmlUrl =
   'https://example.com/repo/repodata/somesha256-primary.xml.gz';
+const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
 
 describe('modules/datasource/rpm/index', () => {
-  describe('getPrimaryGzipUrl', () => {
-    const rpmDatasource = new RpmDatasource();
+  let cacheDirResult: DirectoryResult | null;
+  let rpmDatasource: RpmDatasource;
 
+  beforeEach(async () => {
+    rpmDatasource = new RpmDatasource();
+    cacheDirResult = await tmpDir({ unsafeCleanup: true });
+
+    GlobalConfig.reset();
+    memCache.init();
+    GlobalConfig.set({ cacheDir: cacheDirResult.path });
+    await packageCache.init({ cacheDir: cacheDirResult.path });
+  });
+
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    await packageCache.cleanup({});
+    memCache.reset();
+    GlobalConfig.reset();
+    await cacheDirResult?.cleanup();
+    cacheDirResult = null;
+  });
+
+  describe('getPrimaryGzipUrl', () => {
     it('returns the correct primary.xml URL', async () => {
       const repomdXml = codeBlock`
         <?xml version="1.0" encoding="UTF-8"?>
@@ -159,8 +187,6 @@ describe('modules/datasource/rpm/index', () => {
 
   describe('getReleasesByPackageName', () => {
     const packageName = 'example-package';
-    const rpmDatasource = new RpmDatasource();
-    const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
 
     function buildPrimaryXml(packageEntries: string): string {
       return codeBlock`
@@ -249,15 +275,60 @@ describe('modules/datasource/rpm/index', () => {
       vi.spyOn(
         (
           rpmDatasource as unknown as {
-            http: { getBuffer: (url: string) => unknown };
+            http: { stream: (url: string) => NodeJS.ReadableStream };
           }
         ).http,
-        'getBuffer',
-      ).mockRejectedValue('boom');
+        'stream',
+      ).mockReturnValue(Readable.from([]));
+      vi.spyOn(cacheFs, 'pipeline').mockRejectedValue('boom');
 
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toBe('boom');
+    });
+
+    it('reuses the extracted primary.xml file across package lookups', async () => {
+      const primaryXml = buildPrimaryXml(codeBlock`
+        <package type="rpm">
+          <name>bash</name>
+          <arch>x86_64</arch>
+          <version epoch="0" ver="5.2.15" rel="1.azl3"/>
+        </package>
+        <package type="rpm">
+          <name>curl</name>
+          <arch>x86_64</arch>
+          <version epoch="0" ver="8.5.0" rel="2.azl3"/>
+        </package>
+      `);
+
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .get('/somesha256-primary.xml.gz')
+        .once()
+        .reply(200, gzipSync(primaryXml), {
+          'Content-Type': 'application/gzip',
+        });
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .head('/somesha256-primary.xml.gz')
+        .once()
+        .reply(304);
+
+      const bashReleases = await rpmDatasource.getReleasesByPackageName(
+        primaryXmlUrl,
+        'bash',
+      );
+      const curlReleases = await rpmDatasource.getReleasesByPackageName(
+        primaryXmlUrl,
+        'curl',
+      );
+
+      expect(bashReleases).toEqual({
+        releases: [{ version: '5.2.15-1.azl3' }],
+      });
+      expect(curlReleases).toEqual({
+        releases: [{ version: '8.5.0-2.azl3' }],
+      });
     });
 
     it('returns null if no element package is found in primary.xml', async () => {
@@ -381,8 +452,6 @@ describe('modules/datasource/rpm/index', () => {
   });
 
   describe('getReleases', () => {
-    const rpmDatasource = new RpmDatasource();
-
     it('returns null if registryUrl is not provided', async () => {
       const releases = await rpmDatasource.getReleases({
         registryUrl: undefined,
