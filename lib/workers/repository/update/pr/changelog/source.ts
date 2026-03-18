@@ -217,6 +217,7 @@ export abstract class ChangeLogSource {
         sourceDirectory,
         packageName,
         depName,
+        changelogUrl,
       },
       versions: changelogReleases,
     };

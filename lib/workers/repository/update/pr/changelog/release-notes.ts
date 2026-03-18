@@ -48,6 +48,8 @@ export async function getReleaseList(
         return [];
       case 'forgejo':
         return await forgejo.getReleaseList(project, release);
+      case 'generic':
+        return await generic.getReleaseList(project, release);
       case 'gitea':
         return await gitea.getReleaseList(project, release);
       case 'github':
@@ -295,7 +297,7 @@ export async function getReleaseNotesMdFileInner(
           sourceDirectory,
         );
       case 'generic':
-        return await generic.getReleaseNotesMd(apiBaseUrl);
+        return await generic.getReleaseNotesMd(apiBaseUrl, project.depName);
       case 'gitea':
         return await gitea.getReleaseNotesMd(
           repository,
@@ -356,7 +358,7 @@ export async function getReleaseNotesMd(
   project: ChangeLogProject,
   release: ChangeLogRelease,
 ): Promise<ChangeLogNotes | null> {
-  const { baseUrl, repository, packageName } = project;
+  const { baseUrl, repository, packageName, changelogUrl } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
 
@@ -373,6 +375,19 @@ export async function getReleaseNotesMd(
     regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
     '\n',
   );
+
+  // Unity only returns the changelog for the current version
+  if (
+    project.depName === 'Unity Editor' &&
+    project.packageName === 'm_EditorVersion'
+  ) {
+    return {
+      body: await linkifyBody(project, changelogMd),
+      url: changelogUrl!,
+      notesSourceUrl: changelogUrl!,
+    };
+  }
+
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
     const changelogParsed = sectionize(changelogMd, level);
     if (changelogParsed.length >= 2) {
@@ -389,12 +404,21 @@ export async function getReleaseNotesMd(
             .split(' ')
             .filter(Boolean);
           const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
-          const notesSourceUrl = getNotesSourceUrl(
-            baseUrl,
-            repository,
-            project,
-            changelogFile,
-          );
+          let notesSourceUrl = '';
+
+          if (project.type === 'generic') {
+            notesSourceUrl = repository
+              ? getNotesSourceUrl(baseUrl, repository, project, changelogFile)
+              : changelogUrl!;
+          } else {
+            notesSourceUrl = getNotesSourceUrl(
+              baseUrl,
+              repository,
+              project,
+              changelogFile,
+            );
+          }
+
           const mdHeadingLink = title
             .filter((word) => !isHttpUrl(word))
             .join('-')

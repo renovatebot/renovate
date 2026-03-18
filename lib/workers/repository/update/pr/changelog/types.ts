@@ -41,6 +41,7 @@ export interface ChangeLogProject {
   repository: string;
   sourceUrl: string;
   sourceDirectory?: string;
+  changelogUrl?: string;
 }
 
 export type ChangeLogError =
