@@ -535,8 +535,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       eslint-plugin-oxlint:
-        specifier: 1.51.0
-        version: 1.51.0
+        specifier: 1.53.0
+        version: 1.53.0
       expect-more-jest:
         specifier: 5.5.0
         version: 5.5.0
@@ -3562,8 +3562,8 @@ packages:
     resolution: {integrity: sha512-FlhMRUiDUHztGj+bhm3pYo5DJ6Gbjh/FGPClcDENme7f9+Sc3+HZg6wMq80KJmRD8/oj/Ib6gy4D/ppjmHfGVA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  eslint-plugin-oxlint@1.51.0:
-    resolution: {integrity: sha512-lct8LD1AxfHF1PcsuK6mFYals+zX0mx/WP2G4i16h0iR8jpT3xCfGTmTNwXiImcevzGIiJ/VDBgQ7t0B9z2Jeg==}
+  eslint-plugin-oxlint@1.53.0:
+    resolution: {integrity: sha512-rRsxP+11XyYynihsKBosP5/KNgCxNMLxVV4xSypsoCmHXaXnMMe+gscwugFvR4DZI/HCeg7+qR1Ru/aSv1hvSQ==}
 
   eslint-scope@8.4.0:
     resolution: {integrity: sha512-sNXOfKCn74rt8RICKMvJS7XKV/Xk9kA7DyJr8mJik3S7Cwgy3qlkkmyS2uQB3jiJg6VNdZd/pDBJu0nvG2NlTg==}
@@ -10121,7 +10121,7 @@ snapshots:
       strip-ansi: 6.0.1
       text-table: 0.2.0
 
-  eslint-plugin-oxlint@1.51.0:
+  eslint-plugin-oxlint@1.53.0:
     dependencies:
       jsonc-parser: 3.3.1
 
