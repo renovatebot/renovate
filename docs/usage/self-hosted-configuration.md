@@ -1423,7 +1423,7 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
 
 <!-- prettier-ignore -->
 !!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 
