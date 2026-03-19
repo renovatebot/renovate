@@ -1,14 +1,14 @@
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { emojify } from '../../../../util/emoji';
-import * as template from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
+} from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 export async function handleClosedPr(
   config: BranchConfig,

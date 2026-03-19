@@ -1,7 +1,7 @@
-import { logger } from '../logger';
-import { isSkipComment } from './ignore';
+import { logger } from '../logger/index.ts';
+import { isSkipComment } from './ignore.ts';
 
-vi.mock('../logger', () => ({
+vi.mock('../logger/index.ts', () => ({
   logger: {
     debug: vi.fn(),
   },
@@ -22,7 +22,7 @@ describe('util/ignore', () => {
 
   it('logs unknown command for "renovate:" comments without "ignore"', () => {
     isSkipComment('renovate:update');
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Unknown comment command: update',
     );

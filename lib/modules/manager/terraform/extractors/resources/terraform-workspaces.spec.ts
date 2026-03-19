@@ -1,4 +1,4 @@
-import { TerraformWorkspaceExtractor } from './terraform-workspace';
+import { TerraformWorkspaceExtractor } from './terraform-workspace.ts';
 
 describe('modules/manager/terraform/extractors/resources/terraform-workspaces', () => {
   const extractor = new TerraformWorkspaceExtractor();

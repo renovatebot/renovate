@@ -1,37 +1,63 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isPlainObject, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
-import { getQueryString } from '../../../util/url';
-import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types';
-import { prInfo } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server.ts';
+import { getQueryString } from '../../../util/url.ts';
+import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types.ts';
+import { prInfo } from './utils.ts';
+
+/* v8 ignore next */
+function migrateBitbucketServerCache(platform: unknown): void {
+  if (!isPlainObject(platform)) {
+    return;
+  }
+
+  if (!isPlainObject(platform.bitbucketServer)) {
+    return;
+  }
+
+  platform['bitbucket-server'] = platform.bitbucketServer;
+  delete platform.bitbucketServer;
+}
 
 export class BbsPrCache {
   private cache: BbsPrCacheData;
   private items: BbsPr[] = [];
+  private projectKey: string;
+  private repo: string;
+  private readonly ignorePrAuthor: boolean;
+  private author: string | null;
 
   private constructor(
-    private projectKey: string,
-    private repo: string,
-    private readonly ignorePrAuthor: boolean,
-    private author: string | null,
+    projectKey: string,
+    repo: string,
+    ignorePrAuthor: boolean,
+    author: string | null,
   ) {
+    this.projectKey = projectKey;
+    this.repo = repo;
+    this.ignorePrAuthor = ignorePrAuthor;
+    this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
-    repoCache.platform.bitbucketServer ??= {};
-    let pullRequestCache = repoCache.platform.bitbucketServer
+    migrateBitbucketServerCache(repoCache.platform);
+    repoCache.platform['bitbucket-server'] ??= {};
+    let pullRequestCache = repoCache.platform['bitbucket-server']
       .pullRequestsCache as BbsPrCacheData;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (
+      isNullOrUndefined(pullRequestCache) ||
+      pullRequestCache.author !== author
+    ) {
       pullRequestCache = {
         items: {},
         updatedDate: null,
         author,
       };
     }
-    repoCache.platform.bitbucketServer.pullRequestsCache = pullRequestCache;
+    repoCache.platform['bitbucket-server'].pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
     this.updateItems();
   }
@@ -46,6 +72,7 @@ export class BbsPrCache {
     const res = new BbsPrCache(projectKey, repo, ignorePrAuthor, author);
     const isSynced = memCache.get<true | undefined>('bbs-pr-cache-synced');
 
+    // v8 ignore next -- TODO: add test #40625
     if (!isSynced) {
       await res.sync(http);
       memCache.set('bbs-pr-cache-synced', true);
@@ -135,7 +162,7 @@ export class BbsPrCache {
       state: 'ALL',
       limit: this.items.length ? '20' : '100',
     };
-    if (!this.ignorePrAuthor && is.string(this.author)) {
+    if (!this.ignorePrAuthor && isString(this.author)) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = this.author;
     }

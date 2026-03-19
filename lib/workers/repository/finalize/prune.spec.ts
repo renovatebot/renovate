@@ -1,8 +1,8 @@
-import { GlobalConfig } from '../../../config/global';
-import type { Pr } from '../../../modules/platform/types';
-import * as cleanup from './prune';
-import { git, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { Pr } from '../../../modules/platform/types.ts';
+import * as cleanup from './prune.ts';
 
 let config: RenovateConfig;
 
@@ -11,10 +11,6 @@ beforeEach(() => {
     repoIsOnboarded: true,
     branchPrefix: `renovate/`,
     pruneStaleBranches: true,
-    ignoredAuthors: [],
-    platform: 'github',
-    errors: [],
-    warnings: [],
   });
 });
 
@@ -100,20 +96,47 @@ describe('workers/repository/finalize/prune', () => {
         'renovate/maint/v7-a',
       );
       expect(scm.isBranchModified).toHaveBeenCalledTimes(3);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/main-b',
         'main',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-a',
         'maint/v7',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-b',
         'maint/v7',
+      );
+    });
+
+    it('uses defaultBranch when baseBranchPatterns exist but baseBranches are not computed yet', async () => {
+      config.branchList = [];
+      config.baseBranchPatterns = ['/^release\\/.*/'];
+      config.defaultBranch = 'main';
+      git.getBranchList.mockReturnValueOnce([
+        'renovate/release/1.x-dependency',
+      ]);
+      platform.findPr.mockResolvedValueOnce(null);
+
+      await expect(
+        cleanup.pruneStaleBranches(config, config.branchList),
+      ).resolves.not.toThrow();
+
+      expect(platform.findPr).toHaveBeenCalledExactlyOnceWith({
+        branchName: 'renovate/release/1.x-dependency',
+        state: 'open',
+        targetBranch: 'main',
+      });
+      expect(scm.isBranchModified).toHaveBeenCalledExactlyOnceWith(
+        'renovate/release/1.x-dependency',
+        'main',
+      );
+      expect(scm.deleteBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/release/1.x-dependency',
       );
     });
 

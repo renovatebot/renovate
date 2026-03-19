@@ -1,46 +1,22 @@
-import { Stream } from 'node:stream';
-import is from '@sindresorhus/is';
-import bunyan from 'bunyan';
-import fs from 'fs-extra';
+import {
+  isArray,
+  isBuffer,
+  isDate,
+  isEmptyObject,
+  isError,
+  isFunction,
+  isNonEmptyObject,
+  isNonEmptyStringAndNotWhitespace,
+  isObject,
+  isPlainObject,
+  isString,
+} from '@sindresorhus/is';
 import { RequestError as HttpError } from 'got';
-import { ZodError } from 'zod';
-import { ExecError } from '../util/exec/exec-error';
-import { regEx } from '../util/regex';
-import { redactedFields, sanitize } from '../util/sanitize';
-import type { BunyanRecord, BunyanStream } from './types';
-
-const excludeProps = ['pid', 'time', 'v', 'hostname'];
-
-export class ProblemStream extends Stream {
-  private _problems: BunyanRecord[] = [];
-
-  readable: boolean;
-
-  writable: boolean;
-
-  constructor() {
-    super();
-    this.readable = false;
-    this.writable = true;
-  }
-
-  write(data: BunyanRecord): boolean {
-    const problem = { ...data };
-    for (const prop of excludeProps) {
-      delete problem[prop];
-    }
-    this._problems.push(problem);
-    return true;
-  }
-
-  getProblems(): BunyanRecord[] {
-    return this._problems;
-  }
-
-  clearProblems(): void {
-    this._problems = [];
-  }
-}
+import { DateTime } from 'luxon';
+import { ZodError } from 'zod/v3';
+import { ExecError } from '../util/exec/exec-error.ts';
+import { regEx } from '../util/regex.ts';
+import { redactedFields, sanitize } from '../util/sanitize.ts';
 
 const contentFields = [
   'content',
@@ -58,12 +34,13 @@ type ZodShortenedIssue =
     };
 
 export function prepareZodIssues(input: unknown): ZodShortenedIssue {
-  if (!is.plainObject(input)) {
+  if (!isPlainObject(input)) {
     return null;
   }
 
   let err: null | string | string[] = null;
-  if (is.array(input._errors, is.string)) {
+  // v8 ignore else -- TODO: add test #40625
+  if (isArray(input._errors, isString)) {
     if (input._errors.length === 1) {
       err = input._errors[0];
     } else if (input._errors.length > 1) {
@@ -74,7 +51,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   }
   delete input._errors;
 
-  if (is.emptyObject(input)) {
+  if (isEmptyObject(input)) {
     return err;
   }
 
@@ -82,6 +59,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   const entries = Object.entries(input);
   for (const [key, value] of entries.slice(0, 3)) {
     const child = prepareZodIssues(value);
+    // v8 ignore else -- TODO: add test #40625
     if (child !== null) {
       output[key] = child;
     }
@@ -97,10 +75,11 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
 export function prepareZodError(err: ZodError): Record<string, unknown> {
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    /* v8 ignore next 3 -- TODO: drop set? */
+    /* v8 ignore start -- TODO: drop set? */
     set: () => {
       /* intentionally empty */
     },
+    // v8 ignore stop -- TODO: drop set? */
   });
 
   return {
@@ -116,6 +95,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
   }
 
   const response: Record<string, unknown> = {
+    // We want to loose class information, but keep enumerable properties of the error
+    // oxlint-disable-next-line typescript/no-misused-spread
     ...err,
   };
 
@@ -134,7 +115,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   }
 
   // handle rawExec error
-  if (err instanceof ExecError && is.nonEmptyObject(err.options?.env)) {
+  if (err instanceof ExecError && isNonEmptyObject(err.options?.env)) {
     const env = Object.keys(err.options.env);
     response.options = { ...err.options, env };
   }
@@ -153,6 +134,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
     options.method = err.options.method;
     options.http2 = err.options.http2;
 
+    // v8 ignore else -- TODO: add test #40625
     if (err.response) {
       response.response = {
         statusCode: err.response.statusCode,
@@ -174,35 +156,39 @@ export default function prepareError(err: Error): Record<string, unknown> {
 type NestedValue = unknown[] | object;
 
 function isNested(value: unknown): value is NestedValue {
-  return is.array(value) || is.object(value);
+  return isArray(value) || isObject(value);
 }
 
 export function sanitizeValue(
   value: unknown,
   seen = new WeakMap<NestedValue, unknown>(),
 ): any {
-  if (is.string(value)) {
+  if (isString(value)) {
     return sanitize(sanitizeUrls(value));
   }
 
-  if (is.date(value)) {
+  if (isDate(value)) {
     return value;
   }
 
-  if (is.function(value)) {
+  if (DateTime.isDateTime(value)) {
+    return value.toISO();
+  }
+
+  if (isFunction(value)) {
     return '[function]';
   }
 
-  if (is.buffer(value)) {
+  if (isBuffer(value)) {
     return '[content]';
   }
 
-  if (is.error(value)) {
+  if (isError(value)) {
     const err = prepareError(value);
     return sanitizeValue(err, seen);
   }
 
-  if (is.array(value)) {
+  if (isArray(value)) {
     const length = value.length;
     const arrayResult = Array(length);
     seen.set(value, arrayResult);
@@ -216,7 +202,7 @@ export function sanitizeValue(
     return arrayResult;
   }
 
-  if (is.object(value)) {
+  if (isObject(value)) {
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
@@ -225,7 +211,7 @@ export function sanitizeValue(
         curValue = val;
       } else if (redactedFields.includes(key)) {
         // Do not mask/sanitize secrets templates
-        if (is.string(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
+        if (isString(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
           curValue = val;
         } else {
           curValue = '***********';
@@ -251,89 +237,6 @@ export function sanitizeValue(
   return value;
 }
 
-export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
-  if (streamConfig.type === 'rotating-file') {
-    throw new Error("Rotating files aren't supported");
-  }
-
-  const stream = streamConfig.stream as BunyanStream;
-  if (stream?.writable) {
-    const write = (
-      chunk: BunyanRecord,
-      enc: BufferEncoding,
-      cb: (err?: Error | null) => void,
-    ): void => {
-      const raw = sanitizeValue(chunk);
-      const result =
-        streamConfig.type === 'raw'
-          ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(
-              regEx(/\n?$/),
-              '\n',
-            );
-      stream.write(result, enc, cb);
-    };
-
-    return {
-      ...streamConfig,
-      type: 'raw',
-      stream: { write },
-    } as bunyan.Stream;
-  }
-
-  if (streamConfig.path) {
-    const fileStream = fs.createWriteStream(streamConfig.path, {
-      flags: 'a',
-      encoding: 'utf8',
-    });
-
-    return withSanitizer({ ...streamConfig, stream: fileStream });
-  }
-
-  throw new Error("Missing 'stream' or 'path' for bunyan stream");
-}
-
-/**
- * A function that terminates execution if the log level that was entered is
- *  not a valid value for the Bunyan logger.
- * @param logLevelToCheck
- * @returns returns the logLevel when the logLevelToCheck is valid or the defaultLevel passed as argument when it is undefined. Else it stops execution.
- */
-export function validateLogLevel(
-  logLevelToCheck: string | undefined,
-  defaultLevel: bunyan.LogLevelString,
-): bunyan.LogLevelString {
-  const allowedValues: bunyan.LogLevelString[] = [
-    'trace',
-    'debug',
-    'info',
-    'warn',
-    'error',
-    'fatal',
-  ];
-
-  if (
-    is.undefined(logLevelToCheck) ||
-    (is.string(logLevelToCheck) &&
-      allowedValues.includes(logLevelToCheck as bunyan.LogLevelString))
-  ) {
-    // log level is in the allowed values or its undefined
-    return (logLevelToCheck as bunyan.LogLevelString) ?? defaultLevel;
-  }
-
-  const logger = bunyan.createLogger({
-    name: 'renovate',
-    streams: [
-      {
-        level: 'fatal',
-        stream: process.stdout,
-      },
-    ],
-  });
-  logger.fatal({ logLevel: logLevelToCheck }, 'Invalid log level');
-  process.exit(1);
-}
-
 // Can't use `util/regex` because of circular reference to logger
 const urlRe = /[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi;
 const urlCredRe = /\/\/[^@]+@/g;
@@ -350,18 +253,18 @@ export function sanitizeUrls(text: string): string {
 export function getEnv(key: string): string | undefined {
   return [process.env[`RENOVATE_${key}`], process.env[key]]
     .map((v) => v?.toLowerCase().trim())
-    .find(is.nonEmptyStringAndNotWhitespace);
+    .find(isNonEmptyStringAndNotWhitespace);
 }
 
 export function getMessage(
   p1: string | Record<string, any>,
   p2?: string,
 ): string | undefined {
-  return is.string(p1) ? p1 : p2;
+  return isString(p1) ? p1 : p2;
 }
 
 export function toMeta(
   p1: string | Record<string, any>,
 ): Record<string, unknown> {
-  return is.object(p1) ? p1 : {};
+  return isObject(p1) ? p1 : {};
 }

@@ -1,4 +1,4 @@
-import { sampleSize } from './sample';
+import { sampleSize } from './sample.ts';
 
 describe('util/sample', () => {
   describe('sampleSize', () => {

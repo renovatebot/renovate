@@ -1,18 +1,21 @@
-import is from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { anyMatchRegexOrGlobList } from '../string-match';
-import { Matcher } from './base';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { anyMatchRegexOrGlobList } from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class CategoriesMatcher extends Matcher {
   override matches(
     { categories }: PackageRuleInputConfig,
     { matchCategories }: PackageRule,
   ): boolean | null {
-    if (is.nullOrUndefined(matchCategories)) {
+    if (isNullOrUndefined(matchCategories)) {
       return null;
     }
 
-    if (is.nullOrUndefined(categories)) {
+    if (isNullOrUndefined(categories)) {
       return false;
     }
 

@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import * as fragments from './fragments';
-import { parse } from '.';
+import * as fragments from './fragments.ts';
+import { parse } from './index.ts';
 
 describe('modules/manager/bazel-module/parser/index', () => {
   describe('parse', () => {
@@ -403,6 +403,26 @@ describe('modules/manager/bazel-module/parser/index', () => {
           true,
         ),
       ]);
+    });
+
+    it('finds use_repo_rule and repo rule call', () => {
+      const input = codeBlock`
+        pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+        pull(name = "nginx", tag = "1.27.1")
+      `;
+      const res = parse(input);
+      expect(res).toMatchObject([
+        { type: 'useRepoRule', variableName: 'pull' },
+        { type: 'repoRuleCall', functionName: 'pull' },
+      ]);
+    });
+
+    it('ignores use_repo_rule with insufficient args', () => {
+      const input = codeBlock`
+        pull = use_repo_rule("only_one_arg")
+      `;
+      const res = parse(input);
+      expect(res).toEqual([]);
     });
   });
 });

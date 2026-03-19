@@ -1,4 +1,4 @@
-import maven, { isValid as _isValid } from '.';
+import maven, { isValid as _isValid } from './index.ts';
 
 const { isValid, isVersion, isStable, getMajor, getMinor, getPatch, matches } =
   maven;

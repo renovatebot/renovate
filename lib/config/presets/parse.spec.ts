@@ -1,4 +1,4 @@
-import { parsePreset } from './parse';
+import { parsePreset } from './parse.ts';
 
 describe('config/presets/parse', () => {
   describe('parsePreset', () => {

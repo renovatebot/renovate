@@ -14,7 +14,7 @@ The following updates await pending status checks. To force their creation now, 
 
  - [ ] <!-- approvePr-branch=branchName4 -->pr4
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 

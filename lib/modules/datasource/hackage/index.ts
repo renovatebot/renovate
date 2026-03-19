@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
-import { joinUrlParts } from '../../../util/url';
-import * as pvpVersioning from '../../versioning/pvp';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { HackagePackageMetadata } from './schema';
+import { isNonEmptyString } from '@sindresorhus/is';
+import { joinUrlParts } from '../../../util/url.ts';
+import * as pvpVersioning from '../../versioning/pvp/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { HackagePackageMetadata } from './schema.ts';
 
 export class HackageDatasource extends Datasource {
   static readonly id = 'hackage';
@@ -18,7 +18,7 @@ export class HackageDatasource extends Datasource {
 
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryUrl, packageName } = config;
-    if (!is.nonEmptyString(registryUrl)) {
+    if (!isNonEmptyString(registryUrl)) {
       return null;
     }
     const massagedPackageName = encodeURIComponent(packageName);

@@ -1,11 +1,11 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
 import { mockFn } from 'vitest-mock-extended';
-import { getConfig } from '../../../config/defaults';
-import type { PackageFile } from '../../../modules/manager/types';
-import { Vulnerabilities } from './vulnerabilities';
-import { logger } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
@@ -24,8 +24,15 @@ vi.mock('@renovatebot/osv-offline', () => {
 
 describe('workers/repository/process/vulnerabilities', () => {
   describe('create()', () => {
-    it('works', async () => {
+    beforeEach(resetOsv);
+
+    it('works, and is a singleton', async () => {
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+      });
       await expect(Vulnerabilities.create()).resolves.not.toThrow();
+      await expect(Vulnerabilities.create()).resolves.not.toThrow();
+      expect(createMock).toHaveBeenCalledTimes(1);
     });
 
     it('throws when osv-offline error', async () => {
@@ -40,6 +47,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     let vulnerabilities: Vulnerabilities;
 
     beforeAll(async () => {
+      resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
       });
@@ -144,6 +152,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     };
 
     beforeAll(async () => {
+      resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
       });
@@ -169,7 +178,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Cannot map datasource docker to OSV ecosystem',
       );
@@ -190,7 +199,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'No vulnerabilities found in OSV database for lodash',
       );
@@ -243,7 +252,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Skipping withdrawn vulnerability GHSA-x5rq-j2xg-h7qm',
       );
@@ -271,7 +280,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping vulnerability lookup for package lodash due to unsupported version #4.17.11',
       );
@@ -299,7 +308,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err, packageName: 'lodash' },
         'Error fetching vulnerability information for package',
@@ -348,7 +357,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { event },
         'Skipping OSV event with invalid version',
@@ -413,7 +422,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11',
       );
@@ -456,7 +465,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 1.5.1',
       );
@@ -506,11 +515,11 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Vulnerability GO-2022-0187 affects stdlib 1.7.5',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Setting allowed version >= 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
       );
@@ -1249,7 +1258,6 @@ describe('workers/repository/process/vulnerabilities', () => {
         packageFiles,
       );
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Error processing CVSS vector some-invalid-score',
       );
@@ -1552,3 +1560,8 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 });
+
+function resetOsv() {
+  // @ts-expect-error - reset the cached OSV client to avoid state leak between tests
+  Vulnerabilities.osvOffline = undefined;
+}

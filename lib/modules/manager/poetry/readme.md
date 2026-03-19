@@ -4,8 +4,10 @@ Whenever the `pyproject.toml` file is updated, the Poetry lock file will be chec
 
 The following `depTypes` are supported by the Poetry manager:
 
+- `build-system.requires`
 - `dependencies`
 - `dev-dependencies`
+- `dependency-groups`
 - `extras`
 - `<group-name>` (dynamic, based on the group name, per [dependency groups documentation](https://python-poetry.org/docs/managing-dependencies/#dependency-groups))
 

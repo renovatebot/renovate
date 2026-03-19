@@ -1,22 +1,25 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { logger } from '../../../../../../logger';
+import { logger } from '../../../../../../logger/index.ts';
 import type {
   GithubGitBlob,
   GithubGitTree,
   GithubGitTreeNode,
-} from '../../../../../../types/platform/github';
-import { queryReleases } from '../../../../../../util/github/graphql';
-import { memCacheProvider } from '../../../../../../util/http/cache/memory-http-cache-provider';
-import { GithubHttp } from '../../../../../../util/http/github';
-import { fromBase64 } from '../../../../../../util/string';
-import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
-import { compareChangelogFilePath } from '../common';
+} from '../../../../../../types/platform/github/index.ts';
+import { queryReleases } from '../../../../../../util/github/graphql/index.ts';
+import { memCacheProvider } from '../../../../../../util/http/cache/memory-http-cache-provider.ts';
+import { GithubHttp } from '../../../../../../util/http/github.ts';
+import { fromBase64 } from '../../../../../../util/string.ts';
+import {
+  ensureTrailingSlash,
+  joinUrlParts,
+} from '../../../../../../util/url.ts';
+import { compareChangelogFilePath } from '../common.ts';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
-} from '../types';
+} from '../types.ts';
 
 export const id = 'github-changelog';
 const http = new GithubHttp(id);

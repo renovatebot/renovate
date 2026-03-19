@@ -1,12 +1,13 @@
 import stream from 'node:stream';
 import util from 'node:util';
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
 export const pipeline = util.promisify(stream.pipeline);
 
@@ -36,6 +37,9 @@ export async function readLocalFile(
     const fileContent = encoding
       ? await fs.readFile(localFileName, encoding)
       : await fs.readFile(localFileName);
+
+    logWarningIfUnicodeHiddenCharactersInPackageFile(fileName, fileContent);
+
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
@@ -86,7 +90,8 @@ export async function renameLocalFile(
 }
 
 export async function ensureDir(dirName: string): Promise<void> {
-  if (is.nonEmptyString(dirName)) {
+  // v8 ignore else -- TODO: add test #40625
+  if (isNonEmptyString(dirName)) {
     await fs.ensureDir(dirName);
   }
 }
@@ -219,13 +224,14 @@ export async function findUpLocal(
     type: 'file',
   });
   // Return null if nothing found
-  if (!is.nonEmptyString(res) || !is.nonEmptyString(localDir)) {
+  if (!isNonEmptyString(res) || !isNonEmptyString(localDir)) {
     return null;
   }
   const safePath = upath.normalizeSafe(res);
   // Return relative path if file is inside of local dir
   if (safePath.startsWith(localDir)) {
     let relativePath = safePath.replace(localDir, '');
+    // v8 ignore else -- TODO: add test #40625
     if (relativePath.startsWith('/')) {
       relativePath = relativePath.substring(1);
     }

@@ -1,8 +1,8 @@
 import { CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
-import { emojify } from '../../../../../util/emoji';
-import { capitalize } from '../../../../../util/string';
-import type { BranchConfig } from '../../../../types';
+import { emojify } from '../../../../../util/emoji.ts';
+import { capitalize } from '../../../../../util/string.ts';
+import type { BranchConfig } from '../../../../types.ts';
 
 export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;

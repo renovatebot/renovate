@@ -1,4 +1,4 @@
-import { MatchDatasourcesMigration } from './match-datasources-migration';
+import { MatchDatasourcesMigration } from './match-datasources-migration.ts';
 
 describe('config/migrations/custom/match-datasources-migration', () => {
   it('should migrate properly', async () => {

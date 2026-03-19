@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isTruthy } from '@sindresorhus/is';
 import jsonata from 'jsonata';
-import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
-import { logger } from '../../../../logger';
-import * as template from '../../../../util/template';
-import { parseUrl } from '../../../../util/url';
-import type { PackageDependency } from '../../types';
-import type { ValidMatchFields } from '../utils';
-import { checkIsValidDependency, validMatchFields } from '../utils';
-import { QueryResultZod } from './schema';
-import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
+import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as template from '../../../../util/template/index.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { ValidMatchFields } from '../utils.ts';
+import { checkIsValidDependency, validMatchFields } from '../utils.ts';
+import { QueryResultZod } from './schema.ts';
+import type { JSONataManagerTemplates, JsonataExtractConfig } from './types.ts';
 
 export async function handleMatching(
   json: unknown,
@@ -25,7 +25,7 @@ export async function handleMatching(
 
     // allows empty dep object cause templates can be used to configure the required fields
     // if some issues arise then the isValidDependency call will catch them later on
-    if (!queryResult || is.emptyArray(queryResult)) {
+    if (!queryResult || isEmptyArray(queryResult)) {
       logger.debug(
         {
           jsonataQuery: query,
@@ -50,7 +50,7 @@ export async function handleMatching(
 
   return results
     .map((dep) => createDependency(dep, config))
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter((dep) =>
       checkIsValidDependency(dep, packageFile, 'custom.jsonata'),
     );

@@ -1,11 +1,11 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { RequestError, type RetryObject } from 'got';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getEnv } from '../env';
-import { parseLinkHeader, parseUrl } from '../url';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { getEnv } from '../env.ts';
+import { parseLinkHeader, parseUrl } from '../url.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {
@@ -25,6 +25,12 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     super(type, options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof GitlabHttpOptions)[]);
+  }
+
   protected override async requestJsonUnsafe<T = unknown>(
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<GitlabHttpOptions>,
@@ -38,7 +44,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     opts.httpOptions.throwHttpErrors = true;
 
     const result = await super.requestJsonUnsafe<T>(method, opts);
-    if (opts.httpOptions.paginate && is.array(result.body)) {
+    if (opts.httpOptions.paginate && isArray(result.body)) {
       opts.httpOptions.memCache = false;
 
       // Check if result is paginated
@@ -57,7 +63,8 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           opts.url = nextUrl;
 
           const nextResult = await this.requestJsonUnsafe<T>(method, opts);
-          if (is.array(nextResult.body)) {
+          // v8 ignore else -- TODO: add test #40625
+          if (isArray(nextResult.body)) {
             result.body.push(...nextResult.body);
           }
         }
@@ -96,7 +103,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     // TODO: fix test, should be `RequestError`
     if (
       'code' in err &&
-      is.string(err.code) &&
+      isString(err.code) &&
       platformFailureCodes.includes(err.code)
     ) {
       throw new ExternalHostError(err, 'gitlab');

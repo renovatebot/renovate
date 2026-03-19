@@ -2,11 +2,11 @@ import type {
   RepositoryCacheConfig,
   RepositoryCacheType,
   UpdateType,
-} from '../../../config/types';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { RepoInitConfig } from '../../../workers/repository/init/types';
-import type { ExtractResult } from '../../../workers/repository/process/extract-update';
-import type { PrBlockedBy } from '../../../workers/types';
+} from '../../../config/types.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { RepoInitConfig } from '../../../workers/repository/init/types.ts';
+import type { ExtractResult } from '../../../workers/repository/process/extract-update.ts';
+import type { PrBlockedBy } from '../../../workers/types.ts';
 
 export interface BaseBranchCache {
   revision?: number;
@@ -81,6 +81,11 @@ export interface BranchCache {
   branchFingerprint?: string; // Defunct
   commitFingerprint?: string; // Actively used
   /**
+   * The branch's most recent commit timestamp (ISO string)
+   * Used for commitHourlyLimit tracking
+   */
+  commitTimestamp?: string;
+  /**
    * Branch name
    */
   branchName: string;
@@ -137,6 +142,7 @@ export interface RepoCacheData {
   platform?: {
     forgejo?: {
       pullRequestsCache?: unknown;
+      orgs?: Record<string, boolean>;
     };
     gitea?: {
       pullRequestsCache?: unknown;
@@ -155,7 +161,7 @@ export interface RepoCacheData {
     gitlab?: {
       pullRequestsCache?: unknown;
     };
-    bitbucketServer?: {
+    'bitbucket-server'?: {
       pullRequestsCache?: unknown;
     };
   };

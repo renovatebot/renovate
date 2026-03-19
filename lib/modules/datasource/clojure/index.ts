@@ -1,6 +1,6 @@
-import { MavenDatasource } from '../maven';
-import { MAVEN_REPO } from '../maven/common';
-import { CLOJARS_REPO } from './common';
+import { MAVEN_REPO } from '../maven/common.ts';
+import { MavenDatasource } from '../maven/index.ts';
+import { CLOJARS_REPO } from './common.ts';
 
 export class ClojureDatasource extends MavenDatasource {
   static override readonly id = 'clojure';

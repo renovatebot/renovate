@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { isComment } from './common';
+import { isNonEmptyString } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { isComment } from './common.ts';
 
 const regex = regEx(
   `(?:^|["'])(?<name>[-\\w]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-\\w]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
@@ -31,7 +31,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   for (const section of sections) {
     let depType = setDepType(section, 'requires');
-    const rawLines = section.split('\n').filter(is.nonEmptyString);
+    const rawLines = section.split('\n').filter(isNonEmptyString);
 
     for (const rawLine of rawLines) {
       if (!isComment(rawLine)) {

@@ -1,7 +1,7 @@
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'deb';
 export const displayName = 'Deb version';
@@ -64,10 +64,10 @@ class DebVersioningApi extends GenericVersioningApi {
       return null;
     }
     const release = [...remainingVersion.matchAll(numericPattern)].map((m) =>
-      parseInt(m[0]),
+      parseInt(m[0], 10),
     );
     return {
-      epoch: parseInt(epochStr),
+      epoch: parseInt(epochStr, 10),
       upstreamVersion,
       debianRevision,
       release,

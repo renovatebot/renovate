@@ -1,4 +1,4 @@
-import * as platform from './index';
+import * as platform from './index.ts';
 
 describe('modules/platform/local/index', () => {
   describe('initPlatform', () => {

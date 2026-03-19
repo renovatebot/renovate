@@ -1,5 +1,5 @@
-import { logger } from '../../../../logger';
-import { minimatch } from '../../../../util/minimatch';
+import { logger } from '../../../../logger/index.ts';
+import { minimatch } from '../../../../util/minimatch.ts';
 
 export function matchesAnyPattern(val: string, patterns: string[]): boolean {
   const res = patterns.some(

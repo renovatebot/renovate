@@ -1,6 +1,11 @@
 The `gradle` manager uses a custom parser written in JavaScript, similar to many others managers.
 It does not call `gradle` directly in order to extract a list of dependencies.
 
+### Executing the Gradle Wrapper
+
+Renovate will only execute the Gradle Wrapper (via `./gradlew` or `gradlew.bat`) if the self-hosted administrator configures [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) to include the `gradleWrapper` option.
+This is required due to [possibly supply chain security attack vectors](../../../security-and-permissions.md#trusting-repository-developers) that can occur with the Gradle Wrapper being executed.
+
 ### Updating lockfiles
 
 The gradle manager supports gradle lock files in `.lockfile` artifacts, as well as lock files used by the [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin.
@@ -11,7 +16,7 @@ As the output of these commands can be very large, any text other than errors (i
 
 ### Dependency verification
 
-If Renovate finds a `gradle/verification-metadata.xml` file and either `<verify-metadata>true</verify-metadata>` or `<verify-signatures>true</verify-signatures>` (or both), it updates the content by using the `gradle --write-verification-metadata <hashTypes> dependencies` command.
+If Renovate finds a `gradle/verification-metadata.xml` file and either `<verify-metadata>true</verify-metadata>` or `<verify-signatures>true</verify-signatures>` (or both), it updates the content by using the `./gradlew --write-verification-metadata <hashTypes> dependencies` command.
 Renovate will check the file for existing hash types (like `sha256`) and use them as `<hashTypes>`.
 
 <!-- prettier-ignore -->

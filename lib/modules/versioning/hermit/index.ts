@@ -1,7 +1,7 @@
 import { satisfies } from 'semver';
-import type { RegExpVersion } from '../regex';
-import { RegExpVersioningApi } from '../regex';
-import type { VersioningApiConstructor } from '../types';
+import type { RegExpVersion } from '../regex/index.ts';
+import { RegExpVersioningApi } from '../regex/index.ts';
+import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'hermit';
 export const displayName = 'Hermit';
@@ -40,14 +40,14 @@ export class HermitVersioning extends RegExpVersioningApi {
       compatibility,
     } = groups;
     const release = [
-      Number.parseInt(major),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch),
-      typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement),
+      Number.parseInt(major, 10),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
+      typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement, 10),
     ];
 
     if (build) {
-      release.push(Number.parseInt(build));
+      release.push(Number.parseInt(build, 10));
     }
 
     return {
@@ -82,20 +82,20 @@ export class HermitVersioning extends RegExpVersioningApi {
     const release = [];
 
     if (major) {
-      release.push(Number.parseInt(major));
+      release.push(Number.parseInt(major, 10));
     }
 
     if (minor) {
-      release.push(Number.parseInt(minor));
+      release.push(Number.parseInt(minor, 10));
     }
     if (patch) {
-      release.push(Number.parseInt(patch));
+      release.push(Number.parseInt(patch, 10));
     }
     if (supplement) {
-      release.push(Number.parseInt(supplement));
+      release.push(Number.parseInt(supplement, 10));
     }
     if (build) {
-      release.push(Number.parseInt(build));
+      release.push(Number.parseInt(build, 10));
     }
 
     return {

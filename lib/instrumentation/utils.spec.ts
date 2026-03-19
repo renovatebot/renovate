@@ -1,4 +1,4 @@
-import { massageThrowable } from './utils';
+import { massageThrowable } from './utils.ts';
 
 describe('instrumentation/utils', () => {
   describe('massageThrowable', () => {

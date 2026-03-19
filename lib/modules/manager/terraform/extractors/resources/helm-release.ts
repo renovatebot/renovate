@@ -1,14 +1,18 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { joinUrlParts } from '../../../../../util/url';
-import { HelmDatasource } from '../../../../datasource/helm';
-import { getDep } from '../../../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci';
-import type { ExtractConfig, PackageDependency } from '../../../types';
-import { DependencyExtractor } from '../../base';
-import type { TerraformDefinitionFile } from '../../hcl/types';
-import type { ProviderLock } from '../../lockfile/types';
-import { checkIfStringIsPath } from '../../util';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isPlainObject,
+} from '@sindresorhus/is';
+import { logger } from '../../../../../logger/index.ts';
+import { joinUrlParts } from '../../../../../util/url.ts';
+import { HelmDatasource } from '../../../../datasource/helm/index.ts';
+import { getDep } from '../../../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
+import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
+import { checkIfStringIsPath } from '../../util.ts';
 
 export class HelmReleaseExtractor extends DependencyExtractor {
   getCheckList(): string[] {
@@ -23,12 +27,12 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     const dependencies = [];
 
     const helmReleases = hclMap?.resource?.helm_release;
-    if (is.nullOrUndefined(helmReleases)) {
+    if (isNullOrUndefined(helmReleases)) {
       return [];
     }
 
     /* v8 ignore next 7 -- needs test */
-    if (!is.plainObject(helmReleases)) {
+    if (!isPlainObject(helmReleases)) {
       logger.debug(
         { helmReleases },
         'Terraform: unexpected `helmReleases` value',
@@ -46,7 +50,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
 
       dependencies.push(dep);
 
-      if (!is.nonEmptyString(helmRelease.chart)) {
+      if (!isNonEmptyString(helmRelease.chart)) {
         dep.skipReason = 'invalid-name';
       } else if (isOCIRegistry(helmRelease.chart)) {
         // For oci charts, we remove the oci:// and use the docker datasource
@@ -54,7 +58,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         this.processOCI(dep.depName, config, dep);
       } else if (checkIfStringIsPath(helmRelease.chart)) {
         dep.skipReason = 'local-chart';
-      } else if (is.nonEmptyString(helmRelease.repository)) {
+      } else if (isNonEmptyString(helmRelease.repository)) {
         if (isOCIRegistry(helmRelease.repository)) {
           // For oci charts, we remove the oci:// and use the docker datasource
           this.processOCI(

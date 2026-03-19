@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../../logger';
-import type { ReleaseResult } from '../../../../modules/datasource/types';
-import { toMs } from '../../../../util/pretty-time';
-import { AbandonedPackageStats } from '../../../../util/stats';
-import type { LookupUpdateConfig } from './types';
+import { logger } from '../../../../logger/index.ts';
+import type { ReleaseResult } from '../../../../modules/datasource/types.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import { AbandonedPackageStats } from '../../../../util/stats.ts';
+import type { LookupUpdateConfig } from './types.ts';
 
 export function calculateAbandonment(
   releaseResult: ReleaseResult,

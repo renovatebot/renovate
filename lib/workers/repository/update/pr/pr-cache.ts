@@ -1,6 +1,6 @@
-import { logger } from '../../../../logger';
-import { getCache } from '../../../../util/cache/repository';
-import type { PrCache } from '../../../../util/cache/repository/types';
+import { logger } from '../../../../logger/index.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import type { PrCache } from '../../../../util/cache/repository/types.ts';
 
 export function getPrCache(branchName: string): PrCache | null {
   logger.trace(`getPrCache()`);

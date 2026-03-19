@@ -1,15 +1,19 @@
-import { getConfig } from '../../../config/defaults';
-import { GlobalConfig } from '../../../config/global';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { addMeta } from '../../../logger';
-import { getCache } from '../../../util/cache/repository';
-import * as _extractUpdate from './extract-update';
-import { lookup } from './extract-update';
-import { extractDependencies, getBaseBranchConfig, updateRepo } from '.';
-import { git, logger, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, logger, platform, scm } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { addMeta } from '../../../logger/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import * as _extractUpdate from './extract-update.ts';
+import { lookup } from './extract-update.ts';
+import {
+  extractDependencies,
+  getBaseBranchConfig,
+  updateRepo,
+} from './index.ts';
 
-vi.mock('./extract-update');
+vi.mock('./extract-update.ts');
 
 const extract = vi.mocked(_extractUpdate).extract;
 
@@ -76,7 +80,6 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
@@ -157,7 +160,6 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           baseBranches: [
@@ -170,7 +172,7 @@ describe('workers/repository/process/index', () => {
         },
         'baseBranches',
       );
-      /* eslint-disable vitest/prefer-called-exactly-once-with */
+
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'RELEASE/v0',
       });
@@ -184,7 +186,6 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'some-other',
       });
-      /* eslint-enable vitest/prefer-called-exactly-once-with */
     });
 
     it('maps $default to defaultBranch', async () => {

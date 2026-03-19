@@ -1,9 +1,9 @@
-import { logger } from '../../logger';
-import type { Nullish } from '../../types';
-import { parseJson } from '../../util/common';
-import { regEx } from '../../util/regex';
-import { ensureTrailingSlash } from '../../util/url';
-import type { FetchPresetConfig, Preset } from './types';
+import { logger } from '../../logger/index.ts';
+import type { Nullish } from '../../types/index.ts';
+import { parseJson } from '../../util/common.ts';
+import { regEx } from '../../util/regex.ts';
+import { ensureTrailingSlash } from '../../util/url.ts';
+import type { FetchPresetConfig, Preset } from './types.ts';
 
 export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_INVALID = 'invalid preset';
@@ -22,7 +22,7 @@ export async function fetchPreset({
   fetch,
 }: FetchPresetConfig): Promise<Nullish<Preset>> {
   // TODO: fix me, can be undefiend #22198
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
   const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';

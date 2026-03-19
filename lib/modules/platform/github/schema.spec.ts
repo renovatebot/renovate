@@ -1,4 +1,5 @@
-import { GithubContentResponse } from './schema';
+import { logger } from '~test/util.ts';
+import { GithubContentResponse, GithubVulnerabilityAlert } from './schema.ts';
 
 describe('modules/platform/github/schema', () => {
   it('should be parse directory response', () => {
@@ -105,5 +106,85 @@ describe('modules/platform/github/schema', () => {
       },
     });
     expect(error).toBeUndefined();
+  });
+
+  it('should skip vulnerability alerts with unsupported ecosystems', () => {
+    const result = GithubVulnerabilityAlert.parse([
+      {
+        dismissed_reason: null,
+        security_advisory: {
+          description: 'Test advisory',
+          identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
+        },
+        security_vulnerability: {
+          first_patched_version: { identifier: '1.0.0' },
+          package: { ecosystem: 'dotnet', name: 'test-package' },
+          vulnerable_version_range: '< 1.0.0',
+        },
+        dependency: { manifest_path: 'package.json' },
+      },
+      {
+        dismissed_reason: null,
+        security_advisory: {
+          description: 'Test advisory',
+          identifiers: [{ type: 'CVE', value: 'CVE-2024-5678' }],
+        },
+        security_vulnerability: {
+          first_patched_version: { identifier: '2.0.0' },
+          package: { ecosystem: 'npm', name: 'valid-package' },
+          vulnerable_version_range: '< 2.0.0',
+        },
+        dependency: { manifest_path: 'package.json' },
+      },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].security_vulnerability?.package.ecosystem).toBe('npm');
+  });
+
+  it('should log vulnerability alerts with parse errors', () => {
+    const { data, success } = GithubVulnerabilityAlert.safeParse([
+      {
+        dismissed_reason: null,
+        security_advisory: {
+          description: 'Test advisory',
+          identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
+        },
+        security_vulnerability: {
+          first_patched_version: { identifier: '1.0.0' },
+          package: { ecosystem: 'dotnet', name: 'test-package' },
+          vulnerable_version_range: '< 1.0.0',
+        },
+      },
+    ]);
+    expect(success).toBe(true);
+    expect(data).toBeEmptyArray();
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.any(Error),
+      }),
+      'Vulnerability Alert: Failed to parse some alerts',
+    );
+  });
+
+  it('should filter vulnerability alerts with missing security_vulnerability', () => {
+    const { data, success } = GithubVulnerabilityAlert.safeParse([
+      {
+        dismissed_reason: null,
+        security_advisory: {
+          description: 'Test advisory',
+          identifiers: [{ type: 'CVE', value: 'CVE-2024-5678' }],
+        },
+        security_vulnerability: null,
+        dependency: { manifest_path: 'package.json' },
+      },
+    ]);
+    expect(success).toBe(true);
+    expect(data).toBeEmptyArray();
+    expect(logger.logger.debug).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.any(Error),
+      }),
+      'Vulnerability Alert: Failed to parse some alerts',
+    );
   });
 });

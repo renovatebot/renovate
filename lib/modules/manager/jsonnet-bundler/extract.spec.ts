@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const jsonnetfile = Fixtures.get('jsonnetfile.json');
 const jsonnetfileWithName = Fixtures.get('jsonnetfile-with-name.json');

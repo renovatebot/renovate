@@ -1,7 +1,7 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import { api as npm } from '../npm';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import { api as npm } from '../npm/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'go-mod-directive';
 export const displayName = 'Go Modules Directive';

@@ -1,5 +1,5 @@
 import addrs from 'email-addresses';
-import { parseGitAuthor } from './author';
+import { parseGitAuthor } from './author.ts';
 
 vi.mock('email-addresses', { spy: true });
 

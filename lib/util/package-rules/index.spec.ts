@@ -1,11 +1,11 @@
-import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
-import { MISSING_API_CREDENTIALS } from '../../constants/error-messages';
-import { DockerDatasource } from '../../modules/datasource/docker';
-import { OrbDatasource } from '../../modules/datasource/orb';
-import type { HostRule } from '../../types';
-import type { MergeConfidence } from '../merge-confidence/types';
-import { applyPackageRules } from './index';
-import { hostRules } from '~test/util';
+import { hostRules } from '~test/util.ts';
+import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
+import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
+import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
+import { OrbDatasource } from '../../modules/datasource/orb/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import type { MergeConfidence } from '../merge-confidence/types.ts';
+import { applyPackageRules } from './index.ts';
 
 type TestConfig = PackageRuleInputConfig & {
   x?: number;
@@ -20,10 +20,12 @@ describe('util/package-rules/index', () => {
     packageRules: [
       {
         matchPackageNames: ['a', 'b', 'xyz/**', '!xyz/foo**'],
+        // @ts-expect-error -- testing
         x: 2,
       },
       {
         matchPackageNames: ['/a/', '/b/', '!aa', '!/d/'],
+        // @ts-expect-error -- testing
         y: 2,
       },
       {
@@ -216,6 +218,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchPackageNames: ['!foo'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -237,6 +240,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchPackageNames: ['neutrino', '/^@neutrino\\//'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -259,6 +263,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['dependencies', 'peerDependencies'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -277,6 +282,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['test'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -295,6 +301,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['test'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -312,6 +319,7 @@ describe('util/package-rules/index', () => {
         {
           matchManagers: ['npm', 'meteor'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -331,6 +339,7 @@ describe('util/package-rules/index', () => {
         {
           matchManagers: ['dockerfile', 'npm'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -352,6 +361,7 @@ describe('util/package-rules/index', () => {
         {
           matchCategories: ['node'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -372,6 +382,7 @@ describe('util/package-rules/index', () => {
         {
           matchCategories: ['docker'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -391,6 +402,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchCategories: ['docker'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -409,10 +421,12 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDatasources: [OrbDatasource.id, DockerDatasource.id],
+          // @ts-expect-error -- testing
           x: 1,
         },
         {
           matchDatasources: [DockerDatasource.id],
+          // @ts-expect-error -- testing
           y: 1,
         },
       ],
@@ -432,6 +446,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['master', 'staging'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -450,6 +465,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDatasources: [OrbDatasource.id],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -467,6 +483,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['master'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -484,6 +501,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['/^release\\/.*/'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -502,6 +520,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['/^release\\/.*/'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -520,10 +539,12 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchUpdateTypes: ['minor', 'patch'],
+          // @ts-expect-error -- testing
           x: 1,
         },
         {
           matchUpdateTypes: ['minor'],
+          // @ts-expect-error -- testing
           y: 1,
         },
       ],
@@ -546,6 +567,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -568,6 +590,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -590,6 +613,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -611,6 +635,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar',
             'https://github.com/renovatebot/presets',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -633,6 +658,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar',
             'https://github.com/facebook/react',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -642,6 +668,74 @@ describe('util/package-rules/index', () => {
       packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/facebook/react-native',
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('handles matchRegistryUrls when missing registryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com/**',
+            'https://private.registry.com/**',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://private.registry.com/npm'],
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+
+  it('non-matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://registry.npmjs.org'],
     };
     const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -663,6 +757,7 @@ describe('util/package-rules/index', () => {
         packageRules: [
           {
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -681,6 +776,7 @@ describe('util/package-rules/index', () => {
         packageRules: [
           {
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -699,6 +795,7 @@ describe('util/package-rules/index', () => {
         packageRules: [
           {
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -718,6 +815,7 @@ describe('util/package-rules/index', () => {
           {
             matchUpdateTypes: ['major'],
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -734,7 +832,7 @@ describe('util/package-rules/index', () => {
       expect(error).toMatchObject(new Error(MISSING_API_CREDENTIALS));
       expect(error.validationError).toBe('Missing credentials');
       expect(error.validationMessage).toBe(
-        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.',
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
       );
     });
   });
@@ -744,6 +842,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDepTypes: ['dependencies', 'peerDependencies'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -762,6 +861,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['dependencies', 'peerDependencies'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -781,6 +881,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '<= 2.0.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -819,6 +920,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '>= 2.0.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -840,6 +942,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '2.1.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -869,6 +972,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '4.6.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -890,6 +994,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '/^4/',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -920,6 +1025,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '!/^4/',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -950,6 +1056,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchFileNames: ['package.json'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -974,6 +1081,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchFileNames: ['yarn.lock'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -988,6 +1096,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchFileNames: ['examples/**', 'lib/'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1047,6 +1156,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/Renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1069,6 +1179,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar',
             'https://github.com/Renovatebot/renovate',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1089,6 +1200,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['abc'],
           matchCategories: ['js'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1106,6 +1218,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['abc'],
           matchBaseBranches: ['dev'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1123,6 +1236,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['abc'],
           matchManagers: ['npm'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1139,6 +1253,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDepNames: ['test1'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1162,6 +1277,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1233,5 +1349,40 @@ describe('util/package-rules/index', () => {
     const res = await applyPackageRules(config);
     expect(res.depName).toBe('node');
     expect(res.packageName).toBe('docker.io/library/node');
+  });
+
+  it('compiles sourceUrl with template helper functions', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl:
+            'https://github.com/{{replace "/" "/terraform-provider-" packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe(
+      'https://github.com/hashicorp/terraform-provider-aws',
+    );
+  });
+
+  it('compiles sourceUrl with template variables', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl: 'https://github.com/{{packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe('https://github.com/hashicorp/aws');
   });
 });

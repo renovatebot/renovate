@@ -1,4 +1,4 @@
-import { NewValueMatcher } from './new-value';
+import { NewValueMatcher } from './new-value.ts';
 
 describe('util/package-rules/new-value', () => {
   const matcher = new NewValueMatcher();

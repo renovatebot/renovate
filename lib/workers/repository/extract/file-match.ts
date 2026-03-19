@@ -1,7 +1,7 @@
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { minimatch } from '../../../util/minimatch';
-import { matchRegexOrGlob } from '../../../util/string-match';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { minimatch } from '../../../util/minimatch.ts';
+import { matchRegexOrGlob } from '../../../util/string-match.ts';
 
 export function getIncludedFiles(
   fileList: string[],

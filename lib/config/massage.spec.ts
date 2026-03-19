@@ -1,5 +1,5 @@
-import * as massage from './massage';
-import type { RenovateConfig } from './types';
+import * as massage from './massage.ts';
+import type { RenovateConfig } from './types.ts';
 
 describe('config/massage', () => {
   describe('massageConfig', () => {

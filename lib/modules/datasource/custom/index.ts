@@ -1,11 +1,15 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { getExpression } from '../../../util/jsonata';
-import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { fetchers } from './formats';
-import { ReleaseResultZod } from './schema';
-import { getCustomConfig } from './utils';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { getExpression } from '../../../util/jsonata.ts';
+import { Datasource } from '../datasource.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { fetchers } from './formats/index.ts';
+import { ReleaseResultZod } from './schema.ts';
+import { getCustomConfig } from './utils.ts';
 
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
@@ -20,7 +24,7 @@ export class CustomDatasource extends Datasource {
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const config = getCustomConfig(getReleasesConfig);
-    if (is.nullOrUndefined(config)) {
+    if (isNullOrUndefined(config)) {
       return null;
     }
 

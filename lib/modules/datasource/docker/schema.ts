@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import { Json, LooseArray } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import { Json, LooseArray } from '../../../util/schema-utils/index.ts';
 
 // OCI manifests
 
@@ -170,7 +170,7 @@ export const DockerHubTagsPage = z.object({
   count: z.number(),
   next: z.string().nullable().catch(null),
   results: LooseArray(DockerHubTag, {
-    /* v8 ignore next 6 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     onError: ({ error }) => {
       logger.debug(
         { error },

@@ -1,4 +1,4 @@
-import { PinVersionsMigration } from './pin-versions-migration';
+import { PinVersionsMigration } from './pin-versions-migration.ts';
 
 describe('config/migrations/custom/pin-versions-migration', () => {
   it('should migrate true', async () => {

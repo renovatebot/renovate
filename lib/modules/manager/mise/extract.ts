@@ -1,24 +1,32 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { BackendToolingConfig } from './backends';
+import {
+  isArray,
+  isFunction,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { BackendToolingConfig } from './backends.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
-} from './backends';
-import type { MiseTool, MiseToolOptions } from './schema';
-import type { ToolingDefinition } from './upgradeable-tooling';
-import { asdfTooling, miseTooling } from './upgradeable-tooling';
-import { parseTomlFile } from './utils';
+} from './backends.ts';
+import type { MiseTool, MiseToolOptions } from './schema.ts';
+import type { ToolingDefinition } from './upgradeable-tooling.ts';
+import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
+import { parseTomlFile } from './utils.ts';
 
 // Tool names can have options in the tool name
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
@@ -49,7 +57,7 @@ export function extractPackageFile(
       const toolName = depName.substring(delimiterIndex + 1);
       const options = parseOptions(
         optionsInName,
-        is.nonEmptyObject(toolData) ? toolData : {},
+        isNonEmptyObject(toolData) ? toolData : {},
       );
       const toolConfig =
         version === null
@@ -64,17 +72,17 @@ export function extractPackageFile(
 }
 
 function parseVersion(toolData: MiseTool): string | null {
-  if (is.nonEmptyString(toolData)) {
+  if (isNonEmptyString(toolData)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
     return toolData;
   }
-  if (is.array(toolData, is.string)) {
+  if (isArray(toolData, isString)) {
     // Handle the array case
     // e.g. 'erlang = ["23.3", "24.0"]'
     return toolData.length ? toolData[0] : null; // Get the first version in the array
   }
-  if (is.object(toolData) && is.nonEmptyString(toolData.version)) {
+  if (isObject(toolData) && isNonEmptyString(toolData.version)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
     return toolData.version;
@@ -86,7 +94,7 @@ function parseOptions(
   optionsInName: string,
   toolOptions: MiseToolOptions,
 ): MiseToolOptions {
-  const options = is.nonEmptyString(optionsInName)
+  const options = isNonEmptyString(optionsInName)
     ? Object.fromEntries(
         optionsInName.split(',').map((option) => option.split('=', 2)),
       )
@@ -103,7 +111,7 @@ function getToolConfig(
   toolName: string,
   version: string,
   toolOptions: MiseToolOptions,
-): ToolingConfig | BackendToolingConfig | null {
+): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
     case '':
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
@@ -127,6 +135,8 @@ function getToolConfig(
       return createDotnetToolConfig(toolName);
     case 'gem':
       return createGemToolConfig(toolName);
+    case 'github':
+      return createGithubToolConfig(toolName, version, toolOptions);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':
@@ -150,7 +160,7 @@ function getToolConfig(
 function getRegistryToolConfig(
   short: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   // Try to get the config from miseTooling first, then asdfTooling
   return (
     getConfigFromTooling(miseTooling, short, version) ??
@@ -162,14 +172,14 @@ function getConfigFromTooling(
   toolingSource: Record<string, ToolingDefinition>,
   name: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   const toolDefinition = toolingSource[name];
   if (!toolDefinition) {
     return null;
   } // Return null if no toolDefinition is found
 
   return (
-    (is.function(toolDefinition.config)
+    (isFunction(toolDefinition.config)
       ? toolDefinition.config(version)
       : toolDefinition.config) ?? null
   ); // Ensure null is returned instead of undefined
@@ -178,7 +188,7 @@ function getConfigFromTooling(
 function createDependency(
   name: string,
   version: string | null,
-  config: ToolingConfig | BackendToolingConfig | null,
+  config: StaticTooling | BackendToolingConfig | null,
 ): PackageDependency {
   if (version === null) {
     return {

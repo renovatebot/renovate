@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
-import { hash, hashStream, toSha256 } from './hash';
+import { hash, hashStream, toSha256 } from './hash.ts';
 
 describe('util/hash', () => {
   it('hashes data with sha256', () => {

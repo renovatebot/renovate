@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { getSliceEndNumber } from './extract';
-import { extractPackageFile } from './';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { getSliceEndNumber } from './extract.ts';
+import { extractPackageFile } from './index.ts';
 
 const yamlFile1 = Fixtures.get('requirements01.yml');
 const yamlFile2 = Fixtures.get('requirements02.yml');
