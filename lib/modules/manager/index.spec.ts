@@ -25,12 +25,12 @@ describe('modules/manager/index', () => {
   });
 
   describe('lockFileNames', () => {
-    for (const [name, mgr] of manager.getManagers()) {
-      if (mgr.supportsLockFileMaintenance) {
-        it(`has lockFileNames for ${name}`, () => {
-          expect(mgr.lockFileNames).toBeNonEmptyArray();
-        });
-      }
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileNames for ${name}`, () => {
+        expect(mgr.lockFileNames).toBeNonEmptyArray();
+      });
     }
   });
 

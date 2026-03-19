@@ -673,6 +673,74 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
+  it('handles matchRegistryUrls when missing registryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com/**',
+            'https://private.registry.com/**',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://private.registry.com/npm'],
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+
+  it('non-matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://registry.npmjs.org'],
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
   describe('matchConfidence', () => {
     const hostRule: HostRule = {
       hostType: 'merge-confidence',
@@ -1281,5 +1349,40 @@ describe('util/package-rules/index', () => {
     const res = await applyPackageRules(config);
     expect(res.depName).toBe('node');
     expect(res.packageName).toBe('docker.io/library/node');
+  });
+
+  it('compiles sourceUrl with template helper functions', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl:
+            'https://github.com/{{replace "/" "/terraform-provider-" packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe(
+      'https://github.com/hashicorp/terraform-provider-aws',
+    );
+  });
+
+  it('compiles sourceUrl with template variables', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl: 'https://github.com/{{packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe('https://github.com/hashicorp/aws');
   });
 });

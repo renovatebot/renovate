@@ -1,4 +1,4 @@
-import { fs, scm } from '~test/util.ts';
+import { fs, logger, scm } from '~test/util.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -70,7 +70,13 @@ describe('modules/manager/swift/artifacts', () => {
 
     const result = await updateArtifacts({
       packageFileName: 'Package.swift',
-      updatedDeps: [{ depName: 'Alamofire/Alamofire', newVersion: '5.10.0' }],
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
       newPackageFileContent: '',
       config: {},
     });
@@ -96,7 +102,13 @@ describe('modules/manager/swift/artifacts', () => {
 
     const result = await updateArtifacts({
       packageFileName: 'Package.swift',
-      updatedDeps: [{ depName: 'Alamofire/Alamofire', newVersion: '5.10.0' }],
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
       newPackageFileContent: '',
       config: { isLockFileMaintenance: true },
     });
@@ -110,7 +122,13 @@ describe('modules/manager/swift/artifacts', () => {
 
     const result = await updateArtifacts({
       packageFileName: 'Package.swift',
-      updatedDeps: [{ depName: 'Alamofire/Alamofire', newVersion: '5.10.0' }],
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
       newPackageFileContent: '',
       config: {},
     });
@@ -129,7 +147,13 @@ describe('modules/manager/swift/artifacts', () => {
 
     const result = await updateArtifacts({
       packageFileName: 'Package.swift',
-      updatedDeps: [{ depName: 'Alamofire/Alamofire', newVersion: '5.10.0' }],
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
       newPackageFileContent: '',
       config: {},
     });
@@ -148,7 +172,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -179,12 +204,14 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
         {
           depName: 'apple/swift-argument-parser',
           datasource: GithubTagsDatasource.id,
-          newVersion: '1.5.0',
+          newVersion: 'v1.5.0',
+          newValue: '1.5.0',
         },
       ],
       newPackageFileContent: '',
@@ -209,7 +236,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'nonexistent/package',
           datasource: GithubTagsDatasource.id,
-          newVersion: '1.0.0',
+          newVersion: 'v1.0.0',
+          newValue: '1.0.0',
         },
       ],
       newPackageFileContent: '',
@@ -230,7 +258,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -260,7 +289,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -286,7 +316,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'apple/swift-argument-parser',
           datasource: GithubTagsDatasource.id,
-          newVersion: '1.5.0',
+          newVersion: 'v1.5.0',
+          newValue: '1.5.0',
         },
       ],
       newPackageFileContent: '',
@@ -313,7 +344,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -334,7 +366,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'alamofire/alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -355,7 +388,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'https://github.com/Alamofire/Alamofire.git',
           datasource: GitTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -397,7 +431,8 @@ describe('modules/manager/swift/artifacts', () => {
           depName: 'org/my-lib',
           datasource: GitlabTagsDatasource.id,
           registryUrls: ['https://gitlab.example.com'],
-          newVersion: '2.0.0',
+          newVersion: 'v2.0.0',
+          newValue: '2.0.0',
         },
       ],
       newPackageFileContent: '',
@@ -420,7 +455,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
           newDigest: 'precomputedsha456',
         },
       ],
@@ -446,7 +482,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -469,7 +506,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.9.1', // same as fixture
+          newVersion: 'v5.9.1', // same as fixture
+          newValue: '5.9.1',
         },
       ],
       newPackageFileContent: '',
@@ -490,7 +528,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -513,7 +552,8 @@ describe('modules/manager/swift/artifacts', () => {
       updatedDeps: [
         {
           depName: 'Alamofire/Alamofire',
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -523,7 +563,7 @@ describe('modules/manager/swift/artifacts', () => {
     expect(result).toBeNull();
   });
 
-  it('skips dep with no newVersion', async () => {
+  it('skips dep with no newValue', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2Fixture);
 
@@ -533,7 +573,7 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          // no newVersion
+          // no newValue
         },
       ],
       newPackageFileContent: '',
@@ -553,7 +593,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           // no datasource — resolveCommitSha returns null
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -580,7 +621,8 @@ describe('modules/manager/swift/artifacts', () => {
       updatedDeps: [
         {
           depName: 'Alamofire/Alamofire',
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -603,7 +645,8 @@ describe('modules/manager/swift/artifacts', () => {
         {
           depName: 'Alamofire/Alamofire',
           datasource: GithubTagsDatasource.id,
-          newVersion: '5.10.0',
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
         },
       ],
       newPackageFileContent: '',
@@ -616,6 +659,64 @@ describe('modules/manager/swift/artifacts', () => {
     // Revision unchanged — getDigest threw
     expect(contents).toContain(
       '"revision": "f455c2975872ccd2d9c81594c658af65716e9b9a"',
+    );
+  });
+
+  it('if newValue is present, but newVersion is absent, no update is performed', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: undefined,
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toBeNull();
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        depName: 'Alamofire/Alamofire',
+        newVersion: undefined,
+        newValue: '5.10.0',
+      },
+      'swift: found a newValue but not a newVersion',
+    );
+  });
+
+  it('newValue is used to look up digest', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+
+    // getDigest should have been called with the v-prefixed newVersion tag
+    expect(datasource.getDigest).toHaveBeenCalledWith(
+      expect.objectContaining({ datasource: GithubTagsDatasource.id }),
+      'v5.10.0',
     );
   });
 });

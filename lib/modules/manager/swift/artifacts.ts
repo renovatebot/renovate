@@ -181,8 +181,21 @@ export async function updateArtifacts({
     let updated = content;
 
     for (const dep of updatedDeps) {
-      const newVersion = dep.newVersion;
-      if (!newVersion) {
+      const newValue = dep.newValue;
+      if (!newValue) {
+        continue;
+      }
+
+      // shouldn't happen
+      if (!dep.newVersion) {
+        logger.debug(
+          {
+            depName: dep.depName,
+            newVersion: dep.newVersion,
+            newValue: dep.newValue,
+          },
+          'swift: found a newValue but not a newVersion',
+        );
         continue;
       }
 
@@ -196,16 +209,16 @@ export async function updateArtifacts({
       }
 
       // Skip if already up-to-date
-      if (pin.state.version === newVersion) {
+      if (pin.state.version === newValue) {
         logger.debug(
-          { depName: dep.depName, newVersion },
+          { depName: dep.depName, newValue },
           'swift: pin already at target version',
         );
         continue;
       }
 
-      const newRevision = await resolveCommitSha(dep, newVersion);
-      updated = updatePinInJson(updated, pin, newVersion, newRevision);
+      const newRevision = await resolveCommitSha(dep, dep.newVersion);
+      updated = updatePinInJson(updated, pin, newValue, newRevision);
     }
 
     if (updated !== content) {

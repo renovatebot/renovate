@@ -419,6 +419,7 @@ export async function validateConfig(
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrls',
+              'matchRegistryUrls',
               'matchUpdateTypes',
               'matchConfidence',
               'matchCurrentAge',

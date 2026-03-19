@@ -32,7 +32,7 @@ concurrency:
 
 env:
   # are we on a release branch?
-  DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
+  DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
   PDM_VERSION: 2.26.6 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
@@ -220,7 +220,7 @@ jobs:
         run: pnpm biome-ci
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .cache/eslint
           # we need to add the hash because eslint cache doesn't detect plugin changes
@@ -234,7 +234,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .cache/eslint
           key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -258,7 +258,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .cache/prettier
           # we need to add the hash because prettier cache doesn't detect plugin changes
@@ -276,7 +276,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .cache/prettier
           key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -333,7 +333,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore tsbuildinfo cache
-        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
@@ -344,7 +344,7 @@ jobs:
 
       - name: Save tsbuildinfo cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -411,7 +411,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .cache/vitest
           key: |
@@ -437,7 +437,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
         with:
           use_oidc: true
           report_type: test_results
@@ -490,7 +490,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -673,7 +673,7 @@ jobs:
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
       - name: dry-run
-        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true')
+        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_RELEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -825,7 +825,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@d849c1c2ca8bc05a2271c2eb63fa939bdf4c6b3a # v4.2.2
+        uses: containerbase/internal-tools@e51e0951283aaa3205f904d72bfdefc3dbcf5ada # v4.5.2
         with:
           command: docker-config
 
@@ -859,7 +859,7 @@ jobs:
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
-          elif [[ "${{env.DO_REALEASE}}" == "true" ]]; then
+          elif [[ "${{env.DO_RELEASE}}" == "true" ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 

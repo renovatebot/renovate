@@ -24,7 +24,7 @@ export async function updateBazelLockfile(
         { toolName: 'bazelisk', constraint: bazeliskConstraint },
       ],
     };
-    await exec('bazel mod deps', execOptions);
+    await exec('bazel mod deps --lockfile_mode=update', execOptions);
 
     const status = await getRepoStatus();
     if (
