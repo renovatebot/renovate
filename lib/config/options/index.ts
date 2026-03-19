@@ -1601,6 +1601,20 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'matchRegistryUrls',
+    description:
+      'A list of URLs (or URL patterns) to match against registryUrls.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    patternMatch: true,
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'autoReplaceGlobalMatch',
     description:
       'Control whether replacement regular expressions are global matches or only the first match.',
