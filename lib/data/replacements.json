@@ -3,6 +3,7 @@
   "all": {
     "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
+      "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
@@ -61,6 +62,17 @@
       "replacements:zap"
     ],
     "ignoreDeps": []
+  },
+  "actions-attest-build-provenance-to-actions-attest": {
+    "description": "`actions/attest-build-provenance` was renamed to `actions/attest`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=4",
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["actions/attest-build-provenance"],
+        "replacementName": "actions/attest"
+      }
+    ]
   },
   "airbnb-prop-types-to-prop-types-tools": {
     "description": "`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.",
