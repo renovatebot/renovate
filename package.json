@@ -329,7 +329,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.3.0",
     "emojibase-data": "17.0.0",
-    "esbuild": "0.27.3",
+    "esbuild": "0.27.4",
     "eslint": "9.39.4",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
