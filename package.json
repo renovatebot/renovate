@@ -333,7 +333,7 @@
     "eslint": "9.39.4",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
-    "eslint-plugin-oxlint": "1.54.0",
+    "eslint-plugin-oxlint": "1.55.0",
     "expect-more-jest": "5.5.0",
     "globals": "17.4.0",
     "graphql": "16.13.1",
