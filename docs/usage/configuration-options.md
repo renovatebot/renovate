@@ -3568,6 +3568,24 @@ The above will set a replaceStrategy for any npm package which starts with `@ang
 
 The above will group together any npm package which starts with the string `angular`.
 
+### packageRules.matchRegistryUrls
+
+Use this option to match packages based on their `registryUrls`.
+Any package whose `registryUrls` array contains at least one URL matching any of the provided patterns will be selected.
+
+Here's an example of where you use this to disable updates from a specific private registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchRegistryUrls": ["https://private.registry.example.com/**"],
+      "enabled": false
+    }
+  ]
+}
+```
+
 ### packageRules.matchRepositories
 
 ### packageRules.matchSourceUrls
@@ -3856,6 +3874,8 @@ Use this field to set the directory in which the package is present at the sourc
 Use this field to set the source URL for a package, including overriding an existing one.
 Source URLs are necessary to link to the source of the package and in order to look up changelogs.
 
+The `sourceUrl` field supports template compilation, allowing you to dynamically construct URLs based on package information.
+
 ```json title="Setting the source URL for the dummy package"
 {
   "packageRules": [
@@ -3866,6 +3886,20 @@ Source URLs are necessary to link to the source of the package and in order to l
   ]
 }
 ```
+
+```json title="Using templates to construct source URLs for OpenTofu providers"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["terraform-provider"],
+      "registryUrls": ["https://registry.opentofu.org"],
+      "sourceUrl": "https://github.com/{{replace '/' '/terraform-provider-' packageName}}"
+    }
+  ]
+}
+```
+
+In the example above, a package name like `hashicorp/aws` will be transformed to `https://github.com/hashicorp/terraform-provider-aws`.
 
 ## patch
 
@@ -3896,7 +3930,7 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
-On GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
+On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure, Bitbucket Server, Forgejo, Gitea, GitHub and GitLab.
@@ -4938,7 +4972,7 @@ Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
 1. Select the "Settings" tab
-1. Select "Code security and analysis" in the sidebar
+1. Select "Advanced Security" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Dependabot alerts".

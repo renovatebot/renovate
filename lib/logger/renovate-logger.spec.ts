@@ -22,4 +22,26 @@ describe('logger/renovate-logger', () => {
     logger.bunyan = fakeLogger as unknown as BunyanLogger;
     expect(fakeLogger.info).toHaveBeenCalledTimes(1);
   });
+
+  describe('before bunyan is initialized', () => {
+    it('should log to console', () => {
+      const consoleSpy = vi.spyOn(console, 'warn');
+      const logger = new RenovateLogger('test', {});
+      logger.info('hello before init');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        `⚠️ NOTE ⚠️: Renovate's logger has not yet been initialized. If you see no other output, this is a bug`,
+      );
+    });
+
+    it('should not log more than once', () => {
+      const consoleSpy = vi.spyOn(console, 'warn');
+      const logger = new RenovateLogger('test', {});
+      logger.info('hello before init');
+      logger.info('hello before init');
+      logger.info('hello before init');
+      expect(consoleSpy).toHaveBeenCalledExactlyOnceWith(
+        `⚠️ NOTE ⚠️: Renovate's logger has not yet been initialized. If you see no other output, this is a bug`,
+      );
+    });
+  });
 });
