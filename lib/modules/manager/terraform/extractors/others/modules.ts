@@ -77,7 +77,6 @@ export class ModuleExtractor extends DependencyExtractor {
 
     if (isOCIRegistry(source)) {
       applyOciDependency(dep, source, config.registryAliases);
-      dep.depName = dep.packageName;
       return dep;
     }
 
