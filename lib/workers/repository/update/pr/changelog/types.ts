@@ -27,6 +27,7 @@ export type ChangeLogPlatform =
   | 'bitbucket'
   | 'bitbucket-server'
   | 'forgejo'
+  | 'generic'
   | 'gitea'
   | 'github'
   | 'gitlab';
@@ -40,6 +41,7 @@ export interface ChangeLogProject {
   repository: string;
   sourceUrl: string;
   sourceDirectory?: string;
+  changelogUrl?: string;
 }
 
 export type ChangeLogError =

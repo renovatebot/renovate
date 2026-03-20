@@ -12,24 +12,28 @@ export * from './types.ts';
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig,
 ): Promise<ChangeLogResult | null> {
-  const { sourceUrl, versioning, currentVersion, newVersion } = config;
+  const { registryUrl, sourceUrl, versioning, currentVersion, newVersion } =
+    config;
   try {
-    if (!(sourceUrl && currentVersion && newVersion)) {
+    if (!((registryUrl || sourceUrl) && currentVersion && newVersion)) {
       return null;
     }
     const versioningApi = allVersioning.get(versioning);
     if (versioningApi.equals(currentVersion, newVersion)) {
       return null;
     }
+
+    const platformUrl = sourceUrl ?? registryUrl!;
+
     logger.debug(
-      `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${newVersion})`,
+      `Fetching changelog: ${platformUrl} (${currentVersion} -> ${newVersion})`,
     );
 
-    const platform = detectPlatform(sourceUrl);
+    const platform = detectPlatform(platformUrl);
 
     if (isNullOrUndefined(platform)) {
       logger.info(
-        { sourceUrl, hostType: platform },
+        { platformUrl, hostType: platform },
         'Unknown platform, skipping changelog fetching.',
       );
       return null;
@@ -39,7 +43,7 @@ export async function getChangeLogJSON(
 
     if (isNullOrUndefined(changeLogSource)) {
       logger.info(
-        { sourceUrl, hostType: platform },
+        { platformUrl, hostType: platform },
         'Unknown changelog source, skipping changelog fetching.',
       );
       return null;
