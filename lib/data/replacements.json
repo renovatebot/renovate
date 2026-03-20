@@ -1239,7 +1239,7 @@
     "packageRules": [
       {
         "matchDatasources": ["npm"],
-        "matchPacakgeNames": ["@wuchale/vite-plugin"],
+        "matchPackageNames": ["@wuchale/vite-plugin"],
         "replacementName": "wuchale",
         "replacementVersion": "0.22.0"
       }
