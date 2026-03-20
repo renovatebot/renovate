@@ -1358,9 +1358,9 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'extractVersion',
     description:
-      "A regex (`re2`) to extract a version from a datasource's raw version string.",
-    type: 'string',
-    format: 'regex',
+      "Extract and optionally transform a version from a datasource's raw version string. Can be a regex string (legacy) or an array with [regex, template] for transformation using handlebars syntax.",
+    type: 'array',
+    subType: 'string',
     cli: false,
     env: false,
   },

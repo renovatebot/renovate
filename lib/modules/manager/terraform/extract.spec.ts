@@ -394,7 +394,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'github-releases',
           depName: 'hashicorp/terraform',
           depType: 'required_version',
-          extractVersion: 'v(?<version>.*)$',
+          extractVersion: ['v(?<version>.*)$'],
         },
         {
           currentValue: '2.7.2',
@@ -770,7 +770,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'github-releases',
           depName: 'hashicorp/terraform',
           depType: 'required_version',
-          extractVersion: 'v(?<version>.*)$',
+          extractVersion: ['v(?<version>.*)$'],
           versioning: hashicorp.id,
         },
       ]);
@@ -790,7 +790,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'github-releases',
           depName: 'hashicorp/terraform',
           depType: 'tfe_workspace',
-          extractVersion: 'v(?<version>.*)$',
+          extractVersion: ['v(?<version>.*)$'],
         },
         {
           skipReason: 'unspecified-version',
@@ -800,7 +800,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'github-releases',
           depName: 'hashicorp/terraform',
           depType: 'tfe_workspace',
-          extractVersion: 'v(?<version>.*)$',
+          extractVersion: ['v(?<version>.*)$'],
         },
       ]);
     });

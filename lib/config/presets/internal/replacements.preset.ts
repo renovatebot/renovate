@@ -8,7 +8,10 @@ import { addPresets } from './auto-generate-replacements.ts';
 
 const { $schema: _, ...replacementPresets } = replacementGroupsJson;
 
-export const presets: Record<string, Preset> = replacementPresets;
+export const presets: Record<string, Preset> = replacementPresets as Record<
+  string,
+  Preset
+>;
 
 const muiReplacement: Replacement[] = [
   [['@material-ui/codemod'], '@mui/codemod'],

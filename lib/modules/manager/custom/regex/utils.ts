@@ -4,7 +4,7 @@ import { logger } from '../../../../logger/index.ts';
 import * as template from '../../../../util/template/index.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { ValidMatchFields } from '../utils.ts';
-import { validMatchFields } from '../utils.ts';
+import { parseExtractVersionValue, validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,
   PackageFileInfo,
@@ -33,6 +33,9 @@ function updateDependency(
     case 'indentation':
       dependency.indentation = isEmptyStringOrWhitespace(value) ? value : '';
       break;
+    case 'extractVersion':
+      dependency.extractVersion = parseExtractVersionValue(value);
+      break;
     default:
       dependency[field] = value;
       break;
@@ -54,11 +57,14 @@ export function createDependency(
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {
-        const compiled = template.compile(
-          tmpl,
-          { ...groups, packageFile: packageFileName, packageFileDir },
-          false,
-        );
+        const compiled =
+          field === 'extractVersion'
+            ? tmpl
+            : template.compile(
+                tmpl,
+                { ...groups, packageFile: packageFileName, packageFileDir },
+                false,
+              );
         updateDependency(dependency, field, compiled);
       } catch {
         logger.warn(
