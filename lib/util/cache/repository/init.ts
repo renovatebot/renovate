@@ -24,14 +24,14 @@ export async function initRepoCache(config: RepoCacheConfig): Promise<void> {
 
   if (repositoryCache === 'enabled') {
     const cache = CacheFactory.get(repository!, repoFingerprint, type);
-    await instrument('repository-cache.load', () => cache.load());
+    await instrument('load RepoCache', () => cache.load());
     setCache(cache);
     return;
   }
 
   if (repositoryCache === 'reset') {
     const cache = CacheFactory.get(repository!, repoFingerprint, type);
-    await instrument('repository-cache.save', () => cache.save());
+    await instrument('save RepoCache', () => cache.save());
     setCache(cache);
     return;
   }

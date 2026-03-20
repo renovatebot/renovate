@@ -24,7 +24,7 @@ export async function saveCache(): Promise<void> {
   if (GlobalConfig.get('dryRun')) {
     logger.info(`DRY-RUN: Would save repository cache.`);
   } else {
-    await instrument('repository-cache.save', () => repoCache.save());
+    await instrument('save RepoCache', () => repoCache.save());
   }
 }
 
