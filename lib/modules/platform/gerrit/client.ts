@@ -11,6 +11,7 @@ import type {
   GerritChange,
   GerritChangeMessageInfo,
   GerritFindPRConfig,
+  GerritHashtagsInput,
   GerritMergeableInfo,
   GerritProjectInfo,
   GerritRequestDetail,
@@ -242,10 +243,19 @@ class GerritClient {
     );
   }
 
-  async deleteHashtag(changeNumber: number, hashtag: string): Promise<void> {
-    await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
-      body: { remove: [hashtag] },
-    });
+  async setHashtags(
+    changeNumber: number,
+    hashtagsInput: GerritHashtagsInput,
+  ): Promise<void> {
+    const add = hashtagsInput.add?.length ? hashtagsInput.add : undefined;
+    const remove = hashtagsInput.remove?.length
+      ? hashtagsInput.remove
+      : undefined;
+    if (add ?? remove) {
+      await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
+        body: { add, remove },
+      });
+    }
   }
 
   async addReviewers(changeNumber: number, reviewers: string[]): Promise<void> {
@@ -262,7 +272,7 @@ class GerritClient {
 
   async addAssignee(changeNumber: number, assignee: string): Promise<void> {
     await this.gerritHttp.putJson<GerritAccountInfo>(
-      // TODO: refactor this as this API removed in Gerrit 3.8
+      // TODO: use CCs instead as Gerrit 3.8+ no longer supports assignees
       `a/changes/${changeNumber}/assignee`,
       {
         body: { assignee },
