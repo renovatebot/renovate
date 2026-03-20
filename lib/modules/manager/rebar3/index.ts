@@ -6,6 +6,7 @@ import * as hexVersioning from '../../versioning/hex/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
+export { getRangeStrategy } from './range.ts';
 
 export const url = 'https://rebar3.org';
 export const categories: Category[] = ['erlang'];
