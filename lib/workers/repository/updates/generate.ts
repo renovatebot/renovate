@@ -1,4 +1,9 @@
-import { isArray, isNonEmptyString, isString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { markdownTable } from 'markdown-table';
 import semver from 'semver';
@@ -141,18 +146,23 @@ function compilePrTitle(
   if (!upgrade.prTitleStrict) {
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {
-      upgrade.prTitle +=
-        upgrade.updateType === 'major' && upgrade.separateMajorMinor
-          ? ' (major)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'minor' && upgrade.separateMinorPatch
-          ? ' (minor)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'patch' && upgrade.separateMinorPatch
-          ? ' (patch)'
-          : '';
+      const hasVersionInTitle = isNonEmptyStringAndNotWhitespace(
+        template.compile(upgrade.commitMessageExtra ?? '', upgrade),
+      );
+      if (!hasVersionInTitle) {
+        upgrade.prTitle +=
+          upgrade.updateType === 'major' && upgrade.separateMajorMinor
+            ? ' (major)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'minor' && upgrade.separateMinorPatch
+            ? ' (minor)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'patch' && upgrade.separateMinorPatch
+            ? ' (patch)'
+            : '';
+      }
     }
   }
   // Compile again to allow for nested templates
