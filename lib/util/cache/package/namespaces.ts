@@ -57,6 +57,7 @@ export const packageCacheNamespaces = [
   'datasource-git',
   'datasource-forgejo-releases',
   'datasource-forgejo-tags',
+  'datasource-gerrit-tags',
   'datasource-gitea-releases',
   'datasource-gitea-tags',
   'datasource-github-digest',
