@@ -604,6 +604,8 @@ describe('modules/versioning/maven/compare', () => {
       ${'],v1.0]'}               | ${'v2.0'}    | ${'],v2.0]'}
       ${'(,v1.0)'}               | ${'v2.0'}    | ${'(,v3.0)'}
       ${'[v1.2.3,]'}             | ${'v1.2.4'}  | ${'[v1.2.3,]'}
+      ${'[3,4-alpha)'}           | ${'4.3.2'}   | ${'[4,5-alpha)'}
+      ${'[v3,v4-alpha)'}         | ${'v4.3.2'}  | ${'[v4,v5-alpha)'}
     `(
       'autoExtendMavenRange("$range", "$version") === $expected',
       ({ range, version, expected }) => {
