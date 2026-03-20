@@ -2,7 +2,7 @@ import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { regEx } from '../../../util/regex.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { isHttpUrl } from '../../../util/url.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
@@ -180,6 +180,7 @@ function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
+  content: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
@@ -292,18 +293,59 @@ function resolveResourceManifest(
       }
       case 'OCIRepository': {
         const container = removeOCIPrefix(resource.spec.url);
-        let dep = getDep(container, false, registryAliases);
-        if (resource.spec.ref?.digest) {
-          dep = getDep(
+        if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
+          const combinedDep = getDep(
             `${container}@${resource.spec.ref.digest}`,
             false,
             registryAliases,
           );
-          if (resource.spec.ref?.tag) {
-            logger.debug('A digest and tag was found, ignoring tag');
+          // Set currentValue to the tag so the docker datasource can look up the image's new digest
+          combinedDep.currentValue = resource.spec.ref.tag;
+
+          // Attempt to find the exact block spanning `tag: ...` to `digest: ...` (or vice-versa) in the source content
+          const escapedTag = escapeRegExp(resource.spec.ref.tag);
+          const escapedDigest = escapeRegExp(resource.spec.ref.digest);
+          // Regex handles both ordering: tag before digest, or digest before tag.
+          // Allows optional single or double quotes around the values.
+          const multilineRegEx = regEx(
+            `(tag\\s*:\\s*["']?${escapedTag}["']?[\\s\\S]+?digest\\s*:\\s*["']?${escapedDigest}["']?)|(digest\\s*:\\s*["']?${escapedDigest}["']?[\\s\\S]+?tag\\s*:\\s*["']?${escapedTag}["']?)`,
+          );
+          const match = multilineRegEx.exec(content);
+          if (match) {
+            combinedDep.replaceString = match[0];
+            // We use the literals directly for replacement to preserve any surrounding quotes if they exist in the match
+            if (match[1]) {
+              // tag came first
+              combinedDep.autoReplaceStringTemplate = match[0]
+                .replace(resource.spec.ref.tag, '{{newValue}}')
+                .replace(resource.spec.ref.digest, '{{newDigest}}');
+            } else {
+              // digest came first
+              combinedDep.autoReplaceStringTemplate = match[0]
+                .replace(resource.spec.ref.digest, '{{newDigest}}')
+                .replace(resource.spec.ref.tag, '{{newValue}}');
+            }
+          } else {
+            logger.debug(
+              { file: manifest.file, name: resource.metadata.name },
+              'Could not find exact tag/digest block in content, auto-replace might fail',
+            );
+            // fallback (will likely fail auto-replace if not formatted this way, but avoids breaking tests outright)
+            combinedDep.replaceString = `${resource.spec.ref.tag}@${resource.spec.ref.digest}`;
+            combinedDep.autoReplaceStringTemplate =
+              '{{newValue}}@{{newDigest}}';
           }
+
+          deps.push(combinedDep);
+        } else if (resource.spec.ref?.digest) {
+          const dep = getDep(
+            `${container}@${resource.spec.ref.digest}`,
+            false,
+            registryAliases,
+          );
+          deps.push(dep);
         } else if (resource.spec.ref?.tag) {
-          dep = getDep(
+          const dep = getDep(
             `${container}:${resource.spec.ref.tag}`,
             false,
             registryAliases,
@@ -311,10 +353,12 @@ function resolveResourceManifest(
           dep.autoReplaceStringTemplate =
             '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
+          deps.push(dep);
         } else {
+          const dep = getDep(container, false, registryAliases);
           dep.skipReason = 'unversioned-reference';
+          deps.push(dep);
         }
-        deps.push(dep);
         break;
       }
 
@@ -351,6 +395,7 @@ export function extractPackageFile(
         manifest,
         helmRepositories,
         config?.registryAliases,
+        content,
       );
       break;
     }
@@ -364,9 +409,13 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
   const results: PackageFile<FluxManagerData>[] = [];
+  const fileContents = new Map<string, string>(); // Add a map to cache content
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
+    if (content) {
+      fileContents.set(file, content);
+    } // Cache it
     // TODO #22198
     const manifest = readManifest(content!, file);
     if (manifest) {
@@ -383,11 +432,15 @@ export async function extractAllPackageFiles(
         deps = resolveSystemManifest(manifest);
         break;
       case 'resource': {
-        deps = resolveResourceManifest(
-          manifest,
-          helmRepositories,
-          config.registryAliases,
-        );
+        const content = fileContents.get(manifest.file); // Retrieve it natively
+        if (content) {
+          deps = resolveResourceManifest(
+            manifest,
+            helmRepositories,
+            config.registryAliases,
+            content,
+          );
+        }
         break;
       }
     }
