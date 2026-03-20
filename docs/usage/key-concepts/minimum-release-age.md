@@ -44,6 +44,11 @@ To protect against this, it's recommended to ensure that your package manager co
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
 
+<!-- prettier-ignore -->
+!!! note
+    For uv, Renovate reads `[tool.uv] exclude-newer` from `pyproject.toml` and uses the more restrictive (older) date between it and `minimumReleaseAge`.
+    See uv's [dependency bot integration guide](https://docs.astral.sh/uv/guides/integration/dependency-bots/#dependency-cooldown) for details on configuring `exclude-newer`.
+
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 <!-- prettier-ignore -->
