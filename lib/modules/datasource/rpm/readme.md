@@ -7,14 +7,40 @@ According to this Pulp project doc, <https://docs.pulpproject.org/en/2.10/plugin
 
 ## Set URL when using an RPM repository
 
-To use an RPM repository with the datasource, you must set a `registryUrl` with the directory that contains the `repomd.xml` and corresponding `primary.xml`.
+To use an RPM repository with the datasource, you must set a `registryUrl` with the directory that contains the `repomd.xml` and corresponding repository metadata.
+
+Renovate reads `repomd.xml` first to discover the available metadata files.
+If the repository exposes `primary_db` / `primary.sqlite.gz`, Renovate will use it first.
+Otherwise, or if the SQLite metadata cannot be used, Renovate falls back to `primary.xml.gz`.
+
+If you need to control this behavior explicitly, set `rpmMetadataSource` to one of:
+
+- `auto`: prefer `primary_db`, fall back to `primary`
+- `primary_db`: require `primary_db` metadata
+- `primary`: require `primary` metadata
+
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["rpm"],
+      "rpmMetadataSource": "primary"
+    }
+  ]
+}
+```
 
 **Example**:
 
 If we have
 
 - `http://example.com/repo/repodata/repomd.xml`
-- `http://example.com/repo/repodata/<SHA256>-primary.xml` where `<SHA256>` is a dynamically generated SHA256 pattern.
+- `http://example.com/repo/repodata/<SHA256>-primary.sqlite.gz` or
+- `http://example.com/repo/repodata/<SHA256>-primary.xml.gz`
+
+where `<SHA256>` is a dynamically generated SHA256 pattern.
 
 Then the `registryUrl` should set as `http://example.com/repo/repodata/` or `http://example.com/repo/repodata`.
 
@@ -49,7 +75,7 @@ where the versioning format could be `<semantic version>-<revision or release>`,
 }
 ```
 
-In an RPM repository, the `<SHA256>-primary.xml` looks like this:
+When XML metadata is used, the `<SHA256>-primary.xml.gz` expands to content like this:
 
 ```
 `<?xml version="1.0" encoding="UTF-8"?>
@@ -99,8 +125,11 @@ Or just `1.1.0` if `rel` (like `example-package2`) is not available.
 
 ## Limitation and Consideration
 
+When available, Renovate prefers `primary_db` / `primary.sqlite.gz`, which is typically faster for repeated package lookups in large RPM repositories.
+
+If the repository does not provide SQLite metadata, Renovate falls back to `primary.xml.gz`.
 In real-world scenarios, the decompressed `primary.xml` file from an RPM repository can be extremely large.
-To handle this efficiently, this implementation uses streaming XML parsing, which processes the file incrementally and avoids loading the entire XML into memory.
+To handle this efficiently, the XML fallback uses streaming XML parsing, which processes the file incrementally and avoids loading the entire XML into memory.
 
 Streaming XML parsing is a practical solution for large files in Node.js, but for extremely large or complex cases (e.g., files exceeding ~512MB), you may still encounter memory or performance issues.
 For such scenarios, consider using more robust approaches such as native modules, optimized SAX parsers, or external tools.

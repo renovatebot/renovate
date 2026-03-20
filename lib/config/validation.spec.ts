@@ -153,6 +153,45 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('allows rpmMetadataSource in packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchDatasources: ['rpm'],
+            rpmMetadataSource: 'primary',
+          },
+        ],
+      } satisfies RenovateConfig;
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('warns for invalid rpmMetadataSource', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchDatasources: ['rpm'],
+            rpmMetadataSource: 'broken',
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error -- invalid config for validation test
+        config,
+      );
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'Invalid value `broken` for `packageRules[0].rpmMetadataSource`. The allowed values are auto, primary, primary_db.',
+        },
+      ]);
+    });
+
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
