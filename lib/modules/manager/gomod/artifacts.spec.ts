@@ -1034,6 +1034,165 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
+  it('supports docker mode with authenticated GOPROXY', async () => {
+    process.env.GOPROXY = 'https://private-proxy.example.com,direct';
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      allowedEnv: ['GOPROXY'],
+    });
+    hostRules.add({
+      username: 'username1',
+      password: 'password1',
+      hostType: 'go-proxy',
+      matchHost: 'https://private-proxy.example.com',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
+    });
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/renovatebot/base-image' +
+          ' bash -l -c "' +
+          'install-tool golang 1.23.3' +
+          ' && ' +
+          'go get -d -t ./...' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            GOPROXY:
+              'https://username1:password1@private-proxy.example.com/,direct',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('supports docker mode with two authenticated GOPROXY', async () => {
+    process.env.GOPROXY =
+      'https://private-proxy.example.com,https://private-proxy.enterprise.com,https://proxy.golang.org,direct';
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+    });
+    hostRules.add({
+      username: 'username1',
+      password: 'password1',
+      hostType: 'go-proxy',
+      matchHost: 'https://private-proxy.example.com',
+    });
+    hostRules.add({
+      token: 'token2',
+      hostType: 'go-proxy',
+      matchHost: 'https://private-proxy.enterprise.com',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
+    });
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/renovatebot/base-image' +
+          ' bash -l -c "' +
+          'install-tool golang 1.23.3' +
+          ' && ' +
+          'go get -d -t ./...' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            GOPROXY:
+              'https://username1:password1@private-proxy.example.com/,https://token2@private-proxy.enterprise.com/,https://proxy.golang.org,direct',
+          },
+        },
+      },
+    ]);
+  });
+
   it('supports docker mode with 2 credentials', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
