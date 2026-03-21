@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -215,6 +216,145 @@ kind: ConfigMap
             replaceString: 'busybox',
           },
         ],
+      });
+    });
+
+    describe('image volume references', () => {
+      it.each`
+        kind                       | apiVersion
+        ${'DaemonSet'}             | ${'apps/v1'}
+        ${'Deployment'}            | ${'apps/v1'}
+        ${'Job'}                   | ${'batch/v1'}
+        ${'ReplicaSet'}            | ${'apps/v1'}
+        ${'ReplicationController'} | ${'v1'}
+        ${'StatefulSet'}           | ${'apps/v1'}
+      `(
+        'extracts image volumes from $kind',
+        ({ kind, apiVersion }: { kind: string; apiVersion: string }) => {
+          const res = extractPackageFile(
+            codeBlock`
+              apiVersion: ${apiVersion}
+              kind: ${kind}
+              metadata:
+                name: test
+              spec:
+                template:
+                  spec:
+                    volumes:
+                      - name: vol
+                        image:
+                          reference: quay.io/test/image:v1.0.0
+            `,
+            'file.yaml',
+            {},
+          );
+
+          expect(res?.deps).toContainEqual({
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.0.0',
+            datasource: 'docker',
+            depName: 'quay.io/test/image',
+            packageName: 'quay.io/test/image',
+            replaceString: 'quay.io/test/image:v1.0.0',
+          });
+        },
+      );
+
+      it('extracts image volumes from Pod and CronJob', () => {
+        const res = extractPackageFile(
+          codeBlock`
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: pod-test
+            spec:
+              volumes:
+                - name: vol
+                  image:
+                    reference: quay.io/test/pod-image:v1.0.0
+            ---
+            apiVersion: batch/v1
+            kind: CronJob
+            metadata:
+              name: cronjob-test
+            spec:
+              jobTemplate:
+                spec:
+                  template:
+                    spec:
+                      volumes:
+                        - name: vol
+                          image:
+                            reference: quay.io/test/cronjob-image:v2.0.0
+          `,
+          'file.yaml',
+          {},
+        );
+
+        expect(res?.deps).toStrictEqual([
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.0.0',
+            datasource: 'docker',
+            depName: 'quay.io/test/pod-image',
+            packageName: 'quay.io/test/pod-image',
+            replaceString: 'quay.io/test/pod-image:v1.0.0',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v2.0.0',
+            datasource: 'docker',
+            depName: 'quay.io/test/cronjob-image',
+            packageName: 'quay.io/test/cronjob-image',
+            replaceString: 'quay.io/test/cronjob-image:v2.0.0',
+          },
+          {
+            currentValue: 'batch/v1',
+            datasource: 'kubernetes-api',
+            depName: 'CronJob',
+            versioning: 'kubernetes-api',
+          },
+        ]);
+      });
+
+      it('skips malformed volume entries and extracts valid ones', () => {
+        const res = extractPackageFile(
+          codeBlock`
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: pod-test
+            spec:
+              volumes:
+                - name: bad-vol
+                  image:
+                    notReference: invalid
+                - name: good-vol
+                  image:
+                    reference: quay.io/test/image:v1.0.0
+          `,
+          'file.yaml',
+          {},
+        );
+
+        expect(res?.deps).toStrictEqual([
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.0.0',
+            datasource: 'docker',
+            depName: 'quay.io/test/image',
+            packageName: 'quay.io/test/image',
+            replaceString: 'quay.io/test/image:v1.0.0',
+          },
+        ]);
       });
     });
   });
