@@ -103,6 +103,7 @@ export const packageCacheNamespaces = [
   'github-releases-datasource-v2',
   'github-tags-datasource-v2',
   'merge-confidence',
+  'pkgbuild-hash',
   'preset',
   'terraform-provider-hash',
   'url-sha256',
