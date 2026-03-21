@@ -124,7 +124,7 @@ describe('modules/manager/cake/index', () => {
   it('calls applyRegistries to honor nuget.config files if present for .cake files', async () => {
     const applyRegistriesSpy = vi
       .spyOn(nugetExtractUtil, 'applyRegistries')
-      .mockImplementation((deps: any) => deps);
+      .mockImplementation((deps) => deps);
 
     const content = codeBlock`#addin nuget:?package=Contoso.SomePackage&version=1.2.3`;
     await extractPackageFile(content, 'build.cake', config);
@@ -135,7 +135,7 @@ describe('modules/manager/cake/index', () => {
   it('calls applyRegistries to honor nuget.config files if present for InstallTools', async () => {
     const applyRegistriesSpy = vi
       .spyOn(nugetExtractUtil, 'applyRegistries')
-      .mockImplementation((deps: any) => deps);
+      .mockImplementation((deps) => deps);
 
     const content = codeBlock`
       #:sdk Cake.Sdk
