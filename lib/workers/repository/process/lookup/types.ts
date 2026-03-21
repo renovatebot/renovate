@@ -59,6 +59,7 @@ export interface UpdateResult {
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string | null;
+  sourceTag?: string;
   currentVersion?: string;
   isSingleVersion?: boolean;
   lookupName?: string;
