@@ -1,4 +1,6 @@
 import { Fixtures } from '~test/fixtures.ts';
+import { partial } from '~test/util.ts';
+import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
@@ -12,6 +14,19 @@ const invalidGitRepoYaml = Fixtures.get('invalid_gitrepo.yaml');
 
 const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
 
+const validFleetYamlWithAlias = Fixtures.get('reg_alias_fleet.yaml');
+
+const noConfig = partial<ExtractConfig>({
+  registryAliases: {},
+});
+
+const aliasConfig = partial<ExtractConfig>({
+  registryAliases: {
+    'https://registry.com/jetstack': 'https://charts.jetstack.io',
+    'registry.com/docker-io': 'registry-1.docker.io',
+  },
+});
+
 describe('modules/manager/fleet/extract', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -19,13 +34,13 @@ describe('modules/manager/fleet/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('should return null if empty content', () => {
-      const result = extractPackageFile('', 'fleet.yaml');
+      const result = extractPackageFile('', 'fleet.yaml', noConfig);
 
       expect(result).toBeNull();
     });
 
     it('should return null if a unknown manifest is supplied', () => {
-      const result = extractPackageFile(configMapYaml, 'fleet.yaml');
+      const result = extractPackageFile(configMapYaml, 'fleet.yaml', noConfig);
 
       expect(result).toBeNull();
     });
@@ -37,13 +52,18 @@ describe('modules/manager/fleet/extract', () => {
 kind: Fleet
 < `,
           'fleet.yaml',
+          noConfig,
         );
 
         expect(result).toBeNull();
       });
 
       it('should parse valid configuration', () => {
-        const result = extractPackageFile(validFleetYaml, 'fleet.yaml');
+        const result = extractPackageFile(
+          validFleetYaml,
+          'fleet.yaml',
+          noConfig,
+        );
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([
@@ -81,10 +101,38 @@ kind: Fleet
         ]);
       });
 
+      it('should support registryAlias configuration', () => {
+        const result = extractPackageFile(
+          validFleetYamlWithAlias,
+          'fleet.yaml',
+          aliasConfig,
+        );
+
+        expect(result).not.toBeNull();
+        expect(result?.deps).toMatchObject([
+          {
+            currentValue: 'v1.8.0',
+            datasource: 'helm',
+            depName: 'cert-manager',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+          },
+          {
+            currentValue: '7.1.2',
+            datasource: 'docker',
+            depName: 'registry.com/docker-io/bitnamicharts/external-dns',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            pinDigests: false,
+          },
+        ]);
+      });
       it('should parse valid configuration with target customization', () => {
         const result = extractPackageFile(
           validFleetYamlWithCustom,
           'fleet.yaml',
+          noConfig,
         );
 
         expect(result).not.toBeNull();
@@ -157,7 +205,11 @@ kind: Fleet
       });
 
       it('should parse parse invalid configurations', () => {
-        const result = extractPackageFile(inValidFleetYaml, 'fleet.yaml');
+        const result = extractPackageFile(
+          inValidFleetYaml,
+          'fleet.yaml',
+          noConfig,
+        );
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([
@@ -196,13 +248,18 @@ kind: Fleet
  kind: GitRepo
  < `,
           'test.yaml',
+          noConfig,
         );
 
         expect(result).toBeNull();
       });
 
       it('should parse valid configuration', () => {
-        const result = extractPackageFile(validGitRepoYaml, 'test.yaml');
+        const result = extractPackageFile(
+          validGitRepoYaml,
+          'test.yaml',
+          noConfig,
+        );
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([
@@ -224,7 +281,11 @@ kind: Fleet
       });
 
       it('should parse invalid configuration', () => {
-        const result = extractPackageFile(invalidGitRepoYaml, 'test.yaml');
+        const result = extractPackageFile(
+          invalidGitRepoYaml,
+          'test.yaml',
+          noConfig,
+        );
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([

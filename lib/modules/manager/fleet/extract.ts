@@ -6,7 +6,11 @@ import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import { checkIfStringIsPath } from '../terraform/util.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
 import { FleetFile, type FleetHelmBlock, GitRepo } from './schema.ts';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
@@ -39,7 +43,10 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   };
 }
 
-function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
+function extractFleetHelmBlock(
+  doc: FleetHelmBlock,
+  config: ExtractConfig,
+): PackageDependency {
   const dep: PackageDependency = {
     depType: 'fleet',
     datasource: HelmDatasource.id,
@@ -56,6 +63,7 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
     const dockerDep = getDep(
       `${removeOCIPrefix(doc.chart)}:${doc.version}`,
       false,
+      config.registryAliases,
     );
 
     return {
@@ -82,7 +90,18 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
       skipReason: 'no-repository',
     };
   }
-  dep.registryUrls = [doc.repo];
+
+  if (!doc.repo) {
+    dep.skipReason = 'placeholder-url';
+    return dep;
+  }
+
+  const alias = config.registryAliases?.[doc.repo];
+  if (doc.repo && alias) {
+    dep.registryUrls = [alias];
+  } else {
+    dep.registryUrls = [doc.repo];
+  }
 
   const currentValue = doc.version;
   if (!doc.version) {
@@ -98,10 +117,13 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   };
 }
 
-function extractFleetFile(doc: FleetFile): PackageDependency[] {
+function extractFleetFile(
+  doc: FleetFile,
+  config: ExtractConfig,
+): PackageDependency[] {
   const result: PackageDependency[] = [];
 
-  result.push(extractFleetHelmBlock(doc.helm));
+  result.push(extractFleetHelmBlock(doc.helm, config));
 
   if (!isUndefined(doc.targetCustomizations)) {
     // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
@@ -110,11 +132,14 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
     delete helmBlockContext.version;
 
     for (const [index, custom] of doc.targetCustomizations.entries()) {
-      const dep = extractFleetHelmBlock({
-        // merge base config with customization
-        ...helmBlockContext,
-        ...custom.helm,
-      });
+      const dep = extractFleetHelmBlock(
+        {
+          // merge base config with customization
+          ...helmBlockContext,
+          ...custom.helm,
+        },
+        config,
+      );
       result.push({
         // overwrite name with customization name to allow splitting of PRs
         ...dep,
@@ -128,6 +153,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config: ExtractConfig,
 ): PackageFileContent | null {
   if (!content) {
     return null;
@@ -139,7 +165,7 @@ export function extractPackageFile(
       customSchema: FleetFile,
       failureBehaviour: 'filter',
     });
-    const fleetDeps = docs.flatMap(extractFleetFile);
+    const fleetDeps = docs.flatMap((doc) => extractFleetFile(doc, config));
 
     deps.push(...fleetDeps);
   } else {
