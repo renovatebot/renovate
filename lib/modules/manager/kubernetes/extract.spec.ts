@@ -323,6 +323,29 @@ kind: ConfigMap
         ]);
       });
 
+      it('does not extract image volumes for unsupported kind', () => {
+        const res = extractPackageFile(
+          codeBlock`
+            apiVersion: extensions/v1beta1
+            kind: NetworkPolicy
+            metadata:
+              name: test-network-policy
+            spec:
+              podSelector: {}
+          `,
+          'file.yaml',
+          {},
+        );
+        expect(res?.deps).toStrictEqual([
+          {
+            currentValue: 'extensions/v1beta1',
+            datasource: 'kubernetes-api',
+            depName: 'NetworkPolicy',
+            versioning: 'kubernetes-api',
+          },
+        ]);
+      });
+
       it('skips malformed volume entries and extracts valid ones', () => {
         const res = extractPackageFile(
           codeBlock`
