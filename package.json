@@ -259,7 +259,7 @@
     "semver-utils": "1.1.4",
     "shlex": "3.0.0",
     "simple-git": "3.33.0",
-    "slugify": "1.6.6",
+    "slugify": "1.6.8",
     "source-map-support": "0.5.21",
     "strip-json-comments": "5.0.3",
     "toml-eslint-parser": "1.0.3",
@@ -272,7 +272,7 @@
     "zod": "4.3.6"
   },
   "optionalDependencies": {
-    "better-sqlite3": "12.6.2",
+    "better-sqlite3": "12.8.0",
     "openpgp": "6.3.0",
     "re2": "1.23.3"
   },
@@ -339,7 +339,7 @@
     "graphql": "16.13.1",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
-    "lint-staged": "16.3.3",
+    "lint-staged": "16.4.0",
     "markdownlint-cli2": "0.21.0",
     "markdownlint-cli2-formatter-template": "0.0.4",
     "memfs": "4.56.11",
