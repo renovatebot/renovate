@@ -230,6 +230,12 @@ Any Issues with missing labels will be put in a list in a new "error" Issue.
 
 The Action runs each week.
 
+## Checking Module Label Coverage
+
+Run `pnpm labels:check` to check whether all datasource, manager, and platform modules have matching GitHub labels.
+
+If you have permission to create labels, run `pnpm labels:sync` to create any missing labels with the default color and description.
+
 ### Apply the correct labels manually
 
 The Action will _not_ fix any badly labeled issues.
