@@ -33,15 +33,42 @@ export async function filterInternalChecks(
     currentVersion,
     datasource,
     depName,
+    maxMajorIncrement,
     packageName,
     internalChecksFilter,
   } = config;
   let release: Release | undefined = undefined;
   let pendingChecks = false;
   let pendingReleases: Release[] = [];
+  const maxMajorPendingReleases: Release[] = [];
+
+  // Pre-filter releases exceeding maxMajorIncrement
+  let releasesToCheck = sortedReleases;
+  if (maxMajorIncrement && maxMajorIncrement > 0 && currentVersion) {
+    const currentMajor = versioningApi.getMajor(currentVersion);
+    if (currentMajor !== null) {
+      const withinLimit: Release[] = [];
+      for (const r of sortedReleases) {
+        const releaseMajor = versioningApi.getMajor(r.version);
+        if (
+          releaseMajor !== null &&
+          releaseMajor - currentMajor > maxMajorIncrement
+        ) {
+          logger.once.debug(
+            `Skipping ${depName}@${r.version} because major increment ${releaseMajor - currentMajor} exceeds maxMajorIncrement ${maxMajorIncrement}`,
+          );
+          maxMajorPendingReleases.push(r);
+        } else {
+          withinLimit.push(r);
+        }
+      }
+      releasesToCheck = withinLimit;
+    }
+  }
+
   if (internalChecksFilter === 'none') {
     // Don't care if minimumReleaseAge or minimumConfidence are unmet
-    release = sortedReleases.pop();
+    release = releasesToCheck.pop();
   } else {
     const candidateVersionsWithoutReleaseTimestamp: Record<
       MinimumReleaseAgeBehaviour,
@@ -52,7 +79,7 @@ export async function filterInternalChecks(
     };
 
     // iterate through releases from highest to lowest, looking for the first which will pass checks if present
-    for (let candidateRelease of sortedReleases.reverse()) {
+    for (let candidateRelease of releasesToCheck.reverse()) {
       // merge the release data into dependency config
       let releaseConfig = mergeChildConfig(config, candidateRelease);
       // calculate updateType and then apply it
@@ -194,6 +221,29 @@ export async function filterInternalChecks(
           pendingChecks = true;
         }
       }
+    }
+  }
+
+  // Add maxMajorIncrement-exceeding releases to pending
+  pendingReleases = pendingReleases.concat(maxMajorPendingReleases);
+
+  // If no release was selected (e.g., all exceeded maxMajorIncrement),
+  // fall back to the highest pending release
+  if (!release && pendingReleases.length) {
+    release = pendingReleases.pop();
+    pendingReleases = [];
+  }
+
+  // Force pendingChecks if the chosen release exceeds maxMajorIncrement
+  if (release && maxMajorIncrement && maxMajorIncrement > 0 && currentVersion) {
+    const currentMajor = versioningApi.getMajor(currentVersion);
+    const releaseMajor = versioningApi.getMajor(release.version);
+    if (
+      currentMajor !== null &&
+      releaseMajor !== null &&
+      releaseMajor - currentMajor > maxMajorIncrement
+    ) {
+      pendingChecks = true;
     }
   }
 
