@@ -1,9 +1,12 @@
 import { Graph, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { getTransitiveDependents } from '../../../util/graph.ts';
+import {
+  getMatchingFiles,
+  getTransitiveDependents,
+  resolveRelativePathToRoot,
+} from '../../../util/graph.ts';
 import { regEx } from '../../../util/regex.ts';
-import { scm } from '../../platform/scm.ts';
 
 export interface ReplaceDirective {
   oldPath: string;
@@ -50,21 +53,16 @@ export function parseReplaceDirectives(content: string): ReplaceDirective[] {
 
 /**
  * Resolve a replace directive's local path to a repo-relative go.mod path.
- * Uses a virtual root (same technique as NuGet's reframeRelativePathToRootOfRepo)
- * to avoid issues with upath.resolve prepending cwd for relative paths.
  */
 export function resolveGoModulePath(
   baseGoModPath: string,
   directive: ReplaceDirective,
 ): string {
-  const virtualRoot = '/';
-  const absoluteBase = upath.resolve(virtualRoot, baseGoModPath);
-  const absoluteResolved = upath.resolve(
-    upath.dirname(absoluteBase),
+  const resolvedDir = resolveRelativePathToRoot(
+    baseGoModPath,
     directive.newPath,
-    'go.mod',
   );
-  return upath.relative(virtualRoot, absoluteResolved);
+  return upath.join(resolvedDir, 'go.mod');
 }
 
 /**
@@ -75,10 +73,7 @@ export function resolveGoModulePath(
 export async function buildGoModDependencyGraph(): Promise<Graph> {
   const graph = new Graph();
 
-  const allFiles = await scm.getFileList();
-  const goModFiles = allFiles.filter(
-    (f) => f.endsWith('/go.mod') || f === 'go.mod',
-  );
+  const goModFiles = await getMatchingFiles('go.mod');
 
   for (const goModFile of goModFiles) {
     graph.addNode(goModFile);

@@ -1,10 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
-import { logger } from '../../../logger/index.ts';
-import { getTransitiveDependents } from '../../../util/graph.ts';
-import { minimatchFilter } from '../../../util/minimatch.ts';
-import { scm } from '../../platform/scm.ts';
+import {
+  getMatchingFiles,
+  getTransitiveDependents,
+  resolveRelativePathToRoot,
+} from '../../../util/graph.ts';
 import type { ProjectFile } from './types.ts';
 import { readFileAsXmlDocument } from './util.ts';
 
@@ -66,7 +67,7 @@ export async function getDependentPackageFiles(
       upath.normalize(a),
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      reframeRelativePathToRootOfRepo(f, r),
+      resolveRelativePathToRoot(f, r),
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -90,39 +91,8 @@ export async function getDependentPackageFiles(
 }
 
 /**
- * Take the path relative from a project file, and make it relative from the root of the repo
- */
-function reframeRelativePathToRootOfRepo(
-  dependentProjectRelativePath: string,
-  projectReference: string,
-): string {
-  const virtualRepoRoot = '/';
-  const absoluteDependentProjectPath = upath.resolve(
-    virtualRepoRoot,
-    dependentProjectRelativePath,
-  );
-  const absoluteProjectReferencePath = upath.resolve(
-    upath.dirname(absoluteDependentProjectPath),
-    projectReference,
-  );
-  const relativeProjectReferencePath = upath.relative(
-    virtualRepoRoot,
-    absoluteProjectReferencePath,
-  );
-
-  return relativeProjectReferencePath;
-}
-
-/**
  * Get a list of package files in localDir
  */
 async function getAllPackageFiles(): Promise<string[]> {
-  const allFiles = await scm.getFileList();
-  const filteredPackageFiles = allFiles.filter(
-    minimatchFilter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true }),
-  );
-
-  logger.trace({ filteredPackageFiles }, 'Found package files');
-
-  return filteredPackageFiles;
+  return getMatchingFiles('*.{cs,vb,fs}proj');
 }
