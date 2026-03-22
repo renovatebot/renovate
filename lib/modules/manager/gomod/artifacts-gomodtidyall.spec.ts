@@ -214,6 +214,120 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     );
   });
 
+  it('works together with gomodMassage - massages primary then tidies dependents', async () => {
+    const gomodWithReplace = codeBlock`
+      module github.com/renovate-tests/gomod1
+
+      require github.com/pkg/errors v0.7.0
+
+      replace github.com/pkg/errors => ../errors
+    `;
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+
+    vi.doMock('./package-tree.ts', () => ({
+      getGoModulesInTidyOrder: vi.fn().mockResolvedValue(['api/go.mod']),
+    }));
+
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', 'go.mod', 'api/go.sum'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New api/go.sum');
+    // Final go.mod read — simulates the massaged file on disk
+    // with // renovate-replace prefix that gets stripped during un-massage
+    fs.readLocalFile.mockResolvedValueOnce(
+      gomodWithReplace.replace(
+        'replace github.com/pkg/errors => ../errors',
+        '// renovate-replace replace github.com/pkg/errors => ../errors',
+      ),
+    );
+
+    const config: UpdateArtifactsConfig = {
+      constraints: { go: '1.21' },
+      postUpdateOptions: ['gomodMassage', 'gomodTidyAll'],
+    };
+
+    const result = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomodWithReplace,
+      config,
+    });
+
+    expect(result).not.toBeNull();
+
+    // Verify execution order: go get first, then primary tidy, then dependent tidy
+    const cmds = execSnapshots.map((s) => s.cmd);
+    const goGetIdx = cmds.findIndex((c) =>
+      typeof c === 'string' ? c.startsWith('go get') : false,
+    );
+    const primaryTidyIdx = cmds.findIndex((c) => c === 'go mod tidy');
+    const depTidyIdx = cmds.findIndex((c) =>
+      typeof c === 'string' ? c.includes('cd api') : false,
+    );
+
+    // go get runs first, then primary tidy, then dependent tidy
+    expect(goGetIdx).toBeGreaterThanOrEqual(0);
+    expect(primaryTidyIdx).toBeGreaterThan(goGetIdx);
+    expect(depTidyIdx).toBeGreaterThan(primaryTidyIdx);
+
+    // Verify the dependent tidy command runs after massage
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ cmd: '(cd api && go mod tidy)' }),
+      ]),
+    );
+  });
+
+  it('runs go mod tidy on primary module when gomodTidyAll is used alone without gomodTidy', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+
+    vi.doMock('./package-tree.ts', () => ({
+      getGoModulesInTidyOrder: vi.fn().mockResolvedValue(['api/go.mod']),
+    }));
+
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', 'api/go.sum'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New api/go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+
+    // gomodTidyAll WITHOUT gomodTidy — should still tidy the primary module
+    const config: UpdateArtifactsConfig = {
+      constraints: { go: '1.21' },
+      postUpdateOptions: ['gomodTidyAll'],
+    };
+
+    const result = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config,
+    });
+
+    expect(result).not.toBeNull();
+
+    // Verify primary module gets go mod tidy AND dependent gets subshell tidy
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ cmd: 'go mod tidy' }),
+        expect.objectContaining({ cmd: '(cd api && go mod tidy)' }),
+      ]),
+    );
+  });
+
   it('does not call package-tree when gomodTidyAll is not enabled', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');

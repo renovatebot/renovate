@@ -285,14 +285,15 @@ export async function updateArtifacts({
       tidyOpts += ' -e';
     }
 
+    const isGoModTidyAllRequired =
+      config.postUpdateOptions?.includes('gomodTidyAll') === true;
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
+        isGoModTidyAllRequired ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
-    const isGoModTidyAllRequired =
-      config.postUpdateOptions?.includes('gomodTidyAll') === true;
     if (isGoModTidyRequired) {
       args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
