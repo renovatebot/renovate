@@ -1,11 +1,9 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
+import { resolveRelativePathToRoot } from '../../../util/fs/index.ts';
+import { getMatchingFiles } from '../../../util/fs/repo.ts';
 import { getTransitiveDependents } from '../../../util/graph.ts';
-import {
-  getMatchingFiles,
-  resolveRelativePathToRoot,
-} from '../../../util/tree.ts';
 import type { ProjectFile } from './types.ts';
 import { readFileAsXmlDocument } from './util.ts';
 
