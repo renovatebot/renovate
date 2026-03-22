@@ -280,7 +280,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     expect(result![0].file!.path).toBe('go.sum');
   });
 
-  it('collects updated go.mod from dependent modules', async () => {
+  it('collects updated go.mod from dependent modules when only go.mod changed', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
@@ -290,12 +290,13 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       getGoModulesInTidyOrder: vi.fn().mockResolvedValue(['api/go.mod']),
     }));
 
+    // Only dependent go.mod modified (no go.sum changes anywhere)
+    // This exercises the gomodTidyAllModules.some() branch in hasAnyChanges
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
-        modified: ['api/go.mod', 'api/go.sum'],
+        modified: ['api/go.mod'],
       }),
     );
-    fs.readLocalFile.mockResolvedValueOnce('New api/go.sum');
     fs.readLocalFile.mockResolvedValueOnce('New api/go.mod');
     fs.readLocalFile.mockResolvedValueOnce(gomod1); // final primary go.mod read
 
@@ -314,9 +315,6 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     expect(result).not.toBeNull();
     expect(result).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          file: expect.objectContaining({ path: 'api/go.sum' }),
-        }),
         expect.objectContaining({
           file: expect.objectContaining({ path: 'api/go.mod' }),
         }),
