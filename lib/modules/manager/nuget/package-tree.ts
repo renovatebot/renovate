@@ -1,8 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
-import { resolveRelativePathToRoot } from '../../../util/fs/index.ts';
-import { getMatchingFiles } from '../../../util/fs/repo.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import {
+  getMatchingFiles,
+  resolveRelativePathToRoot,
+} from '../../../util/fs/index.ts';
 import { getTransitiveDependents } from '../../../util/graph.ts';
 import type { ProjectFile } from './types.ts';
 import { readFileAsXmlDocument } from './util.ts';
@@ -19,7 +22,10 @@ export async function getDependentPackageFiles(
   isCentralManagement = false,
   isGlobalJson = false,
 ): Promise<ProjectFile[]> {
-  const packageFiles = await getMatchingFiles('*.{cs,vb,fs}proj');
+  const packageFiles = getMatchingFiles(
+    '*.{cs,vb,fs}proj',
+    await scm.getFileList(),
+  );
   const graph = new Graph();
 
   if (isCentralManagement) {

@@ -9,7 +9,11 @@ import {
   resolveGoModulePath,
 } from './package-tree.ts';
 
-vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/fs/index.ts', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('../../../util/fs/index.ts')>();
+  return { ...actual, readLocalFile: vi.fn() };
+});
 
 describe('modules/manager/gomod/package-tree', () => {
   describe('parseReplaceDirectives', () => {

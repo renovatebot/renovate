@@ -1,10 +1,11 @@
 import { Graph, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
+import { scm } from '../../../modules/platform/scm.ts';
 import {
+  getMatchingFiles,
   readLocalFile,
   resolveRelativePathToRoot,
 } from '../../../util/fs/index.ts';
-import { getMatchingFiles } from '../../../util/fs/repo.ts';
 import { getTransitiveDependents } from '../../../util/graph.ts';
 import { regEx } from '../../../util/regex.ts';
 
@@ -73,7 +74,7 @@ export function resolveGoModulePath(
 export async function buildGoModDependencyGraph(): Promise<Graph> {
   const graph = new Graph();
 
-  const goModFiles = await getMatchingFiles('go.mod');
+  const goModFiles = getMatchingFiles('go.mod', await scm.getFileList());
 
   for (const goModFile of goModFiles) {
     graph.addNode(goModFile);

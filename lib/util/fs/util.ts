@@ -2,6 +2,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
+import { minimatchFilter } from '../minimatch.ts';
 
 /**
  * Take a relative path reference from a repo-relative file and resolve it
@@ -21,6 +22,19 @@ export function resolveRelativePathToRoot(
     relativePath,
   );
   return upath.relative(virtualRoot, absoluteResolved);
+}
+
+/**
+ * Filter a list of repo-relative file paths by a minimatch pattern.
+ * Shared between managers for building dependency graphs from specific file types.
+ */
+export function getMatchingFiles(
+  pattern: string,
+  allFiles: string[],
+): string[] {
+  return allFiles.filter(
+    minimatchFilter(pattern, { matchBase: true, nocase: true }),
+  );
 }
 
 function assertBaseDir(path: string, allowedDir: string): void {
