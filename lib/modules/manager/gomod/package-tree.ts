@@ -1,12 +1,12 @@
 import { Graph, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { getTransitiveDependents } from '../../../util/graph.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   getMatchingFiles,
-  getTransitiveDependents,
   resolveRelativePathToRoot,
-} from '../../../util/graph.ts';
-import { regEx } from '../../../util/regex.ts';
+} from '../../../util/tree.ts';
 
 export interface ReplaceDirective {
   oldPath: string;
