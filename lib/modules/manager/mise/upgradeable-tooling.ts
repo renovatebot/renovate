@@ -375,6 +375,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
     },
   },
+  prettier: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'prettier/prettier',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   protoc: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
