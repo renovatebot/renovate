@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { partial } from '~test/util.ts';
 import type { ExtractConfig } from '../types.ts';
@@ -13,20 +14,6 @@ const validGitRepoYaml = Fixtures.get('valid_gitrepo.yaml');
 const invalidGitRepoYaml = Fixtures.get('invalid_gitrepo.yaml');
 
 const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
-
-const validFleetYamlWithAlias = `
-defaultNamespace: cert-manager
-helm:
-  chart: cert-manager
-  repo: https://registry.com/jetstack
-  releaseName: cert-manager
-  version: v1.8.0
----
-defaultNamespace: external-dns
-helm:
-  chart: oci://registry.com/docker-io/bitnamicharts/external-dns
-  version: 7.1.2
-`;
 
 const aliasConfig = partial<ExtractConfig>({
   registryAliases: {
@@ -107,7 +94,19 @@ kind: Fleet
 
       it('should support registryAlias configuration', () => {
         const result = extractPackageFile(
-          validFleetYamlWithAlias,
+          codeBlock`
+            defaultNamespace: cert-manager
+            helm:
+              chart: cert-manager
+              repo: https://registry.com/jetstack
+              releaseName: cert-manager
+              version: v1.8.0
+            ---
+            defaultNamespace: external-dns
+            helm:
+              chart: oci://registry.com/docker-io/bitnamicharts/external-dns
+              version: 7.1.2
+            `,
           'fleet.yaml',
           aliasConfig,
         );
