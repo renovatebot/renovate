@@ -91,13 +91,8 @@ function extractFleetHelmBlock(
     };
   }
 
-  if (!doc.repo) {
-    dep.skipReason = 'placeholder-url';
-    return dep;
-  }
-
   const alias = config.registryAliases?.[doc.repo];
-  if (doc.repo && alias) {
+  if (alias) {
     dep.registryUrls = [alias];
   } else {
     dep.registryUrls = [doc.repo];
