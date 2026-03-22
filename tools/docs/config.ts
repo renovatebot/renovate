@@ -131,9 +131,6 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       ) {
         el[1] = `<code>${el[1]}</code>`;
       }
-      if (el[0] === 'supportsTemplating' && el[1]) {
-        el[1] = `<a href="templates/">true</a>`;
-      }
       if (
         // objects and arrays should be printed in JSON notation
         ((type === 'object' || type === 'array') &&
@@ -207,7 +204,7 @@ function genExperimentalMsg(el: Record<string, any>): string {
 function genTemplatingMsg(): string {
   return (
     '\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate\'s template syntax"\n' +
-    indent`${2}See [templates](templates/) for available variables and helpers.` +
+    indent`${2}See [templates](templates.md) for available variables and helpers.` +
     '\n'
   );
 }
@@ -331,14 +328,15 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       for (const key of lookupKeys) {
         const [headerIndex, footerIndex] = indexed[key];
-
-        configOptionsRaw[headerIndex] +=
+        let sectionContent =
           `\n${option.description}\n\n` +
           genTable(Object.entries(el), option.type, option.default);
 
         if (el.supportsTemplating) {
-          configOptionsRaw[footerIndex] += genTemplatingMsg();
+          sectionContent += genTemplatingMsg();
         }
+
+        configOptionsRaw[headerIndex] += sectionContent;
 
         if (el.experimental) {
           configOptionsRaw[footerIndex] += genExperimentalMsg(el);
