@@ -10,7 +10,7 @@ export const url = 'https://github.com/yonaskolb/XcodeGen';
 export const categories: Category[] = ['swift'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['/(^|/)project\\.yml$/'],
+  managerFilePatterns: ['**/project.yml'],
   pinDigests: false,
 };
 
