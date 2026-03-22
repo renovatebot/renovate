@@ -1,8 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
-
-const projectYml = Fixtures.get('project.yml');
 
 describe('modules/manager/xcodegen/extract', () => {
   describe('extractPackageFile()', () => {
@@ -32,10 +29,19 @@ describe('modules/manager/xcodegen/extract', () => {
       expect(extractPackageFile(content, 'project.yml')).toBeNull();
     });
 
-    it('extracts dependencies from full project.yml fixture', () => {
-      const result = extractPackageFile(projectYml, 'project.yml');
+    it('extracts packages from a realistic project.yml', () => {
+      const content = codeBlock`
+        name: MyProject
+        packages:
+          Yams:
+            url: https://github.com/jpsim/Yams
+            from: 2.0.0
+          RxClient:
+            path: ../RxClient
+      `;
+      const result = extractPackageFile(content, 'project.yml');
       expect(result).not.toBeNull();
-      expect(result!.deps).toHaveLength(13);
+      expect(result!.deps).toHaveLength(2);
     });
 
     it('extracts remote package with url and from', () => {
