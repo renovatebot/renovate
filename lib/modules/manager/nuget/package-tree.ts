@@ -21,7 +21,7 @@ export async function getDependentPackageFiles(
   isCentralManagement = false,
   isGlobalJson = false,
 ): Promise<ProjectFile[]> {
-  const packageFiles = await getAllPackageFiles();
+  const packageFiles = await getMatchingFiles('*.{cs,vb,fs}proj');
   const graph = new Graph();
 
   if (isCentralManagement) {
@@ -88,11 +88,4 @@ export async function getDependentPackageFiles(
 
   // deduplicate
   return Array.from(deps).map(([name, isLeaf]) => ({ name, isLeaf }));
-}
-
-/**
- * Get a list of package files in localDir
- */
-async function getAllPackageFiles(): Promise<string[]> {
-  return getMatchingFiles('*.{cs,vb,fs}proj');
 }
