@@ -58,6 +58,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -75,6 +76,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -92,6 +94,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -109,6 +112,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -119,6 +123,22 @@ describe('modules/manager/sbt/update', () => {
       );
     });
 
+    it('should update Scala version', () => {
+      const simpleContent = codeBlock`scalaVersion := "2.13.17"`;
+
+      const res = sbtUpdater.updateDependency({
+        fileContent: simpleContent,
+        upgrade: {
+          depName: 'scala',
+          packageName: 'org.scala-lang:scala-library',
+          currentValue: '2.13.17',
+          newValue: '2.13.18',
+        },
+      });
+
+      expect(res).toEqual(codeBlock`scalaVersion := "2.13.18"`);
+    });
+
     it('should update version outside of libraryDependencies as well', () => {
       const simpleContent = codeBlock`dependencyOverrides += "org.example" %% "foo" % "1.0.0" % Test`;
 
@@ -126,6 +146,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -148,6 +169,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -172,6 +194,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
           sharedVariableName: 'someVersion',
@@ -196,6 +219,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
           sharedVariableName: 'someVersion',
@@ -217,6 +241,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -234,6 +259,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -251,6 +277,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -271,6 +298,7 @@ describe('modules/manager/sbt/update', () => {
         fileContent: simpleContent,
         upgrade: {
           depName: 'org.example:foo',
+          packageName: 'org.example:foo_2.13',
           currentValue: '1.0.0',
           newValue: '1.0.1',
         },
@@ -292,6 +320,7 @@ describe('modules/manager/sbt/update', () => {
         upgrade: {
           updateType: 'replacement',
           depName: 'org.scalatestplus:mockito-3-12',
+          packageName: 'org.scalatestplus:mockito-3-12_2.13',
           currentValue: '3.2.10.0',
           newName: 'org.scalatestplus.new:mockito-4-11',
           newValue: '3.3.0.0',
@@ -311,6 +340,7 @@ describe('modules/manager/sbt/update', () => {
         upgrade: {
           updateType: 'replacement',
           depName: 'org.scalatestplus:mockito-3-12',
+          packageName: 'org.scalatestplus:mockito-3-12_2.13',
           currentValue: '3.2.10.0',
           newName: 'org.scalatestplus.new:mockito-4-11',
         },
@@ -329,6 +359,7 @@ describe('modules/manager/sbt/update', () => {
         upgrade: {
           updateType: 'replacement',
           depName: 'com.fasterxml.jackson:jackson-bom',
+          packageName: 'com.fasterxml.jackson:jackson-bom_2.13',
           currentValue: '2.20.0',
           newName: 'tools.jackson:jackson-bom-new',
           newValue: '3.0.0',
@@ -351,6 +382,7 @@ describe('modules/manager/sbt/update', () => {
         upgrade: {
           updateType: 'replacement',
           depName: 'org.scalatestplus:mockito-3-12',
+          packageName: 'org.scalatestplus:mockito-3-12_2.13',
           currentValue: '3.2.10.0',
           newName: 'org.scalatestplus.new:mockito-4-11',
           newValue: '3.3.0.0',
