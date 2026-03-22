@@ -1,5 +1,5 @@
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const invalidYAML = Fixtures.get('invalid.yml');
 const matrixYAMLwithNodeSyntaxString = Fixtures.get('matrix_jobs.yml');

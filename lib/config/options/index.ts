@@ -4,7 +4,7 @@ import { getCustomManagers } from '../../modules/manager/custom/index.ts';
 import { getManagers } from '../../modules/manager/index.ts';
 import { getPlatformList } from '../../modules/platform/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
-import { supportedDatasources } from '../presets/internal/merge-confidence.ts';
+import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
 const options: Readonly<RenovateOptions>[] = [
@@ -169,6 +169,7 @@ const options: Readonly<RenovateOptions>[] = [
       commands: [],
       fileFilters: [],
       executionMode: 'update',
+      installTools: {},
     },
   },
   {
@@ -206,6 +207,21 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     parents: ['postUpgradeTasks'],
     default: ['**/*'],
+    cli: false,
+  },
+  {
+    name: 'installTools',
+    description: 'Install tools before executing commands',
+    type: 'object',
+    parents: ['postUpgradeTasks'],
+    default: {},
+    additionalProperties: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+    mergeable: false,
+    freeChoice: true,
     cli: false,
   },
   {
@@ -464,6 +480,14 @@ const options: Readonly<RenovateOptions>[] = [
     default: 'local',
   },
   {
+    name: 'repositoryCacheForceLocal',
+    description:
+      'If set to `true`, Renovate will persist repository cache locally after uploading to S3.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'reportType',
     description: 'Set how, or if, reports should be generated.',
     globalOnly: true,
@@ -506,7 +530,14 @@ const options: Readonly<RenovateOptions>[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+      'scm-manager',
+    ],
   },
   {
     name: 'dryRun',
@@ -618,7 +649,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.1.8',
+    default: 'ghcr.io/renovatebot/base-image:13.27.5',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -631,6 +662,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
+    default: '12021',
   },
   {
     name: 'composerIgnorePlatformReqs',
@@ -1041,7 +1073,12 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Username for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'scm-manager',
+    ],
     globalOnly: true,
   },
   {
@@ -1085,6 +1122,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
     default: null,
+    supportedManagers: ['npm'],
   },
   {
     name: 'autodiscover',
@@ -1557,6 +1595,20 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     allowString: true,
     stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchRegistryUrls',
+    description:
+      'A list of URLs (or URL patterns) to match against registryUrls.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    patternMatch: true,
     parents: ['packageRules'],
     mergeable: true,
     cli: false,
@@ -2091,6 +2143,12 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Timeout in hours for when `prCreation=not-pending`.',
     type: 'integer',
     default: 25,
+  },
+  {
+    name: 'commitHourlyLimit',
+    description: 'Rate limit commits to maximum x per hour. 0 means no limit.',
+    type: 'integer',
+    default: 0,
   },
   {
     name: 'prHourlyLimit',
@@ -3175,7 +3233,13 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['bitbucket-server', 'forgejo', 'gitea', 'gitlab'],
+    supportedPlatforms: [
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'gitlab',
+      'scm-manager',
+    ],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -3192,7 +3256,14 @@ const options: Readonly<RenovateOptions>[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+    ],
   },
   {
     name: 'userStrings',
@@ -3290,6 +3361,17 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'prCacheSyncMaxPages',
+    description:
+      'Maximum number of pages to fetch when syncing the pull request cache.',
+    type: 'integer',
+    default: 100,
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+    experimentalIssues: [41485],
+  },
+  {
     name: 'dockerMaxPages',
     description:
       'By default, Renovate fetches up to 20 pages of Docker tags from registries. But you can set your own limit with this config option.',
@@ -3343,6 +3425,47 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+  },
+  {
+    name: 'toolSettings',
+    description:
+      'Tool specific configuration. Global self-hosted configuration takes precedence.',
+    type: 'object',
+    default: {
+      jvmMaxMemory: 512,
+      jvmMemory: 512,
+    },
+    cli: false,
+  },
+  {
+    name: 'jvmMaxMemory',
+    description:
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'jvmMemory',
+    description:
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'nodeMaxMemory',
+    description:
+      'Maximum memory in MiB for Node child processes invoked by Renovate. If unset, the Node process will automagically determine the memory limit to use. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.nodeMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['npm'],
+    cli: false,
+    env: false,
   },
 ];
 

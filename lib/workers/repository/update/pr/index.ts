@@ -54,8 +54,8 @@ export function getPlatformPrOptions(
 ): PlatformPrOptions {
   const usePlatformAutomerge = Boolean(
     config.automerge &&
-      (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-      config.platformAutomerge,
+    (config.automergeType === 'pr' || config.automergeType === 'branch') &&
+    config.platformAutomerge,
   );
 
   return {
@@ -512,7 +512,10 @@ export async function ensurePr(
     }
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+      logger.info(
+        { labels: prepareLabels(config) },
+        'DRY-RUN: Would create PR: ' + prTitle,
+      );
       pr = { number: 0 } as never;
     } else {
       try {
@@ -537,7 +540,10 @@ export async function ensurePr(
 
         incCountValue('ConcurrentPRs');
         incCountValue('HourlyPRs');
-        logger.info({ pr: pr?.number, prTitle }, 'PR created');
+        logger.info(
+          { pr: pr?.number, prTitle, labels: pr?.labels },
+          'PR created',
+        );
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
         if (
@@ -602,6 +608,7 @@ export async function ensurePr(
     }
   } catch (err) {
     if (
+      // oxlint-disable-next-line typescript/prefer-optional-chain -- instanceof is not a null guard
       err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||

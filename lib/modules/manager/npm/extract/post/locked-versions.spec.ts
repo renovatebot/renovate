@@ -1,10 +1,10 @@
+import { logger } from '~test/util.ts';
 import type { PackageFile } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import * as _npm from '../npm.ts';
 import * as _pnpm from '../pnpm.ts';
 import * as _yarn from '../yarn.ts';
 import { getLockedVersions } from './locked-versions.ts';
-import { logger } from '~test/util.ts';
 
 const npm = vi.mocked(_npm);
 const pnpm = vi.mocked(_pnpm);

@@ -1,17 +1,17 @@
 import { codeBlock } from 'common-tags';
 import type { Indent } from 'detect-indent';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { createConfigMigrationBranch } from './create.ts';
-import { MigratedDataFactory } from './migrated-data.ts';
 import type { MigratedData } from './migrated-data.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, partial, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
+import { MigratedDataFactory } from './migrated-data.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/config-migration/branch/create', () => {
-  const raw = Fixtures.getJson('./renovate.json');
+  const raw = Fixtures.getJsonc('./renovate.json');
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';

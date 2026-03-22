@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile as _extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile as _extractPackageFile } from './index.ts';
 
 const extractPackageFile = (content: string) =>
   _extractPackageFile(content, 'WORKSPACE');

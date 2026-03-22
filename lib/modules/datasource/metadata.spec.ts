@@ -1,3 +1,5 @@
+import { hostRules } from '~test/host-rules.ts';
+import { partial } from '~test/util.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 import { GitTagsDatasource } from './git-tags/index.ts';
 import { HelmDatasource } from './helm/index.ts';
@@ -12,8 +14,6 @@ import {
 import { NpmDatasource } from './npm/index.ts';
 import { PypiDatasource } from './pypi/index.ts';
 import type { ReleaseResult } from './types.ts';
-import { hostRules } from '~test/host-rules.ts';
-import { partial } from '~test/util.ts';
 
 describe('modules/datasource/metadata', () => {
   it('Should handle manualChangelogUrls', () => {

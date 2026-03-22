@@ -35,8 +35,8 @@ import type {
   ReleaseResult,
 } from './types.ts';
 
-export * from './types.ts';
 export { isGetPkgReleasesConfig } from './common.ts';
+export * from './types.ts';
 
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());

@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../config/global.ts';
 import * as semverVersioning from '../../../../../modules/versioning/semver/index.ts';
 import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
@@ -6,8 +8,6 @@ import type { Timestamp } from '../../../../../util/timestamp.ts';
 import type { BranchConfig } from '../../../../types.ts';
 import { getChangeLogJSON } from './index.ts';
 import * as releases from './releases.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../../../../../modules/datasource/npm/index.ts');
 vi.mock('../../../../../util/github/graphql/index.ts');

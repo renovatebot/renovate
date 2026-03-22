@@ -1,5 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -7,8 +9,6 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs, git, hostRules, partial } from '~test/util.ts';
 
 const datasource = vi.mocked(_datasource);
 
@@ -76,7 +76,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'Missing copier template version to update to',
           },
         },
@@ -126,7 +126,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'Unexpected number of dependencies: 0 (should be 1)',
           },
         },
@@ -147,7 +147,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr:
               'Unexpected number of dependencies: undefined (should be 1)',
           },
@@ -347,7 +347,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'exec exception',
           },
         },

@@ -30,6 +30,16 @@ export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
     super(type, options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat([
+        'paginate',
+        'limit',
+        'maxPages',
+      ] as (keyof BitbucketServerHttpOptions)[]);
+  }
+
   protected override async requestJsonUnsafe<T>(
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<BitbucketServerHttpOptions>,

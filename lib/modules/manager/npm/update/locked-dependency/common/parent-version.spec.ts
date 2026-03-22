@@ -1,6 +1,6 @@
-import { findFirstParentVersion } from './parent-version.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { findFirstParentVersion } from './parent-version.ts';
 
 const expressJson = Fixtures.getJson('express.json');
 
