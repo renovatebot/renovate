@@ -2,6 +2,7 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
+import { getTransitiveDependents } from '../../../util/graph.ts';
 import { minimatchFilter } from '../../../util/minimatch.ts';
 import { scm } from '../../platform/scm.ts';
 import type { ProjectFile } from './types.ts';
@@ -77,8 +78,7 @@ export async function getDependentPackageFiles(
     }
   }
 
-  const deps = new Map<string, boolean>();
-  recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
+  const deps = getTransitiveDependents(graph, packageFileName);
 
   if (isCentralManagement || isGlobalJson) {
     // remove props file, as we don't need it
@@ -87,33 +87,6 @@ export async function getDependentPackageFiles(
 
   // deduplicate
   return Array.from(deps).map(([name, isLeaf]) => ({ name, isLeaf }));
-}
-
-/**
- * Traverse graph and find dependent package files at any level of ancestry
- */
-function recursivelyGetDependentPackageFiles(
-  packageFileName: string,
-  graph: Graph,
-  deps: Map<string, boolean>,
-): void {
-  if (deps.has(packageFileName)) {
-    // we have already visited this package file
-    return;
-  }
-
-  const dependents = graph.adjacent(packageFileName);
-
-  if (!dependents || dependents.size === 0) {
-    deps.set(packageFileName, true);
-    return;
-  }
-
-  deps.set(packageFileName, false);
-
-  for (const dep of dependents) {
-    recursivelyGetDependentPackageFiles(dep, graph, deps);
-  }
 }
 
 /**
