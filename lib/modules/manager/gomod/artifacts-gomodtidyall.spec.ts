@@ -50,7 +50,7 @@ const goEnv = {
   CGO_ENABLED: '1',
 };
 
-describe('modules/manager/gomod/artifacts - gomodTidyAll', () => {
+describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   beforeEach(() => {
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
