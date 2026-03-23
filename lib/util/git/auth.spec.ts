@@ -371,6 +371,80 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
       });
     });
+
+    it('returns url with /a/ prefix for gerrit with username and password', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables('https://gerrit.example.com/', {
+          username: 'user',
+          password: 'pass',
+          hostType: 'gerrit',
+          matchHost: 'gerrit.example.com',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gerrit.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@gerrit.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://gerrit.example.com/',
+        GIT_CONFIG_VALUE_3: 'https://gerrit.example.com/a/',
+      });
+    });
+
+    it('returns url with /a/ prefix for gerrit with token', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables('https://gerrit.example.com/', {
+          token: 'token1234',
+          hostType: 'gerrit',
+          matchHost: 'gerrit.example.com',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0:
+          'url.https://ssh:token1234@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://git:token1234@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://token1234@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://token1234@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gerrit.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@gerrit.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://gerrit.example.com/',
+        GIT_CONFIG_VALUE_3: 'https://gerrit.example.com/a/',
+      });
+    });
+
+    it('returns url with /a/ prefix for gerrit hosted on a subpath', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables('https://example.com/gerrit/', {
+          username: 'user',
+          password: 'pass',
+          hostType: 'gerrit',
+          matchHost: 'https://example.com/gerrit',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@example.com/gerrit',
+        GIT_CONFIG_VALUE_1: 'git@example.com:gerrit',
+        GIT_CONFIG_VALUE_2: 'https://example.com/gerrit',
+        GIT_CONFIG_VALUE_3: 'https://example.com/gerrit/a/',
+      });
+    });
   });
 
   describe('getGitEnvironmentVariables()', () => {
@@ -577,6 +651,54 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+      });
+    });
+
+    it('returns environment variables with /a/ prefix for gerrit with username and password', () => {
+      add({
+        hostType: 'gerrit',
+        matchHost: 'https://gerrit.example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://user:pass@gerrit.example.com/a/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gerrit.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@gerrit.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://gerrit.example.com/',
+        GIT_CONFIG_VALUE_3: 'https://gerrit.example.com/a/',
+      });
+    });
+
+    it('returns environment variables with /a/ prefix for gerrit on subpath', () => {
+      add({
+        hostType: 'gerrit',
+        matchHost: 'https://example.com/gerrit',
+        username: 'user',
+        password: 'pass',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://user:pass@example.com/gerrit/a/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@example.com/gerrit',
+        GIT_CONFIG_VALUE_1: 'git@example.com:gerrit',
+        GIT_CONFIG_VALUE_2: 'https://example.com/gerrit',
+        GIT_CONFIG_VALUE_3: 'https://example.com/gerrit/a/',
       });
     });
   });
