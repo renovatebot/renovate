@@ -1,6 +1,9 @@
-import * as memCache from '../../../cache/memory';
-import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
+import * as memCache from '../../../cache/memory/index.ts';
+import type {
+  GithubDatasourceItem,
+  GithubGraphqlCacheRecord,
+} from '../types.ts';
+import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy.ts';
 
 /**
  * In-memory strategy meant to be used for private packages

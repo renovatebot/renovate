@@ -1,4 +1,4 @@
-import type { PackageFile } from '../../../modules/manager/types';
+import type { PackageFile } from '../../../modules/manager/types.ts';
 
 export interface ExtractResults {
   manager: string;

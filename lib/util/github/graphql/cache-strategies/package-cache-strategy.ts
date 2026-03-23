@@ -1,6 +1,9 @@
-import * as packageCache from '../../../cache/package';
-import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
+import * as packageCache from '../../../cache/package/index.ts';
+import type {
+  GithubDatasourceItem,
+  GithubGraphqlCacheRecord,
+} from '../types.ts';
+import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy.ts';
 
 /**
  * Package cache strategy meant to be used for public packages.
@@ -23,6 +26,7 @@ export class GithubGraphqlPackageCacheStrategy<
       })
       .toUTC();
     const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
+    // v8 ignore else -- TODO: add test #40625
     if (ttlMinutes && ttlMinutes > 0) {
       await packageCache.set(
         this.cacheNs,

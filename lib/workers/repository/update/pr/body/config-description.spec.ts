@@ -1,5 +1,5 @@
-import type { BranchConfig } from '../../../../types';
-import { getPrConfigDescription } from './config-description';
+import type { BranchConfig } from '../../../../types.ts';
+import { getPrConfigDescription } from './config-description.ts';
 
 describe('workers/repository/update/pr/body/config-description', () => {
   describe('getPrConfigDescription', () => {

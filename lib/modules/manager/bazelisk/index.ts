@@ -1,8 +1,9 @@
-import type { Category } from '../../../constants';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as semverVersioning from '../../versioning/semver';
+import type { Category } from '../../../constants/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
 
-export { extractPackageFile } from './extract';
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://github.com/bazelbuild/bazelisk';
 export const categories: Category[] = ['bazel'];
@@ -14,3 +15,6 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [GithubReleasesDatasource.id];
+
+export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['MODULE.bazel.lock'];

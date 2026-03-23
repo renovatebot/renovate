@@ -1,9 +1,12 @@
 import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import * as allVersioning from '../../modules/versioning';
-import { getRegexPredicate } from '../string-match';
-import { Matcher } from './base';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import * as allVersioning from '../../modules/versioning/index.ts';
+import { getRegexPredicate } from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class CurrentVersionMatcher extends Matcher {
   override matches(

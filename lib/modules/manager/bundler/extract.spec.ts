@@ -1,11 +1,11 @@
 import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
-import { isValid } from '../../versioning/ruby';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { isValid } from '../../versioning/ruby/index.ts';
+import { extractPackageFile } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const railsGemfile = Fixtures.get('Gemfile.rails');
 const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');

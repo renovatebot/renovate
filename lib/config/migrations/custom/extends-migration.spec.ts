@@ -1,5 +1,5 @@
-import { GlobalConfig } from '../../global';
-import { ExtendsMigration } from './extends-migration';
+import { GlobalConfig } from '../../global.ts';
+import { ExtendsMigration } from './extends-migration.ts';
 
 describe('config/migrations/custom/extends-migration', () => {
   it('migrates preset strings to array', async () => {

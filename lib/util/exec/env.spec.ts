@@ -1,5 +1,5 @@
-import { GlobalConfig } from '../../config/global';
-import { getChildProcessEnv } from './env';
+import { GlobalConfig } from '../../config/global.ts';
+import { getChildProcessEnv } from './env.ts';
 
 describe('util/exec/env', () => {
   const envVars = [

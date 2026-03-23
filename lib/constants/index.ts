@@ -1,2 +1,2 @@
-export * from './platforms';
-export type * from './category';
+export type * from './category.ts';
+export * from './platforms.ts';

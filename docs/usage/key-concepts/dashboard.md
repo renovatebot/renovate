@@ -156,7 +156,7 @@ If you want to approve specific packages, set `dependencyDashboardApproval` to `
 {
   "packageRules": [
     {
-      "matchPackageName": ["@somescope/**"],
+      "matchPackageNames": ["@somescope/**"],
       "dependencyDashboardApproval": true
     }
   ]

@@ -1,18 +1,22 @@
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { hashStream } from '../../../util/hash';
-import { Http } from '../../../util/http';
-import { map as pMap } from '../../../util/promises';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { Http } from '../../../util/http/index.ts';
+import { map as pMap } from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   ArtifactError,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../types';
-import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
-import type { RecordFragment, StringFragment } from './types';
+} from '../types.ts';
+import {
+  findCodeFragment,
+  patchCodeAtFragments,
+  updateCode,
+} from './common.ts';
+import type { RecordFragment, StringFragment } from './types.ts';
 
 const http = new Http('bazel');
 
@@ -136,10 +140,10 @@ export async function updateArtifacts(
 
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
       const rule = findCodeFragment(newContents, [idx]);
-      /* v8 ignore start -- used only for type narrowing */
+      /* v8 ignore next -- used only for type narrowing */
       if (rule?.type !== 'record') {
         continue;
-      } /* v8 ignore stop */
+      }
 
       const urlFragments = getUrlFragments(rule);
       if (!urlFragments?.length) {

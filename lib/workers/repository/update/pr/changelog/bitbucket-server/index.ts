@@ -1,11 +1,14 @@
 import path from 'node:path';
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { logger } from '../../../../../../logger';
-import { Files } from '../../../../../../modules/platform/bitbucket-server/schema';
-import { BitbucketServerHttp } from '../../../../../../util/http/bitbucket-server';
-import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
-import { compareChangelogFilePath } from '../common';
-import type { ChangeLogFile } from '../types';
+import { logger } from '../../../../../../logger/index.ts';
+import { Files } from '../../../../../../modules/platform/bitbucket-server/schema.ts';
+import { BitbucketServerHttp } from '../../../../../../util/http/bitbucket-server.ts';
+import {
+  ensureTrailingSlash,
+  joinUrlParts,
+} from '../../../../../../util/url.ts';
+import { compareChangelogFilePath } from '../common.ts';
+import type { ChangeLogFile } from '../types.ts';
 
 export const id = 'bitbucket-server-changelog';
 const http = new BitbucketServerHttp(id);

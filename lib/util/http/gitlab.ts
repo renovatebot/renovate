@@ -1,11 +1,11 @@
 import { isArray, isString } from '@sindresorhus/is';
 import { RequestError, type RetryObject } from 'got';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getEnv } from '../env';
-import { parseLinkHeader, parseUrl } from '../url';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { getEnv } from '../env.ts';
+import { parseLinkHeader, parseUrl } from '../url.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {
@@ -23,6 +23,12 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 
   constructor(type = 'gitlab', options?: GitlabHttpOptions) {
     super(type, options);
+  }
+
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof GitlabHttpOptions)[]);
   }
 
   protected override async requestJsonUnsafe<T = unknown>(
@@ -57,6 +63,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           opts.url = nextUrl;
 
           const nextResult = await this.requestJsonUnsafe<T>(method, opts);
+          // v8 ignore else -- TODO: add test #40625
           if (isArray(nextResult.body)) {
             result.body.push(...nextResult.body);
           }

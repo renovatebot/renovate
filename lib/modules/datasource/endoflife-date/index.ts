@@ -1,11 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, registryUrl } from './common';
-import { EndoflifeDateVersions } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, registryUrl } from './common.ts';
+import { EndoflifeDateVersions } from './schema.ts';
 
 export class EndoflifeDateDatasource extends Datasource {
   static readonly id = datasource;
@@ -22,13 +22,7 @@ export class EndoflifeDateDatasource extends Datasource {
     super(EndoflifeDateDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl!}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -53,5 +47,17 @@ export class EndoflifeDateDatasource extends Datasource {
     } catch (err) {
       this.handleGenericErrors(err);
     }
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${datasource}`,
+        // TODO: types (#22198)
+        key: `${config.registryUrl!}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

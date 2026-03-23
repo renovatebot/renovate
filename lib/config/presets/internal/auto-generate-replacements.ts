@@ -1,6 +1,6 @@
-import { coerceArray } from '../../../util/array';
-import type { PackageRule } from '../../types';
-import type { Preset } from '../types';
+import { coerceArray } from '../../../util/array.ts';
+import type { PackageRule } from '../../types.ts';
+import type { Preset } from '../types.ts';
 
 export type Replacement = [string[], string];
 

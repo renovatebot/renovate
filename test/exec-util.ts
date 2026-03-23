@@ -1,9 +1,12 @@
 import is from '@sindresorhus/is';
 import traverse from 'neotraverse/legacy';
 import upath from 'upath';
-import { rawExec as _exec } from '../lib/util/exec/common';
-import type { RawExecOptions } from '../lib/util/exec/types';
-import { regEx } from '../lib/util/regex';
+import { rawExec as _exec } from '../lib/util/exec/common.ts';
+import type {
+  CommandWithOptions,
+  RawExecOptions,
+} from '../lib/util/exec/types.ts';
+import { regEx } from '../lib/util/regex.ts';
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
@@ -16,7 +19,10 @@ export interface ExecSnapshot {
 
 export type ExecSnapshots = ExecSnapshot[];
 
-function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
+function execSnapshot(
+  cmd: string | CommandWithOptions,
+  options?: RawExecOptions,
+): ExecSnapshot {
   const snapshot = {
     cmd,
     options,

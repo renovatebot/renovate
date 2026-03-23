@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { NpmDatasource } from '../../datasource/npm';
-import { id, isValid } from '../../versioning/npm';
+import type { Category } from '../../../constants/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { id, isValid } from '../../versioning/npm/index.ts';
 
-import type { PackageDependency, PackageFileContent } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export const categories: Category[] = ['js'];
 

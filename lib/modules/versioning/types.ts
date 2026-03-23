@@ -1,5 +1,5 @@
 import type { SemVer } from 'semver';
-import type { RangeStrategy } from '../../types';
+import type { RangeStrategy } from '../../types/index.ts';
 
 export interface NewValueConfig {
   currentValue: string;

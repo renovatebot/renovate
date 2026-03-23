@@ -1,7 +1,7 @@
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as semverVersioning from '../../versioning/semver';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const scalafmtVersionRegex = regEx(
   'version *= *"?(?<version>\\d+\\.\\d+\\.\\d+)"?',

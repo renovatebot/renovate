@@ -1,4 +1,4 @@
-import semverCoerced from '.';
+import semverCoerced from './index.ts';
 
 describe('modules/versioning/semver-coerced/index', () => {
   describe('.equals(a, b)', () => {

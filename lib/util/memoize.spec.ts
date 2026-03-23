@@ -1,4 +1,4 @@
-import { memoize } from './memoize';
+import { memoize } from './memoize.ts';
 
 describe('util/memoize', () => {
   let calledTimes = 0;

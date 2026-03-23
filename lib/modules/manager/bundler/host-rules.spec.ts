@@ -1,10 +1,10 @@
-import type { HostRule } from '../../../types';
-import { add, clear } from '../../../util/host-rules';
+import type { HostRule } from '../../../types/index.ts';
+import { add, clear } from '../../../util/host-rules.ts';
 
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
-} from './host-rules';
+} from './host-rules.ts';
 
 describe('modules/manager/bundler/host-rules', () => {
   beforeEach(() => {

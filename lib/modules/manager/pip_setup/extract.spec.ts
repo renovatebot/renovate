@@ -1,6 +1,6 @@
-import type { ExtractConfig } from '../types';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import type { ExtractConfig } from '../types.ts';
+import { extractPackageFile } from './index.ts';
 
 const packageFile = 'setup.py';
 

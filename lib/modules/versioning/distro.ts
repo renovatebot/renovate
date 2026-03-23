@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import type { DataFile } from '../../data-files.generated';
-import dataFiles from '../../data-files.generated';
+import type { DataFile } from '../../data-files.generated.ts';
+import dataFiles from '../../data-files.generated.ts';
 
 export interface DistroSchedule {
   codename: string;

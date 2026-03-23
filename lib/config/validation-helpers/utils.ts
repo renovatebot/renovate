@@ -5,11 +5,11 @@ import {
   isString,
 } from '@sindresorhus/is';
 import jsonata from 'jsonata';
-import { logger } from '../../logger';
-import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/types';
-import type { CustomManager } from '../../modules/manager/custom/types';
-import { regEx } from '../../util/regex';
-import type { ValidationMessage } from '../types';
+import { logger } from '../../logger/index.ts';
+import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/types.ts';
+import type { CustomManager } from '../../modules/manager/custom/types.ts';
+import { regEx } from '../../util/regex.ts';
+import type { ValidationMessage } from '../types.ts';
 
 export function getParentName(parentPath: string | undefined): string {
   return parentPath
@@ -70,6 +70,7 @@ export function isFalseGlobal(
   parentPath?: string,
 ): boolean {
   if (parentPath?.includes('hostRules')) {
+    // v8 ignore else -- TODO: add test #40625
     if (
       optionName === 'token' ||
       optionName === 'username' ||

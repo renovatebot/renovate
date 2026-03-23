@@ -1,18 +1,18 @@
-import type { NewValueConfig, VersioningApi } from '../types';
-import { parseRange, parseVersion } from './parser';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { parseRange, parseVersion } from './parser.ts';
 import {
   coerceFloatingComponent,
   getFloatingRangeLowerBound,
   matches,
   rangeToString,
   tryBump,
-} from './range';
+} from './range.ts';
 import type {
   NugetBracketRange,
   NugetFloatingRange,
   NugetVersion,
-} from './types';
-import { compare, versionToString } from './version';
+} from './types.ts';
+import { compare, versionToString } from './version.ts';
 
 export const id = 'nuget';
 export const displayName = 'NuGet';
@@ -270,12 +270,7 @@ class NugetVersioningApi implements VersioningApi {
     return rangeToString({ type: 'nuget-exact-range', version: v });
   }
 
-  getNewValue({
-    currentValue,
-    rangeStrategy,
-    currentVersion,
-    newVersion,
-  }: NewValueConfig): string | null {
+  getNewValue({ currentValue, newVersion }: NewValueConfig): string | null {
     const v = parseVersion(newVersion);
     if (!v) {
       return null;

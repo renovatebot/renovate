@@ -4,10 +4,13 @@ import {
   isNullOrUndefined,
   isUndefined,
 } from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { MISSING_API_CREDENTIALS } from '../../constants/error-messages';
-import { getApiToken } from '../merge-confidence';
-import { Matcher } from './base';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
+import { getApiToken } from '../merge-confidence/index.ts';
+import { Matcher } from './base.ts';
 
 export class MergeConfidenceMatcher extends Matcher {
   override matches(
@@ -26,7 +29,7 @@ export class MergeConfidenceMatcher extends Matcher {
       error.validationSource = 'MatchConfidence Authenticator';
       error.validationError = 'Missing credentials';
       error.validationMessage =
-        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.';
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.';
       throw error;
     }
 

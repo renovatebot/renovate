@@ -1,16 +1,17 @@
 import { isNumber } from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
+import { weave } from 'jsonc-weaver';
 import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
-import { migrateConfig } from '../../../../config/migration';
-import { prettier } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { readLocalFile } from '../../../../util/fs';
-import { EditorConfig } from '../../../../util/json-writer';
-import { detectRepoFileConfig } from '../../init/merge';
+import { migrateConfig } from '../../../../config/migration.ts';
+import { prettier } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { EditorConfig } from '../../../../util/json-writer/index.ts';
+import { detectRepoFileConfig } from '../../init/merge.ts';
 
 export interface MigratedData {
   content: string;
@@ -155,6 +156,16 @@ export class MigratedDataFactory {
 
       if (filename.endsWith('.json5')) {
         content = JSON5.stringify(migratedConfig, undefined, indentSpace);
+      } else if (raw) {
+        try {
+          content = weave(raw, migratedConfig);
+        } catch (err) {
+          logger.warn(
+            { err },
+            'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
+          );
+          content = JSON.stringify(migratedConfig, undefined, indentSpace);
+        }
       } else {
         content = JSON.stringify(migratedConfig, undefined, indentSpace);
       }

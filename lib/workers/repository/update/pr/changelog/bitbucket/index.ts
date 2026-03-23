@@ -1,17 +1,17 @@
 import path from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { logger } from '../../../../../../logger';
-import { PagedSourceResults } from '../../../../../../modules/platform/bitbucket/schema';
-import { BitbucketHttp } from '../../../../../../util/http/bitbucket';
-import { joinUrlParts } from '../../../../../../util/url';
-import { compareChangelogFilePath } from '../common';
+import { logger } from '../../../../../../logger/index.ts';
+import { PagedSourceResults } from '../../../../../../modules/platform/bitbucket/schema.ts';
+import { BitbucketHttp } from '../../../../../../util/http/bitbucket.ts';
+import { joinUrlParts } from '../../../../../../util/url.ts';
+import { compareChangelogFilePath } from '../common.ts';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
-} from '../types';
+} from '../types.ts';
 
 export const id = 'bitbucket-changelog';
 const bitbucketHttp = new BitbucketHttp(id);

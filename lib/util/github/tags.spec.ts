@@ -1,7 +1,7 @@
-import type { Timestamp } from '../../util/timestamp';
-import { GithubHttp } from '../http/github';
-import * as githubGraphql from './graphql';
-import { findCommitOfTag } from './tags';
+import type { Timestamp } from '../../util/timestamp.ts';
+import { GithubHttp } from '../http/github.ts';
+import * as githubGraphql from './graphql/index.ts';
+import { findCommitOfTag } from './tags.ts';
 
 describe('util/github/tags', () => {
   describe('findCommitOfTag', () => {

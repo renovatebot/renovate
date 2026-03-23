@@ -1,8 +1,8 @@
-import { logger } from '../../../../logger';
-import type { Release } from '../../../../modules/datasource/types';
-import type { LookupUpdate } from '../../../../modules/manager/types';
-import type { VersioningApi } from '../../../../modules/versioning';
-import type { RollbackConfig } from './types';
+import { logger } from '../../../../logger/index.ts';
+import type { Release } from '../../../../modules/datasource/types.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
+import type { VersioningApi } from '../../../../modules/versioning/index.ts';
+import type { RollbackConfig } from './types.ts';
 
 export function getRollbackUpdate(
   config: RollbackConfig,

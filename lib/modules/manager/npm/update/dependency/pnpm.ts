@@ -1,10 +1,10 @@
 import { isString } from '@sindresorhus/is';
 import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
-import { logger } from '../../../../../logger';
-import type { UpdateDependencyConfig } from '../../../types';
-import { PnpmCatalogs } from '../../schema';
-import { getNewGitValue, getNewNpmAliasValue } from './common';
+import { logger } from '../../../../../logger/index.ts';
+import type { UpdateDependencyConfig } from '../../../types.ts';
+import { PnpmCatalogs } from '../../schema.ts';
+import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
 
 export function updatePnpmCatalogDependency({
   fileContent,
@@ -14,13 +14,13 @@ export function updatePnpmCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  /* v8 ignore start -- needs test */
+  /* v8 ignore next -- needs test */
   if (!isString(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
     );
     return null;
-  } /* v8 ignore stop -- needs test */
+  }
 
   let { newValue } = upgrade;
 

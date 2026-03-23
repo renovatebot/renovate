@@ -1,5 +1,5 @@
-import { ExternalHostError } from '../types/errors/external-host-error';
-import * as p from './promises';
+import { ExternalHostError } from '../types/errors/external-host-error.ts';
+import * as p from './promises.ts';
 
 describe('util/promises', () => {
   describe('all', () => {

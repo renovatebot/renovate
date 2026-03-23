@@ -1,22 +1,22 @@
-import { clone } from '../clone';
-import type { HttpResponse } from './types';
+import { clone } from '../clone.ts';
+import type { HttpResponse } from './types.ts';
 
 // Copying will help to avoid circular structure
 // and mutation of the cached response.
 export function copyResponse<T>(
-  response: HttpResponse<T>,
+  { statusCode, headers, body, cached }: HttpResponse<T>,
   deep: boolean,
 ): HttpResponse<T> {
-  const { body, statusCode, headers } = response;
-  return deep
-    ? {
-        statusCode,
-        body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
-        headers: clone(headers),
-      }
-    : {
-        statusCode,
-        body,
-        headers,
-      };
+  const res: HttpResponse<T> = { statusCode, headers, body };
+
+  if (deep) {
+    res.headers = clone(headers);
+    res.body = body instanceof Buffer ? (body.subarray() as T) : clone<T>(body);
+  }
+
+  if (cached) {
+    res.cached = true;
+  }
+
+  return res;
 }
