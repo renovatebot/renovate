@@ -4,6 +4,7 @@ import type { BranchStatus } from '../../../types/index.ts';
 import * as git from '../../../util/git/index.ts';
 import { getBaseUrl, setBaseUrl } from '../../../util/http/scm-manager.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -60,7 +61,7 @@ export async function initPlatform({
     throw new Error('Init: SCM-Manager API token not configured');
   }
 
-  const baseUrl = `${endpoint}api/v2`;
+  const baseUrl = `${ensureTrailingSlash(endpoint)}api/v2`;
   setBaseUrl(baseUrl);
 
   try {
