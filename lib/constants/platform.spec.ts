@@ -1,6 +1,7 @@
 import { BitbucketServerTagsDatasource } from '../modules/datasource/bitbucket-server-tags/index.ts';
 import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags/index.ts';
 import { GiteaTagsDatasource } from '../modules/datasource/gitea-tags/index.ts';
+import { GithubDigestDatasource } from '../modules/datasource/github-digest/index.ts';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
 import { GitlabPackagesDatasource } from '../modules/datasource/gitlab-packages/index.ts';
@@ -72,6 +73,9 @@ describe('constants/platform', () => {
     ).toBeTrue();
     expect(
       GITHUB_API_USING_HOST_TYPES.includes(GITHUB_CHANGELOG_ID),
+    ).toBeTrue();
+    expect(
+      GITHUB_API_USING_HOST_TYPES.includes(GithubDigestDatasource.id),
     ).toBeTrue();
     expect(GITHUB_API_USING_HOST_TYPES.includes('github')).toBeTrue();
   });

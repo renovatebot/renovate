@@ -39,6 +39,7 @@ export const GITHUB_API_USING_HOST_TYPES = [
   'hermit',
   'github-changelog',
   'conan',
+  'github-digest',
   // DEPRECATED: do not add additional datasource-specific entries here, if they use `api.github.com` to look up new versions
 ];
 
