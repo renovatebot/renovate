@@ -84,6 +84,7 @@ describe('modules/manager/mise/extract', () => {
       swiftformat = "0.58.0"
       swiftlint = "0.55.1"
       taplo = "0.10.0"
+      tart = "2.31.0"
       terragrunt = "0.72.6"
       tilt = "0.34.0"
       tusd = "2.8.0"
@@ -312,6 +313,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'taplo',
             packageName: 'tamasfe/taplo',
+          },
+          {
+            currentValue: '2.31.0',
+            datasource: 'github-releases',
+            depName: 'tart',
+            packageName: 'cirruslabs/tart',
           },
           {
             currentValue: '0.72.6',
