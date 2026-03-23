@@ -1,3 +1,4 @@
+import { getGlobalOptionDefault } from './global-option-defaults.ts';
 import type { RenovateConfig, RepoGlobalConfig } from './types.ts';
 
 export class GlobalConfig {
@@ -71,9 +72,17 @@ export class GlobalConfig {
     key?: Key,
     defaultValue?: RepoGlobalConfig[Key],
   ): RepoGlobalConfig | RepoGlobalConfig[Key] {
-    return key
-      ? (GlobalConfig.config[key] ?? defaultValue)
-      : GlobalConfig.config;
+    if (!key) {
+      return GlobalConfig.config;
+    }
+    const storedValue = GlobalConfig.config[key];
+    if (storedValue !== undefined) {
+      return storedValue;
+    }
+    return (
+      (getGlobalOptionDefault(key as string) as RepoGlobalConfig[Key]) ??
+      defaultValue
+    );
   }
 
   static set(config: RenovateConfig & RepoGlobalConfig): RenovateConfig {

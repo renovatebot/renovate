@@ -44,18 +44,6 @@ describe('config/presets/local/index', () => {
       ).toThrow();
     });
 
-    it('throws for missing platform', () => {
-      GlobalConfig.set({
-        platform: undefined,
-      });
-      expect(() =>
-        local.getPreset({
-          repo: 'some/repo',
-          presetName: 'default',
-        }),
-      ).toThrow();
-    });
-
     it('forwards to azure', async () => {
       GlobalConfig.set({
         platform: 'azure',

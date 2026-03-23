@@ -4,6 +4,7 @@ import { getCustomManagers } from '../../modules/manager/custom/index.ts';
 import { getManagers } from '../../modules/manager/index.ts';
 import { getPlatformList } from '../../modules/platform/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
+import { registerGlobalOptionDefault } from '../global-option-defaults.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
@@ -3517,3 +3518,9 @@ function freezeConfigOptions(): void {
 
 loadManagerOptions();
 freezeConfigOptions();
+
+for (const option of options) {
+  if (option.default !== undefined) {
+    registerGlobalOptionDefault(option.name, option.default);
+  }
+}
