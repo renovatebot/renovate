@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 export const googleRegex = regEx(
   /(((eu|us|asia)\.)?gcr\.io|[a-z0-9-]+-docker\.pkg\.dev)/,

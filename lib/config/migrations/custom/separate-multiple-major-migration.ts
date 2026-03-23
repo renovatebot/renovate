@@ -1,4 +1,4 @@
-import { AbstractMigration } from '../base/abstract-migration';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class SeparateMultipleMajorMigration extends AbstractMigration {
   override readonly propertyName = 'separateMultipleMajor';

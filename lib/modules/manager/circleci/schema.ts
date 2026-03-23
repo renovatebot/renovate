@@ -1,9 +1,9 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import {
   LooseArray,
   LooseRecord,
   NotCircular,
-} from '../../../util/schema-utils';
+} from '../../../util/schema-utils/index.ts';
 
 export const CircleCiDocker = z
   .object({ image: z.string() })

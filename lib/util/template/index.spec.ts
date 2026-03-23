@@ -1,8 +1,8 @@
-import { getOptions } from '../../config/options';
-import * as _execUtils from '../exec/utils';
-import * as template from '.';
+import { getOptions } from '../../config/options/index.ts';
+import * as _execUtils from '../exec/utils.ts';
+import * as template from './index.ts';
 
-vi.mock('../exec/utils');
+vi.mock('../exec/utils.ts');
 
 const execUtils = vi.mocked(_execUtils);
 
@@ -115,7 +115,7 @@ describe('util/template/index', () => {
   it('string to pretty JSON', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toMatchSnapshot();
   });
 
@@ -173,7 +173,7 @@ describe('util/template/index', () => {
 
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe('foo');
   });
 
@@ -212,6 +212,17 @@ describe('util/template/index', () => {
       depName: 'some.github.com/dep',
     });
     expect(output).toBe('ghc/dep');
+  });
+
+  it('add', () => {
+    const userTemplate = '{{add 1 2}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('3');
+  });
+
+  it('add - throws if inputs are invalid', () => {
+    const userTemplate = '{{add undefined null}}';
+    expect(() => template.compile(userTemplate, {})).toThrow();
   });
 
   describe('proxyCompileInput', () => {
@@ -280,7 +291,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeURIComponent "@fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('%40fsouza%2Fprettierd');
     });
@@ -288,7 +299,7 @@ describe('util/template/index', () => {
     it('decodes values', () => {
       const output = template.compile(
         '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('@fsouza/prettierd');
     });
@@ -298,7 +309,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeBase64 "@fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
     });
@@ -322,7 +333,7 @@ describe('util/template/index', () => {
     it('decode values', () => {
       const output = template.compile(
         '{{{decodeBase64 "QGZzb3V6YS9wcmV0dGllcmQ="}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('@fsouza/prettierd');
     });

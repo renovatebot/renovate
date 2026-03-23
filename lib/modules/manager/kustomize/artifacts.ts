@@ -1,22 +1,22 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { generateHelmEnvs } from './common';
-import { parseKustomize } from './extract';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { generateHelmEnvs } from './common.ts';
+import { parseKustomize } from './extract.ts';
 
 async function localExistingChartPath(
   chartHome: string,

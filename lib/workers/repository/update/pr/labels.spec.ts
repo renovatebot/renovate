@@ -1,10 +1,10 @@
+import { platform } from '~test/util.ts';
 import {
   areLabelsModified,
   getChangedLabels,
   prepareLabels,
   shouldUpdateLabels,
-} from './labels';
-import { platform } from '~test/util';
+} from './labels.ts';
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {
@@ -59,8 +59,7 @@ describe('workers/repository/update/pr/labels', () => {
       const result = prepareLabels({
         labels: ['labelA', null] as never,
         // an empty space between two commas in an array is categorized as a null value
-        // eslint-disable-next-line no-sparse-arrays
-        addLabels: ['labelB', '', undefined, , ,] as never,
+        addLabels: ['labelB', '', undefined, undefined, undefined] as never,
       });
       expect(result).toBeArrayOfSize(2);
       expect(result).toEqual(['labelA', 'labelB']);
@@ -78,7 +77,7 @@ describe('workers/repository/update/pr/labels', () => {
     it('template labels with empty datasource', () => {
       const result = prepareLabels({
         labels: ['{{{datasource}}}', ' {{{datasource}}} '],
-        datasource: null,
+        datasource: undefined,
       });
       expect(result).toBeArrayOfSize(0);
       expect(result).toEqual([]);

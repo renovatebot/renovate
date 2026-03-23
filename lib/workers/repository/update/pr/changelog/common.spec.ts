@@ -1,4 +1,4 @@
-import { compareChangelogFilePath, slugifyUrl } from './common';
+import { compareChangelogFilePath, slugifyUrl } from './common.ts';
 
 describe('workers/repository/update/pr/changelog/common', () => {
   describe('slugifyUrl()', () => {

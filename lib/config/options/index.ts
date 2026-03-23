@@ -1,12 +1,13 @@
-import { AllManagersListLiteral } from '../../manager-list.generated';
-import { getManagers } from '../../modules/manager';
-import { getCustomManagers } from '../../modules/manager/custom';
-import { getPlatformList } from '../../modules/platform';
-import { getVersioningList } from '../../modules/versioning';
-import { supportedDatasources } from '../presets/internal/merge-confidence';
-import { type RenovateOptions, UpdateTypesOptions } from '../types';
+import { isArray, isObject } from '@sindresorhus/is';
+import { AllManagersListLiteral } from '../../manager-list.generated.ts';
+import { getCustomManagers } from '../../modules/manager/custom/index.ts';
+import { getManagers } from '../../modules/manager/index.ts';
+import { getPlatformList } from '../../modules/platform/index.ts';
+import { getVersioningList } from '../../modules/versioning/index.ts';
+import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
+import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
-const options: RenovateOptions[] = [
+const options: Readonly<RenovateOptions>[] = [
   {
     name: 'mode',
     description: 'Mode of operation.',
@@ -32,7 +33,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     allowedValues: ['asc', 'desc'],
-    supportedPlatforms: ['forgejo', 'gitea'],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverRepoSort',
@@ -41,8 +42,16 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     globalOnly: true,
-    allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
-    supportedPlatforms: ['forgejo', 'gitea'],
+    allowedValues: [
+      'alpha',
+      'created',
+      'created_at',
+      'updated',
+      'updated_at',
+      'size',
+      'id',
+    ],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'allowedEnv',
@@ -99,6 +108,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     globalOnly: true,
+    cli: false,
   },
   {
     name: 'userAgent',
@@ -159,6 +169,7 @@ const options: RenovateOptions[] = [
       commands: [],
       fileFilters: [],
       executionMode: 'update',
+      installTools: {},
     },
   },
   {
@@ -199,6 +210,21 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'installTools',
+    description: 'Install tools before executing commands',
+    type: 'object',
+    parents: ['postUpgradeTasks'],
+    default: {},
+    additionalProperties: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+    mergeable: false,
+    freeChoice: true,
+    cli: false,
+  },
+  {
     name: 'format',
     description: 'Format of the custom datasource.',
     type: 'string',
@@ -229,6 +255,16 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingAutoCloseAge',
+    description:
+      'Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    inheritConfigSupport: true,
+    cli: false,
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',
@@ -246,8 +282,6 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     inheritConfigSupport: true,
-    cli: false,
-    env: false,
   },
   {
     name: 'onboardingConfigFileName',
@@ -446,6 +480,14 @@ const options: RenovateOptions[] = [
     default: 'local',
   },
   {
+    name: 'repositoryCacheForceLocal',
+    description:
+      'If set to `true`, Renovate will persist repository cache locally after uploading to S3.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'reportType',
     description: 'Set how, or if, reports should be generated.',
     globalOnly: true,
@@ -488,7 +530,14 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+      'scm-manager',
+    ],
   },
   {
     name: 'dryRun',
@@ -583,6 +632,8 @@ const options: RenovateOptions[] = [
     type: 'string',
     globalOnly: true,
     default: 'renovate_',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerCliOptions',
@@ -590,14 +641,18 @@ const options: RenovateOptions[] = [
       'Pass CLI flags to `docker run` command when `binarySource=docker`.',
     type: 'string',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerSidecarImage',
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.24.1',
+    default: 'ghcr.io/renovatebot/base-image:13.27.6',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerUser',
@@ -605,6 +660,9 @@ const options: RenovateOptions[] = [
       'Set the `UID` and `GID` for Docker-based binaries if you use `binarySource=docker`.',
     globalOnly: true,
     type: 'string',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
+    default: '12021',
   },
   {
     name: 'composerIgnorePlatformReqs',
@@ -959,6 +1017,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowShellExecutorForPostUpgradeCommands',
+    description:
+      'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'allowCustomCrateRegistries',
     description: 'Set this to `true` to allow custom crate registries.',
     globalOnly: true,
@@ -1007,7 +1073,12 @@ const options: RenovateOptions[] = [
     description: 'Username for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'scm-manager',
+    ],
     globalOnly: true,
   },
   {
@@ -1051,6 +1122,7 @@ const options: RenovateOptions[] = [
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
     default: null,
+    supportedManagers: ['npm'],
   },
   {
     name: 'autodiscover',
@@ -1529,6 +1601,20 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchRegistryUrls',
+    description:
+      'A list of URLs (or URL patterns) to match against registryUrls.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    patternMatch: true,
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'autoReplaceGlobalMatch',
     description:
       'Control whether replacement regular expressions are global matches or only the first match.',
@@ -1728,6 +1814,16 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     advancedUse: true,
+  },
+  {
+    name: 'maxMajorIncrement',
+    description:
+      'Limit the maximum major version increment allowed. Set to 0 to disable.',
+    stage: 'package',
+    type: 'integer',
+    default: 500,
+    cli: false,
+    env: false,
   },
   {
     name: 'respectLatest',
@@ -2047,6 +2143,12 @@ const options: RenovateOptions[] = [
     description: 'Timeout in hours for when `prCreation=not-pending`.',
     type: 'integer',
     default: 25,
+  },
+  {
+    name: 'commitHourlyLimit',
+    description: 'Rate limit commits to maximum x per hour. 0 means no limit.',
+    type: 'integer',
+    default: 0,
   },
   {
     name: 'prHourlyLimit',
@@ -2560,6 +2662,7 @@ const options: RenovateOptions[] = [
     allowedValues: [
       'bundlerConservative',
       'composerWithAll',
+      'composerNoMinimalChanges',
       'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
@@ -2568,6 +2671,7 @@ const options: RenovateOptions[] = [
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
       'gomodVendor',
+      'goGenerate',
       'helmUpdateSubChartArchives',
       'kustomizeInflateHelmCharts',
       'npmDedupe',
@@ -2833,17 +2937,34 @@ const options: RenovateOptions[] = [
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
-      Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Change: '`{{{displayFrom}}}` → `{{{displayTo}}}`',
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
-      Age: "{{#if newVersion}}[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+      Age: "{{#if newVersion}}![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Adoption:
-        "{{#if newVersion}}[![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Passing:
-        "{{#if newVersion}}[![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Confidence:
-        "{{#if newVersion}}[![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}",
+    },
+  },
+  {
+    name: 'prBodyHeadingDefinitions',
+    description: 'Table header definitions to use in PR tables.',
+    type: 'object',
+    freeChoice: true,
+    mergeable: true,
+    default: {
+      Age: '[Age](https://docs.renovatebot.com/merge-confidence/)',
+      Adoption: '[Adoption](https://docs.renovatebot.com/merge-confidence/)',
+      Passing: '[Passing](https://docs.renovatebot.com/merge-confidence/)',
+      Confidence:
+        '[Confidence](https://docs.renovatebot.com/merge-confidence/)',
     },
   },
   {
@@ -3077,6 +3198,18 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowedUnsafeExecutions',
+    description: `List of possibly unsafe executions which are permitted to run. This enables global control over any implicit commands
+        which are run as part of a renovate run. This is similar to \`allowedCommands\` but is specifically used to control executions
+        which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
+    type: 'array',
+    subType: 'string',
+    default: [],
+    allowedValues: ['goGenerate', 'gradleWrapper'],
+    stage: 'repository',
+    globalOnly: true,
+  },
+  {
     name: 'gitNoVerify',
     description:
       'Which Git commands will be run with the `--no-verify` option.',
@@ -3100,7 +3233,13 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['bitbucket-server', 'forgejo', 'gitea', 'gitlab'],
+    supportedPlatforms: [
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'gitlab',
+      'scm-manager',
+    ],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -3117,7 +3256,14 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+    ],
   },
   {
     name: 'userStrings',
@@ -3215,6 +3361,17 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'prCacheSyncMaxPages',
+    description:
+      'Maximum number of pages to fetch when syncing the pull request cache.',
+    type: 'integer',
+    default: 100,
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+    experimentalIssues: [41485],
+  },
+  {
     name: 'dockerMaxPages',
     description:
       'By default, Renovate fetches up to 20 pages of Docker tags from registries. But you can set your own limit with this config option.',
@@ -3269,17 +3426,59 @@ const options: RenovateOptions[] = [
     default: false,
     globalOnly: true,
   },
+  {
+    name: 'toolSettings',
+    description:
+      'Tool specific configuration. Global self-hosted configuration takes precedence.',
+    type: 'object',
+    default: {
+      jvmMaxMemory: 512,
+      jvmMemory: 512,
+    },
+    cli: false,
+  },
+  {
+    name: 'jvmMaxMemory',
+    description:
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'jvmMemory',
+    description:
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'nodeMaxMemory',
+    description:
+      'Maximum memory in MiB for Node child processes invoked by Renovate. If unset, the Node process will automagically determine the memory limit to use. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.nodeMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['npm'],
+    cli: false,
+    env: false,
+  },
 ];
 
-export function getOptions(): RenovateOptions[] {
+export function getOptions(): Readonly<RenovateOptions>[] {
   return options;
 }
 
 function loadManagerOptions(): void {
   const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
   for (const [name, config] of allManagers.entries()) {
+    // v8 ignore else -- TODO: add test #40625
     if (config.defaultConfig) {
-      const managerConfig: RenovateOptions = {
+      const managerConfig: Readonly<RenovateOptions> = {
         name,
         description: `Configuration object for the ${name} manager`,
         stage: 'package',
@@ -3294,4 +3493,27 @@ function loadManagerOptions(): void {
   }
 }
 
+function freeze(value: unknown): void {
+  if (isArray(value)) {
+    for (const v of value) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  } else if (isObject(value)) {
+    for (const v of Object.values(value)) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  }
+}
+
+function freezeConfigOptions(): void {
+  for (const option of options) {
+    freeze(option);
+  }
+}
+
 loadManagerOptions();
+freezeConfigOptions();

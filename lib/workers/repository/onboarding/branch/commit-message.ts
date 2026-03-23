@@ -1,6 +1,7 @@
-import type { RenovateConfig } from '../../../../config/types';
-import type { CommitMessage } from '../../model/commit-message';
-import { CommitMessageFactory } from '../../model/commit-message-factory';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import type { CommitMessage } from '../../model/commit-message.ts';
+import { CommitMessageFactory } from '../../model/commit-message-factory.ts';
 
 export class OnboardingCommitMessageFactory {
   private readonly config: RenovateConfig;
@@ -13,7 +14,9 @@ export class OnboardingCommitMessageFactory {
   }
 
   create(): CommitMessage {
-    const { onboardingCommitMessage } = this.config;
+    const onboardingCommitMessage = getInheritedOrGlobal(
+      'onboardingCommitMessage',
+    );
     const commitMessageFactory = new CommitMessageFactory(this.config);
     const commitMessage = commitMessageFactory.create();
 

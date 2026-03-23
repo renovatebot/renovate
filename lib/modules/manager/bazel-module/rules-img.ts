@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { DockerDatasource } from '../../datasource/docker';
-import type { PackageDependency } from '../types';
-import { RepoRuleCallFragment, StringFragment } from './parser/fragments';
+import { z } from 'zod/v3';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { RepoRuleCallFragment, StringFragment } from './parser/fragments.ts';
 
 export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
   children: z.object({
@@ -14,7 +14,6 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
 }).transform(
   ({
     rawString,
-    functionName,
     children: { name, repository, registry, tag, digest },
   }): PackageDependency => {
     // Note: Validation that this is a rules_img pull call is done in transformRulesImgCalls

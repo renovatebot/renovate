@@ -1,6 +1,6 @@
 import cronstrue from 'cronstrue';
-import type { RenovateConfig } from '../../../../config/types';
-import * as schedule from './schedule';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import * as schedule from './schedule.ts';
 
 describe('workers/repository/update/branch/schedule', () => {
   describe('hasValidTimezone(schedule)', () => {

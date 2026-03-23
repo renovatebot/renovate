@@ -1,13 +1,13 @@
 import { isNull } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { joinUrlParts } from '../../../util/url';
-import { id as semverId } from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { defaultRegistryUrls } from './common';
-import { JsrPackageMetadata } from './schema';
-import { extractJsrPackageName } from './util';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { id as semverId } from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { defaultRegistryUrls } from './common.ts';
+import { JsrPackageMetadata } from './schema.ts';
+import { extractJsrPackageName } from './util.ts';
 
 export class JsrDatasource extends Datasource {
   static readonly id = 'jsr';
@@ -23,19 +23,15 @@ export class JsrDatasource extends Datasource {
   // use npm compatible registry api url due to returns
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
-  override readonly releaseTimestampSupport = false;
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `createdAt` field in the results. For packages without explicit timestamps, defaults to 2025-09-18.';
 
   constructor() {
     super(JsrDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${JsrDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `getReleases:${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -71,5 +67,17 @@ export class JsrDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${JsrDatasource.id}`,
+        // TODO: types (#22198)
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

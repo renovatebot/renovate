@@ -1,4 +1,4 @@
-import type { GotOptions, HttpResponse } from '../types';
+import type { GotOptions, HttpResponse } from '../types.ts';
 
 export interface HttpCacheProvider {
   setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(

@@ -1,7 +1,8 @@
-import * as _template from '../../../../../util/template';
-import { getChangelogs } from './changelogs';
+import * as _template from '../../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../../types.ts';
+import { getChangelogs } from './changelogs.ts';
 
-vi.mock('../../../../../util/template');
+vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/changelogs', () => {
@@ -20,8 +21,8 @@ describe('workers/repository/update/pr/body/changelogs', () => {
 
   it('returns release notes', () => {
     template.compile.mockImplementationOnce((_, config): string => {
-      const upgrades: { releaseNotesSummaryTitle: string }[] =
-        config.upgrades as never;
+      // ts can't infere correct type here
+      const { upgrades } = config as BranchConfig;
       return upgrades
         .map((upgrade) => upgrade.releaseNotesSummaryTitle)
         .join('\n')

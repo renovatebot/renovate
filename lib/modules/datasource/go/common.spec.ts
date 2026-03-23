@@ -1,4 +1,4 @@
-import { getSourceUrl } from './common';
+import { getSourceUrl } from './common.ts';
 
 describe('modules/datasource/go/common', () => {
   describe('getSourceUrl', () => {

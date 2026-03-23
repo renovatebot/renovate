@@ -1,13 +1,13 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import * as allVersioning from '../../../../../modules/versioning';
-import { detectPlatform } from '../../../../../util/common';
-import type { BranchUpgradeConfig } from '../../../../types';
-import api from './api';
-import type { ChangeLogSource } from './source';
-import type { ChangeLogResult } from './types';
+import { logger } from '../../../../../logger/index.ts';
+import * as allVersioning from '../../../../../modules/versioning/index.ts';
+import { detectPlatform } from '../../../../../util/common.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
+import api from './api.ts';
+import type { ChangeLogSource } from './source.ts';
+import type { ChangeLogResult } from './types.ts';
 
-export * from './types';
+export * from './types.ts';
 
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig,

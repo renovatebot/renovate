@@ -1,19 +1,23 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import { CrateDatasource } from '../../datasource/crate';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
-import { extractLockFileContentVersions } from './locked-version';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { regEx } from '../../../util/regex.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types.ts';
+import { extractLockFileContentVersions } from './locked-version.ts';
 
 async function cargoUpdate(
   manifestPath: string,
@@ -47,6 +51,13 @@ async function cargoUpdatePrecise(
   // First update individual dependencies to their `newVersion`. Necessary when
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
+    // If the range is bumped in Cargo.toml, the old lockedVersion may no longer
+    // exist in Cargo's dependency graph, so let the --workspace update at the
+    // end re-resolve it instead.
+    if (dep.currentValue && dep.newValue && dep.currentValue !== dep.newValue) {
+      continue;
+    }
+
     cmds.push(
       `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
@@ -210,7 +221,7 @@ async function updateArtifactsImpl(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

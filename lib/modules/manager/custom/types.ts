@@ -1,15 +1,13 @@
-import type { JSONataManagerConfig } from './jsonata/types';
-import type { RegexManagerConfig } from './regex/types';
+import type { JSONataManagerConfig } from './jsonata/types.ts';
+import type { RegexManagerConfig } from './regex/types.ts';
 
 export interface CustomExtractConfig
-  extends Partial<RegexManagerConfig>,
-    Partial<JSONataManagerConfig> {}
+  extends Partial<RegexManagerConfig>, Partial<JSONataManagerConfig> {}
 
 export type CustomManagerName = 'jsonata' | 'regex';
 
 export interface CustomManager
-  extends Partial<RegexManagerConfig>,
-    Partial<JSONataManagerConfig> {
+  extends Partial<RegexManagerConfig>, Partial<JSONataManagerConfig> {
   customType: CustomManagerName;
   managerFilePatterns: string[];
 }

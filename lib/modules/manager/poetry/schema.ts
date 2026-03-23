@@ -1,28 +1,26 @@
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
-import { parseGitUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
+import { z } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
 import {
   LooseArray,
   LooseRecord,
   Toml,
   withDepType,
-} from '../../../util/schema-utils';
-import { uniq } from '../../../util/uniq';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import * as gitVersioning from '../../versioning/git';
-import * as pep440Versioning from '../../versioning/pep440';
-import * as poetryVersioning from '../../versioning/poetry';
-import { DependencyGroup, ProjectSection } from '../pep621/schema';
-import { depTypes } from '../pep621/utils';
-import { dependencyPattern } from '../pip_requirements/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+} from '../../../util/schema-utils/index.ts';
+import { uniq } from '../../../util/uniq.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import * as gitVersioning from '../../versioning/git/index.ts';
+import * as pep440Versioning from '../../versioning/pep440/index.ts';
+import * as poetryVersioning from '../../versioning/poetry/index.ts';
+import { DependencyGroup, ProjectSection } from '../pep621/schema.ts';
+import { depTypes, pep508ToPackageDependency } from '../pep621/utils.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const PoetryOptionalDependencyMixin = z
   .object({
@@ -289,22 +287,15 @@ export const PoetrySection = z.object({
 
 export type PoetrySection = z.infer<typeof PoetrySection>;
 
-const BuildSystemRequireVal = z
-  .string()
-  .nonempty()
-  .transform((val) => regEx(`^${dependencyPattern}$`).exec(val))
-  .transform((match, ctx) => {
-    if (!match) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'invalid requirement',
-      });
-      return z.NEVER;
-    }
-
-    const [, depName, , poetryRequirement] = match;
-    return { depName, poetryRequirement };
-  });
+const BuildSystemRequires = LooseArray(
+  z
+    .string()
+    .nonempty()
+    .transform((val) =>
+      pep508ToPackageDependency(depTypes.buildSystemRequires, val),
+    )
+    .refine((dep) => dep !== null),
+).catch([]);
 
 export const PoetryPyProject = Toml.pipe(
   z
@@ -320,15 +311,20 @@ export const PoetryPyProject = Toml.pipe(
               buildBackend === 'poetry.masonry.api' ||
               buildBackend === 'poetry.core.masonry.api',
           ),
-          requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
-            const req = vals.find(
-              ({ depName }) =>
-                depName === 'poetry' || depName === 'poetry_core',
-            );
-            return req?.poetryRequirement;
-          }),
+          requires: BuildSystemRequires,
         })
-        .transform(({ requires: poetryRequirement }) => poetryRequirement)
+        .transform(({ requires }) => {
+          const req = requires.find(
+            ({ depName }) =>
+              depName === 'poetry' ||
+              depName === 'poetry_core' ||
+              depName === 'poetry-core',
+          );
+          return {
+            poetryRequirement: req?.currentValue,
+            requires,
+          };
+        })
         .optional()
         .catch(undefined),
     })
@@ -336,7 +332,7 @@ export const PoetryPyProject = Toml.pipe(
       const {
         project,
         tool,
-        'build-system': poetryRequirement,
+        'build-system': buildSystem,
         'dependency-groups': dependencyGroups,
       } = pyproject;
 
@@ -358,6 +354,10 @@ export const PoetryPyProject = Toml.pipe(
         ...projectOptionalDependencies,
       ]) {
         projectDepsByName[dep.depName!] = dep;
+      }
+
+      if (buildSystem?.requires) {
+        deps.push(...buildSystem.requires);
       }
 
       const poetryDependencies = tool?.poetry?.dependencies ?? [];
@@ -410,7 +410,10 @@ export const PoetryPyProject = Toml.pipe(
         }
       }
 
-      return { packageFileContent, poetryRequirement };
+      return {
+        packageFileContent,
+        poetryRequirement: buildSystem?.poetryRequirement,
+      };
     }),
 );
 

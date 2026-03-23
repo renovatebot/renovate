@@ -1,4 +1,4 @@
-import { BuildpacksRegistryResponse } from './schema';
+import { BuildpacksRegistryResponse } from './schema.ts';
 
 describe('modules/datasource/buildpacks-registry/schema', () => {
   it('parses buildpack-registry schema', () => {

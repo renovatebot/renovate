@@ -3,16 +3,16 @@ import {
   isNullOrUndefined,
   isPlainObject,
 } from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { joinUrlParts } from '../../../../../util/url';
-import { HelmDatasource } from '../../../../datasource/helm';
-import { getDep } from '../../../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci';
-import type { ExtractConfig, PackageDependency } from '../../../types';
-import { DependencyExtractor } from '../../base';
-import type { TerraformDefinitionFile } from '../../hcl/types';
-import type { ProviderLock } from '../../lockfile/types';
-import { checkIfStringIsPath } from '../../util';
+import { logger } from '../../../../../logger/index.ts';
+import { joinUrlParts } from '../../../../../util/url.ts';
+import { HelmDatasource } from '../../../../datasource/helm/index.ts';
+import { getDep } from '../../../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
+import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
+import { checkIfStringIsPath } from '../../util.ts';
 
 export class HelmReleaseExtractor extends DependencyExtractor {
   getCheckList(): string[] {

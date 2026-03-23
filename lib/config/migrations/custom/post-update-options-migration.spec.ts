@@ -1,4 +1,4 @@
-import { PostUpdateOptionsMigration } from './post-update-options-migration';
+import { PostUpdateOptionsMigration } from './post-update-options-migration.ts';
 
 describe('config/migrations/custom/post-update-options-migration', () => {
   it('should migrate properly', async () => {

@@ -1,5 +1,5 @@
-import { processSupersedesManagers } from './supersedes';
-import type { ExtractResults } from './types';
+import { processSupersedesManagers } from './supersedes.ts';
+import type { ExtractResults } from './types.ts';
 
 describe('workers/repository/extract/supersedes', () => {
   describe('processSupersedesManagers', () => {

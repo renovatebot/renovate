@@ -1,6 +1,6 @@
-import { logger, withMeta } from '../../../logger';
-import type { PackageFileContent } from '../types';
-import { Devbox } from './schema';
+import { logger, withMeta } from '../../../logger/index.ts';
+import type { PackageFileContent } from '../types.ts';
+import { Devbox } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

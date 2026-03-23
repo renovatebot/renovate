@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
-import { tryReuseAutoclosedPr } from './pr-reuse';
-import { platform } from '~test/util';
+import { platform } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 
 describe('workers/repository/update/pr/pr-reuse', () => {
   const tryReuseFn = platform.tryReuseAutoclosedPr;
@@ -75,7 +75,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
   });
 
   it('returns null for dry-runs', async () => {
-    GlobalConfig.set({ dryRun: true });
+    GlobalConfig.set({ dryRun: 'full' });
 
     platform.findPr.mockResolvedValueOnce({
       number: 123,

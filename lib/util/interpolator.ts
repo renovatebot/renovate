@@ -1,12 +1,12 @@
 import { isArray, isPlainObject, isString } from '@sindresorhus/is';
-import type { RenovateConfig } from '../config/types';
+import type { RenovateConfig } from '../config/types.ts';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
   CONFIG_VARIABLES_INVALID,
-} from '../constants/error-messages';
-import { logger } from '../logger';
-import { capitalize } from './string';
+} from '../constants/error-messages.ts';
+import { logger } from '../logger/index.ts';
+import { capitalize } from './string.ts';
 
 export interface InterpolatorOptions {
   name: 'secrets' | 'variables';
@@ -99,7 +99,8 @@ export function replaceInterpolatedValuesInObject(
     delete config[name];
   }
   for (const [key, value] of Object.entries(config)) {
-    if (isPlainObject(value)) {
+    if (isPlainObject(value) && key !== 'onboardingConfig') {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInObject(
         value,
         input,
@@ -108,6 +109,7 @@ export function replaceInterpolatedValuesInObject(
       );
     }
     if (isString(value)) {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInString(
         key,
         value,
@@ -117,6 +119,7 @@ export function replaceInterpolatedValuesInObject(
     }
     if (isArray(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
+        // v8 ignore else -- TODO: add test #40625
         if (isPlainObject(arrayItem)) {
           value[arrayIndex] = replaceInterpolatedValuesInObject(
             arrayItem,

@@ -1,6 +1,6 @@
-import { coerceArray } from '../../../util/array';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { PuppetfileModule } from './types';
+import { coerceArray } from '../../../util/array.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { PuppetfileModule } from './types.ts';
 
 const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
 const commentRegex = regEx(/#.*$/);

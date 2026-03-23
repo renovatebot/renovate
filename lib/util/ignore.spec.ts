@@ -1,7 +1,7 @@
-import { logger } from '../logger';
-import { isSkipComment } from './ignore';
+import { logger } from '../logger/index.ts';
+import { isSkipComment } from './ignore.ts';
 
-vi.mock('../logger', () => ({
+vi.mock('../logger/index.ts', () => ({
   logger: {
     debug: vi.fn(),
   },

@@ -1,16 +1,16 @@
 import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { HelmsmanDocument } from './types';
+} from '../types.ts';
+import type { HelmsmanDocument } from './types.ts';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 

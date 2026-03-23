@@ -1,10 +1,10 @@
-import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { isVersion } from '../../versioning/semver';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { SkipReason } from '../../../types/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { isVersion } from '../../versioning/semver/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(
   content: string,

@@ -1,5 +1,5 @@
-import { regEx } from '../../util/regex';
-import type { VersioningApi, VersioningApiConstructor } from './types';
+import { regEx } from '../../util/regex.ts';
+import type { VersioningApi, VersioningApiConstructor } from './types.ts';
 
 export function isVersioningApiConstructor(
   obj: VersioningApi | VersioningApiConstructor,

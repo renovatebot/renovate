@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import { MiseFile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { MiseFile } from './schema.ts';
 
 export function parseTomlFile(
   content: string,

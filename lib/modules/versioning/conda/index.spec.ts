@@ -1,4 +1,4 @@
-import { api } from '.';
+import { api } from './index.ts';
 
 describe('modules/versioning/conda/index', () => {
   it.each`

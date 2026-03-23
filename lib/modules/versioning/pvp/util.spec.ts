@@ -1,4 +1,4 @@
-import { extractAllParts, getParts } from './util';
+import { extractAllParts, getParts } from './util.ts';
 
 describe('modules/versioning/pvp/util', () => {
   describe('.extractAllParts(version)', () => {

@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { parseCatalog } from './catalog';
+import { parseCatalog } from './catalog.ts';
 
 describe('modules/manager/gradle/extract/catalog', () => {
   it('supports versions declared as single string', () => {
@@ -153,6 +153,11 @@ describe('modules/manager/gradle/extract/catalog', () => {
         sharedVariableName: 'detekt',
       },
     ]);
+  });
+
+  it('ignores empty TOML file', () => {
+    const res = parseCatalog('gradle/libs.versions.toml', '');
+    expect(res).toBeEmptyArray();
   });
 
   it('changes the dependency version, not the comment version', () => {

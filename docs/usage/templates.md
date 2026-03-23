@@ -31,6 +31,14 @@ Some are configuration options passed through, while others are generated as par
 
 ## Additional Handlebars helpers
 
+### add
+
+Returns the sum of the fields.
+
+`{{add major 1}}`
+
+In the example above, it will add `1` to the `major` of current version and return the value.
+
 ### and
 
 Returns `true` only if all expressions are `true`.

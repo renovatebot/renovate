@@ -2,9 +2,9 @@ import { satisfies } from '@renovatebot/ruby-semver';
 import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement.js';
 import type { Version } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator.ts';
 
 export interface Range {
   version: string;

@@ -1,14 +1,14 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { DockerDatasource } from '../../datasource/docker';
-import * as debianVersioning from '../../versioning/debian';
-import * as ubuntuVersioning from '../../versioning/ubuntu';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import * as debianVersioning from '../../versioning/debian/index.ts';
+import * as ubuntuVersioning from '../../versioning/ubuntu/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 
 const variableMarker = '$';
 
@@ -352,7 +352,7 @@ export function extractPackageFile(
         for (const [fullVariable, argName] of Object.entries(variables)) {
           const resolvedArgValue = args[argName];
           if (resolvedArgValue || resolvedArgValue === '') {
-            fromImage = fromImage.replace(fullVariable, resolvedArgValue);
+            fromImage = fromImage.replaceAll(fullVariable, resolvedArgValue);
             lineNumberRanges.push(argsLines[argName]);
           }
         }

@@ -1,4 +1,4 @@
-import { IgnoreNodeModulesMigration } from './ignore-node-modules-migration';
+import { IgnoreNodeModulesMigration } from './ignore-node-modules-migration.ts';
 
 describe('config/migrations/custom/ignore-node-modules-migration', () => {
   it('should migrate to ignorePaths', async () => {

@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import { getCache } from '../../../util/cache/repository';
-import type { ExtractResult } from '../process/extract-update';
+import { logger } from '../../../logger/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { ExtractResult } from '../process/extract-update.ts';
 
 export function setReconfigureBranchCache(
   reconfigureBranchSha: string,

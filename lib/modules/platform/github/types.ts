@@ -1,6 +1,6 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import type { EmailAddress } from '../../../util/schema-utils';
-import type { Pr, PrBodyStruct } from '../types';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { EmailAddress } from '../../../util/schema-utils/index.ts';
+import type { Pr, PrBodyStruct } from '../types.ts';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
