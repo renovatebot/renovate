@@ -292,6 +292,10 @@ describe('modules/manager/npm/post-update/index', () => {
         ],
         updatedArtifacts: [
           {
+            type: 'deletion',
+            path: 'some-deleted-file.yaml',
+          },
+          {
             type: 'addition',
             path: 'pnpm-workspace.yaml',
             contents:
