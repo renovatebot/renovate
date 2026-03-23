@@ -32,6 +32,7 @@ export const FORGEJO_API_USING_HOST_TYPES = [
 
 export const GITHUB_API_USING_HOST_TYPES = [
   'github',
+  'github-digest',
   'github-releases',
   'github-release-attachments',
   'github-tags',

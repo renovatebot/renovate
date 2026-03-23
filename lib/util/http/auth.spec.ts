@@ -98,6 +98,28 @@ describe('util/http/auth', () => {
       `);
     });
 
+    it('github app token for github-digest datasource', () => {
+      const opts: GotOptions = {
+        headers: {
+          accept: 'application/json, application/vnd.github.v3+json',
+        },
+        token: 'x-access-token:ghs_test',
+        hostType: 'github-digest',
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toEqual({
+        headers: {
+          accept:
+            'application/json, application/vnd.github.machine-man-preview+json',
+          authorization: 'token ghs_test',
+        },
+        hostType: 'github-digest',
+        token: 'x-access-token:ghs_test',
+      });
+    });
+
     it(`gitlab personal access token`, () => {
       const opts: GotOptions = {
         headers: {},
