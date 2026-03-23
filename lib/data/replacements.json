@@ -853,7 +853,8 @@
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["/^io\\.github\\.microutils:kotlin-logging/"],
-        "replacementNameTemplate": "{{{replace 'io.github.microutils' 'io.github.oshai' packageName}}}"
+        "replacementNameTemplate": "{{{replace 'io.github.microutils' 'io.github.oshai' packageName}}}",
+        "replacementVersion": "5.1.4"
       }
     ]
   },
