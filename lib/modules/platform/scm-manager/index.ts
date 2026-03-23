@@ -60,7 +60,7 @@ export async function initPlatform({
     throw new Error('Init: SCM-Manager API token not configured');
   }
 
-  const baseUrl = `${endpoint}scm/api/v2`;
+  const baseUrl = `${endpoint}api/v2`;
   setBaseUrl(baseUrl);
 
   try {
