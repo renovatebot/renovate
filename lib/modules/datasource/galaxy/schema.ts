@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export type GalaxyV1 = z.infer<typeof GalaxyV1>;

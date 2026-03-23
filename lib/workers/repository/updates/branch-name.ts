@@ -49,7 +49,7 @@ function cleanBranchName(
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
-    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~
+    .replace(regEx(/[[\]?:\\^~<>]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~ < >
     .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
     .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
@@ -67,7 +67,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
   }
 
   if (update.groupName) {
-    if (['lockFileMaintenance', 'replacement'].includes(update.updateType!)) {
+    if (update.updateType === 'replacement') {
       logger.debug(
         { depName: update.depName },
         `Ignoring grouped branch name for ${update.updateType} update`,
@@ -99,6 +99,9 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
       }
       if (update.updateType === 'patch' && update.separateMinorPatch) {
         update.groupSlug = `patch-${update.groupSlug}`;
+      }
+      if (update.updateType === 'lockFileMaintenance') {
+        update.groupSlug = `lock-file-maintenance-${update.groupSlug}`;
       }
       update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
       update.branchName = update.group!.branchName ?? update.branchName;

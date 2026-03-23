@@ -9,7 +9,7 @@
   "ignorePresets": [":ignoreModulesAndTests"],
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "rebaseWhen": "conflicted",
-  "baseBranchPatterns": ["$default", "next", "maint/42.x"],
+  "baseBranchPatterns": ["$default", "next"],
   "dockerfile": {
     "semanticCommitType": "build"
   },

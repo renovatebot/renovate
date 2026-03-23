@@ -66,11 +66,11 @@ export async function bake(
   args.push(target);
 
   for (let tries = opts.tries ?? 0; tries >= 0; tries--) {
-    const result = exec(`docker`, args);
+    const result = await exec(`docker`, args, { reject: false });
     if (result.signal) {
       logger.error(`Signal received: ${result.signal}`);
       process.exit(-1);
-    } else if (result.status && result.status !== 0) {
+    } else if (result.exitCode) {
       if (tries > 0) {
         logger.debug(`Error occured:\n ${result.stderr}`);
         const delay = opts.delay ? toMs(opts.delay) : null;
@@ -81,7 +81,7 @@ export async function bake(
       } else {
         logger.error(`Error occured:\n${result.stderr}`);
         if (opts.exitOnError !== false) {
-          process.exit(result.status);
+          process.exit(result.exitCode);
         }
         return null;
       }
@@ -97,22 +97,25 @@ export async function bake(
   return meta;
 }
 
-export function sign(
+export async function sign(
   image: string,
   opts: {
     args?: string[];
     exitOnError?: boolean;
   },
-): void {
+): Promise<void> {
   logger.info(`Signing ${image} ...`);
-  const result = exec('cosign', ['sign', '--yes', image]);
+  const result = await exec('cosign', ['sign', '--yes', image], {
+    reject: false,
+  });
+
   if (result.signal) {
     logger.error(`Signal received: ${result.signal}`);
     process.exit(-1);
-  } else if (result.status && result.status !== 0) {
+  } else if (result.exitCode) {
     logger.error(`Error occured:\n${result.stderr}`);
     if (opts.exitOnError !== false) {
-      process.exit(result.status);
+      process.exit(result.exitCode);
     }
   } else {
     logger.debug(`Succeeded:\n${result.stdout || result.stderr}`);

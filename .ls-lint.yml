@@ -24,3 +24,8 @@ ignore:
   - tools/mkdocs/site
   - tools/mkdocs/.cache
   - .worktrees
+  - .agents
+  - .claude
+  - .opencode
+  - AGENTS.md
+  - CLAUDE.md

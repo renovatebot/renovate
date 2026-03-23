@@ -7,6 +7,7 @@ import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
+import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
 
@@ -16,6 +17,13 @@ export interface ToolingDefinition {
 }
 
 export const asdfTooling = upgradeableTooling;
+
+function shortJavaVersioning(version: string): { versioning?: string } {
+  if (regEx(/^\d+(\.\d+)?$/).test(version)) {
+    return { versioning: semverPartialVersioning.id };
+  }
+  return {};
+}
 
 const miseCoreTooling: Record<string, ToolingDefinition> = {
   bun: {
@@ -67,6 +75,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: versionMatch,
+          ...shortJavaVersioning(versionMatch),
         };
       }
       const openJdkMatches = regEx(/^openjdk-(?<version>\d\S+)/).exec(
@@ -77,6 +86,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: openJdkMatches.version,
+          ...shortJavaVersioning(openJdkMatches.version),
         };
       }
       const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
@@ -87,6 +97,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: adoptOpenJdkMatches.version,
+          ...shortJavaVersioning(adoptOpenJdkMatches.version),
         };
       }
       const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
@@ -97,6 +108,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: temurinJdkMatches.version,
+          ...shortJavaVersioning(temurinJdkMatches.version),
         };
       }
       const correttoJdkMatches = regEx(/^corretto-(?<version>\d\S+)/).exec(
@@ -107,6 +119,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: correttoJdkMatches.version,
+          ...shortJavaVersioning(correttoJdkMatches.version),
         };
       }
       const zuluJdkMatches = regEx(/^zulu-(?<version>\d\S+)/).exec(
@@ -117,6 +130,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: zuluJdkMatches.version,
+          ...shortJavaVersioning(zuluJdkMatches.version),
         };
       }
       const oracleGraalvmJdkMatches = regEx(
@@ -127,6 +141,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: oracleGraalvmJdkMatches.version,
+          ...shortJavaVersioning(oracleGraalvmJdkMatches.version),
         };
       }
 
@@ -259,6 +274,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  gh: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'cli/cli',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   'dotenv-linter': {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -349,6 +372,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'apple/pkl',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  prettier: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'prettier/prettier',
       datasource: GithubReleasesDatasource.id,
     },
   },

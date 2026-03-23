@@ -6,7 +6,7 @@ import {
 } from 'emojibase';
 import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import type { RenovateConfig } from '../config/types.ts';
 import dataFiles from '../data-files.generated.ts';
 import { logger } from '../logger/index.ts';

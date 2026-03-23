@@ -6,6 +6,7 @@ export { extractPackageFile } from './extract.ts';
 export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['pdm.lock', 'uv.lock'];
 
 export const displayName = 'PEP 621';
 export const url = 'https://peps.python.org/pep-0621';

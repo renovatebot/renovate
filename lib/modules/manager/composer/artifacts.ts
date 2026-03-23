@@ -1,6 +1,6 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -271,7 +271,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

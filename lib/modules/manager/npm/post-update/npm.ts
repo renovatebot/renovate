@@ -9,7 +9,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import { exec } from '../../../../util/exec/index.ts';
+import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ExtraEnv,
@@ -29,7 +29,11 @@ import { PackageLock } from '../schema.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils.ts';
+import {
+  getNodeOptions,
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from './utils.ts';
 
 async function getNpmConstraintFromPackageLock(
   lockFileDir: string,
@@ -111,6 +115,12 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
     };
+
+    const { nodeMaxMemory } = getToolSettingsOptions(config.toolSettings);
+    if (nodeMaxMemory) {
+      extraEnv.NODE_OPTIONS = getNodeOptions(nodeMaxMemory);
+    }
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,

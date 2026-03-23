@@ -6,6 +6,7 @@ export { updateArtifacts } from './artifacts.ts';
 export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['requirements.txt'];
 
 export const displayName = 'pip-compile';
 export const url = 'https://pip-tools.readthedocs.io/en/latest/cli/pip-compile';
