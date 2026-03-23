@@ -223,25 +223,29 @@ export class UvProcessor extends BasePyProjectProcessor {
         const ms = toMs(config.minimumReleaseAge);
         if (isNullOrUndefined(ms)) {
           logger.debug(
-            { minimumReleaseAge: config.minimumReleaseAge },
-            'Invalid minimumReleaseAge value, skipping UV_EXCLUDE_NEWER for uv lock',
+            `Invalid minimumReleaseAge value '${config.minimumReleaseAge}', skipping UV_EXCLUDE_NEWER for uv lock`,
           );
         } else {
           let excludeNewerDate = DateTime.now().minus(ms).toUTC();
 
           const pyprojectExcludeNewer = project.tool?.uv?.['exclude-newer'];
           if (pyprojectExcludeNewer) {
-            const pyprojectDate = DateTime.fromISO(pyprojectExcludeNewer, {
+            let pyprojectDate = DateTime.fromISO(pyprojectExcludeNewer, {
               zone: 'utc',
             });
+            if (!pyprojectDate.isValid) {
+              const durationMs = toMs(pyprojectExcludeNewer);
+              if (!isNullOrUndefined(durationMs)) {
+                pyprojectDate = DateTime.now().minus(durationMs).toUTC();
+              }
+            }
             if (pyprojectDate.isValid) {
               if (pyprojectDate < excludeNewerDate) {
                 excludeNewerDate = pyprojectDate;
               }
             } else {
               logger.debug(
-                { excludeNewer: pyprojectExcludeNewer },
-                'Invalid exclude-newer value in pyproject.toml, ignoring',
+                `Invalid exclude-newer value '${pyprojectExcludeNewer}' in pyproject.toml, ignoring`,
               );
             }
           }

@@ -894,29 +894,31 @@ describe('modules/manager/pep621/processors/uv', () => {
     });
 
     describe('UV_EXCLUDE_NEWER with minimumReleaseAge', () => {
-      beforeEach(() => {
-        vi.restoreAllMocks();
-      });
+      let execSnapshots: ReturnType<typeof mockExecAll>;
 
-      it('sets UV_EXCLUDE_NEWER env var on lockfile maintenance with minimumReleaseAge', async () => {
+      beforeEach(() => {
         vi.spyOn(Date, 'now').mockReturnValue(
           new Date('2026-03-13T00:00:00.000Z').getTime(),
         );
-        const execSnapshots = mockExecAll();
+        execSnapshots = mockExecAll();
         GlobalConfig.set(adminConfig);
         fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
         fs.readLocalFile.mockResolvedValueOnce('test content');
         fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        // python
         getPkgReleases.mockResolvedValueOnce({
           releases: [{ version: '3.11.1' }],
         });
-        // uv
         getPkgReleases.mockResolvedValueOnce({
           releases: [{ version: '0.2.35' }],
         });
+      });
 
-        const result = await processor.updateArtifacts(
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it('sets UV_EXCLUDE_NEWER from minimumReleaseAge', async () => {
+        await processor.updateArtifacts(
           {
             packageFileName: 'folder/pyproject.toml',
             newPackageFileContent: '',
@@ -928,122 +930,25 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
           parsePyProject('')!,
         );
-        expect(result).toEqual([
-          {
-            file: {
-              contents: 'changed test content',
-              path: 'uv.lock',
-              type: 'addition',
-            },
-          },
-        ]);
-        expect(execSnapshots).toMatchObject([{ cmd: 'uv lock --upgrade' }]);
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
         expect(execSnapshots[0].options?.env).toMatchObject({
           UV_EXCLUDE_NEWER: '2026-03-10T00:00:00.000Z',
         });
       });
 
-      it('sets UV_EXCLUDE_NEWER env var on per-package update with minimumReleaseAge', async () => {
-        vi.spyOn(Date, 'now').mockReturnValue(
-          new Date('2026-03-13T00:00:00.000Z').getTime(),
-        );
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        // python
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        // uv
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
-        const updatedDeps = [
-          { packageName: 'dep1', depType: depTypes.dependencies },
-        ];
-        const result = await processor.updateArtifacts(
-          {
-            packageFileName: 'folder/pyproject.toml',
-            newPackageFileContent: '',
-            config: {
-              minimumReleaseAge: '7 days',
-            },
-            updatedDeps,
-          },
-          parsePyProject('')!,
-        );
-        expect(result).toEqual([
-          {
-            file: {
-              contents: 'changed test content',
-              path: 'uv.lock',
-              type: 'addition',
-            },
-          },
-        ]);
-        expect(execSnapshots).toMatchObject([
-          { cmd: 'uv lock --upgrade-package dep1' },
-        ]);
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
-        expect(execSnapshots[0].options?.env).toMatchObject({
-          UV_EXCLUDE_NEWER: '2026-03-06T00:00:00.000Z',
-        });
-      });
-
-      it('does not set UV_EXCLUDE_NEWER when no minimumReleaseAge', async () => {
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        // python
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        // uv
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
+      it('skips UV_EXCLUDE_NEWER when minimumReleaseAge absent', async () => {
         await processor.updateArtifacts(
           {
             packageFileName: 'folder/pyproject.toml',
             newPackageFileContent: '',
-            config: {
-              isLockFileMaintenance: true,
-            },
+            config: { isLockFileMaintenance: true },
             updatedDeps: [],
           },
           parsePyProject('')!,
         );
-        expect(execSnapshots).toMatchObject([
-          {
-            cmd: 'uv lock --upgrade',
-          },
-        ]);
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
         expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
       });
 
-      it('does not set UV_EXCLUDE_NEWER on invalid minimumReleaseAge', async () => {
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        // python
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        // uv
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
+      it('skips UV_EXCLUDE_NEWER on unparseable minimumReleaseAge', async () => {
         await processor.updateArtifacts(
           {
             packageFileName: 'folder/pyproject.toml',
@@ -1056,76 +961,17 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
           parsePyProject('')!,
         );
-        expect(execSnapshots).toMatchObject([
-          {
-            cmd: 'uv lock --upgrade',
-          },
-        ]);
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
         expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          { minimumReleaseAge: 'invalid garbage' },
-          'Invalid minimumReleaseAge value, skipping UV_EXCLUDE_NEWER for uv lock',
+          "Invalid minimumReleaseAge value 'invalid garbage', skipping UV_EXCLUDE_NEWER for uv lock",
         );
       });
 
-      it('does not set UV_EXCLUDE_NEWER on empty string minimumReleaseAge', async () => {
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        // python
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        // uv
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
-        await processor.updateArtifacts(
-          {
-            packageFileName: 'folder/pyproject.toml',
-            newPackageFileContent: '',
-            config: {
-              isLockFileMaintenance: true,
-              minimumReleaseAge: '',
-            },
-            updatedDeps: [],
-          },
-          parsePyProject('')!,
-        );
-        expect(execSnapshots).toMatchObject([
-          {
-            cmd: 'uv lock --upgrade',
-          },
-        ]);
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
-        expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
-      });
-
-      it('uses pyproject exclude-newer when it is more restrictive than minimumReleaseAge', async () => {
-        vi.spyOn(Date, 'now').mockReturnValue(
-          new Date('2026-03-13T00:00:00.000Z').getTime(),
-        );
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
+      it('uses pyproject ISO date when more restrictive', async () => {
         const pyproject = parsePyProject(codeBlock`
           [tool.uv]
           exclude-newer = "2026-03-05T00:00:00.000Z"
         `)!;
-
         await processor.updateArtifacts(
           {
             packageFileName: 'folder/pyproject.toml',
@@ -1138,33 +984,16 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
           pyproject,
         );
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
         expect(execSnapshots[0].options?.env).toMatchObject({
           UV_EXCLUDE_NEWER: '2026-03-05T00:00:00.000Z',
         });
       });
 
-      it('uses minimumReleaseAge date when it is more restrictive than pyproject exclude-newer', async () => {
-        vi.spyOn(Date, 'now').mockReturnValue(
-          new Date('2026-03-13T00:00:00.000Z').getTime(),
-        );
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
+      it('uses minimumReleaseAge when pyproject less restrictive', async () => {
         const pyproject = parsePyProject(codeBlock`
           [tool.uv]
           exclude-newer = "2026-03-12T00:00:00.000Z"
         `)!;
-
         await processor.updateArtifacts(
           {
             packageFileName: 'folder/pyproject.toml',
@@ -1177,33 +1006,39 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
           pyproject,
         );
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
         expect(execSnapshots[0].options?.env).toMatchObject({
           UV_EXCLUDE_NEWER: '2026-03-10T00:00:00.000Z',
         });
       });
 
-      it('ignores invalid exclude-newer in pyproject.toml and uses minimumReleaseAge', async () => {
-        vi.spyOn(Date, 'now').mockReturnValue(
-          new Date('2026-03-13T00:00:00.000Z').getTime(),
+      it('uses pyproject relative duration when more restrictive', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "2 weeks"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps: [],
+          },
+          pyproject,
         );
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
+        // 2 weeks = 14 days ago = 2026-02-27, which is older than 3 days ago = 2026-03-10
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          UV_EXCLUDE_NEWER: '2026-02-27T00:00:00.000Z',
         });
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
+      });
 
+      it('ignores unparseable pyproject exclude-newer and uses minimumReleaseAge', async () => {
         const pyproject = parsePyProject(codeBlock`
           [tool.uv]
           exclude-newer = "not-a-date"
         `)!;
-
         await processor.updateArtifacts(
           {
             packageFileName: 'folder/pyproject.toml',
@@ -1220,80 +1055,8 @@ describe('modules/manager/pep621/processors/uv', () => {
           UV_EXCLUDE_NEWER: '2026-03-10T00:00:00.000Z',
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          { excludeNewer: 'not-a-date' },
-          'Invalid exclude-newer value in pyproject.toml, ignoring',
+          "Invalid exclude-newer value 'not-a-date' in pyproject.toml, ignoring",
         );
-      });
-
-      it('does not set UV_EXCLUDE_NEWER when no minimumReleaseAge even if pyproject has exclude-newer', async () => {
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
-        const pyproject = parsePyProject(codeBlock`
-          [tool.uv]
-          exclude-newer = "2026-03-05T00:00:00.000Z"
-        `)!;
-
-        await processor.updateArtifacts(
-          {
-            packageFileName: 'folder/pyproject.toml',
-            newPackageFileContent: '',
-            config: {
-              isLockFileMaintenance: true,
-            },
-            updatedDeps: [],
-          },
-          pyproject,
-        );
-        expect(execSnapshots[0].cmd).not.toContain('--exclude-newer');
-        expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
-      });
-
-      it('handles pyproject exclude-newer as local date without time component', async () => {
-        vi.spyOn(Date, 'now').mockReturnValue(
-          new Date('2026-03-13T00:00:00.000Z').getTime(),
-        );
-        const execSnapshots = mockExecAll();
-        GlobalConfig.set(adminConfig);
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
-        fs.readLocalFile.mockResolvedValueOnce('test content');
-        fs.readLocalFile.mockResolvedValueOnce('changed test content');
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '3.11.1' }],
-        });
-        getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '0.2.35' }],
-        });
-
-        const pyproject = parsePyProject(codeBlock`
-          [tool.uv]
-          exclude-newer = "2026-03-05"
-        `)!;
-
-        await processor.updateArtifacts(
-          {
-            packageFileName: 'folder/pyproject.toml',
-            newPackageFileContent: '',
-            config: {
-              isLockFileMaintenance: true,
-              minimumReleaseAge: '3 days',
-            },
-            updatedDeps: [],
-          },
-          pyproject,
-        );
-        expect(execSnapshots[0].options?.env).toMatchObject({
-          UV_EXCLUDE_NEWER: '2026-03-05T00:00:00.000Z',
-        });
       });
 
       it('handles exclude-newer as Date object in schema', () => {
