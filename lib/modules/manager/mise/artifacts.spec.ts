@@ -9,11 +9,15 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts, updateLockedDependency } from './artifacts.ts';
+import * as lockfile from './lockfile.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../../util/git/index.ts');
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('./lockfile.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof lockfile>()),
+}));
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -285,6 +289,28 @@ describe('modules/manager/mise/artifacts', () => {
   // containerbase support may not be available in all test environments.
   // The functionality is tested through the regular tests which use mockExecAll.
 
+  it('prevents command injection', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    fs.writeLocalFile.mockResolvedValueOnce();
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: [],
+      }),
+    );
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: '|| date; echo ' }, { depName: 'node' }],
+      newPackageFileContent: 'content',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: "mise lock '|| date; echo ' node" },
+    ]);
+  });
+
   it('handles subdirectory package files', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
@@ -402,6 +428,36 @@ version = "3.10.17"
       });
 
       expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported when depName is undefined', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: undefined as never,
+        currentVersion: '20.10.0',
+        newVersion: '20.11.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns update-failed in case of errors', () => {
+      vi.spyOn(lockfile, 'getLockedVersion').mockImplementationOnce(() => {
+        throw new Error('unexpected error');
+      });
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.11.0',
+      });
+
+      expect(res).toEqual({ status: 'update-failed' });
     });
   });
 });
