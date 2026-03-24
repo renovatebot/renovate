@@ -148,7 +148,10 @@ export async function generateLockFile(
       const ms = toMs(config.minimumReleaseAge);
       if (ms === null) {
         logger.debug(
-          `Invalid minimumReleaseAge value: ${config.minimumReleaseAge}, skipping --before for npm install`,
+          {
+            minimumReleaseAge: config.minimumReleaseAge,
+          },
+          'Invalid minimumReleaseAge, skipping --before for npm install',
         );
       } else {
         let beforeDate = DateTime.now().minus(ms).toUTC();
@@ -156,14 +159,22 @@ export async function generateLockFile(
         const npmrcDate = parseNpmrcCooldownDate(npmrcContent);
         if (npmrcDate && npmrcDate < beforeDate) {
           logger.debug(
-            `Using stricter .npmrc cooldown date ${npmrcDate.toISO()} over minimumReleaseAge date ${beforeDate.toISO()}`,
+            {
+              npmrcDate: npmrcDate.toISO(),
+              beforeDate: beforeDate.toISO(),
+            },
+            'Using stricter .npmrc cooldown date over minimumReleaseAge date',
           );
           beforeDate = npmrcDate;
         }
 
         const beforeISO = beforeDate.toISO();
         logger.debug(
-          `Setting npm --before=${beforeISO} based on minimumReleaseAge=${config.minimumReleaseAge}`,
+          {
+            beforeISO,
+            minimumReleaseAge: config.minimumReleaseAge,
+          },
+          'Setting npm --before based on minimumReleaseAge',
         );
         cmdOptions += ` --before=${beforeISO}`;
       }
