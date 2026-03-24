@@ -14,9 +14,13 @@ import type {
   UpdateLockedConfig,
   UpdateLockedResult,
 } from '../types.ts';
-import { getLockFileName } from './lockfile.ts';
+import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import { MiseLockFile } from './schema.ts';
 
+/**
+ * Updates mise lock files when dependencies are updated.
+ * Runs `mise lock` for lock file maintenance or `mise lock <tools>` for targeted updates.
+ */
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -86,7 +90,7 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
-    // Rethrow temporary errors to allow Renovate to retry
+    // istanbul ignore if: not worth testing
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -120,6 +124,10 @@ export function updateLockedDependency(
     `mise.updateLockedDependency: ${depName} -> ${newVersion} [${lockFile}]`,
   );
 
+  if (!depName) {
+    return { status: 'unsupported' };
+  }
+
   if (!lockFileContent) {
     return { status: 'unsupported' };
   }
@@ -130,10 +138,9 @@ export function updateLockedDependency(
       return { status: 'unsupported' };
     }
 
-    const toolName = getToolNameForLockFile(depName);
-    const lockedTools = parsed.data.tools[toolName];
+    const lockedVersion = getLockedVersion(parsed.data, depName);
 
-    if (lockedTools?.some((tool) => tool.version === newVersion)) {
+    if (lockedVersion === newVersion) {
       return { status: 'already-updated' };
     }
 
@@ -142,16 +149,4 @@ export function updateLockedDependency(
     logger.debug({ err }, 'mise.updateLockedDependency() error');
     return { status: 'update-failed' };
   }
-}
-
-/**
- * Get the tool name used in the lock file from the dependency name.
- * Lock files use the tool name without backend prefix (e.g., "core:node" -> "node").
- */
-function getToolNameForLockFile(depName: string): string {
-  const delimiterIndex = depName.indexOf(':');
-  if (delimiterIndex === -1) {
-    return depName;
-  }
-  return depName.substring(delimiterIndex + 1);
 }

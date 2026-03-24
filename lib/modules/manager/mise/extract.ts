@@ -24,7 +24,7 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
-import { getLockFileName } from './lockfile.ts';
+import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
@@ -39,6 +39,11 @@ import { parseTomlFile } from './utils.ts';
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
 
+/**
+ * Extracts mise tool dependencies from a mise configuration file.
+ * Supports various backends (core, asdf, aqua, cargo, etc.) and
+ * extracts locked versions when a corresponding lock file exists.
+ */
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -90,10 +95,12 @@ export async function extractPackageFile(
       result.lockFiles = [lockFileName];
       for (const dep of deps) {
         if (dep.depName) {
-          const toolName = getToolNameForLockFile(dep.depName);
-          const lockedTools = lockFileParsed.data.tools[toolName];
-          if (lockedTools?.length) {
-            dep.lockedVersion = lockedTools[0].version;
+          const lockedVersion = getLockedVersion(
+            lockFileParsed.data,
+            dep.depName,
+          );
+          if (lockedVersion) {
+            dep.lockedVersion = lockedVersion;
           }
         }
       }
@@ -106,18 +113,6 @@ export async function extractPackageFile(
   }
 
   return result;
-}
-
-/**
- * Get the tool name used in the lock file from the dependency name.
- * Lock files use the tool name without backend prefix (e.g., "core:node" -> "node").
- */
-function getToolNameForLockFile(depName: string): string {
-  const delimiterIndex = depName.indexOf(':');
-  if (delimiterIndex === -1) {
-    return depName;
-  }
-  return depName.substring(delimiterIndex + 1);
 }
 
 function parseVersion(toolData: MiseTool): string | null {

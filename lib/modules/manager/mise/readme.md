@@ -11,6 +11,24 @@ Renovate supports all standard mise configuration file patterns:
 - Environment-specific variants (e.g., `mise.production.toml`, `.mise.dev.toml`)
 - Local variants (e.g., `mise.local.toml`, `.mise.local.toml`)
 
+### Lock file support
+
+Renovate supports mise lock files (`mise.lock`).
+When a lock file is present:
+
+- Dependencies will have their `lockedVersion` extracted from the lock file
+- Renovate can update lock files when dependencies change
+- Lock file maintenance is supported via the `lockFileMaintenance` option
+
+Renovate recognizes environment-specific lock files:
+
+- `mise.lock` - default lock file
+- `mise.local.lock` - local configuration lock file
+- `mise.{env}.lock` - environment-specific lock files (e.g., `mise.production.lock`)
+- `mise.{env}.local.lock` - environment-specific local lock files
+
+For more information about mise lock files, see the [mise lock file documentation](https://mise.jdx.dev/dev-tools/mise-lock.html).
+
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
