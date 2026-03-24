@@ -24,3 +24,25 @@ export const MiseFile = Toml.pipe(
   }),
 );
 export type MiseFile = z.infer<typeof MiseFile>;
+
+const MiseLockTool = z.object({
+  version: z.string(),
+  backend: z.string().optional(),
+  options: z.record(z.string()).optional(),
+  platforms: z
+    .record(
+      z.object({
+        checksum: z.string().optional(),
+        size: z.number().optional(),
+        url: z.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const MiseLockFile = Toml.pipe(
+  z.object({
+    tools: z.record(z.array(MiseLockTool)),
+  }),
+);
+export type MiseLockFile = z.infer<typeof MiseLockFile>;

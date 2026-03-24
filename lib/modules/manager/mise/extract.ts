@@ -7,6 +7,7 @@ import {
   isString,
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -23,7 +24,9 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { getLockFileName } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
+import { MiseLockFile } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
 import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
 import { parseTomlFile } from './utils.ts';
@@ -32,10 +35,10 @@ import { parseTomlFile } from './utils.ts';
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`mise.extractPackageFile(${packageFile})`);
 
   const misefile = parseTomlFile(content, packageFile);
@@ -68,7 +71,52 @@ export function extractPackageFile(
     }
   }
 
-  return deps.length ? { deps } : null;
+  if (!deps.length) {
+    return null;
+  }
+
+  const result: PackageFileContent = { deps };
+
+  // Try to read and parse lock file for locked versions
+  const lockFileName = getLockFileName(packageFile);
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+
+  if (lockFileContent) {
+    const lockFileParsed = MiseLockFile.safeParse(lockFileContent);
+    if (lockFileParsed.success) {
+      result.lockFiles = [lockFileName];
+      for (const dep of deps) {
+        if (dep.depName) {
+          // Extract the tool name without the backend prefix for lock file lookup
+          const toolName = getToolNameForLockFile(dep.depName);
+          const lockedTools = lockFileParsed.data.tools[toolName];
+          if (lockedTools?.length) {
+            dep.lockedVersion = lockedTools[0].version;
+          }
+        }
+      }
+    } else {
+      logger.debug(
+        { lockFileName, error: lockFileParsed.error },
+        'Failed to parse mise lock file',
+      );
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Get the tool name used in the lock file from the dependency name.
+ * Lock files use the tool name without backend prefix.
+ */
+function getToolNameForLockFile(depName: string): string {
+  const delimiterIndex = depName.indexOf(':');
+  if (delimiterIndex === -1) {
+    return depName;
+  }
+  // Remove backend prefix (e.g., "core:node" -> "node")
+  return depName.substring(delimiterIndex + 1);
 }
 
 function parseVersion(toolData: MiseTool): string | null {
