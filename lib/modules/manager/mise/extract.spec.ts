@@ -71,11 +71,13 @@ describe('modules/manager/mise/extract', () => {
       localstack = "4.3.0"
       lychee = "0.19.1"
       opentofu = "1.6.1"
+      packer = "1.15.0"
       pipx = "1.7.1"
       pkl = "0.28.2"
       protoc = "30.2"
       redis = "8.0.1"
       ruff = "0.11.12"
+      rumdl = "0.1.58"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
@@ -230,6 +232,13 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'opentofu/opentofu',
           },
           {
+            currentValue: '1.15.0',
+            datasource: 'github-releases',
+            depName: 'packer',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/packer',
+          },
+          {
             currentValue: '1.7.1',
             datasource: 'github-releases',
             depName: 'pipx',
@@ -259,6 +268,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'ruff',
             packageName: 'astral-sh/ruff',
+          },
+          {
+            currentValue: '0.1.58',
+            datasource: 'github-releases',
+            depName: 'rumdl',
+            packageName: 'rvben/rumdl',
           },
           {
             currentValue: '0.10.0',
