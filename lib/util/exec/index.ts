@@ -30,7 +30,7 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
 
 function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
   // TODO: types (#22198)
-  const defaultCwd = GlobalConfig.get('localDir')!;
+  const defaultCwd = GlobalConfig.get('localDir');
   const paramCwd = cwdFile
     ? upath.join(defaultCwd, upath.dirname(cwdFile))
     : cwd;
@@ -168,8 +168,8 @@ export async function exec(
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
-  const sideCarImage = GlobalConfig.get('dockerSidecarImage')!;
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
+  const sideCarImage = GlobalConfig.get('dockerSidecarImage');
 
   const { rawCommands, rawOptions } = await prepareRawExec(
     cmd,

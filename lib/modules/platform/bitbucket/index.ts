@@ -241,7 +241,7 @@ export async function initRepo({
   });
   config = {
     repository,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as Config;
   let info: RepoInfo;
   let mainBranch: string;
