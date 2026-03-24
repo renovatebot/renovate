@@ -13,7 +13,6 @@ export function getLockFileName(configPath: string): string {
   // For conf.d files, lock file goes in parent directory
   const lockDir = parentDirname === 'conf.d' ? upath.dirname(dirname) : dirname;
 
-  // Check if this is a local config
   const isLocal = filename.includes('.local.');
 
   // Extract environment from filename
@@ -23,7 +22,6 @@ export function getLockFileName(configPath: string): string {
   ).exec(filename);
   const env = envMatch?.[1] === 'local' ? undefined : envMatch?.[1];
 
-  // Build lock file name
   let lockFileName: string;
   if (env && isLocal) {
     lockFileName = `mise.${env}.local.lock`;
