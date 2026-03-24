@@ -35,7 +35,7 @@ export async function autodiscoverRepositories(
     return config;
   }
   // Autodiscover list of repositories
-  const autodiscoverConfig = {
+  const autodiscoverConfig: AutodiscoverConfig = {
     topics: config.autodiscoverTopics,
     sort: config.autodiscoverRepoSort,
     order: config.autodiscoverRepoOrder,
