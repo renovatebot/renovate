@@ -55,7 +55,29 @@ describe('instrumentation/index', () => {
     const nodeProvider = delegateProvider as NodeTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
-        _spanProcessors: [expect.any(SimpleSpanProcessor)],
+        _spanProcessors: [
+          expect.any(SimpleSpanProcessor),
+          new GitOperationSpanProcessor(),
+        ],
+      },
+    });
+  });
+
+  it('registers GitOperationSpanProcessor regardless of tracing being enabled', () => {
+    // intentionally don't set it
+    delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
+    delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(nodeProvider).toMatchObject({
+      _activeSpanProcessor: {
+        _spanProcessors: expect.arrayContaining([
+          new GitOperationSpanProcessor(),
+        ]),
       },
     });
   });
