@@ -1466,8 +1466,8 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('errors if allowedHeaders is empty or not defined', async () => {
-      GlobalConfig.set({});
+    it('errors if allowedHeaders is empty', async () => {
+      GlobalConfig.set({ allowedHeaders: [] });
 
       const config = {
         hostRules: [

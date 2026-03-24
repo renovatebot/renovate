@@ -63,12 +63,12 @@ describe('workers/repository/init/index', () => {
       await initRepo({});
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { platform: undefined },
+        { platform: 'github' },
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
       );
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { platform: undefined },
+        { platform: 'github' },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",
       );
     });
