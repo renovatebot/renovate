@@ -100,17 +100,14 @@ describe('util/http/auth', () => {
 
     it('github app token with hostType not in GITHUB_API_USING_HOST_TYPES', () => {
       const opts: GotOptions = {
-        headers: {
-          accept: 'application/vnd.github.v3+json',
-        },
+        headers: {},
         token: 'x-access-token:ghs_123test',
         hostType: 'github-digest',
       };
 
       expect(applyAuthorization(opts)).toMatchObject({
         headers: {
-          authorization: 'token ghs_123test',
-          accept: 'application/vnd.github.machine-man-preview+json',
+          authorization: 'Bearer ghs_123test',
         },
       });
     });
