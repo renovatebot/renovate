@@ -143,9 +143,7 @@ async function main(args = process.argv): Promise<void> {
   );
 
   const program = new Command('node tools/sync-module-labels.ts')
-    .description(
-      'Check that datasource/manager/platform GitHub labels exist.',
-    )
+    .description('Check that datasource/manager/platform GitHub labels exist.')
     .option(
       '--repo <owner/name>',
       `Repository to query (default: ${defaultRepo})`,
@@ -158,7 +156,7 @@ async function main(args = process.argv): Promise<void> {
 
   await program.parseAsync(normalizedArgs);
 
-  const options = program.opts<CliOptions>();
+  const options = program.opts() as CliOptions;
   const expectedLabels = getExpectedModuleLabels();
   const existingLabels = await getRepoLabels(options.repo);
   const missingLabels = getMissingModuleLabels(expectedLabels, existingLabels);
