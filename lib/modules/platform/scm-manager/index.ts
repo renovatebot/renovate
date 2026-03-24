@@ -92,7 +92,7 @@ export async function initRepo({
   config = {} as any;
   config.repository = repository;
   config.defaultBranch = defaultBranch;
-  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
   await git.initRepo({
     ...config,
@@ -141,8 +141,7 @@ export async function findPr({
   }
 
   logger.debug(
-    `Could not find PR with source branch ${branchName} and title ${
-      prTitle ?? ''
+    `Could not find PR with source branch ${branchName} and title ${prTitle ?? ''
     } and state ${state}`,
   );
 

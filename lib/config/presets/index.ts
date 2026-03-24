@@ -133,7 +133,6 @@ export async function getPreset(
     const cacheKey = `preset:${preset}`;
     const presetCachePersistence = GlobalConfig.get(
       'presetCachePersistence',
-      false,
     );
 
     if (presetCachePersistence) {

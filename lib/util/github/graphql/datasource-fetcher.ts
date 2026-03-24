@@ -231,21 +231,20 @@ export class GithubGraphqlDatasourceFetcher<
     const cacheKey = this.getCacheKey();
     const cachePrivatePackages = GlobalConfig.get(
       'cachePrivatePackages',
-      false,
     );
     const skipStabilization = !is.undefined(this.datasourceAdapter.maxItems);
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent
         ? new GithubGraphqlPackageCacheStrategy<ResultItem>(
-            cacheNs,
-            cacheKey,
-            skipStabilization,
-          )
+          cacheNs,
+          cacheKey,
+          skipStabilization,
+        )
         : new GithubGraphqlMemoryCacheStrategy<ResultItem>(
-            cacheNs,
-            cacheKey,
-            skipStabilization,
-          );
+          cacheNs,
+          cacheKey,
+          skipStabilization,
+        );
     return this._cacheStrategy;
   }
 

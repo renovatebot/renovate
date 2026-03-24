@@ -1,3 +1,4 @@
+import { getOptions } from './options/index.ts';
 import type { RenovateConfig, RepoGlobalConfig } from './types.ts';
 
 export class GlobalConfig {
@@ -62,15 +63,15 @@ export class GlobalConfig {
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(
     key: Key,
-  ): RepoGlobalConfig[Key];
+  ): Required<RepoGlobalConfig>[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key: Key,
-    defaultValue: Required<RepoGlobalConfig>[Key],
   ): Required<RepoGlobalConfig>[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key?: Key,
-    defaultValue?: RepoGlobalConfig[Key],
-  ): RepoGlobalConfig | RepoGlobalConfig[Key] {
+  ): RepoGlobalConfig | Required<RepoGlobalConfig>[Key] {
+    const defaultValue = getOptions().find((o) => o.name === key)?.default
+
     return key
       ? (GlobalConfig.config[key] ?? defaultValue)
       : GlobalConfig.config;

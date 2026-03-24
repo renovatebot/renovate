@@ -167,7 +167,7 @@ export async function exec(
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
   const sideCarImage = GlobalConfig.get('dockerSidecarImage')!;
 
   const { rawCommands, rawOptions } = await prepareRawExec(

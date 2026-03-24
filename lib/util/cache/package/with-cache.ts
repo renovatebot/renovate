@@ -58,7 +58,7 @@ export async function withCache<T>(
     fallback = false,
   } = options;
 
-  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages', false);
+  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
   const isCacheable = cachePrivatePackages || cacheable;
   if (!isCacheable) {
     return fn();
