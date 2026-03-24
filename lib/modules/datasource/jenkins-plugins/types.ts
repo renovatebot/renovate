@@ -1,4 +1,4 @@
-import type { Timestamp } from '../../../util/timestamp';
+import type { Timestamp } from '../../../util/timestamp.ts';
 
 export interface JenkinsPluginInfo {
   name: string;

@@ -1,6 +1,8 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import { setBaseUrl } from '../../../util/http/gitea';
-import { toBase64 } from '../../../util/string';
+import * as httpMock from '~test/http-mock.ts';
+import { logger, partial } from '~test/util.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { setBaseUrl } from '../../../util/http/gitea.ts';
+import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,
   closePR,
@@ -31,7 +33,7 @@ import {
   updateIssue,
   updateIssueLabels,
   updatePR,
-} from './gitea-helper';
+} from './gitea-helper.ts';
 import type {
   Branch,
   Comment,
@@ -44,9 +46,7 @@ import type {
   Repo,
   RepoContents,
   User,
-} from './types';
-import * as httpMock from '~test/http-mock';
-import { logger, partial } from '~test/util';
+} from './types.ts';
 
 describe('modules/platform/gitea/gitea-helper', () => {
   const giteaApiHost = 'https://gitea.renovatebot.com/';
@@ -469,6 +469,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         mockPR.head!.label,
       );
       expect(res).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           err: expect.any(Object),

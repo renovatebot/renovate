@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const validApplication = Fixtures.get('validApplication.yml');
 const malformedApplication = Fixtures.get('malformedApplications.yml');
@@ -190,6 +190,11 @@ spec:
             datasource: 'helm',
             depName: 'somechart',
             registryUrls: ['https://git.example.com/foo/bar.git'],
+          },
+          {
+            currentValue: '0.4.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/org/chart',
           },
         ],
       });

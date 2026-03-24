@@ -1,33 +1,33 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { filterMap } from '../../../util/filter-map';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getEnv } from '../../../util/env.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { filterMap } from '../../../util/filter-map.ts';
 import {
   ensureCacheDir,
   findLocalSiblingOrParent,
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import { isValid } from '../../versioning/semver';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isValid } from '../../versioning/semver/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { getExtraDepsNotice } from './artifacts-extra';
+} from '../types.ts';
+import { getExtraDepsNotice } from './artifacts-extra.ts';
 
 const { major, valid } = semver;
 
@@ -99,7 +99,7 @@ function getUpdateImportPathCmds(
 }
 
 function useModcacherw(goVersion: string | undefined): boolean {
-  if (!is.string(goVersion)) {
+  if (!isString(goVersion)) {
     return true;
   }
 
@@ -120,16 +120,26 @@ export async function updateArtifacts({
     logger.debug('No go.sum found');
     return null;
   }
-
   const goModDir = upath.dirname(goModFileName);
+  const goModFileBaseName = upath.basename(goModFileName);
+  const modFileFlag =
+    goModFileBaseName === 'go.mod'
+      ? ''
+      : ` -modfile=${quote(goModFileBaseName)}`;
 
-  const vendorDir = upath.join(goModDir, 'vendor/');
-  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
+  // The "vendor" directory can be next to the go.mod, but also in the parent directory in case
+  // the go workspaces are used.
+  const vendorDir = await findLocalSiblingOrParent(goModFileName, 'vendor');
+  const vendorModulesFileName = upath.join(vendorDir ?? '', 'modules.txt');
   const useVendor =
     !!config.postUpdateOptions?.includes('gomodVendor') ||
     (!config.postUpdateOptions?.includes('gomodSkipVendor') &&
+      vendorDir &&
       (await readLocalFile(vendorModulesFileName)) !== null);
   let massagedGoMod = newGoModContent;
+  const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
+  const allowedUnsafeExecutions = GlobalConfig.get('allowedUnsafeExecutions');
+  const goGenerateAllowed = allowedUnsafeExecutions?.includes('goGenerate');
 
   if (config.postUpdateOptions?.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
@@ -234,7 +244,7 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get `;
+    let args = `get${modFileFlag} `;
 
     if (goConstraints && !semver.intersects(goConstraints, `>=1.18`)) {
       // For Go versions < 1.18, we need to use the -d flag to avoid builds or installs
@@ -282,12 +292,12 @@ export async function updateArtifacts({
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
-    const goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
+    let goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
     if (useVendor) {
       // If we find a go.work, then use go workspace vendoring.
       const goWorkFile = await findLocalSiblingOrParent(
@@ -296,6 +306,11 @@ export async function updateArtifacts({
       );
 
       if (goWorkFile) {
+        goWorkSumFileName = upath.join(
+          upath.dirname(goWorkFile),
+          'go.work.sum',
+        );
+
         args = 'work vendor';
         logger.debug('using go work vendor');
         execCommands.push(`${cmd} ${args}`);
@@ -304,13 +319,13 @@ export async function updateArtifacts({
         logger.debug('using go work sync');
         execCommands.push(`${cmd} ${args}`);
       } else {
-        args = 'mod vendor';
+        args = `mod vendor${modFileFlag}`;
         logger.debug('using go mod vendor');
         execCommands.push(`${cmd} ${args}`);
       }
 
       if (isGoModTidyRequired) {
-        args = 'mod tidy' + tidyOpts;
+        args = `mod tidy${modFileFlag}${tidyOpts}`;
         logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -318,9 +333,20 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
+    }
+
+    if (useGoGenerate) {
+      if (goGenerateAllowed) {
+        logger.debug('go generate command included');
+        execCommands.push(`${cmd} generate ./...`);
+      } else {
+        logger.once.warn(
+          `go generate command requested as a post update action, but goGenerate is not permitted in the allowedUnsafeExecutions`,
+        );
+      }
     }
 
     await exec(execCommands, execOptions);
@@ -373,9 +399,12 @@ export async function updateArtifacts({
       }
     }
 
+    const alreadyAdded = new Set<string>();
+    const alreadyDeleted = new Set<string>();
     if (useVendor) {
       for (const f of status.modified.concat(status.not_added)) {
-        if (f.startsWith(vendorDir)) {
+        if (vendorDir && f.startsWith(vendorDir)) {
+          alreadyAdded.add(f);
           res.push({
             file: {
               type: 'addition',
@@ -386,12 +415,15 @@ export async function updateArtifacts({
         }
       }
       for (const f of coerceArray(status.deleted)) {
-        res.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
+        if (vendorDir && f.startsWith(vendorDir)) {
+          alreadyDeleted.add(f);
+          res.push({
+            file: {
+              type: 'deletion',
+              path: f,
+            },
+          });
+        }
       }
     }
 
@@ -424,6 +456,38 @@ export async function updateArtifacts({
 
       logger.debug('Found updated go.mod after go.sum update');
       res.push(artifactResult);
+      alreadyAdded.add(goModFileName);
+    }
+
+    // add all files added when in `go generate` mode.
+    // unfortunately there is not a good way as there is with vendoring or go import path updates to detect this.
+    // Do this at the very very end to ensure we only capture files which would have been explicitly
+    // modified, added, or deleted from a `go generate` invocation
+    if (useGoGenerate && goGenerateAllowed) {
+      logger.debug(
+        'Updating all modified files since generated files were added',
+      );
+      for (const f of status.modified.concat(status.created)) {
+        if (!alreadyAdded.has(f)) {
+          res.push({
+            file: {
+              type: 'addition',
+              path: f,
+              contents: await readLocalFile(f),
+            },
+          });
+        }
+      }
+      for (const f of coerceArray(status.deleted)) {
+        if (!alreadyDeleted.has(f)) {
+          res.push({
+            file: {
+              type: 'deletion',
+              path: f,
+            },
+          });
+        }
+      }
     }
     return res;
   } catch (err) {
@@ -434,7 +498,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: sumFileName,
+          fileName: sumFileName,
           stderr: err.message,
         },
       },

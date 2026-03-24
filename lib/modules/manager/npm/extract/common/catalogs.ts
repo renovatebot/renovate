@@ -1,7 +1,7 @@
-import { type PackageDependency } from '../../../types';
-import { type NpmManagerData } from '../../types';
-import { type Catalog } from '../types';
-import { extractDependency, parseDepName } from './dependency';
+import { type PackageDependency } from '../../../types.ts';
+import { type NpmManagerData } from '../../types.ts';
+import { type Catalog } from '../types.ts';
+import { extractDependency, parseDepName } from './dependency.ts';
 
 export const PNPM_CATALOG_DEPENDENCY = 'pnpm.catalog';
 export const YARN_CATALOG_DEPENDENCY = 'yarn.catalog';

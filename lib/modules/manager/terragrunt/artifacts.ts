@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import { updateArtifacts as updateTerraformArtifacts } from '../terraform/lockfile/index';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { updateArtifacts as updateTerraformArtifacts } from '../terraform/lockfile/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts(
   artifact: UpdateArtifact,

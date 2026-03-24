@@ -1,9 +1,10 @@
-import { getConfig } from '../../../../config/defaults';
-import { createOnboardingBranch } from './create';
-import type { RenovateConfig } from '~test/util';
-import { scm } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { scm } from '~test/util.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { createOnboardingBranch } from './create.ts';
 
-vi.mock('./config', () => ({
+vi.mock('./config.ts', () => ({
   getOnboardingConfigContents: () =>
     JSON.stringify({
       foo: 'bar',
@@ -15,12 +16,16 @@ describe('workers/repository/onboarding/branch/create', () => {
 
   beforeEach(() => {
     config = getConfig();
+    GlobalConfig.set({
+      onboardingBranch: config.onboardingBranch,
+      onboardingConfigFileName: config.onboardingConfigFileName,
+    });
   });
 
   describe('createOnboardingBranch', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
-      expect(scm.commitAndPush).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -32,6 +37,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         force: true,
         message: 'Add renovate.json',
         platformCommit: 'auto',
+        labels: [],
       });
     });
 
@@ -39,11 +45,14 @@ describe('workers/repository/onboarding/branch/create', () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
 
-      config.onboardingCommitMessage = message;
+      GlobalConfig.set({
+        onboardingCommitMessage: message,
+        onboardingBranch: config.onboardingBranch,
+      });
 
       await createOnboardingBranch(config);
 
-      expect(scm.commitAndPush).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -55,6 +64,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         force: true,
         message,
         platformCommit: 'auto',
+        labels: [],
       });
     });
 
@@ -64,7 +74,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ...config,
           commitBody: 'some commit body',
         });
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -76,6 +86,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message: `Add renovate.json\n\nsome commit body`,
           platformCommit: 'auto',
+          labels: [],
         });
       });
 
@@ -83,14 +94,17 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message =
           'We can Renovate if we want to, we can leave PRs in decline';
 
-        config.onboardingCommitMessage = message;
+        GlobalConfig.set({
+          onboardingCommitMessage: message,
+          onboardingBranch: config.onboardingBranch,
+        });
 
         await createOnboardingBranch({
           ...config,
           commitBody: 'Signed Off: {{{gitAuthor}}}',
           gitAuthor: '<Bot bot@botland.com>',
         });
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -102,6 +116,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: <Bot bot@botland.com>`,
           platformCommit: 'auto',
+          labels: [],
         });
       });
     });
@@ -115,7 +130,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -127,6 +142,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          labels: [],
         });
       });
 
@@ -139,11 +155,14 @@ describe('workers/repository/onboarding/branch/create', () => {
         )}`;
 
         config.commitMessagePrefix = prefix;
-        config.onboardingCommitMessage = text;
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+        });
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -155,6 +174,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          labels: [],
         });
       });
     });
@@ -168,7 +188,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -180,6 +200,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          labels: [],
         });
       });
 
@@ -192,11 +213,14 @@ describe('workers/repository/onboarding/branch/create', () => {
         )}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingCommitMessage = text;
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+        });
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -208,6 +232,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          labels: [],
         });
       });
     });
@@ -218,11 +243,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = undefined;
+        GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -234,6 +259,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          labels: [],
         });
       });
 
@@ -242,11 +268,14 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = 'superConfigFile.yaml';
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: 'superConfigFile.yaml',
+        });
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -258,6 +287,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          labels: [],
         });
       });
 
@@ -267,11 +297,14 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+        });
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -283,6 +316,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          labels: [],
         });
       });
 
@@ -292,16 +326,20 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+        });
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,
           force: true,
           platformCommit: 'auto',
+          labels: [],
         });
       });
     });

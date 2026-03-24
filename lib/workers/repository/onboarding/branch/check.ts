@@ -1,18 +1,21 @@
-import { configFileNames } from '../../../../config/app-strings';
-import type { RenovateConfig } from '../../../../config/types';
+import { isNonEmptyObject } from '@sindresorhus/is';
+import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_NO_CONFIG,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { getCache } from '../../../../util/cache/repository';
-import { readLocalFile } from '../../../../util/fs';
-import { getBranchCommit } from '../../../../util/git';
-import { getSemanticCommitPrTitle } from '../common';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { getBranchCommit } from '../../../../util/git/index.ts';
+import { getSemanticCommitPrTitle } from '../common.ts';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -21,7 +24,7 @@ async function findFile(fileName: string): Promise<boolean> {
 }
 
 async function configFileExists(): Promise<boolean> {
-  for (const fileName of configFileNames) {
+  for (const fileName of getConfigFileNames()) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
       logger.debug(`Config file exists, fileName: ${fileName}`);
       return true;
@@ -46,13 +49,13 @@ async function packageJsonConfigExists(): Promise<boolean> {
 async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   return (
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
-      prTitle: config.onboardingPrTitle,
+      branchName: getInheritedOrGlobal('onboardingBranch')!,
+      prTitle: getInheritedOrGlobal('onboardingPrTitle'),
       state: '!open',
       targetBranch: config.baseBranch,
     })) ??
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
+      branchName: getInheritedOrGlobal('onboardingBranch')!,
       prTitle: getSemanticCommitPrTitle(config),
       state: '!open',
       targetBranch: config.baseBranch,
@@ -76,7 +79,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // - An onboarding cache is present, and
   // - The current default branch SHA matches the default SHA found in the cache
   // Also if there is a closed pr skip using cache as it is outdated
-  if (config.requireConfig === 'optional' && config.onboarding === false) {
+  if (
+    config.requireConfig === 'optional' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     // Return early and avoid checking for config files
     return true;
   }
@@ -88,12 +94,12 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   const closedOnboardingPr = await closedPrExists(config);
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
-  // if onboarding cache is present and base branch has not been updated branch is not onboarded
+  // if onboarding cache is present and base branch has not been updated; branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
-    config.onboarding &&
+    getInheritedOrGlobal('onboarding') &&
     !closedOnboardingPr &&
-    onboardingBranchCache &&
+    isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha ===
       getBranchCommit(config.defaultBranch!)
   ) {
@@ -101,7 +107,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return false;
   }
 
-  if (cache.configFileName) {
+  // when bot is ran is fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
+  // prevents https://github.com/renovatebot/renovate/discussions/37328
+  if (cache.configFileName && !config.forkToken) {
     logger.debug('Checking cached config file name');
     try {
       const configFileContent = await platform.getJsonFile(
@@ -139,7 +147,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
-  if (config.requireConfig === 'required' && config.onboarding === false) {
+  if (
+    config.requireConfig === 'required' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
@@ -154,12 +165,36 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   }
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications!.includes('onboardingClose')) {
-    // ensure PR comment
-    await ensureComment({
-      number: closedOnboardingPr.number,
-      topic: `Renovate is disabled`,
-      content: `Renovate is disabled because there is no Renovate configuration file. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
-    });
+    const ageOfOnboardingPr = getElapsedDays(
+      closedOnboardingPr.createdAt!,
+      false,
+    );
+    const onboardingAutoCloseAge = getInheritedOrGlobal(
+      'onboardingAutoCloseAge',
+    );
+    if (onboardingAutoCloseAge) {
+      logger.debug(
+        {
+          onboardingAutoCloseAge,
+          createdAt: closedOnboardingPr.createdAt!,
+          ageOfOnboardingPr,
+        },
+        `Determining that the closed onboarding PR was created at \`${closedOnboardingPr.createdAt!}\` was created ${ageOfOnboardingPr.toFixed(2)} days ago`,
+      );
+    }
+    // if we have onboardingAutoCloseAge, and it hasn't yet passed onboardingAutoCloseAge, add a comment
+    // if it /has/ passed, we'll comment this appropriately in `ensureOnboardingPr`, so there doesn't need to be a comment here
+    if (
+      !onboardingAutoCloseAge ||
+      ageOfOnboardingPr <= onboardingAutoCloseAge
+    ) {
+      // ensure PR comment
+      await ensureComment({
+        number: closedOnboardingPr.number,
+        topic: `Renovate is disabled`,
+        content: `Renovate is disabled because there is no Renovate configuration file. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
+      });
+    }
   }
   throw new Error(REPOSITORY_CLOSED_ONBOARDING);
 }
@@ -168,7 +203,7 @@ export async function getOnboardingPr(
   config: RenovateConfig,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
-    config.onboardingBranch!,
+    getInheritedOrGlobal('onboardingBranch')!,
     config.baseBranch,
   );
 }

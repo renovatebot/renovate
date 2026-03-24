@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { bumpPackageVersion } from '.';
+import { bumpPackageVersion } from './index.ts';
 
 describe('modules/manager/ocb/update', () => {
   describe('bumpPackageVersion()', () => {

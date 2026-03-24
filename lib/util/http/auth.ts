@@ -1,11 +1,11 @@
-import is from '@sindresorhus/is';
-import type { Options } from 'got';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import {
+  FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-} from '../../constants';
-import type { GotOptions } from './types';
+} from '../../constants/index.ts';
+import type { GotOptions } from './types.ts';
 
 export type AuthGotOptions = Pick<
   GotOptions,
@@ -23,7 +23,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
 
-  if (is.nonEmptyString(options.headers?.authorization) || options.noAuth) {
+  if (isNonEmptyString(options.headers?.authorization) || options.noAuth) {
     return options;
   }
 
@@ -36,6 +36,11 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       } else {
         options.headers.authorization = `${authType} ${options.token}`;
       }
+    } else if (
+      options.hostType &&
+      FORGEJO_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
+      options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&
       GITEA_API_USING_HOST_TYPES.includes(options.hostType)
@@ -51,7 +56,8 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');
         options.headers.authorization = `token ${appToken}`;
-        if (is.string(options.headers.accept)) {
+        // v8 ignore else -- TODO: add test #40625
+        if (isString(options.headers.accept)) {
           options.headers.accept = options.headers.accept.replace(
             'application/vnd.github.v3+json',
             'application/vnd.github.machine-man-preview+json',
@@ -83,42 +89,4 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
     delete options.password;
   }
   return options;
-}
-
-// isAmazon return true if request options contains Amazon related headers
-function isAmazon(options: Options): boolean {
-  return !!options.search?.includes('X-Amz-Algorithm');
-}
-
-// isAzureBlob return true if request options contains Azure container registry related data
-function isAzureBlob(options: Options): boolean {
-  return !!(
-    options.hostname?.endsWith('.blob.core.windows.net') && // lgtm [js/incomplete-url-substring-sanitization]
-    options.href?.includes('/docker/registry')
-  );
-}
-
-// removeAuthorization from the redirect options
-export function removeAuthorization(options: Options): void {
-  if (!options.password && !options.headers?.authorization) {
-    return;
-  }
-
-  // Check if request has been redirected to Amazon or an Azure blob (ACR)
-  if (isAmazon(options) || isAzureBlob(options)) {
-    // if there is no port in the redirect URL string, then delete it from the redirect options.
-    // This can be evaluated for removal after upgrading to Got v10
-    const portInUrl = options.href?.split?.('/')?.[2]?.split(':')?.[1];
-    if (!portInUrl) {
-      delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-    }
-
-    // registry is hosted on Amazon or Azure blob, redirect url includes
-    // authentication which is not required and should be removed
-    if (options?.headers?.authorization) {
-      delete options.headers.authorization;
-    }
-    delete options.username;
-    delete options.password;
-  }
 }

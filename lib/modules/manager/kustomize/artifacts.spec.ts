@@ -1,20 +1,20 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, partial } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import type { StatusResult } from '../../../util/git/types';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import type { UpdateArtifactsConfig } from '../types';
-import * as kustomize from '.';
+import { envMock, mockExecAll } from '../../../../test/exec-util.ts';
+import { env, fs, git, partial } from '../../../../test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as kustomize from './index.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
@@ -310,7 +310,9 @@ describe('modules/manager/kustomize/artifacts', () => {
         },
       },
     ]);
-    expect(fs.deleteLocalFile).toHaveBeenCalledWith('charts/example-1.0.0');
+    expect(fs.deleteLocalFile).toHaveBeenCalledExactlyOnceWith(
+      'charts/example-1.0.0',
+    );
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm pull --untar --untardir charts/example-2.0.0 --version 2.0.0 --repo https://github.com.com/example/example example',
@@ -504,7 +506,7 @@ describe('modules/manager/kustomize/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
 
@@ -547,7 +549,7 @@ describe('modules/manager/kustomize/artifacts', () => {
     ]);
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -559,7 +561,7 @@ describe('modules/manager/kustomize/artifacts', () => {
           '-e HELM_REPOSITORY_CACHE ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool helm 3.17.0' +
           ' && ' +

@@ -1,13 +1,13 @@
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { extractTFLintPlugin } from './plugins';
-import type { ExtractionResult } from './types';
-import { checkFileContainsPlugins } from './util';
+} from '../types.ts';
+import { extractTFLintPlugin } from './plugins.ts';
+import type { ExtractionResult } from './types.ts';
+import { checkFileContainsPlugins } from './util.ts';
 
 const dependencyBlockExtractionRegex = regEx(
   /^\s*plugin\s+"(?<pluginName>[^"]+)"\s+{\s*$/,

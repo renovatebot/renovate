@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
-import { parsePEP508 } from './utils';
+import { isTruthy } from '@sindresorhus/is';
+import { parsePEP508 } from './utils.ts';
 
 describe('modules/manager/pep621/utils', () => {
   describe('parsePEP508()', () => {
@@ -23,7 +23,7 @@ describe('modules/manager/pep621/utils', () => {
       ({ value, success, packageName, currentValue, extras, marker }) => {
         const result = parsePEP508(value);
 
-        const expected = is.truthy(success)
+        const expected = isTruthy(success)
           ? clear({ packageName, currentValue, extras, marker })
           : null;
         expect(result).toEqual(expected);

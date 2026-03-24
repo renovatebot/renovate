@@ -1,8 +1,8 @@
-import type { RenovateSharedConfig } from '../../../config/types';
-import { coerceString } from '../../../util/string';
-import type { CommitMessage } from './commit-message';
-import { CustomCommitMessage } from './custom-commit-message';
-import { SemanticCommitMessage } from './semantic-commit-message';
+import type { RenovateSharedConfig } from '../../../config/types.ts';
+import { coerceString } from '../../../util/string.ts';
+import type { CommitMessage } from './commit-message.ts';
+import { CustomCommitMessage } from './custom-commit-message.ts';
+import { SemanticCommitMessage } from './semantic-commit-message.ts';
 
 type CommitMessageConfig = Pick<
   RenovateSharedConfig,

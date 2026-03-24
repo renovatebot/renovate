@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { extractAllPackageFiles } from '..';
-import { logger } from '../../../../logger';
-import type { ExtractConfig } from '../../types';
-import { postExtract } from './post';
-import * as npmExtract from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { ExtractConfig } from '../../types.ts';
+import { extractAllPackageFiles } from '../index.ts';
+import * as npmExtract from './index.ts';
+import { postExtract } from './post/index.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -15,6 +15,10 @@ const defaultExtractConfig = {
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
+const input01PackageManager = Fixtures.get(
+  'inputs/01-package-manager.json',
+  '..',
+);
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
 const vendorisedContent = Fixtures.get('is-object.json', '..');
@@ -176,6 +180,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
+
       expect(logger.warn).toHaveBeenCalledWith(
         'Updating multiple npm lock files is deprecated and support will be removed in future versions.',
       );
@@ -389,7 +394,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds complex yarn workspaces', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+      fs.readLocalFile.mockImplementation((): Promise<any> => {
         return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
@@ -829,6 +834,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"',
       );
@@ -1267,6 +1273,107 @@ describe('modules/manager/npm/extract/index', () => {
           packageFile: 'pnpm-workspace.yaml',
         },
       ]);
+    });
+
+    it('extracts yarnrc.yml and adds it as packageFile', async () => {
+      const yarnrc = codeBlock`
+        nodeLinker: node-modules
+
+        catalog:
+          is-positive: 1.0.0
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(yarnrc);
+
+      fs.readLocalFile.mockResolvedValueOnce(input02Content);
+
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        '.yarnrc.yml',
+      ]);
+
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depName: 'is-positive',
+              depType: 'yarn.catalog.default',
+              prettyDepType: 'yarn.catalog.default',
+            },
+          ],
+          managerData: {
+            hasPackageManager: false,
+          },
+          packageFile: '.yarnrc.yml',
+        },
+      ]);
+    });
+
+    it('extracts yarnrc.yml and adds it as packageFile and packageManager to true', async () => {
+      const yarnrc = codeBlock`
+        nodeLinker: node-modules
+
+        catalog:
+          is-positive: 1.0.0
+      `;
+
+      fs.readLocalFile.mockResolvedValueOnce(yarnrc);
+      fs.readLocalFile.mockResolvedValueOnce(input01PackageManager);
+
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        '.yarnrc.yml',
+      ]);
+
+      expect(res[0]).toEqual({
+        deps: [
+          {
+            currentValue: '1.0.0',
+            datasource: 'npm',
+            depName: 'is-positive',
+            depType: 'yarn.catalog.default',
+            prettyDepType: 'yarn.catalog.default',
+          },
+        ],
+        managerData: {
+          hasPackageManager: true,
+        },
+        packageFile: '.yarnrc.yml',
+      });
+    });
+
+    it('extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps', async () => {
+      const yarnrc = codeBlock`
+        nodeLinker: node-modules
+
+        catalog:
+          is-positive: 1.0.0
+      `;
+
+      fs.readLocalFile.mockResolvedValueOnce(yarnrc);
+
+      fs.readLocalFile.mockResolvedValueOnce(
+        '{"name": "simulate deps to be null", brokenJsonHere: }',
+      );
+
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        '.yarnrc.yml',
+      ]);
+
+      expect(res[0]).toEqual({
+        deps: [
+          {
+            currentValue: '1.0.0',
+            datasource: 'npm',
+            depName: 'is-positive',
+            depType: 'yarn.catalog.default',
+            prettyDepType: 'yarn.catalog.default',
+          },
+        ],
+        managerData: {
+          hasPackageManager: false,
+        },
+        packageFile: '.yarnrc.yml',
+      });
     });
   });
 

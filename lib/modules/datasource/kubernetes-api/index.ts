@@ -1,8 +1,8 @@
 import JSON5 from 'json5';
-import dataFiles from '../../../data-files.generated';
-import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import dataFiles from '../../../data-files.generated.ts';
+import * as kubernetesApiVersioning from '../../versioning/kubernetes-api/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 const apiData: Record<string, string[]> = JSON5.parse(
   dataFiles.get('data/kubernetes-api.json5')!,

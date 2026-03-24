@@ -1,4 +1,4 @@
-import { NugetDatasource } from '../modules/datasource/nuget';
+import { NugetDatasource } from '../modules/datasource/nuget/index.ts';
 import {
   add,
   clear,
@@ -7,7 +7,7 @@ import {
   getAll,
   hostType,
   hosts,
-} from './host-rules';
+} from './host-rules.ts';
 
 describe('util/host-rules', () => {
   beforeEach(() => {

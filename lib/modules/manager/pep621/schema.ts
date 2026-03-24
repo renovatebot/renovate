@@ -1,9 +1,13 @@
-import { z } from 'zod';
-import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { PackageDependency } from '../types';
-import { depTypes, pep508ToPackageDependency } from './utils';
+import { z } from 'zod/v3';
+import {
+  LooseArray,
+  LooseRecord,
+  Toml,
+} from '../../../util/schema-utils/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
 type Pep508Dependency = z.ZodType<PackageDependency<Record<string, any>>>;
 
@@ -27,7 +31,7 @@ function Pep508Dependency(depType: string): Pep508Dependency {
 
 type DependencyGroup = z.ZodType<PackageDependency<Record<string, any>>[]>;
 
-function DependencyGroup(depType: string): DependencyGroup {
+export function DependencyGroup(depType: string): DependencyGroup {
   return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
     (depGroups) => {
       const deps: PackageDependency[] = [];

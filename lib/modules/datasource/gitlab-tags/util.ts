@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import { joinUrlParts } from '../../../util/url';
+import { regEx } from '../../../util/regex.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 
 export const defaultRegistryUrl = 'https://gitlab.com';
 

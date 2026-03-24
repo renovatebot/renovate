@@ -1,7 +1,19 @@
-import { logger } from '../../../logger';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { CopierAnswersFile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { CopierAnswersFile } from './schema.ts';
+
+const gitPrefixRegex = regEx(/^git\+/);
+
+/**
+ * Copier supports `git+https://` and `git+ssh://` URL prefixes,
+ * but git itself does not understand them.
+ * Strip the `git+` prefix so the URL can be used with git directly.
+ */
+function stripGitPrefix(url: string): string {
+  return url.replace(gitPrefixRegex, '');
+}
 
 export function extractPackageFile(
   content: string,
@@ -19,7 +31,7 @@ export function extractPackageFile(
     {
       datasource: GitTagsDatasource.id,
       depName: parsed._src_path,
-      packageName: parsed._src_path,
+      packageName: stripGitPrefix(parsed._src_path),
       depType: 'template',
       currentValue: parsed._commit,
     },

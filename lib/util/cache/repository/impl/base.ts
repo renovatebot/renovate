@@ -1,24 +1,26 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { compressToBase64, decompressFromBase64 } from '../../../compress';
-import { hash } from '../../../hash';
-import { safeStringify } from '../../../stringify';
-import { CACHE_REVISION } from '../common';
-import { cleanupHttpCache } from '../http-cache';
-import type { RepoCacheRecord } from '../schema';
-import { RepoCacheV13 } from '../schema';
-import type { RepoCache, RepoCacheData } from '../types';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { compressToBase64, decompressFromBase64 } from '../../../compress.ts';
+import { hash } from '../../../hash.ts';
+import { safeStringify } from '../../../stringify.ts';
+import { CACHE_REVISION } from '../common.ts';
+import { cleanupHttpCache } from '../http-cache.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import { RepoCacheV13 } from '../schema.ts';
+import type { RepoCache, RepoCacheData } from '../types.ts';
 
 export abstract class RepoCacheBase implements RepoCache {
   protected platform = GlobalConfig.get('platform')!;
   private oldHash: string | null = null;
   private data: RepoCacheData = {};
+  protected readonly repository: string;
+  protected readonly fingerprint: string;
 
-  protected constructor(
-    protected readonly repository: string,
-    protected readonly fingerprint: string,
-  ) {}
+  protected constructor(repository: string, fingerprint: string) {
+    this.repository = repository;
+    this.fingerprint = fingerprint;
+  }
 
   protected abstract read(): Promise<string | null>;
 
@@ -51,14 +53,14 @@ export abstract class RepoCacheBase implements RepoCache {
   async load(): Promise<void> {
     try {
       const oldCache = await this.read();
-      if (!is.string(oldCache)) {
+      if (!isString(oldCache)) {
         logger.debug(
           `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`,
         );
         return;
       }
 
-      if (!is.nonEmptyString(oldCache)) {
+      if (!isNonEmptyString(oldCache)) {
         logger.debug('RepoCacheBase.load() - cache file is empty - skipping');
         return;
       }

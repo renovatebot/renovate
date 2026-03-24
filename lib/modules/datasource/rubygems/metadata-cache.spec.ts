@@ -1,9 +1,9 @@
-import * as _packageCache from '../../../util/cache/package';
-import { Http } from '../../../util/http';
-import { MetadataCache } from './metadata-cache';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import { Http } from '../../../util/http/index.ts';
+import { MetadataCache } from './metadata-cache.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/rubygems/metadata-cache', () => {
@@ -182,7 +182,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
         { version: '3.0.0' },
       ],
     });
-    expect(packageCache.set).toHaveBeenCalledWith(
+    expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
       'datasource-rubygems',
       'metadata-cache:https://rubygems.org:foobar',
       {
@@ -229,7 +229,12 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     );
 
     expect(res1).toEqual(res2);
-    expect(packageCache.set).toHaveBeenCalledOnce();
+    expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
+      'datasource-rubygems',
+      expect.any(String),
+      expect.any(Object),
+      expect.any(Number),
+    );
   });
 
   it('fetches for stale key', async () => {

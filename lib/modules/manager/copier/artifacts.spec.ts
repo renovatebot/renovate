@@ -1,19 +1,19 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { StatusResult } from '../../../util/git/types';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig, Upgrade } from '../types';
-import { updateArtifacts } from '.';
-import { mockExecAll } from '~test/exec-util';
-import { fs, git, hostRules, partial } from '~test/util';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, git, hostRules, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
+import { updateArtifacts } from './index.ts';
 
 const datasource = vi.mocked(_datasource);
 
-vi.mock('../../../util/fs');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -76,12 +76,41 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'Missing copier template version to update to',
           },
         },
       ]);
       expect(execSnapshots).toEqual([]);
+    });
+
+    it('uses newValue for vcs-ref when both newValue and newVersion are provided', async () => {
+      const execSnapshots = mockExecAll();
+
+      const upgradeWithPrefixedTag = [
+        {
+          depName: 'https://github.com/foo/bar',
+          currentValue: 'foobar-v1.0.0',
+          newValue: 'foobar-v1.2.3',
+          newVersion: '1.2.3',
+        },
+      ];
+
+      await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgradeWithPrefixedTag,
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref foobar-v1.2.3',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+      ]);
     });
 
     it('reports an error if no upgrade is specified', async () => {
@@ -97,8 +126,30 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'Unexpected number of dependencies: 0 (should be 1)',
+          },
+        },
+      ]);
+      expect(execSnapshots).toEqual([]);
+    });
+
+    it('reports an error updated deps is undefined', async () => {
+      const execSnapshots = mockExecAll();
+
+      const result = await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: null as never,
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          artifactError: {
+            fileName: '.copier-answers.yml',
+            stderr:
+              'Unexpected number of dependencies: undefined (should be 1)',
           },
         },
       ]);
@@ -296,7 +347,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'exec exception',
           },
         },
@@ -414,6 +465,7 @@ describe('modules/manager/copier/artifacts', () => {
         newPackageFileContent: '',
         config,
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           depName: 'https://github.com/foo/bar',

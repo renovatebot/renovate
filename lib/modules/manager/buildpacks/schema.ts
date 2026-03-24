@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { Toml } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { Toml } from '../../../util/schema-utils/index.ts';
 
 const BuildpackByName = z.object({
   id: z.string(),

@@ -2050,7 +2050,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "master",
       "datasource": "git-refs",
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "lockedVersion": "52.1-java",
+      "lockedVersion": "52.1",
       "managerData": {
         "lineNumber": 129,
       },
@@ -2064,7 +2064,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "depTypes": [
         "db",
       ],
-      "lockedVersion": "52.1-java",
+      "lockedVersion": "52.1",
       "managerData": {
         "lineNumber": 131,
       },
@@ -2078,7 +2078,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "depTypes": [
         "db",
       ],
-      "lockedVersion": "52.1-java",
+      "lockedVersion": "52.1",
       "managerData": {
         "lineNumber": 132,
       },
@@ -2089,7 +2089,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "">= 1.3.0"",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "lockedVersion": "52.1-java",
+      "lockedVersion": "52.1",
       "managerData": {
         "lineNumber": 135,
       },
@@ -2101,7 +2101,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "depTypes": [
         "db",
       ],
-      "lockedVersion": "52.1-java",
+      "lockedVersion": "52.1",
       "managerData": {
         "lineNumber": 137,
       },
@@ -2113,7 +2113,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "depTypes": [
         "db",
       ],
-      "lockedVersion": "52.1-java",
+      "lockedVersion": "52.1",
       "managerData": {
         "lineNumber": 138,
       },

@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { PypiDatasource } from '../../datasource/pypi';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { extractPackageFile } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject2toml = Fixtures.get('pyproject.2.toml');
@@ -51,7 +51,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies', async () => {
       const res = await extractPackageFile(pyproject1toml, filename);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(7);
+      expect(res?.deps).toHaveLength(9);
       expect(res?.extractedConstraints).toEqual({
         python: '~2.7 || ^3.4',
       });
@@ -60,7 +60,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(12);
+      expect(res?.deps).toHaveLength(14);
     });
 
     it('handles case with no dependencies', async () => {
@@ -71,7 +71,42 @@ describe('modules/manager/poetry/extract', () => {
     it('handles multiple constraint dependencies', async () => {
       const res = await extractPackageFile(pyproject4toml, filename);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toHaveLength(4);
+    });
+
+    it('extracts build-system.requires dependencies', async () => {
+      const content = codeBlock`
+        [build-system]
+        requires = ["poetry-core>=1.0.0", "setuptools>=40.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry]
+        name = "test"
+        version = "1.0.0"
+
+        [tool.poetry.dependencies]
+        abc = "^5.5"
+      `;
+
+      const res = await extractPackageFile(content, 'pyproject.toml');
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'poetry-core',
+          currentValue: '>=1.0.0',
+          depType: 'build-system.requires',
+        },
+        {
+          depName: 'setuptools',
+          currentValue: '>=40.0',
+          depType: 'build-system.requires',
+        },
+        {
+          depName: 'abc',
+          currentValue: '^5.5',
+          depType: 'dependencies',
+        },
+      ]);
     });
 
     it('can parse TOML v1 heterogeneous arrays', async () => {
@@ -563,10 +598,65 @@ describe('modules/manager/poetry/extract', () => {
             },
             packageName: 'python-decouple',
           },
+          {
+            currentValue: '==2.0.0',
+            currentVersion: '2.0.0',
+            datasource: 'pypi',
+            depName: 'poetry-core',
+            depType: 'build-system.requires',
+            packageName: 'poetry-core',
+          },
         ],
         extractedConstraints: {},
         packageFileVersion: undefined,
       });
     });
+  });
+
+  it('extracts dependencies from pep735 dependency-groups', async () => {
+    const content = codeBlock`
+        [dependency-groups]
+        typing = ["mypy==1.13.0", "types-requests"]
+        coverage = ["pytest-cov==5.0.0"]
+        all = [{include-group = "typing"}, {include-group = "coverage"}, "click==8.1.7"]
+      `;
+    const res = await extractPackageFile(content, 'pyproject.toml');
+    expect(res?.deps).toMatchObject([
+      {
+        packageName: 'mypy',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==1.13.0',
+        currentVersion: '1.13.0',
+        depName: 'mypy',
+        managerData: { depGroup: 'typing' },
+      },
+      {
+        packageName: 'types-requests',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        skipReason: 'unspecified-version',
+        depName: 'types-requests',
+        managerData: { depGroup: 'typing' },
+      },
+      {
+        packageName: 'pytest-cov',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==5.0.0',
+        currentVersion: '5.0.0',
+        depName: 'pytest-cov',
+        managerData: { depGroup: 'coverage' },
+      },
+      {
+        packageName: 'click',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==8.1.7',
+        currentVersion: '8.1.7',
+        depName: 'click',
+        managerData: { depGroup: 'all' },
+      },
+    ]);
   });
 });

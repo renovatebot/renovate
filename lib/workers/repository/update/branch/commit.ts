@@ -1,13 +1,13 @@
 // TODO #22198
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { scm } from '../../../../modules/platform/scm';
-import type { LongCommitSha } from '../../../../util/git/types';
-import { minimatch } from '../../../../util/minimatch';
-import { sanitize } from '../../../../util/sanitize';
-import type { BranchConfig } from '../../../types';
+import { isNonEmptyArray } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import type { LongCommitSha } from '../../../../util/git/types.ts';
+import { minimatch } from '../../../../util/minimatch.ts';
+import { sanitize } from '../../../../util/sanitize.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 export function commitFilesToBranch(
   config: BranchConfig,
@@ -16,7 +16,7 @@ export function commitFilesToBranch(
     config.updatedArtifacts!,
   );
   // istanbul ignore if
-  if (is.nonEmptyArray(config.excludeCommitPaths)) {
+  if (isNonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
       const matchesExcludePaths = config.excludeCommitPaths!.some(
         (excludedPath) =>
@@ -29,13 +29,12 @@ export function commitFilesToBranch(
       return true;
     });
   }
-  if (!is.nonEmptyArray(updatedFiles)) {
+  if (!isNonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
     return Promise.resolve(null);
   }
   const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
   logger.debug(`${fileLength} file(s) to commit`);
-  // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     return Promise.resolve(null);
@@ -64,5 +63,7 @@ export function commitFilesToBranch(
     prTitle: config.prTitle,
     // Only needed by Gerrit platform
     autoApprove: config.autoApprove,
+    // Only needed by Gerrit platform
+    labels: config.labels,
   });
 }

@@ -1,13 +1,13 @@
-import { getConfig } from './defaults';
+import { getConfig } from './defaults.ts';
 import {
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
   removeGlobalConfig,
-} from './index';
+} from './index.ts';
 
-vi.mock('../modules/datasource/npm');
-vi.mock('../../config.js', () => ({ default: {} }));
+vi.mock('../modules/datasource/npm/index.ts');
+vi.mock('../../config.ts', () => ({ default: {} }));
 
 const defaultConfig = getConfig();
 
@@ -97,7 +97,7 @@ describe('config/index', () => {
       const childConfig = {
         packageRules: [{ a: 3 }, { a: 4 }],
       };
-      const configParser = await import('./index.js');
+      const configParser = await import('./index.ts');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules).toHaveLength(2);
     });
@@ -127,7 +127,11 @@ describe('config/index', () => {
       expect(config).toContainEntries([
         [
           'managerFilePatterns',
-          ['/(^|/)package\\.json$/', '/(^|/)pnpm-workspace\\.yaml$/'],
+          [
+            '/(^|/)package\\.json$/',
+            '/(^|/)pnpm-workspace\\.yaml$/',
+            '/(^|/)\\.yarnrc\\.yml$/',
+          ],
         ],
       ]);
       expect(getManagerConfig(parentConfig, 'html')).toContainEntries([

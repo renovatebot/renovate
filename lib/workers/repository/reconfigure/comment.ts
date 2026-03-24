@@ -1,20 +1,20 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { Pr } from '../../../modules/platform';
-import { platform } from '../../../modules/platform';
-import { ensureComment } from '../../../modules/platform/comment';
-import type { BranchConfig } from '../../types';
+import { isArray, isString } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { ensureComment } from '../../../modules/platform/comment.ts';
+import type { Pr } from '../../../modules/platform/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import type { BranchConfig } from '../../types.ts';
 import {
   getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
-} from '../errors-warnings';
-import { getBaseBranchDesc } from '../onboarding/pr/base-branch';
-import { getScheduleDesc } from '../onboarding/pr/config-description';
-import { getExpectedPrList } from '../onboarding/pr/pr-list';
+} from '../errors-warnings.ts';
+import { getBaseBranchDesc } from '../onboarding/pr/base-branch.ts';
+import { getScheduleDesc } from '../onboarding/pr/config-description.ts';
+import { getExpectedPrList } from '../onboarding/pr/pr-list.ts';
 
 export async function ensureReconfigurePrComment(
   config: RenovateConfig,
@@ -25,7 +25,7 @@ export async function ensureReconfigurePrComment(
 ): Promise<boolean> {
   logger.debug('ensureReconfigurePrComment()');
   logger.trace({ config });
-  let prCommentTemplate = `This is an reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
+  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
 
   // TODO #22198
   prCommentTemplate += `
@@ -86,9 +86,7 @@ export async function ensureReconfigurePrComment(
 function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
-  const desc = is.array(config.description, is.string)
-    ? config.description
-    : [];
+  const desc = isArray(config.description, isString) ? config.description : [];
   return desc.concat(getScheduleDesc(config));
 }
 

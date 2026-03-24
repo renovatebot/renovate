@@ -1,4 +1,4 @@
-import { coerceObject, hasKey } from './object';
+import { coerceObject, hasKey } from './object.ts';
 
 describe('util/object', () => {
   it('finds key in regular object', () => {

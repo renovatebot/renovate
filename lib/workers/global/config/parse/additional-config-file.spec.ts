@@ -3,9 +3,9 @@ import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/config';
-import * as file from './additional-config-file';
+import { logger } from '../../../../logger/index.ts';
+import customConfig from './__fixtures__/config.cjs';
+import * as file from './additional-config-file.ts';
 
 describe('workers/global/config/parse/additional-config-file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');
@@ -42,14 +42,21 @@ describe('workers/global/config/parse/additional-config-file', () => {
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
     ])('parses %s > %s', async (_fileType, filePath) => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/',
+        filePath,
+      );
       expect(
         await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile }),
       ).toEqual(customConfig);
     });
 
     it('migrates', async () => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/config2.js',
+      );
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({
@@ -97,7 +104,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
         const configFile = upath.resolve(tmp.path, fileName);
         fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
         await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
-        expect(processExitSpy).toHaveBeenCalledWith(1);
+        expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
         fs.unlinkSync(configFile);
       },
     );
@@ -110,6 +117,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
 
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
 
+      // TODO this should be called exactly once, but it is 2 times
+
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -117,7 +126,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
 
       const configFile = upath.resolve(
-        __dirname,
+        import.meta.dirname,
         './__fixtures__/config-ref-error.js-invalid',
       );
       const tmpDir = tmp.path;
@@ -131,7 +140,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
       expect(logger.fatal).toHaveBeenCalledWith(
         'Error parsing additional config file due to unresolved variable(s): CI_API_V4_URL is not defined',
       );
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it.each([
@@ -142,7 +151,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
       const configFile = upath.resolve(tmp.path, filePath);
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
+
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
@@ -255,8 +265,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
         true,
       );
 
-      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
+
       expect(logger.trace).toHaveBeenCalledWith(
         expect.anything(),
         'Additional config file successfully deleted',
@@ -277,8 +287,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
         true,
       );
 
-      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
+
       expect(logger.warn).toHaveBeenCalledWith(
         expect.anything(),
         'Error deleting additional config file',

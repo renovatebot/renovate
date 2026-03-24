@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { parseHCL } from './index';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { parseHCL } from './index.ts';
 
 const modulesTF = Fixtures.get('modules.tf');
 const resourcesTF = Fixtures.get('resources.tf');

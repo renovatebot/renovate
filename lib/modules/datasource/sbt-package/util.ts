@@ -1,6 +1,6 @@
-import { coerceArray } from '../../../util/array';
-import { filterMap } from '../../../util/filter-map';
-import { compare } from '../../versioning/maven/compare';
+import { coerceArray } from '../../../util/array.ts';
+import { filterMap } from '../../../util/filter-map.ts';
+import { compare } from '../../versioning/maven/compare.ts';
 
 const linkRegExp = /(?<=href=['"])[^'"]*(?=\/['"])/gi;
 

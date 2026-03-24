@@ -1,18 +1,18 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import { parseYaml } from '../../../util/yaml';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { isFalsy, isNullOrUndefined, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type {
   TektonBundle,
   TektonResolverParamsField,
   TektonResource,
   TektonResourceSpec,
-} from './types';
+} from './types.ts';
 
 export function extractPackageFile(
   content: string,
@@ -42,7 +42,7 @@ export function extractPackageFile(
 
 function getDeps(doc: TektonResource): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  if (is.falsy(doc)) {
+  if (isFalsy(doc)) {
     return deps;
   }
 
@@ -60,7 +60,7 @@ function getDeps(doc: TektonResource): PackageDependency[] {
 
   // Handle PipelineRun resource with inline Pipeline definition
   const pipelineSpec = doc.spec?.pipelineSpec;
-  if (is.truthy(pipelineSpec)) {
+  if (isTruthy(pipelineSpec)) {
     deps.push(...getDeps({ spec: pipelineSpec }));
   }
 
@@ -94,7 +94,7 @@ function addPipelineAsCodeAnnotations(
   annotations: Record<string, string> | undefined | null,
   deps: PackageDependency[],
 ): void {
-  if (is.nullOrUndefined(annotations)) {
+  if (isNullOrUndefined(annotations)) {
     return;
   }
 
@@ -160,7 +160,7 @@ function getAnnotationDep(url: string): PackageDependency | null {
 }
 
 function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
-  if (is.falsy(ref)) {
+  if (isFalsy(ref)) {
     return;
   }
   let imageRef: string | undefined;
@@ -168,13 +168,13 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
   // First, find a bundle reference from the Bundle resolver
   if (ref.resolver === 'bundles') {
     imageRef = getBundleValue(ref.params);
-    if (is.nullOrUndefined(imageRef)) {
+    if (isNullOrUndefined(imageRef)) {
       // Fallback to the deprecated Bundle resolver attribute
       imageRef = getBundleValue(ref.resource);
     }
   }
 
-  if (is.nullOrUndefined(imageRef)) {
+  if (isNullOrUndefined(imageRef)) {
     // Fallback to older style bundle reference
     imageRef = ref.bundle;
   }
@@ -196,7 +196,7 @@ function addStepImageSpec(
   spec: TektonResourceSpec | undefined,
   deps: PackageDependency[],
 ): void {
-  if (is.nullOrUndefined(spec)) {
+  if (isNullOrUndefined(spec)) {
     return;
   }
 
@@ -206,7 +206,7 @@ function addStepImageSpec(
     spec.stepTemplate,
   ];
   for (const step of steps) {
-    if (is.nullOrUndefined(step?.image)) {
+    if (isNullOrUndefined(step?.image)) {
       continue;
     }
     const dep = getDep(step?.image);

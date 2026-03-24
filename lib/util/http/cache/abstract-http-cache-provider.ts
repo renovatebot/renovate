@@ -1,9 +1,10 @@
-import { logger } from '../../../logger';
-import { HttpCacheStats } from '../../stats';
-import type { GotOptions, HttpResponse } from '../types';
-import { copyResponse } from '../util';
-import { HttpCache } from './schema';
-import type { HttpCacheProvider } from './types';
+import { isPlainObject } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { HttpCacheStats } from '../../stats.ts';
+import type { GotOptions, HttpResponse } from '../types.ts';
+import { copyResponse } from '../util.ts';
+import { HttpCache } from './schema.ts';
+import type { HttpCacheProvider } from './types.ts';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   protected abstract load(method: string, url: string): Promise<unknown>;
@@ -18,6 +19,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     const httpCache = HttpCache.parse(cache);
     if (!httpCache) {
       return null;
+    }
+
+    // v8 ignore else -- TODO: add test #40625
+    if (isPlainObject(httpCache.httpResponse)) {
+      httpCache.httpResponse.cached = true;
     }
 
     return httpCache;
@@ -44,6 +50,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
+  // v8 ignore next -- TODO: add test #40625
   bypassServer<T>(
     _method: string,
     _url: string,
@@ -57,7 +64,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (resp.statusCode === 200) {
+    if (!resp.cached && resp.statusCode === 200) {
       const etag = resp.headers?.etag;
       const lastModified = resp.headers?.['last-modified'];
 
@@ -73,11 +80,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         timestamp,
       });
 
-      /* v8 ignore start: should never happen */
+      /* v8 ignore next: should never happen */
       if (!newHttpCache) {
         logger.debug(`http cache: failed to persist cache for ${url}`);
         return resp;
-      } /* v8 ignore stop */
+      }
 
       logger.debug(
         `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,

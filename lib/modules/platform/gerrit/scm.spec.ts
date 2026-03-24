@@ -1,14 +1,15 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import { client as _client } from './client';
-import { GerritScm, configureScm } from './scm';
+import { DateTime } from 'luxon';
+import { git, partial } from '~test/util.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { client as _client } from './client.ts';
+import { GerritScm, configureScm } from './scm.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
   GerritRevisionInfo,
-} from './types';
-import { git, partial } from '~test/util';
+} from './types.ts';
 
-vi.mock('./client');
+vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/scm', () => {
@@ -24,14 +25,16 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(
         gerritScm.isBranchBehindBase('myBranchName', 'baseBranch'),
       ).resolves.toBeTrue();
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-        targetBranch: 'baseBranch',
-        limit: 1,
-        refreshCache: true,
-        requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          targetBranch: 'baseBranch',
+          singleChange: true,
+          requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
+        },
+      );
     });
 
     it('open change found for branchname, rebase action is available -> isBehind == true', async () => {
@@ -77,14 +80,16 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(
         gerritScm.isBranchModified('myBranchName', 'master'),
       ).resolves.toBeFalse();
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-        targetBranch: 'master',
-        limit: 1,
-        refreshCache: true,
-        requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          targetBranch: 'master',
+          singleChange: true,
+          requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
+        },
+      );
     });
 
     it('open change found for branchname, but not modified', async () => {
@@ -124,12 +129,15 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(
         gerritScm.isBranchConflicted('target', 'myBranchName'),
       ).resolves.toBe(true);
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-        targetBranch: 'target',
-        limit: 1,
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          targetBranch: 'target',
+          singleChange: true,
+        },
+      );
     });
 
     it('open change found for branch name/baseBranch and its mergeable', async () => {
@@ -142,7 +150,9 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(
         gerritScm.isBranchConflicted('target', 'myBranchName'),
       ).resolves.toBeFalse();
-      expect(clientMock.getMergeableInfo).toHaveBeenCalledWith(change);
+      expect(clientMock.getMergeableInfo).toHaveBeenCalledExactlyOnceWith(
+        change,
+      );
     });
 
     it('open change found for branch name/baseBranch and its NOT mergeable', async () => {
@@ -155,7 +165,9 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(
         gerritScm.isBranchConflicted('target', 'myBranchName'),
       ).resolves.toBeTrue();
-      expect(clientMock.getMergeableInfo).toHaveBeenCalledWith(change);
+      expect(clientMock.getMergeableInfo).toHaveBeenCalledExactlyOnceWith(
+        change,
+      );
     });
   });
 
@@ -164,20 +176,24 @@ describe('modules/platform/gerrit/scm', () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       git.branchExists.mockReturnValueOnce(true);
       await expect(gerritScm.branchExists('myBranchName')).resolves.toBeTrue();
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-        limit: 1,
-        refreshCache: true,
-      });
-      expect(git.branchExists).toHaveBeenCalledWith('myBranchName');
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          singleChange: true,
+        },
+      );
+      expect(git.branchExists).toHaveBeenCalledExactlyOnceWith('myBranchName');
     });
 
     it('open change found for branch name -> return true', async () => {
       const change = partial<GerritChange>({});
       clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(gerritScm.branchExists('myBranchName')).resolves.toBeTrue();
-      expect(git.branchExists).not.toHaveBeenCalledWith('myBranchName');
+      expect(git.branchExists).not.toHaveBeenCalledExactlyOnceWith(
+        'myBranchName',
+      );
     });
   });
 
@@ -188,13 +204,15 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
         'shaHashValue',
       );
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-        limit: 1,
-        refreshCache: true,
-        requestDetails: ['CURRENT_REVISION'],
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          singleChange: true,
+          requestDetails: ['CURRENT_REVISION'],
+        },
+      );
     });
 
     it('open change found for branchname -> return true', async () => {
@@ -203,6 +221,52 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
         'curSha',
       );
+    });
+  });
+
+  describe('getBranchUpdateDate()', () => {
+    it('no change found for branch name -> return result from git.getBranchUpdateDate', async () => {
+      const expectedDate = DateTime.fromISO('2023-01-15T10:30:00Z');
+      git.getBranchUpdateDate.mockResolvedValueOnce(expectedDate);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      await expect(gerritScm.getBranchUpdateDate('myBranchName')).resolves.toBe(
+        expectedDate,
+      );
+
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          singleChange: true,
+          refreshCache: true,
+          requestDetails: ['CURRENT_REVISION'],
+        },
+      );
+      expect(git.getBranchUpdateDate).toHaveBeenCalledExactlyOnceWith(
+        'myBranchName',
+      );
+    });
+
+    it('open change found for branchname -> return DateTime from Gerrit change', async () => {
+      const gerritDate = '2023-05-20 14:25:30.123456789';
+      const change = partial<GerritChange>({
+        current_revision: 'currentRevSha',
+        revisions: {
+          currentRevSha: partial<GerritRevisionInfo>({
+            created: gerritDate,
+          }),
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+
+      const result = await gerritScm.getBranchUpdateDate('myBranchName');
+
+      expect(result).toBeInstanceOf(DateTime);
+      expect(result!.toISO()).toBe('2023-05-20T14:25:30.123Z');
+      expect(result!.zone.name).toBe('UTC');
+      expect(git.getBranchUpdateDate).not.toHaveBeenCalled();
     });
   });
 
@@ -217,14 +281,18 @@ describe('modules/platform/gerrit/scm', () => {
 
       await expect(gerritScm.mergeToLocal('nonExistingChange')).toResolve();
 
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'nonExistingChange',
-        state: 'open',
-        limit: 1,
-        refreshCache: true,
-        requestDetails: ['CURRENT_REVISION'],
-      });
-      expect(git.mergeToLocal).toHaveBeenCalledWith('nonExistingChange');
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'nonExistingChange',
+          state: 'open',
+          singleChange: true,
+          requestDetails: ['CURRENT_REVISION'],
+        },
+      );
+      expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+        'nonExistingChange',
+      );
     });
 
     it('change exists', async () => {
@@ -241,20 +309,24 @@ describe('modules/platform/gerrit/scm', () => {
 
       await expect(gerritScm.mergeToLocal('existingChange')).toResolve();
 
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'existingChange',
-        state: 'open',
-        limit: 1,
-        refreshCache: true,
-        requestDetails: ['CURRENT_REVISION'],
-      });
-      expect(git.mergeToLocal).toHaveBeenCalledWith('refs/changes/34/1234/1');
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'existingChange',
+          state: 'open',
+          singleChange: true,
+          requestDetails: ['CURRENT_REVISION'],
+        },
+      );
+      expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+        'refs/changes/34/1234/1',
+      );
     });
   });
 
   describe('commitFiles()', () => {
     it('commitFiles() - empty commit', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
+      clientMock.getBranchChange.mockResolvedValueOnce(null);
       git.prepareCommit.mockResolvedValueOnce(null); //empty commit
 
       await expect(
@@ -266,14 +338,15 @@ describe('modules/platform/gerrit/scm', () => {
           prTitle: 'pr title',
         }),
       ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'renovate/dependency-1.x',
-        state: 'open',
-        targetBranch: 'main',
-        limit: 1,
-        refreshCache: true,
-        requestDetails: ['CURRENT_REVISION'],
-      });
+      expect(clientMock.getBranchChange).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'main',
+          requestDetails: ['CURRENT_REVISION'],
+        },
+      );
     });
 
     it('commitFiles() - create first Patch', async () => {
@@ -294,7 +367,7 @@ describe('modules/platform/gerrit/scm', () => {
           prTitle: 'pr title',
         }),
       ).toBe('commitSha');
-      expect(git.prepareCommit).toHaveBeenCalledWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
@@ -307,7 +380,7 @@ describe('modules/platform/gerrit/scm', () => {
         prTitle: 'pr title',
         force: true,
       });
-      expect(git.pushCommit).toHaveBeenCalledWith({
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
@@ -334,7 +407,7 @@ describe('modules/platform/gerrit/scm', () => {
           autoApprove: true,
         }),
       ).toBe('commitSha');
-      expect(git.prepareCommit).toHaveBeenCalledWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
@@ -348,7 +421,7 @@ describe('modules/platform/gerrit/scm', () => {
         autoApprove: true,
         force: true,
       });
-      expect(git.pushCommit).toHaveBeenCalledWith({
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
@@ -356,15 +429,65 @@ describe('modules/platform/gerrit/scm', () => {
       });
     });
 
-    it('commitFiles() - existing change-set without new changes', async () => {
+    it('commitFiles() - existing change should keep target branch', async () => {
       const existingChange = partial<GerritChange>({
-        change_id: '...',
+        change_id: 'Ifcd936eef0ced620040a07a337c586d0a882725b',
+        branch: 'main',
         current_revision: 'commitSha',
         revisions: {
           commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
         },
       });
-      clientMock.findChanges.mockResolvedValueOnce([existingChange]);
+      clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
+        files: [],
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
+      git.hasDiff.mockResolvedValueOnce(true);
+
+      expect(
+        await gerritScm.commitAndPush({
+          branchName: 'renovate/dependency-1.x',
+          baseBranch: 'new-main',
+          message: ['commit msg'],
+          files: [],
+          prTitle: 'pr title',
+        }),
+      ).toBe('commitSha');
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
+        baseBranch: 'new-main',
+        branchName: 'renovate/dependency-1.x',
+        files: [],
+        message: [
+          'pr title',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: Ifcd936eef0ced620040a07a337c586d0a882725b',
+        ],
+        prTitle: 'pr title',
+        force: true,
+      });
+      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        'refs/changes/1/2',
+      );
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        files: [],
+        sourceRef: 'renovate/dependency-1.x',
+        targetRef: 'refs/for/main', // not new-main
+        pushOptions: ['notify=NONE'],
+      });
+    });
+
+    it('commitFiles() - existing change-set without new changes', async () => {
+      const existingChange = partial<GerritChange>({
+        change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
+        branch: 'main',
+        current_revision: 'commitSha',
+        revisions: {
+          commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
+        },
+      });
+      clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
         parentCommitSha: 'parentSha' as LongCommitSha,
@@ -382,31 +505,34 @@ describe('modules/platform/gerrit/scm', () => {
           prTitle: 'pr title',
         }),
       ).toBeNull();
-      expect(git.prepareCommit).toHaveBeenCalledWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
         message: [
           'pr title',
-          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
         ],
         prTitle: 'pr title',
         force: true,
       });
-      expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
+      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        'refs/changes/1/2',
+      );
       expect(git.pushCommit).toHaveBeenCalledTimes(0);
     });
 
     it('commitFiles() - existing change-set with new changes - auto-approve again', async () => {
       const existingChange = partial<GerritChange>({
         _number: 123456,
-        change_id: '...',
+        change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
+        branch: 'main',
         current_revision: 'commitSha',
         revisions: {
           commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
         },
       });
-      clientMock.findChanges.mockResolvedValueOnce([existingChange]);
+      clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
         parentCommitSha: 'parentSha' as LongCommitSha,
@@ -425,20 +551,22 @@ describe('modules/platform/gerrit/scm', () => {
           autoApprove: true,
         }),
       ).toBe('commitSha');
-      expect(git.prepareCommit).toHaveBeenCalledWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
         message: [
           'pr title',
-          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
         ],
         prTitle: 'pr title',
         autoApprove: true,
         force: true,
       });
-      expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
-      expect(git.pushCommit).toHaveBeenCalledWith({
+      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        'refs/changes/1/2',
+      );
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
@@ -466,7 +594,7 @@ describe('modules/platform/gerrit/scm', () => {
           labels: ['hashtag1', 'hashtag2'],
         }),
       ).toBe('commitSha');
-      expect(git.prepareCommit).toHaveBeenCalledWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
@@ -481,7 +609,7 @@ describe('modules/platform/gerrit/scm', () => {
         force: true,
         labels: ['hashtag1', 'hashtag2'],
       });
-      expect(git.pushCommit).toHaveBeenCalledWith({
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
@@ -497,13 +625,14 @@ describe('modules/platform/gerrit/scm', () => {
     it('commitFiles() - existing change-set with new changes - ensure labels', async () => {
       const existingChange = partial<GerritChange>({
         _number: 123456,
-        change_id: '...',
+        change_id: 'If5689d5a0e5b7e5207ee943e4ba8857bff6f05c9',
+        branch: 'main',
         current_revision: 'commitSha',
         revisions: {
           commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
         },
       });
-      clientMock.findChanges.mockResolvedValueOnce([existingChange]);
+      clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
         parentCommitSha: 'parentSha' as LongCommitSha,
@@ -523,21 +652,23 @@ describe('modules/platform/gerrit/scm', () => {
           labels: ['hashtag1', 'hashtag2'],
         }),
       ).toBe('commitSha');
-      expect(git.prepareCommit).toHaveBeenCalledWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
         message: [
           'pr title',
-          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: If5689d5a0e5b7e5207ee943e4ba8857bff6f05c9',
         ],
         prTitle: 'pr title',
         autoApprove: true,
         force: true,
         labels: ['hashtag1', 'hashtag2'],
       });
-      expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
-      expect(git.pushCommit).toHaveBeenCalledWith({
+      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        'refs/changes/1/2',
+      );
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',

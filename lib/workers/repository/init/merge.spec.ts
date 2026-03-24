@@ -1,29 +1,29 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
-import * as decrypt from '../../../config/decrypt';
-import { getConfig } from '../../../config/defaults';
-import * as _migrateAndValidate from '../../../config/migrate-validate';
-import * as _migrate from '../../../config/migration';
-import type { AllConfig } from '../../../config/types';
-import * as memCache from '../../../util/cache/memory';
-import * as repoCache from '../../../util/cache/repository';
-import { initRepoCache } from '../../../util/cache/repository/init';
-import type { RepoCacheData } from '../../../util/cache/repository/types';
-import { getUserEnv } from '../../../util/env';
-import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache';
-import { OnboardingState } from '../onboarding/common';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, logger, partial, platform, scm } from '~test/util.ts';
+import * as decrypt from '../../../config/decrypt.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
+import * as _migrate from '../../../config/migration.ts';
+import type { AllConfig } from '../../../config/types.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import { initRepoCache } from '../../../util/cache/repository/init.ts';
+import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
+import { getUserEnv } from '../../../util/env.ts';
+import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
+import { OnboardingState } from '../onboarding/common.ts';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
   resolveStaticRepoConfig,
   setNpmTokenInNpmrc,
-} from './merge';
-import { fs, logger, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './merge.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../onboarding/branch/onboarding-branch-cache');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
 
 const migrate = vi.mocked(_migrate);
 const migrateAndValidate = vi.mocked(_migrateAndValidate);
@@ -35,7 +35,7 @@ function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
   const mockedError = new Error('mocked exit called');
 
   return [
-    vi.spyOn(process, 'exit').mockImplementationOnce((code?) => {
+    vi.spyOn(process, 'exit').mockImplementationOnce(() => {
       throw mockedError;
     }),
     mockedError,
@@ -49,8 +49,8 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-vi.mock('../../../config/migration');
-vi.mock('../../../config/migrate-validate');
+vi.mock('../../../config/migration.ts');
+vi.mock('../../../config/migrate-validate.ts');
 
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
@@ -76,6 +76,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists',
       );
@@ -390,6 +391,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig({
           ...config,
           requireConfig: 'ignored',
+          // @ts-expect-error -- TODO: do we still need this?
           configFileParsed: undefined,
           warnings: undefined,
           secrets: undefined,
@@ -550,7 +552,7 @@ describe('workers/repository/init/merge', () => {
           const [exitMock] = mockProcessExitOnce();
           let configFileName: string | undefined;
 
-          if (!is.nullOrUndefined(staticConfig)) {
+          if (!isNullOrUndefined(staticConfig)) {
             configFileName = 'static_config.json5';
             fs.readSystemFile.mockResolvedValueOnce(
               JSON.stringify(staticConfig),
@@ -585,8 +587,7 @@ describe('workers/repository/init/merge', () => {
             resolveStaticRepoConfig({}, 'static_config.json'),
           ).rejects.toThrow(error);
 
-          expect(exitMock).toHaveBeenCalledOnce();
-          expect(exitMock).toHaveBeenCalledWith(1);
+          expect(exitMock).toHaveBeenCalledExactlyOnceWith(1);
         });
 
         it('should log static config validation errors and warnings', async () => {
@@ -600,7 +601,8 @@ describe('workers/repository/init/merge', () => {
           );
 
           expect(resolved).toStrictEqual(invalidConfig);
-          expect(logger.logger.info).toHaveBeenCalledExactlyOnceWith(
+
+          expect(logger.logger.info).toHaveBeenCalledWith(
             {
               errors: [
                 {

@@ -1,10 +1,10 @@
-import * as npmVersioning from '../../versioning/npm';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { defaultRegistryUrls as npmDefaultRegistryUrl } from './common';
-import { getDependency } from './get';
+import * as npmVersioning from '../../versioning/npm/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { defaultRegistryUrls as npmDefaultRegistryUrl } from './common.ts';
+import { getDependency } from './get.ts';
 
-export { setNpmrc } from './npmrc';
+export { setNpmrc } from './npmrc.ts';
 
 export class NpmDatasource extends Datasource {
   static readonly id = 'npm';

@@ -1,4 +1,4 @@
-import rpm from '.';
+import rpm from './index.ts';
 
 describe('modules/versioning/rpm/index', () => {
   test.each`

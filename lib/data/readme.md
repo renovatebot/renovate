@@ -48,6 +48,8 @@ When a package gets renamed, you need to tell Renovate:
 - the last version available for the old package name -> `matchCurrentVersion`
 - the first version available for the new package name -> `replacementVersion`
 
+You can omit `replacementVersion` if the current version is the same as the new version.
+
 Example:
 
 ```json
@@ -75,7 +77,7 @@ If this does not happen, for whatever reason, Renovate can not show the changelo
 
 You can use these config options to let Renovate find the correct changelog:
 
-- [`changelogUrl`](https://docs.renovatebot.com/configuration-options/#changelogurl)
+- [`changelogUrl`](https://docs.renovatebot.com/configuration-options/#packageruleschangelogurl)
 
 Read the [Renovate docs, key concepts page for changelogs](https://docs.renovatebot.com/key-concepts/changelogs/) to learn more about how Renovate fetches and displays changelogs.
 
@@ -103,7 +105,7 @@ To check if Renovate can find the source URLs for your package:
 1. Read the Renovate docs for the datasource.
 1. Look for a table in the docs that shows if the datasource returns source URLs.
 
-If Renovate does not find the right source URls automatically: use the [`sourceUrl` config option](https://docs.renovatebot.com/configuration-options/#sourceurl).
+If Renovate does not find the right source URls automatically: use the [`sourceUrl` config option](https://docs.renovatebot.com/configuration-options/#packagerulessourceurl).
 
 To locate the source repository, Renovate requires:
 

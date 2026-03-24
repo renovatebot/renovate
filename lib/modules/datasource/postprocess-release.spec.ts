@@ -1,16 +1,16 @@
-import type { Timestamp } from '../../util/timestamp';
-import * as _datasourceCommon from './common';
-import { Datasource } from './datasource';
-import { postprocessRelease } from './postprocess-release';
+import type { Timestamp } from '../../util/timestamp.ts';
+import * as _datasourceCommon from './common.ts';
+import { Datasource } from './datasource.ts';
+import { postprocessRelease } from './postprocess-release.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
   Release,
   ReleaseResult,
-} from './types';
+} from './types.ts';
 
-vi.mock('./common');
+vi.mock('./common.ts');
 const { getDatasourceFor } = vi.mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {

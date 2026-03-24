@@ -15,6 +15,7 @@ Renovate is maintained by:
 
 - [@viceice](https://github.com/viceice)
 - [@secustor](https://github.com/secustor)
+- [@jamietanna](https://github.com/jamietanna)
 
 ### Maintainers for features
 

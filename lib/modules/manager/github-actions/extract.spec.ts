@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import * as yaml from '../../../util/yaml';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as yaml from '../../../util/yaml.ts';
+import { extractPackageFile } from './index.ts';
 
 const runnerTestWorkflow = codeBlock`
 jobs:
@@ -70,7 +70,10 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps).toMatchSnapshot();
       expect(
         res?.deps.filter((d) => d.datasource === 'github-tags'),
-      ).toHaveLength(8);
+      ).toHaveLength(7);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-digest'),
+      ).toHaveLength(1);
     });
 
     it('use github.com as registry when no settings provided', () => {
@@ -186,6 +189,13 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
           versioning: 'docker',
+        },
+        {
+          currentValue: '1.37.0-glibc',
+          datasource: 'docker',
+          depName: 'busybox',
+          depType: 'docker',
+          replaceString: 'busybox:1.37.0-glibc',
         },
         {
           currentValue: 'latest',
@@ -423,6 +433,11 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'actions/checkout@1e204e # v2.1.0',
         },
         {
+          currentDigestShort: '1e204e',
+          currentValue: 'some-ref-name',
+          replaceString: 'actions/checkout@1e204e # some-ref-name',
+        },
+        {
           currentValue: '01aecc#v2.1.0',
           replaceString: 'actions/checkout@01aecc#v2.1.0',
         },
@@ -466,6 +481,49 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
     });
 
+    it('extracts non-semver ref automatically', () => {
+      const res = extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: taiki-e/install-action@cargo-llvm-cov
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'taiki-e/install-action',
+        currentValue: 'cargo-llvm-cov',
+        datasource: 'github-digest',
+        versioning: 'exact',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+      });
+    });
+
+    it('extracts pinned non-semver ref with digest', () => {
+      const res = extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # cargo-llvm-cov
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'taiki-e/install-action',
+        currentValue: 'cargo-llvm-cov',
+        currentDigest: '4b1248585248751e3b12fd020cf7ac91540ca09c',
+        datasource: 'github-digest',
+        versioning: 'exact',
+        replaceString:
+          'taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # cargo-llvm-cov',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+      });
+    });
+
     it('extracts actions with fqdn', () => {
       const res = extractPackageFile(
         codeBlock`
@@ -477,6 +535,8 @@ describe('modules/manager/github-actions/extract', () => {
               - name: "test2"
                 uses: https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
               - name: "test3"
+                uses: https://gitea.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+              - name: "test4"
                 uses: https://code.domain.test/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
 
           `,
@@ -505,12 +565,22 @@ describe('modules/manager/github-actions/extract', () => {
             registryUrls: ['https://code.forgejo.org/'],
           },
           {
+            depName: 'https://gitea.com/actions/setup-node',
+            packageName: 'actions/setup-node',
+            currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
+            currentValue: 'v3.1.1',
+            replaceString:
+              'https://gitea.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://gitea.com/'],
+          },
+          {
             skipReason: 'unsupported-url',
           },
         ],
       });
 
-      expect(res!.deps[2]).not.toHaveProperty('registryUrls');
+      expect(res!.deps[3]).not.toHaveProperty('registryUrls');
     });
 
     it('extracts multiple action runners from yaml configuration file', () => {
@@ -583,29 +653,30 @@ describe('modules/manager/github-actions/extract', () => {
 
     it('extracts x-version from actions/setup-x', () => {
       const yamlContent = codeBlock`
-      jobs:
-        build:
-          steps:
-            - name: "Setup Node.js"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '16.x'
-            - name: "Setup Node.js with exact version"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '20.0.0'
-            - name: "Setup Go"
-              uses: actions/setup-go@v5
-              with:
-                go-version: '1.23'
-            - name: "Setup Python with range"
-              uses: actions/setup-python@v3
-              with:
-                python-version: '>=3.8.0 <3.10.0'
-            - name: "Setup Node.js with latest"
-              uses: actions/setup-node@v3
-              with:
-                node-version: 'latest'`;
+        jobs:
+          build:
+            steps:
+              - name: "Setup Node.js"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '16.x'
+              - name: "Setup Node.js with exact version"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '20.0.0'
+              - name: "Setup Go"
+                uses: actions/setup-go@v5
+                with:
+                  go-version: '1.23'
+              - name: "Setup Python with range"
+                uses: actions/setup-python@v3
+                with:
+                  python-version: '>=3.8.0 <3.10.0'
+              - name: "Setup Node.js with latest"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: 'latest'
+        `;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
@@ -710,6 +781,24 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
         },
       ]);
+    });
+
+    it('handles actions/setup-x without x-version field', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - name: "Setup Node.js without version"
+                uses: actions/setup-node@v3
+                with:
+                  registry-url: 'https://npm.pkg.github.com'
+        `;
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/setup-node',
+        depType: 'action',
+      });
     });
 
     it('extracts x-version from actions/setup-x in composite action', () => {
@@ -1071,6 +1160,167 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
           versioning: 'conda',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: { 'bun-version': '1.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.2.0',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: { 'deno-version': '2.4.0' },
+      },
+      expected: [
+        {
+          currentValue: '2.4.0',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: { 'ruby-version': '3.4' },
+      },
+      expected: [
+        {
+          currentValue: '3.4',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pypa/hatch@install',
+        with: { version: '1.14.2' },
+      },
+      expected: [
+        {
+          currentValue: '1.14.2',
+          datasource: 'github-releases',
+          depName: 'pypa/hatch',
+          depType: 'uses-with',
+          packageName: 'pypa/hatch',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pypa/hatch@install',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'pypa/hatch',
+          depType: 'uses-with',
+          packageName: 'pypa/hatch',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'golangci/golangci-lint-action@v9',
+        with: { version: 'v2.5.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.5.0',
+          datasource: 'github-releases',
+          depName: 'golangci/golangci-lint',
+          depType: 'uses-with',
+          packageName: 'golangci/golangci-lint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'golangci/golangci-lint-action@v9',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'golangci/golangci-lint',
+          depType: 'uses-with',
+          packageName: 'golangci/golangci-lint',
         },
       ],
     },

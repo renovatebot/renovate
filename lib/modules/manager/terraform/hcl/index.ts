@@ -1,7 +1,7 @@
 import { parse } from '@cdktf/hcl2json';
-import { parseJson } from '../../../../util/common';
-import { TerraformDefinitionFileJSON } from './schema';
-import type { TerraformDefinitionFile } from './types';
+import { parseJson } from '../../../../util/common.ts';
+import { TerraformDefinitionFileJSON } from './schema.ts';
+import type { TerraformDefinitionFile } from './types.ts';
 
 export async function parseHCL(
   content: string,

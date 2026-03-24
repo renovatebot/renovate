@@ -1,9 +1,9 @@
 // TODO #22198
-import { REPOSITORY_CHANGED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import type { BranchConfig } from '../../../types';
+import { REPOSITORY_CHANGED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 export async function prAlreadyExisted(
   config: BranchConfig,

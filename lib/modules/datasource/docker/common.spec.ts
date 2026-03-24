@@ -1,23 +1,23 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
-import * as _hostRules from '../../../util/host-rules';
-import { Http } from '../../../util/http';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
+import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
 import {
   dockerDatasourceId,
   findHelmSourceUrl,
   findLatestStable,
   getAuthHeaders,
   getRegistryRepository,
-} from './common';
-import type { OciHelmConfig } from './schema';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+} from './common.ts';
+import type { OciHelmConfig } from './schema.ts';
 
 const hostRules = vi.mocked(_hostRules);
 
 const http = new Http(dockerDatasourceId);
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 describe('modules/datasource/docker/common', () => {
   describe('getRegistryRepository', () => {
@@ -235,6 +235,33 @@ describe('modules/datasource/docker/common', () => {
       expect(headers).toMatchInlineSnapshot(`
         {
           "authorization": "Bearer some-token",
+        }
+      `);
+    });
+
+    it('supports multiple challenges in www-authenticate header', async () => {
+      httpMock
+        .scope('https://codeberg.org')
+        .get('/v2/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://codeberg.org/v2/token",service="container_registry",scope="*",Basic realm="https://codeberg.org/v2",service="container_registry",scope="*"',
+        })
+        .get(
+          '/v2/token?service=container_registry&scope=repository:my/node/prefix:pull',
+        )
+        .reply(200, { token: 'abc' });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://codeberg.org',
+        'my/node/prefix',
+      );
+
+      // do not inline, otherwise we get false positive from codeql
+      expect(headers).toMatchInlineSnapshot(`
+        {
+          "authorization": "Bearer abc",
         }
       `);
     });

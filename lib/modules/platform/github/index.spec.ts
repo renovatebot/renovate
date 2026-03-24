@@ -1,7 +1,9 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
@@ -10,38 +12,37 @@ import {
   REPOSITORY_FORK_MISSING,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
-} from '../../../constants/error-messages';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as repository from '../../../util/cache/repository';
-import * as _git from '../../../util/git';
-import type { LongCommitSha } from '../../../util/git/types';
-import * as _hostRules from '../../../util/host-rules';
-import { setBaseUrl } from '../../../util/http/github';
-import { toBase64 } from '../../../util/string';
-import { hashBody } from '../pr-body';
+} from '../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as repository from '../../../util/cache/repository/index.ts';
+import * as _git from '../../../util/git/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { setBaseUrl } from '../../../util/http/github.ts';
+import { toBase64 } from '../../../util/string.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   CreatePRConfig,
   ReattemptPlatformAutomergeConfig,
   UpdatePrConfig,
-} from '../types';
-import * as branch from './branch';
-import type { ApiPageCache, GhRestPr } from './types';
-import * as github from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../types.ts';
+import * as branch from './branch.ts';
+import * as github from './index.ts';
+import type { ApiPageCache, GhRestPr } from './types.ts';
 
 const githubApiHost = 'https://api.github.com';
 
 vi.mock('timers/promises');
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http/queue');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/queue.ts');
 const hostRules = vi.mocked(_hostRules);
 
 const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -152,6 +153,184 @@ describe('modules/platform/github/index', () => {
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
       ).toMatchSnapshot();
+    });
+
+    describe('when using the default gitAuthor', () => {
+      describe('when gitAuthor is not set', () => {
+        describe('when no email access', () => {
+          it('if on GitHub.com, a warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).toHaveBeenCalledWith(
+              {
+                documentationUrl:
+                  'https://github.com/renovatebot/renovate/discussions/39309',
+              },
+              'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+            );
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+
+        describe('when email access', () => {
+          it('no warning is shown', async () => {
+            httpMock
+              .scope(githubApiHost)
+              .get('/user')
+              .reply(200, {
+                login: 'some-other-user',
+              })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+
+          it('if on GitHub Enterprise, a warning is not shown', async () => {
+            httpMock
+              .scope('https://ghe.renovatebot.com')
+              .head('/')
+              .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(200, [
+                {
+                  email: 'user@domain.com',
+                },
+              ]);
+
+            await github.initPlatform({
+              token: 'anything',
+
+              endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+        });
+      });
+
+      describe('when explicitly set to only email address', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'renovate@whitesourcesoftware.com',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when explicitly set to RFC-RFC5322 format', () => {
+        it('if on GitHub.com, a warning is shown', async () => {
+          httpMock.scope(githubApiHost).get('/user').reply(200, {
+            login: 'renovate-bot',
+          });
+
+          await github.initPlatform({
+            token: 'anything',
+
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            {
+              documentationUrl:
+                'https://github.com/renovatebot/renovate/discussions/39309',
+            },
+            'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
+          );
+        });
+
+        it('if on GitHub Enterprise, a warning is not shown', async () => {
+          httpMock
+            .scope('https://ghe.renovatebot.com')
+            .head('/')
+            .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+            .get('/user')
+            .reply(200, { login: 'renovate-bot' });
+          await github.initPlatform({
+            token: 'anything',
+
+            endpoint: 'https://ghe.renovatebot.com',
+            gitAuthor: 'Mend Renovate <renovate@whitesourcesoftware.com>',
+          });
+
+          expect(logger.logger.once.warn).not.toHaveBeenCalled();
+        });
+      });
     });
 
     it('should support default endpoint with email', async () => {
@@ -539,6 +718,24 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    // for coverage
+    it('no token', async () => {
+      hostRules.find.mockReturnValue({});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
+    // for coverage
+    it('app token', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'x-access-token:123test',
+      });
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
     it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
@@ -551,7 +748,7 @@ describe('modules/platform/github/index', () => {
       });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'true',
+        forkToken: 'token',
         forkCreation: true,
       });
       expect(config).toMatchSnapshot();
@@ -867,6 +1064,10 @@ describe('modules/platform/github/index', () => {
     it('should detect repoForceRebase', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(200, {
           required_pull_request_reviews: {
@@ -897,6 +1098,10 @@ describe('modules/platform/github/index', () => {
     it('should handle 404', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/dev')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/dev/protection')
         .reply(404);
       const res = await github.getBranchForceRebase('dev');
@@ -906,6 +1111,10 @@ describe('modules/platform/github/index', () => {
     it('should handle 403', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(403);
       const res = await github.getBranchForceRebase('main');
@@ -913,6 +1122,10 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should throw 401', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
@@ -942,7 +1155,126 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeFalse();
     });
 
+    it('should ignore non_fast_forward ruleset for determining rebase', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'non_fast_forward',
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: false,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
+    it('should detect strict required status checks ruleset', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'required_status_checks',
+            parameters: {
+              strict_required_status_checks_policy: true,
+            },
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should continue if no expected rulesets have been found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'deletion',
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should abort and throws on internal error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(500);
+
+      await expect(github.getBranchForceRebase('main')).rejects.toThrow(
+        ExternalHostError,
+      );
+    });
+
+    it('should fallback to legacy branch protection when rulesets not found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should return false when no force rebase rules found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'pull_request',
+            parameters: {
+              required_approving_review_count: 1,
+            },
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(404);
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
     it('should return cached result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
@@ -964,6 +1296,10 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should return cached false result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/dev')
+        .reply(404);
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/branches/dev/protection')
@@ -1207,10 +1543,10 @@ describe('modules/platform/github/index', () => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo');
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ ignorePrAuthor: true });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
-          ignorePrAuthor: true,
         });
 
         const res = await github.getPrList();
@@ -1220,6 +1556,358 @@ describe('modules/platform/github/index', () => {
           { number: 2, title: 'Other PR' },
           { number: 1, title: 'Renovate PR' },
         ]);
+      });
+
+      it('stops sync early when non-Renovate PRs dominate', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const t0 = t.toISO()!;
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — pages full of non-Renovate PRs
+        initRepoMock(scope, 'some/repo');
+        scope
+          .get(pagePath(1, 20))
+          .reply(
+            200,
+            [
+              { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+              { ...pr1, number: 11, updated_at: t3, user: { login: 'other' } },
+            ],
+            { link: pageLink(2) },
+          )
+          .get(pagePath(2, 20))
+          .reply(
+            200,
+            [
+              { ...pr1, number: 12, updated_at: t2, user: { login: 'other' } },
+              { ...pr1, number: 13, updated_at: t0, user: { login: 'other' } },
+            ],
+            { link: pageLink(3) },
+          );
+        // Page 3 is NOT mocked — sync must stop before requesting it
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+      });
+
+      it('advances watermark from unfiltered page so next sync is cheaper', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const t5 = t.plus({ minutes: 5 }).toISO()!;
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — non-Renovate PRs advance watermark to t4
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+            {
+              ...pr1,
+              number: 11,
+              updated_at: t.toISO(),
+              user: { login: 'other' },
+            },
+          ],
+          { link: pageLink(2) },
+        );
+        // Stops after page 1 — oldest (t0) < cutoff (t1)
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 3: sync — watermark is now t4, page has item at t5 and t3
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 12, updated_at: t5, user: { login: 'other' } },
+            { ...pr1, number: 13, updated_at: t3, user: { login: 'other' } },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — oldest (t3) < watermark (t4) → stops
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+      });
+
+      it('derives cutoff from cached items when lastModified is missing', async () => {
+        const scope = httpMock.scope(githubApiHost);
+
+        // Seed cache with multiple items but no lastModified (simulates updateItem usage).
+        const repoCache = repository.getCache();
+        repoCache.platform = {
+          github: {
+            pullRequestsCache: {
+              items: {
+                1: {
+                  number: 1,
+                  sourceBranch: 'renovate-branch',
+                  title: 'Renovate PR',
+                  state: 'open',
+                  updated_at: t1,
+                  node_id: '12345',
+                },
+                2: {
+                  number: 2,
+                  sourceBranch: 'renovate-branch-2',
+                  title: 'Renovate PR 2',
+                  state: 'open',
+                  updated_at: t2,
+                  node_id: '12346',
+                },
+                3: {
+                  number: 3,
+                  sourceBranch: 'renovate-branch-3',
+                  title: 'Renovate PR 3',
+                  state: 'open',
+                  updated_at: t1,
+                  node_id: '12347',
+                },
+              },
+            },
+          },
+        };
+
+        // Sync: page has non-Renovate PRs, oldest predates derived cutoff (t2)
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t3, user: { login: 'other' } },
+            { ...pr1, number: 11, updated_at: t1, user: { login: 'other' } },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — cutoff derived from max(item.updated_at) = t2 stops sync
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(3);
+        expect(res).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ number: 1, title: 'Renovate PR' }),
+            expect.objectContaining({ number: 2, title: 'Renovate PR 2' }),
+            expect.objectContaining({ number: 3, title: 'Renovate PR 3' }),
+          ]),
+        );
+      });
+
+      it('stops at max sync pages', async () => {
+        const scope = httpMock.scope(githubApiHost);
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — 100 pages of non-Renovate PRs all newer than lastModified
+        initRepoMock(scope, 'some/repo');
+        for (let i = 1; i <= 100; i++) {
+          scope.get(pagePath(i, 20)).reply(
+            200,
+            [
+              {
+                ...pr1,
+                number: 100 + i,
+                updated_at: t4,
+                user: { login: 'other' },
+              },
+            ],
+            { link: pageLink(i + 1) },
+          );
+        }
+        // Page 101 NOT mocked — must stop at 100
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { repo: 'some/repo', pages: 100 },
+          'PR cache: hit max sync pages, stopping',
+        );
+      });
+
+      it('stops at custom max sync pages', async () => {
+        GlobalConfig.set({ prCacheSyncMaxPages: 2 });
+        const scope = httpMock.scope(githubApiHost);
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — 2 pages of non-Renovate PRs all newer than lastModified
+        initRepoMock(scope, 'some/repo');
+        for (let i = 1; i <= 2; i++) {
+          scope.get(pagePath(i, 20)).reply(
+            200,
+            [
+              {
+                ...pr1,
+                number: 100 + i,
+                updated_at: t4,
+                user: { login: 'other' },
+              },
+            ],
+            { link: pageLink(i + 1) },
+          );
+        }
+        // Page 3 NOT mocked — must stop at 2
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { repo: 'some/repo', pages: 2 },
+          'PR cache: hit max sync pages, stopping',
+        );
+      });
+
+      it('reconciles mixed pages with both Renovate and non-Renovate PRs', async () => {
+        const scope = httpMock.scope(githubApiHost);
+
+        // Run 1: initial fetch — cache gets lastModified = t1
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — mixed page with Renovate PR among non-Renovate PRs
+        initRepoMock(scope, 'some/repo');
+        const renovatePr2: GhRestPr = {
+          ...renovatePr,
+          number: 2,
+          title: 'Renovate PR 2',
+          updated_at: t3,
+        };
+        scope.get(pagePath(1, 20)).reply(
+          200,
+          [
+            { ...pr1, number: 10, updated_at: t4, user: { login: 'other' } },
+            renovatePr2,
+            {
+              ...pr1,
+              number: 11,
+              updated_at: t.toISO(),
+              user: { login: 'other' },
+            },
+          ],
+          { link: pageLink(2) },
+        );
+        // Page 2 NOT mocked — oldest (t) < lastModified (t1) → stops
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(2);
+        expect(res).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ number: 1, title: 'Renovate PR' }),
+            expect.objectContaining({ number: 2, title: 'Renovate PR 2' }),
+          ]),
+        );
+      });
+
+      it('continues past timestamp tie at page boundary', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const renovatePrT2: GhRestPr = { ...renovatePr, updated_at: t2 };
+
+        // Run 1: initial fetch — cache gets lastModified = t2
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePrT2]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        await github.getPrList();
+
+        // Run 2: sync — oldest on page 1 equals lastModified (t2), must continue
+        initRepoMock(scope, 'some/repo');
+        scope
+          .get(pagePath(1, 20))
+          .reply(
+            200,
+            [
+              { ...pr1, number: 10, updated_at: t3, user: { login: 'other' } },
+              { ...pr1, number: 11, updated_at: t2, user: { login: 'other' } },
+            ],
+            { link: pageLink(2) },
+          )
+          .get(pagePath(2, 20))
+          .reply(
+            200,
+            [{ ...pr1, number: 12, updated_at: t1, user: { login: 'other' } }],
+            { link: pageLink(3) },
+          );
+        // Page 3 is NOT mocked — sync must stop after page 2
+
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
       });
     });
   });
@@ -1298,16 +1986,63 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
+    });
+
+    it('force pushes when local SHA differs from PR SHA', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .head('/repos/some/repo/git/commits/1234')
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(201)
+        .patch('/repos/some/repo/pulls/91')
+        .reply(200, {
+          number: 91,
+          base: { sha: '1234' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'old title',
+          updated_at: '01-09-2022',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValueOnce('5678' as LongCommitSha);
+
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
+
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'somebranch',
+        sha: '5678',
+      });
+      expect(git.forcePushToRemote).toHaveBeenCalledExactlyOnceWith(
+        'somebranch',
+        'origin',
+      );
     });
 
     it('aborts reopening if branch recreation fails', async () => {
@@ -1324,14 +2059,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
@@ -1343,14 +2081,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
@@ -1718,6 +2459,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getIssue(1);
       expect(res).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Issue #1 has been deleted',
       );
@@ -3249,6 +3991,7 @@ describe('modules/platform/github/index', () => {
           milestone: 1,
         });
         expect(pr?.number).toBe(123);
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: {
@@ -3558,9 +4301,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Adding labels 'new_label' to #1234`,
       );
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Deleting label old_label from #1234`,
       );
@@ -3573,6 +4318,7 @@ describe('modules/platform/github/index', () => {
           message: 'Failed to add labels',
         });
         await expect(github.addLabels(2, ['fail'])).toResolve();
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: expect.any(Object),
@@ -3820,6 +4566,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
       );
@@ -3838,6 +4585,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           options: {
@@ -4033,14 +4781,7 @@ describe('modules/platform/github/index', () => {
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
             },
-            security_vulnerability: {
-              package: {
-                ecosystem: 'npm',
-                name: 'foo',
-              },
-              vulnerable_version_range: '0.0.2',
-              first_patched_version: null,
-            },
+            security_vulnerability: null,
             dependency: {
               manifest_path: 'bar/foo',
             },
@@ -4048,7 +4789,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(1);
     });
 
     it('returns empty if disabled', async () => {
@@ -4120,6 +4861,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
         'GitHub vulnerability details',

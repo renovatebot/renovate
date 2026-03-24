@@ -1,18 +1,18 @@
 import os from 'node:os';
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { exec } from '../exec';
-import { newlineRegex, regEx } from '../regex';
-import { addSecretForSanitizing } from '../sanitize';
-import { fromBase64, toBase64 } from '../string';
+import { PLATFORM_GPG_FAILED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { exec } from '../exec/index.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import { addSecretForSanitizing } from '../sanitize.ts';
+import { fromBase64, toBase64 } from '../string.ts';
 
 type PrivateKeyFormat = 'gpg' | 'ssh';
 
 const sshKeyRegex = regEx(
-  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----.*?-----END (?:[A-Z]+ )?PRIVATE KEY-----/,
   's',
 );
 
@@ -115,7 +115,8 @@ class SSHKey extends PrivateKey {
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-ssh.key');
     await fs.outputFile(keyFileName, this.key.replace(/\n?$/, '\n'));
-    process.on('exit', () => fs.removeSync(keyFileName));
+    /* v8 ignore next -- not easily testable */
+    process.on('exit', () => fs.rmSync(keyFileName, { force: true }));
     await fs.chmod(keyFileName, 0o600);
 
     // If there's a passphrase, decrypt the private key and save without passphrase
@@ -139,7 +140,8 @@ class SSHKey extends PrivateKey {
     const { stdout } = await exec(`ssh-keygen -y -f ${keyFileName}`);
     const pubFileName = `${keyFileName}.pub`;
     await fs.outputFile(pubFileName, stdout);
-    process.on('exit', () => fs.removeSync(pubFileName));
+    /* v8 ignore next -- not easily testable */
+    process.on('exit', () => fs.rmSync(pubFileName, { force: true }));
     return keyFileName;
   }
 }
@@ -166,7 +168,7 @@ export function setPrivateKey(
   key: string | undefined,
   passphrase: string | undefined,
 ): void {
-  if (!is.nonEmptyStringAndNotWhitespace(key)) {
+  if (!isNonEmptyStringAndNotWhitespace(key)) {
     return;
   }
   gitPrivateKey = createPrivateKey(key, passphrase);
