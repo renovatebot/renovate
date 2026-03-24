@@ -49,6 +49,7 @@ describe('workers/repository/onboarding/branch/create', () => {
       GlobalConfig.set({
         onboardingCommitMessage: message,
         onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate',
       });
 
       await createOnboardingBranch(config);
@@ -98,6 +99,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         GlobalConfig.set({
           onboardingCommitMessage: message,
           onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
         });
 
         await createOnboardingBranch({
@@ -159,6 +161,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         GlobalConfig.set({
           onboardingCommitMessage: text,
           onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
         });
 
         await createOnboardingBranch(config);
@@ -217,6 +220,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         GlobalConfig.set({
           onboardingCommitMessage: text,
           onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
         });
 
         await createOnboardingBranch(config);
