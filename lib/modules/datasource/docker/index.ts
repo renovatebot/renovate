@@ -663,7 +663,7 @@ export class DockerDatasource extends Datasource {
       }
 
       // typescript issue :-/
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
         url,
       )) as HttpResponse<QuayRestDockerTags>;

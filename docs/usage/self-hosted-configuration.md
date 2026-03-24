@@ -35,6 +35,32 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowShellExecutorForPostUpgradeCommands
 
+Enabling this allows `postUpgradeTasks`' `commands` to execute as if they're in a shell.
+
+This takes effect if you are using shell semantics, such as:
+
+```json title="allowShellExecutorForPostUpgradeCommands=true will allow this to run as expected"
+{
+  "postUpgradeTasks": {
+    "commands": ["echo '...' > go.mod", "go mod tidy || true"],
+    "fileFilters": ["**/*.go"],
+    "executionMode": "branch"
+  }
+}
+```
+
+This will not affect calling a script like:
+
+```json title="allowShellExecutorForPostUpgradeCommands=true will have not effect"
+{
+  "postUpgradeTasks": {
+    "commands": ["bash .scripts/post-yarn-update.sh"],
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "update"
+  }
+}
+```
+
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
@@ -1015,7 +1041,7 @@ If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 Then you must set this variable at the _server_ and the _workers_.
 
-But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `packageRule`, you only need to set this variable at the _workers_.
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#packagerulesmatchconfidence) `packageRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
 
@@ -1129,6 +1155,10 @@ The intention is that this allows Renovate to do a faster `git fetch` between ru
 It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
 ## platform
+
+## prCacheSyncMaxPages
+
+Maximum number of pages to fetch when syncing the pull request cache.
 
 ## prCommitsPerRunLimit
 
@@ -1393,7 +1423,7 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
 
 <!-- prettier-ignore -->
 !!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 
