@@ -459,7 +459,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   } else {
-    logger.debug(`Renovate did not find a PR for branch #${branchName}`);
+    logger.debug(`Renovate did not find a PR for branch ${branchName}`);
   }
   return pr ?? null;
 }
