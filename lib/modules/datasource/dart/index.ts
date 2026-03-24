@@ -1,6 +1,7 @@
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
+import { id as npmId } from '../../versioning/npm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import type { DartResult } from './types.ts';
@@ -22,6 +23,7 @@ export class DartDatasource extends Datasource {
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field of the latest release object in the results.';
+  override readonly defaultVersioning = npmId;
 
   async getReleases({
     packageName,
