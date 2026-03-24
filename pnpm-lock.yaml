@@ -315,8 +315,8 @@ importers:
         specifier: 2.5.0
         version: 2.5.0
       sax:
-        specifier: 1.5.0
-        version: 1.5.0
+        specifier: 1.6.0
+        version: 1.6.0
       semver:
         specifier: 7.7.4
         version: 7.7.4
@@ -5643,8 +5643,8 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  sax@1.5.0:
-    resolution: {integrity: sha512-21IYA3Q5cQf089Z6tgaUTr7lDAyzoTPx5HRtbhsME8Udispad8dC/+sziTNugOEx54ilvatQ9YCzl4KQLPcRHA==}
+  sax@1.6.0:
+    resolution: {integrity: sha512-6R3J5M4AcbtLUdZmRv2SygeVaM7IhrLXu9BmnOGmmACak8fiUtOsYNWUS4uK7upbmHIBbLBeFeI//477BKLBzA==}
     engines: {node: '>=11.0.0'}
 
   semantic-release@25.0.3:
@@ -12469,7 +12469,7 @@ snapshots:
   safer-buffer@2.1.2:
     optional: true
 
-  sax@1.5.0: {}
+  sax@1.6.0: {}
 
   semantic-release@25.0.3(typescript@5.9.3):
     dependencies:
@@ -13251,7 +13251,7 @@ snapshots:
 
   xmldoc@2.0.3:
     dependencies:
-      sax: 1.5.0
+      sax: 1.6.0
 
   xtend@4.0.2: {}
 
