@@ -1,7 +1,7 @@
 import { isString } from '@sindresorhus/is';
 import type { AllConfig } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
-import { platform } from '../../modules/platform/index.ts';
+import { type AutodiscoverConfig, platform } from '../../modules/platform/index.ts';
 import { matchRegexOrGlobList } from '../../util/string-match.ts';
 
 // istanbul ignore next
