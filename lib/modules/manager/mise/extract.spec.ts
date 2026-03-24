@@ -71,6 +71,7 @@ describe('modules/manager/mise/extract', () => {
       localstack = "4.3.0"
       lychee = "0.19.1"
       opentofu = "1.6.1"
+      packer = "1.15.0"
       pipx = "1.7.1"
       pkl = "0.28.2"
       protoc = "30.2"
@@ -228,6 +229,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'opentofu',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '1.15.0',
+            datasource: 'github-releases',
+            depName: 'packer',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/packer',
           },
           {
             currentValue: '1.7.1',
