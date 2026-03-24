@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -9,29 +10,34 @@ const miseFilename = 'mise.toml';
 const mise1toml = Fixtures.get('Mise.1.toml');
 
 describe('modules/manager/mise/extract', () => {
+  beforeEach(() => {
+    // By default, mock no lock file found
+    fs.readLocalFile.mockResolvedValue(null);
+  });
+
   describe('extractPackageFile()', () => {
-    it('returns null for empty', () => {
-      expect(extractPackageFile('', miseFilename)).toBeNull();
+    it('returns null for empty', async () => {
+      expect(await extractPackageFile('', miseFilename)).toBeNull();
     });
 
-    it('returns null for invalid TOML', () => {
-      expect(extractPackageFile('foo', miseFilename)).toBeNull();
+    it('returns null for invalid TOML', async () => {
+      expect(await extractPackageFile('foo', miseFilename)).toBeNull();
     });
 
-    it('returns null for empty tools section', () => {
+    it('returns null for empty tools section', async () => {
       const content = codeBlock`
       [tools]
     `;
-      expect(extractPackageFile(content, miseFilename)).toBeNull();
+      expect(await extractPackageFile(content, miseFilename)).toBeNull();
     });
 
-    it('extracts tools - mise core plugins', () => {
+    it('extracts tools - mise core plugins', async () => {
       const content = codeBlock`
       [tools]
       erlang = '23.3'
       node = '16'
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -48,7 +54,7 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts tools - mise registry tools', () => {
+    it('extracts tools - mise registry tools', async () => {
       const content = codeBlock`
       [tools]
       actionlint = "1.7.7"
@@ -93,7 +99,7 @@ describe('modules/manager/mise/extract', () => {
       tusd = "2.8.0"
       usage = "2.1.1"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -374,12 +380,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts tools - asdf plugins', () => {
+    it('extracts tools - asdf plugins', async () => {
       const content = codeBlock`
       [tools]
       terraform = '1.8.0'
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -390,13 +396,13 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts tools with multiple versions', () => {
+    it('extracts tools with multiple versions', async () => {
       const content = codeBlock`
       [tools]
       erlang = ['23.3', '24.0']
       node = ['16', 'prefix:20', 'ref:master', 'path:~/.nodes/14']
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -413,12 +419,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts tools with plugin options', () => {
+    it('extracts tools with plugin options', async () => {
       const content = codeBlock`
       [tools]
       python = {version='3.11', virtualenv='.venv'}
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -429,7 +435,7 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts tools in the default registry with backends', () => {
+    it('extracts tools in the default registry with backends', async () => {
       const content = codeBlock`
       [tools]
       "core:node" = "16"
@@ -437,7 +443,7 @@ describe('modules/manager/mise/extract', () => {
       "vfox:scala" = "3.5.2"
       "aqua:act" = "0.2.70"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -468,13 +474,13 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts aqua backend tool', () => {
+    it('extracts aqua backend tool', async () => {
       const content = codeBlock`
       [tools]
       "aqua:BurntSushi/ripgrep" = "14.1.0"
       "aqua:cli/cli" = "v2.64.0"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -495,7 +501,7 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts cargo backend tools', () => {
+    it('extracts cargo backend tools', async () => {
       const content = codeBlock`
       [tools]
       "cargo:eza" = "0.18.21"
@@ -503,7 +509,7 @@ describe('modules/manager/mise/extract', () => {
       "cargo:https://github.com/username/demo2" = "branch:main"
       "cargo:https://github.com/username/demo3" = "rev:abcdef"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -534,12 +540,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts dotnet backend tool', () => {
+    it('extracts dotnet backend tool', async () => {
       const content = codeBlock`
       [tools]
       "dotnet:GitVersion.Tool" = "5.12.0"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -552,12 +558,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts gem backend tool', () => {
+    it('extracts gem backend tool', async () => {
       const content = codeBlock`
       [tools]
       "gem:rubocop" = "1.69.2"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -570,12 +576,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts go backend tool', () => {
+    it('extracts go backend tool', async () => {
       const content = codeBlock`
       [tools]
       "go:github.com/DarthSim/hivemind" = "1.0.6"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -588,12 +594,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts npm backend tool', () => {
+    it('extracts npm backend tool', async () => {
       const content = codeBlock`
       [tools]
       "npm:prettier" = "3.3.2"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -606,14 +612,14 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts pipx backend tools', () => {
+    it('extracts pipx backend tools', async () => {
       const content = codeBlock`
       [tools]
       "pipx:yamllint" = "1.35.0"
       "pipx:psf/black" = "24.4.1"
       "pipx:git+https://github.com/psf/black.git" = "24.4.1"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -638,13 +644,13 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts spm backend tools', () => {
+    it('extracts spm backend tools', async () => {
       const content = codeBlock`
       [tools]
       "spm:tuist/tuist" = "4.15.0"
       "spm:https://github.com/tuist/tuist.git" = "4.13.0"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -663,7 +669,7 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts ubi backend tools', () => {
+    it('extracts ubi backend tools', async () => {
       const content = codeBlock`
       [tools]
       "ubi:nekto/act" = "v0.2.70"
@@ -673,7 +679,7 @@ describe('modules/manager/mise/extract', () => {
       "ubi:cargo-bins/cargo-binstall[tag_regex=^\\\\d+\\\\.]" = "1.0.0"
       'ubi:cargo-bins/cargo-binstall[tag_regex=^\\d+\\.\\d+\\.]' = { tag_regex = '^\\d+\\.', version = "1.0.0" }
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -721,7 +727,7 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts github backend tools', () => {
+    it('extracts github backend tools', async () => {
       const content = codeBlock`
       [tools]
       "github:BurntSushi/ripgrep" = "14.1.1"
@@ -729,7 +735,7 @@ describe('modules/manager/mise/extract', () => {
       "github:some/repo" = { version_prefix = "release-", version = "1.0.0" }
       "github:other/repo[version_prefix=v]" = "2.0.0"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -762,13 +768,13 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('provides skipReason for lines with unsupported tooling', () => {
+    it('provides skipReason for lines with unsupported tooling', async () => {
       const content = codeBlock`
       [tools]
       fake-tool = '1.0.0'
       'fake:tool' = '1.0.0'
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -783,12 +789,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('provides skipReason for missing version - empty string', () => {
+    it('provides skipReason for missing version - empty string', async () => {
       const content = codeBlock`
       [tools]
       python = ''
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -799,12 +805,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('provides skipReason for missing version - missing version in object', () => {
+    it('provides skipReason for missing version - missing version in object', async () => {
       const content = codeBlock`
       [tools]
       python = {virtualenv='.venv'}
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -815,13 +821,13 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('provides skipReason for missing version - empty array', () => {
+    it('provides skipReason for missing version - empty array', async () => {
       const content = codeBlock`
       [tools]
       java = '21.0.2'
       erlang = []
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -836,8 +842,8 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('complete mise.toml example', () => {
-      const result = extractPackageFile(mise1toml, miseFilename);
+    it('complete mise.toml example', async () => {
+      const result = await extractPackageFile(mise1toml, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -859,7 +865,7 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('complete example with skip', () => {
+    it('complete example with skip', async () => {
       const content = codeBlock`
       [tools]
       java = '21.0.2'
@@ -867,7 +873,7 @@ describe('modules/manager/mise/extract', () => {
       terraform = {version='1.8.0'}
       fake-tool = '1.6.2'
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -892,12 +898,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('core java plugin function', () => {
+    it('core java plugin function', async () => {
       const content = codeBlock`
       [tools]
       java = "21.0.2"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -912,7 +918,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "openjdk-21.0.2"
     `;
-      const result2 = extractPackageFile(content2, miseFilename);
+      const result2 = await extractPackageFile(content2, miseFilename);
       expect(result2).toMatchObject({
         deps: [
           {
@@ -927,7 +933,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "temurin-21.0.2"
     `;
-      const result3 = extractPackageFile(content3, miseFilename);
+      const result3 = await extractPackageFile(content3, miseFilename);
       expect(result3).toMatchObject({
         deps: [
           {
@@ -942,7 +948,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "zulu-21.0.2"
     `;
-      const result4 = extractPackageFile(content4, miseFilename);
+      const result4 = await extractPackageFile(content4, miseFilename);
       expect(result4).toMatchObject({
         deps: [
           {
@@ -957,7 +963,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "corretto-21.0.2"
     `;
-      const result5 = extractPackageFile(content5, miseFilename);
+      const result5 = await extractPackageFile(content5, miseFilename);
       expect(result5).toMatchObject({
         deps: [
           {
@@ -972,7 +978,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "oracle-graalvm-21.0.2"
     `;
-      const result6 = extractPackageFile(content6, miseFilename);
+      const result6 = await extractPackageFile(content6, miseFilename);
       expect(result6).toMatchObject({
         deps: [
           {
@@ -987,7 +993,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "adoptopenjdk-21.0.2"
     `;
-      const result7 = extractPackageFile(content7, miseFilename);
+      const result7 = await extractPackageFile(content7, miseFilename);
       expect(result7).toMatchObject({
         deps: [
           {
@@ -1003,7 +1009,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "adoptopenjdk-jre-16.0.0+36"
     `;
-      const result8 = extractPackageFile(content8, miseFilename);
+      const result8 = await extractPackageFile(content8, miseFilename);
       expect(result8).toMatchObject({
         deps: [
           {
@@ -1023,12 +1029,12 @@ describe('modules/manager/mise/extract', () => {
       ${'corretto-21.0'} | ${'21.0'}
     `(
       'uses semver-partial versioning for short java version $version',
-      ({ version, currentValue }) => {
+      async ({ version, currentValue }) => {
         const content = codeBlock`
         [tools]
         java = "${version}"
       `;
-        const result = extractPackageFile(content, miseFilename);
+        const result = await extractPackageFile(content, miseFilename);
         expect(result).toMatchObject({
           deps: [
             {
@@ -1048,12 +1054,12 @@ describe('modules/manager/mise/extract', () => {
       ${'temurin-21.0.2'} | ${'21.0.2'}
     `(
       'does not use semver-partial for full java version $version',
-      ({ version, currentValue }) => {
+      async ({ version, currentValue }) => {
         const content = codeBlock`
         [tools]
         java = "${version}"
       `;
-        const result = extractPackageFile(content, miseFilename);
+        const result = await extractPackageFile(content, miseFilename);
         expect(result).toMatchObject({
           deps: [
             {
@@ -1066,5 +1072,127 @@ describe('modules/manager/mise/extract', () => {
         expect(result?.deps[0]).not.toHaveProperty('versioning');
       },
     );
+  });
+
+  describe('extractPackageFile() with lock files', () => {
+    const lockFileContent = codeBlock`
+      [[tools.node]]
+      version = "20.11.0"
+      backend = "core:node"
+
+      [[tools.python]]
+      version = "3.10.17"
+    `;
+
+    it('extracts lockedVersion when lock file present', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+        python = "3.10"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'node',
+            currentValue: '20',
+            lockedVersion: '20.11.0',
+          },
+          {
+            depName: 'python',
+            currentValue: '3.10',
+            lockedVersion: '3.10.17',
+          },
+        ],
+        lockFiles: ['mise.lock'],
+      });
+    });
+
+    it('sets lockFiles array when lock file present', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.lockFiles).toEqual(['mise.lock']);
+    });
+
+    it('handles missing lock file gracefully', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
+      expect(result?.lockFiles).toBeUndefined();
+    });
+
+    it('handles malformed lock file gracefully', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('invalid toml {{{{');
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
+      expect(result?.lockFiles).toBeUndefined();
+    });
+
+    it('works with environment-specific lock files', async () => {
+      const testLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "18.19.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(testLockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "18"
+      `;
+      const result = await extractPackageFile(content, 'mise.test.toml');
+      expect(result?.lockFiles).toEqual(['mise.test.lock']);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '18',
+        lockedVersion: '18.19.0',
+      });
+    });
+
+    it('extracts lockedVersion for tools with backend prefix', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "core:node" = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'core:node',
+        currentValue: '20',
+        lockedVersion: '20.11.0',
+      });
+    });
+
+    it('extracts first lockedVersion when multiple versions exist', async () => {
+      const multiVersionLockFileContent = codeBlock`
+        [[tools.python]]
+        version = "3.10.17"
+
+        [[tools.python]]
+        version = "3.11.12"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(multiVersionLockFileContent);
+      const content = codeBlock`
+        [tools]
+        python = ["3.10", "3.11"]
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'python',
+        currentValue: '3.10',
+        lockedVersion: '3.10.17',
+      });
+    });
   });
 });
