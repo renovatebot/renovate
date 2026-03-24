@@ -190,7 +190,11 @@ export function getNextScheduleTime(
       const tempCron = new Cron(scheduleText);
       const nextRun = tempCron.nextRun();
       tempCron.stop(); // Clean up
-      if (nextRun && (!earliestNextRun || nextRun < earliestNextRun)) {
+      // istanbul ignore if: should not happen for a valid cron schedule
+      if (!nextRun) {
+        continue;
+      }
+      if (!earliestNextRun || nextRun < earliestNextRun) {
         earliestNextRun = nextRun;
       }
     } else {
@@ -202,6 +206,7 @@ export function getNextScheduleTime(
       const nextOccurrence = later.schedule(parsedSchedule).next(1, jsNow) as
         | Date
         | 0;
+      // istanbul ignore else: should not happen for a valid later.js schedule
       if (nextOccurrence instanceof Date) {
         if (!earliestNextRun || nextOccurrence < earliestNextRun) {
           earliestNextRun = nextOccurrence;
@@ -210,12 +215,15 @@ export function getNextScheduleTime(
     }
   }
 
+  // v8 ignore else: unreachable for valid schedules
   if (earliestNextRun) {
     logger.debug(`Next schedule time: ${earliestNextRun.toISOString()}`);
     return earliestNextRun;
   }
 
+  // istanbul ignore next
   logger.debug('No next schedule time found');
+  // istanbul ignore next
   return null;
 }
 

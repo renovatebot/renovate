@@ -554,6 +554,35 @@ describe('workers/repository/update/branch/schedule', () => {
       expect(res).not.toBeNull();
       expect(res!.getTime()).toBeGreaterThan(Date.now());
     });
+
+    it('massages string automergeSchedule to array', () => {
+      config.automergeSchedule = 'after 4:00pm' as never;
+      const res = schedule.getNextScheduleTime(config);
+      expect(res).not.toBeNull();
+      expect(res!.getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('returns the earliest of multiple cron schedules', () => {
+      // fake time 10:50am — '* 22 * * *' fires at 22:00, '* 23 * * *' at 23:00
+      const resEarliest = schedule.getNextScheduleTime({
+        automergeSchedule: ['* 22 * * *', '* 23 * * *'],
+      });
+      const resLater = schedule.getNextScheduleTime({
+        automergeSchedule: ['* 23 * * *'],
+      });
+      expect(resEarliest!.getTime()).toBeLessThan(resLater!.getTime());
+    });
+
+    it('keeps earliest when a later.js schedule fires after the current earliest', () => {
+      // fake time 10:50am — 'after 4pm' is earlier than 'after 11pm'
+      const resWithBoth = schedule.getNextScheduleTime({
+        automergeSchedule: ['after 4:00pm', 'after 11:00pm'],
+      });
+      const resOnlyFirst = schedule.getNextScheduleTime({
+        automergeSchedule: ['after 4:00pm'],
+      });
+      expect(resWithBoth!.getTime()).toBe(resOnlyFirst!.getTime());
+    });
   });
 
   describe('log cron schedules', () => {
