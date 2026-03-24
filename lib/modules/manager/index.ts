@@ -1,3 +1,4 @@
+import { registerManagerOptions } from '../../config/options/index.ts';
 import type { MaybePromise, RangeStrategy } from '../../types/index.ts';
 import managers from './api.ts';
 import customManagers from './custom/api.ts';
@@ -17,6 +18,8 @@ const managerList = Array.from(managers.keys()); // does not include custom mana
 export const getManagerList = (): string[] => managerList;
 export const getManagers = (): Map<string, ManagerApi> => managers;
 export const allManagersList = [...managerList, ...customManagerList];
+
+registerManagerOptions(new Map([...managers, ...customManagers]));
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
