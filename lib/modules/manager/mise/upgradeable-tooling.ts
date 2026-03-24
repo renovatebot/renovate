@@ -412,6 +412,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
     },
   },
+  rumdl: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'rvben/rumdl',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   shellcheck: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {

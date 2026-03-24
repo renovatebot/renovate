@@ -77,6 +77,7 @@ describe('modules/manager/mise/extract', () => {
       protoc = "30.2"
       redis = "8.0.1"
       ruff = "0.11.12"
+      rumdl = "0.1.58"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
@@ -267,6 +268,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'ruff',
             packageName: 'astral-sh/ruff',
+          },
+          {
+            currentValue: '0.1.58',
+            datasource: 'github-releases',
+            depName: 'rumdl',
+            packageName: 'rvben/rumdl',
           },
           {
             currentValue: '0.10.0',
