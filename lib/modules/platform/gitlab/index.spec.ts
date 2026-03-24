@@ -3754,6 +3754,39 @@ describe('modules/platform/gitlab/index', () => {
         'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
       );
     });
+
+    it('should include merge_after in the request body when provided', async () => {
+      const mergeAfterDate = '2026-04-01T10:00:00.000Z';
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            status: 'running',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200);
+
+      await expect(
+        gitlab.reattemptPlatformAutomerge?.({
+          number: 12345,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            merge_after: mergeAfterDate,
+          },
+        }),
+      ).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { merge_after: mergeAfterDate },
+        'Setting merge_after from platform options',
+      );
+    });
   });
 
   describe('mergePr(pr)', () => {
