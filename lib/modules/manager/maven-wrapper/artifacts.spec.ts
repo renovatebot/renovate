@@ -994,7 +994,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     });
 
     // Verify command is still just wrapper:wrapper
-    expect(execSnapshots[0].cmd).toBe('./mvnw wrapper:wrapper');
+    expect(execSnapshots[0].cmd).toBe('./mvnw wrapper:wrapper -Dtype=script');
 
     clearHostRules();
   });
