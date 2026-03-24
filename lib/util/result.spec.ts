@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
-/* eslint-disable @typescript-eslint/only-throw-error */
+/* oxlint-disable typescript/prefer-promise-reject-errors */
+/* oxlint-disable typescript/only-throw-error */
 // TODO: fix, should only allow `Error` type
 
 import { z } from 'zod/v3';

@@ -630,7 +630,7 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           automerge: true,
           automergeType: 'branch',
-          artifactErrors: [{ lockFile: 'foo', stderr: 'bar' }],
+          artifactErrors: [{ fileName: 'foo', stderr: 'bar' }],
         });
 
         expect(res).toEqual({ type: 'with-pr', pr });

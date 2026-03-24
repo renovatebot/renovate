@@ -236,6 +236,7 @@ export function getToolSettingsOptions(
 
   options.jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
   options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
+  options.nodeMaxMemory ??= defaults?.nodeMaxMemory;
 
   if (repoConfig !== undefined) {
     if (repoConfig.jvmMaxMemory) {
@@ -254,10 +255,26 @@ export function getToolSettingsOptions(
     if (repoConfig.jvmMemory) {
       options.jvmMemory = repoConfig.jvmMemory;
     }
+
+    if (repoConfig.nodeMaxMemory) {
+      if (
+        options.nodeMaxMemory &&
+        repoConfig.nodeMaxMemory > options.nodeMaxMemory
+      ) {
+        logger.once.debug(
+          `A higher nodeMaxMemory (${repoConfig.nodeMaxMemory}) than the global configuration (${options.nodeMaxMemory}) is not permitted for Node invocations. Using global configuration instead`,
+        );
+      } else {
+        options.nodeMaxMemory = repoConfig.nodeMaxMemory;
+      }
+    }
   }
 
   options.jvmMaxMemory = Math.floor(options.jvmMaxMemory);
   options.jvmMemory = Math.floor(options.jvmMemory);
+  if (options.nodeMaxMemory) {
+    options.nodeMaxMemory = Math.floor(options.nodeMaxMemory);
+  }
 
   // make sure that the starting memory can't be more than the max memory
   options.jvmMemory = Math.min(options.jvmMemory, options.jvmMaxMemory);

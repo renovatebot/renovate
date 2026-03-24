@@ -608,6 +608,7 @@ export async function ensurePr(
     }
   } catch (err) {
     if (
+      // oxlint-disable-next-line typescript/prefer-optional-chain -- instanceof is not a null guard
       err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||

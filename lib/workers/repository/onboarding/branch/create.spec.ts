@@ -46,7 +46,10 @@ describe('workers/repository/onboarding/branch/create', () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
 
-      config.onboardingCommitMessage = message;
+      GlobalConfig.set({
+        onboardingCommitMessage: message,
+        onboardingBranch: config.onboardingBranch,
+      });
 
       await createOnboardingBranch(config);
 
@@ -92,7 +95,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message =
           'We can Renovate if we want to, we can leave PRs in decline';
 
-        config.onboardingCommitMessage = message;
+        GlobalConfig.set({
+          onboardingCommitMessage: message,
+          onboardingBranch: config.onboardingBranch,
+        });
 
         await createOnboardingBranch({
           ...config,
@@ -150,7 +156,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         )}`;
 
         config.commitMessagePrefix = prefix;
-        config.onboardingCommitMessage = text;
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+        });
 
         await createOnboardingBranch(config);
 
@@ -205,7 +214,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         )}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingCommitMessage = text;
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+        });
 
         await createOnboardingBranch(config);
 
