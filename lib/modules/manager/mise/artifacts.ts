@@ -23,26 +23,19 @@ export async function updateArtifacts({
   newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  // 1. Derive lock file name from package file
   const lockFileName = getLockFileName(packageFileName);
-
-  // 2. Check if lock file exists
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug({ lockFileName }, 'No mise lock file found');
     return null;
   }
 
-  // 3. Write updated package file content
   await writeLocalFile(packageFileName, newPackageFileContent);
 
-  // 4. Build command based on maintenance mode
   let cmd: string;
   if (config.isLockFileMaintenance) {
-    // Full lock file update
     cmd = 'mise lock';
   } else {
-    // Targeted update for specific tools
     const tools = updatedDeps
       .map(({ depName }) => depName)
       .filter(isNonEmptyStringAndNotWhitespace)
@@ -51,7 +44,6 @@ export async function updateArtifacts({
     cmd = tools ? `mise lock ${tools}` : 'mise lock';
   }
 
-  // 5. Set up environment with GitHub token if available
   const extraEnv: ExtraEnv = {};
   const token = findGithubToken(
     hostRules.find({
@@ -63,7 +55,6 @@ export async function updateArtifacts({
     extraEnv.GITHUB_TOKEN = token;
   }
 
-  // 6. Execute with tool constraints
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv,
@@ -79,13 +70,11 @@ export async function updateArtifacts({
   try {
     await exec(cmd, execOptions);
 
-    // 7. Check if lock file was modified
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
 
-    // 8. Return updated lock file
     logger.debug({ lockFileName }, 'Returning updated mise lock file');
     return [
       {
@@ -102,7 +91,6 @@ export async function updateArtifacts({
       throw err;
     }
 
-    // Combine stdout, stderr, and message for better error reporting
     const errorOutput = [err.stdout, err.stderr, err.message]
       .filter(Boolean)
       .join('\n');
@@ -142,7 +130,6 @@ export function updateLockedDependency(
       return { status: 'unsupported' };
     }
 
-    // Extract tool name without backend prefix for lock file lookup
     const toolName = getToolNameForLockFile(depName);
     const lockedTools = parsed.data.tools[toolName];
 
@@ -159,13 +146,12 @@ export function updateLockedDependency(
 
 /**
  * Get the tool name used in the lock file from the dependency name.
- * Lock files use the tool name without backend prefix.
+ * Lock files use the tool name without backend prefix (e.g., "core:node" -> "node").
  */
 function getToolNameForLockFile(depName: string): string {
   const delimiterIndex = depName.indexOf(':');
   if (delimiterIndex === -1) {
     return depName;
   }
-  // Remove backend prefix (e.g., "core:node" -> "node")
   return depName.substring(delimiterIndex + 1);
 }

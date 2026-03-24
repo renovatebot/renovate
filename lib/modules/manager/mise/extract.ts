@@ -81,7 +81,6 @@ export async function extractPackageFile(
 
   const result: PackageFileContent = { deps };
 
-  // Try to read and parse lock file for locked versions
   const lockFileName = getLockFileName(packageFile);
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
 
@@ -91,7 +90,6 @@ export async function extractPackageFile(
       result.lockFiles = [lockFileName];
       for (const dep of deps) {
         if (dep.depName) {
-          // Extract the tool name without the backend prefix for lock file lookup
           const toolName = getToolNameForLockFile(dep.depName);
           const lockedTools = lockFileParsed.data.tools[toolName];
           if (lockedTools?.length) {
@@ -112,14 +110,13 @@ export async function extractPackageFile(
 
 /**
  * Get the tool name used in the lock file from the dependency name.
- * Lock files use the tool name without backend prefix.
+ * Lock files use the tool name without backend prefix (e.g., "core:node" -> "node").
  */
 function getToolNameForLockFile(depName: string): string {
   const delimiterIndex = depName.indexOf(':');
   if (delimiterIndex === -1) {
     return depName;
   }
-  // Remove backend prefix (e.g., "core:node" -> "node")
   return depName.substring(delimiterIndex + 1);
 }
 
