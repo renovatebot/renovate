@@ -1,5 +1,7 @@
+import { quote } from 'shlex';
 import {
   createModuleLabel,
+  formatCreateLabelCommands,
   formatMissingLabels,
   getExpectedModuleLabels,
   getMissingModuleLabels,
@@ -29,6 +31,32 @@ describe('other/sync-module-labels', () => {
 
     expect(missing).toEqual([createModuleLabel('manager', 'jsonata')]);
     expect(formatMissingLabels(missing)).toContain('manager:jsonata');
+  });
+
+  it('renders stable dry-run commands for missing labels', () => {
+    const commands = formatCreateLabelCommands('renovatebot/renovate', [
+      {
+        color: 'C5DEF5',
+        description: "Bob's manager label",
+        name: 'manager:jsonata',
+      },
+      createModuleLabel('datasource', 'docker'),
+    ]);
+
+    expect(commands).toBe(
+      [
+        `gh label create ${quote('datasource:docker')} -R ${quote(
+          'renovatebot/renovate',
+        )} --color ${quote('C5DEF5')} --description ${quote(
+          'Related to the docker datasource',
+        )}`,
+        `gh label create ${quote('manager:jsonata')} -R ${quote(
+          'renovatebot/renovate',
+        )} --color ${quote('C5DEF5')} --description ${quote(
+          "Bob's manager label",
+        )}`,
+      ].join('\n'),
+    );
   });
 
   it('includes labels for known runtime module ids', () => {

@@ -1,5 +1,8 @@
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
+import { Command } from 'commander';
+import { quote } from 'shlex';
+import { init, logger } from '../lib/logger/index.ts';
 import { getDatasourceList } from '../lib/modules/datasource/index.ts';
 import { allManagersList } from '../lib/modules/manager/index.ts';
 import { getPlatformList } from '../lib/modules/platform/index.ts';
@@ -14,8 +17,8 @@ export interface GitHubLabel {
 }
 
 export interface CliOptions {
+  dryRun: boolean;
   repo: string;
-  write: boolean;
 }
 
 const defaultRepo = 'renovatebot/renovate';
@@ -96,37 +99,25 @@ export function formatMissingLabels(labels: GitHubLabel[]): string {
   return lines.join('\n');
 }
 
-export function parseArgs(args: string[]): CliOptions {
-  const options: CliOptions = {
-    repo: defaultRepo,
-    write: false,
-  };
+export function getCreateLabelCommand(
+  repo: string,
+  label: GitHubLabel,
+): string {
+  return (
+    `gh label create ${quote(label.name)} -R ${quote(repo)}` +
+    ` --color ${quote(label.color)}` +
+    ` --description ${quote(label.description)}`
+  );
+}
 
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-
-    switch (arg) {
-      case '--repo':
-        index += 1;
-        if (!args[index]) {
-          throw new Error('Missing value for --repo');
-        }
-        options.repo = args[index];
-        break;
-      case '--write':
-        options.write = true;
-        break;
-      case '--help':
-      case '-h':
-        printHelp();
-        process.exit(0);
-        return options;
-      default:
-        throw new Error(`Unknown argument: ${arg}`);
-    }
-  }
-
-  return options;
+export function formatCreateLabelCommands(
+  repo: string,
+  labels: GitHubLabel[],
+): string {
+  return [...labels]
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .map((label) => getCreateLabelCommand(repo, label))
+    .join('\n');
 }
 
 async function getRepoLabels(repo: string): Promise<GitHubLabel[]> {
@@ -145,71 +136,70 @@ async function getRepoLabels(repo: string): Promise<GitHubLabel[]> {
   return labels.sort((left, right) => left.name.localeCompare(right.name));
 }
 
-async function createMissingLabels(
-  repo: string,
-  labels: GitHubLabel[],
-): Promise<void> {
-  for (const label of labels) {
-    await exec('gh', [
-      'label',
-      'create',
-      label.name,
-      '-R',
-      repo,
-      '--color',
-      label.color,
-      '--description',
-      label.description,
-    ]);
-  }
-}
+async function main(args = process.argv): Promise<void> {
+  await init();
+  const normalizedArgs = args.filter(
+    (arg, index) => !(index > 1 && arg === '--'),
+  );
 
-function printHelp(): void {
-  console.log(`Check that datasource/manager/platform GitHub labels exist.
+  const program = new Command('node tools/sync-module-labels.ts')
+    .description(
+      'Check that datasource/manager/platform GitHub labels exist.',
+    )
+    .option(
+      '--repo <owner/name>',
+      `Repository to query (default: ${defaultRepo})`,
+      defaultRepo,
+    )
+    .option(
+      '--dry-run',
+      'Print gh label create commands for any missing labels',
+    );
 
-Usage:
-  node tools/sync-module-labels.ts [--repo owner/name] [--write]
+  await program.parseAsync(normalizedArgs);
 
-Options:
-  --repo   Repository to query and update (default: ${defaultRepo})
-  --write  Create any missing labels with the default color and description
-`);
-}
-
-async function main(): Promise<void> {
-  const options = parseArgs(process.argv.slice(2));
+  const options = program.opts<CliOptions>();
   const expectedLabels = getExpectedModuleLabels();
   const existingLabels = await getRepoLabels(options.repo);
   const missingLabels = getMissingModuleLabels(expectedLabels, existingLabels);
 
   if (missingLabels.length === 0) {
-    console.log(
+    logger.info(
       `All datasource/manager/platform labels exist in ${options.repo}.`,
     );
     return;
   }
 
-  if (options.write) {
-    await createMissingLabels(options.repo, missingLabels);
-    console.log(
-      `Created ${missingLabels.length} missing datasource/manager/platform labels in ${options.repo}:`,
-    );
-  } else {
-    console.error(
-      `Missing ${missingLabels.length} datasource/manager/platform labels in ${options.repo}:`,
+  logger.error(
+    `Missing ${missingLabels.length} datasource/manager/platform labels in ${options.repo}:\n${formatMissingLabels(
+      missingLabels,
+    )}`,
+  );
+
+  if (options.dryRun) {
+    logger.info(
+      `Run the following commands to create the missing labels:\n${formatCreateLabelCommands(
+        options.repo,
+        missingLabels,
+      )}`,
     );
   }
 
-  console.log(formatMissingLabels(missingLabels));
-
-  if (!options.write) {
-    process.exitCode = 1;
-  }
+  process.exitCode = 1;
 }
 
 if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
-  await main();
+  process.on('unhandledRejection', (err) => {
+    // Will print "unhandledRejection err is not defined"
+    logger.error({ err }, 'unhandledRejection');
+    process.exit(-1);
+  });
+
+  void main().catch((err) => {
+    logger.error({ err }, 'Unexpected error');
+    process.exit(1);
+  });
 }

@@ -234,7 +234,7 @@ The Action runs each week.
 
 Run `pnpm labels:check` to check whether all datasource, manager, and platform modules have matching GitHub labels.
 
-If you have permission to create labels, run `pnpm labels:sync` to create any missing labels with the default color and description.
+Run `pnpm labels:dry-run` to print copy-pasteable `gh label create ...` commands for any missing labels.
 
 ### Apply the correct labels manually
 
