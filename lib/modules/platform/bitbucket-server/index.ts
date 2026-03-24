@@ -269,7 +269,7 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
 
   try {
@@ -1032,8 +1032,7 @@ export async function createPr({
 
     const defReviewers = (
       await bitbucketServerHttp.getJsonUnchecked<{ name: string }[]>(
-        `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
-          config.repositorySlug
+        `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
           sourceBranch,
         )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`,
@@ -1233,8 +1232,7 @@ export async function mergePr({
     }
     const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
       // TODO: types (#22198)
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${
-        config.repositorySlug
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug
       }/pull-requests/${prNo}/merge?version=${pr.version!}`,
     );
     updatePrVersion(prNo, body.version);

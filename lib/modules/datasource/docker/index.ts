@@ -393,9 +393,9 @@ export class DockerDatasource extends Datasource {
 
       if (
         manifestResponse?.headers['content-type'] !==
-          'application/vnd.docker.distribution.manifest.v2+json' &&
+        'application/vnd.docker.distribution.manifest.v2+json' &&
         manifestResponse?.headers['content-type'] !==
-          'application/vnd.oci.image.manifest.v1+json'
+        'application/vnd.oci.image.manifest.v1+json'
       ) {
         return null;
       }
@@ -423,8 +423,7 @@ export class DockerDatasource extends Datasource {
       ) {
         const architecture = configResponse.body.architecture ?? null;
         logger.debug(
-          `Current digest ${currentDigest} relates to architecture ${
-            architecture ?? 'null'
+          `Current digest ${currentDigest} relates to architecture ${architecture ?? 'null'
           }`,
         );
 
@@ -707,7 +706,7 @@ export class DockerDatasource extends Datasource {
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
-      : GlobalConfig.get('dockerMaxPages', 20);
+      : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
     let foundMaxResultsError = false;
     do {
@@ -939,9 +938,9 @@ export class DockerDatasource extends Datasource {
             const manifestList = parsed.data;
             if (
               manifestList.mediaType ===
-                'application/vnd.docker.distribution.manifest.list.v2+json' ||
+              'application/vnd.docker.distribution.manifest.list.v2+json' ||
               manifestList.mediaType ===
-                'application/vnd.oci.image.index.v1+json'
+              'application/vnd.oci.image.index.v1+json'
             ) {
               for (const manifest of manifestList.manifests) {
                 if (manifest.platform?.architecture === architecture) {
@@ -1048,7 +1047,7 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    const maxPages = GlobalConfig.get('dockerMaxPages', 20);
+    const maxPages = GlobalConfig.get('dockerMaxPages');
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {
@@ -1149,7 +1148,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
+        !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 

@@ -148,18 +148,18 @@ function getLabelList(): Promise<Label[]> {
 
     const orgLabels = config.isOrgRepo
       ? helper
-          .getOrgLabels(config.orgName, {
-            memCache: false,
-          })
-          .then((labels) => {
-            logger.debug(`Retrieved ${labels.length} org labels`);
-            return labels;
-          })
-          .catch((err) => {
-            // Will fail if owner of repo is not org
-            logger.debug({ err }, `Unable to fetch organization labels`);
-            return [] as Label[];
-          })
+        .getOrgLabels(config.orgName, {
+          memCache: false,
+        })
+        .then((labels) => {
+          logger.debug(`Retrieved ${labels.length} org labels`);
+          return labels;
+        })
+        .catch((err) => {
+          // Will fail if owner of repo is not org
+          logger.debug({ err }, `Unable to fetch organization labels`);
+          return [] as Label[];
+        })
       : Promise.resolve([]);
 
     config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
@@ -286,7 +286,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
     // Try to fetch information about repository
     try {
@@ -845,8 +845,8 @@ const platform: Platform = {
 
       const labels = Array.isArray(labelNames)
         ? (await Promise.all(labelNames.map(lookupLabelByName))).filter(
-            isNumber,
-          )
+          isNumber,
+        )
         : undefined;
 
       // Update any matching issues which currently exist

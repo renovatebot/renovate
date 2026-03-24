@@ -298,8 +298,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   );
   if (nonArchivedRepositories.length < nonEmptyRepositories.length) {
     logger.debug(
-      `Filtered out ${
-        nonEmptyRepositories.length - nonArchivedRepositories.length
+      `Filtered out ${nonEmptyRepositories.length - nonArchivedRepositories.length
       } archived repositories`,
     );
   }
@@ -315,8 +314,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   // v8 ignore else -- TODO: add test #40625
   if (topicRepositories.length < nonArchivedRepositories.length) {
     logger.debug(
-      `Filtered out ${
-        nonArchivedRepositories.length - topicRepositories.length
+      `Filtered out ${nonArchivedRepositories.length - topicRepositories.length
       } repositories not matching topic filters`,
     );
   }
@@ -499,7 +497,7 @@ export async function initRepo({
     repository,
     cloneSubmodules,
     cloneSubmodulesFilter,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -1567,8 +1565,7 @@ export async function addReviewers(
     .map((e) => e.replace(regEx(/^team:/), ''));
   try {
     await githubApi.postJson(
-      `repos/${
-        config.parentRepo ?? config.repository
+      `repos/${config.parentRepo ?? config.repository
       }/pulls/${prNo}/requested_reviewers`,
       {
         body: {
@@ -1620,8 +1617,7 @@ export async function deleteLabel(
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST /repos/:owner/:repo/issues/:number/comments
   await githubApi.postJson(
-    `repos/${
-      config.parentRepo ?? config.repository
+    `repos/${config.parentRepo ?? config.repository
     }/issues/${issueNo}/comments`,
     {
       body: { body },
@@ -1632,8 +1628,7 @@ async function addComment(issueNo: number, body: string): Promise<void> {
 async function editComment(commentId: number, body: string): Promise<void> {
   // PATCH /repos/:owner/:repo/issues/comments/:id
   await githubApi.patchJson(
-    `repos/${
-      config.parentRepo ?? config.repository
+    `repos/${config.parentRepo ?? config.repository
     }/issues/comments/${commentId}`,
     {
       body: { body },
@@ -1644,8 +1639,7 @@ async function editComment(commentId: number, body: string): Promise<void> {
 async function deleteComment(commentId: number): Promise<void> {
   // DELETE /repos/:owner/:repo/issues/comments/:id
   await githubApi.deleteJson(
-    `repos/${
-      config.parentRepo ?? config.repository
+    `repos/${config.parentRepo ?? config.repository
     }/issues/comments/${commentId}`,
   );
 }
@@ -1959,9 +1953,8 @@ export async function mergePr({
   strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
-  const url = `repos/${
-    config.parentRepo ?? config.repository
-  }/pulls/${prNo}/merge`;
+  const url = `repos/${config.parentRepo ?? config.repository
+    }/pulls/${prNo}/merge`;
   const options: GithubHttpOptions = {
     body: {},
   };

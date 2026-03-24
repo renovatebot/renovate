@@ -33,13 +33,13 @@ import type {
 
 type CloneResult =
   | {
-      err: Error;
-      clonePath?: undefined;
-    }
+    err: Error;
+    clonePath?: undefined;
+  }
   | {
-      clonePath: string;
-      err?: undefined;
-    };
+    clonePath: string;
+    err?: undefined;
+  };
 
 export class CrateDatasource extends Datasource {
   static readonly id = 'crate';
@@ -381,8 +381,8 @@ export class CrateDatasource extends Datasource {
       const lockKey = registryFetchUrl;
 
       const executionTimeout =
-        GlobalConfig.get('executionTimeout', 15) * 60 * 1000;
-      const gitTimeout = GlobalConfig.get('gitTimeout', executionTimeout);
+        GlobalConfig.get('executionTimeout') * 60 * 1000;
+      const gitTimeout = GlobalConfig.get('gitTimeout') ?? executionTimeout;
       const releaseLock = await acquireLock(
         lockKey,
         'crate-registry',
