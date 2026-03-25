@@ -259,7 +259,7 @@ export function parsePrefixRange(input: string): PrefixRange | null {
 }
 
 const mavenBasedRangeRegex = regEx(
-  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])(?:!!(?<preferredVal>[-._+a-zA-Z0-9]+))?/,
+  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])(?:!!(?<preferredVal>[-._+a-zA-Z0-9]+))?$/,
 );
 
 export function parseMavenBasedRange(input: string): MavenBasedRange | null {
