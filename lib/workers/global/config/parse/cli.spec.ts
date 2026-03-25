@@ -28,20 +28,23 @@ describe('workers/global/config/parse/cli', () => {
   });
 
   describe('.getConfig(argv)', () => {
-    it('returns empty argv', () => {
-      expect(cli.getConfig(argv)).toEqual({});
+    it('returns object with options that have defaults', () => {
+      expect(cli.getConfig(argv)).toMatchObject({
+        allowedCommands: [],
+        rebaseWhen: 'auto',
+      });
     });
 
     it('supports boolean no value', () => {
       argv.push('--config-migration');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
+      expect(cli.getConfig(argv)).toMatchObject({ configMigration: true });
       argv = argv.slice(0, -1);
     });
 
     it('supports boolean space true', () => {
       argv.push('--config-migration');
       argv.push('true');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
+      expect(cli.getConfig(argv)).toMatchObject({ configMigration: true });
     });
 
     it('throws exception for invalid boolean value', () => {
@@ -57,45 +60,47 @@ describe('workers/global/config/parse/cli', () => {
     it('supports boolean space false', () => {
       argv.push('--config-migration');
       argv.push('false');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: false });
+      expect(cli.getConfig(argv)).toMatchObject({ configMigration: false });
     });
 
     it('supports boolean equals true', () => {
       argv.push('--config-migration=true');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
+      expect(cli.getConfig(argv)).toMatchObject({ configMigration: true });
     });
 
     it('supports boolean equals false', () => {
       argv.push('--config-migration=false');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: false });
+      expect(cli.getConfig(argv)).toMatchObject({ configMigration: false });
     });
 
     it('supports list single', () => {
       argv.push('--labels=a');
-      expect(cli.getConfig(argv)).toEqual({ labels: ['a'] });
+      expect(cli.getConfig(argv)).toMatchObject({ labels: ['a'] });
     });
 
     it('supports list multiple', () => {
       argv.push('--labels=a,b,c');
-      expect(cli.getConfig(argv)).toEqual({ labels: ['a', 'b', 'c'] });
+      expect(cli.getConfig(argv)).toMatchObject({ labels: ['a', 'b', 'c'] });
     });
 
     it('supports string', () => {
       argv.push('--token=a');
-      expect(cli.getConfig(argv)).toEqual({ token: 'a' });
+      expect(cli.getConfig(argv)).toMatchObject({ token: 'a' });
     });
 
     it('supports repositories', () => {
       argv.push('foo');
       argv.push('bar');
-      expect(cli.getConfig(argv)).toEqual({ repositories: ['foo', 'bar'] });
+      expect(cli.getConfig(argv)).toMatchObject({
+        repositories: ['foo', 'bar'],
+      });
     });
 
     it('parses json lists correctly', () => {
       argv.push(
         `--host-rules=[{"matchHost":"docker.io","hostType":"${DockerDatasource.id}","username":"user","password":"password"}]`,
       );
-      expect(cli.getConfig(argv)).toEqual({
+      expect(cli.getConfig(argv)).toMatchObject({
         hostRules: [
           {
             matchHost: 'docker.io',
@@ -109,14 +114,14 @@ describe('workers/global/config/parse/cli', () => {
 
     it('parses [] correctly as empty list of hostRules', () => {
       argv.push(`--host-rules=[]`);
-      expect(cli.getConfig(argv)).toEqual({
+      expect(cli.getConfig(argv)).toMatchObject({
         hostRules: [],
       });
     });
 
     it('parses an empty string correctly as empty list of hostRules', () => {
       argv.push(`--host-rules=`);
-      expect(cli.getConfig(argv)).toEqual({
+      expect(cli.getConfig(argv)).toMatchObject({
         hostRules: [],
       });
     });
@@ -143,21 +148,21 @@ describe('workers/global/config/parse/cli', () => {
 
     it('parses json object correctly when empty', () => {
       argv.push(`--onboarding-config=`);
-      expect(cli.getConfig(argv)).toEqual({
+      expect(cli.getConfig(argv)).toMatchObject({
         onboardingConfig: {},
       });
     });
 
     it('parses json {} object correctly', () => {
       argv.push(`--onboarding-config={}`);
-      expect(cli.getConfig(argv)).toEqual({
+      expect(cli.getConfig(argv)).toMatchObject({
         onboardingConfig: {},
       });
     });
 
     it('parses json object correctly', () => {
       argv.push(`--onboarding-config={"extends": ["config:recommended"]}`);
-      expect(cli.getConfig(argv)).toEqual({
+      expect(cli.getConfig(argv)).toMatchObject({
         onboardingConfig: {
           extends: ['config:recommended'],
         },
@@ -173,37 +178,37 @@ describe('workers/global/config/parse/cli', () => {
 
     it('dryRun boolean true', () => {
       argv.push('--dry-run=true');
-      expect(cli.getConfig(argv)).toEqual({ dryRun: 'full' });
+      expect(cli.getConfig(argv)).toMatchObject({ dryRun: 'full' });
     });
 
     it('dryRun no value', () => {
       argv.push('--dry-run');
-      expect(cli.getConfig(argv)).toEqual({ dryRun: 'full' });
+      expect(cli.getConfig(argv)).toMatchObject({ dryRun: 'full' });
     });
 
     it('dryRun boolean false', () => {
       argv.push('--dry-run=false');
-      expect(cli.getConfig(argv)).toEqual({ dryRun: null });
+      expect(cli.getConfig(argv)).toMatchObject({ dryRun: null });
     });
 
     it('dryRun  null', () => {
       argv.push('--dry-run=null');
-      expect(cli.getConfig(argv)).toEqual({ dryRun: null });
+      expect(cli.getConfig(argv)).toMatchObject({ dryRun: null });
     });
 
     it('requireConfig boolean true', () => {
       argv.push('--require-config=true');
-      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'required' });
+      expect(cli.getConfig(argv)).toMatchObject({ requireConfig: 'required' });
     });
 
     it('requireConfig no value', () => {
       argv.push('--require-config');
-      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'required' });
+      expect(cli.getConfig(argv)).toMatchObject({ requireConfig: 'required' });
     });
 
     it('requireConfig boolean false', () => {
       argv.push('--require-config=false');
-      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
+      expect(cli.getConfig(argv)).toMatchObject({ requireConfig: 'optional' });
     });
   });
 });
