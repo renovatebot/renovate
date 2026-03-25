@@ -56,8 +56,8 @@ describe('instrumentation/index', () => {
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
-          expect.any(SimpleSpanProcessor),
           new GitOperationSpanProcessor(),
+          expect.any(SimpleSpanProcessor),
         ],
       },
     });
@@ -95,6 +95,7 @@ describe('instrumentation/index', () => {
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
+          new GitOperationSpanProcessor(),
           {
             _exporter: {
               _delegate: {
@@ -108,7 +109,6 @@ describe('instrumentation/index', () => {
               },
             },
           },
-          new GitOperationSpanProcessor(),
         ],
       },
     });
@@ -128,6 +128,7 @@ describe('instrumentation/index', () => {
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
+          new GitOperationSpanProcessor(),
           { _exporter: {} },
           {
             _exporter: {
@@ -142,7 +143,6 @@ describe('instrumentation/index', () => {
               },
             },
           },
-          new GitOperationSpanProcessor(),
         ],
       },
     });

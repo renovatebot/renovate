@@ -39,10 +39,9 @@ import {
 let instrumentations: Instrumentation[] = [];
 
 export function init(): void {
-  const spanProcessors: SpanProcessor[] = [];
+  const spanProcessors: SpanProcessor[] = [new GitOperationSpanProcessor()];
 
   if (!isTracingEnabled()) {
-    spanProcessors.push(new GitOperationSpanProcessor());
     const traceProvider = new NodeTracerProvider({ spanProcessors });
     traceProvider.register({
       contextManager: new AsyncLocalStorageContextManager(),
@@ -70,8 +69,6 @@ export function init(): void {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
   }
-
-  spanProcessors.push(new GitOperationSpanProcessor());
 
   const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors
   const baseResource = resourceFromAttributes({
