@@ -33,7 +33,7 @@ describe('other/sync-module-labels', () => {
     expect(formatMissingLabels(missing)).toContain('manager:jsonata');
   });
 
-  it('renders stable dry-run commands for missing labels', () => {
+  it('renders stable label creation commands for missing labels', () => {
     const commands = formatCreateLabelCommands('renovatebot/renovate', [
       {
         color: 'C5DEF5',

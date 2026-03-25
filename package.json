@@ -51,7 +51,7 @@
     "prettier": "PRETTIER_EXPERIMENTAL_CLI=1 prettier --cache --check '**/*.{ts,js,mjs,json,md,yml}'",
     "prettier-fix": "PRETTIER_EXPERIMENTAL_CLI=1 prettier --write --cache '**/*.{ts,js,mjs,json,md,yml}'",
     "labels:check": "node tools/sync-module-labels.ts",
-    "labels:dry-run": "node tools/sync-module-labels.ts --dry-run",
+    "labels:show-commands": "node tools/sync-module-labels.ts --show-commands",
     "release:prepare": "node tools/prepare-release.ts",
     "release:publish": "node tools/publish-release.ts",
     "start": "node lib/renovate.ts",

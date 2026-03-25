@@ -1,5 +1,4 @@
 import process from 'node:process';
-import { pathToFileURL } from 'node:url';
 import { Command } from 'commander';
 import { quote } from 'shlex';
 import { init, logger } from '../lib/logger/index.ts';
@@ -17,8 +16,8 @@ export interface GitHubLabel {
 }
 
 export interface CliOptions {
-  dryRun: boolean;
   repo: string;
+  showCommands: boolean;
 }
 
 const defaultRepo = 'renovatebot/renovate';
@@ -136,68 +135,56 @@ async function getRepoLabels(repo: string): Promise<GitHubLabel[]> {
   return labels.sort((left, right) => left.name.localeCompare(right.name));
 }
 
-async function main(args = process.argv): Promise<void> {
-  await init();
-  const normalizedArgs = args.filter(
-    (arg, index) => !(index > 1 && arg === '--'),
-  );
+await init();
 
-  const program = new Command('node tools/sync-module-labels.ts')
-    .description('Check that datasource/manager/platform GitHub labels exist.')
-    .option(
-      '--repo <owner/name>',
-      `Repository to query (default: ${defaultRepo})`,
-      defaultRepo,
-    )
-    .option(
-      '--dry-run',
-      'Print gh label create commands for any missing labels',
+process.on('unhandledRejection', (err) => {
+  // Will print "unhandledRejection err is not defined"
+  logger.error({ err }, 'unhandledRejection');
+  process.exit(-1);
+});
+
+const program = new Command('node tools/sync-module-labels.ts')
+  .description('Check that datasource/manager/platform GitHub labels exist.')
+  .option(
+    '--repo <owner/name>',
+    `Repository to query (default: ${defaultRepo})`,
+    defaultRepo,
+  )
+  .option(
+    '--show-commands',
+    'Print gh label create commands for any missing labels',
+  )
+  .action(async (options: CliOptions) => {
+    const expectedLabels = getExpectedModuleLabels();
+    const existingLabels = await getRepoLabels(options.repo);
+    const missingLabels = getMissingModuleLabels(
+      expectedLabels,
+      existingLabels,
     );
 
-  await program.parseAsync(normalizedArgs);
+    if (missingLabels.length === 0) {
+      logger.info(
+        `All datasource/manager/platform labels exist in ${options.repo}.`,
+      );
+      return;
+    }
 
-  const options = program.opts() as CliOptions;
-  const expectedLabels = getExpectedModuleLabels();
-  const existingLabels = await getRepoLabels(options.repo);
-  const missingLabels = getMissingModuleLabels(expectedLabels, existingLabels);
-
-  if (missingLabels.length === 0) {
-    logger.info(
-      `All datasource/manager/platform labels exist in ${options.repo}.`,
-    );
-    return;
-  }
-
-  logger.error(
-    `Missing ${missingLabels.length} datasource/manager/platform labels in ${options.repo}:\n${formatMissingLabels(
-      missingLabels,
-    )}`,
-  );
-
-  if (options.dryRun) {
-    logger.info(
-      `Run the following commands to create the missing labels:\n${formatCreateLabelCommands(
-        options.repo,
+    logger.error(
+      `Missing ${missingLabels.length} datasource/manager/platform labels in ${options.repo}:\n${formatMissingLabels(
         missingLabels,
       )}`,
     );
-  }
 
-  process.exitCode = 1;
-}
+    if (options.showCommands) {
+      logger.info(
+        `Run the following commands to create the missing labels:\n${formatCreateLabelCommands(
+          options.repo,
+          missingLabels,
+        )}`,
+      );
+    }
 
-if (
-  process.argv[1] &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
-) {
-  process.on('unhandledRejection', (err) => {
-    // Will print "unhandledRejection err is not defined"
-    logger.error({ err }, 'unhandledRejection');
-    process.exit(-1);
+    process.exitCode = 1;
   });
 
-  void main().catch((err) => {
-    logger.error({ err }, 'Unexpected error');
-    process.exit(1);
-  });
-}
+void program.parseAsync();
