@@ -39,32 +39,39 @@ import {
 let instrumentations: Instrumentation[] = [];
 
 export function init(): void {
-  const spanProcessors: SpanProcessor[] = [];
-
-  if (isTracingEnabled()) {
-    // v8 ignore if -- TODO add tests
-    if (process.env.OTEL_LOG_LEVEL) {
-      api.diag.setLogger(
-        new api.DiagConsoleLogger(),
-        api.DiagLogLevel[
-          process.env.OTEL_LOG_LEVEL.toUpperCase() as keyof typeof api.DiagLogLevel
-        ],
-      );
-    }
-
-    // add processors
-    if (isTraceDebuggingEnabled()) {
-      spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-    }
-
-    // OTEL specification environment variable
-    if (isTraceSendingEnabled()) {
-      const exporter = new OTLPTraceExporter();
-      spanProcessors.push(new BatchSpanProcessor(exporter));
-    }
+  if (!isTracingEnabled()) {
+    const traceProvider = new NodeTracerProvider({
+      spanProcessors: [new GitOperationSpanProcessor()],
+    });
+    traceProvider.register({
+      contextManager: new AsyncLocalStorageContextManager(),
+    });
+    return;
   }
 
-  // TODO: fix me, transitive initializes logger
+  // v8 ignore if -- TODO add tests
+  if (process.env.OTEL_LOG_LEVEL) {
+    api.diag.setLogger(
+      new api.DiagConsoleLogger(),
+      api.DiagLogLevel[
+        process.env.OTEL_LOG_LEVEL.toUpperCase() as keyof typeof api.DiagLogLevel
+      ],
+    );
+  }
+
+  const spanProcessors: SpanProcessor[] = [];
+
+  // add processors
+  if (isTraceDebuggingEnabled()) {
+    spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  }
+
+  // OTEL specification environment variable
+  if (isTraceSendingEnabled()) {
+    const exporter = new OTLPTraceExporter();
+    spanProcessors.push(new BatchSpanProcessor(exporter));
+  }
+
   spanProcessors.push(new GitOperationSpanProcessor());
 
   const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors
@@ -77,9 +84,9 @@ export function init(): void {
     [ATTR_SERVICE_VERSION]: env.OTEL_SERVICE_VERSION ?? pkg.version,
   });
 
-  const detectedResource = isTracingEnabled()
-    ? detectResources({ detectors: getResourceDetectors(env) })
-    : resourceFromAttributes({});
+  const detectedResource = detectResources({
+    detectors: getResourceDetectors(env),
+  });
 
   const traceProvider = new NodeTracerProvider({
     resource: baseResource.merge(detectedResource),
@@ -91,42 +98,40 @@ export function init(): void {
     contextManager,
   });
 
-  if (isTracingEnabled()) {
-    instrumentations = [
-      new HttpInstrumentation({
-        /* v8 ignore start -- not easily testable */
-        applyCustomAttributesOnSpan: (span, request, response) => {
-          // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
-          if (
-            request instanceof ClientRequest &&
-            request.host === `api.github.com` &&
-            request.path.endsWith(`/protection`) &&
-            response.statusCode === 404
-          ) {
-            span.setStatus({ code: SpanStatusCode.OK });
-          } else if (
-            request instanceof ClientRequest &&
-            request.path === '/v2/' &&
-            request.method === 'GET' &&
-            !request.getHeader('authorization') &&
-            response instanceof ServerResponse &&
-            response.getHeader('www-authenticate') &&
-            response.getHeader('docker-distribution-api-version') &&
-            response.statusCode === 401
-          ) {
-            // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
-            span.setStatus({ code: SpanStatusCode.OK });
-          }
-        },
-        /* v8 ignore stop -- not easily testable */
-      }),
-      new BunyanInstrumentation(),
-      new RedisInstrumentation(),
-    ];
-    registerInstrumentations({
-      instrumentations,
-    });
-  }
+  instrumentations = [
+    new HttpInstrumentation({
+      /* v8 ignore start -- not easily testable */
+      applyCustomAttributesOnSpan: (span, request, response) => {
+        // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
+        if (
+          request instanceof ClientRequest &&
+          request.host === `api.github.com` &&
+          request.path.endsWith(`/protection`) &&
+          response.statusCode === 404
+        ) {
+          span.setStatus({ code: SpanStatusCode.OK });
+        } else if (
+          request instanceof ClientRequest &&
+          request.path === '/v2/' &&
+          request.method === 'GET' &&
+          !request.getHeader('authorization') &&
+          response instanceof ServerResponse &&
+          response.getHeader('www-authenticate') &&
+          response.getHeader('docker-distribution-api-version') &&
+          response.statusCode === 401
+        ) {
+          // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
+          span.setStatus({ code: SpanStatusCode.OK });
+        }
+      },
+      /* v8 ignore stop -- not easily testable */
+    }),
+    new BunyanInstrumentation(),
+    new RedisInstrumentation(),
+  ];
+  registerInstrumentations({
+    instrumentations,
+  });
 }
 
 // https://github.com/open-telemetry/opentelemetry-js-api/issues/34
