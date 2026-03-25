@@ -133,11 +133,12 @@ export interface LookupUpdate {
  */
 export interface PackageDependency<
   T = Record<string, any>,
+  DT extends string = string,
 > extends ManagerData<T> {
   currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
-  depType?: string;
+  depType?: DT;
   fileReplacePosition?: number;
   sharedVariableName?: string;
   lineNumber?: number;
@@ -192,7 +193,10 @@ export interface PackageDependency<
   isAbandoned?: boolean;
 }
 
-export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
+export interface Upgrade<
+  T = Record<string, any>,
+  D extends string = string,
+> extends PackageDependency<T, D> {
   workspace?: string;
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
@@ -280,10 +284,32 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
+export interface DepTypeMetadata {
+  /**
+   * The raw depType set on a given PackageDependency
+   *
+   * @see PackageDependency
+   */
+  depType: string;
+  /**
+   * An alternate name for the `depType`, derived from the Manager's `prettyDepType` used.
+   *
+   * For instance, `optionalDependencies` may have a `prettyDepType` of `optionalDependency`
+   *
+   * Not supported by all Managers.
+   * */
+  prettyDepType?: string;
+  /** Human-readable description of what this depType represents */
+  description: string;
+}
+
 interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
+  knownDepTypes?: DepTypeMetadata[];
+  /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
+  supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
   lockFileNames?: string[];
   supersedesManagers?: string[];

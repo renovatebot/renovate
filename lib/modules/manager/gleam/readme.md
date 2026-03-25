@@ -3,7 +3,7 @@ Renovate can update `gleam.toml` and/or `manifest.toml` files.
 The `gleam` manager can update these `depTypes`:
 
 - `dependencies`
-- `dev-dependencies`
+- `devDependencies` (taken from the `dev-dependencies` section)
 
 ### How Renovate updates `gleam.toml` files
 
