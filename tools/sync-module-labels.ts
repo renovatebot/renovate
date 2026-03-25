@@ -17,7 +17,7 @@ export interface GitHubLabel {
 
 export interface CliOptions {
   repo: string;
-  showCommands: boolean;
+  showCommands?: boolean;
 }
 
 const defaultRepo = 'renovatebot/renovate';
