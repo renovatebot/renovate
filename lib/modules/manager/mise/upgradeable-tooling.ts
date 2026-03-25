@@ -480,6 +480,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
     },
   },
+  tart: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'cirruslabs/tart',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   terragrunt: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
