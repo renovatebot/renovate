@@ -47,7 +47,7 @@ const npmrcMinReleaseAgeRegex = regEx(
 
 export function parseNpmrcCooldownDate(
   npmrcContent: string | null,
-): DateTime | null {
+): DateTime<true> | null {
   const dateStr = npmrcContent?.match(npmrcBeforeRegex)?.[1];
   if (dateStr) {
     const parsed = DateTime.fromISO(dateStr, { zone: 'utc' });
