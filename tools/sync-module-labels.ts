@@ -1,4 +1,3 @@
-import process from 'node:process';
 import { Command } from 'commander';
 import { quote } from 'shlex';
 import { init, logger } from '../lib/logger/index.ts';
@@ -147,7 +146,7 @@ const program = new Command('node tools/sync-module-labels.ts')
   .description('Check that datasource/manager/platform GitHub labels exist.')
   .option(
     '--repo <owner/name>',
-    `Repository to query (default: ${defaultRepo})`,
+    `Repository to query`,
     defaultRepo,
   )
   .option(
