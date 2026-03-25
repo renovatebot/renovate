@@ -278,11 +278,13 @@ export async function updateArtifacts({
         'maven-wrapper.properties',
         'maven-wrapper.jar',
       );
-      try {
-        await deleteLocalFile(jarPath);
-        logger.debug({ jarPath }, 'Deleted old maven-wrapper.jar');
-      } catch {
-        // File may not exist, ignore
+      if (jarPath.endsWith('maven-wrapper.jar')) {
+        try {
+          await deleteLocalFile(jarPath);
+          logger.debug({ jarPath }, 'Deleted old maven-wrapper.jar');
+        } catch {
+          // File may not exist, ignore
+        }
       }
     }
 
