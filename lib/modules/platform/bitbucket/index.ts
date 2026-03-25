@@ -40,7 +40,12 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as comments from './comments.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
-import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema.ts';
+import {
+  RepoInfo,
+  Repositories,
+  UnresolvedPrTasks,
+  WorkspaceAccesses,
+} from './schema.ts';
 import type {
   Account,
   BitbucketStatus,
@@ -125,14 +130,49 @@ export async function initPlatform({
 export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    let { body: repos } = await bitbucketHttp.getJson(
-      `/2.0/repositories/?role=contributor`,
-      { paginate: true },
-      Repositories,
+    // Determine which workspaces to query.
+    // If the caller supplied explicit namespaces use them directly;
+    // otherwise discover all workspaces the authenticated user belongs to.
+    // The old cross-workspace endpoint GET /2.0/repositories?role=contributor
+    // was removed by Bitbucket on 2026-03-31 (CHANGE-2770).
+    let workspaceSlugs: string[];
+    const autodiscoverNamespaces = config.namespaces;
+    if (isNonEmptyArray(autodiscoverNamespaces)) {
+      logger.debug(
+        { autodiscoverNamespaces },
+        'Using configured namespaces as Bitbucket workspaces',
+      );
+      workspaceSlugs = autodiscoverNamespaces;
+    } else {
+      logger.debug('Fetching Bitbucket workspaces for the current user');
+      const { body: slugs } = await bitbucketHttp.getJson(
+        '/2.0/user/workspaces',
+        { paginate: true },
+        WorkspaceAccesses,
+      );
+      workspaceSlugs = slugs;
+      logger.debug(
+        { workspaceSlugs },
+        `Found ${workspaceSlugs.length} Bitbucket workspace(s)`,
+      );
+    }
+
+    // Fetch repositories for every workspace in parallel.
+    const repoArrays = await Promise.all(
+      workspaceSlugs.map((workspace) =>
+        bitbucketHttp
+          .getJson(
+            `/2.0/repositories/${workspace}`,
+            { paginate: true },
+            Repositories,
+          )
+          .then(({ body }) => body),
+      ),
     );
 
-    // if autodiscoverProjects is configured
-    // filter the repos list
+    let repos = repoArrays.flat();
+
+    // if autodiscoverProjects is configured, filter the repos list
     const autodiscoverProjects = config.projects;
     if (isNonEmptyArray(autodiscoverProjects)) {
       logger.debug(

@@ -126,7 +126,14 @@ describe('modules/platform/bitbucket/index', () => {
     it('returns repos', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .get('/2.0/user/workspaces?pagelen=100')
+        .reply(200, {
+          values: [
+            { workspace: { slug: 'foo' } },
+            { workspace: { slug: 'some' } },
+          ],
+        })
+        .get('/2.0/repositories/foo?pagelen=100')
         .reply(200, {
           values: [
             {
@@ -134,6 +141,11 @@ describe('modules/platform/bitbucket/index', () => {
               uuid: '111',
               full_name: 'foo/bar',
             },
+          ],
+        })
+        .get('/2.0/repositories/some?pagelen=100')
+        .reply(200, {
+          values: [
             {
               mainbranch: { name: 'master' },
               uuid: '222',
@@ -145,10 +157,31 @@ describe('modules/platform/bitbucket/index', () => {
       expect(res).toEqual(['foo/bar', 'some/repo']);
     });
 
+    it('uses configured namespaces directly without fetching workspaces', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/foo?pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              uuid: '111',
+              full_name: 'foo/bar',
+            },
+          ],
+        });
+      const res = await bitbucket.getRepos({ namespaces: ['foo'] });
+      expect(res).toEqual(['foo/bar']);
+    });
+
     it('filters repos based on autodiscoverProjects patterns', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .get('/2.0/user/workspaces?pagelen=100')
+        .reply(200, {
+          values: [{ workspace: { slug: 'foo' } }],
+        })
+        .get('/2.0/repositories/foo?pagelen=100')
         .reply(200, {
           values: [
             {
@@ -160,25 +193,29 @@ describe('modules/platform/bitbucket/index', () => {
             {
               mainbranch: { name: 'master' },
               uuid: '222',
-              full_name: 'some/repo',
+              full_name: 'foo/repo',
               project: { name: 'allow' },
             },
           ],
         });
       const res = await bitbucket.getRepos({ projects: ['allow'] });
-      expect(res).toEqual(['some/repo']);
+      expect(res).toEqual(['foo/repo']);
     });
 
     it('filters repos based on autodiscoverProjects patterns with negation', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .get('/2.0/user/workspaces?pagelen=100')
+        .reply(200, {
+          values: [{ workspace: { slug: 'some' } }],
+        })
+        .get('/2.0/repositories/some?pagelen=100')
         .reply(200, {
           values: [
             {
               mainbranch: { name: 'master' },
               uuid: '111',
-              full_name: 'foo/bar',
+              full_name: 'some/bar',
               project: { name: 'ignore' },
             },
             {
