@@ -39,7 +39,13 @@ import {
 let instrumentations: Instrumentation[] = [];
 
 export function init(): void {
+  const spanProcessors: SpanProcessor[] = [new GitOperationSpanProcessor()];
+
   if (!isTracingEnabled()) {
+    const traceProvider = new NodeTracerProvider({ spanProcessors });
+    traceProvider.register({
+      contextManager: new AsyncLocalStorageContextManager(),
+    });
     return;
   }
 
@@ -53,7 +59,6 @@ export function init(): void {
     );
   }
 
-  const spanProcessors: SpanProcessor[] = [];
   // add processors
   if (isTraceDebuggingEnabled()) {
     spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
@@ -63,7 +68,6 @@ export function init(): void {
   if (isTraceSendingEnabled()) {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
-    spanProcessors.push(new GitOperationSpanProcessor());
   }
 
   const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors
