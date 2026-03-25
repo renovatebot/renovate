@@ -116,6 +116,7 @@ describe('modules/versioning/gradle/index', () => {
       ${'[1.2,,1.3]'}
       ${'[1,[2,3],4]'}
       ${'[1.3,1.2]'}
+      ${'[1..3,1.2]'}
     `('parseMavenBasedRange("$rangeStr") is null', ({ rangeStr }) => {
       const range = parseMavenBasedRange(rangeStr);
       expect(range).toBeNull();
