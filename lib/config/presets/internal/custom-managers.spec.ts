@@ -606,13 +606,19 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                        | expected
-        ${'.gitlab-ci.yaml'}        | ${true}
-        ${'.gitlab-ci.yml'}         | ${true}
-        ${'foo.yaml'}               | ${false}
-        ${'foo.yml'}                | ${false}
-        ${'.gitlab/ci.yml'}         | ${false}
-        ${'includes/gitlab-ci.yml'} | ${false}
+        path                             | expected
+        ${'.gitlab-ci.yaml'}             | ${true}
+        ${'.gitlab-ci.yml'}              | ${true}
+        ${'foo.gitlab-ci.yaml'}          | ${true}
+        ${'foo.gitlab-ci.yml'}           | ${true}
+        ${'includes/.gitlab-ci.yaml'}    | ${true}
+        ${'includes/.gitlab-ci.yml'}     | ${true}
+        ${'includes/foo.gitlab-ci.yaml'} | ${true}
+        ${'includes/foo.gitlab-ci.yml'}  | ${true}
+        ${'foo.yaml'}                    | ${false}
+        ${'foo.yml'}                     | ${false}
+        ${'.gitlab/ci.yml'}              | ${false}
+        ${'includes/gitlab-ci.yml'}      | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),
