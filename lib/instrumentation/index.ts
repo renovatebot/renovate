@@ -39,10 +39,11 @@ import {
 let instrumentations: Instrumentation[] = [];
 
 export function init(): void {
+  const spanProcessors: SpanProcessor[] = [];
+
   if (!isTracingEnabled()) {
-    const traceProvider = new NodeTracerProvider({
-      spanProcessors: [new GitOperationSpanProcessor()],
-    });
+    spanProcessors.push(new GitOperationSpanProcessor());
+    const traceProvider = new NodeTracerProvider({ spanProcessors });
     traceProvider.register({
       contextManager: new AsyncLocalStorageContextManager(),
     });
@@ -58,8 +59,6 @@ export function init(): void {
       ],
     );
   }
-
-  const spanProcessors: SpanProcessor[] = [];
 
   // add processors
   if (isTraceDebuggingEnabled()) {
