@@ -171,25 +171,6 @@ export async function detectRepoFileConfig(
   return { configFileName, configFileParsed };
 }
 
-function applyHostRulesFromConfig(config: RenovateConfig): void {
-  if (!config.hostRules) {
-    return;
-  }
-  logger.debug('Setting hostRules from config');
-  for (const rule of config.hostRules) {
-    try {
-      hostRules.add(rule);
-    } catch (err) {
-      // v8 ignore next -- TODO: add test #40625
-      logger.warn({ err, config: rule }, 'Error setting hostRule from config');
-    }
-  }
-  // host rules can change concurrency
-  queue.clear();
-  throttle.clear();
-  delete config.hostRules;
-}
-
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
   if (!repoConfig.configFileParseError) {
     return;
@@ -252,10 +233,8 @@ export async function mergeRenovateConfig(
       config,
     );
 
-    setNpmTokenInNpmrc(resolvedRepoEntry);
-    if (isString(resolvedRepoEntry.npmrc)) {
-      npmApi.setNpmrc(resolvedRepoEntry.npmrc);
-    }
+    logger.trace('Processing npmrc in repository entry config');
+    applyNpmrc(resolvedRepoEntry);
 
     const resolvedRepoEntryWithSecrets = applySecretsAndVariablesToConfig({
       config: resolvedRepoEntry,
@@ -263,8 +242,7 @@ export async function mergeRenovateConfig(
       variables: config.variables,
     });
 
-    applyHostRulesFromConfig(resolvedRepoEntryWithSecrets);
-
+    applyHostRules(resolvedRepoEntryWithSecrets);
     returnConfig = mergeChildConfig(returnConfig, resolvedRepoEntryWithSecrets);
   }
 
@@ -299,12 +277,8 @@ export async function mergeRenovateConfig(
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
-  setNpmTokenInNpmrc(decryptedConfig);
-  // istanbul ignore if
-  if (isString(decryptedConfig.npmrc)) {
-    logger.debug('Found npmrc in decrypted config - setting');
-    npmApi.setNpmrc(decryptedConfig.npmrc);
-  }
+  logger.trace('Processing npmrc in decrypted config');
+  applyNpmrc(decryptedConfig);
   // Decrypt after resolving in case the preset contains npm authentication instead
   const { config: configToDecrypt } = await presets.resolveConfigPresets(
     decryptedConfig,
@@ -319,14 +293,8 @@ export async function mergeRenovateConfig(
     logger.trace({ config: resolvedConfig }, 'resolved config after migrating');
     resolvedConfig = migrationResult.migratedConfig;
   }
-  setNpmTokenInNpmrc(resolvedConfig);
-  // istanbul ignore if
-  if (isString(resolvedConfig.npmrc)) {
-    logger.debug(
-      'Ignoring any .npmrc files in repository due to configured npmrc',
-    );
-    npmApi.setNpmrc(resolvedConfig.npmrc);
-  }
+  logger.trace('Processing npmrc in resolved config');
+  applyNpmrc(resolvedConfig);
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
     secrets: mergeChildConfig(
@@ -339,8 +307,7 @@ export async function mergeRenovateConfig(
     ),
   });
 
-  applyHostRulesFromConfig(resolvedConfig);
-
+  applyHostRules(resolvedConfig);
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
   ({ config: returnConfig } = await presets.resolveConfigPresets(
     returnConfig,
@@ -359,6 +326,34 @@ export async function mergeRenovateConfig(
   delete returnConfig.env;
 
   return returnConfig;
+}
+
+export function applyNpmrc(config: RenovateConfig): void {
+  setNpmTokenInNpmrc(config);
+  if (!isString(config.npmrc)) {
+    return;
+  }
+  logger.debug('Setting npmrc from config');
+  npmApi.setNpmrc(config.npmrc);
+}
+
+export function applyHostRules(config: RenovateConfig): void {
+  if (!config.hostRules) {
+    return;
+  }
+
+  logger.debug('Setting hostRules from config');
+  for (const rule of config.hostRules) {
+    try {
+      hostRules.add(rule);
+    } catch (err) {
+      logger.warn({ err, config: rule }, 'Error setting hostRule from config');
+    }
+  }
+  // host rules can change concurrency
+  queue.clear();
+  throttle.clear();
+  delete config.hostRules;
 }
 
 /** needed when using portal secrets for npmToken */
