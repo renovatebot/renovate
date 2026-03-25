@@ -32,6 +32,7 @@ import type {
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
+  EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
   Issue,
@@ -45,9 +46,11 @@ import type {
 } from '../types.ts';
 import { getNewBranchName, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import * as azureHelper from './azure-helper.ts';
-import type { AzurePr } from './types.ts';
+import { IssueService } from './issue.ts';
+import type { AzurePr, Config } from './types.ts';
 import { AzurePrVote } from './types.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -59,18 +62,6 @@ import {
   mapMergeStrategy,
   max4000Chars,
 } from './util.ts';
-
-interface Config {
-  repoForceRebase: boolean;
-  mergeMethods: Record<string, GitPullRequestMergeStrategy>;
-  owner: string;
-  repoId: string;
-  project: string;
-  prList: AzurePr[];
-  fileList: null;
-  repository: string;
-  defaultBranch: string;
-}
 
 interface User {
   id: string;
@@ -88,6 +79,25 @@ const defaults: {
 };
 
 export const id = 'azure';
+
+function createIssueOperations(config: Config): {
+  findIssue: (title: string) => Promise<Issue | null>;
+  ensureIssueClosing: (title: string) => Promise<void>;
+  ensureIssue: (
+    issueConfig: EnsureIssueConfig,
+  ) => Promise<EnsureIssueResult | null>;
+  getIssueList: (titleFilter?: string) => Promise<Issue[]>;
+} {
+  const service = new IssueService(config);
+
+  return {
+    findIssue: (title: string) => service.findIssue(title),
+    ensureIssueClosing: (title: string) => service.ensureIssueClosing(title),
+    ensureIssue: (issueConfig: EnsureIssueConfig) =>
+      service.ensureIssue(issueConfig),
+    getIssueList: (titleFilter?: string) => service.getIssueList(titleFilter),
+  };
+}
 
 export function initPlatform({
   endpoint,
@@ -857,47 +867,45 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, maxBodyLength())
-    .replace(
-      'you tick the rebase/retry checkbox',
-      'PR is renamed to start with "rebase!"',
-    )
-    .replace(
-      'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"',
-    )
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+  return (
+    smartTruncate(readOnlyIssueBody(input), maxBodyLength())
+      .replace(
+        'you tick the rebase/retry checkbox',
+        'PR is renamed to start with "rebase!"',
+      )
+      .replace(
+        'checking the rebase/retry box above',
+        'renaming the PR to start with "rebase!"',
+      )
+      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+      // Replace GitHub-style PR links with Azure DevOps format
+      .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+      // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR
+      .replace(regEx(/#(\d+)/g), '!$1')
+  );
 }
 
 export function maxBodyLength(): number {
   return 4000;
 }
 
-/* v8 ignore next */
-export function findIssue(): Promise<Issue | null> {
-  // TODO: Needs implementation (#9592)
-  logger.debug(`findIssue() is not implemented`);
-  return Promise.resolve(null);
+export async function findIssue(title: string): Promise<Issue | null> {
+  return await createIssueOperations(config).findIssue(title);
 }
 
-/* v8 ignore next */
-export function ensureIssue(): Promise<EnsureIssueResult | null> {
-  // TODO: Needs implementation (#9592)
-  logger.debug(`ensureIssue() is not implemented`);
-  return Promise.resolve(null);
+export async function ensureIssue(
+  issueConfig: EnsureIssueConfig,
+): Promise<EnsureIssueResult | null> {
+  return await createIssueOperations(config).ensureIssue(issueConfig);
 }
 
-/* v8 ignore next */
-export function ensureIssueClosing(): Promise<void> {
-  return Promise.resolve();
+export async function ensureIssueClosing(title: string): Promise<void> {
+  return await createIssueOperations(config).ensureIssueClosing(title);
 }
 
-/* v8 ignore next */
-export function getIssueList(): Promise<Issue[]> {
-  logger.debug(`getIssueList()`);
-  // TODO: Needs implementation (#9592)
-  return Promise.resolve([]);
+export async function getIssueList(titleFilter?: string): Promise<Issue[]> {
+  return await createIssueOperations(config).getIssueList(titleFilter);
 }
 
 async function getUserIds(users: string[]): Promise<User[]> {
