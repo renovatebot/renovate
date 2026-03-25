@@ -144,11 +144,7 @@ process.on('unhandledRejection', (err) => {
 
 const program = new Command('node tools/sync-module-labels.ts')
   .description('Check that datasource/manager/platform GitHub labels exist.')
-  .option(
-    '--repo <owner/name>',
-    `Repository to query`,
-    defaultRepo,
-  )
+  .option('--repo <owner/name>', `Repository to query`, defaultRepo)
   .option(
     '--show-commands',
     'Print gh label create commands for any missing labels',
