@@ -524,7 +524,7 @@ describe('workers/repository/init/merge', () => {
         enabled: false,
       };
 
-      memCache.set('preset::globalPreset', {
+      memCache.set('preset:local>globalPreset', {
         packageRules: [globalPresetRule],
         hostRules: [
           {
@@ -534,27 +534,27 @@ describe('workers/repository/init/merge', () => {
         ],
         npmrc: npmrcValue,
       });
-      memCache.set('preset::ignoredByGlobal', {
+      memCache.set('preset:local>ignoredByGlobal', {
         packageRules: [ignoredByGlobalRule],
       });
-      memCache.set('preset::ignoredByEntry', {
+      memCache.set('preset:local>ignoredByEntry', {
         packageRules: [ignoredByEntryRule],
       });
-      memCache.set('preset::ignoredByRepo', {
+      memCache.set('preset:local>ignoredByRepo', {
         packageRules: [ignoredByRepoRule],
       });
-      memCache.set('preset::repoEntryPreset', {
+      memCache.set('preset:local>repoEntryPreset', {
         packageRules: [repoEntryPresetRule],
       });
-      memCache.set('preset::repoFilePreset', {
+      memCache.set('preset:local>repoFilePreset', {
         packageRules: [repoFilePresetRule],
       });
 
       scm.getFileList.mockResolvedValue(['renovate.json']);
       fs.readLocalFile.mockResolvedValue(
         JSON.stringify({
-          extends: [':repoFilePreset'],
-          ignorePresets: [':ignoredByRepo'],
+          extends: ['local>repoFilePreset'],
+          ignorePresets: ['local>ignoredByRepo'],
           packageRules: [repoFileRule],
         }),
       );
@@ -562,17 +562,17 @@ describe('workers/repository/init/merge', () => {
       const inputConfig: RepositoryWorkerConfig = {
         ...config,
         extends: [
-          ':globalPreset',
-          ':ignoredByGlobal',
-          ':ignoredByEntry',
-          ':ignoredByRepo',
+          'local>globalPreset',
+          'local>ignoredByGlobal',
+          'local>ignoredByEntry',
+          'local>ignoredByRepo',
         ],
-        ignorePresets: [':ignoredByGlobal'],
+        ignorePresets: ['local>ignoredByGlobal'],
         packageRules: [globalRule],
         secrets: { HOST_TOKEN: 'resolved-secret-token' },
         repositoryEntryConfig: {
-          extends: [':repoEntryPreset'],
-          ignorePresets: [':ignoredByEntry'],
+          extends: ['local>repoEntryPreset'],
+          ignorePresets: ['local>ignoredByEntry'],
           packageRules: [repoEntryRule],
         },
       };
