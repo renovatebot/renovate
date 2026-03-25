@@ -32,7 +32,10 @@ export function getBucket(
 
   // Check for major update type first
   if (fromMajor !== toMajor) {
-    if (separateMultipleMajor) {
+    if (separateMultipleMajor) { 
+      if (separateMultipleMinor) {
+        return `v${toMajor}.${toMinor}`;
+      } 
       return `v${toMajor}`;
     }
     // default path for major updates is not to separate them
