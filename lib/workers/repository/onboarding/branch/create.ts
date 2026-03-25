@@ -12,7 +12,7 @@ export async function createOnboardingBranch(
   config: Partial<RenovateConfig>,
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
-  const configFile = getDefaultConfigFileName(config);
+  const configFile = getDefaultConfigFileName();
   // TODO #22198
   const contents = await getOnboardingConfigContents(config, configFile);
   logger.debug('Creating onboarding branch');

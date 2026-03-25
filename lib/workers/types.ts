@@ -119,6 +119,8 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+
+  constraints?: Record<string, string>;
 }
 
 export type PrBlockedBy =

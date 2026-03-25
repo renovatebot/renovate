@@ -54,6 +54,18 @@ function isLessThanRange(version: string, range: string): boolean {
 
 const isValid = (input: string): boolean => !!npm.isValid(hex2npm(input));
 
+function isSingleVersion(constraint: string): boolean {
+  return (
+    npm.isVersion(constraint) ||
+    (constraint?.startsWith('==') &&
+      npm.isVersion(constraint.substring(2).trim()))
+  );
+}
+
+function getPinnedValue(newVersion: string): string {
+  return `== ${newVersion}`;
+}
+
 const matches = (version: string, range: string): boolean =>
   npm.matches(hex2npm(version), hex2npm(range));
 
@@ -111,11 +123,13 @@ export { isValid };
 export const api: VersioningApi = {
   ...npm,
   isLessThanRange,
+  isSingleVersion,
   isValid,
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
+  getPinnedValue,
 };
 
 export default api;

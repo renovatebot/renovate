@@ -81,3 +81,26 @@ export async function formatDescription(
 export function getModuleLink(module: string, title?: string): string {
   return `[${title ?? module}](${module}/index.md)`;
 }
+
+// Helper: format a cell based on row type
+export function formatCell(row: string[], colIndex: number): string {
+  const col = row[colIndex] ?? '';
+
+  const firstCol = (row[0] ?? '').toLowerCase().trim();
+  const isParentsRow = firstCol === 'parents';
+
+  // Special formatting for "parents" row, second column
+  if (isParentsRow && colIndex === 1) {
+    const items = col
+      .split(',')
+      .sort((a, b) => a.localeCompare(b))
+      .map((s) => `<code>${s.trim()}</code>`)
+      .map((item) => `<span>${item}</span>`)
+      .join('')
+      .replace('>.<', '>(the root document)<');
+    return `<td class="parents">${items}</td>`;
+  }
+
+  // Default cell
+  return `<td>${col}</td>`;
+}
