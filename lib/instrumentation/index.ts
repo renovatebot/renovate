@@ -63,7 +63,6 @@ export function init(): void {
   if (isTraceSendingEnabled()) {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
-    // TODO: fix me, transitive initializes logger
     spanProcessors.push(new GitOperationSpanProcessor());
   }
 
