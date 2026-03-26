@@ -14,6 +14,7 @@ import {
   repoCacheProvider,
 } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
+import * as promises from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match.ts';
@@ -157,17 +158,15 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
       );
     }
 
-    // Fetch repositories for every workspace in parallel.
-    const repoArrays = await Promise.all(
-      workspaceSlugs.map((workspace) =>
-        bitbucketHttp
-          .getJson(
-            `/2.0/repositories/${workspace}`,
-            { paginate: true },
-            Repositories,
-          )
-          .then(({ body }) => body),
-      ),
+    // Fetch repositories for every workspace in parallel (concurrency-limited).
+    const repoArrays = await promises.map(workspaceSlugs, (workspace) =>
+      bitbucketHttp
+        .getJson(
+          `/2.0/repositories/${workspace}`,
+          { paginate: true },
+          Repositories,
+        )
+        .then(({ body }) => body),
     );
 
     let repos = repoArrays.flat();

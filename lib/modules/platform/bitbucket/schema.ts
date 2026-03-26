@@ -102,6 +102,6 @@ const WorkspaceAccess = z.object({
 
 export const WorkspaceAccesses = z
   .object({
-    values: LooseArray(WorkspaceAccess),
+    values: z.array(WorkspaceAccess),
   })
   .transform((body) => body.values.map(({ workspace }) => workspace.slug));

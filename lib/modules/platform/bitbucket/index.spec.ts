@@ -129,8 +129,8 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/user/workspaces?pagelen=100')
         .reply(200, {
           values: [
-            { workspace: { slug: 'foo' } },
             { workspace: { slug: 'some' } },
+            { workspace: { slug: 'foo' } },
           ],
         })
         .get('/2.0/repositories/foo?pagelen=100')
@@ -154,7 +154,7 @@ describe('modules/platform/bitbucket/index', () => {
           ],
         });
       const res = await bitbucket.getRepos({});
-      expect(res).toEqual(['foo/bar', 'some/repo']);
+      expect(res).toEqual(['some/repo', 'foo/bar']);
     });
 
     it('uses configured namespaces directly without fetching workspaces', async () => {
@@ -179,9 +179,9 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/user/workspaces?pagelen=100')
         .reply(200, {
-          values: [{ workspace: { slug: 'foo' } }],
+          values: [{ workspace: { slug: 'some' } }],
         })
-        .get('/2.0/repositories/foo?pagelen=100')
+        .get('/2.0/repositories/some?pagelen=100')
         .reply(200, {
           values: [
             {
@@ -207,9 +207,9 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/user/workspaces?pagelen=100')
         .reply(200, {
-          values: [{ workspace: { slug: 'some' } }],
+          values: [{ workspace: { slug: 'foo' } }],
         })
-        .get('/2.0/repositories/some?pagelen=100')
+        .get('/2.0/repositories/foo?pagelen=100')
         .reply(200, {
           values: [
             {
