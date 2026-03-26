@@ -421,6 +421,11 @@ async function walkNode(
         );
         await walkPropertiesFile(propFilePath, ctx);
       }
+    } else if (child.name === 'import' && child.attr.file) {
+      const importedFile = upath.normalize(
+        upath.join(upath.dirname(packageFile), child.attr.file),
+      );
+      await walkXmlFile(importedFile, ctx);
     } else if (child.name === 'dependency') {
       collectDependency(content, child, packageFile, ctx);
     } else {

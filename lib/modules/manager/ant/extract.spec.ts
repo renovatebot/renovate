@@ -723,4 +723,134 @@ describe('modules/manager/ant/extract', () => {
       },
     ]);
   });
+
+  it('follows import file references', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <import file="deps.xml" />
+          </project>
+        `,
+        'deps.xml': codeBlock`
+          <project>
+            <artifact:dependencies>
+              <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+            </artifact:dependencies>
+          </project>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'deps.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+          }),
+        ],
+      },
+    ]);
+  });
+
+  it('skips missing import files', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <import file="missing.xml" />
+            <artifact:dependencies>
+              <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+            </artifact:dependencies>
+          </project>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+          }),
+        ],
+      },
+    ]);
+  });
+
+  it('does not loop on self-importing files', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <import file="build.xml" />
+            <artifact:dependencies>
+              <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+            </artifact:dependencies>
+          </project>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+          }),
+        ],
+      },
+    ]);
+  });
+
+  it('shares properties across imported files', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <property name="junit.version" value="4.13.2" />
+            <import file="deps.xml" />
+          </project>
+        `,
+        'deps.xml': codeBlock`
+          <project>
+            <artifact:dependencies>
+              <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
+            </artifact:dependencies>
+          </project>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            sharedVariableName: 'junit.version',
+          }),
+        ],
+      },
+    ]);
+  });
 });
