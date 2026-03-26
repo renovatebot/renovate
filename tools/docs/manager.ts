@@ -87,7 +87,6 @@ export async function generateManagers(
     let md = codeBlock`
       ---
       title: ${getTitle(manager, displayName, isCustomMgr)}
-      sidebar_label: ${displayName}
       edit_url: https://github.com/renovatebot/renovate/edit/main/lib/modules/manager/${
         isCustomMgr ? `custom/${manager}` : manager
       }/readme.md
