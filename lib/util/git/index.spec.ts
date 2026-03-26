@@ -1051,6 +1051,30 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
+  describe('getGitAuthor()', () => {
+    it('returns the configured author name and email', () => {
+      // beforeEach sets author to 'Jest <Jest@example.com>'
+      expect(git.getGitAuthor()).toEqual({
+        name: 'Jest',
+        email: 'Jest@example.com',
+      });
+    });
+
+    it('returns updated author after setGitAuthor', () => {
+      git.setGitAuthor('Renovate Bot <renovate@example.com>');
+      expect(git.getGitAuthor()).toEqual({
+        name: 'Renovate Bot',
+        email: 'renovate@example.com',
+      });
+    });
+
+    it('returns null when author is not configured', async () => {
+      await git.initRepo({ url: origin.path });
+      // initRepo resets config, clearing gitAuthorName and gitAuthorEmail
+      expect(git.getGitAuthor()).toBeNull();
+    });
+  });
+
   describe('isBranchConflicted', () => {
     beforeAll(async () => {
       const repo = simpleGit(base.path);

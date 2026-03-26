@@ -305,6 +305,14 @@ export function setGitAuthor(gitAuthor: string | undefined): void {
   config.gitAuthorEmail = gitAuthorParsed.address;
 }
 
+export function getGitAuthor(): { name: string; email: string } | null {
+  const { gitAuthorName, gitAuthorEmail } = config;
+  if (gitAuthorName && gitAuthorEmail) {
+    return { name: gitAuthorName, email: gitAuthorEmail };
+  }
+  return null;
+}
+
 export async function writeGitAuthor(): Promise<void> {
   const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
   /* v8 ignore if -- TODO: add test #40625 */

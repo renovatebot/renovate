@@ -2176,9 +2176,17 @@ async function pushFiles(
     const treeSha = treeRes.body.sha;
 
     // Now we recreate the commit using the tree we recreated the step before
+    const gitAuthor = git.getGitAuthor();
     const commitRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/commits`,
-      { body: { message, tree: treeSha, parents: [parentCommitSha] } },
+      {
+        body: {
+          message,
+          tree: treeSha,
+          parents: [parentCommitSha],
+          ...(gitAuthor && { author: gitAuthor }),
+        },
+      },
     );
     incLimitedValue('Commits');
     const remoteCommitSha = commitRes.body.sha as LongCommitSha;

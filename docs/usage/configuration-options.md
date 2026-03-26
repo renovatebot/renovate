@@ -1864,7 +1864,8 @@ When this field is unset (default), Renovate will use its platform credentials (
 
 <!-- prettier-ignore -->
 !!! note
-    If running as a GitHub App and using `platformCommit`, GitHub itself sets the git author in commits so you should not configure this field.
+    If running as a GitHub App and using `platformCommit`, Renovate passes `gitAuthor` to the GitHub commits API so the author field on remote commits matches the configured identity.
+    Configure `gitAuthor` to match the GitHub App's commit author (e.g. `App Name <app-id+app-slug[bot]@users.noreply.github.com>`) to ensure Renovate correctly recognizes its own commits.
 
 The `gitAuthor` option accepts a [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant string.
 It's recommended to include a name followed by an email address, e.g.
@@ -3957,7 +3958,16 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 <!-- prettier-ignore -->
 !!! note
-    When using platform commits, GitHub determines the git author string to use and Renovate's own gitAuthor is ignored.
+    When using platform commits, Renovate passes its configured `gitAuthor` to the GitHub API so the commit author matches the configured identity.
+    GitHub signs the commit as the committer (using its own GPG key), but the author field will reflect `gitAuthor`.
+    This ensures Renovate can correctly recognize its own commits when checking for branch modifications.
+
+<!-- prettier-ignore -->
+!!! warning
+    If `gitAuthor` is set to an identity that differs from the GitHub App's actual account (for example, an email address that does not correspond to the authenticated App), the commit's author will show as unverified in GitHub's UI when [vigilant mode](https://docs.github.com/en/authentication/managing-commit-signature-verification/displaying-verification-statuses-for-all-of-your-commits) is enabled for that identity.
+    The commit itself will still carry GitHub's committer signature (web-flow) and be marked as verified via that signature.
+    This is the same behavior as regular `git`-based commits, where Renovate also writes whatever `gitAuthor` is configured without GitHub being able to verify the author.
+    To avoid this, configure `gitAuthor` to match the GitHub App's commit identity exactly (e.g. `App Name <APP_ID+app-slug[bot]@users.noreply.github.com>`).
 
 ## postUpdateOptions
 

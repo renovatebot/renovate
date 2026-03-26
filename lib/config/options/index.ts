@@ -1210,6 +1210,11 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: ['merge', 'none'],
     default: 'none',
   },
+  // TODO: set globalOnly: true to prevent repo-level config from overriding
+  // the commit author identity. A repository owner can currently set an
+  // arbitrary gitAuthor in renovate.json, which Renovate will use for both
+  // local git commits and platform API commits (when platformCommit is
+  // enabled). Compare with gitPrivateKey which is already globalOnly.
   {
     name: 'gitAuthor',
     description:

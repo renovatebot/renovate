@@ -5266,5 +5266,80 @@ describe('modules/platform/github/index', () => {
 
       expect(res).toBeNull();
     });
+
+    it('includes configured git author in commit API call', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+      git.getGitAuthor.mockReturnValueOnce({
+        name: 'Renovate Bot',
+        email: 'renovate@example.com',
+      });
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+
+      await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      const commitApiCall = httpMock
+        .getTrace()
+        .find(
+          (req) => req.url?.endsWith('/git/commits') && req.method === 'POST',
+        );
+      expect(commitApiCall?.body).toMatchObject({
+        author: { name: 'Renovate Bot', email: 'renovate@example.com' },
+      });
+    });
+
+    it('omits author field in commit API call when git author is not configured', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+      git.getGitAuthor.mockReturnValueOnce(null);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+
+      await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      const commitApiCall = httpMock
+        .getTrace()
+        .find(
+          (req) => req.url?.endsWith('/git/commits') && req.method === 'POST',
+        );
+      expect(commitApiCall?.body).not.toHaveProperty('author');
+    });
   });
 });
