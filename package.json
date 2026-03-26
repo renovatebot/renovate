@@ -355,7 +355,7 @@
     "tar": "7.5.11",
     "tmp-promise": "3.0.3",
     "tsdown": "0.21.4",
-    "type-fest": "5.4.4",
+    "type-fest": "5.5.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.57.1",
     "unified": "11.0.5",
