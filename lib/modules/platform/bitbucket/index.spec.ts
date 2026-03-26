@@ -129,8 +129,8 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/user/workspaces?pagelen=100')
         .reply(200, {
           values: [
-            { workspace: { slug: 'some' } },
             { workspace: { slug: 'foo' } },
+            { workspace: { slug: 'some' } },
           ],
         })
         .get('/2.0/repositories/foo?pagelen=100')
@@ -154,7 +154,7 @@ describe('modules/platform/bitbucket/index', () => {
           ],
         });
       const res = await bitbucket.getRepos({});
-      expect(res).toEqual(['some/repo', 'foo/bar']);
+      expect(res).toEqual(['foo/bar', 'some/repo']);
     });
 
     it('uses configured namespaces directly without fetching workspaces', async () => {
@@ -187,19 +187,19 @@ describe('modules/platform/bitbucket/index', () => {
             {
               mainbranch: { name: 'master' },
               uuid: '111',
-              full_name: 'foo/bar',
+              full_name: 'some/bar',
               project: { name: 'ignore' },
             },
             {
               mainbranch: { name: 'master' },
               uuid: '222',
-              full_name: 'foo/repo',
+              full_name: 'some/repo',
               project: { name: 'allow' },
             },
           ],
         });
       const res = await bitbucket.getRepos({ projects: ['allow'] });
-      expect(res).toEqual(['foo/repo']);
+      expect(res).toEqual(['some/repo']);
     });
 
     it('filters repos based on autodiscoverProjects patterns with negation', async () => {
@@ -215,19 +215,19 @@ describe('modules/platform/bitbucket/index', () => {
             {
               mainbranch: { name: 'master' },
               uuid: '111',
-              full_name: 'some/bar',
+              full_name: 'foo/bar',
               project: { name: 'ignore' },
             },
             {
               mainbranch: { name: 'master' },
               uuid: '222',
-              full_name: 'some/repo',
+              full_name: 'foo/repo',
               project: { name: 'allow' },
             },
           ],
         });
       const res = await bitbucket.getRepos({ projects: ['!ignore'] });
-      expect(res).toEqual(['some/repo']);
+      expect(res).toEqual(['foo/repo']);
     });
   });
 
