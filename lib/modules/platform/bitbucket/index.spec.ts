@@ -221,13 +221,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               mainbranch: { name: 'master' },
               uuid: '222',
-              full_name: 'foo/repo',
+              full_name: 'some/repo',
               project: { name: 'allow' },
             },
           ],
         });
       const res = await bitbucket.getRepos({ projects: ['!ignore'] });
-      expect(res).toEqual(['foo/repo']);
+      expect(res).toEqual(['some/repo']);
     });
   });
 
