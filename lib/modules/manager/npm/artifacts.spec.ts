@@ -704,6 +704,45 @@ minimumReleaseAgeExclude:
       expect(res).toBeNull();
     });
 
+    it('uses packageName (bare package name) for pnpm overrides with range selectors', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 4320`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'fast-xml-parser@<=5.3.5',
+            packageName: 'fast-xml-parser',
+            depType: 'pnpm.overrides',
+            currentValue: '5.3.5',
+            newVersion: '5.5.7',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.7
+            `,
+          },
+        },
+      ]);
+    });
+
     it('preserves catalog changes in pnpm-workspace.yaml when adding minimumReleaseAgeExclude', async () => {
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.readLocalFile.mockResolvedValueOnce(
