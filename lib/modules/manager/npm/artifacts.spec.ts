@@ -744,5 +744,48 @@ minimumReleaseAgeExclude:
         },
       ]);
     });
+
+    it('does not skip version append when a different dep shares the same version string', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  # Renovate security update: lodash@4.17.21
+  - lodash@4.17.21`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'underscore',
+            currentValue: '1.13.5',
+            newVersion: '4.17.21',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              codeBlock`
+                minimumReleaseAge: 10080
+                minimumReleaseAgeExclude:
+                  # Renovate security update: lodash@4.17.21
+                  - lodash@4.17.21
+                  # Renovate security update: underscore@4.17.21
+                  - underscore@4.17.21
+              ` + '\n',
+          },
+        },
+      ]);
+    });
   });
 });
