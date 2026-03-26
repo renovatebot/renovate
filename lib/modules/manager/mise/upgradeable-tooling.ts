@@ -361,6 +361,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  packer: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'hashicorp/packer',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   pipx: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -401,6 +409,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'astral-sh/ruff',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  rumdl: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'rvben/rumdl',
       datasource: GithubReleasesDatasource.id,
     },
   },
@@ -462,6 +477,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'tamasfe/taplo',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  tart: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'cirruslabs/tart',
       datasource: GithubReleasesDatasource.id,
     },
   },
