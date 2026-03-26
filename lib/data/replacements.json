@@ -851,6 +851,7 @@
     "description": "replaces kotlin-logging github organization and maven group from MicroUtils to oshai",
     "packageRules": [
       {
+        "matchCurrentVersion": "[3,4)",
         "matchDatasources": ["maven"],
         "matchPackageNames": ["/^io\\.github\\.microutils:kotlin-logging/"],
         "replacementNameTemplate": "{{{replace 'io.github.microutils' 'io.github.oshai' packageName}}}",
