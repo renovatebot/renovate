@@ -221,11 +221,60 @@ function resolveVersionReference(
   };
 }
 
-function getDependencyType(scope: string | undefined): string {
+function parseCoords(coords: string): {
+  depName: string;
+  depType?: string;
+  rawVersion: string;
+} | null {
+  const parts = coords.split(':');
+  if (parts.length < 3) {
+    return null;
+  }
+
+  const [groupId, artifactId] = parts;
+  if (!groupId || !artifactId) {
+    return null;
+  }
+
+  let depType: string | undefined;
+  let rawVersion: string;
+
+  if (parts.length >= 4 && scopeNames.has(parts.at(-1)!)) {
+    depType = parts.at(-1);
+    rawVersion = parts.at(-2)!;
+  } else {
+    rawVersion = parts.at(-1)!;
+  }
+
+  return {
+    depName: `${groupId}:${artifactId}`,
+    rawVersion,
+    depType,
+  };
+}
+
+function getDependencyType(
+  scope: string | undefined,
+  coordsDepType?: string,
+): string {
+  if (coordsDepType) {
+    return coordsDepType;
+  }
   if (scope && scopeNames.has(scope)) {
     return scope;
   }
   return 'compile';
+}
+
+function addDependencyResult(
+  dep: PackageDependency,
+  targetFile: string,
+  ctx: WalkContext,
+): void {
+  if (!ctx.results.has(targetFile)) {
+    ctx.results.set(targetFile, { packageFile: targetFile, deps: [] });
+  }
+  ctx.results.get(targetFile)!.deps.push(dep);
 }
 
 function collectDependency(
@@ -234,11 +283,20 @@ function collectDependency(
   packageFile: string,
   ctx: WalkContext,
 ): void {
-  const { groupId, artifactId, version, scope } = node.attr;
-
-  if (!version || !groupId || !artifactId) {
-    return;
+  if (node.attr.groupId && node.attr.artifactId && node.attr.version) {
+    collectInlineDependency(content, node, packageFile, ctx);
+  } else if (node.attr.coords) {
+    collectCoordsDependency(content, node, packageFile, ctx);
   }
+}
+
+function collectInlineDependency(
+  content: string,
+  node: XmlDocument,
+  packageFile: string,
+  ctx: WalkContext,
+): void {
+  const { groupId, artifactId, version, scope } = node.attr;
 
   const range = readAttributeRange(content, node, 'version', version);
   /* v8 ignore next 3 -- readAttributeRange only fails if xmldoc misreports attributes */
@@ -268,13 +326,64 @@ function collectDependency(
   }
 
   const targetFile = property?.packageFile ?? packageFile;
-  const targetPosition = property?.fileReplacePosition ?? range.valuePosition;
-  dep.fileReplacePosition = targetPosition;
+  dep.fileReplacePosition =
+    property?.fileReplacePosition ?? range.valuePosition;
 
-  if (!ctx.results.has(targetFile)) {
-    ctx.results.set(targetFile, { packageFile: targetFile, deps: [] });
+  addDependencyResult(dep, targetFile, ctx);
+}
+
+function collectCoordsDependency(
+  content: string,
+  node: XmlDocument,
+  packageFile: string,
+  ctx: WalkContext,
+): void {
+  const coords = parseCoords(node.attr.coords);
+  if (!coords) {
+    return;
   }
-  ctx.results.get(targetFile)!.deps.push(dep);
+
+  const { currentValue, sharedVariableName, property } =
+    resolveVersionReference(coords.rawVersion, ctx.propertyMap);
+
+  const range = readAttributeRange(content, node, 'coords', node.attr.coords);
+  /* v8 ignore next 3 -- readAttributeRange only fails if xmldoc misreports attributes */
+  if (!range) {
+    return;
+  }
+
+  const versionPositionInCoords = node.attr.coords.lastIndexOf(
+    coords.rawVersion,
+  );
+  /* v8 ignore next 3 -- rawVersion was extracted from coords so it always exists */
+  if (versionPositionInCoords === -1) {
+    return;
+  }
+
+  const dep: PackageDependency = {
+    datasource: MavenDatasource.id,
+    depName: coords.depName,
+    depType: getDependencyType(node.attr.scope, coords.depType),
+    registryUrls: [],
+  };
+
+  if (currentValue) {
+    dep.currentValue = currentValue;
+  } else {
+    dep.currentValue = coords.rawVersion;
+    dep.skipReason = 'contains-variable';
+  }
+
+  if (sharedVariableName) {
+    dep.sharedVariableName = sharedVariableName;
+  }
+
+  const targetFile = property?.packageFile ?? packageFile;
+  dep.fileReplacePosition =
+    property?.fileReplacePosition ??
+    range.valuePosition + versionPositionInCoords;
+
+  addDependencyResult(dep, targetFile, ctx);
 }
 
 async function walkNode(

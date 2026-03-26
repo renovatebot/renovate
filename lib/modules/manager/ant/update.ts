@@ -64,22 +64,37 @@ export function updateDependency({
     fileReplacePosition,
   );
   if (quotedAttribute) {
-    if (quotedAttribute.value === newValue) {
-      return fileContent;
-    }
-
-    if (quotedAttribute.value !== currentValue) {
-      logger.debug(
-        `ant manager: version mismatch at position ${fileReplacePosition}`,
+    if (quotedAttribute.value === currentValue) {
+      if (currentValue === newValue) {
+        return fileContent;
+      }
+      return (
+        fileContent.slice(0, quotedAttribute.start) +
+        newValue +
+        fileContent.slice(quotedAttribute.end)
       );
-      return null;
     }
 
-    return (
-      fileContent.slice(0, quotedAttribute.start) +
-      newValue +
-      fileContent.slice(quotedAttribute.end)
+    if (currentValue && quotedAttribute.value.includes(currentValue)) {
+      /* v8 ignore next 3 -- coords value already contains newValue */
+      if (quotedAttribute.value.includes(newValue)) {
+        return fileContent;
+      }
+      const replacedValue = quotedAttribute.value.replace(
+        currentValue,
+        newValue,
+      );
+      return (
+        fileContent.slice(0, quotedAttribute.start) +
+        replacedValue +
+        fileContent.slice(quotedAttribute.end)
+      );
+    }
+
+    logger.debug(
+      `ant manager: version mismatch at position ${fileReplacePosition}`,
     );
+    return null;
   }
 
   const propertiesValue = versionFromPropertiesContent(

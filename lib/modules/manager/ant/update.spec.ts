@@ -203,4 +203,21 @@ describe('modules/manager/ant/update', () => {
 
     expect(result).toBeNull();
   });
+
+  it('updates version within coords attribute', () => {
+    const fileContent =
+      '<project><dependency coords="junit:junit:4.13.2" /></project>';
+
+    const result = updateDependency({
+      fileContent,
+      upgrade: {
+        depName: 'junit:junit',
+        currentValue: '4.13.2',
+        newValue: '4.13.3',
+        fileReplacePosition: fileContent.indexOf('4.13.2'),
+      },
+    });
+
+    expect(result).toContain('coords="junit:junit:4.13.3"');
+  });
 });
