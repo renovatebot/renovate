@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { extractRegistries } from '../maven/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -282,11 +283,12 @@ function collectDependency(
   node: XmlDocument,
   packageFile: string,
   ctx: WalkContext,
+  registryUrls: string[] = [],
 ): void {
   if (node.attr.groupId && node.attr.artifactId && node.attr.version) {
-    collectInlineDependency(content, node, packageFile, ctx);
+    collectInlineDependency(content, node, packageFile, ctx, registryUrls);
   } else if (node.attr.coords) {
-    collectCoordsDependency(content, node, packageFile, ctx);
+    collectCoordsDependency(content, node, packageFile, ctx, registryUrls);
   }
 }
 
@@ -295,6 +297,7 @@ function collectInlineDependency(
   node: XmlDocument,
   packageFile: string,
   ctx: WalkContext,
+  registryUrls: string[],
 ): void {
   const { groupId, artifactId, version, scope } = node.attr;
 
@@ -311,7 +314,7 @@ function collectInlineDependency(
     datasource: MavenDatasource.id,
     depName: `${groupId}:${artifactId}`,
     depType: getDependencyType(scope),
-    registryUrls: [],
+    registryUrls,
   };
 
   if (currentValue) {
@@ -337,6 +340,7 @@ function collectCoordsDependency(
   node: XmlDocument,
   packageFile: string,
   ctx: WalkContext,
+  registryUrls: string[],
 ): void {
   const coords = parseCoords(node.attr.coords);
   if (!coords) {
@@ -364,7 +368,7 @@ function collectCoordsDependency(
     datasource: MavenDatasource.id,
     depName: coords.depName,
     depType: getDependencyType(node.attr.scope, coords.depType),
-    registryUrls: [],
+    registryUrls,
   };
 
   if (currentValue) {
@@ -386,12 +390,65 @@ function collectCoordsDependency(
   addDependencyResult(dep, targetFile, ctx);
 }
 
+function collectBlockRegistries(node: XmlDocument): string[] {
+  const registryUrls: string[] = [];
+
+  for (const child of node.children) {
+    if (!isXmlElement(child)) {
+      continue;
+    }
+    if (child.name !== 'remoteRepository') {
+      continue;
+    }
+    const url = child.attr.url;
+    if (url) {
+      registryUrls.push(url);
+    }
+  }
+
+  return registryUrls;
+}
+
+async function readSettingsRegistries(
+  currentFile: string,
+  settingsFile: string,
+): Promise<string[]> {
+  const resolvedSettingsFile = upath.normalize(
+    upath.join(upath.dirname(currentFile), settingsFile),
+  );
+  const settingsContent = await readLocalFile(resolvedSettingsFile, 'utf8');
+  if (!settingsContent) {
+    return [];
+  }
+
+  return extractRegistries(settingsContent);
+}
+
 async function walkNode(
   content: string,
   node: XmlDocument,
   packageFile: string,
   ctx: WalkContext,
+  inheritedRegistryUrls: string[] = [],
 ): Promise<void> {
+  let registryUrls = inheritedRegistryUrls;
+
+  if (node.attr.settingsFile) {
+    const settingsRegistries = await readSettingsRegistries(
+      packageFile,
+      node.attr.settingsFile,
+    );
+    registryUrls = [
+      ...new Set([...inheritedRegistryUrls, ...settingsRegistries]),
+    ];
+  }
+
+  if (node.name === 'artifact:dependencies') {
+    registryUrls = [
+      ...new Set([...registryUrls, ...collectBlockRegistries(node)]),
+    ];
+  }
+
   for (const child of node.children) {
     if (!isXmlElement(child)) {
       continue;
@@ -427,9 +484,9 @@ async function walkNode(
       );
       await walkXmlFile(importedFile, ctx);
     } else if (child.name === 'dependency') {
-      collectDependency(content, child, packageFile, ctx);
+      collectDependency(content, child, packageFile, ctx, registryUrls);
     } else {
-      await walkNode(content, child, packageFile, ctx);
+      await walkNode(content, child, packageFile, ctx, registryUrls);
     }
   }
 }

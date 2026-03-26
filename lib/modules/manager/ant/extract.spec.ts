@@ -853,4 +853,147 @@ describe('modules/manager/ant/extract', () => {
       },
     ]);
   });
+
+  it('collects registryUrls from remoteRepository elements', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <artifact:dependencies>
+              <remoteRepository url="https://repo.example.com/maven2" />
+              <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+            </artifact:dependencies>
+          </project>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            registryUrls: ['https://repo.example.com/maven2'],
+          }),
+        ],
+      },
+    ]);
+  });
+
+  it('reads registryUrls from settingsFile', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <artifact:dependencies settingsFile="settings.xml">
+              <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+            </artifact:dependencies>
+          </project>
+        `,
+        'settings.xml': codeBlock`
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+            <mirrors>
+              <mirror>
+                <url>https://mirror.example.com/maven2</url>
+              </mirror>
+            </mirrors>
+          </settings>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            registryUrls: ['https://mirror.example.com/maven2'],
+          }),
+        ],
+      },
+    ]);
+  });
+
+  it('ignores missing settings file', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <artifact:dependencies settingsFile="missing.xml">
+              <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+            </artifact:dependencies>
+          </project>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            registryUrls: [],
+          }),
+        ],
+      },
+    ]);
+  });
+
+  it('combines settingsFile and remoteRepository registries', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml': codeBlock`
+          <project>
+            <artifact:dependencies settingsFile="settings.xml">
+              <remoteRepository url="https://repo.example.com/maven2" />
+              <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+            </artifact:dependencies>
+          </project>
+        `,
+        'settings.xml': codeBlock`
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+            <mirrors>
+              <mirror>
+                <url>https://mirror.example.com/maven2</url>
+              </mirror>
+            </mirrors>
+          </settings>
+        `,
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            registryUrls: [
+              'https://mirror.example.com/maven2',
+              'https://repo.example.com/maven2',
+            ],
+          }),
+        ],
+      },
+    ]);
+  });
 });
