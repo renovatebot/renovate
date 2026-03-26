@@ -3,6 +3,7 @@ import { mock, mockDeep } from 'vitest-mock-extended';
 import { s3 } from '~test/s3.ts';
 import { fs, logger } from '~test/util.ts';
 import type { RenovateConfig } from '../config/types.ts';
+import { prettier } from '../expose.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import {
@@ -19,6 +20,7 @@ import type { Report } from './types.ts';
 vi.mock('../util/fs/index.ts', () => mockDeep());
 vi.mock('../util/s3.ts', () => mockDeep());
 vi.mock('../logger/index.ts', () => mockDeep());
+vi.mock('../expose.ts');
 
 describe('instrumentation/reporting', () => {
   beforeEach(() => {
@@ -133,6 +135,31 @@ describe('instrumentation/reporting', () => {
     expect(fs.writeSystemFile).toHaveBeenCalledExactlyOnceWith(
       config.reportPath,
       JSON.stringify(expectedReport),
+    );
+  });
+
+  it('write formatted report if reportFormatting is enabled', async () => {
+    const formatMock = vi.fn().mockResolvedValue('{"formatted":true}');
+    vi.mocked(prettier).mockReturnValue({ format: formatMock } as never);
+
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'file',
+      reportPath: './report.json',
+      reportFormatting: true,
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+
+    await exportStats(config);
+
+    expect(formatMock).toHaveBeenCalledWith(JSON.stringify(expectedReport), {
+      parser: 'json',
+    });
+    expect(fs.writeSystemFile).toHaveBeenCalledExactlyOnceWith(
+      config.reportPath,
+      '{"formatted":true}',
     );
   });
 

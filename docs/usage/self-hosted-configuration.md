@@ -1362,6 +1362,10 @@ Renovate also supports connecting to Redis clusters as well. In order to connect
 
 Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
 
+## reportFormatting
+
+This option only applies when [`reportType`](#reporttype) is `file` or `s3`.
+
 ## reportPath
 
 `reportPath` describes the location where the report is written to.
