@@ -36,7 +36,7 @@ export class TerraformVersionExtractor extends DependencyExtractor {
     dep.depType = 'required_version';
     dep.datasource = GithubReleasesDatasource.id;
     dep.depName = 'hashicorp/terraform';
-    dep.extractVersion = 'v(?<version>.*)$';
+    dep.extractVersion = ['v(?<version>.*)$'];
     dep.versioning = hashicorp.id;
     return dep;
   }

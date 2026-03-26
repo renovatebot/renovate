@@ -741,7 +741,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '16.x',
           datasource: 'github-releases',
           versioning: 'node',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -750,7 +750,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '20.0.0',
           datasource: 'github-releases',
           versioning: 'node',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -759,7 +759,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '1.23',
           datasource: 'github-releases',
           versioning: 'npm',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -768,7 +768,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '>=3.8.0 <3.10.0',
           datasource: 'github-releases',
           versioning: 'npm',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -777,7 +777,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: 'latest',
           datasource: 'github-releases',
           versioning: 'node',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
       ]);
@@ -891,7 +891,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '16.x',
           datasource: 'github-releases',
           versioning: 'node',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -900,7 +900,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '20.0.0',
           datasource: 'github-releases',
           versioning: 'node',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -909,7 +909,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '1.23',
           datasource: 'github-releases',
           versioning: 'npm',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -918,7 +918,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: '>=3.8.0 <3.10.0',
           datasource: 'github-releases',
           versioning: 'npm',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
         {
@@ -927,7 +927,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: 'latest',
           datasource: 'github-releases',
           versioning: 'node',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
           depType: 'uses-with',
         },
       ]);

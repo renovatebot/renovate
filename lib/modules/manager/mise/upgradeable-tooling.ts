@@ -31,7 +31,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'oven-sh/bun',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^bun-v(?<version>\\S+)',
+      extractVersion: ['^bun-v(?<version>\\S+)'],
     },
   },
   deno: {
@@ -39,7 +39,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'denoland/deno',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   elixir: {
@@ -53,7 +53,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'erlang/otp',
       datasource: GithubTagsDatasource.id,
-      extractVersion: '^OTP-(?<version>\\S+)',
+      extractVersion: ['^OTP-(?<version>\\S+)'],
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$`,
     },
   },
@@ -62,7 +62,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'golang/go',
       datasource: GithubTagsDatasource.id,
-      extractVersion: '^go(?<version>\\S+)',
+      extractVersion: ['^go(?<version>\\S+)'],
     },
   },
   java: {
@@ -160,7 +160,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'python/cpython',
       datasource: GithubTagsDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   ruby: {
@@ -183,7 +183,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'swift-lang/swift',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^swift-(?<version>\\S+)',
+      extractVersion: ['^swift-(?<version>\\S+)'],
     },
   },
   zig: {
@@ -201,7 +201,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'rhysd/actionlint',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   astro: {
@@ -209,7 +209,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'astronomer/astro-cli',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'aws-cli': {
@@ -224,7 +224,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: '99designs/aws-vault',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   buf: {
@@ -232,7 +232,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'bufbuild/buf',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   caddy: {
@@ -248,7 +248,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'ccache/ccache',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   committed: {
@@ -256,7 +256,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'crate-ci/committed',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   conan: {
@@ -271,7 +271,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'hashicorp/consul',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   gh: {
@@ -287,7 +287,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'dotenv-linter/dotenv-linter',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   hivemind: {
@@ -295,7 +295,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'DarthSim/hivemind',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   hk: {
@@ -303,7 +303,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'jdx/hk',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   jq: {
@@ -311,7 +311,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'jqlang/jq',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^jq-(?<version>\\S+)',
+      extractVersion: ['^jq-v(?<version>\\S+)'],
     },
   },
   kafka: {
@@ -334,7 +334,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'evilmartians/lefthook',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   localstack: {
@@ -342,7 +342,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'localstack/localstack',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   lychee: {
@@ -350,7 +350,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'lycheeverse/lychee',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^lychee-v(?<version>\\S+)',
+      extractVersion: ['^lychee-v(?<version>\\S+)'],
     },
   },
   opentofu: {
@@ -358,7 +358,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'opentofu/opentofu',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   packer: {
@@ -395,7 +395,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'protocolbuffers/protobuf',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   redis: {
@@ -424,7 +424,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'koalaman/shellcheck',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   skeema: {
@@ -432,7 +432,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'skeema/skeema',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   sops: {
@@ -440,7 +440,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'getsops/sops',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   sqlite: {
@@ -448,7 +448,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'sqlite/sqlite',
       datasource: GithubTagsDatasource.id,
-      extractVersion: '^version-(?<version>\\S+)',
+      extractVersion: ['^version-(?<version>\\S+)'],
     },
   },
   stripe: {
@@ -456,7 +456,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'stripe/stripe-cli',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   swiftformat: {
@@ -492,7 +492,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'gruntwork-io/terragrunt',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   tilt: {
@@ -500,7 +500,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'tilt-dev/tilt',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   tusd: {
@@ -508,7 +508,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'tus/tusd',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   usage: {
@@ -516,7 +516,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'jdx/usage',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
 };

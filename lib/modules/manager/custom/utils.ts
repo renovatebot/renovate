@@ -17,6 +17,29 @@ export const validMatchFields = [
 
 export type ValidMatchFields = (typeof validMatchFields)[number];
 
+export function parseExtractVersionValue(
+  value: string,
+): string | [string] | [string, string] {
+  const trimmed = value?.trim();
+
+  if (trimmed?.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (
+        Array.isArray(parsed) &&
+        (parsed.length === 1 || parsed.length === 2) &&
+        parsed.every((item) => typeof item === 'string')
+      ) {
+        return parsed as [string] | [string, string];
+      }
+    } catch {
+      // best-effort parse; fall through to legacy behavior
+    }
+  }
+
+  return [value];
+}
+
 export function isValidDependency({
   depName,
   currentValue,

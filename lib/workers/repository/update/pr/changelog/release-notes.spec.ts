@@ -1086,7 +1086,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           gitRef: '1.0.0',
         }),
         partial<BranchUpgradeConfig>({
-          extractVersion: 'app-(?<version>[0-9.]*)',
+          extractVersion: ['app-(?<version>[0-9.]*)'],
         }),
       );
       expect(res).toEqual({
