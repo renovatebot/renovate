@@ -107,6 +107,89 @@ describe('modules/manager/ant/update', () => {
     expect(result).toContain("version='4.13.3'");
   });
 
+  it('updates properties file values', () => {
+    const fileContent = 'slf4j.version=1.7.36\nother=value\n';
+
+    const result = updateDependency({
+      fileContent,
+      upgrade: {
+        depName: 'org.slf4j:slf4j-api',
+        currentValue: '1.7.36',
+        newValue: '2.0.17',
+        fileReplacePosition: fileContent.indexOf('1.7.36'),
+        sharedVariableName: 'slf4j.version',
+      },
+    });
+
+    expect(result).toContain('slf4j.version=2.0.17');
+  });
+
+  it('returns null when properties value does not match and no sharedVariableName', () => {
+    const fileContent = 'some.version=9.9.9\n';
+
+    const result = updateDependency({
+      fileContent,
+      upgrade: {
+        depName: 'org.example:lib',
+        currentValue: '1.0.0',
+        newValue: '2.0.0',
+        fileReplacePosition: fileContent.indexOf('9.9.9'),
+      },
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('updates properties value when sharedVariableName is set even if mismatch', () => {
+    const fileContent = 'my.version=999\n';
+
+    const result = updateDependency({
+      fileContent,
+      upgrade: {
+        depName: 'org.example:lib',
+        currentValue: '1.0.0',
+        newValue: '2.0.0',
+        fileReplacePosition: fileContent.indexOf('999'),
+        sharedVariableName: 'my.version',
+      },
+    });
+
+    expect(result).toContain('my.version=2.0.0');
+  });
+
+  it('returns fileContent unchanged when properties value already matches newValue', () => {
+    const fileContent = 'slf4j.version=2.0.17\nother=value\n';
+
+    const result = updateDependency({
+      fileContent,
+      upgrade: {
+        depName: 'org.slf4j:slf4j-api',
+        currentValue: '1.7.36',
+        newValue: '2.0.17',
+        fileReplacePosition: fileContent.indexOf('2.0.17'),
+        sharedVariableName: 'slf4j.version',
+      },
+    });
+
+    expect(result).toBe(fileContent);
+  });
+
+  it('returns null when properties line is empty at offset', () => {
+    const fileContent = 'some.version=\n';
+
+    const result = updateDependency({
+      fileContent,
+      upgrade: {
+        depName: 'org.example:lib',
+        currentValue: '1.0.0',
+        newValue: '2.0.0',
+        fileReplacePosition: fileContent.indexOf('\n'),
+      },
+    });
+
+    expect(result).toBeNull();
+  });
+
   it('returns null when no quote is found before position', () => {
     const result = updateDependency({
       fileContent: 'no-quotes-here',

@@ -1,3 +1,4 @@
+import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -16,6 +17,19 @@ const scopeNames = new Set([
   'provided',
   'system',
 ]);
+
+interface AntProperty {
+  value: string;
+  fileReplacePosition: number;
+  packageFile: string;
+}
+
+interface WalkContext {
+  propertyMap: Map<string, AntProperty>;
+  visitedXmlFiles: Set<string>;
+  visitedPropertiesFiles: Set<string>;
+  results: Map<string, PackageFileContent>;
+}
 
 function isXmlElement(node: unknown): node is XmlDocument {
   const n = node as { type?: string };
@@ -59,6 +73,154 @@ function readAttributeRange(
   return { valuePosition, valueLength: match.groups.value.length };
 }
 
+function addProperty(
+  ctx: WalkContext,
+  name: string,
+  value: string,
+  fileReplacePosition: number,
+  packageFile: string,
+): void {
+  if (!ctx.propertyMap.has(name)) {
+    ctx.propertyMap.set(name, { value, fileReplacePosition, packageFile });
+  }
+}
+
+function parsePropertiesFile(
+  content: string,
+  packageFile: string,
+  ctx: WalkContext,
+): void {
+  const isCrlf = content.includes('\r\n');
+  const lineBreakLength = isCrlf ? 2 : 1;
+  const lines = content.split(regEx(/\r?\n/));
+
+  let offset = 0;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('!')) {
+      offset += line.length + lineBreakLength;
+      continue;
+    }
+
+    const separatorMatch = regEx(/[:=]/).exec(trimmed);
+    if (!separatorMatch?.index) {
+      offset += line.length + lineBreakLength;
+      continue;
+    }
+
+    const separatorIndex = separatorMatch.index;
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const rawValue = trimmed.slice(separatorIndex + 1);
+    const leftPartLength = separatorIndex + 1 + rawValue.search(regEx(/\S|$/));
+    const value = rawValue.trim();
+
+    if (!key || !value) {
+      offset += line.length + lineBreakLength;
+      continue;
+    }
+
+    const leadingWhitespace = line.length - line.trimStart().length;
+    const valuePosition = offset + leadingWhitespace + leftPartLength;
+
+    addProperty(ctx, key, value, valuePosition, packageFile);
+    offset += line.length + lineBreakLength;
+  }
+}
+
+function resolvePropertyString(
+  input: string,
+  propertyMap: Map<string, AntProperty>,
+  visited: Set<string> = new Set(),
+): string | null {
+  if (!input.includes('${')) {
+    return input;
+  }
+
+  const propRegex = regEx(/\$\{([^}]+)}/g);
+  let changed = false;
+  const result = input.replace(propRegex, (match, propName: string) => {
+    if (visited.has(propName)) {
+      return match;
+    }
+
+    const prop = propertyMap.get(propName);
+    if (!prop) {
+      return match;
+    }
+
+    visited.add(propName);
+    const resolved = resolvePropertyString(prop.value, propertyMap, visited);
+    visited.delete(propName);
+
+    if (!resolved) {
+      return match;
+    }
+
+    /* v8 ignore next 3 -- v8 does not track replace callback coverage reliably */
+    changed = true;
+    return resolved;
+  });
+
+  if (changed && result.includes('${')) {
+    return null;
+  }
+
+  if (!changed) {
+    return null;
+  }
+
+  return result;
+}
+
+function resolveVersionReference(
+  rawVersion: string,
+  propertyMap: Map<string, AntProperty>,
+): {
+  currentValue: string | null;
+  sharedVariableName: string | undefined;
+  property: AntProperty | undefined;
+} {
+  const singlePropMatch = regEx(/^\$\{([^}]+)}$/).exec(rawVersion);
+
+  if (singlePropMatch) {
+    const propName = singlePropMatch[1];
+    const prop = propertyMap.get(propName);
+    if (!prop) {
+      return {
+        currentValue: null,
+        sharedVariableName: propName,
+        property: undefined,
+      };
+    }
+
+    const resolved = resolvePropertyString(
+      prop.value,
+      propertyMap,
+      new Set([propName]),
+    );
+    return {
+      currentValue: resolved,
+      sharedVariableName: propName,
+      property: prop,
+    };
+  }
+
+  if (rawVersion.includes('${')) {
+    const resolved = resolvePropertyString(rawVersion, propertyMap);
+    return {
+      currentValue: resolved,
+      sharedVariableName: undefined,
+      property: undefined,
+    };
+  }
+
+  return {
+    currentValue: rawVersion,
+    sharedVariableName: undefined,
+    property: undefined,
+  };
+}
+
 function getDependencyType(scope: string | undefined): string {
   if (scope && scopeNames.has(scope)) {
     return scope;
@@ -69,63 +231,126 @@ function getDependencyType(scope: string | undefined): string {
 function collectDependency(
   content: string,
   node: XmlDocument,
-): PackageDependency | null {
+  packageFile: string,
+  ctx: WalkContext,
+): void {
   const { groupId, artifactId, version, scope } = node.attr;
 
   if (!version || !groupId || !artifactId) {
-    return null;
+    return;
   }
 
   const range = readAttributeRange(content, node, 'version', version);
   /* v8 ignore next 3 -- readAttributeRange only fails if xmldoc misreports attributes */
   if (!range) {
-    return null;
+    return;
   }
 
-  return {
+  const { currentValue, sharedVariableName, property } =
+    resolveVersionReference(version, ctx.propertyMap);
+
+  const dep: PackageDependency = {
     datasource: MavenDatasource.id,
     depName: `${groupId}:${artifactId}`,
-    currentValue: version,
     depType: getDependencyType(scope),
-    fileReplacePosition: range.valuePosition,
     registryUrls: [],
   };
+
+  if (currentValue) {
+    dep.currentValue = currentValue;
+  } else {
+    dep.currentValue = version;
+    dep.skipReason = 'contains-variable';
+  }
+
+  if (sharedVariableName) {
+    dep.sharedVariableName = sharedVariableName;
+  }
+
+  const targetFile = property?.packageFile ?? packageFile;
+  const targetPosition = property?.fileReplacePosition ?? range.valuePosition;
+  dep.fileReplacePosition = targetPosition;
+
+  if (!ctx.results.has(targetFile)) {
+    ctx.results.set(targetFile, { packageFile: targetFile, deps: [] });
+  }
+  ctx.results.get(targetFile)!.deps.push(dep);
 }
 
-function walkNode(
+async function walkNode(
   content: string,
   node: XmlDocument,
-  deps: PackageDependency[],
-): void {
+  packageFile: string,
+  ctx: WalkContext,
+): Promise<void> {
   for (const child of node.children) {
     if (!isXmlElement(child)) {
       continue;
     }
 
-    if (child.name === 'dependency') {
-      const dep = collectDependency(content, child);
-      if (dep) {
-        deps.push(dep);
+    if (child.name === 'property') {
+      if (child.attr.name && child.attr.value) {
+        const propRange = readAttributeRange(
+          content,
+          child,
+          'value',
+          child.attr.value,
+        );
+        if (propRange) {
+          addProperty(
+            ctx,
+            child.attr.name,
+            child.attr.value,
+            propRange.valuePosition,
+            packageFile,
+          );
+        }
+      } else if (child.attr.file) {
+        const propFilePath = upath.join(
+          upath.dirname(packageFile),
+          child.attr.file,
+        );
+        await walkPropertiesFile(propFilePath, ctx);
       }
+    } else if (child.name === 'dependency') {
+      collectDependency(content, child, packageFile, ctx);
     } else {
-      walkNode(content, child, deps);
+      await walkNode(content, child, packageFile, ctx);
     }
   }
 }
 
+async function walkPropertiesFile(
+  filePath: string,
+  ctx: WalkContext,
+): Promise<void> {
+  if (ctx.visitedPropertiesFiles.has(filePath)) {
+    return;
+  }
+  ctx.visitedPropertiesFiles.add(filePath);
+
+  const content = await readLocalFile(filePath, 'utf8');
+  if (!content) {
+    logger.debug(`ant manager: could not read properties file ${filePath}`);
+    return;
+  }
+
+  parsePropertiesFile(content, filePath, ctx);
+}
+
 async function walkXmlFile(
   packageFile: string,
-  visitedFiles: Set<string>,
-): Promise<PackageFileContent | null> {
-  if (visitedFiles.has(packageFile)) {
-    return null;
+  ctx: WalkContext,
+): Promise<void> {
+  if (ctx.visitedXmlFiles.has(packageFile)) {
+    return;
   }
-  visitedFiles.add(packageFile);
+  ctx.visitedXmlFiles.add(packageFile);
 
   const content = await readLocalFile(packageFile, 'utf8');
   if (!content) {
     logger.debug(`ant manager: could not read ${packageFile}`);
-    return null;
+    return;
   }
 
   let doc: XmlDocument;
@@ -133,32 +358,27 @@ async function walkXmlFile(
     doc = new XmlDocument(content);
   } catch {
     logger.debug(`ant manager: could not parse XML ${packageFile}`);
-    return null;
+    return;
   }
 
-  const deps: PackageDependency[] = [];
-  walkNode(content, doc, deps);
-
-  if (deps.length === 0) {
-    return null;
-  }
-
-  return { packageFile, deps };
+  await walkNode(content, doc, packageFile, ctx);
 }
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFileContent[] | null> {
-  const results: PackageFileContent[] = [];
-  const visitedFiles = new Set<string>();
+  const ctx: WalkContext = {
+    propertyMap: new Map(),
+    visitedXmlFiles: new Set(),
+    visitedPropertiesFiles: new Set(),
+    results: new Map(),
+  };
 
   for (const packageFile of packageFiles) {
-    const result = await walkXmlFile(packageFile, visitedFiles);
-    if (result) {
-      results.push(result);
-    }
+    await walkXmlFile(packageFile, ctx);
   }
 
+  const results = [...ctx.results.values()].filter((r) => r.deps.length > 0);
   return results.length > 0 ? results : null;
 }

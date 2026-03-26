@@ -28,6 +28,21 @@ function versionFromQuotedAttribute(
   return { value, start: quoteStart + 1, end };
 }
 
+function versionFromPropertiesContent(
+  content: string,
+  offset: number,
+): { value: string; start: number; end: number } | null {
+  let end = content.indexOf('\n', offset);
+  if (end === -1) {
+    end = content.length;
+  }
+  const value = content.slice(offset, end).trim();
+  if (!value) {
+    return null;
+  }
+  return { value, start: offset, end: offset + value.length };
+}
+
 export function updateDependency({
   fileContent,
   upgrade,
@@ -64,6 +79,29 @@ export function updateDependency({
       fileContent.slice(0, quotedAttribute.start) +
       newValue +
       fileContent.slice(quotedAttribute.end)
+    );
+  }
+
+  const propertiesValue = versionFromPropertiesContent(
+    fileContent,
+    fileReplacePosition,
+  );
+  if (propertiesValue) {
+    if (propertiesValue.value === newValue) {
+      return fileContent;
+    }
+
+    if (propertiesValue.value !== currentValue && !upgrade.sharedVariableName) {
+      logger.debug(
+        `ant manager: properties value mismatch at position ${fileReplacePosition}`,
+      );
+      return null;
+    }
+
+    return (
+      fileContent.slice(0, propertiesValue.start) +
+      newValue +
+      fileContent.slice(propertiesValue.end)
     );
   }
 
