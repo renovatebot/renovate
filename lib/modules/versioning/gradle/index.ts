@@ -190,6 +190,10 @@ function minSatisfyingVersion(
   }, null);
 }
 
+const strictlyShorthandRegex = regEx(
+  /^(?<baseRange>[^!]+)!!(?<preferredVal>[-._+a-zA-Z0-9]+)$/,
+);
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -218,6 +222,30 @@ function getNewValue({
       // our version is already "+" which includes ever version
       return null;
     }
+  }
+
+  const strictlyShorthandMatchGroups =
+    strictlyShorthandRegex.exec(currentValue)?.groups;
+  if (strictlyShorthandMatchGroups) {
+    const { baseRange, preferredVal } = strictlyShorthandMatchGroups;
+    const newBaseRange = mavenVersion.getNewValue({
+      currentValue: baseRange,
+      rangeStrategy,
+      newVersion,
+    });
+    // istanbul ignore if: the implementation has a non-null return type
+    if (newBaseRange === null) {
+      return null;
+    }
+
+    let newPreferredVal = preferredVal;
+    const preferredValueWasReferenced =
+      baseRange.includes(preferredVal) && !newBaseRange.includes(preferredVal);
+    if (preferredValueWasReferenced) {
+      newPreferredVal = newVersion;
+    }
+
+    return `${newBaseRange}!!${newPreferredVal}`;
   }
 
   return mavenVersion.getNewValue({ currentValue, rangeStrategy, newVersion });
