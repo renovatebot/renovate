@@ -27,7 +27,7 @@ export function pushForReview(options: {
   autoApprove?: boolean;
   labels?: string[];
 }): Promise<boolean> {
-  const pushOptions = ['notify=NONE'];
+  const pushOptions = ['notify=NONE', 'ready'];
   if (options.autoApprove) {
     pushOptions.push('label=Code-Review+2');
   }

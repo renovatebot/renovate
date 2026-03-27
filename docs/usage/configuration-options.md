@@ -4430,6 +4430,7 @@ This feature works with the following managers:
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
+- [`fleet`](modules/manager/fleet/index.md)
 - [`flux`](modules/manager/flux/index.md)
 - [`github-actions`](modules/manager/github-actions/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
