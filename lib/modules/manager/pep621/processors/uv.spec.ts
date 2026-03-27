@@ -897,9 +897,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       let execSnapshots: ReturnType<typeof mockExecAll>;
 
       beforeEach(() => {
-        vi.spyOn(Date, 'now').mockReturnValue(
-          new Date('2026-03-13T00:00:00.000Z').getTime(),
-        );
+         vi.useFakeTimers();
+         vi.setSystemTime(new Date('2026-03-13T00:00:00.000Z'));
         execSnapshots = mockExecAll();
         GlobalConfig.set(adminConfig);
         fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
@@ -915,6 +914,7 @@ describe('modules/manager/pep621/processors/uv', () => {
 
       afterEach(() => {
         vi.restoreAllMocks();
+        vi.useRealTimers();
       });
 
       it('sets UV_EXCLUDE_NEWER from minimumReleaseAge', async () => {

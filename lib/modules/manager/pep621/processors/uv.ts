@@ -250,7 +250,7 @@ export class UvProcessor extends BasePyProjectProcessor {
             }
           }
 
-          extraEnv.UV_EXCLUDE_NEWER = excludeNewerDate.toISO()!;
+          extraEnv.UV_EXCLUDE_NEWER = excludeNewerDate.toISO();
         }
       }
 
