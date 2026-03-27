@@ -9,7 +9,7 @@ import { logger } from '../logger/index.ts';
 import { capitalize } from './string.ts';
 
 export interface InterpolatorOptions {
-  name: 'secrets' | 'variables';
+  name: 'secrets' | 'variables' | 'env';
   templateRegex: RegExp;
   nameRegex: RegExp;
 }

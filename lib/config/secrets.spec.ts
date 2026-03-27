@@ -3,6 +3,7 @@ import {
   CONFIG_VALIDATION,
   CONFIG_VARIABLES_INVALID,
 } from '../constants/error-messages.ts';
+import { setCustomEnv } from '../util/env.ts';
 import { getConfig } from './defaults.ts';
 import {
   applySecretsAndVariablesToConfig,
@@ -55,6 +56,10 @@ describe('config/secrets', () => {
   });
 
   describe('applySecretsAndVariablesToConfig(config)', () => {
+    afterEach(() => {
+      setCustomEnv({});
+    });
+
     it('replaces both secrets and variables', () => {
       const config = {
         secrets: { TOKEN: 'secret123' },
@@ -126,6 +131,39 @@ describe('config/secrets', () => {
     it('throws if variable is missing', () => {
       const config = {
         hostRules: [{ hostType: '{{ variables.MISSING_VAR }}' }],
+      };
+      expect(() => applySecretsAndVariablesToConfig({ config })).toThrow(
+        CONFIG_VALIDATION,
+      );
+    });
+
+    it('replaces {{ env.X }} with customEnvVariables values in hostRules', () => {
+      setCustomEnv({ EXAMPLE_USER: 'somename' });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'example.com',
+            username: '{{ env.EXAMPLE_USER }}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result.hostRules).toEqual([
+        { matchHost: 'example.com', username: 'somename' },
+      ]);
+    });
+
+    it('throws if env variable in {{ env.X }} is not found', () => {
+      // No EXAMPLE_USER set
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'example.com',
+            username: '{{ env.EXAMPLE_USER }}',
+          },
+        ],
       };
       expect(() => applySecretsAndVariablesToConfig({ config })).toThrow(
         CONFIG_VALIDATION,
