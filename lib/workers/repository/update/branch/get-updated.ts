@@ -15,6 +15,7 @@ import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
 import { coerceString } from '../../../../util/string.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import { doAutoReplace } from './auto-replace.ts';
+import { executeCustomUpdateCommands } from './execute-update-commands.ts';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -104,6 +105,8 @@ export async function getUpdatedPackageFiles(
   const managerPackageFiles: Record<string, Set<string>> = {};
   const packageFileUpdatedDeps: Record<string, BranchUpgradeConfig[]> = {};
   const lockFileMaintenanceFiles: string[] = [];
+  const updateCommandArtifacts: FileChange[] = [];
+  const updateCommandErrors: ArtifactError[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
     const manager = upgrade.manager;
@@ -230,6 +233,36 @@ export async function getUpdatedPackageFiles(
         }
       }
     } else {
+      if (upgrade.customUpdateCommands?.commands?.length) {
+        if (reuseExistingBranch) {
+          logger.debug(
+            { packageFile, depName },
+            'Need to rebase branch as customUpdateCommands cannot verify existing branch output',
+          );
+          return getUpdatedPackageFiles({
+            ...config,
+            reuseExistingBranch: false,
+          });
+        }
+        logger.debug(
+          { packageFile, depName },
+          'Using customUpdateCommands instead of auto-replace',
+        );
+        const result = await executeCustomUpdateCommands(upgrade, config);
+        for (const file of result.updatedPackageFiles) {
+          if (file.type === 'addition') {
+            updatedFileContents[file.path] = file.contents!.toString();
+            delete nonUpdatedFileContents[file.path];
+          }
+        }
+        for (const artifact of result.updatedArtifacts) {
+          updateCommandArtifacts.push(artifact);
+        }
+        for (const error of result.artifactErrors) {
+          updateCommandErrors.push(error);
+        }
+        continue;
+      }
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
         let res = await doAutoReplace(
@@ -313,8 +346,8 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: updatedFileContents[name],
   }));
-  const updatedArtifacts: FileChange[] = [];
-  const artifactErrors: ArtifactError[] = [];
+  const updatedArtifacts: FileChange[] = [...updateCommandArtifacts];
+  const artifactErrors: ArtifactError[] = [...updateCommandErrors];
   const artifactNotices: ArtifactNotice[] = [];
   if (isNonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');

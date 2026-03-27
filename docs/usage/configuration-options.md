@@ -1363,6 +1363,113 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+## customUpdateCommands
+
+Update commands are commands that are executed by Renovate _instead of_ the regular file update (auto-replace) step.
+The intention is to handle cases where an external tool must be invoked to propagate a dependency update across multiple files — for example updating a lockfile, regenerating code, or running a CLI that modifies several files at once.
+
+All file changes produced by the commands (additions, modifications, and deletions) are captured via `git status` and committed by Renovate.
+This makes `customUpdateCommands` well-suited for tools like the [Backstage CLI](https://backstage.io/docs/tooling/cli/commands/#versionsbump), which updates `backstage.json`, `package.json`, `yarn.lock`, and other files in a single invocation.
+
+Each command must match at least one of the patterns defined in [`allowedCommands`](./self-hosted-configuration.md#allowedcommands) (a global-only configuration option) in order to be executed.
+If the list of allowed commands is empty then no commands will be executed.
+
+`customUpdateCommands` can be applied to specific dependencies using `packageRules`.
+For running commands _after_ a file has already been updated by Renovate, see [`postUpgradeTasks`](#postupgradetasks) instead.
+
+Example — using the Backstage CLI to bump all Backstage packages at once:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/backstage\\.json$/"],
+      "matchStrings": ["\"version\":\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "backstage/backstage",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["backstage/backstage"],
+      "customUpdateCommands": {
+        "commands": [
+          "yarn backstage-cli versions:bump --release {{{newValue}}}"
+        ],
+        "fileFilters": [
+          "backstage.json",
+          "package.json",
+          "yarn.lock",
+          "packages/*/package.json"
+        ]
+      }
+    }
+  ],
+  "allowedCommands": ["^yarn backstage-cli versions:bump"]
+}
+```
+
+The `customUpdateCommands` configuration consists of four fields:
+
+### customUpdateCommands.commands
+
+A list of commands that are executed instead of the regular file update step.
+
+You can use Handlebars templating in these commands (e.g. `{{{newValue}}}`, `{{{depName}}}`, `{{{packageFile}}}`).
+They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
+
+<!-- prettier-ignore -->
+!!! note
+    Do not use `git add` in your commands to add new files to be tracked. Instead, add them by including them in your [`customUpdateCommands.fileFilters`](#customupdatecommandsfilefilters).
+
+### customUpdateCommands.fileFilters
+
+A list of glob-style matchers that determine which files changed by the commands will be included in the final commit made by Renovate.
+Dotfiles are included.
+
+Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
+Specify a custom value for this if you wish to limit the committed changes to a known set of files.
+
+### customUpdateCommands.installTools
+
+Whether to install any additional tools dynamically before executing the `commands`.
+
+These must be known by [Containerbase](https://github.com/containerbase/base).
+
+<!-- prettier-ignore -->
+!!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
+
+```json title="Adding a tool requirement"
+{
+  "customUpdateCommands": {
+    "commands": ["yarn backstage-cli versions:bump --release {{{newValue}}}"],
+    "installTools": {
+      "yarn": {}
+    }
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    The tool objects inside `installTools` currently do not expose any additional configurability.
+
+### customUpdateCommands.workingDirTemplate
+
+A template describing the working directory in which the commands should be executed, relative to the repository root.
+If the template evaluates to a false value, the command will be executed from the root of the repository.
+
+```json
+{
+  "customUpdateCommands": {
+    "commands": ["my-update-script.sh"],
+    "workingDirTemplate": "{{{packageFileDir}}}"
+  }
+}
+```
+
 ## customizeDashboard
 
 You may use the `customizeDashboard` object to customize the Dependency Dashboard.
