@@ -1,3 +1,4 @@
+import { ZodError } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
@@ -56,6 +57,11 @@ export class ElmPackageDatasource extends Datasource {
         );
       })
       .unwrap();
+
+    if (err instanceof ZodError) {
+      logger.debug({ err }, 'elm-package: validation error');
+      return null;
+    }
 
     if (err) {
       this.handleGenericErrors(err);

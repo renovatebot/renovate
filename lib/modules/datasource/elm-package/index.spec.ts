@@ -126,6 +126,19 @@ describe('modules/datasource/elm-package/index', () => {
       expect(res).toBeNull();
     });
 
+    it('returns null for invalid schema response', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages/elm/core/releases.json')
+        .reply(200, { '1.0.0': 'not-a-number' });
+      expect(
+        await getPkgReleases({
+          datasource: ElmPackageDatasource.id,
+          packageName: 'elm/core',
+        }),
+      ).toBeNull();
+    });
+
     it('handles package without slash in name', async () => {
       httpMock
         .scope(baseUrl)
