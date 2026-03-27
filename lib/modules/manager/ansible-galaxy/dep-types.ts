@@ -9,6 +9,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'role',
     description: 'Ansible role',
   },
-] as const;
+];
 
 export type AnsibleGalaxyDepType = (typeof knownDepTypes)[number]['depType'];
