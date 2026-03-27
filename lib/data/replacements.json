@@ -1238,6 +1238,7 @@
     "description": "The `@wuchale/vite-plugin` package is now included in `wuchale` at `wuchale/vite`.",
     "packageRules": [
       {
+        "matchCurrentVersion": "^0.17.0",
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@wuchale/vite-plugin"],
         "replacementName": "wuchale",
