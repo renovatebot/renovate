@@ -896,8 +896,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       let execSnapshots: ReturnType<typeof mockExecAll>;
 
       beforeEach(() => {
-         vi.useFakeTimers();
-         vi.setSystemTime(new Date('2026-03-13T00:00:00.000Z'));
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-03-13T00:00:00.000Z'));
         execSnapshots = mockExecAll();
         GlobalConfig.set(adminConfig);
         fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
