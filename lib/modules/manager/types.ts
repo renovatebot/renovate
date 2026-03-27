@@ -133,12 +133,12 @@ export interface LookupUpdate {
  */
 export interface PackageDependency<
   T = Record<string, any>,
-  DT extends string = string,
+  DepType extends string = string,
 > extends ManagerData<T> {
   currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
-  depType?: DT;
+  depType?: DepType;
   fileReplacePosition?: number;
   sharedVariableName?: string;
   lineNumber?: number;
