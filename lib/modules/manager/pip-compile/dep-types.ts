@@ -4,7 +4,7 @@ export const knownDepTypes: DepTypeMetadata[] = [
   {
     depType: 'indirect',
     description:
-      'Indirect/transitive dependency locked in the compiled requirements file but not directly specified in source',
+      'Indirect/transitive dependency locked in the compiled requirements file, but not directly specified in source',
   },
 ];
 

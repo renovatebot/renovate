@@ -3,12 +3,11 @@ import type { DepTypeMetadata } from '../types.ts';
 export const knownDepTypes: DepTypeMetadata[] = [
   {
     depType: 'prod',
-    description: 'A production dependency in `mix.exs`',
+    description: 'A production dependency',
   },
   {
     depType: 'dev',
-    description:
-      'A development-only dependency in `mix.exs` (restricted via `only:`)',
+    description: 'A development-only dependency (restricted via `only:`)',
   },
 ];
 

@@ -11,8 +11,7 @@ export const knownDepTypes: DepTypeMetadata[] = [
   },
   {
     depType: 'devDependencies',
-    description:
-      'A dependency from a `buildSrc` project without Kotlin source files',
+    description: 'A dependency from a `buildSrc` project',
   },
   {
     depType: 'test',

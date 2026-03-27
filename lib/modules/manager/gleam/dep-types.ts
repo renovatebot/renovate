@@ -3,11 +3,11 @@ import type { DepTypeMetadata } from '../types.ts';
 export const knownDepTypes: DepTypeMetadata[] = [
   {
     depType: 'dependencies',
-    description: 'Listed under `dependencies` in `gleam.toml`',
+    description: 'Listed under `dependencies`',
   },
   {
     depType: 'devDependencies',
-    description: 'Listed under `dev-dependencies` in `gleam.toml`',
+    description: 'Listed under `dev-dependencies`',
   },
 ];
 

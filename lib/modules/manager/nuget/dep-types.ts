@@ -3,7 +3,7 @@ import type { DepTypeMetadata } from '../types.ts';
 export const knownDepTypes: DepTypeMetadata[] = [
   {
     depType: 'docker',
-    description: 'Container base image from `ContainerBaseImage` in .csproj',
+    description: 'Container base image from `ContainerBaseImage`',
   },
   {
     depType: 'nuget',

@@ -3,12 +3,11 @@ import type { DepTypeMetadata } from '../types.ts';
 export const knownDepTypes: DepTypeMetadata[] = [
   {
     depType: 'galaxy-collection',
-    description:
-      'Ansible Galaxy collection from `requirements.yml` or `galaxy.yml`',
+    description: 'Ansible Galaxy collection',
   },
   {
     depType: 'role',
-    description: 'Ansible role from `requirements.yml`',
+    description: 'Ansible role',
   },
 ] as const;
 
