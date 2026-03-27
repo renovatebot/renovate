@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { DockerDatasource } from '../../datasource/docker';
-import type { ExtractConfig } from '../types';
-import { extractPackageFile } from '.';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import type { ExtractConfig } from '../types.ts';
+import { extractPackageFile } from './index.ts';
 
 const config = partial<ExtractConfig>({});
 

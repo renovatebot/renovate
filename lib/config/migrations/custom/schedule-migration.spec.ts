@@ -1,4 +1,4 @@
-import { ScheduleMigration } from './schedule-migration';
+import { ScheduleMigration } from './schedule-migration.ts';
 
 describe('config/migrations/custom/schedule-migration', () => {
   it('migrates every friday', async () => {

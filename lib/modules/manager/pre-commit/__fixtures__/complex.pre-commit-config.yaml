@@ -69,6 +69,14 @@ repos:
           - '@trivago/prettier-plugin-sort-imports@^5.2.2'
           - prettier@^3.6.2
           - '' # invalid npm package
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+        language: golang
+        additional_dependencies:
+          - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
+          - "" # invalid go package
 
   # pre-commit meta hooks
   - repo: meta

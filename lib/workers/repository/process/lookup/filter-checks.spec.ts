@@ -1,28 +1,28 @@
+import * as _datasourceCommon from '../../../../modules/datasource/common.ts';
+import { Datasource } from '../../../../modules/datasource/datasource.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
   Release,
   ReleaseResult,
-} from '../../../../modules/datasource';
-import * as _datasourceCommon from '../../../../modules/datasource/common';
-import { Datasource } from '../../../../modules/datasource/datasource';
-import * as allVersioning from '../../../../modules/versioning';
-import { clone } from '../../../../util/clone';
-import * as _dateUtil from '../../../../util/date';
-import * as _mergeConfidence from '../../../../util/merge-confidence';
-import { toMs } from '../../../../util/pretty-time';
-import type { Timestamp } from '../../../../util/timestamp';
-import { filterInternalChecks } from './filter-checks';
-import type { LookupUpdateConfig, UpdateResult } from './types';
+} from '../../../../modules/datasource/index.ts';
+import * as allVersioning from '../../../../modules/versioning/index.ts';
+import { clone } from '../../../../util/clone.ts';
+import * as _dateUtil from '../../../../util/date.ts';
+import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import { filterInternalChecks } from './filter-checks.ts';
+import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
-vi.mock('../../../../util/date');
+vi.mock('../../../../util/date.ts');
 const dateUtil = vi.mocked(_dateUtil);
 
-vi.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/merge-confidence/index.ts');
 const mergeConfidence = vi.mocked(_mergeConfidence);
 
-vi.mock('../../../../modules/datasource/common');
+vi.mock('../../../../modules/datasource/common.ts');
 const { getDatasourceFor } = vi.mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {

@@ -1,7 +1,7 @@
-import * as httpMock from '../../../../test/http-mock';
-import type { Timestamp } from '../../../util/timestamp';
-import { MINIMUM_RELEASE_TIMESTAMP } from './schema';
-import { JsrDatasource } from '.';
+import * as httpMock from '../../../../test/http-mock.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { JsrDatasource } from './index.ts';
+import { MINIMUM_RELEASE_TIMESTAMP } from './schema.ts';
 
 const jsrPackageMetadataResponse = {
   latest: '0.0.2',

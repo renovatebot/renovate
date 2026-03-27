@@ -1,10 +1,10 @@
-import { logger, partial, platform } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
-import type { RenovateConfig } from '../../../config/types';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { Pr } from '../../../modules/platform';
-import type { BranchConfig } from '../../types';
-import { ensureReconfigurePrComment, getConfigDesc } from './comment';
+import { logger, partial, platform } from '../../../../test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { Pr } from '../../../modules/platform/index.ts';
+import type { BranchConfig } from '../../types.ts';
+import { ensureReconfigurePrComment, getConfigDesc } from './comment.ts';
 
 describe('workers/repository/reconfigure/comment', () => {
   describe('ensureReconfigurePrComment()', () => {

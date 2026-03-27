@@ -1,4 +1,4 @@
-import nuget from '.';
+import nuget from './index.ts';
 
 describe('modules/versioning/nuget/index', () => {
   describe('isSingleVersion()', () => {

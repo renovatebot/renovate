@@ -1,5 +1,5 @@
 import { createUnzip } from 'zlib';
-import * as fs from '../../../util/fs';
+import * as fs from '../../../util/fs/index.ts';
 
 /**
  * Extracts the specified compressed file to the output file.

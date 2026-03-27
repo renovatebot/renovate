@@ -1,9 +1,9 @@
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { parseYaml } from '../../../util/yaml';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { GitlabDocumentArray } from './schema';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { GitlabDocumentArray } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

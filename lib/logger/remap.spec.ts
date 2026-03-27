@@ -4,7 +4,7 @@ import {
   resetRepositoryLogLevelRemaps,
   setGlobalLogLevelRemaps,
   setRepositoryLogLevelRemaps,
-} from './remap';
+} from './remap.ts';
 
 describe('logger/remap', () => {
   afterEach(() => {

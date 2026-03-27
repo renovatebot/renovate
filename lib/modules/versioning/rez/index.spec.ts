@@ -1,5 +1,5 @@
-import semver from '../semver';
-import { api as versioning } from '.';
+import semver from '../semver/index.ts';
+import { api as versioning } from './index.ts';
 
 describe('modules/versioning/rez/index', () => {
   it.each`

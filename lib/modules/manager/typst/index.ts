@@ -1,5 +1,5 @@
-import { TypstDatasource } from '../../datasource/typst';
-import { extractPackageFile } from './extract';
+import { TypstDatasource } from '../../datasource/typst/index.ts';
+import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile };
 

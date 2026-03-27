@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const droneciRegistryAlias = Fixtures.get('.drone2.yml');
 

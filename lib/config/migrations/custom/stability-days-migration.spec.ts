@@ -1,4 +1,4 @@
-import { StabilityDaysMigration } from './stability-days-migration';
+import { StabilityDaysMigration } from './stability-days-migration.ts';
 
 describe('config/migrations/custom/stability-days-migration', () => {
   it('migrates', async () => {

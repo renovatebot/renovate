@@ -1,6 +1,6 @@
-import { regEx } from '../../../util/regex';
-import type { HelmRepository } from './schema';
-import type { FluxManifest } from './types';
+import { regEx } from '../../../util/regex.ts';
+import type { HelmRepository } from './schema.ts';
+import type { FluxManifest } from './types.ts';
 
 export const systemManifestFileNameRegex = '(?:^|/)gotk-components\\.ya?ml$';
 

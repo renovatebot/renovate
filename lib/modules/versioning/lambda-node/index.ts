@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import { api as nodeApi } from '../node';
-import type { VersioningApi } from '../types';
-import { findLambdaScheduleForVersion } from './schedule';
+import { api as nodeApi } from '../node/index.ts';
+import type { VersioningApi } from '../types.ts';
+import { findLambdaScheduleForVersion } from './schedule.ts';
 
 export const id = 'lambda-node';
 export const displayName = 'Lambda Node.js Runtime';

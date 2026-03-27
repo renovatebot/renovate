@@ -1,5 +1,5 @@
-import { RegExpVersioningApi } from '../regex';
-import type { VersioningApi } from '../types';
+import { RegExpVersioningApi } from '../regex/index.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'kubernetes-api';
 export const displayName = 'Kubernetes API';

@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { Http } from '../../../util/http';
-import { VersionsEndpointCache, memCache } from './versions-endpoint-cache';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { Http } from '../../../util/http/index.ts';
+import { VersionsEndpointCache, memCache } from './versions-endpoint-cache.ts';
 
 const rubygems = new VersionsEndpointCache(new Http('rubygems'));
 

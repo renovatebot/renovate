@@ -1,5 +1,6 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { emojify } from '../../../util/emoji.ts';
+import { regEx } from '../../../util/regex.ts';
 
 const re = regEx(
   `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
@@ -14,7 +15,9 @@ export function smartTruncate(input: string, len: number): string {
     `Truncating PR body due to platform limitation of ${len} characters`,
   );
 
-  const note = `> **Note:** This PR body was truncated due to platform limits.\n\n`;
+  const note = emojify(
+    `> :information_source: **Note**\n> \n> This PR body was truncated due to platform limits.\n\n`,
+  );
   const truncatedInput = note + input;
 
   const reMatch = re.exec(truncatedInput);

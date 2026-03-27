@@ -1,15 +1,18 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { joinUrlParts } from '../../../util/url';
-import * as semanticVersioning from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { Release } from '../index';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { DenoAPIModuleResponse, DenoAPIModuleVersionResponse } from './schema';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import * as semanticVersioning from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { Release } from '../index.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import {
+  DenoAPIModuleResponse,
+  DenoAPIModuleVersionResponse,
+} from './schema.ts';
 
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';
@@ -33,13 +36,7 @@ export class DenoDatasource extends Datasource {
     super(DenoDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${DenoDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `getReleases:${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -69,11 +66,21 @@ export class DenoDatasource extends Datasource {
     return await this.getReleaseResult(moduleAPIURL);
   }
 
-  @cache({
-    namespace: `datasource-${DenoDatasource.id}`,
-    key: (moduleAPIURL) => `getReleaseResult:${moduleAPIURL}`,
-  })
-  async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${DenoDatasource.id}`,
+        // TODO: types (#22198)
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  private async _getReleaseResult(
+    moduleAPIURL: string,
+  ): Promise<ReleaseResult> {
     const detailsCacheKey = `details:${moduleAPIURL}`;
     const releasesCache: Record<string, Release> =
       (await packageCache.get(
@@ -128,5 +135,15 @@ export class DenoDatasource extends Datasource {
     }
 
     return { releases, tags };
+  }
+
+  getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
+    return withCache(
+      {
+        namespace: `datasource-${DenoDatasource.id}`,
+        key: `getReleaseResult:${moduleAPIURL}`,
+      },
+      () => this._getReleaseResult(moduleAPIURL),
+    );
   }
 }

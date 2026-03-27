@@ -1,20 +1,21 @@
 import os from 'node:os';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { resetPrefetchedImages } from '../../../util/exec/docker';
-import { ExecError } from '../../../util/exec/exec-error';
-import type { StatusResult } from '../../../util/git/types';
-import { getPkgReleases } from '../../datasource';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
-import { env, fs, git, logger, partial, scm } from '~test/util';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git, logger, partial, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { getPkgReleases } from '../../datasource/index.ts';
+import { isGradleExecutionAllowed } from './artifacts.ts';
+import { updateArtifacts } from './index.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../../../util/exec/env');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -23,7 +24,10 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+
+  // although not enabled by default, let's assume it is
+  allowedUnsafeExecutions: ['gradleWrapper'],
 };
 
 const osPlatformSpy = vi.spyOn(os, 'platform');
@@ -82,6 +86,54 @@ describe('modules/manager/gradle/artifacts', () => {
     });
   });
 
+  describe('isGradleExecutionAllowed', () => {
+    it('returns false when allowedUnsafeExecutions is empty (as it not enabled by default option)', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: undefined,
+      });
+
+      const res = isGradleExecutionAllowed('gradlew');
+
+      expect(res).toBeFalse();
+    });
+
+    it('returns true when allowedUnsafeExecutions includes `gradleWrapper`', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: ['gradleWrapper'],
+      });
+
+      const res = isGradleExecutionAllowed('gradlew');
+
+      expect(res).toBeTrue();
+    });
+
+    it('returns false when allowedUnsafeExecutions does not include `gradleWrapper`', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const res = isGradleExecutionAllowed('gradlew');
+
+      expect(res).toBeFalse();
+    });
+
+    it('logs when allowedUnsafeExecutions does not include `gradleWrapper`', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      isGradleExecutionAllowed('some_gradle-wrapper.command');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        'Gradle wrapper command, `some_gradle-wrapper.command`, was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
+      );
+    });
+  });
+
   describe('lockfile tests', () => {
     it('aborts if no lockfile is found', async () => {
       const execSnapshots = mockExecAll();
@@ -121,6 +173,77 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toBeEmptyArray();
     });
 
+    it('aborts if allowedUnsafeExecutions does not include `gradleWrapper`', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const execSnapshots = mockExecAll();
+
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [
+            { depName: 'org.junit.jupiter:junit-jupiter-api' },
+            { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+          ],
+          newPackageFileContent: '',
+          config: {},
+        }),
+      ).toBeNull();
+
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
+      );
+      expect(execSnapshots).toBeEmptyArray();
+    });
+
+    it('uses custom JVM heap settings when toolSettings are configured', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        toolSettings: { jvmMaxMemory: 600 },
+      });
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms600m -Xmx600m" --console=plain --dependency-verification lenient -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms600m -Xmx600m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
+          },
+        },
+      ]);
+    });
+
     it('updates lock file', async () => {
       const execSnapshots = mockExecAll();
 
@@ -145,16 +268,18 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -188,16 +313,18 @@ describe('modules/manager/gradle/artifacts', () => {
       // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q properties',
+          cmd: 'gradlew.bat -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: 'gradlew.bat -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -231,16 +358,18 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -282,16 +411,18 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -318,7 +449,7 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -328,11 +459,11 @@ describe('modules/manager/gradle/artifacts', () => {
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar' +
+            'ghcr.io/renovatebot/base-image' +
             ' bash -l -c "' +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew --console=plain --dependency-verification lenient -q properties' +
+            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q properties' +
             '"',
           options: { cwd: '/tmp/github/some/repo' },
         },
@@ -345,15 +476,17 @@ describe('modules/manager/gradle/artifacts', () => {
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar' +
+            'ghcr.io/renovatebot/base-image' +
             ' bash -l -c "' +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
+            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -382,15 +515,17 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 16.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'install-tool java 16.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -423,16 +558,18 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -465,7 +602,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ).toEqual([
         {
           artifactError: {
-            lockFile: 'build.gradle',
+            fileName: 'build.gradle',
             stderr: 'failed',
           },
         },
@@ -473,7 +610,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
@@ -486,7 +623,7 @@ describe('modules/manager/gradle/artifacts', () => {
         cmd: '',
         stdout: '',
         stderr: '',
-        options: { encoding: 'utf8' },
+        options: {},
       });
       mockExecAll(execError);
 
@@ -526,15 +663,17 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -578,13 +717,49 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
+    });
+
+    it('aborts verification metadata updates if allowedUnsafeExecutions does not include `gradleWrapper`', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        }),
+      );
+
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [
+            { depName: 'org.junit.jupiter:junit-jupiter-api' },
+            { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+          ],
+          newPackageFileContent: '',
+          config: {},
+        }),
+      ).toBeNull();
+
+      expect(execSnapshots).toBeEmptyArray();
     });
 
     it('updates existing checksums also if verify-checksums is disabled', async () => {
@@ -631,10 +806,12 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -688,23 +865,27 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -744,10 +925,12 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -786,10 +969,12 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);

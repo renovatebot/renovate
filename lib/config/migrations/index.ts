@@ -1,1 +1,1 @@
-export { MigrationsService } from './migrations-service';
+export { MigrationsService } from './migrations-service.ts';

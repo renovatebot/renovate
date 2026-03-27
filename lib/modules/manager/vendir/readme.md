@@ -80,3 +80,22 @@ directories:
         # optional if tagSelection is specified (available in v0.22.0+)
         tag: v0.1.0
 ```
+
+### HTTP
+
+<!-- prettier-ignore -->
+!!! note
+    Updates to dependencies tracked through the HTTP source can only be updated using [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
+
+Renovate can extract HTTP dependency sources, but will not update them without [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
+
+```yaml title="Example vendir.yml for syncing a remote file"
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+  - path: internal
+    contents:
+      - path: renovate-ce
+        http:
+          url: https://raw.githubusercontent.com/mend/renovate-ce-ee/refs/main/docs/openapi-community.yaml
+```

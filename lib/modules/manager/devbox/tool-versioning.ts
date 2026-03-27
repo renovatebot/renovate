@@ -1,9 +1,9 @@
-import * as looseVersioning from '../../versioning/loose';
-import * as nodeVersioning from '../../versioning/node';
-import * as pythonVersioning from '../../versioning/python';
-import * as rubyVersioning from '../../versioning/ruby';
-import * as semver from '../../versioning/semver';
-import type { VersioningApi } from '../../versioning/types';
+import * as looseVersioning from '../../versioning/loose/index.ts';
+import * as nodeVersioning from '../../versioning/node/index.ts';
+import * as pythonVersioning from '../../versioning/python/index.ts';
+import * as rubyVersioning from '../../versioning/ruby/index.ts';
+import * as semver from '../../versioning/semver/index.ts';
+import type { VersioningApi } from '../../versioning/types.ts';
 
 export type ToolVersioning = Record<string, { api: VersioningApi; id: string }>;
 

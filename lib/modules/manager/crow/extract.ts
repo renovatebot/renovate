@@ -1,9 +1,9 @@
 import { isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceObject } from '../../../util/object';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import { CrowConfig } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import { CrowConfig } from './schema.ts';
 
 function crowVersionDecider(config: CrowConfig): (keyof CrowConfig)[] {
   const keys = ['clone', 'steps', 'pipeline', 'services'];

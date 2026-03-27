@@ -1,14 +1,17 @@
 // TODO: types (#22198)
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import type { CombinedHostRule } from '../../../types';
-import type { ToolConstraint } from '../../../util/exec/types';
-import { coerceNumber } from '../../../util/number';
-import { api, id as composerVersioningId } from '../../versioning/composer';
-import type { UpdateArtifactsConfig } from '../types';
-import type { Lockfile, PackageFile } from './schema';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import type { CombinedHostRule } from '../../../types/index.ts';
+import type { ToolConstraint } from '../../../util/exec/types.ts';
+import { coerceNumber } from '../../../util/number.ts';
+import {
+  api,
+  id as composerVersioningId,
+} from '../../versioning/composer/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import type { Lockfile, PackageFile } from './schema.ts';
 
 export { composerVersioningId };
 

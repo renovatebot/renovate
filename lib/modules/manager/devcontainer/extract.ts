@@ -1,16 +1,16 @@
-import { logger } from '../../../logger';
-import { GolangVersionDatasource } from '../../datasource/golang-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { PythonVersionDatasource } from '../../datasource/python-version';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import { isValidDependency } from '../custom/utils';
-import { getDep as getDockerDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { isValidDependency } from '../custom/utils.ts';
+import { getDep as getDockerDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { DevContainerFile } from './schema';
+} from '../types.ts';
+import { DevContainerFile } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

@@ -1,5 +1,5 @@
-import { get } from '..';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { get } from '../index.ts';
 
 describe('modules/versioning/regex/index', () => {
   describe('regex versioning', () => {

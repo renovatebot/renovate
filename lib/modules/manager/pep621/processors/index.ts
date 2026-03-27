@@ -1,7 +1,7 @@
-import { HatchProcessor } from './hatch';
-import { PdmProcessor } from './pdm';
-import type { PyProjectProcessor } from './types';
-import { UvProcessor } from './uv';
+import { HatchProcessor } from './hatch.ts';
+import { PdmProcessor } from './pdm.ts';
+import type { PyProjectProcessor } from './types.ts';
+import { UvProcessor } from './uv.ts';
 
 export const processors: PyProjectProcessor[] = [
   new HatchProcessor(),

@@ -1,7 +1,7 @@
-import * as azureApi from '../../platform/azure/azure-got-wrapper';
-import { AzureTagsDatasource } from '.';
+import * as azureApi from '../../platform/azure/azure-got-wrapper.ts';
+import { AzureTagsDatasource } from './index.ts';
 
-vi.mock('../../platform/azure/azure-got-wrapper');
+vi.mock('../../platform/azure/azure-got-wrapper.ts');
 
 describe('modules/datasource/azure-tags/index', () => {
   let azureTags: AzureTagsDatasource;

@@ -1,8 +1,8 @@
-import { logger } from '../../../../../logger';
-import semver from '../../../../versioning/semver';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../../../types';
-import * as packageLock from './package-lock';
-import * as yarnLock from './yarn-lock';
+import { logger } from '../../../../../logger/index.ts';
+import semver from '../../../../versioning/semver/index.ts';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../../../types.ts';
+import * as packageLock from './package-lock/index.ts';
+import * as yarnLock from './yarn-lock/index.ts';
 
 export async function updateLockedDependency(
   config: UpdateLockedConfig,
