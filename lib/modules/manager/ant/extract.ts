@@ -1,12 +1,12 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { regEx } from '../../../util/regex.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
-  PackageFileContent,
+  PackageFile,
 } from '../types.ts';
 
 const scopeNames = new Set([
@@ -20,10 +20,6 @@ const scopeNames = new Set([
 function isXmlElement(node: unknown): node is XmlDocument {
   const n = node as { type?: string };
   return n?.type === 'element';
-}
-
-function escapeRegex(input: string): string {
-  return input.replace(regEx(/[.*+?^${}()|[\]\\]/g), '\\$&');
 }
 
 function readAttributeRange(
@@ -45,18 +41,18 @@ function readAttributeRange(
   }
 
   const tagContent = content.slice(startTagPosition, tagEnd + 1);
-  const attrRegex = regEx(
-    `\\b${attrName}\\s*=\\s*(?<quote>["'])(?<value>${escapeRegex(attrValue)})\\k<quote>`,
-  );
-  const match = attrRegex.exec(tagContent);
+  const escaped = escapeRegExp(attrValue);
+  const match =
+    regEx(`\\b${attrName}\\s*=\\s*"(${escaped})"`).exec(tagContent) ??
+    regEx(`\\b${attrName}\\s*=\\s*'(${escaped})'`).exec(tagContent);
   /* v8 ignore next 3 -- only called with attributes already parsed by xmldoc */
-  if (!match?.groups?.quote || !match.groups.value) {
+  if (!match?.[1]) {
     return null;
   }
 
   const valuePosition =
-    startTagPosition + match.index + match[0].indexOf(match.groups.value);
-  return { valuePosition, valueLength: match.groups.value.length };
+    startTagPosition + match.index + match[0].indexOf(match[1]);
+  return { valuePosition, valueLength: match[1].length };
 }
 
 function getDependencyType(scope: string | undefined): string {
@@ -116,7 +112,7 @@ function walkNode(
 async function walkXmlFile(
   packageFile: string,
   visitedFiles: Set<string>,
-): Promise<PackageFileContent | null> {
+): Promise<PackageFile | null> {
   if (visitedFiles.has(packageFile)) {
     return null;
   }
@@ -149,8 +145,8 @@ async function walkXmlFile(
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[],
-): Promise<PackageFileContent[] | null> {
-  const results: PackageFileContent[] = [];
+): Promise<PackageFile[] | null> {
+  const results: PackageFile[] = [];
   const visitedFiles = new Set<string>();
 
   for (const packageFile of packageFiles) {
