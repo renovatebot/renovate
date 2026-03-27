@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -22,6 +23,8 @@ import {
   renameLocalFile,
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
@@ -34,6 +37,35 @@ import {
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
+
+const npmrcBeforeRegex = regEx(
+  /^\s*before\s*=\s*"?(\d{4}-\d{2}-\d{2}(?:T[\d:.]+Z?)?)"?(?:\s+[;#].*)?\s*$/m,
+);
+const npmrcMinReleaseAgeRegex = regEx(
+  /^\s*min-release-age\s*=\s*"?(\d+)"?(?:\s+[;#].*)?\s*$/m,
+);
+
+export function parseNpmrcCooldownDate(
+  npmrcContent: string | null,
+): DateTime<true> | null {
+  const dateStr = npmrcContent?.match(npmrcBeforeRegex)?.[1];
+  if (dateStr) {
+    const parsed = DateTime.fromISO(dateStr, { zone: 'utc' });
+    if (parsed.isValid) {
+      return parsed;
+    }
+    logger.debug(`Invalid before date in .npmrc: ${dateStr}, ignoring`);
+  }
+
+  const daysStr = npmrcContent?.match(npmrcMinReleaseAgeRegex)?.[1];
+  if (daysStr) {
+    return DateTime.now()
+      .minus({ days: parseInt(daysStr, 10) })
+      .toUTC();
+  }
+
+  return null;
+}
 
 async function getNpmConstraintFromPackageLock(
   lockFileDir: string,
@@ -67,6 +99,7 @@ export async function generateLockFile(
   filename: string,
   config: Partial<PostUpdateConfig> = {},
   upgrades: Upgrade[] = [],
+  npmrcContent: string | null = null,
 ): Promise<GenerateLockFileResult> {
   // TODO: don't assume package-lock.json is in the same directory
   const lockFileName = upath.join(lockFileDir, filename);
@@ -109,6 +142,42 @@ export async function generateLockFile(
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       cmdOptions += ' --ignore-scripts';
+    }
+
+    if (config.minimumReleaseAge) {
+      const ms = toMs(config.minimumReleaseAge);
+      if (ms === null) {
+        logger.debug(
+          {
+            minimumReleaseAge: config.minimumReleaseAge,
+          },
+          'Invalid minimumReleaseAge, skipping --before for npm install',
+        );
+      } else {
+        let beforeDate = DateTime.now().minus(ms).toUTC();
+
+        const npmrcDate = parseNpmrcCooldownDate(npmrcContent);
+        if (npmrcDate && npmrcDate < beforeDate) {
+          logger.debug(
+            {
+              npmrcDate: npmrcDate.toISO(),
+              beforeDate: beforeDate.toISO(),
+            },
+            'Using stricter .npmrc cooldown date over minimumReleaseAge date',
+          );
+          beforeDate = npmrcDate;
+        }
+
+        const beforeISO = beforeDate.toISO();
+        logger.debug(
+          {
+            beforeISO,
+            minimumReleaseAge: config.minimumReleaseAge,
+          },
+          'Setting npm --before based on minimumReleaseAge',
+        );
+        cmdOptions += ` --before=${beforeISO}`;
+      }
     }
 
     const extraEnv: ExtraEnv = {
