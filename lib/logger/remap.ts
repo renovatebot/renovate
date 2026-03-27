@@ -1,7 +1,6 @@
-import type { LogLevelString } from 'bunyan';
-import type { StringMatchPredicate } from '../util/string-match';
-import { getRegexOrGlobPredicate } from '../util/string-match';
-import type { LogLevelRemap } from './types';
+import type { StringMatchPredicate } from '../util/string-match.ts';
+import { getRegexOrGlobPredicate } from '../util/string-match.ts';
+import type { BunyanLogLevel, LogLevelRemap } from './types.ts';
 
 let globalRemaps: LogLevelRemap[] | undefined;
 let repositoryRemaps: LogLevelRemap[] | undefined;
@@ -11,6 +10,7 @@ let matcherCache = new WeakMap<LogLevelRemap, StringMatchPredicate>();
 function match(remap: LogLevelRemap, input: string): boolean {
   const { matchMessage: pattern } = remap;
   let matchFn = matcherCache.get(remap);
+  // v8 ignore else -- TODO: add test #40625
   if (!matchFn) {
     matchFn = getRegexOrGlobPredicate(pattern);
     matcherCache.set(remap, matchFn);
@@ -19,9 +19,10 @@ function match(remap: LogLevelRemap, input: string): boolean {
   return matchFn(input);
 }
 
-export function getRemappedLevel(msg: string): LogLevelString | null {
+export function getRemappedLevel(msg: string): BunyanLogLevel | null {
   if (repositoryRemaps) {
     for (const remap of repositoryRemaps) {
+      // v8 ignore else -- TODO: add test #40625
       if (match(remap, msg)) {
         return remap.newLogLevel;
       }

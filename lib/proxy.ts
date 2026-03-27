@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { createGlobalProxyAgent } from 'global-agent';
-import { logger } from './logger';
+import { logger } from './logger/index.ts';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 

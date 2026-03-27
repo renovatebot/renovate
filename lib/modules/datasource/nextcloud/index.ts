@@ -1,10 +1,10 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import * as semver from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { Applications } from './schema';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as semver from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { Applications } from './schema.ts';
 
 export class NextcloudDatasource extends Datasource {
   static readonly id = 'nextcloud';
@@ -21,12 +21,7 @@ export class NextcloudDatasource extends Datasource {
     super(NextcloudDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${NextcloudDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -77,5 +72,16 @@ export class NextcloudDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${NextcloudDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,5 +1,5 @@
-import type { PackageDependency } from '../../types';
-import type { HomebrewManagerData, UrlParsedResult } from '../types';
+import type { PackageDependency } from '../../types.ts';
+import type { HomebrewManagerData, UrlParsedResult } from '../types.ts';
 
 export abstract class HomebrewUrlHandler {
   abstract readonly type: string;

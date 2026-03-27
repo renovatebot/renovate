@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import type { PackageFileContent } from '../types';
-import { BitriseFile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFileContent } from '../types.ts';
+import { BitriseFile } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

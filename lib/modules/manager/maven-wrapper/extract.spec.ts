@@ -1,4 +1,4 @@
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 const onlyWrapperProperties =
   'wrapperUrl=https://repo.maven.apache.org/maven2/io/takari/maven-wrapper/0.5.6/maven-wrapper-0.5.6.jar';
@@ -21,7 +21,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven',
           packageName: 'org.apache.maven:apache-maven',
-          versioning: 'maven',
         },
         {
           currentValue: '3.1.0',
@@ -30,7 +29,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven-wrapper',
           packageName: 'org.apache.maven.wrapper:maven-wrapper',
-          versioning: 'maven',
         },
       ]);
     });
@@ -46,7 +44,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven-wrapper',
           packageName: 'org.apache.maven.wrapper:maven-wrapper',
-          versioning: 'maven',
         },
       ]);
     });
@@ -60,7 +57,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven-wrapper',
           packageName: 'org.apache.maven.wrapper:maven-wrapper',
-          versioning: 'maven',
         },
       ]);
     });
@@ -77,7 +73,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven-wrapper',
           packageName: 'org.apache.maven.wrapper:maven-wrapper',
-          versioning: 'maven',
         },
       ]);
     });
@@ -91,7 +86,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven-wrapper',
           packageName: 'org.apache.maven.wrapper:maven-wrapper',
-          versioning: 'maven',
         },
       ]);
     });
@@ -105,7 +99,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven-wrapper',
           packageName: 'org.apache.maven.wrapper:maven-wrapper',
-          versioning: 'maven',
         },
       ]);
     });
@@ -125,7 +118,6 @@ describe('modules/manager/maven-wrapper/extract', () => {
           datasource: 'maven',
           depName: 'maven',
           packageName: 'org.apache.maven:apache-maven',
-          versioning: 'maven',
         },
       ]);
     });

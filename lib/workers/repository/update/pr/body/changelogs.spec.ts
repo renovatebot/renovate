@@ -1,8 +1,8 @@
-import * as _template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
-import { getChangelogs } from './changelogs';
+import * as _template from '../../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../../types.ts';
+import { getChangelogs } from './changelogs.ts';
 
-vi.mock('../../../../../util/template');
+vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/changelogs', () => {

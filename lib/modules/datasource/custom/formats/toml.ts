@@ -1,7 +1,7 @@
-import { readLocalFile } from '../../../../util/fs';
-import type { Http } from '../../../../util/http';
-import { parse as parseToml } from '../../../../util/toml';
-import type { CustomDatasourceFetcher } from './types';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import type { Http } from '../../../../util/http/index.ts';
+import { parse as parseToml } from '../../../../util/toml.ts';
+import type { CustomDatasourceFetcher } from './types.ts';
 
 export class TomlFetcher implements CustomDatasourceFetcher {
   async fetch(http: Http, registryURL: string): Promise<unknown> {

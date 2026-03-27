@@ -3,33 +3,38 @@
   "all": {
     "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
+      "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
+      "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
-      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
+      "replacements:edb-jdbc-to-enterprisedb",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
+      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-plugin-node-to-maintained-fork",
       "replacements:eslint-plugin-vitest-to-scoped",
+      "replacements:express-mung-to-express-response-middleware",
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:framer-motion-to-motion",
-      "replacements:hapi-to-scoped",
       "replacements:google-github-action-release-please-to-googleapis",
       "replacements:grafana-oss-to-grafana",
+      "replacements:hapi-to-scoped",
+      "replacements:home-operations-to-official",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
       "replacements:k8s-registry-move",
+      "replacements:kotlin-logging-to-oshai",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:ojdbc-to-ojdbc11",
-      "replacements:ojdbc10-to-ojdbc11",
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
@@ -39,6 +44,7 @@
       "replacements:read-pkg-up-rename",
       "replacements:redux-devtools-extension-to-scope",
       "replacements:renovate-pep440-to-renovatebot-pep440",
+      "replacements:rolldown-vite-to-vite",
       "replacements:rollup-babel-to-scoped",
       "replacements:rollup-json-to-scoped",
       "replacements:rollup-node-resolve-to-scoped",
@@ -47,14 +53,27 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
     "ignoreDeps": []
+  },
+  "actions-attest-build-provenance-to-actions-attest": {
+    "description": "`actions/attest-build-provenance` was renamed to `actions/attest`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=4",
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["actions/attest-build-provenance"],
+        "replacementName": "actions/attest"
+      }
+    ]
   },
   "airbnb-prop-types-to-prop-types-tools": {
     "description": "`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.",
@@ -138,6 +157,17 @@
         "matchPackageNames": ["babel-eslint"],
         "replacementName": "@babel/eslint-parser",
         "replacementVersion": "7.11.0"
+      }
+    ]
+  },
+  "base-ui-components-to-base-ui": {
+    "description": "`@base-ui-components/react` was renamed to `@base-ui/react`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@base-ui-components/react"],
+        "replacementName": "@base-ui/react",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
@@ -244,15 +274,20 @@
       }
     ]
   },
-  "eslint-plugin-eslint-comments-to-maintained-fork": {
-    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+  "edb-jdbc-to-enterprisedb": {
+    "description": "`com.edb:edb-jdbc` and `com.edb:edb-jdbc18` were moved to `com.enterprisedb:edb-jdbc`.",
     "packageRules": [
       {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["eslint-plugin-eslint-comments"],
-        "matchCurrentVersion": "^3.2.0",
-        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
-        "replacementVersion": "3.2.0"
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
+      },
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.edb:edb-jdbc18"],
+        "replacementName": "com.enterprisedb:edb-jdbc",
+        "replacementVersion": "42.5.4.2"
       }
     ]
   },
@@ -265,6 +300,18 @@
         "matchPackageNames": ["eslint-config-standard-with-typescript"],
         "replacementName": "eslint-config-love",
         "replacementVersion": "43.1.0"
+      }
+    ]
+  },
+  "eslint-plugin-eslint-comments-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
+        "replacementVersion": "3.2.0"
       }
     ]
   },
@@ -289,6 +336,18 @@
         "matchPackageNames": ["eslint-plugin-vitest"],
         "replacementName": "@vitest/eslint-plugin",
         "replacementVersion": "1.0.1"
+      }
+    ]
+  },
+  "express-mung-to-express-response-middleware": {
+    "description": "Replace stale `express-mung` with a maintained fork: `express-response-middleware`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["express-mung"],
+        "replacementName": "express-response-middleware",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
@@ -709,12 +768,12 @@
     ]
   },
   "grafana-oss-to-grafana": {
-    "description": "`grafana/grafana-oss`` was replaced by `grafana/grafana` with the same images",
+    "description": "`grafana/grafana-oss` was replaced by `grafana/grafana` with the same images",
     "packageRules": [
       {
         "matchDatasources": ["docker"],
         "matchPackageNames": ["/^(?:docker\\.io/)?grafana/grafana-oss$/"],
-        "matchCurrentVersion": ">=12.1.1",
+        "matchCurrentVersion": "12.1.1",
         "replacementName": "grafana/grafana"
       }
     ]
@@ -728,6 +787,18 @@
         "matchPackageNames": ["hapi"],
         "replacementName": "@hapi/hapi",
         "replacementVersion": "18.2.0"
+      }
+    ]
+  },
+  "home-operations-to-official": {
+    "description": "`home-operations` only builts these until official versions are released",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.18.6",
+        "matchDatasources": ["helm", "docker"],
+        "matchPackageNames": ["ghcr.io/home-operations/charts-mirror/cilium"],
+        "replacementName": "quay.io/cilium/charts/cilium",
+        "replacementVersion": "1.18.6"
       }
     ]
   },
@@ -773,6 +844,18 @@
         "matchDatasources": ["docker"],
         "matchPackageNames": ["/^k8s\\.gcr\\.io/.+$/"],
         "replacementNameTemplate": "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}"
+      }
+    ]
+  },
+  "kotlin-logging-to-oshai": {
+    "description": "replaces kotlin-logging github organization and maven group from MicroUtils to oshai",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "[3,4)",
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["/^io\\.github\\.microutils:kotlin-logging/"],
+        "replacementNameTemplate": "{{{replace 'io.github.microutils' 'io.github.oshai' packageName}}}",
+        "replacementVersion": "5.1.4"
       }
     ]
   },
@@ -824,19 +907,14 @@
     ]
   },
   "ojdbc-to-ojdbc11": {
-    "description": "`ojdbc:ojdbc` was moved to `com.oracle.database.jdbc:ojdbc11`.",
+    "description": "`ojdbc:ojdbc` and `com.oracle.database.jdbc:ojdbc10` were moved to `com.oracle.database.jdbc:ojdbc11`.",
     "packageRules": [
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["ojdbc:ojdbc"],
         "replacementName": "com.oracle.database.jdbc:ojdbc11",
         "replacementVersion": "21.1.0.0"
-      }
-    ]
-  },
-  "ojdbc10-to-ojdbc11": {
-    "description": "`com.oracle.database.jdbc:ojdbc10` was moved to `com.oracle.database.jdbc:ojdbc11`.",
-    "packageRules": [
+      },
       {
         "matchDatasources": ["maven"],
         "matchPackageNames": ["com.oracle.database.jdbc:ojdbc10"],
@@ -956,6 +1034,17 @@
       }
     ]
   },
+  "rolldown-vite-to-vite": {
+    "description": "`rolldown-vite` was merged to `vite` in version 8.0.0.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rolldown-vite"],
+        "replacementName": "vite",
+        "replacementVersion": "8.0.0"
+      }
+    ]
+  },
   "rollup-babel-to-scoped": {
     "description": "The babel plugin for rollup became scoped.",
     "packageRules": [
@@ -1046,6 +1135,18 @@
       }
     ]
   },
+  "terraform-provider-mrparkers-keycloak-to-keycloak-keycloak": {
+    "description": "The Keycloak Terraform/OpenTofu provider was moved to `keycloak/keycloak`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["terraform-provider"],
+        "matchPackageNames": ["mrparkers/keycloak"],
+        "matchCurrentVersion": "4.4.0",
+        "replacementName": "keycloak/keycloak",
+        "replacementVersion": "4.5.0"
+      }
+    ]
+  },
   "tsconfig-bases-node": {
     "description": "`@tsconfig-bases` node updates.",
     "extends": ["customManagers:tsconfigNodeVersions"],
@@ -1108,6 +1209,18 @@
         "matchPackageNames": ["typeorm-seeding"],
         "replacementName": "@jorgebodega/typeorm-seeding",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "vitest-coverage-c8-to-coverage-v8": {
+    "description": "`@vitest/coverage-c8` was renamed to `@vitest/coverage-v8`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.32.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@vitest/coverage-c8"],
+        "replacementName": "@vitest/coverage-v8",
+        "replacementVersion": "0.33.0"
       }
     ]
   },

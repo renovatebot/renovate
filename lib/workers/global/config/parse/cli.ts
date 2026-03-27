@@ -1,11 +1,11 @@
 import { Command } from 'commander';
-import { getOptions } from '../../../../config/options';
-import type { AllConfig } from '../../../../config/types';
-import { pkg } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
-import { coersions } from './coersions';
-import type { ParseConfigOptions } from './types';
+import { getOptions } from '../../../../config/options/index.ts';
+import type { AllConfig } from '../../../../config/types.ts';
+import { pkg } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { coersions } from './coersions.ts';
+import type { ParseConfigOptions } from './types.ts';
 
 export function getCliName(option: ParseConfigOptions): string {
   if (option.cli === false) {
@@ -13,6 +13,48 @@ export function getCliName(option: ParseConfigOptions): string {
   }
   const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
   return `--${nameWithHyphens.toLowerCase()}`;
+}
+
+function createProgram(): Command<[string[]]> {
+  const options = getOptions();
+
+  let program = new Command().arguments('[repositories...]');
+
+  options.forEach((option) => {
+    if (option.cli !== false) {
+      const param = `<${option.type}>`.replace('<boolean>', '[boolean]');
+      const optionString = `${getCliName(option)} ${param}`;
+      program = program.option(
+        optionString,
+        option.description,
+        coersions[option.type],
+      );
+    }
+  });
+
+  /* oxlint-disable no-console -- intentional: CLI help output */
+  /* istanbul ignore next */
+  function helpConsole(): void {
+    console.log('  Examples:');
+    console.log('');
+    console.log('    $ renovate --token 123test singapore/lint-condo');
+    console.log(
+      '    $ LOG_LEVEL=debug renovate --labels=renovate,dependency --ignore-unstable=false singapore/lint-condo',
+    );
+    console.log('    $ renovate singapore/lint-condo singapore/package-test');
+    console.log(
+      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:recommended"]}'`,
+    );
+    /* oxlint-enable no-console */
+  }
+
+  return program
+    .version(pkg.version, '-v, --version')
+    .on('--help', helpConsole);
+}
+
+export function parseEarlyFlags(input: string[] = process.argv): void {
+  createProgram().allowUnknownOption().allowExcessArguments().parse(input);
 }
 
 export function getConfig(input: string[]): AllConfig {
@@ -48,39 +90,7 @@ export function getConfig(input: string[]): AllConfig {
 
   const config: Record<string, any> = {};
 
-  let program = new Command().arguments('[repositories...]');
-
-  options.forEach((option) => {
-    if (option.cli !== false) {
-      const param = `<${option.type}>`.replace('<boolean>', '[boolean]');
-      const optionString = `${getCliName(option)} ${param}`;
-      program = program.option(
-        optionString,
-        option.description,
-        coersions[option.type],
-      );
-    }
-  });
-
-  /* eslint-disable no-console */
-  /* istanbul ignore next */
-  function helpConsole(): void {
-    console.log('  Examples:');
-    console.log('');
-    console.log('    $ renovate --token 123test singapore/lint-condo');
-    console.log(
-      '    $ LOG_LEVEL=debug renovate --labels=renovate,dependency --ignore-unstable=false singapore/lint-condo',
-    );
-    console.log('    $ renovate singapore/lint-condo singapore/package-test');
-    console.log(
-      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:recommended"]}'`,
-    );
-    /* eslint-enable no-console */
-  }
-
-  program = program
-    .version(pkg.version, '-v, --version')
-    .on('--help', helpConsole)
+  createProgram()
     .action((repositories: string[], opts: Record<string, unknown>) => {
       if (repositories?.length) {
         config.repositories = repositories;

@@ -1,21 +1,21 @@
 import { isString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { emojify } from '../../../../util/emoji';
-import { coerceString } from '../../../../util/string';
-import * as template from '../../../../util/template';
-import { joinUrlParts } from '../../../../util/url';
-import { getPlatformPrOptions } from '../../update/pr';
-import { prepareLabels } from '../../update/pr/labels';
-import { addParticipants } from '../../update/pr/participants';
-import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
-import type { MigratedData } from '../branch/migrated-data';
-import { getMigrationBranchName } from '../common';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { coerceString } from '../../../../util/string.ts';
+import * as template from '../../../../util/template/index.ts';
+import { joinUrlParts } from '../../../../util/url.ts';
+import { getPlatformPrOptions } from '../../update/pr/index.ts';
+import { prepareLabels } from '../../update/pr/labels.ts';
+import { addParticipants } from '../../update/pr/participants.ts';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
+import type { MigratedData } from '../branch/migrated-data.ts';
+import { getMigrationBranchName } from '../common.ts';
 
 export async function ensureConfigMigrationPr(
   config: RenovateConfig,

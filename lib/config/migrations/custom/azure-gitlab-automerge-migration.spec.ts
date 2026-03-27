@@ -1,4 +1,4 @@
-import { AzureGitLabAutomergeMigration } from './azure-gitlab-automerge-migration';
+import { AzureGitLabAutomergeMigration } from './azure-gitlab-automerge-migration.ts';
 
 describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
   it('should migrate non undefined gitLabAutomerge', async () => {

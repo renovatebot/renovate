@@ -1,6 +1,6 @@
-import { logger } from '../../logger';
-import type { GithubHttp } from '../http/github';
-import { queryTags } from './graphql';
+import { logger } from '../../logger/index.ts';
+import type { GithubHttp } from '../http/github.ts';
+import { queryTags } from './graphql/index.ts';
 
 export async function findCommitOfTag(
   registryUrl: string | undefined,

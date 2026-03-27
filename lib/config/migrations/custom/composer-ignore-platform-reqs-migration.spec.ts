@@ -1,4 +1,4 @@
-import { ComposerIgnorePlatformReqsMigration } from './composer-ignore-platform-reqs-migration';
+import { ComposerIgnorePlatformReqsMigration } from './composer-ignore-platform-reqs-migration.ts';
 
 describe('config/migrations/custom/composer-ignore-platform-reqs-migration', () => {
   it('should migrate true to empty array', async () => {

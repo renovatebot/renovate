@@ -1,4 +1,4 @@
-import perl from '.';
+import perl from './index.ts';
 
 describe('modules/versioning/perl/index', () => {
   it.each`

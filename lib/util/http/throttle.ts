@@ -1,7 +1,7 @@
 import pThrottle from 'p-throttle';
-import { logger } from '../../logger';
-import { parseUrl } from '../url';
-import { getThrottleIntervalMs } from './rate-limits';
+import { logger } from '../../logger/index.ts';
+import { parseUrl } from '../url.ts';
+import { getThrottleIntervalMs } from './rate-limits.ts';
 
 const hostThrottles = new Map<string, Throttle | null>();
 

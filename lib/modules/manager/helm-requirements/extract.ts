@@ -1,12 +1,12 @@
 import { isArray } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { parseSingleYaml } from '../../../util/yaml';
-import { HelmDatasource } from '../../datasource/helm';
+import { logger } from '../../../logger/index.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 
 export function extractPackageFile(
   content: string,

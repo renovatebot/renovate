@@ -1,7 +1,7 @@
 import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
 import type { SegmentElement } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 interface RubyVersion {
   major: number;
@@ -58,7 +58,7 @@ const pgteUpperBound = (version: string): string => {
 // istanbul ignore next
 const incrementLastSegment = (version: string): string => {
   const segments = releaseSegments(version);
-  const nextLast = parseInt(segments.pop() as string) + 1;
+  const nextLast = parseInt(segments.pop() as string, 10) + 1;
 
   return [...segments, nextLast].join('.');
 };

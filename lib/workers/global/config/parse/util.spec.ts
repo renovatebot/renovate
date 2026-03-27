@@ -1,5 +1,5 @@
-import { logger } from '../../../../logger';
-import { migrateAndValidateConfig } from './util';
+import { logger } from '../../../../logger/index.ts';
+import { migrateAndValidateConfig } from './util.ts';
 
 describe('workers/global/config/parse/util', () => {
   it('massages config', async () => {

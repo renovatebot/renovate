@@ -8,13 +8,13 @@ import {
   type ZodType,
   type ZodTypeDef,
   z,
-} from 'zod';
-import { logger } from '../../logger';
-import type { PackageDependency } from '../../modules/manager/types';
-import { parseJsonc } from '../common';
-import { parse as parseToml } from '../toml';
-import type { YamlOptions } from '../yaml';
-import { parseSingleYaml, parseYaml } from '../yaml';
+} from 'zod/v3';
+import { logger } from '../../logger/index.ts';
+import type { PackageDependency } from '../../modules/manager/types.ts';
+import { parseJsonc } from '../common.ts';
+import { parse as parseToml } from '../toml.ts';
+import type { YamlOptions } from '../yaml.ts';
+import { parseSingleYaml, parseYaml } from '../yaml.ts';
 
 interface ErrorContext<T> {
   error: z.ZodError;
@@ -289,7 +289,7 @@ export const Toml = z.string().transform((str, ctx) => {
 export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   try {
     return ini.parse(str);
-  } catch {
+  } catch /* v8 ignore next -- TODO: add test #40625 */ {
     ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
     return z.NEVER;
   }

@@ -1,4 +1,4 @@
-import { RebaseStalePrsMigration } from './rebase-stale-prs-migration';
+import { RebaseStalePrsMigration } from './rebase-stale-prs-migration.ts';
 
 describe('config/migrations/custom/rebase-stale-prs-migration', () => {
   it('should migrate true', async () => {

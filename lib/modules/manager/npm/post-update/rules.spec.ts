@@ -1,5 +1,5 @@
-import * as hostRules from '../../../../util/host-rules';
-import { processHostRules } from './rules';
+import * as hostRules from '../../../../util/host-rules.ts';
+import { processHostRules } from './rules.ts';
 
 describe('modules/manager/npm/post-update/rules', () => {
   describe('processHostRules()', () => {

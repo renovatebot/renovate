@@ -1,8 +1,8 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { id as semverVersioning } from '../../versioning/semver';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { id as semverVersioning } from '../../versioning/semver/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const VERSION_REGEX = regEx(/^\s+VERSION="(.*)"$/m);
 

@@ -1,4 +1,4 @@
-import type { AllConfig, RenovateConfig } from './../types';
+import type { AllConfig, RenovateConfig } from './../types.ts';
 export type MigrationConstructor = new (
   originalConfig: MigratableConfig,
   migratedConfig: RenovateConfig,

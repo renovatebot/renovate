@@ -1,18 +1,19 @@
-import type { Category } from '../../../constants';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HelmDatasource } from '../../datasource/helm';
-import { TerraformModuleDatasource } from '../../datasource/terraform-module';
-import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
+import type { Category } from '../../../constants/index.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { TerraformModuleDatasource } from '../../datasource/terraform-module/index.ts';
+import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 
-export { updateArtifacts } from './lockfile';
-export { updateLockedDependency } from './lockfile/update-locked';
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
+export { updateArtifacts } from './lockfile/index.ts';
+export { updateLockedDependency } from './lockfile/update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['.terraform.lock.hcl'];
 
 export const url = 'https://developer.hashicorp.com/terraform/docs';
 export const categories: Category[] = ['iac', 'terraform'];

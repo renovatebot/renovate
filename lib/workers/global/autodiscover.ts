@@ -1,8 +1,11 @@
 import { isString } from '@sindresorhus/is';
-import type { AllConfig } from '../../config/types';
-import { logger } from '../../logger';
-import { platform } from '../../modules/platform';
-import { matchRegexOrGlobList } from '../../util/string-match';
+import type { AllConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import {
+  type AutodiscoverConfig,
+  platform,
+} from '../../modules/platform/index.ts';
+import { matchRegexOrGlobList } from '../../util/string-match.ts';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -35,14 +38,19 @@ export async function autodiscoverRepositories(
     return config;
   }
   // Autodiscover list of repositories
-  let discovered = await platform.getRepos({
+  const autodiscoverConfig: AutodiscoverConfig = {
     topics: config.autodiscoverTopics,
     sort: config.autodiscoverRepoSort,
     order: config.autodiscoverRepoOrder,
     includeMirrors: config.includeMirrors,
     namespaces: config.autodiscoverNamespaces,
     projects: config.autodiscoverProjects,
-  });
+  };
+  logger.debug(
+    { autodiscoverConfig },
+    `Attempting to autodiscover ${config.platform} repositories`,
+  );
+  let discovered = await platform.getRepos(autodiscoverConfig);
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug('No repositories were autodiscovered');

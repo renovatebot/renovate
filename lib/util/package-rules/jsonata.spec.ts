@@ -1,4 +1,4 @@
-import { JsonataMatcher } from './jsonata';
+import { JsonataMatcher } from './jsonata.ts';
 
 describe('util/package-rules/jsonata', () => {
   const matcher = new JsonataMatcher();
@@ -82,5 +82,23 @@ describe('util/package-rules/jsonata', () => {
       { matchJsonata: ['$notafunction()'] },
     );
     expect(result).toBeFalse();
+  });
+
+  describe('$detectPlatform', () => {
+    it('should return true when sourceUrl matches platform', async () => {
+      const result = await matcher.matches(
+        { sourceUrl: 'https://github.com/foo/bar' },
+        { matchJsonata: ['$detectPlatform(sourceUrl) = "github"'] },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return false when sourceUrl does not match platform', async () => {
+      const result = await matcher.matches(
+        { sourceUrl: 'https://gitlab.com/foo/bar' },
+        { matchJsonata: ['$detectPlatform(sourceUrl) = "github"'] },
+      );
+      expect(result).toBeFalse();
+    });
   });
 });

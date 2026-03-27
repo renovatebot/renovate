@@ -1,22 +1,25 @@
 import { isObject, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
-import { api as versioning } from '../../versioning/cargo';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getEnv } from '../../../util/env.ts';
+import {
+  findLocalSiblingOrParent,
+  readLocalFile,
+} from '../../../util/fs/index.ts';
+import { api as versioning } from '../../versioning/cargo/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { extractLockFileVersions } from './locked-version';
-import { CargoConfig, CargoManifest } from './schema';
+} from '../types.ts';
+import { extractLockFileVersions } from './locked-version.ts';
+import { CargoConfig, CargoManifest } from './schema.ts';
 import type {
   CargoManagerData,
   CargoRegistries,
   CargoRegistryUrl,
-} from './types';
-import { DEFAULT_REGISTRY_URL } from './utils';
+} from './types.ts';
+import { DEFAULT_REGISTRY_URL } from './utils.ts';
 
 const DEFAULT_REGISTRY_ID = 'crates-io';
 

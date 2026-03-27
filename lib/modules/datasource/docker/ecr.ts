@@ -1,11 +1,11 @@
 import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import { ECR } from '@aws-sdk/client-ecr';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import type { HttpError } from '../../../util/http';
-import type { HttpResponse } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { addSecretForSanitizing } from '../../../util/sanitize';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 
 export const ecrRegex = regEx(
   /\d+\.(?:dkr\.ecr|dkr-ecr)(?:-fips)?\.([-a-z0-9]+)\.(?:amazonaws\.com|on\.aws)/,

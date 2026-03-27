@@ -1,9 +1,9 @@
 import { isArray, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { parseSingleYaml } from '../../../util/yaml';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { TravisMatrixItem, TravisYaml } from './types';
+import { logger } from '../../../logger/index.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { TravisMatrixItem, TravisYaml } from './types.ts';
 
 export function extractPackageFile(
   content: string,

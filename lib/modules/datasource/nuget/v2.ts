@@ -1,11 +1,11 @@
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import type { Http } from '../../../util/http';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import type { ReleaseResult } from '../types';
-import { massageUrl, removeBuildMeta } from './common';
+import { logger } from '../../../logger/index.ts';
+import type { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import type { ReleaseResult } from '../types.ts';
+import { massageUrl, removeBuildMeta } from './common.ts';
 
 export class NugetV2Api {
   getPkgProp(pkgInfo: XmlElement, propName: string): string | undefined {

@@ -1,4 +1,4 @@
-import { bootstrap, hasProxy } from './proxy';
+import { bootstrap, hasProxy } from './proxy.ts';
 
 describe('proxy', () => {
   const httpProxy = 'http://example.org/http-proxy';

@@ -3,7 +3,7 @@ import {
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
-} from './yarnrc';
+} from './yarnrc.ts';
 
 describe('modules/manager/npm/extract/yarnrc', () => {
   describe('resolveRegistryUrl()', () => {

@@ -1,11 +1,11 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { readLocalDirectory } from '../../../util/fs';
-import { minimatch } from '../../../util/minimatch';
-import { regEx } from '../../../util/regex';
-import { HermitDatasource } from '../../datasource/hermit';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { HermitListItem } from './types';
+import { logger } from '../../../logger/index.ts';
+import { readLocalDirectory } from '../../../util/fs/index.ts';
+import { minimatch } from '../../../util/minimatch.ts';
+import { regEx } from '../../../util/regex.ts';
+import { HermitDatasource } from '../../datasource/hermit/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { HermitListItem } from './types.ts';
 
 const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
 

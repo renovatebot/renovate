@@ -1,13 +1,6 @@
-import chalk from 'chalk';
-import * as prettyStdout from './pretty-stdout';
-import type { BunyanRecord } from './types';
-
-vi.mock('chalk', () => ({
-  default: ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(
-    (r, c) => Object.defineProperty(r, c, { value: (s: string) => s }),
-    {},
-  ),
-}));
+import * as util from 'node:util';
+import * as prettyStdout from './pretty-stdout.ts';
+import type { BunyanRecord } from './types.ts';
 
 describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {
@@ -32,7 +25,7 @@ describe('logger/pretty-stdout', () => {
         repository: 'a/b',
       };
       expect(prettyStdout.getMeta(rec as any)).toEqual(
-        chalk.gray(' (repository=a/b)'),
+        util.styleText('gray', ' (repository=a/b)'),
       );
     });
 
@@ -44,7 +37,7 @@ describe('logger/pretty-stdout', () => {
         module: 'test',
       };
       expect(prettyStdout.getMeta(rec as any)).toEqual(
-        chalk.gray(' (repository=a/b, branch=c) [test]'),
+        util.styleText('gray', ' (repository=a/b, branch=c) [test]'),
       );
     });
   });

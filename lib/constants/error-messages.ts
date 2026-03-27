@@ -16,7 +16,6 @@ export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 export const PLATFORM_UNKNOWN_ERROR = 'platform-unknown-error';
 
-/** cause repo to be considered as disabled */
 export const PlatformErrors = [
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -37,7 +36,6 @@ export const CONFIG_GIT_URL_UNAVAILABLE = 'config-git-url-unavailable';
 export const CONFIG_INHERIT_NOT_FOUND = 'config-inherit-not-found';
 export const CONFIG_INHERIT_PARSE_ERROR = 'config-inherit-parse-error';
 
-/** cause repo to be considered as disabled */
 export const ConfigErrors = [
   CONFIG_VALIDATION,
   CONFIG_PRESETS_INVALID,
@@ -126,3 +124,6 @@ export const PAGE_NOT_FOUND_ERROR = 'page-not-found';
 
 // Missing API required credentials
 export const MISSING_API_CREDENTIALS = 'missing-api-credentials';
+
+/** Logger not initialized */
+export const LOGGER_NOT_INITIALIZED = 'logger-not-initialized';

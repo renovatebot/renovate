@@ -1,14 +1,14 @@
-import type * as _hostRules from '../../../util/host-rules';
+import type * as _hostRules from '../../../util/host-rules.ts';
 
 describe('modules/platform/azure/azure-got-wrapper', () => {
-  let azure: typeof import('./azure-got-wrapper');
+  let azure: typeof import('./azure-got-wrapper.ts');
   let hostRules: typeof _hostRules;
 
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    hostRules = await vi.importActual('../../../util/host-rules');
-    azure = await vi.importActual('./azure-got-wrapper');
+    hostRules = await vi.importActual('../../../util/host-rules.ts');
+    azure = await vi.importActual('./azure-got-wrapper.ts');
   });
 
   describe('gitApi', () => {

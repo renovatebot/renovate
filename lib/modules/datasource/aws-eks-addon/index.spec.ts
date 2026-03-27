@@ -5,10 +5,10 @@ import {
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getPkgReleases } from '..';
-import { logger } from '../../../../test/util';
+import { logger } from '../../../../test/util.ts';
+import { getPkgReleases } from '../index.ts';
 
-import { AwsEKSAddonDataSource } from '.';
+import { AwsEKSAddonDataSource } from './index.ts';
 
 const datasource = AwsEKSAddonDataSource.id;
 const eksMock = mockClient(EKSClient);
