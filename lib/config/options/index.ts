@@ -1,8 +1,8 @@
 import { isArray, isObject } from '@sindresorhus/is';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
 import { getCustomManagers } from '../../modules/manager/custom/index.ts';
 import { getManagers } from '../../modules/manager/index.ts';
-import { getPlatformList } from '../../modules/platform/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
@@ -649,7 +649,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.28.1',
+    default: 'ghcr.io/renovatebot/base-image:13.28.4',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1050,7 +1050,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'platform',
     description: 'Platform type of repository.',
     type: 'string',
-    allowedValues: getPlatformList(),
+    allowedValues: [...PLATFORM_HOST_TYPES],
     default: 'github',
     globalOnly: true,
   },
