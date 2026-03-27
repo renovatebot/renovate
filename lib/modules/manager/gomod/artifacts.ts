@@ -285,11 +285,14 @@ export async function updateArtifacts({
       tidyOpts += ' -e';
     }
 
+    const isGoModTidyAllRequired =
+      config.postUpdateOptions?.includes('gomodTidyAll') === true;
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
+        isGoModTidyAllRequired ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = `mod tidy${modFileFlag}${tidyOpts}`;
@@ -338,6 +341,36 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
+    // gomodTidyAll: run go mod tidy on all transitive dependent modules
+    let gomodTidyAllModules: string[] = [];
+    if (isGoModTidyAllRequired) {
+      try {
+        const { getGoModulesInTidyOrder } = await import('./package-tree.ts');
+        gomodTidyAllModules = await getGoModulesInTidyOrder(goModFileName);
+        if (gomodTidyAllModules.length > 0) {
+          logger.debug(
+            { gomodTidyAllModules },
+            'gomodTidyAll: tidying dependent modules',
+          );
+          for (const modulePath of gomodTidyAllModules) {
+            const moduleDir = upath.relative(
+              goModDir,
+              upath.dirname(modulePath),
+            );
+            args = `mod tidy${tidyOpts}`;
+            execCommands.push(`(cd ${quote(moduleDir)} && ${cmd} ${args})`);
+          }
+        } else {
+          logger.debug('gomodTidyAll: no dependent modules found');
+        }
+      } catch (err) {
+        logger.warn(
+          { err },
+          'gomodTidyAll: failed to process dependent modules',
+        );
+      }
+    }
+
     if (useGoGenerate) {
       if (goGenerateAllowed) {
         logger.debug('go generate command included');
@@ -352,11 +385,19 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
-    if (
-      !status.modified.includes(sumFileName) &&
-      !status.modified.includes(goModFileName) &&
-      !status.modified.includes(goWorkSumFileName)
-    ) {
+
+    // Build set of expected sum files (primary + dependent modules)
+    const dependentSumFiles = gomodTidyAllModules.map((m) =>
+      m.replace(regEx(/\.mod$/), '.sum'),
+    );
+    const hasAnyChanges =
+      status.modified.includes(sumFileName) ||
+      status.modified.includes(goModFileName) ||
+      status.modified.includes(goWorkSumFileName) ||
+      dependentSumFiles.some((f) => status.modified.includes(f)) ||
+      gomodTidyAllModules.some((f) => status.modified.includes(f));
+
+    if (!hasAnyChanges) {
       return null;
     }
 
@@ -381,6 +422,32 @@ export async function updateArtifacts({
           contents: await readLocalFile(goWorkSumFileName),
         },
       });
+    }
+
+    // Include go.sum and go.mod changes from dependent modules (gomodTidyAll)
+    for (const depSumFile of dependentSumFiles) {
+      if (status.modified.includes(depSumFile)) {
+        logger.debug(`Returning updated dependent ${depSumFile}`);
+        res.push({
+          file: {
+            type: 'addition',
+            path: depSumFile,
+            contents: await readLocalFile(depSumFile),
+          },
+        });
+      }
+    }
+    for (const depModFile of gomodTidyAllModules) {
+      if (status.modified.includes(depModFile)) {
+        logger.debug(`Returning updated dependent ${depModFile}`);
+        res.push({
+          file: {
+            type: 'addition',
+            path: depModFile,
+            contents: await readLocalFile(depModFile),
+          },
+        });
+      }
     }
 
     // Include all the .go file import changes

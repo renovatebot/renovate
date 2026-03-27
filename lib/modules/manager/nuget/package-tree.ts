@@ -1,9 +1,12 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
-import { logger } from '../../../logger/index.ts';
-import { minimatchFilter } from '../../../util/minimatch.ts';
-import { scm } from '../../platform/scm.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import {
+  getMatchingFiles,
+  resolveRelativePathToRoot,
+} from '../../../util/fs/index.ts';
+import { getTransitiveDependents } from '../../../util/graph.ts';
 import type { ProjectFile } from './types.ts';
 import { readFileAsXmlDocument } from './util.ts';
 
@@ -19,7 +22,10 @@ export async function getDependentPackageFiles(
   isCentralManagement = false,
   isGlobalJson = false,
 ): Promise<ProjectFile[]> {
-  const packageFiles = await getAllPackageFiles();
+  const packageFiles = getMatchingFiles(
+    '*.{cs,vb,fs}proj',
+    await scm.getFileList(),
+  );
   const graph = new Graph();
 
   if (isCentralManagement) {
@@ -65,7 +71,7 @@ export async function getDependentPackageFiles(
       upath.normalize(a),
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      reframeRelativePathToRootOfRepo(f, r),
+      resolveRelativePathToRoot(f, r),
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -77,8 +83,7 @@ export async function getDependentPackageFiles(
     }
   }
 
-  const deps = new Map<string, boolean>();
-  recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
+  const deps = getTransitiveDependents(graph, packageFileName);
 
   if (isCentralManagement || isGlobalJson) {
     // remove props file, as we don't need it
@@ -87,69 +92,4 @@ export async function getDependentPackageFiles(
 
   // deduplicate
   return Array.from(deps).map(([name, isLeaf]) => ({ name, isLeaf }));
-}
-
-/**
- * Traverse graph and find dependent package files at any level of ancestry
- */
-function recursivelyGetDependentPackageFiles(
-  packageFileName: string,
-  graph: Graph,
-  deps: Map<string, boolean>,
-): void {
-  if (deps.has(packageFileName)) {
-    // we have already visited this package file
-    return;
-  }
-
-  const dependents = graph.adjacent(packageFileName);
-
-  if (!dependents || dependents.size === 0) {
-    deps.set(packageFileName, true);
-    return;
-  }
-
-  deps.set(packageFileName, false);
-
-  for (const dep of dependents) {
-    recursivelyGetDependentPackageFiles(dep, graph, deps);
-  }
-}
-
-/**
- * Take the path relative from a project file, and make it relative from the root of the repo
- */
-function reframeRelativePathToRootOfRepo(
-  dependentProjectRelativePath: string,
-  projectReference: string,
-): string {
-  const virtualRepoRoot = '/';
-  const absoluteDependentProjectPath = upath.resolve(
-    virtualRepoRoot,
-    dependentProjectRelativePath,
-  );
-  const absoluteProjectReferencePath = upath.resolve(
-    upath.dirname(absoluteDependentProjectPath),
-    projectReference,
-  );
-  const relativeProjectReferencePath = upath.relative(
-    virtualRepoRoot,
-    absoluteProjectReferencePath,
-  );
-
-  return relativeProjectReferencePath;
-}
-
-/**
- * Get a list of package files in localDir
- */
-async function getAllPackageFiles(): Promise<string[]> {
-  const allFiles = await scm.getFileList();
-  const filteredPackageFiles = allFiles.filter(
-    minimatchFilter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true }),
-  );
-
-  logger.trace({ filteredPackageFiles }, 'Found package files');
-
-  return filteredPackageFiles;
 }
