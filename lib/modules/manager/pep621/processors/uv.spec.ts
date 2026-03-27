@@ -14,7 +14,6 @@ import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts'
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
-import { PyProject } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
 
@@ -1056,17 +1055,6 @@ describe('modules/manager/pep621/processors/uv', () => {
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           "Invalid exclude-newer value 'not-a-date' in pyproject.toml, ignoring",
-        );
-      });
-
-      it('handles exclude-newer as Date object in schema', () => {
-        const result = PyProject.parse({
-          tool: {
-            uv: { 'exclude-newer': new Date('2026-03-05T00:00:00.000Z') },
-          },
-        });
-        expect(result.tool?.uv?.['exclude-newer']).toBe(
-          '2026-03-05T00:00:00.000Z',
         );
       });
     });

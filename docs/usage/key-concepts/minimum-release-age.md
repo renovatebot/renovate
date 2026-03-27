@@ -52,11 +52,12 @@ This ensures that npm only resolves package versions that were available before 
 The `--before` date is calculated as `now - minimumReleaseAge`.
 If a `before=<date>` or `min-release-age=<days>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
 
+### uv
+
 <!-- prettier-ignore -->
-!!! note
-    For uv, Renovate reads `[tool.uv] exclude-newer` from `pyproject.toml` and uses the more restrictive (older) date between it and `minimumReleaseAge`.
-    The `exclude-newer` value can be an RFC 3339 timestamp (e.g. `2025-01-01T00:00:00Z`) or a friendly duration (e.g. `2 weeks`), but ISO 8601 durations (e.g. `P14D`) are not supported.
-    See uv's [dependency bot integration guide](https://docs.astral.sh/uv/guides/integration/dependency-bots/#dependency-cooldown) for details on configuring `exclude-newer`.
+For uv, Renovate reads `[tool.uv] exclude-newer` from `pyproject.toml` and uses the more restrictive (older) date between it and `minimumReleaseAge`.
+The `exclude-newer` value can be an RFC 3339 timestamp (e.g. `2025-01-01T00:00:00Z`) or a friendly duration (e.g. `2 weeks`), but ISO 8601 durations (e.g. `P14D`) are not supported.
+See uv's [dependency bot integration guide](https://docs.astral.sh/uv/guides/integration/dependency-bots/#dependency-cooldown) for details on configuring `exclude-newer`.
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
