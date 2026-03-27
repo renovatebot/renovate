@@ -16,10 +16,11 @@ import { toBase64 } from '../../../../util/string.ts';
 import * as _limits from '../../../global/limits.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
+import * as _schedule from '../branch/schedule.ts';
 import * as _statusChecks from '../branch/status-checks.ts';
 import * as _prBody from './body/index.ts';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types.ts';
-import { ensurePr } from './index.ts';
+import { ensurePr, getPlatformPrOptions } from './index.ts';
 import * as _participants from './participants.ts';
 import * as _prCache from './pr-cache.ts';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
@@ -43,6 +44,9 @@ const comment = vi.mocked(_comment);
 
 vi.mock('./pr-cache.ts');
 const prCache = vi.mocked(_prCache);
+
+vi.mock('../branch/schedule.ts');
+const scheduleMock = vi.mocked(_schedule);
 
 describe('workers/repository/update/pr/index', () => {
   describe('ensurePr', () => {
@@ -1227,6 +1231,73 @@ describe('workers/repository/update/pr/index', () => {
           'PR cache not found',
         );
       });
+    });
+  });
+
+  describe('getPlatformPrOptions', () => {
+    const baseConfig: BranchConfig = {
+      manager: 'some-manager',
+      branchName: 'renovate/branch',
+      baseBranch: 'main',
+      upgrades: [],
+      prTitle: 'Some title',
+      automerge: true,
+      automergeType: 'pr',
+      platformAutomerge: true,
+    };
+
+    beforeEach(() => {
+      scheduleMock.isScheduledNow.mockReturnValue(false);
+      scheduleMock.getNextScheduleTime.mockReturnValue(
+        new Date('2026-04-01T10:00:00.000Z'),
+      );
+    });
+
+    it('returns base options without merge_after when usePlatformAutomerge is false', () => {
+      const result = getPlatformPrOptions({ ...baseConfig, automerge: false });
+      expect(result.usePlatformAutomerge).toBeFalse();
+      expect(result.merge_after).toBeUndefined();
+    });
+
+    it('does not set merge_after when automergeSchedule is undefined', () => {
+      const result = getPlatformPrOptions(baseConfig);
+      expect(result.merge_after).toBeUndefined();
+    });
+
+    it('does not set merge_after when automergeSchedule is empty', () => {
+      const result = getPlatformPrOptions({
+        ...baseConfig,
+        automergeSchedule: [],
+      });
+      expect(result.merge_after).toBeUndefined();
+    });
+
+    it('does not set merge_after when isScheduledNow returns true', () => {
+      scheduleMock.isScheduledNow.mockReturnValue(true);
+      const result = getPlatformPrOptions({
+        ...baseConfig,
+        automergeSchedule: ['after 10pm'],
+      });
+      expect(result.merge_after).toBeUndefined();
+    });
+
+    it('does not set merge_after when getNextScheduleTime returns null', () => {
+      scheduleMock.getNextScheduleTime.mockReturnValue(null);
+      const result = getPlatformPrOptions({
+        ...baseConfig,
+        automergeSchedule: ['after 10pm'],
+      });
+      expect(result.merge_after).toBeUndefined();
+    });
+
+    it('sets merge_after when outside schedule and next time is available', () => {
+      const nextTime = new Date('2026-04-01T10:00:00.000Z');
+      scheduleMock.getNextScheduleTime.mockReturnValue(nextTime);
+      const result = getPlatformPrOptions({
+        ...baseConfig,
+        automergeSchedule: ['after 10pm'],
+      });
+      expect(result.merge_after).toBe(nextTime.toISOString());
     });
   });
 });
