@@ -1829,6 +1829,19 @@ describe('workers/repository/updates/generate', () => {
       expect(res.upgrades[0].prettyDepType).toBe('devDependency');
     });
 
+    it('uses the manager definition for prettyDepType if one is present for the depType', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'npm',
+          branchName: 'deps',
+          depType: 'optionalDependencies',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].prettyDepType).toBe('optionalDependency');
+    });
+
     it('falls back to depType when prettyDepType is not set', () => {
       const branch = [
         {
