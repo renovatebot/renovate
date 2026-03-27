@@ -52,7 +52,6 @@ function parseDependencyLine(line: string): NugetPackageDependency | null {
     const result: NugetPackageDependency = {
       datasource: NugetDatasource.id,
       depName,
-      depType: 'nuget',
       currentValue,
     };
 
