@@ -1,12 +1,14 @@
 import { isArray, isNonEmptyString } from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { parseJson } from '../../../../util/common.ts';
 import { coersions } from './coersions.ts';
-import type { ParseConfigOptions } from './types.ts';
 import { migrateAndValidateConfig } from './util.ts';
+
+export { getEnvName };
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -23,17 +25,6 @@ function normalizePrefixes(
     }
   }
   return result;
-}
-
-export function getEnvName(option: ParseConfigOptions): string {
-  if (option.env === false) {
-    return '';
-  }
-  if (option.env) {
-    return option.env;
-  }
-  const nameWithUnderscores = option.name.replace(/([A-Z])/g, '_$1');
-  return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
 const renameKeys = {
