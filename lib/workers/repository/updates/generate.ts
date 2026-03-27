@@ -5,7 +5,6 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { getPrettyDepType } from '../../../modules/manager/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { safeStringify } from '../../../util/stringify.ts';
@@ -301,10 +300,7 @@ export function generateBranchConfig(
       upgrade.displayPending = '';
     }
     upgrade.prettyDepType =
-      upgrade.prettyDepType ??
-      getPrettyDepType(upgrade.manager, upgrade.depType!) ??
-      upgrade.depType ??
-      'dependency';
+      upgrade.prettyDepType ?? upgrade.depType ?? 'dependency';
     if (useGroupSettings) {
       // Now overwrite original config with group config
       upgrade = mergeChildConfig(upgrade, upgrade.group);
