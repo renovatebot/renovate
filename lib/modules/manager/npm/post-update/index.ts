@@ -450,6 +450,7 @@ export async function getAdditionalFiles(
       fileName,
       config,
       upgrades,
+      npmrcContent,
     );
     if (res.error) {
       /* v8 ignore next -- needs test */
