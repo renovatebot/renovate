@@ -102,10 +102,9 @@ const TerraformWorkspace = z.object({
 const TerraformWorkspaceArray = oneOrMany(TerraformWorkspace);
 
 const DockerSimpleInstance = z.record(tfLiteral);
-const DockerContainerSpec = z.record(tfLiteral);
 const DockerTaskSpec = z
   .object({
-    container_spec: oneOrMany(DockerContainerSpec).optional(),
+    container_spec: oneOrMany(DockerSimpleInstance).optional(),
   })
   .catchall(tfLiteral);
 const DockerPortsSpec = z.record(tfLiteral);

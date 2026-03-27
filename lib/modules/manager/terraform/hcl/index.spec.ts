@@ -134,8 +134,7 @@ describe('modules/manager/terraform/hcl/index', () => {
       `;
       const res = await parseHCL(modulesTFJSON, 'file.tf.json');
       expect(res?.module).toBeDefined();
-      expect(Object.keys(res!.module!)).toBeArrayOfSize(6);
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         module: {
           bar: [
             {

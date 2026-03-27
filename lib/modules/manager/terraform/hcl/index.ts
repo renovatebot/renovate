@@ -19,9 +19,7 @@ export async function parseHCL(
       fileName.endsWith('.tf.json') ||
       fileName.endsWith('.tofu.json')
     ) {
-      return TerraformDefinitionFileJSON.parse(
-        parseJson(content, fileName),
-      ) as TerraformDefinitionFile;
+      return TerraformDefinitionFileJSON.parse(parseJson(content, fileName));
     } else {
       return null;
     }
