@@ -891,5 +891,189 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
+
+    describe('UV_EXCLUDE_NEWER with minimumReleaseAge', () => {
+      let execSnapshots: ReturnType<typeof mockExecAll>;
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-03-13T00:00:00.000Z'));
+        execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '3.11.1' }],
+        });
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '0.2.35' }],
+        });
+      });
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+      });
+
+      it('sets UV_EXCLUDE_NEWER from minimumReleaseAge', async () => {
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          UV_EXCLUDE_NEWER: '2026-03-10T00:00:00.000Z',
+        });
+      });
+
+      it('skips UV_EXCLUDE_NEWER when minimumReleaseAge absent', async () => {
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: { isLockFileMaintenance: true },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
+      });
+
+      it('skips UV_EXCLUDE_NEWER when minimumReleaseAgeBehaviour is timestamp-optional', async () => {
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeBehaviour: 'timestamp-optional',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
+      });
+
+      it('skips UV_EXCLUDE_NEWER on unparseable minimumReleaseAge', async () => {
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: 'invalid garbage',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          "Invalid minimumReleaseAge value 'invalid garbage', skipping UV_EXCLUDE_NEWER for uv lock",
+        );
+      });
+
+      it('uses pyproject ISO date when more restrictive', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "2026-03-05T00:00:00.000Z"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps: [],
+          },
+          pyproject,
+        );
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          UV_EXCLUDE_NEWER: '2026-03-05T00:00:00.000Z',
+        });
+      });
+
+      it('uses minimumReleaseAge when pyproject less restrictive', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "2026-03-12T00:00:00.000Z"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps: [],
+          },
+          pyproject,
+        );
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          UV_EXCLUDE_NEWER: '2026-03-10T00:00:00.000Z',
+        });
+      });
+
+      it('uses pyproject relative duration when more restrictive', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "2 weeks"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps: [],
+          },
+          pyproject,
+        );
+        // 2 weeks = 14 days ago = 2026-02-27, which is older than 3 days ago = 2026-03-10
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          UV_EXCLUDE_NEWER: '2026-02-27T00:00:00.000Z',
+        });
+      });
+
+      it('ignores unparseable pyproject exclude-newer and uses minimumReleaseAge', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "not-a-date"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps: [],
+          },
+          pyproject,
+        );
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          UV_EXCLUDE_NEWER: '2026-03-10T00:00:00.000Z',
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          "Invalid exclude-newer value 'not-a-date' in pyproject.toml, ignoring",
+        );
+      });
+    });
   });
 });

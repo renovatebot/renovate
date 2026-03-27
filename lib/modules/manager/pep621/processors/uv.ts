@@ -1,4 +1,5 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -14,6 +15,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
 import { find } from '../../../../util/host-rules.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -215,6 +217,48 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
+
+      // See https://docs.astral.sh/uv/guides/integration/dependency-bots/#dependency-cooldown
+      // Skip UV_EXCLUDE_NEWER when minimumReleaseAgeBehaviour is 'timestamp-optional',
+      // as simple API doesn't return releaseTimestamp and the user opted out of requiring it
+      if (
+        config.minimumReleaseAge &&
+        config.minimumReleaseAgeBehaviour !== 'timestamp-optional'
+      ) {
+        const ms = toMs(config.minimumReleaseAge);
+        if (isNullOrUndefined(ms)) {
+          logger.debug(
+            `Invalid minimumReleaseAge value '${config.minimumReleaseAge}', skipping UV_EXCLUDE_NEWER for uv lock`,
+          );
+        } else {
+          let excludeNewerDate = DateTime.now().minus(ms).toUTC();
+
+          const pyprojectExcludeNewer = project.tool?.uv?.['exclude-newer'];
+          if (pyprojectExcludeNewer) {
+            let pyprojectDate = DateTime.fromISO(pyprojectExcludeNewer, {
+              zone: 'utc',
+            });
+            if (!pyprojectDate.isValid) {
+              const durationMs = toMs(pyprojectExcludeNewer);
+              if (!isNullOrUndefined(durationMs)) {
+                pyprojectDate = DateTime.now().minus(durationMs).toUTC();
+              }
+            }
+            if (pyprojectDate.isValid) {
+              if (pyprojectDate < excludeNewerDate) {
+                excludeNewerDate = pyprojectDate;
+              }
+            } else {
+              logger.debug(
+                `Invalid exclude-newer value '${pyprojectExcludeNewer}' in pyproject.toml, ignoring`,
+              );
+            }
+          }
+
+          extraEnv.UV_EXCLUDE_NEWER = excludeNewerDate.toISO();
+        }
+      }
+
       await exec(cmd, execOptions);
 
       // check for changes
