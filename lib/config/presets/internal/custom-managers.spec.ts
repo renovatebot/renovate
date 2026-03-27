@@ -850,7 +850,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `tsconfig/node` version in tsconfig.json', () => {
-    const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
+    const customManager = presets.tsconfigNodeVersions.customManagers![0];
 
     it(`find in tsconfig.json extends string`, async () => {
       const fileContent = codeBlock`
@@ -864,7 +864,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager!,
+        customManager,
       );
 
       expect(res?.deps).toMatchObject([
@@ -888,7 +888,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager!,
+        presets.tsconfigNodeVersions.customManagers![1],
       );
 
       expect(res?.deps).toMatchObject([
@@ -915,7 +915,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager!,
+        customManager,
       );
 
       expect(res?.deps).toMatchObject([
@@ -937,7 +937,7 @@ describe('config/presets/internal/custom-managers', () => {
         ${'tsconfig.yml'}           | ${false}
       `('$path', ({ path, expected }) => {
         expect(
-          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+          matchRegexOrGlobList(path, customManager.managerFilePatterns),
         ).toBe(expected);
       });
     });
