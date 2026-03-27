@@ -219,7 +219,12 @@ export class UvProcessor extends BasePyProjectProcessor {
       }
 
       // See https://docs.astral.sh/uv/guides/integration/dependency-bots/#dependency-cooldown
-      if (config.minimumReleaseAge) {
+      // Skip UV_EXCLUDE_NEWER when minimumReleaseAgeBehaviour is 'timestamp-optional',
+      // as simple API doesn't return releaseTimestamp and the user opted out of requiring it
+      if (
+        config.minimumReleaseAge &&
+        config.minimumReleaseAgeBehaviour !== 'timestamp-optional'
+      ) {
         const ms = toMs(config.minimumReleaseAge);
         if (isNullOrUndefined(ms)) {
           logger.debug(

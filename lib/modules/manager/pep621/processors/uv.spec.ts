@@ -947,6 +947,23 @@ describe('modules/manager/pep621/processors/uv', () => {
         expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
       });
 
+      it('skips UV_EXCLUDE_NEWER when minimumReleaseAgeBehaviour is timestamp-optional', async () => {
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeBehaviour: 'timestamp-optional',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots[0].options?.env?.UV_EXCLUDE_NEWER).toBeUndefined();
+      });
+
       it('skips UV_EXCLUDE_NEWER on unparseable minimumReleaseAge', async () => {
         await processor.updateArtifacts(
           {
