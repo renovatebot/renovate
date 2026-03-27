@@ -9,7 +9,6 @@ import type { Category } from '../../constants/index.ts';
 import type {
   MaybePromise,
   ModuleApi,
-  Nullish,
   RangeStrategy,
   SkipReason,
   StageName,
@@ -351,6 +350,5 @@ export interface PostUpdateConfig<T = Record<string, any>>
   reuseExistingBranch?: boolean;
   toolSettings?: ToolSettingsOptions;
 
-  minimumReleaseAge?: Nullish<string>;
   isLockFileMaintenance?: boolean;
 }
