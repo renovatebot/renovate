@@ -32,6 +32,7 @@ export function detectPlatform(
   | 'bitbucket'
   | 'bitbucket-server'
   | 'forgejo'
+  | 'generic'
   | 'gitea'
   | 'github'
   | 'gitlab'
@@ -48,6 +49,9 @@ export function detectPlatform(
   }
   if (hostname?.includes('forgejo')) {
     return 'forgejo';
+  }
+  if (hostname === 'services.api.unity.com') {
+    return 'generic';
   }
   if (hostname && ['codeberg.org', 'codefloe.com'].includes(hostname)) {
     return 'forgejo';

@@ -768,6 +768,9 @@ export async function lookupUpdates(
 
     if (release?.changelogContent) {
       res.changelogContent = release.changelogContent;
+    }
+
+    if (release?.changelogUrl) {
       res.changelogUrl = release.changelogUrl;
     }
   } catch (err) /* istanbul ignore next */ {
