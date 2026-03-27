@@ -1001,7 +1001,7 @@ export async function mergeToLocal(
       await git.merge([refSpecToMerge]);
     } else {
       await fetchRevSpec(refSpecToMerge);
-      await git.merge(['FETCH_HEAD']);
+      await gitRetry(() => git.merge(['FETCH_HEAD']));
     }
   } catch (err) {
     logger.debug(
