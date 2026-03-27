@@ -11,29 +11,32 @@ const TemplateSpecVolumes = z.object({
   template: z.object({ spec: PodSpecVolumes }),
 });
 
-const ImageVolumeReferences = z.discriminatedUnion('kind', [
-  z.object({
-    kind: z.literal('Pod'),
-    spec: PodSpecVolumes.transform((s) => s.volumes),
-  }),
-  z.object({
-    kind: z.enum([
-      'DaemonSet',
-      'Deployment',
-      'Job',
-      'ReplicaSet',
-      'ReplicationController',
-      'StatefulSet',
-    ]),
-    spec: TemplateSpecVolumes.transform((s) => s.template.spec.volumes),
-  }),
-  z.object({
-    kind: z.literal('CronJob'),
-    spec: z
-      .object({ jobTemplate: z.object({ spec: TemplateSpecVolumes }) })
-      .transform((s) => s.jobTemplate.spec.template.spec.volumes),
-  }),
-]);
+const ImageVolumeReferences = z
+  .discriminatedUnion('kind', [
+    z.object({
+      kind: z.literal('Pod'),
+      spec: PodSpecVolumes.transform((s) => s.volumes),
+    }),
+    z.object({
+      kind: z.enum([
+        'DaemonSet',
+        'Deployment',
+        'Job',
+        'ReplicaSet',
+        'ReplicationController',
+        'StatefulSet',
+      ]),
+      spec: TemplateSpecVolumes.transform((s) => s.template.spec.volumes),
+    }),
+    z.object({
+      kind: z.literal('CronJob'),
+      spec: z
+        .object({ jobTemplate: z.object({ spec: TemplateSpecVolumes }) })
+        .transform((s) => s.jobTemplate.spec.template.spec.volumes),
+    }),
+  ])
+  .transform(({ spec }) => spec)
+  .catch([]);
 
 export const KubernetesResource = z.object({
   apiVersion: z.string().trim().min(1),
@@ -48,9 +51,10 @@ export const KubernetesManifest = KubernetesResource.extend({
   spec: z.unknown(),
 }).transform(({ spec, ...resource }) => ({
   ...resource,
-  imageVolumeReferences:
-    ImageVolumeReferences.safeParse({ kind: resource.kind, spec }).data?.spec ??
-    [],
+  imageVolumeReferences: ImageVolumeReferences.parse({
+    kind: resource.kind,
+    spec,
+  }),
 }));
 export type KubernetesManifest = z.infer<typeof KubernetesManifest>;
 
