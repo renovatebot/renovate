@@ -30,7 +30,11 @@ export class ElmPackageDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const baseUrl = registryUrl ?? this.defaultRegistryUrls[0];
+    /* v8 ignore if -- should never happen */
+    if (!registryUrl) {
+      return null;
+    }
+    const baseUrl = registryUrl;
     const pkgUrl = joinUrlParts(
       baseUrl,
       'packages',

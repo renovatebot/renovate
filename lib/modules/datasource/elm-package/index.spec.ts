@@ -117,21 +117,13 @@ describe('modules/datasource/elm-package/index', () => {
       });
     });
 
-    it('falls back to default registry when registryUrl is not provided', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/packages/elm/core/releases.json')
-        .reply(200, body);
+    it('returns null when registryUrl is not provided', async () => {
       const ds = new ElmPackageDatasource();
       const res = await ds.getReleases({
         packageName: 'elm/core',
         registryUrl: undefined,
       });
-      expect(res).toMatchObject({
-        releases: expect.arrayContaining([
-          expect.objectContaining({ version: '1.0.0' }),
-        ]),
-      });
+      expect(res).toBeNull();
     });
 
     it('handles package without slash in name', async () => {
