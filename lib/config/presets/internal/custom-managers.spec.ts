@@ -876,6 +876,30 @@ describe('config/presets/internal/custom-managers', () => {
       ]);
     });
 
+    it(`find in tsconfig.json extends string with short reference`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": "@tsconfig/node20",
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
     it(`find in tsconfig.json extends array`, async () => {
       const fileContent = codeBlock`
         {
