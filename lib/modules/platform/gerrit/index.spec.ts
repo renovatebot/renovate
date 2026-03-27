@@ -374,7 +374,7 @@ describe('modules/platform/gerrit/index', () => {
         sourceRef: 'source',
         targetRef: 'refs/for/target',
         files: [],
-        pushOptions: ['notify=NONE'],
+        pushOptions: ['notify=NONE', 'ready'],
       });
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
@@ -410,7 +410,7 @@ describe('modules/platform/gerrit/index', () => {
         sourceRef: 'source',
         targetRef: 'refs/for/target',
         files: [],
-        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
@@ -444,7 +444,12 @@ describe('modules/platform/gerrit/index', () => {
         sourceRef: 'source',
         targetRef: 'refs/for/target',
         files: [],
-        pushOptions: ['notify=NONE', 'hashtag=label1', 'hashtag=label2'],
+        pushOptions: [
+          'notify=NONE',
+          'ready',
+          'hashtag=label1',
+          'hashtag=label2',
+        ],
       });
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
