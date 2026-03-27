@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'install',
     description: 'Listed under `install_requires` in the `[options]` section',
@@ -17,6 +17,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'extra',
     description: 'Listed under the `[options.extras_require]` section',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type SetupCfgDepType = (typeof knownDepTypes)[number]['depType'];

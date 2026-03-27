@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'module',
     description: 'A Terraform module source reference',
@@ -101,6 +101,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'kubernetes_stateful_set_v1',
     description: 'A container image in a `kubernetes_stateful_set_v1` resource',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type TerraformDepType = (typeof knownDepTypes)[number]['depType'];

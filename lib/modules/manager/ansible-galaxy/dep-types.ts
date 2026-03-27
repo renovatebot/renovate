@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'galaxy-collection',
     description: 'Ansible Galaxy collection',
@@ -9,6 +9,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'role',
     description: 'Ansible role',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type AnsibleGalaxyDepType = (typeof knownDepTypes)[number]['depType'];

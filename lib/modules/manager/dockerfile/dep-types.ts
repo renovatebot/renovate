@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'syntax',
     description:
@@ -15,6 +15,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'The last `FROM` instruction in the Dockerfile (the final build stage)',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type DockerfileDepType = (typeof knownDepTypes)[number]['depType'];

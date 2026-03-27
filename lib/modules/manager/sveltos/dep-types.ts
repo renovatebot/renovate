@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'ClusterProfile',
     description: 'A Sveltos `ClusterProfile` resource',
@@ -13,6 +13,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'EventTrigger',
     description: 'A Sveltos `EventTrigger` resource',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type SveltosDepType = (typeof knownDepTypes)[number]['depType'];

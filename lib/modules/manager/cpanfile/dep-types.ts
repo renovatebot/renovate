@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'configure',
     description: 'Dependencies needed during the configure phase',
@@ -21,6 +21,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'develop',
     description: 'Dependencies needed during development (author_requires)',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type CpanfileDepType = (typeof knownDepTypes)[number]['depType'];

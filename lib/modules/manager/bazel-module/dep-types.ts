@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'bazel_dep',
     description: 'A direct Bazel module dependency via `bazel_dep`',
@@ -54,6 +54,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'A container image pulled via a `rules_img` repo rule in a module extension',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type BazelModuleDepType = (typeof knownDepTypes)[number]['depType'];

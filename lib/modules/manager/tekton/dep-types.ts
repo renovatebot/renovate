@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'tekton-annotation',
     description:
@@ -15,6 +15,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'Container image used in a Tekton step, sidecar, or step template',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type TektonDepType = (typeof knownDepTypes)[number]['depType'];

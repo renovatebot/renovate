@@ -307,7 +307,7 @@ interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
-  knownDepTypes?: DepTypeMetadata[];
+  knownDepTypes?: readonly DepTypeMetadata[];
   /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
   supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;

@@ -5,7 +5,7 @@ import type { DepTypeMetadata } from '../types.ts';
  * `[tool.poetry.group.<name>.dependencies]` become depTypes at runtime.
  * The values below cover all known/common depTypes.
  */
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'dependencies',
     description: 'Listed under `[tool.poetry.dependencies]`',
@@ -35,7 +35,9 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'dependency-groups',
     description: 'Listed under `[dependency-groups]` (PEP 735)',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
+
+export type PoetryDepType = (typeof knownDepTypes)[number]['depType'] | (string & {});
 
 export const supportsDynamicDepTypesNote =
   'Dependency group names from `[tool.poetry.group.<name>.dependencies]` are also used as `depType` values.';

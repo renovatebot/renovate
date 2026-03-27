@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'docker',
     description: 'Container base image from `ContainerBaseImage`',
@@ -19,6 +19,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'dotnet-sdk',
     description: '.NET SDK version from `global.json`',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type NugetDepType = (typeof knownDepTypes)[number]['depType'];

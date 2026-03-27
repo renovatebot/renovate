@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'dependencies',
     prettyDepType: 'dependency',
@@ -56,9 +56,9 @@ export const knownDepTypes: DepTypeMetadata[] = [
     prettyDepType: 'overrides',
     description: 'Listed under `pnpm.overrides`',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export const supportsDynamicDepTypesNote =
   'Additionally, catalog dependencies produce dynamic `depType` values: `pnpm.catalog.<name>` for [pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs) and `yarn.catalog.<name>` for [yarn catalogs](https://yarnpkg.com/features/catalogs).';
 
-export type NpmDepType = (typeof knownDepTypes)[number]['depType'];
+export type NpmDepType = (typeof knownDepTypes)[number]['depType'] | (string & {});

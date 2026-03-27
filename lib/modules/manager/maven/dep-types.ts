@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'compile',
     description:
@@ -50,6 +50,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'A parent POM that is itself a root POM or has an external parent; promoted from `parent` during multi-module resolution',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type MavenDepType = (typeof knownDepTypes)[number]['depType'];

@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'container_pull',
     description: 'A Docker container image pulled via `container_pull`',
@@ -73,6 +73,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'A Maven artifact installed via the private `_maven_install` rule',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type BazelDepType = (typeof knownDepTypes)[number]['depType'];

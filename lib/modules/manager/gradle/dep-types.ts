@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'plugin',
     description: 'A Gradle plugin dependency',
@@ -18,6 +18,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'A test dependency from the `gradle-consistent-versions` plugin lock file',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type GradleDepType = (typeof knownDepTypes)[number]['depType'];

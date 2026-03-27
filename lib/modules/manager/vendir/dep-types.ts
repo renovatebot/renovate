@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'HelmChart',
     description: 'Helm chart dependency in vendir configuration',
@@ -17,6 +17,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'HttpSource',
     description: 'HTTP-based source',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type VendirDepType = (typeof knownDepTypes)[number]['depType'];

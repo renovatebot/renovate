@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'provider',
     description: 'A Crossplane Provider package',
@@ -13,6 +13,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'function',
     description: 'A Crossplane Function package',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type CrossplaneDepType = (typeof knownDepTypes)[number]['depType'];

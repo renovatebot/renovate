@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'github',
     description: 'Terragrunt module sourced from a GitHub repository',
@@ -13,6 +13,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'terragrunt',
     description: 'Terragrunt module sourced from a Terraform Module registry',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type TerragruntDepType = (typeof knownDepTypes)[number]['depType'];

@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'build_requires',
     description:
@@ -16,6 +16,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'A runtime dependency declared in `[requires]` or `requirements()`',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type ConanDepType = (typeof knownDepTypes)[number]['depType'];

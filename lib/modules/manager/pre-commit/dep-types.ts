@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'repository',
     description: 'Pre-commit hook repository reference',
@@ -17,6 +17,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'pre-commit-golang',
     description: 'Go additional dependency for a pre-commit hook',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type PreCommitDepType = (typeof knownDepTypes)[number]['depType'];

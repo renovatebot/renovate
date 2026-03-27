@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'Kustomization',
     description: 'Kustomization resource referencing remote bases or images',
@@ -14,6 +14,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'HelmChart',
     description: 'Helm chart embedded in a kustomization file via `helmCharts`',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type KustomizeDepType = (typeof knownDepTypes)[number]['depType'];

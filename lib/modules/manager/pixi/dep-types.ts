@@ -10,7 +10,9 @@ import type { DepTypeMetadata } from '../types.ts';
  *
  * There are no fixed/enumerable depType values for this manager.
  */
-export const knownDepTypes: DepTypeMetadata[] = [];
+export const knownDepTypes = [] as const satisfies readonly DepTypeMetadata[];
+
+export type PixiDepType = (typeof knownDepTypes)[number]['depType'] | (string & {});
 
 export const supportsDynamicDepTypesNote =
   'Feature dependencies produce dynamic `depType` values in the form `feature-<name>`, where `<name>` is the feature name defined in the pixi configuration. Top-level dependencies (under `[dependencies]` or `[pypi-dependencies]`) do not have a `depType` set.';

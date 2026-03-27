@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'feature',
     description:
@@ -11,6 +11,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'The base Docker image specified in the `image` field of devcontainer.json',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type DevcontainerDepType = (typeof knownDepTypes)[number]['depType'];

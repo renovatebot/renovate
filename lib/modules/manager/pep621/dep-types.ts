@@ -5,7 +5,7 @@ import type { DepTypeMetadata } from '../types.ts';
  * produce `tool.hatch.envs.${envName}` depTypes at runtime.
  * The values below cover all known/common depTypes.
  */
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'requires-python',
     description: 'The `requires-python` constraint from `[project]`',
@@ -38,7 +38,9 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'tool.uv.sources',
     description: 'Listed under `[tool.uv.sources]`',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
+
+export type Pep621DepType = (typeof knownDepTypes)[number]['depType'] | (string & {});
 
 export const supportsDynamicDepTypesNote =
   'Hatch environments produce dynamic `depType` values in the form `tool.hatch.envs.<env-name>`.';

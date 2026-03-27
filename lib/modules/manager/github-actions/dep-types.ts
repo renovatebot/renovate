@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'action',
     description:
@@ -29,6 +29,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     description:
       'A language/runtime version passed as an input to a versioned action (e.g. `node-version` for `actions/setup-node`)',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type GithubActionsDepType = (typeof knownDepTypes)[number]['depType'];

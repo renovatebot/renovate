@@ -1,6 +1,6 @@
 import type { DepTypeMetadata, PackageDependency } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'golang',
     description:
@@ -27,7 +27,7 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'tool',
     description: `A tool dependency using Go 1.24+'s \`tool\` directive`,
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type GomodDepType = (typeof knownDepTypes)[number]['depType'];
 

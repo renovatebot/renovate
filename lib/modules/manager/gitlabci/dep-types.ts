@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'image',
     description: 'Docker image specified as a string',
@@ -17,6 +17,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'repository',
     description: 'A GitLab CI/CD component reference',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type GitlabciDepType = (typeof knownDepTypes)[number]['depType'];

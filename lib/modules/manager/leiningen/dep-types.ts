@@ -1,6 +1,6 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'dependencies',
     description: 'Listed under `:dependencies`',
@@ -21,6 +21,6 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'parent-project',
     description: 'Listed under `:parent-project` (via lein-parent `:coords`)',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
 
 export type LeiningenDepType = (typeof knownDepTypes)[number]['depType'];

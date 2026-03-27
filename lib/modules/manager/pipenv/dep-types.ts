@@ -6,7 +6,7 @@ import type { DepTypeMetadata } from '../types.ts';
  * treated as a dependency section. The values below cover the standard
  * section names.
  */
-export const knownDepTypes: DepTypeMetadata[] = [
+export const knownDepTypes = [
   {
     depType: 'packages',
     description: 'Listed under `[packages]`',
@@ -15,7 +15,9 @@ export const knownDepTypes: DepTypeMetadata[] = [
     depType: 'dev-packages',
     description: 'Listed under `[dev-packages]`',
   },
-];
+] as const satisfies readonly DepTypeMetadata[];
+
+export type PipenvDepType = (typeof knownDepTypes)[number]['depType'] | (string & {});
 
 export const supportsDynamicDepTypesNote =
   'Dependencies from other package category groups in the Pipfile use the group name as the `depType`.';
