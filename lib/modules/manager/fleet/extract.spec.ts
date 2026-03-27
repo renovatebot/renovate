@@ -15,13 +15,6 @@ const invalidGitRepoYaml = Fixtures.get('invalid_gitrepo.yaml');
 
 const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
 
-const aliasConfig = partial<ExtractConfig>({
-  registryAliases: {
-    'https://registry.com/jetstack': 'https://charts.jetstack.io',
-    'registry.com/docker-io': 'registry-1.docker.io',
-  },
-});
-
 describe('modules/manager/fleet/extract', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -108,7 +101,12 @@ kind: Fleet
               version: 7.1.2
             `,
           'fleet.yaml',
-          aliasConfig,
+          partial<ExtractConfig>({
+            registryAliases: {
+              'https://registry.com/jetstack': 'https://charts.jetstack.io',
+              'registry.com/docker-io': 'registry-1.docker.io',
+            },
+          }),
         );
 
         expect(result).not.toBeNull();
