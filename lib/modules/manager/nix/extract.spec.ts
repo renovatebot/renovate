@@ -257,6 +257,68 @@ describe('modules/manager/nix/extract', () => {
     });
   });
 
+  it('returns the correct nixpkgs input', async () => {
+    /* When using inputs.<name>.inputs.nixpkgs.follows you will have multiple instances
+       of nixpkgs. The "root" item has the root aliases inputs.<name> -> alias. So we must
+       key off the alias not the <name> */
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "nixpkgs_4": {
+          "locked": {
+            "lastModified": 1769598131,
+            "narHash": "sha256-e7VO/kGLgRMbWtpBqdWl0uFg8Y2XWFMdz0uUJvlML8o=",
+            "owner": "nixos",
+            "repo": "nixpkgs",
+            "rev": "fa83fd837f3098e3e678e6cf017b2b36102c7211",
+            "type": "github"
+          },
+          "original": {
+            "owner": "nixos",
+            "ref": "nixos-25.11",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs_4"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toEqual({
+      deps: [
+        {
+          currentValue: 'nixos-25.11',
+          depName: 'nixpkgs_4',
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: nixpkgsVersioning,
+          lockedVersion: 'fa83fd837f3098e3e678e6cf017b2b36102c7211',
+        },
+      ],
+    });
+  });
+
   it('includes nixpkgs with no explicit ref', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
