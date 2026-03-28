@@ -538,10 +538,9 @@ export async function getAdditionalFiles(
       /* v8 ignore next -- needs test */
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
         for (const upgrade of config.upgrades) {
-          /* eslint-disable no-useless-escape */
           if (
             res.stderr.includes(
-              `Couldn't find any versions for \\\"${upgrade.depName}\\\"`,
+              `Couldn't find any versions for \\"${upgrade.depName}\\"`,
             )
           ) {
             logger.debug(
@@ -555,7 +554,6 @@ export async function getAdditionalFiles(
               NpmDatasource.id,
             );
           }
-          /* eslint-enable no-useless-escape */
         }
       }
 
