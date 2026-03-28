@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
+import { Json } from '../../../util/schema-utils/index.ts';
 
 /**
  * Elm application dependencies structure
@@ -42,10 +43,9 @@ export const ElmPackageJson = z.object({
 /**
  * Union type for any valid elm.json
  */
-export const ElmJson = z.discriminatedUnion('type', [
-  ElmApplicationJson,
-  ElmPackageJson,
-]);
+export const ElmJson = Json.pipe(
+  z.discriminatedUnion('type', [ElmApplicationJson, ElmPackageJson]),
+);
 
 export type ElmApplicationJsonType = z.infer<typeof ElmApplicationJson>;
 export type ElmPackageJsonType = z.infer<typeof ElmPackageJson>;
