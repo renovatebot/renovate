@@ -42,7 +42,7 @@ import {
   OnboardingState,
   getDefaultConfigFileName,
 } from '../onboarding/common.ts';
-import type { RepoFileConfig } from './types.ts';
+import type { RepoFileConfig, RepositoryWorkerConfig } from './types.ts';
 
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
@@ -184,10 +184,10 @@ export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
 
 // Check for repository config
 export async function mergeRenovateConfig(
-  config: RenovateConfig,
+  config: RepositoryWorkerConfig,
   branchName?: string,
 ): Promise<RenovateConfig> {
-  let returnConfig = { ...config };
+  let returnConfig: RepositoryWorkerConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
   if (config.requireConfig !== 'ignored') {
     repoConfig = await detectRepoFileConfig(branchName);
@@ -207,6 +207,44 @@ export async function mergeRenovateConfig(
     configFileParsed,
     process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
+
+  // Apply the repositories[] object-entry config between global config and
+  // repository file config.
+  // Must run after repository file config is loaded so its `ignorePresets` can
+  // be included when resolving object-entry presets.
+  const repoEntryConfig = returnConfig.repositoryEntryConfig;
+  delete returnConfig.repositoryEntryConfig;
+
+  if (isNonEmptyObject(repoEntryConfig)) {
+    const repoEntry = repoEntryConfig as RenovateConfig;
+    const toResolve: RenovateConfig = {
+      ...repoEntry,
+      extends: [...(returnConfig.extends ?? []), ...(repoEntry.extends ?? [])],
+      ignorePresets: [
+        ...(returnConfig.ignorePresets ?? []),
+        ...(repoEntry.ignorePresets ?? []),
+        ...(resolvedRepoConfig.ignorePresets ?? []),
+      ],
+    };
+    delete returnConfig.extends;
+
+    const { config: resolvedRepoEntry } = await presets.resolveConfigPresets(
+      toResolve,
+      config,
+    );
+
+    logger.trace('Processing npmrc in repository entry config');
+    applyNpmrc(resolvedRepoEntry);
+
+    const resolvedRepoEntryWithSecrets = applySecretsAndVariablesToConfig({
+      config: resolvedRepoEntry,
+      secrets: config.secrets,
+      variables: config.variables,
+    });
+
+    applyHostRules(resolvedRepoEntryWithSecrets);
+    returnConfig = mergeChildConfig(returnConfig, resolvedRepoEntryWithSecrets);
+  }
 
   if (isNonEmptyArray(returnConfig.extends)) {
     resolvedRepoConfig.extends = [
@@ -239,12 +277,8 @@ export async function mergeRenovateConfig(
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
-  setNpmTokenInNpmrc(decryptedConfig);
-  // istanbul ignore if
-  if (isString(decryptedConfig.npmrc)) {
-    logger.debug('Found npmrc in decrypted config - setting');
-    npmApi.setNpmrc(decryptedConfig.npmrc);
-  }
+  logger.trace('Processing npmrc in decrypted config');
+  applyNpmrc(decryptedConfig);
   // Decrypt after resolving in case the preset contains npm authentication instead
   const { config: configToDecrypt } = await presets.resolveConfigPresets(
     decryptedConfig,
@@ -259,14 +293,8 @@ export async function mergeRenovateConfig(
     logger.trace({ config: resolvedConfig }, 'resolved config after migrating');
     resolvedConfig = migrationResult.migratedConfig;
   }
-  setNpmTokenInNpmrc(resolvedConfig);
-  // istanbul ignore if
-  if (isString(resolvedConfig.npmrc)) {
-    logger.debug(
-      'Ignoring any .npmrc files in repository due to configured npmrc',
-    );
-    npmApi.setNpmrc(resolvedConfig.npmrc);
-  }
+  logger.trace('Processing npmrc in resolved config');
+  applyNpmrc(resolvedConfig);
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
     secrets: mergeChildConfig(
@@ -279,24 +307,7 @@ export async function mergeRenovateConfig(
     ),
   });
 
-  // istanbul ignore if
-  if (resolvedConfig.hostRules) {
-    logger.debug('Setting hostRules from config');
-    for (const rule of resolvedConfig.hostRules) {
-      try {
-        hostRules.add(rule);
-      } catch (err) {
-        logger.warn(
-          { err, config: rule },
-          'Error setting hostRule from config',
-        );
-      }
-    }
-    // host rules can change concurrency
-    queue.clear();
-    throttle.clear();
-    delete resolvedConfig.hostRules;
-  }
+  applyHostRules(resolvedConfig);
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
   ({ config: returnConfig } = await presets.resolveConfigPresets(
     returnConfig,
@@ -315,6 +326,34 @@ export async function mergeRenovateConfig(
   delete returnConfig.env;
 
   return returnConfig;
+}
+
+export function applyNpmrc(config: RenovateConfig): void {
+  setNpmTokenInNpmrc(config);
+  if (!isString(config.npmrc)) {
+    return;
+  }
+  logger.debug('Setting npmrc from config');
+  npmApi.setNpmrc(config.npmrc);
+}
+
+export function applyHostRules(config: RenovateConfig): void {
+  if (!config.hostRules) {
+    return;
+  }
+
+  logger.debug('Setting hostRules from config');
+  for (const rule of config.hostRules) {
+    try {
+      hostRules.add(rule);
+    } catch (err) {
+      logger.warn({ err, config: rule }, 'Error setting hostRule from config');
+    }
+  }
+  // host rules can change concurrency
+  queue.clear();
+  throttle.clear();
+  delete config.hostRules;
 }
 
 /** needed when using portal secrets for npmToken */
