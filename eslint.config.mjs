@@ -78,14 +78,6 @@ export default tseslint.config(
         },
       ],
 
-      '@typescript-eslint/consistent-type-assertions': [
-        'error',
-        {
-          assertionStyle: 'as',
-          objectLiteralTypeAssertions: 'allow',
-        },
-      ],
-
       '@typescript-eslint/explicit-function-return-type': [
         'error',
         {
@@ -120,6 +112,19 @@ export default tseslint.config(
           avoidQuotes: true,
         },
       ],
+
+      // Migrated to oxlint
+      '@typescript-eslint/adjacent-overload-signatures': 'off',
+      '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/ban-tslint-comment': 'off',
+      '@typescript-eslint/class-literal-property-style': 'off',
+      '@typescript-eslint/consistent-generic-constructors': 'off',
+      '@typescript-eslint/consistent-indexed-object-style': 'off',
+      '@typescript-eslint/consistent-type-assertions': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/prefer-for-of': 'off',
+      '@typescript-eslint/prefer-function-type': 'off',
     },
   },
   {
