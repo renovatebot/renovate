@@ -8,6 +8,8 @@
 /* v8 ignore next -- BTW don't forget to update `self-hosted-configuration.md` */
 export const packageCacheNamespaces = [
   '_test-namespace',
+  'changelog-azure-release',
+  'changelog-azure-notes@v2',
   'changelog-bitbucket-notes@v2',
   'changelog-bitbucket-release',
   'changelog-bitbucket-server-notes@v2',
