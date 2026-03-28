@@ -1356,6 +1356,17 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'rpmMetadataSource',
+    description:
+      'Select which RPM repository metadata source Renovate should use. `auto` prefers `primary_db` and falls back to `primary`, while `primary_db` and `primary` force a specific repodata type.',
+    type: 'string',
+    allowedValues: ['auto', 'primary', 'primary_db'],
+    default: 'auto',
+    stage: 'package',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'extractVersion',
     description:
       "A regex (`re2`) to extract a version from a datasource's raw version string.",

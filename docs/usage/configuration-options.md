@@ -4588,6 +4588,31 @@ Renovate's "rollback" feature exists to propose a downgrade to the next-highest 
 Renovate does not create these rollback PRs by default, so this functionality needs to be opted-into.
 We recommend you do this selectively with `packageRules` and not globally.
 
+## rpmMetadataSource
+
+The `rpmMetadataSource` option controls which RPM repository metadata source Renovate uses for the [`rpm`](modules/datasource/rpm/index.md) datasource.
+
+By default, Renovate uses `"auto"`, which prefers `primary_db` metadata when it is published by the repository and falls back to `primary` metadata if the SQLite path is unavailable.
+
+If you need to make the behavior deterministic for a specific repository, set `rpmMetadataSource` in `packageRules`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["rpm"],
+      "rpmMetadataSource": "primary"
+    }
+  ]
+}
+```
+
+Allowed values:
+
+- `auto`: Prefer `primary_db`, then fall back to `primary`
+- `primary`: Use XML `primary` metadata only
+- `primary_db`: Use SQLite `primary_db` metadata only
+
 ## schedule
 
 The `schedule` option allows you to define times of the day, week or month when you are willing to allow Renovate to create branches.
