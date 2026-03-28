@@ -71,16 +71,6 @@ export default tseslint.config(
   {
     ...jsFiles,
     rules: {
-      'consistent-return': 0,
-      eqeqeq: 'error',
-      'no-console': 'error',
-      'no-negated-condition': 'error',
-      'no-param-reassign': 'error',
-      'no-template-curly-in-string': 'error',
-      radix: ['error', 'as-needed'], // on ES5+ the radix defaults to 10
-
-      'sort-imports': 0,
-
       'no-restricted-imports': [
         2,
         {
@@ -93,13 +83,6 @@ export default tseslint.config(
         {
           assertionStyle: 'as',
           objectLiteralTypeAssertions: 'allow',
-        },
-      ],
-
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          disallowTypeAnnotations: false,
         },
       ],
 
@@ -123,18 +106,12 @@ export default tseslint.config(
         },
       ],
 
-      curly: [2, 'all'],
-
       '@typescript-eslint/no-empty-object-type': [
         2,
         {
           allowInterfaces: 'with-single-extends',
         },
       ],
-
-      // TODO: not compatible with recent versions of typescript-eslint
-      // 'typescript-enum/no-const-enum': 2,
-      // 'typescript-enum/no-enum': 2,
 
       'object-shorthand': [
         'error',
@@ -155,7 +132,6 @@ export default tseslint.config(
     },
 
     rules: {
-      'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
       'global-require': 0,
@@ -185,10 +161,6 @@ export default tseslint.config(
       globals: {
         ...globals.node,
       },
-    },
-
-    rules: {
-      'no-console': 'off',
     },
   },
   {
