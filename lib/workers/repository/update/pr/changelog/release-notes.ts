@@ -165,6 +165,12 @@ export async function getReleaseNotes(
     releases,
   );
   if (isUndefined(matchedRelease)) {
+    const sourceTag = config.sourceTag;
+    if (sourceTag) {
+      matchedRelease = releases.find((r) => r.tag === sourceTag);
+    }
+  }
+  if (isUndefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
       (r) =>
@@ -484,10 +490,11 @@ export async function addReleaseNotes(
   const cacheKeyPrefix = sourceDirectory
     ? `${repository}:${sourceDirectory}`
     : `${repository}`;
+  const sourceTagCachePart = config.sourceTag ? `:${config.sourceTag}` : '';
 
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = `${cacheKeyPrefix}:${v.version}`;
+    const cacheKey = `${cacheKeyPrefix}:${v.version}${sourceTagCachePart}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     releaseNotes ??= await getReleaseNotesMd(input.project, v);
     releaseNotes ??= await getReleaseNotes(input.project, v, config);

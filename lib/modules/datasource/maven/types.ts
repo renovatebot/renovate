@@ -17,6 +17,7 @@ export type DependencyInfo = Pick<
   ReleaseResult,
   | 'homepage'
   | 'sourceUrl'
+  | 'sourceTag'
   | 'packageScope'
   | 'replacementName'
   | 'replacementVersion'
