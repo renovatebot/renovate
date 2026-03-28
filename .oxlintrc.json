@@ -4,7 +4,9 @@
   "options": {
     "typeAware": true
   },
-  "categories": {},
+  "categories": {
+    "correctness": "error"
+  },
   "rules": {
     "eqeqeq": "error",
     "no-console": "error",
