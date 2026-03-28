@@ -201,6 +201,14 @@ function genExperimentalMsg(el: Record<string, any>): string {
   return warning + '\n';
 }
 
+function genTemplatingMsg(): string {
+  return (
+    '\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate\'s template syntax"\n' +
+    indent`${2}See [templates](templates.md) for available variables and helpers.` +
+    '\n'
+  );
+}
+
 function genDeprecationMsg(el: Record<string, any>): string {
   let warning =
     '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
@@ -320,11 +328,19 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       for (const key of lookupKeys) {
         const [headerIndex, footerIndex] = indexed[key];
-
-        configOptionsRaw[headerIndex] +=
+        let sectionContent =
           `\n${option.description}\n\n` +
           genTable(Object.entries(el), option.type, option.default);
 
+        if (el.supportsTemplating) {
+          sectionContent += genTemplatingMsg();
+        }
+
+        configOptionsRaw[headerIndex] += sectionContent;
+
+        if (el.experimental) {
+          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+        }
         if (el.advancedUse) {
           configOptionsRaw[headerIndex] += generateAdvancedUse();
         }
