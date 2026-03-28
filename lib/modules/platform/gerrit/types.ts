@@ -146,6 +146,6 @@ export interface GerritMergeableInfo {
 }
 
 export interface GerritHashtagsInput {
-  add?: string[];
-  remove?: string[];
+  add?: string[] | null;
+  remove?: string[] | null;
 }

@@ -210,12 +210,10 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
-  if (prConfig.addLabels?.length || prConfig.removeLabels?.length) {
-    await client.setHashtags(prConfig.number, {
-      add: prConfig.addLabels ?? undefined,
-      remove: prConfig.removeLabels ?? undefined,
-    });
-  }
+  await client.setHashtags(prConfig.number, {
+    add: prConfig.addLabels,
+    remove: prConfig.removeLabels,
+  });
   if (prConfig.targetBranch) {
     await client.moveChange(prConfig.number, prConfig.targetBranch);
   }

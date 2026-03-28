@@ -1,3 +1,4 @@
+import { isNonEmptyArray } from '@sindresorhus/is';
 import semver from 'semver';
 import { z } from 'zod/v3';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
@@ -247,11 +248,8 @@ class GerritClient {
     changeNumber: number,
     hashtagsInput: GerritHashtagsInput,
   ): Promise<void> {
-    const add = hashtagsInput.add?.length ? hashtagsInput.add : undefined;
-    const remove = hashtagsInput.remove?.length
-      ? hashtagsInput.remove
-      : undefined;
-    if (add ?? remove) {
+    const { add, remove } = hashtagsInput;
+    if (isNonEmptyArray(add) || isNonEmptyArray(remove)) {
       await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
         body: { add, remove },
       });
