@@ -3,7 +3,7 @@ import { regEx } from '../../../util/regex.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
 import { isVersion } from '../../versioning/semver/index.ts';
-import type { PackageDependency } from '../types.ts';
+import type { GomodDep } from './dep-types.ts';
 
 function trimQuotes(str: string): string {
   return str.replace(regEx(/^"(.*)"$/), '$1');
@@ -40,12 +40,12 @@ function isPlaceholderPseudoVersion(version: string): boolean {
   return version === placeholderPseudoVersion;
 }
 
-export function parseLine(input: string): PackageDependency | null {
+export function parseLine(input: string): GomodDep | null {
   const goVersionMatches = goVersionRegex.exec(input)?.groups;
   if (goVersionMatches) {
     const { version: currentValue } = goVersionMatches;
 
-    const dep: PackageDependency = {
+    const dep: GomodDep = {
       datasource: GolangVersionDatasource.id,
       versioning: 'go-mod-directive',
       depType: 'golang',
@@ -64,7 +64,7 @@ export function parseLine(input: string): PackageDependency | null {
   if (toolchainMatches) {
     const { version: currentValue } = toolchainMatches;
 
-    const dep: PackageDependency = {
+    const dep: GomodDep = {
       datasource: GolangVersionDatasource.id,
       depType: 'toolchain',
       depName: 'go',
@@ -84,7 +84,7 @@ export function parseLine(input: string): PackageDependency | null {
 
     const depName = trimQuotes(module);
 
-    const dep: PackageDependency = {
+    const dep: GomodDep = {
       datasource: GoDatasource.id,
       depType: 'require',
       depName,
@@ -128,7 +128,7 @@ export function parseLine(input: string): PackageDependency | null {
 
     const depName = trimQuotes(replacement);
 
-    const dep: PackageDependency = {
+    const dep: GomodDep = {
       datasource: GoDatasource.id,
       depType: 'replace',
       depName,
@@ -174,7 +174,7 @@ export function parseLine(input: string): PackageDependency | null {
 
     const depName = trimQuotes(module);
 
-    const dep: PackageDependency = {
+    const dep: GomodDep = {
       datasource: GoDatasource.id,
       depType: 'tool',
       depName,

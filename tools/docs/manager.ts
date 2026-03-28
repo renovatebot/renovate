@@ -146,6 +146,39 @@ export async function generateManagers(
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
       md += formatUrls(urls);
+      if (
+        definition.knownDepTypes?.length ||
+        definition.supportsDynamicDepTypesNote
+      ) {
+        md += '## Dependency types\n\n';
+        if (definition.knownDepTypes?.length) {
+          const hasPrettyDepType = definition.knownDepTypes.some(
+            (m) => m.prettyDepType,
+          );
+          md += 'This manager extracts the following `depType` values:\n\n';
+          if (hasPrettyDepType) {
+            md += '| `depType` | `prettyDepType` | Description |\n';
+            md += '|-----------|-----------------|-------------|\n';
+            for (const {
+              depType,
+              prettyDepType,
+              description,
+            } of definition.knownDepTypes) {
+              md += `| \`${depType}\` | ${prettyDepType ? `\`${prettyDepType}\`` : ''} | ${description} |\n`;
+            }
+          } else {
+            md += '| `depType` | Description |\n';
+            md += '|-----------|-------------|\n';
+            for (const { depType, description } of definition.knownDepTypes) {
+              md += `| \`${depType}\` | ${description} |\n`;
+            }
+          }
+          md += '\n';
+        }
+        if (definition.supportsDynamicDepTypesNote) {
+          md += definition.supportsDynamicDepTypesNote + '\n\n';
+        }
+      }
       md += '## Default config\n\n';
       md += '```json\n';
       md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';

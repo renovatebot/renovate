@@ -11,6 +11,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { AzurePipelinesDepType } from './dep-types.ts';
 import type {
   AzurePipelines,
   Container,
@@ -28,7 +29,7 @@ const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 export function extractRepository(
   repository: Repository,
   currentRepository?: string,
-): PackageDependency | null {
+): PackageDependency<Record<string, any>, AzurePipelinesDepType> | null {
   let repositoryUrl = null;
 
   let depName = repository.name;
@@ -89,7 +90,7 @@ export function extractRepository(
 
 export function extractContainer(
   container: Container,
-): PackageDependency | null {
+): PackageDependency<Record<string, any>, AzurePipelinesDepType> | null {
   const dep = getDep(container.image);
   logger.debug(
     {
@@ -99,14 +100,13 @@ export function extractContainer(
     },
     'Azure pipelines docker image',
   );
-  dep.depType = 'docker';
 
-  return dep;
+  return { ...dep, depType: 'docker' };
 }
 
 export function extractAzurePipelinesTasks(
   task: string,
-): PackageDependency | null {
+): PackageDependency<Record<string, any>, AzurePipelinesDepType> | null {
   const match = AzurePipelinesTaskRegex.exec(task);
   if (match?.groups) {
     return {
@@ -136,7 +136,7 @@ export function parseAzurePipelines(
 
 function extractSteps(
   steps: Step[] | undefined,
-): PackageDependency<Record<string, any>>[] {
+): PackageDependency<Record<string, any>, AzurePipelinesDepType>[] {
   const deps = [];
   for (const step of coerceArray(steps)) {
     const task = extractAzurePipelinesTasks(step.task);
@@ -147,11 +147,11 @@ function extractSteps(
   return deps;
 }
 
-function extractJob(job: Job | undefined): PackageDependency[] {
+function extractJob(job: Job | undefined): PackageDependency<Record<string, any>, AzurePipelinesDepType>[] {
   return extractSteps(job?.steps);
 }
 
-function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
+function extractDeploy(deploy: Deploy | undefined): PackageDependency<Record<string, any>, AzurePipelinesDepType>[] {
   const deps = extractJob(deploy?.deploy);
   deps.push(...extractJob(deploy?.postRouteTraffic));
   deps.push(...extractJob(deploy?.preDeploy));
@@ -161,8 +161,8 @@ function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
   return deps;
 }
 
-function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+function extractJobs(jobs: Jobs | undefined): PackageDependency<Record<string, any>, AzurePipelinesDepType>[] {
+  const deps: PackageDependency<Record<string, any>, AzurePipelinesDepType>[] = [];
   for (const jobOrDeployment of coerceArray(jobs)) {
     const deployment = jobOrDeployment as Deployment;
     if (deployment.strategy) {
@@ -184,7 +184,7 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, AzurePipelinesDepType>[] = [];
 
   const pkg = parseAzurePipelines(content, packageFile);
   if (!pkg) {
