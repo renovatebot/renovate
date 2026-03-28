@@ -95,15 +95,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(content);
-  } catch {
-    logger.debug({ packageFile }, 'Invalid JSON in elm.json');
-    return null;
-  }
-
-  const result = ElmJson.safeParse(parsed);
+  const result = ElmJson.safeParse(content);
   if (!result.success) {
     logger.debug(
       { packageFile, error: result.error },
