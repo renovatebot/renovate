@@ -4,6 +4,7 @@ import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import * as debianVersioning from '../../versioning/debian/index.ts';
 import * as ubuntuVersioning from '../../versioning/ubuntu/index.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -179,22 +180,40 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    if (currentFrom.startsWith(`${name}/`)) {
-      const depName = currentFrom.substring(name.length + 1);
-      const dep = {
-        ...getDep(`${value}/${depName}`, false),
-        replaceString: currentFrom,
-      };
-      // retain depName, not sure if condition is necessary
-      if (dep.depName?.startsWith(value)) {
-        dep.packageName = dep.depName;
-        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
-      }
-      if (specifyReplaceString) {
-        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
-      }
-      return dep;
+    const match =
+      currentFrom.startsWith(`${name}/`) || currentFrom.startsWith(name);
+    if (!match) {
+      continue;
     }
+    const depName = currentFrom.slice(
+      currentFrom.startsWith(`${name}/`) ? name.length + 1 : name.length,
+    );
+    const valueWithSlash = ensureTrailingSlash(value);
+    const dep = {
+      ...getDep(`${valueWithSlash}${depName}`, false),
+      replaceString: currentFrom,
+    };
+    // retain depName, not sure if condition is necessary
+    if (dep.depName?.startsWith(valueWithSlash)) {
+      dep.packageName = dep.depName;
+      // Keep original name and path structure in the depName
+      // Only extract depName up to the tag separator if there's actually a tag/digest
+      if (dep.currentValue || dep.currentDigest) {
+        // Split on @ first (for digest), then find the last : (for tag)
+        const [imageAndTag] = currentFrom.split('@');
+        const lastColonIndex = imageAndTag.lastIndexOf(':');
+        if (lastColonIndex > 0) {
+          dep.depName = imageAndTag.substring(0, lastColonIndex);
+        }
+      } else {
+        // No tag/digest, so the entire currentFrom is the depName
+        dep.depName = currentFrom;
+      }
+    }
+    if (specifyReplaceString) {
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+    }
+    return dep;
   }
 
   const dep = splitImageParts(currentFrom);
