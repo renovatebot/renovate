@@ -506,6 +506,15 @@ const options: Readonly<RenovateOptions>[] = [
     experimental: true,
   },
   {
+    name: 'reportFormatting',
+    description:
+      'If set to `true`, Renovate will format the report JSON with Prettier before writing.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
