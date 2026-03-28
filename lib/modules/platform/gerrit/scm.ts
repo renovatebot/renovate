@@ -20,7 +20,10 @@ export function configureScm(repo: string, login: string): void {
   username = login;
 }
 
-export function pushForReview(options: {
+/** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
+const pendingChangeBranches = new Set<string>();
+
+export async function pushForReview(options: {
   sourceRef: string;
   targetBranch: string;
   files: FileChange[];
@@ -37,18 +40,19 @@ export function pushForReview(options: {
     }
   }
 
-  return git.pushCommit({
+  const result = await git.pushCommit({
     sourceRef: options.sourceRef,
     targetRef: `refs/for/${options.targetBranch}`,
     files: options.files,
     pushOptions,
   });
+  if (result) {
+    pendingChangeBranches.delete(options.sourceRef);
+  }
+  return result;
 }
 
 export class GerritScm extends DefaultGitScm {
-  /** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
-  private pendingChangeBranches = new Set<string>();
-
   override async branchExists(branchName: string): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
@@ -209,13 +213,12 @@ export class GerritScm extends DefaultGitScm {
           });
           /* v8 ignore else -- should never happen */
           if (pushResult) {
-            this.pendingChangeBranches.delete(commit.branchName);
             return commitSha;
           }
         }
       } else {
         logger.debug(`Commit prepared, push deferred to createPr()`);
-        this.pendingChangeBranches.add(commit.branchName);
+        pendingChangeBranches.add(commit.branchName);
         return commitSha;
       }
     }
@@ -223,13 +226,13 @@ export class GerritScm extends DefaultGitScm {
   }
 
   override deleteBranch(branchName: string): Promise<void> {
-    this.pendingChangeBranches.delete(branchName);
+    pendingChangeBranches.delete(branchName);
     return Promise.resolve();
   }
 
   override async mergeToLocal(branchName: string): Promise<void> {
     // Unpushed branches can't be fetched from origin, merge locally instead
-    if (this.pendingChangeBranches.has(branchName)) {
+    if (pendingChangeBranches.has(branchName)) {
       logger.debug(`Merging local branch ${branchName} (not yet pushed)`);
       return git.mergeToLocal(branchName, { localBranch: true });
     }
