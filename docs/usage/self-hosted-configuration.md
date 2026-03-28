@@ -435,6 +435,7 @@ Other valid cache namespaces are as follows:
 - `datasource-docker-releases-v2`
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
+- `datasource-elm-package`
 - `datasource-endoflife-date`
 - `datasource-forgejo-releases`
 - `datasource-forgejo-tags`

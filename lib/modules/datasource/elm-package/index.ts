@@ -1,5 +1,6 @@
 import { ZodError } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -27,7 +28,7 @@ export class ElmPackageDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the package name using the GitHub pattern.';
 
-  async getReleases({
+  async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -75,5 +76,16 @@ export class ElmPackageDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${ElmPackageDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }
