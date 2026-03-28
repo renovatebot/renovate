@@ -140,6 +140,19 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  // Fallback to `gerrit` hostType.
+  // Unlike other platforms, this applies to any hostType because Gerrit
+  // controls all HTTP access and has no fixed list of derivative host types.
+  if (hostType !== 'gerrit') {
+    res = {
+      ...hostRules.find({
+        hostType: 'gerrit',
+        url,
+      }),
+      ...res,
+    };
+  }
+
   // Fallback to `gitea` hostType
   if (
     hostType &&
