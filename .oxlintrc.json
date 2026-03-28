@@ -28,7 +28,20 @@
         "disallowTypeAnnotations": false
       }
     ],
-    "no-unused-vars": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": ["nock", "parse-link-header", "path"]
+      }
+    ],
+    "no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "none",
+        "ignoreRestSiblings": true
+      }
+    ],
     "no-unassigned-vars": "error",
 
     "typescript/await-thenable": "error",
@@ -54,6 +67,27 @@
     "typescript/unbound-method": ["error", { "ignoreStatic": true }],
     "typescript/require-await": "error",
 
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "as",
+        "objectLiteralTypeAssertions": "allow"
+      }
+    ],
+    "typescript/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true
+      }
+    ],
+    "typescript/no-empty-object-type": [
+      "error",
+      {
+        "allowInterfaces": "with-single-extends"
+      }
+    ],
+
     "typescript/dot-notation": "error",
     "typescript/non-nullable-type-assertion-style": "error",
     "typescript/prefer-find": "error",
@@ -78,7 +112,8 @@
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
-        "typescript/unbound-method": "off"
+        "typescript/unbound-method": "off",
+        "typescript/explicit-function-return-type": "off"
       }
     },
     {
@@ -119,7 +154,8 @@
     {
       "files": ["**/*.js", "**/*.mjs", "**/*.cjs"],
       "rules": {
-        "typescript/restrict-template-expressions": "off"
+        "typescript/restrict-template-expressions": "off",
+        "typescript/explicit-function-return-type": "off"
       }
     }
   ],
