@@ -71,47 +71,8 @@ export default tseslint.config(
   {
     ...jsFiles,
     rules: {
-      'no-restricted-imports': [
-        2,
-        {
-          paths: ['nock', 'parse-link-header', 'path'],
-        },
-      ],
-
-      '@typescript-eslint/consistent-type-assertions': [
-        'error',
-        {
-          assertionStyle: 'as',
-          objectLiteralTypeAssertions: 'allow',
-        },
-      ],
-
-      '@typescript-eslint/explicit-function-return-type': [
-        'error',
-        {
-          allowExpressions: true,
-          allowTypedFunctionExpressions: true,
-        },
-      ],
-
       '@typescript-eslint/no-explicit-any': 0,
       '@typescript-eslint/no-non-null-assertion': 0,
-
-      '@typescript-eslint/no-unused-vars': [
-        2,
-        {
-          vars: 'all',
-          args: 'none',
-          ignoreRestSiblings: true,
-        },
-      ],
-
-      '@typescript-eslint/no-empty-object-type': [
-        2,
-        {
-          allowInterfaces: 'with-single-extends',
-        },
-      ],
 
       'object-shorthand': [
         'error',
@@ -137,7 +98,6 @@ export default tseslint.config(
       'global-require': 0,
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/no-object-literal-type-assertion': 0,
-      '@typescript-eslint/explicit-function-return-type': 0,
       'max-classes-per-file': 0,
       'class-methods-use-this': 0,
     },
@@ -146,7 +106,6 @@ export default tseslint.config(
     files: ['**/*.{js,mjs,cjs}'],
 
     rules: {
-      '@typescript-eslint/explicit-function-return-type': 0,
       '@typescript-eslint/explicit-module-boundary-types': 0,
     },
   },
