@@ -20,6 +20,14 @@ const v2Fixture = JSON.stringify(
   {
     pins: [
       {
+        identity: 'by-commit',
+        kind: 'remoteSourceControl',
+        location: 'https://github.com/example/by-commit',
+        state: {
+          revision: 'decaf',
+        },
+      },
+      {
         identity: 'alamofire',
         kind: 'remoteSourceControl',
         location: 'https://github.com/Alamofire/Alamofire',
