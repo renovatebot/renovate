@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -7,8 +9,6 @@ import type { FileAddition } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 import * as rules from './post-update/rules.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');

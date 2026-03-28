@@ -1,8 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
-
-import { extractPackageFile } from './index.ts';
 import { fs } from '~test/util.ts';
+import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

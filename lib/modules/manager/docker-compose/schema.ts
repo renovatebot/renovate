@@ -1,5 +1,5 @@
 import { isObject, isString } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 const DockerComposeService = z.object({
   image: z.string().optional(),

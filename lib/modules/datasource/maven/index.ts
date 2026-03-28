@@ -4,8 +4,7 @@ import * as packageCache from '../../../util/cache/package/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
-import mavenVersion from '../../versioning/maven/index.ts';
-import * as mavenVersioning from '../../versioning/maven/index.ts';
+import mavenVersion, * as mavenVersioning from '../../versioning/maven/index.ts';
 import { Datasource } from '../datasource.ts';
 import type {
   GetReleasesConfig,

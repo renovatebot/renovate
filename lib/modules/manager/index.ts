@@ -10,6 +10,7 @@ import type {
   PackageFileContent,
   RangeConfig,
 } from './types.ts';
+
 export { hashMap } from './fingerprint.generated.ts';
 
 const managerList = Array.from(managers.keys()); // does not include custom managers

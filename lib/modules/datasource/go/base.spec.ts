@@ -1,12 +1,12 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import { BaseGoDatasource } from './base.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 

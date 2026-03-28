@@ -80,7 +80,7 @@ export function getQueryString(params: Record<string, any>): string {
     if (isArray<object>(v)) {
       for (const item of v) {
         // TODO: fix me?
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        // oxlint-disable-next-line typescript/no-base-to-string
         usp.append(k, item.toString());
       }
     } else {

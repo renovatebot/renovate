@@ -1,6 +1,6 @@
+import { Fixtures } from '~test/fixtures.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 

@@ -1,4 +1,5 @@
 import type { Response } from 'got';
+import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type {
   BbsRestRepo,
@@ -11,7 +12,6 @@ import {
   getInvalidReviewers,
   getRepoGitUrl,
 } from './utils.ts';
-import { partial } from '~test/util.ts';
 
 vi.unmock('../../../util/git');
 
@@ -114,177 +114,207 @@ describe('modules/platform/bitbucket-server/utils', () => {
     ).toStrictEqual([]);
   });
 
-  const scenarios = {
-    'endpoint with no path': new URL('https://stash.renovatebot.com'),
-    'endpoint with path': new URL('https://stash.renovatebot.com/vcs/'),
-  };
-
   describe('getRepoGitUrl', () => {
-    Object.entries(scenarios).forEach(([scenarioName, url]) => {
-      describe(scenarioName, () => {
-        const username = 'abc';
-        const password = '123';
-        const opts = {
-          username,
-          password,
-        };
+    describe('endpoint with path', () => {
+      const url = new URL('https://stash.renovatebot.com/vcs/');
+      const username = 'abc';
+      const password = '123';
+      const opts = {
+        username,
+        password,
+      };
 
-        it('works gitUrl:undefined generate endpoint', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              undefined,
-              infoMock(url, 'SOME', 'repo', {
-                cloneUrl: { https: false, ssh: false },
-              }),
-              opts,
-            ),
-          ).toBe(
-            httpLink(url.toString(), 'SOME', 'repo').replace(
-              'https://',
-              `https://${username}:${password}@`,
-            ),
-          );
-        });
+      it('works gitUrl:undefined generate endpoint', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            undefined,
+            infoMock(url, 'SOME', 'repo', {
+              cloneUrl: { https: false, ssh: false },
+            }),
+            opts,
+          ),
+        ).toBe(
+          httpLink(url.toString(), 'SOME', 'repo').replace(
+            'https://',
+            `https://${username}:${password}@`,
+          ),
+        );
+      });
 
-        it('works gitUrl:undefined use endpoint with injected auth', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              undefined,
-              infoMock(url, 'SOME', 'repo', {
-                cloneUrl: { https: true, ssh: false },
-              }),
-              opts,
-            ),
-          ).toBe(
-            httpLink(url.toString(), 'SOME', 'repo').replace(
-              'https://',
-              `https://${username}:${password}@`,
-            ),
-          );
-        });
+      it('works gitUrl:undefined use endpoint with injected auth', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            undefined,
+            infoMock(url, 'SOME', 'repo', {
+              cloneUrl: { https: true, ssh: false },
+            }),
+            opts,
+          ),
+        ).toBe(
+          httpLink(url.toString(), 'SOME', 'repo').replace(
+            'https://',
+            `https://${username}:${password}@`,
+          ),
+        );
+      });
 
-        it('works gitUrl:undefined use ssh', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              undefined,
-              infoMock(url, 'SOME', 'repo', {
-                cloneUrl: { https: false, ssh: true },
-              }),
-              opts,
-            ),
-          ).toBe(sshLink('SOME', 'repo'));
-        });
+      it('works gitUrl:undefined use ssh', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            undefined,
+            infoMock(url, 'SOME', 'repo', {
+              cloneUrl: { https: false, ssh: true },
+            }),
+            opts,
+          ),
+        ).toBe(sshLink('SOME', 'repo'));
+      });
 
-        it('works gitUrl:default', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'default',
-              infoMock(url, 'SOME', 'repo'),
-              opts,
-            ),
-          ).toBe(
-            httpLink(url.toString(), 'SOME', 'repo').replace(
-              'https://',
-              `https://${username}:${password}@`,
-            ),
-          );
-        });
+      it('works gitUrl:default', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'default',
+            infoMock(url, 'SOME', 'repo'),
+            opts,
+          ),
+        ).toBe(
+          httpLink(url.toString(), 'SOME', 'repo').replace(
+            'https://',
+            `https://${username}:${password}@`,
+          ),
+        );
+      });
 
-        it('gitUrl:default invalid http url throws CONFIG_GIT_URL_UNAVAILABLE', () => {
-          expect(() =>
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'default',
-              infoMock('invalidUrl', 'SOME', 'repo', {
-                cloneUrl: { https: true, ssh: false },
-              }),
-              opts,
-            ),
-          ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
-        });
+      it('gitUrl:default invalid http url throws CONFIG_GIT_URL_UNAVAILABLE', () => {
+        expect(() =>
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'default',
+            infoMock('invalidUrl', 'SOME', 'repo', {
+              cloneUrl: { https: true, ssh: false },
+            }),
+            opts,
+          ),
+        ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
+      });
 
-        it('gitUrl:default no http url returns generated url', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'default',
-              infoMock(url, 'SOME', 'repo', {
-                cloneUrl: { https: false, ssh: false },
-              }),
-              opts,
-            ),
-          ).toBe(
-            httpLink(url.toString(), 'SOME', 'repo').replace(
-              'https://',
-              `https://${username}:${password}@`,
-            ),
-          );
-        });
+      it('gitUrl:default no http url returns generated url', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'default',
+            infoMock(url, 'SOME', 'repo', {
+              cloneUrl: { https: false, ssh: false },
+            }),
+            opts,
+          ),
+        ).toBe(
+          httpLink(url.toString(), 'SOME', 'repo').replace(
+            'https://',
+            `https://${username}:${password}@`,
+          ),
+        );
+      });
 
-        it('gitUrl:ssh no ssh url throws CONFIG_GIT_URL_UNAVAILABLE', () => {
-          expect(() =>
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'ssh',
-              infoMock(url, 'SOME', 'repo', {
-                cloneUrl: { https: false, ssh: false },
-              }),
-              opts,
-            ),
-          ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
-        });
+      it('gitUrl:ssh no ssh url throws CONFIG_GIT_URL_UNAVAILABLE', () => {
+        expect(() =>
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'ssh',
+            infoMock(url, 'SOME', 'repo', {
+              cloneUrl: { https: false, ssh: false },
+            }),
+            opts,
+          ),
+        ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
+      });
 
-        it('works gitUrl:ssh', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'ssh',
-              infoMock(url, 'SOME', 'repo'),
-              opts,
-            ),
-          ).toBe(sshLink('SOME', 'repo'));
-        });
+      it('works gitUrl:ssh', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'ssh',
+            infoMock(url, 'SOME', 'repo'),
+            opts,
+          ),
+        ).toBe(sshLink('SOME', 'repo'));
+      });
 
-        it('works gitUrl:endpoint', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'endpoint',
-              infoMock(url, 'SOME', 'repo'),
-              opts,
-            ),
-          ).toBe(
-            httpLink(url.toString(), 'SOME', 'repo').replace(
-              'https://',
-              `https://${username}:${password}@`,
-            ),
-          );
-        });
+      it('works gitUrl:endpoint', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'endpoint',
+            infoMock(url, 'SOME', 'repo'),
+            opts,
+          ),
+        ).toBe(
+          httpLink(url.toString(), 'SOME', 'repo').replace(
+            'https://',
+            `https://${username}:${password}@`,
+          ),
+        );
+      });
 
-        it('works gitUrl:endpoint no basic auth', () => {
-          expect(
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'endpoint',
-              infoMock(url, 'SOME', 'repo'),
-              {},
-            ),
-          ).toBe(httpLink(url.toString(), 'SOME', 'repo'));
-        });
+      it('works gitUrl:endpoint no basic auth', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'endpoint',
+            infoMock(url, 'SOME', 'repo'),
+            {},
+          ),
+        ).toBe(httpLink(url.toString(), 'SOME', 'repo'));
+      });
+    });
+
+    describe('endpoint with no path', () => {
+      const url = new URL('https://stash.renovatebot.com');
+      const username = 'abc';
+      const password = '123';
+      const opts = {
+        username,
+        password,
+      };
+
+      it('works gitUrl:endpoint', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'endpoint',
+            infoMock(url, 'SOME', 'repo'),
+            opts,
+          ),
+        ).toBe('https://abc:123@stash.renovatebot.com/scm/SOME/repo.git');
+      });
+
+      it('gitUrl:default no http url returns generated url', () => {
+        expect(
+          getRepoGitUrl(
+            'SOME/repo',
+            url.toString(),
+            'default',
+            infoMock(url, 'SOME', 'repo', {
+              cloneUrl: { https: false, ssh: false },
+            }),
+            opts,
+          ),
+        ).toBe('https://abc:123@stash.renovatebot.com/scm/SOME/repo.git');
       });
     });
     it('actually respects the gitUrl Setting', () => {

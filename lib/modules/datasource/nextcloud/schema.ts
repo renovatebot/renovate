@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 
 const Translation = z.object({

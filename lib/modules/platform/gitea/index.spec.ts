@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
@@ -27,8 +29,6 @@ import type {
   RepoPermission,
   User,
 } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger, partial } from '~test/util.ts';
 
 /**
  * latest tested gitea version.
@@ -284,13 +284,13 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock.scope('https://gitea.com/api/v1');
       scope
         .get('/user')
-        .reply(200, mockUser)
+        .reply(200, { ...mockUser, full_name: '' })
         .get('/version')
         .reply(200, { version: GITEA_VERSION });
 
       expect(await gitea.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://gitea.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'renovate <renovate@example.com>',
       });
     });
 
@@ -2923,6 +2923,15 @@ describe('modules/platform/gitea/index', () => {
 
       expect(gitea.massageMarkdown(body)).toBe(
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](issues/123) [#124](issues/124) [#125](issues/125)',
       );
     });
   });

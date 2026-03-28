@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { EmailAddress } from '../../../util/schema-utils/index.ts';
 
 export const User = z.object({
+  name: z.string(),
   displayName: z.string(),
   emailAddress: EmailAddress.catch(''),
   active: z.boolean(),
-  slug: z.string(),
 });
 
 export const Users = z.array(User);
@@ -18,6 +18,12 @@ export const Comment = z.object({
 });
 
 export type Comment = z.infer<typeof Comment>;
+
+export const PullRequestMerge = z.object({
+  autoMerge: z.boolean().optional(),
+});
+
+export type PullRequestMerge = z.infer<typeof PullRequestMerge>;
 
 export const PullRequestCommentActivity = z.object({
   action: z.literal('COMMENTED'),

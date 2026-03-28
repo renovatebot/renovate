@@ -1,7 +1,6 @@
-import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { parseYaml } from '../../../util/yaml.ts';
+import { withDebugMessage } from '../../../util/schema-utils/index.ts';
 import {
   KubernetesApiDatasource,
   supportedApis,
@@ -13,7 +12,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
-import type { KubernetesConfiguration } from './types.ts';
+import { type KubernetesManifest, KubernetesManifests } from './schema.ts';
 
 export function extractPackageFile(
   content: string,
@@ -29,9 +28,13 @@ export function extractPackageFile(
     return null;
   }
 
+  const manifests = KubernetesManifests.catch(
+    withDebugMessage([], `${packageFile} does not match Kubernetes schema`),
+  ).parse(content);
+
   const deps: PackageDependency[] = [
     ...extractImages(content, config),
-    ...extractApis(content, packageFile),
+    ...extractApis(manifests),
   ];
 
   return deps.length ? { deps } : null;
@@ -71,29 +74,8 @@ function extractImages(
   return deps;
 }
 
-function extractApis(
-  content: string,
-  packageFile: string,
-): PackageDependency[] {
-  let doc: KubernetesConfiguration[];
-
-  try {
-    // TODO: use schema (#9610)
-    doc = parseYaml(content, {
-      removeTemplates: true,
-    });
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse Kubernetes manifest.');
-    return [];
-  }
-
-  return doc
-    .filter(isTruthy)
-    .filter(
-      (m) =>
-        isNonEmptyStringAndNotWhitespace(m.kind) &&
-        isNonEmptyStringAndNotWhitespace(m.apiVersion),
-    )
+function extractApis(manifests: KubernetesManifest[]): PackageDependency[] {
+  return manifests
     .filter((m) => supportedApis.has(m.kind))
     .map((configuration) => ({
       depName: configuration.kind,

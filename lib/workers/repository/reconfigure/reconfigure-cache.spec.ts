@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import * as _cache from '../../../util/cache/repository/index.ts';
 import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
 import type { BranchConfig } from '../../types.ts';
@@ -5,7 +6,6 @@ import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
 } from './reconfigure-cache.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../../../util/cache/repository/index.ts');
 

@@ -1,11 +1,11 @@
+import { exec, mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import { exec, mockExecAll } from '~test/exec-util.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -157,7 +157,7 @@ describe('modules/manager/gleam/artifacts', () => {
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           artifactError: {
-            lockFile: 'manifest.toml',
+            fileName: 'manifest.toml',
             stderr: 'fake_gleam_failure',
           },
         },

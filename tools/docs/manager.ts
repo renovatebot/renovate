@@ -156,6 +156,19 @@ export async function generateManagers(
         isCustomMgr ? `custom/${manager}` : manager
       }/readme.md`,
     );
+
+    if (!isCustomMgr && definition.supportsLockFileMaintenance) {
+      md += '\n## Lock File Maintenance\n\n';
+
+      md +=
+        'This manager supports [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) for the following file(s):\n';
+      md += '\n';
+      for (const lockFile of definition.lockFileNames) {
+        md += `- \`${lockFile}\`\n`;
+      }
+      md += '\n';
+    }
+
     if (!isCustomMgr) {
       md += '\n## Additional Information\n\n';
     }

@@ -1,5 +1,7 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, logger, partial, platform, scm } from '~test/util.ts';
 import * as decrypt from '../../../config/decrypt.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
@@ -19,8 +21,6 @@ import {
   resolveStaticRepoConfig,
   setNpmTokenInNpmrc,
 } from './merge.ts';
-import { fs, logger, partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../onboarding/branch/onboarding-branch-cache.ts');

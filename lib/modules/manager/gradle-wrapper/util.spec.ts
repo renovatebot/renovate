@@ -1,6 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { codeBlock } from 'common-tags';
+import { fs, partial } from '~test/util.ts';
 import {
   extractGradleVersion,
   getJavaConstraint,
@@ -9,7 +10,6 @@ import {
   gradleWrapperFileName,
   prepareGradleCommand,
 } from './utils.ts';
-import { fs, partial } from '~test/util.ts';
 
 const platform = vi.spyOn(os, 'platform');
 vi.mock('../../../util/fs/index.ts');
@@ -28,6 +28,8 @@ describe('modules/manager/gradle-wrapper/util', () => {
         ${'8.0.1'}    | ${'^17.0.0'}
         ${'8.5.0'}    | ${'^21.0.0'}
         ${'9.0.1'}    | ${'^21.0.0'}
+        ${'9.1.0'}    | ${'^25.0.0'}
+        ${'10.0.1'}   | ${'^25.0.0'}
       `(
         '$gradleVersion | $javaConstraint',
         async ({ gradleVersion, javaConstraint }) => {

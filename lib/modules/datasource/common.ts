@@ -5,8 +5,8 @@ import {
 import { logger } from '../../logger/index.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { regEx } from '../../util/regex.ts';
-import { defaultVersioning } from '../versioning/index.ts';
 import * as allVersioning from '../versioning/index.ts';
+import { defaultVersioning } from '../versioning/index.ts';
 import datasources from './api.ts';
 import { CustomDatasource } from './custom/index.ts';
 import type {

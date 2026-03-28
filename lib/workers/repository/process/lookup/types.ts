@@ -30,10 +30,7 @@ export interface RollbackConfig {
 }
 
 export interface LookupUpdateConfig
-  extends RollbackConfig,
-    FilterConfig,
-    RangeConfig,
-    RenovateConfig {
+  extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
   currentVersion?: string;
 
   digestOneAndOnly?: boolean;

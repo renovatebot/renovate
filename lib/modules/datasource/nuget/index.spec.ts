@@ -1,15 +1,15 @@
 import { Readable } from 'stream';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { hostRules, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { id as versioning } from '../../versioning/nuget/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { parseRegistryUrl } from './common.ts';
 import { NugetDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { hostRules, logger } from '~test/util.ts';
 
 const datasource = NugetDatasource.id;
 

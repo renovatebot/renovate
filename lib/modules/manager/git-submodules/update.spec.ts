@@ -4,12 +4,13 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Upgrade } from '../types.ts';
 import { updateDependency } from './index.ts';
-import { fs } from '~test/util.ts';
+
 vi.mock('../../../util/fs/index.ts');
 
 vi.mock('simple-git');

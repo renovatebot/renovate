@@ -13,6 +13,7 @@ import type {
   VolumesPair,
 } from '../types.ts';
 import { isCommandWithOptions } from '../utils.ts';
+
 const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');

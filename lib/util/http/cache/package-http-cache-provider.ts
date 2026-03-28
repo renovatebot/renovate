@@ -19,9 +19,7 @@ export interface PackageHttpCacheProviderOptions {
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
-
-  private softTtlMinutes: number;
-  private hardTtlMinutes: number;
+  private defaultTtlMinutes: number;
 
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
@@ -34,11 +32,25 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttlValues = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttlValues.softTtlMinutes;
-    this.hardTtlMinutes = ttlValues.hardTtlMinutes;
+    this.defaultTtlMinutes = softTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
+  }
+
+  private get softTtlMinutes(): number {
+    const { softTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return softTtlMinutes;
+  }
+
+  private get hardTtlMinutes(): number {
+    const { hardTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return hardTtlMinutes;
   }
 
   private cacheKey(method: string, url: string): string {
