@@ -199,6 +199,43 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('uses helm versioning for OCI HelmRelease ranges resolved through registryAliases', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            chart:
+              spec:
+                chart: sealed-secrets
+                sourceRef:
+                  kind: HelmRepository
+                  name: sealed-secrets
+                version: "1.2.x"
+        `,
+        'helmRelease.yaml',
+        {
+          registryAliases: {
+            'sealed-secrets': 'oci://ghcr.io/charts',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '1.2.x',
+            datasource: DockerDatasource.id,
+            depName: 'sealed-secrets',
+            packageName: 'ghcr.io/charts/sealed-secrets',
+            versioning: 'helm',
+          },
+        ],
+      });
+    });
+
     it('ignores HelmRelease resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
       expect(result).toBeNull();
@@ -1171,6 +1208,29 @@ describe('modules/manager/flux/extract', () => {
           ],
           packageFile:
             'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        },
+      ]);
+    });
+
+    it('should use helm versioning for OCI HelmRepository range versions', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIReleaseRange.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '0.4.x',
+              datasource: DockerDatasource.id,
+              depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              packageName:
+                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+              versioning: 'helm',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIReleaseRange.yaml',
         },
       ]);
     });
