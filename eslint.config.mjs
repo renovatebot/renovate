@@ -3,7 +3,6 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import oxlint from 'eslint-plugin-oxlint';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import renovatePlugin from './tools/lint/rules.js';
 
 const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
@@ -47,13 +46,6 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylistic,
-  {
-    plugins: { renovate: renovatePlugin },
-    rules: {
-      'renovate/no-tools-import': 'error',
-      'renovate/test-root-describe': 'error',
-    },
-  },
   {
     ...jsFiles,
 
