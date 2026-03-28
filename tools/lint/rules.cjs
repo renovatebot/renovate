@@ -2,10 +2,8 @@ const CWD = process.cwd();
 const TOOLS_IMPORT_PATTERN = /(?:^|\/|\.\.\/)tools\//;
 
 /** @type {import('eslint').ESLint.Plugin} */
-export default {
-  meta: {
-    name: 'renovate',
-  },
+module.exports = {
+  meta: { name: 'renovate' },
   rules: {
     'no-tools-import': {
       meta: {
@@ -14,13 +12,14 @@ export default {
           noToolsImport: 'Importing from tools/ is not allowed in lib/',
         },
       },
+      /** @type {(context: any) => any} */
       create(context) {
         const filename = context.filename ?? context.physicalFilename ?? '';
         if (!filename.includes('/lib/')) {
           return {};
         }
-
         return {
+          /** @type {(node: any) => void} */
           ImportDeclaration(node) {
             if (TOOLS_IMPORT_PATTERN.test(node.source.value)) {
               context.report({ node: node.source, messageId: 'noToolsImport' });
@@ -56,7 +55,7 @@ export default {
               if (!descr) {
                 context.report({
                   node,
-                  message: `Test root describe must have arguments`,
+                  message: 'Test root describe must have arguments',
                 });
                 return;
               }
