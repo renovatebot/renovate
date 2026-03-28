@@ -2663,6 +2663,7 @@ const options: Readonly<RenovateOptions>[] = [
       'bundlerConservative',
       'composerWithAll',
       'composerNoMinimalChanges',
+      'dotnetEnableWindowsTargeting',
       'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
