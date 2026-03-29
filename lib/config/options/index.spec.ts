@@ -67,17 +67,17 @@ describe('config/options/index', () => {
     }
   });
 
-  it('supportsTemplating options should be of type string or array with subType string', () => {
-    const opts = getOptions();
+  describe('supportsTemplating options', () => {
+    const opts = getOptions().filter((option) => option.supportsTemplating);
 
-    opts
-      .filter((option) => option.supportsTemplating)
-      .forEach((option) => {
+    for (const option of opts) {
+      it(`${option.name} should be of type string or array of strings`, () => {
         const valid =
           option.type === 'string' ||
           (option.type === 'array' && option.subType === 'string');
         expect(valid).toBeTrue();
       });
+    }
   });
 
   describe('every option with a siblingProperties has a `property` that matches a known option', () => {

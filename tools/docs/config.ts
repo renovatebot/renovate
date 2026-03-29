@@ -345,10 +345,6 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
           configOptionsRaw[headerIndex] += generateAdvancedUse();
         }
 
-        if (el.experimental) {
-          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
-        }
-
         if (is.nonEmptyString(el.deprecationMsg)) {
           configOptionsRaw[footerIndex] += genDeprecationMsg(el);
         }
