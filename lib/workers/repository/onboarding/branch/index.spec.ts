@@ -207,6 +207,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       GlobalConfig.set({
         onboarding: false,
         onboardingBranch: config.onboardingBranch,
+        requireConfig: 'required',
       });
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
