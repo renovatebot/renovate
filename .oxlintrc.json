@@ -72,7 +72,25 @@
     "typescript/no-unsafe-return": "off",
 
     "vitest/no-conditional-tests": "error",
-    "vitest/hoisted-apis-on-top": "error"
+    "vitest/hoisted-apis-on-top": "error",
+
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/array-type": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/class-literal-property-style": "error",
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/consistent-indexed-object-style": "error",
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "as",
+        "objectLiteralTypeAssertions": "allow"
+      }
+    ],
+    "no-empty-function": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-function-type": "error"
   },
   "overrides": [
     {
