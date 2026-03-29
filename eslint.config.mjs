@@ -1,10 +1,6 @@
-import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
-import * as importX from 'eslint-plugin-import-x';
 import oxlint from 'eslint-plugin-oxlint';
-import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -50,12 +46,8 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylistic,
-  eslintPluginPromise.configs['flat/recommended'],
-  eslintContainerbase.configs.all,
   {
     ...jsFiles,
-
-    extends: [importX.flatConfigs.recommended, importX.flatConfigs.typescript],
 
     languageOptions: {
       globals: {
@@ -65,88 +57,16 @@ export default tseslint.config(
       ecmaVersion: 'latest',
       sourceType: 'module',
     },
-
-    settings: {
-      'import-x/resolver-next': [
-        createTypeScriptImportResolver({ project: 'tsconfig.json' }),
-      ],
-    },
   },
 
   eslintConfigPrettier,
   {
     ...jsFiles,
     rules: {
-      'import-x/default': 2,
-      'import-x/named': 2,
-      'import-x/namespace': 2,
-      'import-x/no-named-as-default-member': 0,
-
-      'import-x/no-extraneous-dependencies': [
-        'error',
-        {
-          devDependencies: [
-            '*.config.mjs',
-            '*.config.ts',
-            'test/**/*',
-            '**/*.spec.ts',
-          ],
-        },
-      ],
-
-      'import-x/prefer-default-export': 0,
-      'import-x/no-cycle': 2,
-      'consistent-return': 0,
-      eqeqeq: 'error',
-      'no-console': 'error',
-      'no-negated-condition': 'error',
-      'no-param-reassign': 'error',
-      'no-template-curly-in-string': 'error',
-      radix: ['error', 'as-needed'], // on ES5+ the radix defaults to 10
-
-      'sort-imports': 0,
-
-      'import-x/no-unresolved': [
-        'error',
-        {
-          ignore: ['^mdast$'],
-        },
-      ],
-
-      'import-x/order': 0,
-
-      'import-x/no-restricted-paths': [
-        2,
-        {
-          zones: [
-            {
-              target: 'lib/**/*.ts',
-              from: 'tools/**/*.ts',
-              message: 'Importing the `tools/*` files is not allowed',
-            },
-          ],
-        },
-      ],
-
       'no-restricted-imports': [
         2,
         {
           paths: ['nock', 'parse-link-header', 'path'],
-        },
-      ],
-
-      '@typescript-eslint/consistent-type-assertions': [
-        'error',
-        {
-          assertionStyle: 'as',
-          objectLiteralTypeAssertions: 'allow',
-        },
-      ],
-
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          disallowTypeAnnotations: false,
         },
       ],
 
@@ -170,18 +90,12 @@ export default tseslint.config(
         },
       ],
 
-      curly: [2, 'all'],
-
       '@typescript-eslint/no-empty-object-type': [
         2,
         {
           allowInterfaces: 'with-single-extends',
         },
       ],
-
-      // TODO: not compatible with recent versions of typescript-eslint
-      // 'typescript-enum/no-const-enum': 2,
-      // 'typescript-enum/no-enum': 2,
 
       'object-shorthand': [
         'error',
@@ -190,6 +104,19 @@ export default tseslint.config(
           avoidQuotes: true,
         },
       ],
+
+      // Migrated to oxlint
+      '@typescript-eslint/adjacent-overload-signatures': 'off',
+      '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/ban-tslint-comment': 'off',
+      '@typescript-eslint/class-literal-property-style': 'off',
+      '@typescript-eslint/consistent-generic-constructors': 'off',
+      '@typescript-eslint/consistent-indexed-object-style': 'off',
+      '@typescript-eslint/consistent-type-assertions': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/prefer-for-of': 'off',
+      '@typescript-eslint/prefer-function-type': 'off',
     },
   },
   {
@@ -202,10 +129,8 @@ export default tseslint.config(
     },
 
     rules: {
-      'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
-      'import-x/no-dynamic-require': 0,
       'global-require': 0,
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/no-object-literal-type-assertion': 0,
@@ -234,30 +159,12 @@ export default tseslint.config(
         ...globals.node,
       },
     },
-
-    rules: {
-      'import-x/no-extraneous-dependencies': [
-        'error',
-        {
-          devDependencies: true,
-        },
-      ],
-
-      'no-console': 'off',
-    },
   },
   {
     files: ['tools/**/*.{js,cjs}', 'bin/*.{js,cjs}'],
 
     rules: {
       '@typescript-eslint/no-var-requires': 'off',
-    },
-  },
-  {
-    files: ['**/*.mjs'],
-
-    rules: {
-      'import-x/extensions': 0,
     },
   },
   {

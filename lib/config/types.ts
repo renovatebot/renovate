@@ -577,6 +577,7 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchRepositories?: string[];
   matchSourceUrls?: string[];
+  matchRegistryUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   matchJsonata?: string[];
   overrideDatasource?: string;
