@@ -4,6 +4,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexDatasource } from '../../datasource/hex/index.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://rebar3.org';
@@ -14,6 +15,8 @@ export const defaultConfig = {
   versioning: hexVersioning.id,
 };
 
+export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['rebar.lock'];
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitTagsDatasource.id,
