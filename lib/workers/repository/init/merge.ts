@@ -288,10 +288,7 @@ export async function mergeRenovateConfig(
   return returnConfig;
 }
 
-export function applyNpmrc(
-  config: RenovateConfig,
-  configType = 'config',
-): void {
+export function applyNpmrc(config: RenovateConfig, configType: string): void {
   setNpmTokenInNpmrc(config);
   if (!isString(config.npmrc)) {
     return;

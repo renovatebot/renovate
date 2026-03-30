@@ -513,7 +513,7 @@ describe('workers/repository/init/merge', () => {
     it('does nothing if npmrc is missing after token migration', () => {
       const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
 
-      applyNpmrc({});
+      applyNpmrc({}, 'test');
 
       expect(setNpmrcSpy).not.toHaveBeenCalled();
     });
@@ -525,7 +525,7 @@ describe('workers/repository/init/merge', () => {
         npmrc: 'something_authToken=${NPM_TOKEN}',
       };
 
-      applyNpmrc(config);
+      applyNpmrc(config, 'test');
 
       expect(config.npmToken).toBeUndefined();
       expect(config.npmrc).toBe('something_authToken=token');
