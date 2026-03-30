@@ -272,7 +272,7 @@ export async function extractPnpmWorkspaceFile(
     for (const [overridesKey, overridesVal] of Object.entries(
       workspaceFile.overrides,
     )) {
-      // Newer flat syntax: `parent>parent>child`
+      // flat syntax: `parent>parent>child`
       const packageName =
         parsePkgAndParentSelector(overridesKey).targetPkg.name;
       const depType = 'pnpm.overrides';
