@@ -392,6 +392,77 @@ describe('modules/manager/npm/extract/pnpm', () => {
       });
     });
 
+    it('parses overrides in pnpm-workspace.yaml file', async () => {
+      expect(
+        await extractPnpmWorkspaceFile(
+          {
+            overrides: {
+              'foo>bar': '2.0.0',
+              'foo@1.0.0': '2.0.0',
+              'foo@>1.0.0': '2.0.0',
+              'foo@>=1.0.0': '2.0.0',
+              'foo@1.0.0>bar': '2.0.0',
+              'foo@>1.0.0>bar': '2.0.0',
+              'foo@>=1.0.0 <2.0.0': '>=2.0.0',
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '>=2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0 <2.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+          },
+        ],
+      });
+    });
+
     it('finds relevant lockfile', async () => {
       const lockfileContent = codeBlock`
         lockfileVersion: '9.0'

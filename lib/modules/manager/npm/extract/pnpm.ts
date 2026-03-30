@@ -1,3 +1,4 @@
+import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
 import {
   isNonEmptyObject,
   isNumber,
@@ -19,10 +20,10 @@ import {
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type { PackageFile, PackageFileContent } from '../../types.ts';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
-import type { PnpmCatalogs } from '../schema.ts';
-import { PnpmWorkspaceFile } from '../schema.ts';
+import type { PnpmCatalogs, PnpmWorkspaceFile } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { extractCatalogDeps } from './common/catalogs.ts';
+import { extractDependency } from './common/dependency.ts';
 import type { Catalog, LockFile } from './types.ts';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
@@ -255,33 +256,34 @@ function getLockedDependencyVersions(
   return res;
 }
 
-export function tryParsePnpmWorkspaceYaml(content: string):
-  | {
-      success: true;
-      data: PnpmWorkspaceFile;
-    }
-  | { success: false; data?: never } {
-  try {
-    const data = parseSingleYaml(content, {
-      customSchema: PnpmWorkspaceFile,
-    });
-    return { success: true, data };
-  } catch {
-    return { success: false };
-  }
-}
-
 type PnpmCatalogs = z.TypeOf<typeof PnpmCatalogs>;
 
 export async function extractPnpmWorkspaceFile(
-  catalogs: PnpmCatalogs,
+  workspaceFile: PnpmWorkspaceFile,
   packageFile: string,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
 
-  const pnpmCatalogs = pnpmCatalogsToArray(catalogs);
+  const pnpmCatalogs = pnpmCatalogsToArray(workspaceFile);
 
   const deps = extractCatalogDeps(pnpmCatalogs);
+
+  if (workspaceFile.overrides) {
+    for (const [overridesKey, overridesVal] of Object.entries(
+      workspaceFile.overrides,
+    )) {
+      // Newer flat syntax: `parent>parent>child`
+      const packageName =
+        parsePkgAndParentSelector(overridesKey).targetPkg.name;
+      const depType = 'pnpm.overrides';
+      deps.push({
+        depName: overridesKey,
+        packageName,
+        depType,
+        ...extractDependency(depType, packageName, overridesVal),
+      });
+    }
+  }
 
   let pnpmShrinkwrap;
   const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');

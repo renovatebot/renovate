@@ -28,13 +28,16 @@ export const YarnConfig = Yaml.pipe(
 );
 export type YarnConfig = z.infer<typeof YarnConfig>;
 
-export const PnpmWorkspaceFile = z
-  .object({
-    packages: z.array(z.string()),
-    minimumReleaseAge: z.number().nullish(),
-    minimumReleaseAgeExclude: z.array(z.string()).optional(),
-  })
-  .and(PnpmCatalogs);
+export const PnpmWorkspaceFile = Yaml.pipe(
+  z
+    .object({
+      packages: z.array(z.string()).optional(),
+      minimumReleaseAge: z.number().nullish(),
+      minimumReleaseAgeExclude: z.array(z.string()).optional(),
+      overrides: z.record(z.string()).optional(),
+    })
+    .and(PnpmCatalogs),
+);
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
 export const PackageManager = z
