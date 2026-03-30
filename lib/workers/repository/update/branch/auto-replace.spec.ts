@@ -1057,11 +1057,38 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('updates naked prek SHA pins by replacing the digest only', async () => {
+    it('updates frozen prek SHA pins and preserves trailing notes', async () => {
+      const toml = codeBlock`
+        [[repos]]
+        repo = "https://github.com/crate-ci/typos"
+        rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0 # note
+        hooks = [{ id = "typos" }]
+      `;
+      const [dep] = extractPrekPackageFile(toml, 'prek.toml')!.deps;
+
+      upgrade.manager = 'prek';
+      upgrade.packageFile = 'prek.toml';
+      Object.assign(upgrade, dep, {
+        newDigest: '4fd1bf4f1b1f64d8aa0d95cb7d1877991f9fa18f',
+        newValue: 'v1.45.0',
+        depIndex: 0,
+      });
+
+      const res = await doAutoReplace(upgrade, toml, reuseExistingBranch);
+      expect(res).toBe(
+        toml.replace(
+          '"631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0',
+          '"4fd1bf4f1b1f64d8aa0d95cb7d1877991f9fa18f" # frozen: v1.45.0',
+        ),
+      );
+      expect(res).toContain('# note');
+    });
+
+    it('updates version-commented prek SHA pins and preserves trailing notes', async () => {
       const toml = codeBlock`
         [[repos]]
         repo = "https://github.com/python-jsonschema/check-jsonschema"
-        rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f"
+        rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # pin @v1.2.3 # note
         hooks = [{ id = "check-metaschema" }]
       `;
       const [dep] = extractPrekPackageFile(toml, 'prek.toml')!.deps;
@@ -1070,16 +1097,37 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'prek.toml';
       Object.assign(upgrade, dep, {
         newDigest: '5b4f9a992fd52893e5d80e72d6ce4d5b2f9d701e',
+        newValue: 'v1.2.4',
         depIndex: 0,
       });
 
       const res = await doAutoReplace(upgrade, toml, reuseExistingBranch);
       expect(res).toBe(
         toml.replace(
-          '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
-          '5b4f9a992fd52893e5d80e72d6ce4d5b2f9d701e',
+          '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # pin @v1.2.3',
+          '"5b4f9a992fd52893e5d80e72d6ce4d5b2f9d701e" # pin @v1.2.4',
         ),
       );
+      expect(res).toContain('# note');
+    });
+
+    it('updates prek tag pins using the standard replacement path', async () => {
+      const toml = codeBlock`
+        [[repos]]
+        repo = "https://github.com/pre-commit/pre-commit-hooks"
+        rev = "v1.2.3"
+      `;
+      const [dep] = extractPrekPackageFile(toml, 'prek.toml')!.deps;
+
+      upgrade.manager = 'prek';
+      upgrade.packageFile = 'prek.toml';
+      Object.assign(upgrade, dep, {
+        newValue: 'v1.2.4',
+        depIndex: 0,
+      });
+
+      const res = await doAutoReplace(upgrade, toml, reuseExistingBranch);
+      expect(res).toBe(toml.replace('"v1.2.3"', '"v1.2.4"'));
     });
 
     it('updates with terraform image replacement', async () => {

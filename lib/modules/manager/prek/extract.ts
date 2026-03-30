@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseComment } from '../github-actions/parse.ts';
 import {
   extractGitDependency,
   extractGitDependencyMetadata,
@@ -8,16 +9,15 @@ import {
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { type PrekConfig, PrekTomlSchema } from './schema.ts';
 
-const repoSectionRegex = regEx(/^\s*\[\[\s*repos\s*\]\]\s*$/);
+const repoSectionRegex = regEx(/^\s*\[\[\s*repos\s*\]\]\s*(?:#.*)?$/);
 const repoLineRegex = regEx(
-  /^\s*repo\s*=\s*(?<quote>["'])(?<repo>.+?)["']\s*$/,
-);
-const revLineWithFrozenCommentRegex = regEx(
-  /^\s*rev\s*=\s*(?<replaceString>(?<quote>["'])(?<currentDigest>[a-f0-9]{40})["'](?<commentWhiteSpaces>\s*)#\s*frozen:\s*(?<currentValue>\S+))\s*$/,
+  /^\s*repo\s*=\s*(?<quote>["'])(?<repo>.+?)["']\s*(?:#.*)?$/,
 );
 const revLineRegex = regEx(
-  /^\s*rev\s*=\s*(?<replaceString>(?<quote>["'])(?<currentDigest>[a-f0-9]{40})["'])\s*$/,
+  /^\s*rev\s*=\s*(?<quote>["'])(?<currentDigest>[a-f0-9]{40})["'](?<commentWhiteSpaces>\s*)(?:#(?<comment>.*))?\s*$/,
 );
+const frozenCommentRegex = regEx(/^\s*frozen:\s*(?<currentValue>\S+)/);
+const fullShaRegex = regEx(/^[a-f0-9]{40}$/);
 
 interface RegexDep {
   currentDigest: string;
@@ -26,8 +26,18 @@ interface RegexDep {
   autoReplaceStringTemplate?: string;
 }
 
+interface ParsedShaComment {
+  currentValue?: string;
+  replaceComment?: string;
+  autoReplaceCommentPrefix?: string;
+}
+
 function getShaPinnedDepKey(repo: string, rev: string): string {
   return `${repo}\n${rev}`;
+}
+
+function isFullSha(value: string): boolean {
+  return fullShaRegex.test(value);
 }
 
 function setRegexDep(
@@ -39,6 +49,57 @@ function setRegexDep(
   const deps = regexDeps.get(key) ?? [];
   deps.push(dep);
   regexDeps.set(key, deps);
+}
+
+function getSemanticCommentSegment(comment: string): string {
+  const trailingNoteIndex = comment.indexOf('#');
+  if (trailingNoteIndex === -1) {
+    return comment;
+  }
+
+  return comment.slice(0, trailingNoteIndex).trimEnd();
+}
+
+function parseShaComment(comment: string | undefined): ParsedShaComment {
+  if (!comment) {
+    return {};
+  }
+
+  const semanticComment = getSemanticCommentSegment(comment);
+  const frozenMatch = frozenCommentRegex.exec(semanticComment);
+  if (frozenMatch?.groups?.currentValue) {
+    const { currentValue } = frozenMatch.groups;
+    const replaceComment = frozenMatch[0];
+    return {
+      currentValue,
+      replaceComment,
+      autoReplaceCommentPrefix: replaceComment.slice(
+        0,
+        replaceComment.length - currentValue.length,
+      ),
+    };
+  }
+
+  const parsedComment = parseComment(semanticComment);
+  const matchedComment = parsedComment.matchedString?.trim();
+  if (
+    parsedComment.pinnedVersion &&
+    matchedComment &&
+    matchedComment === semanticComment.trim()
+  ) {
+    const currentValue = parsedComment.pinnedVersion;
+    const replaceComment = parsedComment.matchedString!;
+    return {
+      currentValue,
+      replaceComment,
+      autoReplaceCommentPrefix: replaceComment.slice(
+        0,
+        replaceComment.length - currentValue.length,
+      ),
+    };
+  }
+
+  return {};
 }
 
 function extractWithRegex(content: string): Map<string, RegexDep[]> {
@@ -73,31 +134,21 @@ function extractWithRegex(content: string): Map<string, RegexDep[]> {
       continue;
     }
 
-    const frozenMatch = revLineWithFrozenCommentRegex.exec(line);
-    if (frozenMatch?.groups) {
-      const {
-        quote,
-        currentDigest,
-        currentValue,
-        replaceString,
-        commentWhiteSpaces,
-      } = frozenMatch.groups;
-
-      storeDep({
-        currentDigest,
-        currentValue,
-        replaceString,
-        autoReplaceStringTemplate: `${quote}{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWhiteSpaces}# frozen: {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
-      });
-      continue;
-    }
-
     const revMatch = revLineRegex.exec(line);
     if (revMatch?.groups) {
-      const { currentDigest, replaceString } = revMatch.groups;
+      const { quote, currentDigest, comment, commentWhiteSpaces } =
+        revMatch.groups;
+      const parsedComment = parseShaComment(comment);
+      if (!parsedComment.currentValue) {
+        continue;
+      }
+
+      const quotedDigest = `${quote}${currentDigest}${quote}`;
       storeDep({
         currentDigest,
-        replaceString,
+        currentValue: parsedComment.currentValue,
+        autoReplaceStringTemplate: `${quote}{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWhiteSpaces}#${parsedComment.autoReplaceCommentPrefix}{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
+        replaceString: `${quotedDigest}${commentWhiteSpaces}#${parsedComment.replaceComment}`,
       });
     }
   }
@@ -157,7 +208,11 @@ function findDependencies(
       continue;
     }
 
-    deps.push(extractGitDependency(rev, repo));
+    const dep = extractGitDependency(rev, repo);
+    if (isFullSha(rev)) {
+      dep.skipReason ??= 'unspecified-version';
+    }
+    deps.push(dep);
   }
   return deps;
 }

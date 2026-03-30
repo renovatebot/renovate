@@ -250,7 +250,57 @@ rev = "v5.0.0"`;
       });
     });
 
-    it('extracts naked SHA revs as digest pins', () => {
+    it('extracts frozen SHA revs when repo line has a trailing comment', () => {
+      const config = `[[repos]]
+repo = "https://github.com/crate-ci/typos" # comment
+rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0
+hooks = [{ id = "typos" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # frozen: {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            currentDigest: '631208b7aac2daa8b707f55e7331f9112b0e062d',
+            currentValue: 'v1.44.0',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+            replaceString:
+              '"631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0',
+          },
+        ],
+      });
+    });
+
+    it('extracts frozen SHA revs when repo section line has a trailing comment', () => {
+      const config = `[[repos]] # comment
+rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0
+repo = "https://github.com/crate-ci/typos"
+hooks = [{ id = "typos" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # frozen: {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            currentDigest: '631208b7aac2daa8b707f55e7331f9112b0e062d',
+            currentValue: 'v1.44.0',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+            replaceString:
+              '"631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0',
+          },
+        ],
+      });
+    });
+
+    it('marks bare SHA revs as unspecified-version', () => {
       const config = `[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f"
@@ -260,12 +310,268 @@ hooks = [{ id = "check-metaschema" }]`;
       expect(result).toEqual({
         deps: [
           {
-            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
             datasource: 'github-tags',
             depName: 'python-jsonschema/check-jsonschema',
             depType: 'repository',
             packageName: 'python-jsonschema/check-jsonschema',
-            replaceString: '"9f48a48aa91a6040d749ad68ec70907d907a5a7f"',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('extracts frozen SHA revs with trailing notes without consuming the note', () => {
+      const config = `[[repos]]
+repo = "https://github.com/crate-ci/typos"
+rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0 # note
+hooks = [{ id = "typos" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # frozen: {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            currentDigest: '631208b7aac2daa8b707f55e7331f9112b0e062d',
+            currentValue: 'v1.44.0',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+            replaceString:
+              '"631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0',
+          },
+        ],
+      });
+    });
+
+    it('extracts SHA revs with version comments as digest pins with currentValue', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # v1.2.3
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: 'v1.2.3',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # v1.2.3',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts SHA revs with plain numeric version comments as digest pins with currentValue', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # 1.2.3
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: '1.2.3',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString: '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # 1.2.3',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts SHA revs with pin-style version comments as digest pins with currentValue', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # pin @v1.2.3
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: 'v1.2.3',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # pin @v1.2.3',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # pin @{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts SHA revs with tag-style version comments as digest pins with currentValue', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.3
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: 'v1.2.3',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.3',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts SHA revs with renovate pin comments as digest pins with currentValue', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # renovate: pin @v1.2.3
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: 'v1.2.3',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # renovate: pin @v1.2.3',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # renovate: pin @{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts SHA revs with version comments and trailing notes without consuming the note', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # @v1.2.3 # note
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: 'v1.2.3',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # @v1.2.3',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # @{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          },
+        ],
+      });
+    });
+
+    it('marks SHA revs with unrecognized comments as unspecified-version', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v3.0.0-alpha.9-for-vscode
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('marks SHA revs with non-version trailing comments as unspecified-version', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # pin this
+hooks = [{ id = "check-metaschema" }]`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('keeps duplicate repo and SHA entries correlated to the correct replace strings', () => {
+      const config = `[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # v1.2.3
+
+[[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.4`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: 'v1.2.3',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # v1.2.3',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          },
+          {
+            currentDigest: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            currentValue: 'v1.2.4',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              '"9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.4',
+            autoReplaceStringTemplate:
+              '"{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
           },
         ],
       });
@@ -424,6 +730,26 @@ additional_dependencies = [
             depName: 'pre-commit/pre-commit-hooks',
             depType: 'repository',
             packageName: 'pre-commit/pre-commit-hooks',
+          },
+        ],
+      });
+    });
+
+    it('preserves invalid-url skip reason for bare SHA revs with malformed repository URLs', () => {
+      const config = `[[repos]]
+repo = "https://github.com/"
+rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f"`;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+            datasource: undefined,
+            depName: undefined,
+            depType: 'repository',
+            packageName: undefined,
+            skipReason: 'invalid-url',
           },
         ],
       });
