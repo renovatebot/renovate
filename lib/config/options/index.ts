@@ -513,6 +513,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     experimental: true,
+    cli: false,
   },
   {
     name: 'force',
