@@ -4,6 +4,7 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import { extractPackageFile as extractPrekPackageFile } from '../../../../modules/manager/prek/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
 import { doAutoReplace } from './auto-replace.ts';
 
@@ -1027,6 +1028,57 @@ describe('workers/repository/update/branch/auto-replace', () => {
         yml
           .replace(upgrade.depName, upgrade.newName)
           .replace(upgrade.currentValue, upgrade.newValue),
+      );
+    });
+
+    it('updates frozen prek SHA pins using autoReplaceStringTemplate', async () => {
+      const toml = codeBlock`
+        [[repos]]
+        repo = "https://github.com/crate-ci/typos"
+        rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0
+        hooks = [{ id = "typos" }]
+      `;
+      const [dep] = extractPrekPackageFile(toml, 'prek.toml')!.deps;
+
+      upgrade.manager = 'prek';
+      upgrade.packageFile = 'prek.toml';
+      Object.assign(upgrade, dep, {
+        newDigest: '4fd1bf4f1b1f64d8aa0d95cb7d1877991f9fa18f',
+        newValue: 'v1.45.0',
+        depIndex: 0,
+      });
+
+      const res = await doAutoReplace(upgrade, toml, reuseExistingBranch);
+      expect(res).toBe(
+        toml.replace(
+          '"631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0',
+          '"4fd1bf4f1b1f64d8aa0d95cb7d1877991f9fa18f" # frozen: v1.45.0',
+        ),
+      );
+    });
+
+    it('updates naked prek SHA pins by replacing the digest only', async () => {
+      const toml = codeBlock`
+        [[repos]]
+        repo = "https://github.com/python-jsonschema/check-jsonschema"
+        rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f"
+        hooks = [{ id = "check-metaschema" }]
+      `;
+      const [dep] = extractPrekPackageFile(toml, 'prek.toml')!.deps;
+
+      upgrade.manager = 'prek';
+      upgrade.packageFile = 'prek.toml';
+      Object.assign(upgrade, dep, {
+        newDigest: '5b4f9a992fd52893e5d80e72d6ce4d5b2f9d701e',
+        depIndex: 0,
+      });
+
+      const res = await doAutoReplace(upgrade, toml, reuseExistingBranch);
+      expect(res).toBe(
+        toml.replace(
+          '9f48a48aa91a6040d749ad68ec70907d907a5a7f',
+          '5b4f9a992fd52893e5d80e72d6ce4d5b2f9d701e',
+        ),
       );
     });
 

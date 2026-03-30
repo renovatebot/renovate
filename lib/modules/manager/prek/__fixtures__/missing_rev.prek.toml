@@ -1,0 +1,6 @@
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+
+[[repos]]
+repo = "https://github.com/rhysd/actionlint"
+rev = "v1.7.7"
