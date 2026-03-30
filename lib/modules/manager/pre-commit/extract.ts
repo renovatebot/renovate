@@ -1,88 +1,17 @@
-import {
-  isEmptyObject,
-  isNonEmptyObject,
-  isPlainObject,
-} from '@sindresorhus/is';
+import { isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import type { SkipReason } from '../../../types/index.ts';
-import { detectPlatform } from '../../../util/common.ts';
-import { find } from '../../../util/host-rules.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
-import { parseLine } from '../gomod/line-parser.ts';
-import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency.ts';
-import { pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
 } from './parsing.ts';
 import type { PreCommitConfig } from './types.ts';
-
-/**
- * Determines the datasource(id) to be used for this dependency
- * @param repository the full git url, ie git@github.com/user/project.
- *        Used in debug statements to clearly indicate the related dependency.
- * @param hostname the hostname (ie github.com)
- *        Used to determine which renovate datasource should be used.
- *        Is matched literally against `github.com` and `gitlab.com`.
- *        If that doesn't match, `hostRules.find()` is used to find related sources.
- *        In that case, the hostname is passed on as registryUrl to the corresponding datasource.
- */
-function determineDatasource(
-  repository: string,
-  hostname: string,
-): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  if (hostname === 'github.com' || detectPlatform(repository) === 'github') {
-    logger.debug({ repository, hostname }, 'Found github dependency');
-    return { datasource: GithubTagsDatasource.id };
-  }
-  if (hostname === 'gitlab.com') {
-    logger.debug({ repository, hostname }, 'Found gitlab dependency');
-    return { datasource: GitlabTagsDatasource.id };
-  }
-  if (detectPlatform(repository) === 'gitlab') {
-    logger.debug(
-      { repository, hostname },
-      'Found gitlab dependency with custom registryUrl',
-    );
-    return {
-      datasource: GitlabTagsDatasource.id,
-      registryUrls: ['https://' + hostname],
-    };
-  }
-  const hostUrl = 'https://' + hostname;
-  const res = find({ url: hostUrl });
-  if (isEmptyObject(res)) {
-    // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
-    logger.debug(
-      { repository, hostUrl },
-      'Provided hostname does not match any hostRules. Ignoring',
-    );
-    return { skipReason: 'unknown-registry', registryUrls: [hostname] };
-  }
-  for (const [hostType, sourceId] of [
-    ['github', GithubTagsDatasource.id],
-    ['gitlab', GitlabTagsDatasource.id],
-  ]) {
-    if (isNonEmptyObject(find({ hostType, url: hostUrl }))) {
-      logger.debug(
-        { repository, hostUrl, hostType },
-        `Provided hostname matches a ${hostType} hostrule.`,
-      );
-      return { datasource: sourceId, registryUrls: [hostname] };
-    }
-  }
-  logger.debug(
-    { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType github nor gitlab',
-  );
-  return { skipReason: 'unknown-registry', registryUrls: [hostname] };
-}
-
-const gitUrlRegex = regEx(/\.git$/i);
+import {
+  extractGitDependency,
+  extractPreCommitAdditionalDependencies,
+} from './utils.ts';
 
 // Matches: rev: <digest><whitespace># frozen: <version>
 const revLineWithFrozenCommentRegex = regEx(
@@ -123,48 +52,6 @@ function extractWithRegex(content: string): Map<string, RegexDep> {
   return regexDeps;
 }
 
-function extractDependency(tag: string, repository: string): PackageDependency {
-  logger.debug(`Found version ${tag}`);
-
-  const urlMatchers = [
-    // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo
-    regEx('^https?://(?<hostname>[^/]+)/(?<depName>\\S*)'),
-    // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
-    regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
-    // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
-    regEx(/^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/),
-    // This splits "ssh://git@github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
-    regEx(/^ssh:\/\/git@(?<hostname>[^/]+)\/(?<depName>\S*)/),
-  ];
-  for (const urlMatcher of urlMatchers) {
-    const match = urlMatcher.exec(repository);
-    if (match?.groups) {
-      const hostname = match.groups.hostname;
-      const depName = match.groups.depName.replace(gitUrlRegex, '');
-      const sourceDef = determineDatasource(repository, hostname);
-      return {
-        ...sourceDef,
-        depName,
-        depType: 'repository',
-        packageName: depName,
-        currentValue: tag,
-      };
-    }
-  }
-  logger.info(
-    { repository },
-    'Could not separate hostname from full dependency url.',
-  );
-  return {
-    depName: undefined,
-    depType: 'repository',
-    datasource: undefined,
-    packageName: undefined,
-    skipReason: 'invalid-url',
-    currentValue: tag,
-  };
-}
-
 /**
  * Find all supported dependencies in the pre-commit yaml object.
  *
@@ -188,47 +75,9 @@ function findDependencies(
         // normally language are not defined in yaml
         // only support it when it's explicitly defined.
         // this avoid to parse hooks from pre-commit-hooks.yaml from git repo
-        if (hook.language === 'node') {
-          hook.additional_dependencies?.map((req) => {
-            const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(req);
-            if (!match?.groups) {
-              return;
-            }
-
-            const depType = 'pre-commit-node';
-            const dep = npmExtractDependency(
-              depType,
-              match.groups.name,
-              match.groups.range,
-            );
-            packageDependencies.push({
-              depType,
-              depName: match.groups.name,
-              packageName: match.groups.name,
-              ...dep,
-            });
-          });
-        } else if (hook.language === 'python') {
-          hook.additional_dependencies?.map((req) => {
-            const dep = pep508ToPackageDependency('pre-commit-python', req);
-            if (dep) {
-              packageDependencies.push(dep);
-            }
-          });
-        } else if (hook.language === 'golang') {
-          hook.additional_dependencies?.map((req) => {
-            // Convert dependency into a gomod require line to use the gomod line parser
-            const requireLine = `require ${req.replace('@', ' ')}`;
-            const dep = parseLine(requireLine);
-            if (dep) {
-              const depType = 'pre-commit-golang';
-              packageDependencies.push({
-                ...dep,
-                depType,
-              });
-            }
-          });
-        }
+        packageDependencies.push(
+          ...extractPreCommitAdditionalDependencies(hook),
+        );
       }
     }
 
@@ -236,7 +85,7 @@ function findDependencies(
       logger.trace(item, 'Matched pre-commit dependency spec');
       const repository = String(item.repo);
       const tag = String(item.rev);
-      const dep = extractDependency(tag, repository);
+      const dep = extractGitDependency(tag, repository);
 
       // Check if this rev has regex-extracted formatting info
       const regexDep = regexDeps.get(tag);
