@@ -102,8 +102,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@renovatebot/good-enough-parser':
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 2.0.0
+        version: 2.0.0
       '@renovatebot/osv-offline':
         specifier: 2.4.0
         version: 2.4.0
@@ -1964,9 +1964,9 @@ packages:
     resolution: {integrity: sha512-bdf6QcWyfXqBl4/8l96XCzyR+u28tIgKFnR+sJFeGht8u+e9fOWf5ZAZ+Mkq3qSXT4xBRwbYYE3udZC0wU2UIw==}
     engines: {node: '>=22.12.0'}
 
-  '@renovatebot/good-enough-parser@1.2.0':
-    resolution: {integrity: sha512-5HrZJqZJzjzhghtJ85nNG8/dE97MQ1LOvo+T4dMGZg1s56HnZEZkm5KENNhQ+dwqC6vk5DdOcZ8J0oQOcn8gng==}
-    engines: {node: '>=18.12.0', yarn: ^1.17.0}
+  '@renovatebot/good-enough-parser@2.0.0':
+    resolution: {integrity: sha512-3GiqYMmerr9IsF5Rl98l5lGX/A/s9DQo5gHMgdteNPwL8VR3TZjn22hU+14jttST0mrua1g0aNrVWnpKdGM4Hw==}
+    engines: {node: '>=22.12.0', pnpm: ^10.0.0}
 
   '@renovatebot/osv-offline-db@2.4.0':
     resolution: {integrity: sha512-W8MmEcyLmbTZG0j2Vh9CRVcqpKU9BvElki9nPReykmilE9ab66NczAwIpwRlyxjuJkr10lceX2XLzTVxfq+Qeg==}
@@ -5007,9 +5007,6 @@ packages:
 
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
-
-  moo@0.5.2:
-    resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
 
   moo@0.5.3:
     resolution: {integrity: sha512-m2fmM2dDm7GZQsY7KK2cme8agi+AAljILjQnof7p1ZMDe6dQ4bdnSMx0cPppudoeNv5hEFQirN6u+O4fDE0IWA==}
@@ -8470,12 +8467,12 @@ snapshots:
       upath: 2.0.1
       zod: 3.25.76
 
-  '@renovatebot/good-enough-parser@1.2.0':
+  '@renovatebot/good-enough-parser@2.0.0':
     dependencies:
       '@thi.ng/zipper': 1.0.3
       '@types/moo': 0.5.10
       klona: 2.0.6
-      moo: 0.5.2
+      moo: 0.5.3
 
   '@renovatebot/osv-offline-db@2.4.0':
     dependencies:
@@ -11838,8 +11835,6 @@ snapshots:
     optional: true
 
   module-details-from-path@1.0.4: {}
-
-  moo@0.5.2: {}
 
   moo@0.5.3: {}
 
