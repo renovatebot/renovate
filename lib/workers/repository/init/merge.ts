@@ -288,12 +288,17 @@ export async function mergeRenovateConfig(
   return returnConfig;
 }
 
-export function applyNpmrc(config: RenovateConfig, configType: string): void {
+export function applyNpmrc(
+  config: RenovateConfig,
+  configType?: 'resolved' | 'decrypted',
+): void {
   setNpmTokenInNpmrc(config);
   if (!isString(config.npmrc)) {
     return;
   }
-  logger.debug(`Setting npmrc from ${configType} config`);
+  logger.debug(
+    `Setting npmrc from ${configType ? `${configType} ` : ''}config`,
+  );
   npmApi.setNpmrc(config.npmrc);
 }
 
