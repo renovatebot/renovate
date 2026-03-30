@@ -6,7 +6,7 @@ settings:
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
-  '@yarnpkg/core@4.5.0>tar': 7.5.12
+  '@yarnpkg/core@4.5.0>tar': 7.5.13
   esbuild: 0.27.4
   vite: 8.0.0-beta.18
 
@@ -586,8 +586,8 @@ importers:
         specifier: 25.0.3
         version: 25.0.3(typescript@5.9.3)
       tar:
-        specifier: 7.5.12
-        version: 7.5.12
+        specifier: 7.5.13
+        version: 7.5.13
       tmp-promise:
         specifier: 3.0.3
         version: 3.0.3
@@ -6065,8 +6065,8 @@ packages:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
     engines: {node: '>=6'}
 
-  tar@7.5.12:
-    resolution: {integrity: sha512-9TsuLcdhOn4XztcQqhNyq1KOwOOED/3k58JAvtULiYqbO8B/0IBAAIE1hj0Svmm58k27TmcigyDI0deMlgG3uw==}
+  tar@7.5.13:
+    resolution: {integrity: sha512-tOG/7GyXpFevhXVh8jOPJrmtRpOTsYqUIkVdVooZYJS/z8WhfQUX8RJILmeuJNinGAMSu1veBr4asSHFt5/hng==}
     engines: {node: '>=18'}
 
   temp-dir@3.0.0:
@@ -9489,7 +9489,7 @@ snapshots:
       p-limit: 2.3.0
       semver: 7.7.4
       strip-ansi: 6.0.1
-      tar: 7.5.12
+      tar: 7.5.13
       tinylogic: 2.0.0
       treeify: 1.1.0
       tslib: 2.8.1
@@ -11907,7 +11907,7 @@ snapshots:
       nopt: 9.0.0
       proc-log: 6.1.0
       semver: 7.7.4
-      tar: 7.5.12
+      tar: 7.5.13
       tinyglobby: 0.2.15
       which: 6.0.1
     transitivePeerDependencies:
@@ -13030,7 +13030,7 @@ snapshots:
       readable-stream: 3.6.2
     optional: true
 
-  tar@7.5.12:
+  tar@7.5.13:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
