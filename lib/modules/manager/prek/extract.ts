@@ -21,9 +21,9 @@ const fullShaRegex = regEx(/^[a-f0-9]{40}$/);
 
 interface RegexDep {
   currentDigest: string;
-  currentValue?: string;
+  currentValue: string;
   replaceString: string;
-  autoReplaceStringTemplate?: string;
+  autoReplaceStringTemplate: string;
 }
 
 interface ParsedShaComment {
@@ -197,12 +197,8 @@ function findDependencies(
       deps.push({
         ...extractGitDependencyMetadata(repo),
         currentDigest: regexDep.currentDigest,
-        ...(regexDep.currentValue
-          ? {
-              currentValue: regexDep.currentValue,
-              autoReplaceStringTemplate: regexDep.autoReplaceStringTemplate,
-            }
-          : {}),
+        currentValue: regexDep.currentValue,
+        autoReplaceStringTemplate: regexDep.autoReplaceStringTemplate,
         replaceString: regexDep.replaceString,
       });
       continue;
