@@ -70,6 +70,7 @@ describe('modules/manager/mise/extract', () => {
       lefthook = "1.11.13"
       localstack = "4.3.0"
       lychee = "0.19.1"
+      npm = "11.2.0"
       opentofu = "1.6.1"
       packer = "1.15.0"
       pipx = "1.7.1"
@@ -224,6 +225,12 @@ describe('modules/manager/mise/extract', () => {
             depName: 'lychee',
             extractVersion: '^lychee-v(?<version>\\S+)',
             packageName: 'lycheeverse/lychee',
+          },
+          {
+            currentValue: '11.2.0',
+            datasource: 'npm',
+            depName: 'npm',
+            packageName: 'npm',
           },
           {
             currentValue: '1.6.1',
