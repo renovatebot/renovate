@@ -50,6 +50,7 @@ const pinnedPrecommitConfig = codeBlock`
 describe('modules/manager/pre-commit/extract', () => {
   beforeEach(() => {
     hostRules.find.mockReset();
+    hostRules.hostType.mockReset();
   });
 
   describe('extractPackageFile()', () => {
@@ -175,6 +176,24 @@ describe('modules/manager/pre-commit/extract', () => {
           {
             currentValue: 'v1.0.0',
             datasource: 'gitlab-tags',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+            registryUrls: ['https://enterprise.com'],
+          },
+        ],
+      });
+    });
+
+    it('preserves registryUrls for custom github hosts detected via hostRules', () => {
+      hostRules.hostType.mockReturnValueOnce('github');
+
+      const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
             depName: 'pre-commit/pre-commit-hooks',
             depType: 'repository',
             packageName: 'pre-commit/pre-commit-hooks',

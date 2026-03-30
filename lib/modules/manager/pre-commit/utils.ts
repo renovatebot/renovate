@@ -43,15 +43,28 @@ function determineDatasource(
   repository: string,
   hostname: string,
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  if (hostname === 'github.com' || detectPlatform(repository) === 'github') {
+  const hostUrl = 'https://' + hostname;
+  const platform = detectPlatform(repository) ?? detectPlatform(hostUrl);
+
+  if (hostname === 'github.com') {
     logger.debug({ repository, hostname }, 'Found github dependency');
     return { datasource: GithubTagsDatasource.id };
+  }
+  if (platform === 'github') {
+    logger.debug(
+      { repository, hostname },
+      'Found github dependency with custom registryUrl',
+    );
+    return {
+      datasource: GithubTagsDatasource.id,
+      registryUrls: ['https://' + hostname],
+    };
   }
   if (hostname === 'gitlab.com') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
     return { datasource: GitlabTagsDatasource.id };
   }
-  if (detectPlatform(repository) === 'gitlab') {
+  if (platform === 'gitlab') {
     logger.debug(
       { repository, hostname },
       'Found gitlab dependency with custom registryUrl',
@@ -61,7 +74,6 @@ function determineDatasource(
       registryUrls: ['https://' + hostname],
     };
   }
-  const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
   if (isEmptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
