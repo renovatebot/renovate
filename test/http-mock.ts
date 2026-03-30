@@ -2,11 +2,11 @@ import fs from 'node:fs';
 import type { Url } from 'node:url';
 import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import nock from 'nock';
 import { makeGraphqlSnapshot } from './graphql-snapshot.ts';
 
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 export type { Body, ReplyHeaders, Scope } from 'nock';
 
 interface RequestLog {
