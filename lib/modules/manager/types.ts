@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  MinimumReleaseAgeBehaviour,
   ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -9,6 +10,7 @@ import type { Category } from '../../constants/index.ts';
 import type {
   MaybePromise,
   ModuleApi,
+  Nullish,
   RangeStrategy,
   SkipReason,
   StageName,
