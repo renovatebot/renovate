@@ -1,10 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "plugins": ["import", "promise", "typescript", "vitest"],
+  "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
   },
-  "categories": {},
+  "categories": {
+    "correctness": "error"
+  },
   "rules": {
     "eqeqeq": "error",
     "no-console": "error",
@@ -30,6 +33,8 @@
     ],
     "no-unused-vars": "error",
     "no-unassigned-vars": "error",
+
+    "renovate/no-tools-import": "error",
 
     "typescript/await-thenable": "error",
     "typescript/no-floating-promises": "error",
@@ -70,7 +75,25 @@
     "typescript/no-unsafe-return": "off",
 
     "vitest/no-conditional-tests": "error",
-    "vitest/hoisted-apis-on-top": "error"
+    "vitest/hoisted-apis-on-top": "error",
+
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/array-type": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/class-literal-property-style": "error",
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/consistent-indexed-object-style": "error",
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "as",
+        "objectLiteralTypeAssertions": "allow"
+      }
+    ],
+    "no-empty-function": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-function-type": "error"
   },
   "overrides": [
     {
@@ -78,7 +101,8 @@
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
-        "typescript/unbound-method": "off"
+        "typescript/unbound-method": "off",
+        "renovate/test-root-describe": "error"
       }
     },
     {

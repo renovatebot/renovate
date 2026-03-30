@@ -3,7 +3,6 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import oxlint from 'eslint-plugin-oxlint';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import renovatePlugin from './tools/lint/rules.js';
 
 const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
@@ -48,13 +47,6 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylistic,
   {
-    plugins: { renovate: renovatePlugin },
-    rules: {
-      'renovate/no-tools-import': 'error',
-      'renovate/test-root-describe': 'error',
-    },
-  },
-  {
     ...jsFiles,
 
     languageOptions: {
@@ -71,35 +63,10 @@ export default tseslint.config(
   {
     ...jsFiles,
     rules: {
-      'consistent-return': 0,
-      eqeqeq: 'error',
-      'no-console': 'error',
-      'no-negated-condition': 'error',
-      'no-param-reassign': 'error',
-      'no-template-curly-in-string': 'error',
-      radix: ['error', 'as-needed'], // on ES5+ the radix defaults to 10
-
-      'sort-imports': 0,
-
       'no-restricted-imports': [
         2,
         {
           paths: ['nock', 'parse-link-header', 'path'],
-        },
-      ],
-
-      '@typescript-eslint/consistent-type-assertions': [
-        'error',
-        {
-          assertionStyle: 'as',
-          objectLiteralTypeAssertions: 'allow',
-        },
-      ],
-
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          disallowTypeAnnotations: false,
         },
       ],
 
@@ -123,18 +90,12 @@ export default tseslint.config(
         },
       ],
 
-      curly: [2, 'all'],
-
       '@typescript-eslint/no-empty-object-type': [
         2,
         {
           allowInterfaces: 'with-single-extends',
         },
       ],
-
-      // TODO: not compatible with recent versions of typescript-eslint
-      // 'typescript-enum/no-const-enum': 2,
-      // 'typescript-enum/no-enum': 2,
 
       'object-shorthand': [
         'error',
@@ -143,6 +104,19 @@ export default tseslint.config(
           avoidQuotes: true,
         },
       ],
+
+      // Migrated to oxlint
+      '@typescript-eslint/adjacent-overload-signatures': 'off',
+      '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/ban-tslint-comment': 'off',
+      '@typescript-eslint/class-literal-property-style': 'off',
+      '@typescript-eslint/consistent-generic-constructors': 'off',
+      '@typescript-eslint/consistent-indexed-object-style': 'off',
+      '@typescript-eslint/consistent-type-assertions': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/prefer-for-of': 'off',
+      '@typescript-eslint/prefer-function-type': 'off',
     },
   },
   {
@@ -155,7 +129,6 @@ export default tseslint.config(
     },
 
     rules: {
-      'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
       'global-require': 0,
@@ -185,10 +158,6 @@ export default tseslint.config(
       globals: {
         ...globals.node,
       },
-    },
-
-    rules: {
-      'no-console': 'off',
     },
   },
   {

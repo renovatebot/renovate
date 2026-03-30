@@ -4,6 +4,11 @@ import 'source-map-support/register.js';
 import './punycode.cjs';
 
 void (async (): Promise<void> => {
+  // prints and exits the process if --version or --help is passed
+  const { parseEarlyFlags } =
+    await import('./workers/global/config/parse/cli.ts');
+  parseEarlyFlags();
+
   // has to be imported before logger and other libraries which are instrumentalised
   const otel = await import('./instrumentation/index.ts');
   otel.init();
