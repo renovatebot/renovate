@@ -747,7 +747,7 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 
 ## commitMessagePrefix
 
-This is used to alter `commitMessag` and `prTitle` (which also affects how it's displayed in the Dependency Dashboard) without needing to copy/paste the whole string.
+This is used to alter `commitMessage` and `prTitle` (which also affects how it's displayed in the Dependency Dashboard) without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
 ## commitMessageSuffix
