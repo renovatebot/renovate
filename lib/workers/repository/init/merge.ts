@@ -254,6 +254,11 @@ export async function mergeRenovateConfig(
     logger.trace({ config: resolvedConfig }, 'resolved config after migrating');
     resolvedConfig = migrationResult.migratedConfig;
   }
+  if (isString(resolvedConfig.npmrc)) {
+    logger.debug(
+      'Ignoring any .npmrc files in repository due to configured npmrc',
+    );
+  }
   applyNpmrc(resolvedConfig, 'resolved');
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
