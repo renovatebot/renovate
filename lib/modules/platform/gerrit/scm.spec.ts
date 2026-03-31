@@ -295,8 +295,8 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
-    it('unpushed branch uses local merge', async () => {
-      // Simulate commitAndPush for a new change (no existing Gerrit change)
+    it('uses local merge when there is a pending change branch', async () => {
+      // Creates a pending change branch
       clientMock.getBranchChange.mockResolvedValueOnce(null);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
@@ -311,10 +311,8 @@ describe('modules/platform/gerrit/scm', () => {
         prTitle: 'Configure Renovate',
       });
 
-      // Now mergeToLocal should use the local merge instead of fetching
       git.mergeToLocal.mockResolvedValueOnce();
       await expect(gerritScm.mergeToLocal('renovate/onboarding')).toResolve();
-      // Should NOT query Gerrit API since we know the branch is unpushed
       expect(clientMock.findChanges).not.toHaveBeenCalled();
       expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
         'renovate/onboarding',
