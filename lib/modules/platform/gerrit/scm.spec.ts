@@ -303,8 +303,6 @@ describe('modules/platform/gerrit/scm', () => {
         parentCommitSha: 'parentSha' as LongCommitSha,
         files: [],
       });
-
-      // First, create the unpushed commit
       await gerritScm.commitAndPush({
         branchName: 'renovate/onboarding',
         baseBranch: 'main',
@@ -315,12 +313,9 @@ describe('modules/platform/gerrit/scm', () => {
 
       // Now mergeToLocal should use the local merge instead of fetching
       git.mergeToLocal.mockResolvedValueOnce();
-
       await expect(gerritScm.mergeToLocal('renovate/onboarding')).toResolve();
-
       // Should NOT query Gerrit API since we know the branch is unpushed
       expect(clientMock.findChanges).not.toHaveBeenCalled();
-      // Should use mergeToLocal with localBranch option
       expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
         'renovate/onboarding',
         { localBranch: true },
