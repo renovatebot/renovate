@@ -1170,7 +1170,7 @@ Use an `s3://` URL to archive the `.git/` directory to S3 after each run and res
 ```ts title="Set persistRepoDataType to an S3 URI to enable S3 backed git data persistence"
 {
   persistRepoData: true,
-  persistRepoDataType: 's3://bucket-name/renovate-git/';
+  persistRepoDataType: 's3://bucket-name/renovate-git/',
 }
 ```
 

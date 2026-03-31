@@ -72,6 +72,12 @@ describe('util/git/s3-persist', () => {
   }
 
   describe('restoreGitDataFromS3', () => {
+    it('throws on invalid S3 URL', async () => {
+      await expect(
+        restoreGitDataFromS3(tmpDir, 'not-an-s3-url', platform, repository),
+      ).rejects.toThrow('Invalid S3 URL: not-an-s3-url');
+    });
+
     it('restores git data successfully', async () => {
       const archiveDir = await fs.mkdtemp('/tmp/s3-persist-archive-');
       const archive = await createValidArchive(archiveDir);
