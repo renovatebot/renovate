@@ -70,6 +70,17 @@ repos:
           - prettier@^3.6.2
           - '' # invalid npm package
 
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    # should handle SHA pinned rev without version comment
+    rev: 1a2b345678cd90ef12ab34567cd89e0f1234567a
+    hooks:
+      - id: check-ast
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    # should update version comment alongside SHA
+    rev: 1abc23456d7e8f90123abcdef12345678abcdef0 # v1.2.3
+    hooks:
+      - id: check-merge-conflict
+
   # pre-commit meta hooks
   - repo: meta
     hooks: []

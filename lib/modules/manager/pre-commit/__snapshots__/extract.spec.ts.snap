@@ -109,6 +109,23 @@ exports[`modules/manager/pre-commit/extract > extractPackageFile() > extracts fr
       "depType": "repository",
       "packageName": "pre-commit/mirrors-prettier",
     },
+    {
+      "currentValue": "1a2b345678cd90ef12ab34567cd89e0f1234567a",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "packageName": "pre-commit/pre-commit-hooks",
+    },
+    {
+      "autoReplaceStringTemplate": "{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+      "currentDigest": "1abc23456d7e8f90123abcdef12345678abcdef0",
+      "currentValue": "v1.2.3",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "packageName": "pre-commit/pre-commit-hooks",
+      "replaceString": "1abc23456d7e8f90123abcdef12345678abcdef0 # v1.2.3",
+    },
   ],
 }
 `;

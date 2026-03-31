@@ -21,7 +21,6 @@ const invalidRepoPrecommitConfig = Fixtures.get(
 const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml',
 );
-const gitRefsPrecommitConfig = Fixtures.get('git_refs.pre-commit-config.yaml');
 
 describe('modules/manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
@@ -123,6 +122,18 @@ describe('modules/manager/pre-commit/extract', () => {
             packageName: 'prettier',
           },
           { depName: 'pre-commit/mirrors-prettier', currentValue: 'v3.1.0' },
+          {
+            depName: 'pre-commit/pre-commit-hooks',
+            currentValue: '1a2b345678cd90ef12ab34567cd89e0f1234567a',
+          },
+          {
+            depName: 'pre-commit/pre-commit-hooks',
+            currentValue: 'v1.2.3',
+            currentDigest: '1abc23456d7e8f90123abcdef12345678abcdef0',
+            replaceString: '1abc23456d7e8f90123abcdef12345678abcdef0 # v1.2.3',
+            autoReplaceStringTemplate:
+              '{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          },
         ],
       });
     });
@@ -161,32 +172,6 @@ describe('modules/manager/pre-commit/extract', () => {
             packageName: 'pre-commit/pre-commit-hooks',
             registryUrls: ['enterprise.com'],
             skipReason: 'unknown-registry',
-          },
-        ],
-      });
-    });
-
-    it('extracts SHA pinned rev with version comment', () => {
-      const result = extractPackageFile(gitRefsPrecommitConfig, filename);
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: '1a2b345678cd90ef12ab34567cd89e0f1234567a',
-            datasource: 'github-tags',
-            depName: 'pre-commit/pre-commit-hooks',
-            depType: 'repository',
-            packageName: 'pre-commit/pre-commit-hooks',
-          },
-          {
-            currentValue: 'v1.2.3',
-            currentDigest: '1abc23456d7e8f90123abcdef12345678abcdef0',
-            datasource: 'github-tags',
-            depName: 'pre-commit/pre-commit-hooks',
-            depType: 'repository',
-            packageName: 'pre-commit/pre-commit-hooks',
-            replaceString: '1abc23456d7e8f90123abcdef12345678abcdef0 # v1.2.3',
-            autoReplaceStringTemplate:
-              '{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
           },
         ],
       });
