@@ -1074,6 +1074,30 @@ describe('config/presets/index', () => {
         });
       });
 
+      describe('when resolving an internal preset inside a nested object config value', () => {
+        it('returns the unmerged internal presets from a datasource', async () => {
+          config.extends = ['local>username/preset-repo'];
+          local.getPreset.mockResolvedValueOnce({
+            artifactory: {
+              extends: ['security:openssf-scorecard'],
+              enabled: true,
+            },
+          });
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(unmerged).toEqual(['security:openssf-scorecard']);
+        });
+      });
+
       describe('when duplicate internal presets are found', () => {
         it('they are de-duplicated when returned as unmerged', async () => {
           config.extends = [
