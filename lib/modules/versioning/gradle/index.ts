@@ -190,10 +190,6 @@ function minSatisfyingVersion(
   }, null);
 }
 
-const strictlyShorthandRegex = regEx(
-  /^(?<baseRange>[^!]+)!!(?<preferredVal>[-._+a-zA-Z0-9]+)$/,
-);
-
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -224,10 +220,13 @@ function getNewValue({
     }
   }
 
-  const strictlyShorthandMatchGroups =
-    strictlyShorthandRegex.exec(currentValue)?.groups;
-  if (strictlyShorthandMatchGroups) {
-    const { baseRange, preferredVal } = strictlyShorthandMatchGroups;
+  const mavenRange = parseMavenBasedRange(currentValue);
+  if (mavenRange?.preferredVal) {
+    const { leftVal, rightVal, preferredVal } = mavenRange;
+    const baseRange = currentValue.slice(
+      0,
+      currentValue.lastIndexOf(`!!${preferredVal}`),
+    );
     const newBaseRange = mavenVersion.getNewValue({
       currentValue: baseRange,
       rangeStrategy,
@@ -238,12 +237,14 @@ function getNewValue({
       return null;
     }
 
-    let newPreferredVal = preferredVal;
-    const preferredValueWasReferenced =
-      baseRange.includes(preferredVal) && !newBaseRange.includes(preferredVal);
-    if (preferredValueWasReferenced) {
-      newPreferredVal = newVersion;
-    }
+    const preferredIsBoundary =
+      preferredVal === leftVal || preferredVal === rightVal;
+    const newParsed = parseMavenBasedRange(newBaseRange);
+    const preferredStillPresent =
+      newParsed?.leftVal === preferredVal ||
+      newParsed?.rightVal === preferredVal;
+    const newPreferredVal =
+      preferredIsBoundary && !preferredStillPresent ? newVersion : preferredVal;
 
     return `${newBaseRange}!!${newPreferredVal}`;
   }
