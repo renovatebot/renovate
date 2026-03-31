@@ -251,6 +251,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
 
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
+  packageFile: string;
   upgrade: Upgrade<T>;
 }
 

@@ -70,12 +70,15 @@ describe('modules/manager/mise/extract', () => {
       lefthook = "1.11.13"
       localstack = "4.3.0"
       lychee = "0.19.1"
+      npm = "11.2.0"
       opentofu = "1.6.1"
+      packer = "1.15.0"
       pipx = "1.7.1"
       pkl = "0.28.2"
       protoc = "30.2"
       redis = "8.0.1"
       ruff = "0.11.12"
+      rumdl = "0.1.58"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
@@ -84,6 +87,7 @@ describe('modules/manager/mise/extract', () => {
       swiftformat = "0.58.0"
       swiftlint = "0.55.1"
       taplo = "0.10.0"
+      tart = "2.31.0"
       terragrunt = "0.72.6"
       tilt = "0.34.0"
       tusd = "2.8.0"
@@ -223,11 +227,24 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'lycheeverse/lychee',
           },
           {
+            currentValue: '11.2.0',
+            datasource: 'npm',
+            depName: 'npm',
+            packageName: 'npm',
+          },
+          {
             currentValue: '1.6.1',
             datasource: 'github-releases',
             depName: 'opentofu',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '1.15.0',
+            datasource: 'github-releases',
+            depName: 'packer',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/packer',
           },
           {
             currentValue: '1.7.1',
@@ -259,6 +276,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'ruff',
             packageName: 'astral-sh/ruff',
+          },
+          {
+            currentValue: '0.1.58',
+            datasource: 'github-releases',
+            depName: 'rumdl',
+            packageName: 'rvben/rumdl',
           },
           {
             currentValue: '0.10.0',
@@ -312,6 +335,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'taplo',
             packageName: 'tamasfe/taplo',
+          },
+          {
+            currentValue: '2.31.0',
+            datasource: 'github-releases',
+            depName: 'tart',
+            packageName: 'cirruslabs/tart',
           },
           {
             currentValue: '0.72.6',

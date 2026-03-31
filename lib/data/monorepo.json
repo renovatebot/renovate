@@ -344,6 +344,7 @@
     "dotnetcore-cap": "https://github.com/dotnetcore/CAP",
     "dropwizard": "https://github.com/dropwizard/dropwizard",
     "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
+    "effect": "https://github.com/Effect-TS/effect-smol",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
     "elastic-ecs-dotnet": "https://github.com/elastic/ecs-dotnet",
     "electron-forge": [
@@ -588,6 +589,8 @@
     "opentelemetry-java-contrib": "https://github.com/open-telemetry/opentelemetry-java-contrib",
     "opentelemetry-js": "https://github.com/open-telemetry/opentelemetry-js",
     "opentelemetry-js-contrib": "https://github.com/open-telemetry/opentelemetry-js-contrib",
+    "opentelemetry-php": "https://github.com/open-telemetry/opentelemetry-php",
+    "opentelemetry-php-contrib": "https://github.com/open-telemetry/opentelemetry-php-contrib",
     "opentelemetry-python": "https://github.com/open-telemetry/opentelemetry-python",
     "opentelemetry-python-contrib": "https://github.com/open-telemetry/opentelemetry-python-contrib",
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
