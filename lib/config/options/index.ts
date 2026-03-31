@@ -1003,6 +1003,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'persistRepoDataType',
+    description:
+      'Set the storage backend for persisted repository git data when `persistRepoData` is `true`. Use an `s3://` URL to persist to S3.',
+    type: 'string',
+    default: 'local',
+    globalOnly: true,
+    experimental: true,
+  },
+  {
     name: 'exposeAllEnv',
     description:
       'Set this to `true` to allow passing of all environment variables to package managers.',

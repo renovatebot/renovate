@@ -80,6 +80,23 @@ export async function renovateRepository(
       try {
         await fs.ensureDir(localDir);
         logger.debug('Using localDir: ' + localDir);
+        if (
+          repoConfig.persistRepoData &&
+          repoConfig.persistRepoDataType?.startsWith('s3://')
+        ) {
+          const { restoreGitDataFromS3 } =
+            await import('../../util/git/s3-persist.ts');
+          const platform = GlobalConfig.get('platform')!;
+          const restored = await restoreGitDataFromS3(
+            localDir,
+            repoConfig.persistRepoDataType,
+            platform,
+            repoConfig.repository!,
+          );
+          if (restored) {
+            logger.info('Restored git data from S3 - will use fast fetch');
+          }
+        }
         config = await initRepo(config);
         addSplit('init');
       } catch (err) /* istanbul ignore next */ {
@@ -187,6 +204,20 @@ export async function renovateRepository(
       await pruneStaleBranches(config, []);
     }
     repoResult = processResult(config, errorRes);
+  }
+  if (
+    localDir &&
+    repoConfig.persistRepoData &&
+    repoConfig.persistRepoDataType?.startsWith('s3://')
+  ) {
+    const { archiveGitDataToS3 } = await import('../../util/git/s3-persist.ts');
+    const platform = GlobalConfig.get('platform')!;
+    await archiveGitDataToS3(
+      localDir,
+      repoConfig.persistRepoDataType,
+      platform,
+      repoConfig.repository!,
+    );
   }
   if (localDir && !repoConfig.persistRepoData) {
     try {

@@ -1155,6 +1155,42 @@ Set this to `true` if you want Renovate to persist repo data between runs.
 The intention is that this allows Renovate to do a faster `git fetch` between runs rather than `git clone`.
 It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
+## persistRepoDataType
+
+<!-- prettier-ignore -->
+!!! warning "This feature is flagged as experimental"
+    Experimental features might be changed or removed at any time.
+
+Set the storage backend for persisted repository git data when [`persistRepoData`](#persistrepodata) is `true`.
+
+By default, Renovate keeps repository data on the local filesystem (`local`).
+On ephemeral infrastructure (e.g., AWS Fargate, Kubernetes Jobs), local data is lost between runs.
+Use an `s3://` URL to archive the `.git/` directory to S3 after each run and restore it before the next run, enabling fast `git fetch` instead of full `git clone`.
+
+```ts title="Set persistRepoDataType to an S3 URI to enable S3 backed git data persistence"
+{
+  persistRepoData: true,
+  persistRepoDataType: 's3://bucket-name/renovate-git/';
+}
+```
+
+Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
+Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
+Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
+
+The S3 object key follows the pattern `{prefix}{platform}/{repository}/git-data.tar.gz`.
+
+This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle) for S3-compatible storage.
+
+<!-- prettier-ignore -->
+!!! tip
+    You may set a folder hierarchy as part of `persistRepoDataType`.
+    For example, `persistRepoDataType: 's3://bucket-name/dir1/.../dirN/'`.
+
+<!-- prettier-ignore -->
+!!! note
+    This option persists git repository data (the `.git/` directory) to enable fast fetches, and is separate from the repository cache ([`repositoryCacheType`](#repositorycachetype)) and the lookup cache ([`redisUrl`](#redisurl)). If the S3 archive is missing (first run) or corrupted, Renovate falls back to a full `git clone` automatically.
+
 ## platform
 
 ## prCacheSyncMaxPages
