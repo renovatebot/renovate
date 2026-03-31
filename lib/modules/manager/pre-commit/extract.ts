@@ -79,6 +79,32 @@ function determineDatasource(
 
 const gitUrlRegex = regEx(/\.git$/i);
 
+// Same SHA pattern as github-actions/extract.ts
+const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
+
+interface RevCommentInfo {
+  replaceString: string;
+  currentValue: string;
+  commentWhiteSpaces: string;
+}
+
+function extractRevComments(content: string): Map<string, RevCommentInfo> {
+  const map = new Map<string, RevCommentInfo>();
+  const re = regEx(
+    /^\s*rev\s*:\s*(?<currentDigest>(?:[a-f0-9]{40}|[a-f0-9]{64}))(?<commentWhiteSpaces>\s+)#\s*(?<currentValue>\S+)\s*$/gm,
+  );
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(content)) !== null) {
+    const { currentDigest, commentWhiteSpaces, currentValue } = match.groups!;
+    map.set(currentDigest, {
+      replaceString: `${currentDigest}${commentWhiteSpaces}# ${currentValue}`,
+      currentValue,
+      commentWhiteSpaces,
+    });
+  }
+  return map;
+}
+
 function extractDependency(
   tag: string,
   repository: string,
@@ -136,7 +162,10 @@ function extractDependency(
  *
  * @param precommitFile the parsed yaml config file
  */
-function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
+function findDependencies(
+  precommitFile: PreCommitConfig,
+  revCommentMap: Map<string, RevCommentInfo>,
+): PackageDependency[] {
   if (!precommitFile.repos) {
     logger.debug(`No repos section found, skipping file`);
     return [];
@@ -186,6 +215,16 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
       const tag = String(item.rev);
       const dep = extractDependency(tag, repository);
 
+      if (shaRe.test(tag)) {
+        const commentInfo = revCommentMap.get(tag);
+        if (commentInfo) {
+          dep.currentDigest = tag;
+          dep.currentValue = commentInfo.currentValue;
+          dep.replaceString = commentInfo.replaceString;
+          dep.autoReplaceStringTemplate = `{{#if newDigest}}{{newDigest}}{{#if newValue}}${commentInfo.commentWhiteSpaces}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`;
+        }
+      }
+
       packageDependencies.push(dep);
     } else {
       logger.trace(item, 'Did not find pre-commit repo spec');
@@ -225,7 +264,8 @@ export function extractPackageFile(
     return null;
   }
   try {
-    const deps = findDependencies(parsedContent);
+    const revCommentMap = extractRevComments(content);
+    const deps = findDependencies(parsedContent, revCommentMap);
     if (deps.length) {
       logger.trace({ deps }, 'Found dependencies in pre-commit config');
       return { deps };

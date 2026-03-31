@@ -1,0 +1,11 @@
+fail_fast: true
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 1a2b345678cd90ef12ab34567cd89e0f1234567a
+    hooks:
+      - id: check-ast
+  - repo: git://github.com/pre-commit/pre-commit-hooks
+    # We will ignore trailing comments, we need to test it won't break the config
+    rev: 1abc23456d7e8f90123abcdef12345678abcdef0 # v1.2.3
+    hooks:
+      - id: check-merge-conflict
