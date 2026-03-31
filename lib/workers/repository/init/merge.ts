@@ -239,7 +239,10 @@ export async function mergeRenovateConfig(
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
-  applyNpmrc(decryptedConfig, 'decrypted');
+  applyNpmrc(
+    decryptedConfig,
+    'Ignoring any .npmrc files in repository due to configured npmrc',
+  );
   // Decrypt after resolving in case the preset contains npm authentication instead
   const { config: configToDecrypt } = await presets.resolveConfigPresets(
     decryptedConfig,
@@ -254,7 +257,7 @@ export async function mergeRenovateConfig(
     logger.trace({ config: resolvedConfig }, 'resolved config after migrating');
     resolvedConfig = migrationResult.migratedConfig;
   }
-  applyNpmrc(resolvedConfig, 'resolved');
+  applyNpmrc(resolvedConfig, 'Found npmrc in decrypted config - setting');
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
     secrets: mergeChildConfig(
@@ -290,15 +293,13 @@ export async function mergeRenovateConfig(
 
 export function applyNpmrc(
   config: RenovateConfig,
-  configType?: 'resolved' | 'decrypted',
+  logMessage = 'Setting npmrc from config',
 ): void {
   setNpmTokenInNpmrc(config);
   if (!isString(config.npmrc)) {
     return;
   }
-  logger.debug(
-    `Setting npmrc from ${configType ? `${configType} ` : ''}config`,
-  );
+  logger.debug(logMessage);
   npmApi.setNpmrc(config.npmrc);
 }
 
