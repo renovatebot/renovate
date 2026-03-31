@@ -700,20 +700,7 @@ export async function checkoutBranchFromRemote(
 export async function deleteVirtualBranch(branchName: string): Promise<void> {
   await syncGit();
   // Delete local branch if it exists
-  try {
-    await deleteLocalBranch(branchName);
-    logger.debug(`Deleted local branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- TODO: add test */
-    if (errChecked) {
-      throw errChecked;
-    }
-    logger.debug(
-      { err, branchName },
-      `No local branch to delete with name: ${branchName}`,
-    );
-  }
+  await deleteBranch(branchName, { localBranch: true });
 
   // Delete remote-tracking ref that was created from refspec
   // Note: git update-ref -d succeeds even if ref doesn't exist
@@ -996,24 +983,29 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(branchName: string): Promise<void> {
+export async function deleteBranch(
+  branchName: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   await syncGit();
-  try {
-    const deleteCommand = ['push', '--delete', 'origin', branchName];
+  if (!options?.localBranch) {
+    try {
+      const deleteCommand = ['push', '--delete', 'origin', branchName];
 
-    if (getNoVerify().includes('push')) {
-      deleteCommand.push('--no-verify');
-    }
+      if (getNoVerify().includes('push')) {
+        deleteCommand.push('--no-verify');
+      }
 
-    await gitRetry(() => git.raw(deleteCommand));
-    logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
-    if (errChecked) {
-      throw errChecked;
+      await gitRetry(() => git.raw(deleteCommand));
+      logger.debug(`Deleted remote branch: ${branchName}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore if -- TODO: add test #40625 */
+      if (errChecked) {
+        throw errChecked;
+      }
+      logger.debug(`No remote branch to delete with name: ${branchName}`);
     }
-    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);

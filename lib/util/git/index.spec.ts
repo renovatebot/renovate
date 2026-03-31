@@ -615,6 +615,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
         '--no-verify',
       ]);
     });
+
+    it('should only delete local branch when localBranch option is set', async () => {
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      await git.deleteBranch('renovate/past_branch', { localBranch: true });
+      expect(rawSpy).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['push', '--delete']),
+      );
+    });
   });
 
   describe('getBranchLastCommitTime', () => {

@@ -14,14 +14,11 @@ describe('modules/platform/gerrit/scm', () => {
     configureScm('test/repo');
   });
 
-  describe('deleteBranch()', () => {
-    it('should call git.deleteVirtualBranch', async () => {
-      await gerritScm.deleteBranch('renovate/test-branch');
-
-      expect(git.deleteVirtualBranch).toHaveBeenCalledExactlyOnceWith(
-        'renovate/test-branch',
-      );
-    });
+  describe('deleteBranch()', async () => {
+    await expect(gerritScm.deleteBranch('renovate/test-branch')).toResolve();
+    expect(git.deleteVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      'renovate/test-branch',
+    );
   });
 
   describe('mergeToLocal', () => {
