@@ -18,6 +18,7 @@ import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
 } from '../../../constants/error-messages.ts';
+import { pkg } from '../../../expose.ts';
 import { logger } from '../../../logger/index.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
@@ -43,7 +44,6 @@ import {
   getDefaultConfigFileName,
 } from '../onboarding/common.ts';
 import type { RepoFileConfig } from './types.ts';
-import { pkg } from '../../../expose.ts';
 
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
