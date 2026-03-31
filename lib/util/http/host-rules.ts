@@ -78,6 +78,23 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
       }),
       ...res,
     };
+  } else if (GlobalConfig.get('platform') === 'github') {
+    // Fallback to `github` hostType when the request URL targets the same host as the configured GitHub platform endpoint.
+    // This covers GitHub Enterprise Server without hardcoding URLs.
+    const platformEndpoint = GlobalConfig.get('endpoint');
+    if (platformEndpoint) {
+      const requestHost = parseUrl(url)?.hostname;
+      const endpointHost = parseUrl(platformEndpoint)?.hostname;
+      if (requestHost && endpointHost && requestHost === endpointHost) {
+        res = {
+          ...hostRules.find({
+            hostType: 'github',
+            url,
+          }),
+          ...res,
+        };
+      }
+    }
   }
 
   // Fallback to `gitlab` hostType
