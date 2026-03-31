@@ -7,6 +7,7 @@ import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
 import { GitlabReleasesDatasource } from '../../../datasource/gitlab-releases/index.ts';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { BazelDepType } from '../dep-types.ts';
 
 // Source: https://bazel.build/rules/lib/repo/http
 const archives = [
@@ -135,33 +136,40 @@ export const HttpTarget = z
     sha256: z.string(),
   })
   .refine(({ url, urls }) => !!url || !!urls)
-  .transform(({ rule, name, url, urls = [] }): PackageDependency[] => {
-    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(isTruthy);
-    if (!parsedUrl) {
-      return [];
-    }
+  .transform(
+    ({
+      rule,
+      name,
+      url,
+      urls = [],
+    }): PackageDependency<Record<string, any>, BazelDepType>[] => {
+      const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(isTruthy);
+      if (!parsedUrl) {
+        return [];
+      }
 
-    const dep: PackageDependency = {
-      datasource: parsedUrl.datasource,
-      depType: rule,
-      depName: name,
-      packageName: parsedUrl.packageName,
-    };
+      const dep: PackageDependency<Record<string, any>, BazelDepType> = {
+        datasource: parsedUrl.datasource,
+        depType: rule,
+        depName: name,
+        packageName: parsedUrl.packageName,
+      };
 
-    // We don't want to set both `currentValue` and `currentDigest`.
-    //
-    // What we want is to provide the first occurrence of `currentValue`,
-    // or, if it's not available, `currentDigest`.
-    //
-    // Auto-replace mechanism will replace this first occurrence,
-    // and artifact update function will do the rest.
-    //
-    // Hence, `if-else-if` is being used here.
-    if (parsedUrl.currentValue) {
-      dep.currentValue = parsedUrl.currentValue;
-    } else if (parsedUrl.currentDigest) {
-      dep.currentDigest = parsedUrl.currentDigest;
-    }
+      // We don't want to set both `currentValue` and `currentDigest`.
+      //
+      // What we want is to provide the first occurrence of `currentValue`,
+      // or, if it's not available, `currentDigest`.
+      //
+      // Auto-replace mechanism will replace this first occurrence,
+      // and artifact update function will do the rest.
+      //
+      // Hence, `if-else-if` is being used here.
+      if (parsedUrl.currentValue) {
+        dep.currentValue = parsedUrl.currentValue;
+      } else if (parsedUrl.currentDigest) {
+        dep.currentDigest = parsedUrl.currentDigest;
+      }
 
-    return [dep];
-  });
+      return [dep];
+    },
+  );

@@ -4,6 +4,7 @@ import { CrateDatasource } from '../../../datasource/crate/index.ts';
 import type { CargoManagerData } from '../../cargo/types.ts';
 import type { PackageDependency } from '../../types.ts';
 import { applyGitSource } from '../../util.ts';
+import type { BazelModuleDepType } from '../dep-types.ts';
 import { ExtensionTagFragment, StringFragment } from './fragments.ts';
 
 export const crateExtensionPrefix = 'crate';
@@ -34,7 +35,7 @@ export const RuleToCratePackageDep = ExtensionTagFragment.extend({
 }).transform(
   ({
     children: { package: packageName, version, git, rev, tag, branch, path },
-  }): PackageDependency => {
+  }): PackageDependency<Record<string, any>, BazelModuleDepType> => {
     let skipReason: SkipReason | undefined;
     let currentValue: string;
     let nestedVersion = false;
@@ -46,7 +47,7 @@ export const RuleToCratePackageDep = ExtensionTagFragment.extend({
       currentValue = '';
     }
 
-    const dep: PackageDependency<CargoManagerData> = {
+    const dep: PackageDependency<CargoManagerData, BazelModuleDepType> = {
       datasource: CrateDatasource.id,
       depName: packageName.value,
       currentValue,

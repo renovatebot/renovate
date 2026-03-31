@@ -29,10 +29,7 @@ const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 export class PdmProcessor extends BasePyProjectProcessor {
   override lockfileName = 'pdm.lock';
 
-  process(
-    project: PyProject,
-    deps: PackageDependency[],
-  ): PackageDependency<Pep621ManagerData>[] {
+  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const devDependencies = project.tool?.pdm?.devDependencies;
     if (devDependencies) {
       deps.push(...devDependencies);

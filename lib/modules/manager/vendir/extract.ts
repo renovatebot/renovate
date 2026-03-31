@@ -11,6 +11,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { VendirDepType } from './dep-types.ts';
 import type {
   GitRefDefinition,
   GithubReleaseDefinition,
@@ -23,7 +24,7 @@ import { Vendir } from './schema.ts';
 export function extractHelmChart(
   helmChart: HelmChartDefinition,
   aliases?: Record<string, string>,
-): PackageDependency {
+): PackageDependency<Record<string, any>, VendirDepType> {
   if (isOCIRegistry(helmChart.repository.url)) {
     const dep = getDep(
       `${removeOCIPrefix(helmChart.repository.url)}/${helmChart.name}:${helmChart.version}`,
@@ -50,7 +51,7 @@ export function extractHelmChart(
 
 export function extractGitSource(
   gitSource: GitRefDefinition,
-): PackageDependency {
+): PackageDependency<Record<string, any>, VendirDepType> {
   const httpUrl = getHttpUrl(gitSource.url);
   return {
     depName: httpUrl,
@@ -62,7 +63,7 @@ export function extractGitSource(
 
 export function extractGithubReleaseSource(
   githubRelease: GithubReleaseDefinition,
-): PackageDependency {
+): PackageDependency<Record<string, any>, VendirDepType> {
   return {
     depName: githubRelease.slug,
     packageName: githubRelease.slug,
@@ -74,7 +75,7 @@ export function extractGithubReleaseSource(
 
 export function extractHttpReleaseSource(
   httpRelease: HttpReleaseDefinition,
-): PackageDependency {
+): PackageDependency<Record<string, any>, VendirDepType> {
   return {
     packageName: httpRelease.url,
     currentValue: 'latest',
@@ -104,7 +105,7 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`vendir.extractPackageFile(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, VendirDepType>[] = [];
 
   const pkg = parseVendir(content, packageFile);
   if (!pkg) {

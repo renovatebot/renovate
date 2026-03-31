@@ -276,7 +276,7 @@ describe('modules/manager/bazel-module/rules', () => {
         bazelDepSkipReason: 'git-dependency',
       };
       const override1: OverridePackageDep = {
-        depType: 'bar_override',
+        depType: 'archive_override',
         depName: 'rules_foo',
         bazelDepSkipReason: 'unsupported-datasource',
       };

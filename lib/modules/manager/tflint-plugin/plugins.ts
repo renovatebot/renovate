@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { TflintPluginDepType } from './dep-types.ts';
 import type { ExtractionResult } from './types.ts';
 import { keyValueExtractionRegex } from './util.ts';
 
@@ -13,7 +14,8 @@ export function extractTFLintPlugin(
   _pluginName: string,
 ): ExtractionResult {
   let lineNumber = startingLine;
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, TflintPluginDepType>[] =
+    [];
 
   let pluginSource: string | null = null;
   let currentVersion: string | null = null;
@@ -64,8 +66,8 @@ export function extractTFLintPlugin(
 function analyseTFLintPlugin(
   source: string | null,
   version: string | null,
-): PackageDependency {
-  const dep: PackageDependency = {};
+): PackageDependency<Record<string, any>, TflintPluginDepType> {
+  const dep: PackageDependency<Record<string, any>, TflintPluginDepType> = {};
 
   if (source) {
     dep.depType = 'plugin';

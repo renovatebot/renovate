@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
+import type { TerraformDepType } from './dep-types.ts';
 import type { TerraformDefinitionFile } from './hcl/types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
 import { getLockedVersion, massageProviderLookupName } from './util.ts';
@@ -23,7 +24,7 @@ export abstract class DependencyExtractor {
     hclRoot: TerraformDefinitionFile,
     locks: ProviderLock[],
     config: ExtractConfig,
-  ): PackageDependency[];
+  ): PackageDependency<Record<string, any>, TerraformDepType>[];
 }
 
 export abstract class TerraformProviderExtractor extends DependencyExtractor {
@@ -34,30 +35,30 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
   protected analyzeTerraformProvider(
     dep: PackageDependency,
     locks: ProviderLock[],
-    depType: string,
-  ): PackageDependency {
-    dep.depType = depType;
-    dep.depName = dep.managerData?.moduleName;
-    dep.datasource = TerraformProviderDatasource.id;
+    depType: TerraformDepType,
+  ): PackageDependency<Record<string, any>, TerraformDepType> {
+    const result = { ...dep, depType };
+    result.depName = result.managerData?.moduleName;
+    result.datasource = TerraformProviderDatasource.id;
 
-    if (isNonEmptyString(dep.managerData?.source)) {
+    if (isNonEmptyString(result.managerData?.source)) {
       // TODO #22198
-      const source = this.sourceExtractionRegex.exec(dep.managerData.source);
+      const source = this.sourceExtractionRegex.exec(result.managerData.source);
       if (!source?.groups) {
-        dep.skipReason = 'unsupported-url';
-        return dep;
+        result.skipReason = 'unsupported-url';
+        return result;
       }
 
       // buildin providers https://github.com/terraform-providers
       if (source.groups.namespace === 'terraform-providers') {
-        dep.registryUrls = [`https://releases.hashicorp.com`];
+        result.registryUrls = [`https://releases.hashicorp.com`];
       } else if (source.groups.hostname) {
-        dep.registryUrls = [`https://${source.groups.hostname}`];
-        dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
+        result.registryUrls = [`https://${source.groups.hostname}`];
+        result.packageName = `${source.groups.namespace}/${source.groups.type}`;
       } else {
-        dep.packageName = dep.managerData?.source;
+        result.packageName = result.managerData?.source;
         const foundLocks = locks.filter(
-          (lock) => lock.packageName === dep.packageName,
+          (lock) => lock.packageName === result.packageName,
         );
 
         if (
@@ -66,26 +67,26 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
             TerraformProviderDatasource.defaultRegistryUrls[0]
         ) {
           logger.debug(
-            { dep, foundLocks },
+            { dep: result, foundLocks },
             'Terraform: Single lock found for provider with non-default registry URL',
           );
-          dep.registryUrls = [foundLocks[0].registryUrl];
+          result.registryUrls = [foundLocks[0].registryUrl];
         } else if (foundLocks.length > 1) {
           logger.debug(
-            { dep, foundLocks },
+            { dep: result, foundLocks },
             'Terraform: Multiple locks found for provider unable to determine registry URL',
           );
         }
       }
     }
-    massageProviderLookupName(dep);
+    massageProviderLookupName(result);
 
-    dep.lockedVersion = getLockedVersion(dep, locks);
+    result.lockedVersion = getLockedVersion(result, locks);
 
-    if (!dep.currentValue) {
-      dep.skipReason = 'unspecified-version';
+    if (!result.currentValue) {
+      result.skipReason = 'unspecified-version';
     }
 
-    return dep;
+    return result;
   }
 }

@@ -2,12 +2,13 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { isComment } from './common.ts';
+import type { ConanDepType } from './dep-types.ts';
 
 const regex = regEx(
   `(?:^|["'])(?<name>[-\\w]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-\\w]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
 );
 
-function setDepType(content: string, originalType: string): string {
+function setDepType(content: string, originalType: ConanDepType): ConanDepType {
   let depType = originalType;
   if (content.includes('python_requires')) {
     depType = 'python_requires';
@@ -28,9 +29,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       part.includes('require'), // matches [requires], requirements(), and requires
   );
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, ConanDepType>[] = [];
   for (const section of sections) {
-    let depType = setDepType(section, 'requires');
+    let depType: ConanDepType = setDepType(section, 'requires');
     const rawLines = section.split('\n').filter(isNonEmptyString);
 
     for (const rawLine of rawLines) {
@@ -41,7 +42,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         for (const line of lines) {
           const matches = regex.exec(line.trim());
           if (matches?.groups) {
-            let dep: PackageDependency = {};
+            let dep: PackageDependency<Record<string, any>, ConanDepType> = {};
             const depName = matches.groups?.name;
             const currentValue = matches.groups?.version.trim();
 

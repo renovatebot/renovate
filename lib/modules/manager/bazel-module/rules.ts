@@ -8,12 +8,16 @@ import { regEx } from '../../../util/regex.ts';
 import { BazelDatasource } from '../../datasource/bazel/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { BazelModuleDepType } from './dep-types.ts';
 import { RuleFragment, StringFragment } from './parser/fragments.ts';
 
 // Rule Schemas
 
-export interface BasePackageDep extends PackageDependency {
-  depType: string;
+export interface BasePackageDep extends PackageDependency<
+  Record<string, any>,
+  BazelModuleDepType
+> {
+  depType: BazelModuleDepType;
   depName: string;
 }
 
@@ -50,7 +54,7 @@ function isMerge(value: BazelModulePackageDep): value is MergePackageDep {
 // properties.
 export function bazelModulePackageDepToPackageDependency(
   bmpd: BazelModulePackageDep,
-): PackageDependency {
+): PackageDependency<Record<string, any>, BazelModuleDepType> {
   const copy: BazelModulePackageDep = clone(bmpd);
   if (isOverride(copy)) {
     const partial = copy as Partial<OverridePackageDep>;
@@ -194,7 +198,7 @@ function collectByModule(
 
 export function processModulePkgDeps(
   packageDeps: BazelModulePackageDep[],
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, BazelModuleDepType>[] {
   if (!packageDeps.length) {
     return [];
   }
@@ -207,7 +211,9 @@ export function processModulePkgDeps(
   // Create a new bazelDep that will be modified. We do not want to change the
   // input.
   const bazelDepOut = { ...bazelDep };
-  const deps: PackageDependency[] = [bazelDepOut];
+  const deps: PackageDependency<Record<string, any>, BazelModuleDepType>[] = [
+    bazelDepOut,
+  ];
   const merges = packageDeps.filter(isMerge);
   for (const merge of merges) {
     merge.bazelDepMergeFields.forEach((k) => (bazelDepOut[k] = merge[k]));
@@ -234,7 +240,7 @@ export function processModulePkgDeps(
 
 export function toPackageDependencies(
   packageDeps: BazelModulePackageDep[],
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, BazelModuleDepType>[] {
   return collectByModule(packageDeps).map(processModulePkgDeps).flat();
 }
 

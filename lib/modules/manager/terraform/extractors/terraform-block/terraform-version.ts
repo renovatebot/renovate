@@ -3,6 +3,7 @@ import { GithubReleasesDatasource } from '../../../../datasource/github-releases
 import * as hashicorp from '../../../../versioning/hashicorp/index.ts';
 import type { PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDepType } from '../../dep-types.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 
 export class TerraformVersionExtractor extends DependencyExtractor {
@@ -10,7 +11,9 @@ export class TerraformVersionExtractor extends DependencyExtractor {
     return ['required_version'];
   }
 
-  extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
+  extract(
+    hclRoot: TerraformDefinitionFile,
+  ): PackageDependency<Record<string, any>, TerraformDepType>[] {
     const terraformBlocks = hclRoot?.terraform;
     if (isNullOrUndefined(terraformBlocks)) {
       return [];
@@ -32,12 +35,16 @@ export class TerraformVersionExtractor extends DependencyExtractor {
     return dependencies;
   }
 
-  protected analyseTerraformVersion(dep: PackageDependency): PackageDependency {
-    dep.depType = 'required_version';
-    dep.datasource = GithubReleasesDatasource.id;
-    dep.depName = 'hashicorp/terraform';
-    dep.extractVersion = 'v(?<version>.*)$';
-    dep.versioning = hashicorp.id;
-    return dep;
+  protected analyseTerraformVersion(
+    dep: PackageDependency,
+  ): PackageDependency<Record<string, any>, TerraformDepType> {
+    return {
+      ...dep,
+      depType: 'required_version',
+      datasource: GithubReleasesDatasource.id,
+      depName: 'hashicorp/terraform',
+      extractVersion: 'v(?<version>.*)$',
+      versioning: hashicorp.id,
+    };
   }
 }

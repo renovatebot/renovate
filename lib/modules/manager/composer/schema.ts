@@ -14,6 +14,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import { api as semverComposer } from '../../versioning/composer/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { ComposerDepType } from './dep-types.ts';
 import type { ComposerManagerData } from './types.ts';
 
 export const ComposerRepo = z.object({
@@ -253,9 +254,13 @@ export const ComposerExtract = z
     const { composerJsonType, require, requireDev } = file;
     const { registryUrls, gitRepos, pathRepos } = file.repositories;
 
-    const deps: PackageDependency[] = [];
+    const deps: PackageDependency<Record<string, any>, ComposerDepType>[] = [];
 
-    const profiles = [
+    const profiles: {
+      depType: ComposerDepType;
+      req: Record<string, string>;
+      locked: LockedPackage[];
+    }[] = [
       {
         depType: 'require',
         req: require,
@@ -291,7 +296,7 @@ export const ComposerExtract = z
           continue;
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<Record<string, any>, ComposerDepType> = {
           depType,
           depName,
           currentValue,

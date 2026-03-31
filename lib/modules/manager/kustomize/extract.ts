@@ -14,6 +14,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { KustomizeDepType } from './dep-types.ts';
 import type { HelmChart, Image, Kustomize } from './types.ts';
 
 // URL specifications should follow the hashicorp URL format
@@ -214,7 +215,7 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`kustomize.extractPackageFile(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, KustomizeDepType>[] = [];
 
   const pkg = parseKustomize(content, packageFile);
   if (!pkg) {
@@ -227,7 +228,7 @@ export function extractPackageFile(
     if (dep) {
       deps.push({
         ...dep,
-        depType: pkg.kind,
+        depType: pkg.kind as KustomizeDepType,
       });
     }
   }
@@ -238,7 +239,7 @@ export function extractPackageFile(
     if (dep) {
       deps.push({
         ...dep,
-        depType: pkg.kind,
+        depType: pkg.kind as KustomizeDepType,
       });
     }
   }
@@ -249,7 +250,7 @@ export function extractPackageFile(
     if (dep) {
       deps.push({
         ...dep,
-        depType: pkg.kind,
+        depType: pkg.kind as KustomizeDepType,
       });
     }
   }
@@ -260,7 +261,7 @@ export function extractPackageFile(
     if (dep) {
       deps.push({
         ...dep,
-        depType: pkg.kind,
+        depType: pkg.kind as KustomizeDepType,
       });
     }
   }

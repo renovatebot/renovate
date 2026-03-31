@@ -2,6 +2,7 @@ import { z } from 'zod/v3';
 import { regEx } from '../../../../util/regex.ts';
 import { GoDatasource } from '../../../datasource/go/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { BazelDepType } from '../dep-types.ts';
 
 export const goRules = ['go_repository', '_go_repository'] as const;
 
@@ -16,8 +17,15 @@ export const GoTarget = z
   })
   .refine(({ tag, commit }) => !!tag || !!commit)
   .transform(
-    ({ rule, name, tag, commit, importpath, remote }): PackageDependency[] => {
-      const dep: PackageDependency = {
+    ({
+      rule,
+      name,
+      tag,
+      commit,
+      importpath,
+      remote,
+    }): PackageDependency<Record<string, any>, BazelDepType>[] => {
+      const dep: PackageDependency<Record<string, any>, BazelDepType> = {
         datasource: GoDatasource.id,
         depType: rule,
         depName: name,

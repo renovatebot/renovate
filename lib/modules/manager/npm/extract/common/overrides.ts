@@ -1,5 +1,6 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types.ts';
+import type { NpmDepType } from '../../dep-types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { extractDependency } from './dependency.ts';
 import { setNodeCommitTopic } from './node.ts';
@@ -13,8 +14,8 @@ import { setNodeCommitTopic } from './node.ts';
 export function extractOverrideDepsRec(
   parents: string[],
   child: NpmManagerData,
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+): PackageDependency<Record<string, any>, NpmDepType>[] {
+  const deps: PackageDependency<Record<string, any>, NpmDepType>[] = [];
   if (!child || isEmptyObject(child)) {
     return deps;
   }
@@ -24,7 +25,7 @@ export function extractOverrideDepsRec(
       // "." means the constraint is applied to the parent dep
       const currDepName =
         overrideName === '.' ? parents[parents.length - 1] : overrideName;
-      const dep: PackageDependency<NpmManagerData> = {
+      const dep: PackageDependency<NpmManagerData, NpmDepType> = {
         depName: currDepName,
         depType: 'overrides',
         managerData: { parents: parents.slice() }, // set parents for dependency

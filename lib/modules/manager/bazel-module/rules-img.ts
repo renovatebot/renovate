@@ -1,6 +1,7 @@
 import { z } from 'zod/v3';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { BazelModuleDepType } from './dep-types.ts';
 import { RepoRuleCallFragment, StringFragment } from './parser/fragments.ts';
 
 export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
@@ -15,7 +16,7 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
   ({
     rawString,
     children: { name, repository, registry, tag, digest },
-  }): PackageDependency => {
+  }): PackageDependency<Record<string, any>, BazelModuleDepType> => {
     // Note: Validation that this is a rules_img pull call is done in transformRulesImgCalls
 
     // Construct the package name
@@ -24,7 +25,7 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
       packageName = `${registry.value}/${repository.value}`;
     }
 
-    const result: PackageDependency = {
+    const result: PackageDependency<Record<string, any>, BazelModuleDepType> = {
       datasource: DockerDatasource.id,
       depType: 'rules_img_pull',
       depName: name.value,
@@ -41,8 +42,10 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
   },
 );
 
-export function transformRulesImgCalls(fragments: any[]): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+export function transformRulesImgCalls(
+  fragments: any[],
+): PackageDependency<Record<string, any>, BazelModuleDepType>[] {
+  const deps: PackageDependency<Record<string, any>, BazelModuleDepType>[] = [];
 
   // First, collect all use_repo_rule assignments to know which variables are repo rules
   const repoRuleVariables = new Map<

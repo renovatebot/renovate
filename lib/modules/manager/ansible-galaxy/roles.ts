@@ -2,6 +2,7 @@ import { regEx } from '../../../util/regex.ts';
 import { GalaxyDatasource } from '../../datasource/galaxy/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { AnsibleGalaxyDepType } from './dep-types.ts';
 import type { AnsibleGalaxyPackageDependency } from './types.ts';
 import {
   blockLineRegEx,
@@ -76,8 +77,11 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
   return true;
 }
 
-export function extractRoles(lines: string[]): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+export function extractRoles(
+  lines: string[],
+): PackageDependency<Record<string, any>, AnsibleGalaxyDepType>[] {
+  const deps: PackageDependency<Record<string, any>, AnsibleGalaxyDepType>[] =
+    [];
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     let lineMatch = newBlockRegEx.exec(lines[lineNumber]);

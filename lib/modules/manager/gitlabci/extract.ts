@@ -11,6 +11,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types.ts';
+import type { GitlabciDepType } from './dep-types.ts';
 import {
   GitlabDocument,
   Job,
@@ -28,7 +29,7 @@ const componentReferenceLatestVersion = '~latest';
 function extractDepFromIncludeComponent(
   component: string,
   registryAliases?: Record<string, string>,
-): PackageDependency | null {
+): PackageDependency<Record<string, any>, GitlabciDepType> | null {
   let componentUrl = component;
   if (registryAliases) {
     for (const key in registryAliases) {
@@ -52,7 +53,7 @@ function extractDepFromIncludeComponent(
     return null;
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<Record<string, any>, GitlabciDepType> = {
     datasource: GitlabTagsDatasource.id,
     depName: componentReference.projectPath,
     depType: 'repository',
@@ -75,7 +76,7 @@ export function extractPackageFile(
   packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, GitlabciDepType>[] = [];
   try {
     const docs = parseYaml(content, { uniqueKeys: false });
 
@@ -87,15 +88,17 @@ export function extractPackageFile(
         const { image, services } = job;
 
         if (image) {
-          const dep = getGitlabDep(image.value, config.registryAliases);
-          dep.depType = image.type;
-          deps.push(dep);
+          deps.push({
+            ...getGitlabDep(image.value, config.registryAliases),
+            depType: image.type as GitlabciDepType,
+          });
         }
 
         for (const service of services) {
-          const dep = getGitlabDep(service, config.registryAliases);
-          dep.depType = 'service-image';
-          deps.push(dep);
+          deps.push({
+            ...getGitlabDep(service, config.registryAliases),
+            depType: 'service-image',
+          });
         }
       }
 

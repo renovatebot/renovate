@@ -9,10 +9,11 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { CircleciDepType } from './dep-types.ts';
 import { CircleCiFile, type CircleCiOrb } from './schema.ts';
 
 function extractDefinition(
-  deps: PackageDependency[],
+  deps: PackageDependency<Record<string, any>, CircleciDepType>[],
   definition: CircleCiOrb | CircleCiFile,
   registryAliases: Record<string, string>,
 ): void {
@@ -58,7 +59,7 @@ export function extractPackageFile(
   }
 
   const registryAliases = config?.registryAliases ?? {};
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, CircleciDepType>[] = [];
   extractDefinition(deps, parsed, registryAliases);
 
   for (const alias of parsed.aliases) {

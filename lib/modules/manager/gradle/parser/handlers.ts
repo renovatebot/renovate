@@ -4,6 +4,7 @@ import { getSiblingFileName } from '../../../../util/fs/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { GradleDepType } from '../dep-types.ts';
 import type { parseGradle as parseGradleCallback } from '../parser.ts';
 import type {
   ContentDescriptorMatcher,
@@ -238,7 +239,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
     methodName.value === 'kotlin' ? `org.jetbrains.kotlin.${plugin}` : plugin;
   const packageName = `${depName}:${depName}.gradle.plugin`;
 
-  const dep: PackageDependency<GradleManagerData> = {
+  const dep: PackageDependency<GradleManagerData, GradleDepType> = {
     depType: 'plugin',
     depName,
     packageName,

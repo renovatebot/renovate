@@ -9,6 +9,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { DockerfileDepType } from './dep-types.ts';
 
 const variableMarker = '$';
 
@@ -249,7 +250,7 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): PackageFileContent | null {
   const sanitizedContent = content.replace(regEx(/^\uFEFF/), ''); // remove bom marker
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, DockerfileDepType>[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};
   const argsLines: Record<string, number[]> = {};
@@ -289,8 +290,10 @@ export function extractPackageFile(
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
-        const dep = getDep(syntaxImage, true, config.registryAliases);
-        dep.depType = 'syntax';
+        const dep: PackageDependency<Record<string, any>, DockerfileDepType> = {
+          ...getDep(syntaxImage, true, config.registryAliases),
+          depType: 'syntax',
+        };
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -379,7 +382,9 @@ export function extractPackageFile(
           },
           'Dockerfile FROM',
         );
-        deps.push(dep);
+        deps.push(
+          dep as PackageDependency<Record<string, any>, DockerfileDepType>,
+        );
       }
     }
 
@@ -414,7 +419,9 @@ export function extractPackageFile(
           },
           'Dockerfile COPY --from',
         );
-        deps.push(dep);
+        deps.push(
+          dep as PackageDependency<Record<string, any>, DockerfileDepType>,
+        );
       } else {
         logger.debug(
           { image: copyFromMatch.groups.image },
@@ -454,7 +461,9 @@ export function extractPackageFile(
           },
           'Dockerfile RUN --mount=from',
         );
-        deps.push(dep);
+        deps.push(
+          dep as PackageDependency<Record<string, any>, DockerfileDepType>,
+        );
       }
     }
 
@@ -464,9 +473,12 @@ export function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  for (const d of deps) {
-    d.depType ??= 'stage';
+  for (let i = 0; i < deps.length; i++) {
+    if (i === deps.length - 1) {
+      deps[i] = { ...deps[i], depType: 'final' };
+    } else {
+      deps[i] = { ...deps[i], depType: deps[i].depType ?? 'stage' };
+    }
   }
-  deps[deps.length - 1].depType = 'final';
   return { deps };
 }

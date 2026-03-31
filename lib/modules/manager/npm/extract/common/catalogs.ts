@@ -1,4 +1,5 @@
 import { type PackageDependency } from '../../../types.ts';
+import type { NpmDepType } from '../../dep-types.ts';
 import { type NpmManagerData } from '../../types.ts';
 import { type Catalog } from '../types.ts';
 import { extractDependency, parseDepName } from './dependency.ts';
@@ -16,14 +17,14 @@ function getCatalogDepType(name: string, npmManager: 'pnpm' | 'yarn'): string {
 export function extractCatalogDeps(
   catalogs: Catalog[],
   npmManager: 'pnpm' | 'yarn' = 'pnpm',
-): PackageDependency<NpmManagerData>[] {
-  const deps: PackageDependency<NpmManagerData>[] = [];
+): PackageDependency<NpmManagerData, NpmDepType>[] {
+  const deps: PackageDependency<NpmManagerData, NpmDepType>[] = [];
 
   for (const catalog of catalogs) {
     for (const [key, val] of Object.entries(catalog.dependencies)) {
       const depType = getCatalogDepType(catalog.name, npmManager);
       const depName = parseDepName(depType, key);
-      const dep: PackageDependency<NpmManagerData> = {
+      const dep: PackageDependency<NpmManagerData, NpmDepType> = {
         depType,
         depName,
         ...extractDependency(depType, depName, val!),

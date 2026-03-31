@@ -2,6 +2,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { ClojureDatasource } from '../../datasource/clojure/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { LeiningenDepType } from './dep-types.ts';
 import type { ExtractContext, ExtractedVariables } from './types.ts';
 
 export function trimAtKey(str: string, kwName: string): string | null {
@@ -32,7 +33,7 @@ export function extractFromVectors(
     return [];
   }
   let balance = 0;
-  const result: PackageDependency[] = [];
+  const result: PackageDependency<Record<string, any>, LeiningenDepType>[] = [];
   let idx = 0;
   let vecPos = 0;
   let artifactId = '';
@@ -59,7 +60,7 @@ export function extractFromVectors(
             depName,
             currentValue,
             sharedVariableName: varName,
-          });
+          } as PackageDependency<Record<string, any>, LeiningenDepType>);
         }
       } else {
         result.push({
@@ -67,7 +68,7 @@ export function extractFromVectors(
           datasource: ClojureDatasource.id,
           depName,
           currentValue: cleanStrLiteral(version),
-        });
+        } as PackageDependency<Record<string, any>, LeiningenDepType>);
       }
     }
     artifactId = '';
@@ -186,7 +187,7 @@ function collectDeps(
   options: CollectDepsOptions = {
     nested: true,
   },
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, LeiningenDepType>[] {
   const ctx = {
     depType: options.depType ?? key,
     registryUrls,
@@ -194,12 +195,17 @@ function collectDeps(
   // A vector like [["dep-1" "1.0.0"] ["dep-2" "0.0.0"]] is nested
   // A vector like ["dep-1" "1.0.0"] is not
   const dimensions = options.nested ? 2 : 1;
-  let result: PackageDependency[] = [];
+  let result: PackageDependency<Record<string, any>, LeiningenDepType>[] = [];
   let restContent = trimAtKey(content, key);
   while (restContent) {
     result = [
       ...result,
-      ...extractFromVectors(restContent, ctx, vars, dimensions),
+      ...(extractFromVectors(
+        restContent,
+        ctx,
+        vars,
+        dimensions,
+      ) as PackageDependency<Record<string, any>, LeiningenDepType>[]),
     ];
     restContent = trimAtKey(restContent, key);
   }
@@ -210,7 +216,7 @@ export function extractPackageFile(content: string): PackageFileContent {
   const registryUrls = extractLeinRepos(content);
   const vars = extractVariables(content);
 
-  const deps: PackageDependency[] = [
+  const deps: PackageDependency<Record<string, any>, LeiningenDepType>[] = [
     ...collectDeps(content, 'dependencies', registryUrls, vars),
     ...collectDeps(content, 'managed-dependencies', registryUrls, vars),
     ...collectDeps(content, 'plugins', registryUrls, vars),

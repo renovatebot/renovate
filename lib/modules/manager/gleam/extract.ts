@@ -4,6 +4,7 @@ import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
 import { HexDatasource } from '../../datasource/hex/index.ts';
 import { api as versioning } from '../../versioning/hex/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { GleamDepType } from './dep-types.ts';
 import { extractLockFileVersions } from './locked-version.ts';
 import { GleamToml } from './schema.ts';
 
@@ -28,10 +29,10 @@ function toPackageDep({
   name: string;
   sectionKey: string;
   version: string;
-}): PackageDependency {
+}): PackageDependency<Record<string, any>, GleamDepType> {
   return {
     depName: name,
-    depType: mapSectionKey(sectionKey),
+    depType: mapSectionKey(sectionKey) as GleamDepType,
     datasource: HexDatasource.id,
     currentValue: version,
   };
@@ -43,13 +44,15 @@ function toPackageDeps({
 }: {
   deps?: Record<string, string>;
   sectionKey: string;
-}): PackageDependency[] {
+}): PackageDependency<Record<string, any>, GleamDepType>[] {
   return Object.entries(deps ?? {}).map(([name, version]) =>
     toPackageDep({ name, sectionKey, version }),
   );
 }
 
-function extractGleamTomlDeps(gleamToml: GleamToml): PackageDependency[] {
+function extractGleamTomlDeps(
+  gleamToml: GleamToml,
+): PackageDependency<Record<string, any>, GleamDepType>[] {
   return dependencySections.flatMap((sectionKey) =>
     toPackageDeps({
       deps: gleamToml[sectionKey],

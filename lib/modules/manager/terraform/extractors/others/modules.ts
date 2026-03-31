@@ -7,6 +7,7 @@ import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.t
 import { TerraformModuleDatasource } from '../../../../datasource/terraform-module/index.ts';
 import type { PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDepType } from '../../dep-types.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 
 export const githubRefMatchRegex = regEx(
@@ -30,7 +31,9 @@ export class ModuleExtractor extends DependencyExtractor {
     return ['module'];
   }
 
-  extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
+  extract(
+    hclRoot: TerraformDefinitionFile,
+  ): PackageDependency<Record<string, any>, TerraformDepType>[] {
     const modules = hclRoot.module;
     if (isNullOrUndefined(modules)) {
       return [];
@@ -45,7 +48,7 @@ export class ModuleExtractor extends DependencyExtractor {
     const dependencies = [];
     for (const [depName, moduleElements] of Object.entries(modules)) {
       for (const moduleElement of moduleElements) {
-        const dep = {
+        const dep: PackageDependency<Record<string, any>, TerraformDepType> = {
           depName,
           depType: 'module',
           currentValue: moduleElement.version,
@@ -60,7 +63,9 @@ export class ModuleExtractor extends DependencyExtractor {
     return dependencies;
   }
 
-  private analyseTerraformModule(dep: PackageDependency): PackageDependency {
+  private analyseTerraformModule(
+    dep: PackageDependency<Record<string, any>, TerraformDepType>,
+  ): PackageDependency<Record<string, any>, TerraformDepType> {
     // TODO #22198
     const source = dep.managerData!.source as string;
     const githubRefMatch = githubRefMatchRegex.exec(source);

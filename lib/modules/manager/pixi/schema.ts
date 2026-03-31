@@ -8,6 +8,7 @@ import { id as gitRefVersionID } from '../../versioning/git/index.ts';
 import { id as pep440VersionID } from '../../versioning/pep440//index.ts';
 import { PyProject } from '../pep621/schema.ts';
 import type { PackageDependency } from '../types.ts';
+import type { PixiDepType } from './dep-types.ts';
 
 export type Channels = z.infer<typeof Channel>[];
 
@@ -16,7 +17,10 @@ const Channel = z.union([
   z.object({ channel: z.string(), priority: z.number() }),
 ]);
 
-export interface PixiPackageDependency extends PackageDependency {
+export interface PixiPackageDependency extends PackageDependency<
+  Record<string, any>,
+  PixiDepType
+> {
   channel?: string;
   channels?: Channels;
 }

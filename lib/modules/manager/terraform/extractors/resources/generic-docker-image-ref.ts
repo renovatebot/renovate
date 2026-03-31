@@ -7,6 +7,7 @@ import {
 import { getDep } from '../../../dockerfile/extract.ts';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDepType } from '../../dep-types.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 import type { GenericImageResourceDef } from '../../types.ts';
@@ -23,7 +24,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     hclMap: TerraformDefinitionFile,
     _locks: ProviderLock[],
     config: ExtractConfig,
-  ): PackageDependency[] {
+  ): PackageDependency<Record<string, any>, TerraformDepType>[] {
     const dependencies = [];
 
     dependencies.push(
@@ -41,7 +42,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     typeMap: Record<string, unknown> | undefined,
     image_definitions: GenericImageResourceDef[],
     config: ExtractConfig,
-  ): PackageDependency[] {
+  ): PackageDependency<Record<string, any>, TerraformDepType>[] {
     if (isNullOrUndefined(typeMap)) {
       return [];
     }
@@ -59,7 +60,12 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
       // loop over instances of a resource type
       for (const instance of Object.values(resourceInstancesMap).flat()) {
         dependencies.push(
-          ...this.walkPath({ depType: type }, instance, path, config),
+          ...this.walkPath(
+            { depType: type as TerraformDepType },
+            instance,
+            path,
+            config,
+          ),
         );
       }
     }
@@ -76,12 +82,15 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
    * @param leftPath path elements left to walk down
    */
   private walkPath(
-    abstractDep: PackageDependency,
+    abstractDep: PackageDependency<Record<string, any>, TerraformDepType>,
     parentElement: unknown,
     leftPath: string[],
     config: ExtractConfig,
-  ): PackageDependency[] {
-    const dependencies: PackageDependency[] = [];
+  ): PackageDependency<Record<string, any>, TerraformDepType>[] {
+    const dependencies: PackageDependency<
+      Record<string, any>,
+      TerraformDepType
+    >[] = [];
     // if there are no path elements left, we have reached the end of the path
     if (leftPath.length === 0) {
       /* v8 ignore next 8 -- needs test */
@@ -93,10 +102,14 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
           },
         ];
       }
-      const test = getDep(parentElement, true, config.registryAliases);
-      const dep: PackageDependency = {
-        ...abstractDep,
+      const { depType: _, ...test } = getDep(
+        parentElement,
+        true,
+        config.registryAliases,
+      );
+      const dep: PackageDependency<Record<string, any>, TerraformDepType> = {
         ...test,
+        ...abstractDep,
       };
       return [dep];
     }

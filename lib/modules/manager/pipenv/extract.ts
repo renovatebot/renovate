@@ -10,6 +10,7 @@ import { parse as parseToml } from '../../../util/toml.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { PipenvDepType } from './dep-types.ts';
 import type { PipFile, PipRequirement, PipSource } from './types.ts';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
@@ -26,10 +27,10 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
 const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
-  sectionName: string,
+  sectionName: PipenvDepType,
   pipfileSection: Record<string, PipRequirement>,
   sources?: PipSource[],
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, PipenvDepType>[] {
   const deps = Object.entries(pipfileSection)
     .map((x) => {
       const [packageNameString, requirements] = x;
@@ -76,7 +77,7 @@ function extractFromSection(
           skipReason = 'invalid-version';
         }
       }
-      const dep: PackageDependency = {
+      const dep: PackageDependency<Record<string, any>, PipenvDepType> = {
         depType: sectionName,
         depName,
         packageName: normalizePythonDepName(depName),
@@ -154,7 +155,7 @@ export async function extractPackageFile(
         return [];
       }
 
-      return extractFromSection(category, section, sources);
+      return extractFromSection(category as PipenvDepType, section, sources);
     })
     .flat();
 

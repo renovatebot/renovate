@@ -10,6 +10,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { DevcontainerDepType } from './dep-types.ts';
 import { DevContainerFile } from './schema.ts';
 
 export function extractPackageFile(
@@ -25,8 +26,7 @@ export function extractPackageFile(
     const imageDep = getDep(image, packageFile, extractConfig.registryAliases);
 
     if (imageDep) {
-      imageDep.depType = 'image';
-      deps.push(imageDep);
+      deps.push({ ...imageDep, depType: 'image' });
     } else {
       logger.trace(
         { packageFile },
@@ -44,9 +44,11 @@ export function extractPackageFile(
           extractConfig.registryAliases,
         );
         if (featureDep) {
-          featureDep.depType = 'feature';
-          featureDep.pinDigests = false;
-          deps.push(featureDep);
+          const featureDepWithType: PackageDependency<
+            Record<string, any>,
+            DevcontainerDepType
+          > = { ...featureDep, depType: 'feature', pinDigests: false };
+          deps.push(featureDepWithType);
 
           let dep: PackageDependency;
           switch (featureDep.depName) {

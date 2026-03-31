@@ -7,9 +7,12 @@ import {
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { Pep621DepType } from './dep-types.ts';
 import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
-type Pep508Dependency = z.ZodType<PackageDependency<Record<string, any>>>;
+type Pep508Dependency = z.ZodType<
+  PackageDependency<Record<string, any>, Pep621DepType>
+>;
 
 function Pep508Dependency(depType: string): Pep508Dependency {
   return z.string().transform((x, ctx) => {
@@ -29,12 +32,14 @@ function Pep508Dependency(depType: string): Pep508Dependency {
   }) as Pep508Dependency;
 }
 
-type DependencyGroup = z.ZodType<PackageDependency<Record<string, any>>[]>;
+type DependencyGroup = z.ZodType<
+  PackageDependency<Record<string, any>, Pep621DepType>[]
+>;
 
 export function DependencyGroup(depType: string): DependencyGroup {
   return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
     (depGroups) => {
-      const deps: PackageDependency[] = [];
+      const deps: PackageDependency<Record<string, any>, Pep621DepType>[] = [];
       for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
         for (const dep of groupDeps) {
           if (dep.packageName) {
@@ -100,7 +105,7 @@ const HatchConfig = z
   })
   .catch({ envs: {} })
   .transform(({ envs }) => {
-    const deps: PackageDependency[] = [];
+    const deps: PackageDependency<Record<string, any>, Pep621DepType>[] = [];
     for (const [
       envName,
       { dependencies, 'extra-dependencies': extraDependencies },

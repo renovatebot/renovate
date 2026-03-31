@@ -12,6 +12,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { NugetDepType } from './dep-types.ts';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest.ts';
 import { extractPackagesFromSingleCsharpFile } from './extract/single-csharp-file.ts';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types.ts';
@@ -164,7 +165,7 @@ export async function extractPackageFile(
   const registries = await getConfiguredRegistries(packageFile);
 
   if (packageFile.endsWith('dotnet-tools.json')) {
-    const deps: PackageDependency[] = [];
+    const deps: PackageDependency<Record<string, any>, NugetDepType>[] = [];
     let manifest: DotnetToolsManifest;
 
     try {
@@ -195,7 +196,7 @@ export async function extractPackageFile(
 
       applyRegistries(dep, registries);
 
-      deps.push(dep);
+      deps.push(dep as PackageDependency<Record<string, any>, NugetDepType>);
     }
 
     return deps.length ? { deps } : null;
@@ -220,13 +221,13 @@ export async function extractPackageFile(
     return null;
   }
 
-  let deps: PackageDependency[] = [];
+  let deps: PackageDependency<Record<string, any>, NugetDepType>[] = [];
   let packageFileVersion: string | undefined;
   try {
     const parsedXml = new XmlDocument(content);
     deps = extractDepsFromXml(parsedXml).map((dep) =>
       applyRegistries(dep, registries),
-    );
+    ) as PackageDependency<Record<string, any>, NugetDepType>[];
     packageFileVersion = findVersion(parsedXml)?.val;
   } catch (err) {
     logger.debug({ err, packageFile }, `Failed to parse XML`);

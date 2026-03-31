@@ -20,6 +20,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { CommunityActions } from './community.ts';
+import type { GithubActionsDepType } from './dep-types.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { Steps } from './schema.ts';
@@ -50,18 +51,20 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
 function extractDockerAction(
   actionRef: DockerReference,
   config: ExtractConfig,
-): PackageDependency {
+): PackageDependency<Record<string, any>, GithubActionsDepType> {
   const dep = getDep(actionRef.originalRef, true, config.registryAliases);
-  dep.depType = 'docker';
-  dep.replaceString = actionRef.originalRef;
-  return dep;
+  return {
+    ...dep,
+    depType: 'docker',
+    replaceString: actionRef.originalRef,
+  };
 }
 
 function extractRepositoryAction(
   actionRef: RepositoryReference,
   parsed: ReturnType<typeof parseUsesLine> & object,
   customRegistryUrlsPackageDependency: PackageDependency,
-): PackageDependency {
+): PackageDependency<Record<string, any>, GithubActionsDepType> {
   const {
     replaceString: valueString,
     quote,
@@ -83,16 +86,16 @@ function extractRepositoryAction(
   const pathSuffix = subPath ? `/${subPath}` : '';
   const commentWs = commentPrecedingWhitespace || ' ';
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<Record<string, any>, GithubActionsDepType> = {
+    ...(isExplicitHostname
+      ? detectDatasource(registryUrl)
+      : customRegistryUrlsPackageDependency),
     depName,
     commitMessageTopic: '{{{depName}}} action',
     versioning: dockerVersioning.id,
     depType: 'action',
     replaceString: valueString,
     autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
-    ...(isExplicitHostname
-      ? detectDatasource(registryUrl)
-      : customRegistryUrlsPackageDependency),
   };
 
   if (packageName !== depName) {
@@ -145,11 +148,12 @@ function extractRepositoryAction(
 function extractWithRegex(
   content: string,
   config: ExtractConfig,
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, GithubActionsDepType>[] {
   const customRegistryUrlsPackageDependency =
     detectCustomGitHubRegistryUrlsForActions();
   logger.trace('github-actions.extractWithRegex()');
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, GithubActionsDepType>[] =
+    [];
 
   for (const line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
@@ -209,7 +213,9 @@ const runnerVersionRegex = regEx(
   /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/,
 );
 
-function extractRunner(runner: string): PackageDependency | null {
+function extractRunner(
+  runner: string,
+): PackageDependency<Record<string, any>, GithubActionsDepType> | null {
   const runnerVersionGroups = runnerVersionRegex.exec(runner)?.groups;
   if (!runnerVersionGroups) {
     return null;
@@ -221,7 +227,10 @@ function extractRunner(runner: string): PackageDependency | null {
     return null;
   }
 
-  const dependency: PackageDependency = {
+  const dependency: PackageDependency<
+    Record<string, any>,
+    GithubActionsDepType
+  > = {
     depName,
     currentValue,
     replaceString: `${depName}-${currentValue}`,
@@ -248,7 +257,9 @@ const versionedActions: Record<string, string> = {
   // - java
 };
 
-function extractVersionedAction(step: Steps): PackageDependency | null {
+function extractVersionedAction(
+  step: Steps,
+): PackageDependency<Record<string, any>, GithubActionsDepType> | null {
   for (const [action, versioning] of Object.entries(versionedActions)) {
     const actionName = `actions/setup-${action}`;
     if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
@@ -274,8 +285,11 @@ function extractVersionedAction(step: Steps): PackageDependency | null {
   return null;
 }
 
-function extractSteps(steps: Steps[]): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+function extractSteps(
+  steps: Steps[],
+): PackageDependency<Record<string, any>, GithubActionsDepType>[] {
+  const deps: PackageDependency<Record<string, any>, GithubActionsDepType>[] =
+    [];
 
   for (const step of steps) {
     const res = CommunityActions.safeParse(step);
@@ -297,7 +311,7 @@ function extractWithYAMLParser(
   content: string,
   packageFile: string,
   config: ExtractConfig,
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, GithubActionsDepType>[] {
   logger.trace('github-actions.extractWithYAMLParser()');
 
   const obj = withMeta({ packageFile }, () => Workflow.parse(content));
@@ -313,22 +327,21 @@ function extractWithYAMLParser(
     return [];
   }
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, GithubActionsDepType>[] =
+    [];
 
   for (const job of Object.values(obj.jobs)) {
     if (job.container) {
       const dep = getDep(job.container, true, config.registryAliases);
       if (dep) {
-        dep.depType = 'container';
-        deps.push(dep);
+        deps.push({ ...dep, depType: 'container' });
       }
     }
 
     for (const service of job.services) {
       const dep = getDep(service, true, config.registryAliases);
       if (dep) {
-        dep.depType = 'service';
-        deps.push(dep);
+        deps.push({ ...dep, depType: 'service' });
       }
     }
 

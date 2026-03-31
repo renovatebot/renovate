@@ -3,6 +3,7 @@ import * as fs from '../../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { coerceString } from '../../../../util/string.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { GradleDepType } from '../dep-types.ts';
 import type { GradleManagerData } from '../types.ts';
 import { isDependencyString, versionLikeSubstring } from '../utils.ts';
 
@@ -131,7 +132,7 @@ interface VersionWithPosition {
 
 interface VersionWithDepType {
   version: string;
-  depType: string;
+  depType: GradleDepType;
 }
 
 /**
@@ -152,7 +153,7 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
         depVerMap.set(depName, {
           version: lockVersion,
           depType: isTestDepType ? 'test' : 'dependencies',
-        } as VersionWithDepType);
+        });
       }
     } else if (line === '[Test dependencies]') {
       isTestDepType = true; // We know that all lines below this header are test dependencies

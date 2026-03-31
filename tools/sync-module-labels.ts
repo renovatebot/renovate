@@ -138,6 +138,7 @@ await init();
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
+  console.error({ err }, 'unhandledRejection');
   logger.error({ err }, 'unhandledRejection');
   process.exit(-1);
 });

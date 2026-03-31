@@ -2,6 +2,7 @@ import { z } from 'zod/v3';
 import { MavenDatasource } from '../../../datasource/maven/index.ts';
 import { id as versioning } from '../../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { BazelModuleDepType } from '../dep-types.ts';
 import {
   ExtensionTagFragment,
   StringArrayFragment,
@@ -16,8 +17,8 @@ export const mavenExtensionPrefix = 'maven';
 
 export const mavenExtensionTags = [artifactTag, installTag];
 
-function depTypeByTag(tag: string): string {
-  return `maven_${tag}`;
+function depTypeByTag(tag: string): BazelModuleDepType {
+  return `maven_${tag}` as BazelModuleDepType;
 }
 
 const ArtifactSpec = z.object({
@@ -36,7 +37,9 @@ const MavenArtifactTarget = ExtensionTagFragment.extend({
     version: StringFragment,
   }),
 }).transform(
-  ({ children: { artifact, group, version } }): PackageDependency[] => [
+  ({
+    children: { artifact, group, version },
+  }): PackageDependency<Record<string, any>, BazelModuleDepType>[] => [
     {
       datasource: MavenDatasource.id,
       versioning,
@@ -64,15 +67,18 @@ const MavenInstallTarget = ExtensionTagFragment.extend({
     }),
     repositories: StringArrayFragment,
   }),
-}).transform(({ children: { artifacts, repositories } }): PackageDependency[] =>
-  artifacts.map(({ group, artifact, version: currentValue }) => ({
-    datasource: MavenDatasource.id,
-    versioning,
-    depName: `${group}:${artifact}`,
-    currentValue,
-    depType: depTypeByTag(installTag),
-    registryUrls: repositories.items.map((i) => i.value),
-  })),
+}).transform(
+  ({
+    children: { artifacts, repositories },
+  }): PackageDependency<Record<string, any>, BazelModuleDepType>[] =>
+    artifacts.map(({ group, artifact, version: currentValue }) => ({
+      datasource: MavenDatasource.id,
+      versioning,
+      depName: `${group}:${artifact}`,
+      currentValue,
+      depType: depTypeByTag(installTag),
+      registryUrls: repositories.items.map((i) => i.value),
+    })),
 );
 
 export const RuleToMavenPackageDep = z.union([
@@ -81,11 +87,15 @@ export const RuleToMavenPackageDep = z.union([
 ]);
 
 export function fillRegistryUrls(
-  packageDeps: PackageDependency[][],
-): PackageDependency[] {
-  const artifactRules: PackageDependency[] = [];
+  packageDeps: PackageDependency<Record<string, any>, BazelModuleDepType>[][],
+): PackageDependency<Record<string, any>, BazelModuleDepType>[] {
+  const artifactRules: PackageDependency<
+    Record<string, any>,
+    BazelModuleDepType
+  >[] = [];
   const registryUrls: string[] = [];
-  const result: PackageDependency[] = [];
+  const result: PackageDependency<Record<string, any>, BazelModuleDepType>[] =
+    [];
 
   // registry urls are specified only in maven.install, not in maven.artifact
   packageDeps.flat().forEach((dep) => {

@@ -10,6 +10,7 @@ import { getDep } from '../../../dockerfile/extract.ts';
 import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci.ts';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDepType } from '../../dep-types.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 import { checkIfStringIsPath } from '../../util.ts';
@@ -23,7 +24,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     hclMap: TerraformDefinitionFile,
     _locks: ProviderLock[],
     config: ExtractConfig,
-  ): PackageDependency[] {
+  ): PackageDependency<Record<string, any>, TerraformDepType>[] {
     const dependencies = [];
 
     const helmReleases = hclMap?.resource?.helm_release;
@@ -41,7 +42,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     }
 
     for (const helmRelease of Object.values(helmReleases).flat()) {
-      const dep: PackageDependency = {
+      const dep: PackageDependency<Record<string, any>, TerraformDepType> = {
         currentValue: helmRelease.version,
         depType: 'helm_release',
         depName: helmRelease.chart,

@@ -9,6 +9,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import * as bazelrc from './bazelrc.ts';
+import type { BazelModuleDepType } from './dep-types.ts';
 import { RuleToCratePackageDep } from './parser/crate.ts';
 import type { ResultFragment } from './parser/fragments.ts';
 import { parse } from './parser/index.ts';
@@ -101,11 +102,13 @@ async function extractBazelPfc(
 
 function extractGitRepositoryDeps(
   records: ResultFragment[],
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, BazelModuleDepType>[] {
   return LooseArray(GitRepositoryToPackageDep).parse(records);
 }
 
-function extractMavenDeps(records: ResultFragment[]): PackageDependency[] {
+function extractMavenDeps(
+  records: ResultFragment[],
+): PackageDependency<Record<string, any>, BazelModuleDepType>[] {
   return LooseArray(RuleToMavenPackageDep)
     .transform(fillRegistryUrls)
     .parse(records);

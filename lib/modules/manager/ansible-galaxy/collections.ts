@@ -3,6 +3,7 @@ import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection/i
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { AnsibleGalaxyDepType } from './dep-types.ts';
 import type { AnsibleGalaxyPackageDependency } from './types.ts';
 import {
   blockLineRegEx,
@@ -133,14 +134,17 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
   return true;
 }
 
-export function extractCollections(lines: string[]): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+export function extractCollections(
+  lines: string[],
+): PackageDependency<Record<string, any>, AnsibleGalaxyDepType>[] {
+  const deps: PackageDependency<Record<string, any>, AnsibleGalaxyDepType>[] =
+    [];
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     let lineMatch = newBlockRegEx.exec(lines[lineNumber]);
     if (lineMatch) {
       const dep: AnsibleGalaxyPackageDependency = {
-        depType: 'galaxy-collection',
+        depType: 'galaxy-collection-bad',
         managerData: {
           name: null,
           version: null,

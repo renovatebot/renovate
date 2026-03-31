@@ -1,5 +1,6 @@
 import { newlineRegex } from '../../../util/regex.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { PackageFileContent } from '../types.ts';
+import type { GomodDep } from './dep-types.ts';
 import {
   endBlockRegex,
   excludeBlockStartRegex,
@@ -7,10 +8,10 @@ import {
 } from './line-parser.ts';
 
 function findMatchingModule(
-  tool: PackageDependency,
-  deps: PackageDependency[],
-): PackageDependency | undefined {
-  let bestMatch: PackageDependency | undefined;
+  tool: GomodDep,
+  deps: GomodDep[],
+): GomodDep | undefined {
+  let bestMatch: GomodDep | undefined;
   const normalizedTool = tool.depName! + '/';
 
   // Find the longest matching prefix for the tool within the dependencies
@@ -27,8 +28,8 @@ function findMatchingModule(
 }
 
 export function extractPackageFile(content: string): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
-  const tools: PackageDependency[] = [];
+  const deps: GomodDep[] = [];
+  const tools: GomodDep[] = [];
   let inExcludeBlock = false;
 
   const lines = content.split(newlineRegex);

@@ -6,6 +6,7 @@ import { isHttpUrl } from '../../../../util/url.ts';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { BazelDepType } from '../dep-types.ts';
 
 const githubUrlRegex = regEx(
   /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/,
@@ -35,33 +36,41 @@ export const GitTarget = z
     remote: z.string(),
   })
   .refine(({ tag, commit }) => !!tag || !!commit)
-  .transform(({ rule, name, tag, commit, remote }): PackageDependency[] => {
-    const dep: PackageDependency = {
-      depType: rule,
-      depName: name,
-    };
+  .transform(
+    ({
+      rule,
+      name,
+      tag,
+      commit,
+      remote,
+    }): PackageDependency<Record<string, any>, BazelDepType>[] => {
+      const dep: PackageDependency<Record<string, any>, BazelDepType> = {
+        depType: rule,
+        depName: name,
+      };
 
-    if (tag) {
-      dep.currentValue = tag;
-    }
-
-    if (commit) {
-      dep.currentDigest = commit;
-    }
-
-    const githubPackage = githubPackageName(remote);
-    if (githubPackage) {
-      dep.packageName = githubPackage;
-      if (dep.currentValue) {
-        dep.datasource = GithubReleasesDatasource.id;
-      } else {
-        dep.datasource = GithubTagsDatasource.id;
+      if (tag) {
+        dep.currentValue = tag;
       }
-    }
 
-    if (!dep.datasource) {
-      dep.skipReason = 'unsupported-datasource';
-    }
+      if (commit) {
+        dep.currentDigest = commit;
+      }
 
-    return [dep];
-  });
+      const githubPackage = githubPackageName(remote);
+      if (githubPackage) {
+        dep.packageName = githubPackage;
+        if (dep.currentValue) {
+          dep.datasource = GithubReleasesDatasource.id;
+        } else {
+          dep.datasource = GithubTagsDatasource.id;
+        }
+      }
+
+      if (!dep.datasource) {
+        dep.skipReason = 'unsupported-datasource';
+      }
+
+      return [dep];
+    },
+  );

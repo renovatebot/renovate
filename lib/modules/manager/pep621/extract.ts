@@ -10,6 +10,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { Pep621DepType } from './dep-types.ts';
 import { processors } from './processors/index.ts';
 import { PyProject } from './schema.ts';
 
@@ -41,7 +42,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, Pep621DepType>[] = [];
 
   const pythonConstraint = def.project?.['requires-python'];
   const extractedConstraints: Record<string, string> = {};
@@ -78,7 +79,7 @@ export async function extractPackageFile(
   }
 
   // process specific tool sets
-  let processedDeps = deps;
+  let processedDeps: PackageDependency[] = deps;
   const lockFiles: string[] = [];
   for (const processor of processors) {
     processedDeps = processor.process(def, processedDeps);

@@ -20,6 +20,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../types.ts';
+import type { MavenDepType } from './dep-types.ts';
 import type { MavenProp } from './types.ts';
 
 const supportedNamespaces = [
@@ -172,7 +173,7 @@ function depFromNode(
   let groupId = node.valueWithPath('groupId')?.trim();
   const artifactId = node.valueWithPath('artifactId')?.trim();
   const currentValue = node.valueWithPath('version')?.trim();
-  let depType: string | undefined;
+  let depType: MavenDepType | undefined;
 
   if (!groupId && node.name === 'plugin') {
     groupId = 'org.apache.maven.plugins';
@@ -183,7 +184,7 @@ function depFromNode(
     const versionNode = node.descendantWithPath('version')!;
     const fileReplacePosition = versionNode.position!; // TODO: should not be null
     const datasource = MavenDatasource.id;
-    const result: PackageDependency = {
+    const result: PackageDependency<Record<string, any>, MavenDepType> = {
       datasource,
       depName,
       currentValue,
@@ -205,7 +206,8 @@ function depFromNode(
         } else if (node.valueWithPath('optional')?.trim() === 'true') {
           depType = 'optional';
         } else {
-          depType = node.valueWithPath('scope')?.trim() ?? 'compile'; // maven default scope is compile
+          depType = (node.valueWithPath('scope')?.trim() ??
+            'compile') as MavenDepType; // maven default scope is compile
         }
         break;
     }
@@ -585,12 +587,12 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
 
   const packageFiles = packageFileNames.map((packageFile) => {
     const pkg = extractedPackages[packageFile];
-    const deps = extractedDeps[packageFile];
-    for (const dep of deps) {
+    const deps = extractedDeps[packageFile].map((dep) => {
       if (rootDeps.has(dep.depName!)) {
-        dep.depType = 'parent-root';
+        return { ...dep, depType: 'parent-root' as MavenDepType };
       }
-    }
+      return dep;
+    });
     return { ...pkg, deps };
   });
 

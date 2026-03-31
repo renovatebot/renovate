@@ -8,6 +8,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { OcbDepType } from './dep-types.ts';
 import { type Module, OCBConfig } from './schema.ts';
 
 export function extractPackageFile(
@@ -36,7 +37,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, OcbDepType>[] = [];
   if (definition.dist.otelcol_version) {
     deps.push({
       datasource: GoDatasource.id,
@@ -62,9 +63,9 @@ export function extractPackageFile(
 
 export function processModule(
   module: Module,
-  depType: string,
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+  depType: OcbDepType,
+): PackageDependency<Record<string, any>, OcbDepType>[] {
+  const deps: PackageDependency<Record<string, any>, OcbDepType>[] = [];
   if (isNullOrUndefined(module)) {
     return deps;
   }

@@ -7,6 +7,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { TektonDepType } from './dep-types.ts';
 import type {
   TektonBundle,
   TektonResolverParamsField,
@@ -19,7 +20,7 @@ export function extractPackageFile(
   packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`tekton.extractPackageFile(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, TektonDepType>[] = [];
   let docs: TektonResource[];
   try {
     // TODO: use schema (#9610)
@@ -40,8 +41,10 @@ export function extractPackageFile(
   return { deps };
 }
 
-function getDeps(doc: TektonResource): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+function getDeps(
+  doc: TektonResource,
+): PackageDependency<Record<string, any>, TektonDepType>[] {
+  const deps: PackageDependency<Record<string, any>, TektonDepType>[] = [];
   if (isFalsy(doc)) {
     return deps;
   }
@@ -92,7 +95,7 @@ const annotationRegex = regEx(
 
 function addPipelineAsCodeAnnotations(
   annotations: Record<string, string> | undefined | null,
-  deps: PackageDependency[],
+  deps: PackageDependency<Record<string, any>, TektonDepType>[],
 ): void {
   if (isNullOrUndefined(annotations)) {
     return;
@@ -125,9 +128,12 @@ const gitUrl = regEx(
   /^(?<url>(?:(?:http|https):\/\/)?(?<path>(?:[^:/\s]+[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?:\/raw)?\/(?<currentValue>.+?)\/(?<subdir>[^?\s]*)$/,
 );
 
-function getAnnotationDep(url: string): PackageDependency | null {
-  const dep: PackageDependency = {};
-  dep.depType = 'tekton-annotation';
+function getAnnotationDep(
+  url: string,
+): PackageDependency<Record<string, any>, TektonDepType> | null {
+  const dep: PackageDependency<Record<string, any>, TektonDepType> = {
+    depType: 'tekton-annotation',
+  };
 
   let groups = githubRelease.exec(url)?.groups;
 
@@ -159,7 +165,10 @@ function getAnnotationDep(url: string): PackageDependency | null {
   return null;
 }
 
-function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
+function addDep(
+  ref: TektonBundle,
+  deps: PackageDependency<Record<string, any>, TektonDepType>[],
+): void {
   if (isFalsy(ref)) {
     return;
   }
@@ -179,8 +188,8 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     imageRef = ref.bundle;
   }
 
-  const dep = getDep(imageRef);
-  dep.depType = 'tekton-bundle';
+  const baseDep = getDep(imageRef);
+  const dep = { ...baseDep, depType: 'tekton-bundle' as const };
   logger.trace(
     {
       depName: dep.depName,
@@ -194,7 +203,7 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
 
 function addStepImageSpec(
   spec: TektonResourceSpec | undefined,
-  deps: PackageDependency[],
+  deps: PackageDependency<Record<string, any>, TektonDepType>[],
 ): void {
   if (isNullOrUndefined(spec)) {
     return;
@@ -209,8 +218,8 @@ function addStepImageSpec(
     if (isNullOrUndefined(step?.image)) {
       continue;
     }
-    const dep = getDep(step?.image);
-    dep.depType = 'tekton-step-image';
+    const baseDep = getDep(step?.image);
+    const dep = { ...baseDep, depType: 'tekton-step-image' as const };
     logger.trace(
       {
         depName: dep.depName,

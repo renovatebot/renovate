@@ -2,6 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { CopierDepType } from './dep-types.ts';
 import { CopierAnswersFile } from './schema.ts';
 
 const gitPrefixRegex = regEx(/^git\+/);
@@ -27,7 +28,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps: PackageDependency[] = [
+  const deps: PackageDependency<Record<string, any>, CopierDepType>[] = [
     {
       datasource: GitTagsDatasource.id,
       depName: parsed._src_path,

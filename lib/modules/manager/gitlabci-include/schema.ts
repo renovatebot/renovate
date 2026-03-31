@@ -3,6 +3,7 @@ import { toArray } from '../../../util/array.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { GitlabciIncludeDepType } from './dep-types.ts';
 
 const GitlabInclude = z
   .object({
@@ -10,7 +11,10 @@ const GitlabInclude = z
     ref: z.string().optional().catch(undefined),
   })
   .transform(({ project, ref }) => {
-    const dep: PackageDependency = {
+    const dep: PackageDependency<
+      Record<string, any>,
+      GitlabciIncludeDepType
+    > = {
       datasource: GitlabTagsDatasource.id,
       depName: project,
       depType: 'repository',

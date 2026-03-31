@@ -12,6 +12,7 @@ import {
   id as npmVersioningId,
 } from '../../../../versioning/npm/index.ts';
 import type { PackageDependency } from '../../../types.ts';
+import type { NpmDepType } from '../../dep-types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/,
@@ -30,8 +31,8 @@ export function extractDependency(
   depType: string,
   depName: string,
   input: string,
-): PackageDependency {
-  const dep: PackageDependency = {};
+): PackageDependency<Record<string, any>, NpmDepType> {
+  const dep: PackageDependency<Record<string, any>, NpmDepType> = {};
   if (!validateNpmPackageName(depName).validForOldPackages) {
     dep.skipReason = 'invalid-name';
     return dep;
@@ -204,7 +205,7 @@ export function extractDependency(
 }
 
 export function getExtractedConstraints(
-  deps: PackageDependency[],
+  deps: PackageDependency<Record<string, any>, NpmDepType>[],
 ): Record<string, string> {
   const extractedConstraints: Record<string, string> = {};
   const constraints = ['node', 'yarn', 'npm', 'pnpm', 'vscode'];

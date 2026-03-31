@@ -6,6 +6,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { CrossplaneDepType } from './dep-types.ts';
 import { XPKG } from './schema.ts';
 
 export function extractPackageFile(
@@ -25,10 +26,12 @@ export function extractPackageFile(
     failureBehaviour: 'filter',
   });
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, CrossplaneDepType>[] = [];
   for (const xpkg of list) {
-    const dep = getDep(xpkg.spec.package, true, extractConfig?.registryAliases);
-    dep.depType = xpkg.kind.toLowerCase();
+    const dep: PackageDependency<Record<string, any>, CrossplaneDepType> = {
+      ...getDep(xpkg.spec.package, true, extractConfig?.registryAliases),
+      depType: xpkg.kind.toLowerCase() as CrossplaneDepType,
+    };
     deps.push(dep);
   }
 

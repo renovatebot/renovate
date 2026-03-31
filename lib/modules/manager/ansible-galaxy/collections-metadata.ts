@@ -1,11 +1,13 @@
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { AnsibleGalaxyDepType } from './dep-types.ts';
 import { dependencyRegex, galaxyRegEx } from './util.ts';
 
 export function extractCollectionsMetaDataFile(
   lines: string[],
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+): PackageDependency<Record<string, any>, AnsibleGalaxyDepType>[] {
+  const deps: PackageDependency<Record<string, any>, AnsibleGalaxyDepType>[] =
+    [];
   // in a galaxy.yml the dependency map is inside a `dependencies:` block
   let foundDependencyBlock = false;
   for (const line of lines) {
@@ -15,7 +17,10 @@ export function extractCollectionsMetaDataFile(
       // expects a line like this `  ansible.windows: "1.4.0"`
       const galaxyRegExResult = galaxyRegEx.exec(line);
       if (galaxyRegExResult?.groups) {
-        const dep: PackageDependency = {
+        const dep: PackageDependency<
+          Record<string, any>,
+          AnsibleGalaxyDepType
+        > = {
           depType: 'galaxy-collection',
           datasource: GalaxyCollectionDatasource.id,
           depName: galaxyRegExResult.groups.packageName,

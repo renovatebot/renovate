@@ -3,6 +3,7 @@ import { z } from 'zod/v3';
 import { MavenDatasource } from '../../../datasource/maven/index.ts';
 import { id as versioning } from '../../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { BazelDepType } from '../dep-types.ts';
 
 export const mavenRules = ['maven_install', '_maven_install'] as const;
 
@@ -50,7 +51,7 @@ export const MavenTarget = z
       rule: depType,
       artifacts,
       repositories: registryUrls,
-    }): PackageDependency[] =>
+    }): PackageDependency<Record<string, any>, BazelDepType>[] =>
       artifacts.map(({ group, artifact, version: currentValue }) => ({
         datasource: MavenDatasource.id,
         versioning,

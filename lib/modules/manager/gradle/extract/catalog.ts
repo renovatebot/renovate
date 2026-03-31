@@ -5,6 +5,7 @@ import { hasKey } from '../../../../util/object.ts';
 import { escapeRegExp, regEx } from '../../../../util/regex.ts';
 import { massage, parse as parseToml } from '../../../../util/toml.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { GradleDepType } from '../dep-types.ts';
 import type {
   GradleCatalog,
   GradleCatalogArtifactDescriptor,
@@ -286,7 +287,7 @@ export function parseCatalog(
       versionSubContent,
     });
 
-    const dependency: PackageDependency<GradleManagerData> = {
+    const dependency: PackageDependency<GradleManagerData, GradleDepType> = {
       depType: 'plugin',
       depName,
       packageName: `${depName}:${depName}.gradle.plugin`,

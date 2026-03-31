@@ -5,13 +5,14 @@ import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { PubDepType } from './dep-types.ts';
 import type { Pubspec } from './schema.ts';
 import { parsePubspec } from './utils.ts';
 
 function extractFromSection(
   pubspec: Pubspec,
   sectionKey: keyof Pick<Pubspec, 'dependencies' | 'dev_dependencies'>,
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, PubDepType>[] {
   const sectionContent = pubspec[sectionKey];
   if (!sectionContent) {
     return [];
@@ -24,7 +25,7 @@ function extractFromSection(
     'flutter_web_plugins',
     'meta',
   ];
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, PubDepType>[] = [];
   for (const depName of Object.keys(sectionContent)) {
     if (skippedPackages.includes(depName)) {
       continue;

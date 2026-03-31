@@ -1,6 +1,7 @@
 import { z } from 'zod/v3';
 import { DockerDatasource } from '../../../datasource/docker/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { BazelModuleDepType } from '../dep-types.ts';
 import { ExtensionTagFragment, StringFragment } from './fragments.ts';
 
 export const ociExtensionPrefix = 'oci';
@@ -22,7 +23,7 @@ export const RuleToDockerPackageDep = ExtensionTagFragment.extend({
   ({
     rawString,
     children: { name, image, tag, digest },
-  }): PackageDependency => ({
+  }): PackageDependency<Record<string, any>, BazelModuleDepType> => ({
     datasource: DockerDatasource.id,
     depType: 'oci_pull',
     depName: name.value,

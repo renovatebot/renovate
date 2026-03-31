@@ -15,6 +15,7 @@ import { parseLine } from '../gomod/line-parser.ts';
 import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency.ts';
 import { pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { PreCommitDepType } from './dep-types.ts';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
@@ -123,7 +124,10 @@ function extractWithRegex(content: string): Map<string, RegexDep> {
   return regexDeps;
 }
 
-function extractDependency(tag: string, repository: string): PackageDependency {
+function extractDependency(
+  tag: string,
+  repository: string,
+): PackageDependency<Record<string, any>, PreCommitDepType> {
   logger.debug(`Found version ${tag}`);
 
   const urlMatchers = [
@@ -174,12 +178,15 @@ function extractDependency(tag: string, repository: string): PackageDependency {
 function findDependencies(
   precommitFile: PreCommitConfig,
   regexDeps: Map<string, RegexDep>,
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, PreCommitDepType>[] {
   if (!precommitFile.repos) {
     logger.debug(`No repos section found, skipping file`);
     return [];
   }
-  const packageDependencies: PackageDependency[] = [];
+  const packageDependencies: PackageDependency<
+    Record<string, any>,
+    PreCommitDepType
+  >[] = [];
 
   for (const item of precommitFile.repos) {
     // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
@@ -195,24 +202,26 @@ function findDependencies(
               return;
             }
 
-            const depType = 'pre-commit-node';
+            const depType: PreCommitDepType = 'pre-commit-node';
             const dep = npmExtractDependency(
               depType,
               match.groups.name,
               match.groups.range,
             );
             packageDependencies.push({
+              ...dep,
               depType,
               depName: match.groups.name,
               packageName: match.groups.name,
-              ...dep,
             });
           });
         } else if (hook.language === 'python') {
           hook.additional_dependencies?.map((req) => {
             const dep = pep508ToPackageDependency('pre-commit-python', req);
             if (dep) {
-              packageDependencies.push(dep);
+              packageDependencies.push(
+                dep as PackageDependency<Record<string, any>, PreCommitDepType>,
+              );
             }
           });
         } else if (hook.language === 'golang') {
@@ -221,7 +230,7 @@ function findDependencies(
             const requireLine = `require ${req.replace('@', ' ')}`;
             const dep = parseLine(requireLine);
             if (dep) {
-              const depType = 'pre-commit-golang';
+              const depType: PreCommitDepType = 'pre-commit-golang';
               packageDependencies.push({
                 ...dep,
                 depType,

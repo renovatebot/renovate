@@ -7,10 +7,13 @@ import { getDep } from '../dockerfile/extract.ts';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import { checkIfStringIsPath } from '../terraform/util.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { FleetDepType } from './dep-types.ts';
 import { FleetFile, type FleetHelmBlock, GitRepo } from './schema.ts';
 
-function extractGitRepo(doc: GitRepo): PackageDependency {
-  const dep: PackageDependency = {
+function extractGitRepo(
+  doc: GitRepo,
+): PackageDependency<Record<string, any>, FleetDepType> {
+  const dep: PackageDependency<Record<string, any>, FleetDepType> = {
     depType: 'git_repo',
     datasource: GitTagsDatasource.id,
   };
@@ -39,8 +42,10 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   };
 }
 
-function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
-  const dep: PackageDependency = {
+function extractFleetHelmBlock(
+  doc: FleetHelmBlock,
+): PackageDependency<Record<string, any>, FleetDepType> {
+  const dep: PackageDependency<Record<string, any>, FleetDepType> = {
     depType: 'fleet',
     datasource: HelmDatasource.id,
   };
@@ -98,8 +103,10 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   };
 }
 
-function extractFleetFile(doc: FleetFile): PackageDependency[] {
-  const result: PackageDependency[] = [];
+function extractFleetFile(
+  doc: FleetFile,
+): PackageDependency<Record<string, any>, FleetDepType>[] {
+  const result: PackageDependency<Record<string, any>, FleetDepType>[] = [];
 
   result.push(extractFleetHelmBlock(doc.helm));
 

@@ -8,6 +8,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexDatasource } from '../../datasource/hex/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { MixDepType } from './dep-types.ts';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
@@ -31,7 +32,10 @@ export async function extractPackageFile(
   packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`mix.extractPackageFile(${packageFile})`);
-  const deps = new Map<string, PackageDependency>();
+  const deps = new Map<
+    string,
+    PackageDependency<Record<string, any>, MixDepType>
+  >();
   const contentArr = content
     .split(newlineRegex)
     .map((line) => line.replace(commentMatchRegExp, ''));
@@ -62,7 +66,7 @@ export async function extractPackageFile(
           }
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<Record<string, any>, MixDepType> = {
           depName: app,
           depType: 'prod',
         };

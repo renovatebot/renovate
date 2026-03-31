@@ -2,6 +2,7 @@ import { regEx } from '../../../util/regex.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
+import type { BitbucketPipelinesDepType } from './dep-types.ts';
 
 export const pipeRegex = regEx(`^\\s*-\\s?pipe:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
 export const dockerImageRegex = regEx(
@@ -14,12 +15,15 @@ export function addDepAsBitbucketTag(
   pipe: string,
 ): void {
   const [depName, currentValue] = pipe.split(':');
-  const dep: PackageDependency = {
+  const dep: PackageDependency<
+    Record<string, any>,
+    BitbucketPipelinesDepType
+  > = {
     depName,
     currentValue,
     datasource: BitbucketTagsDatasource.id,
+    depType: 'bitbucket-tags',
   };
-  dep.depType = 'bitbucket-tags';
   deps.push(dep);
 }
 
@@ -28,8 +32,13 @@ export function addDepAsDockerImage(
   currentDockerImage: string,
   registryAliases?: Record<string, string>,
 ): void {
-  const dep = getDep(currentDockerImage, true, registryAliases);
-  dep.depType = 'docker';
+  const dep: PackageDependency<
+    Record<string, any>,
+    BitbucketPipelinesDepType
+  > = {
+    ...getDep(currentDockerImage, true, registryAliases),
+    depType: 'docker',
+  };
   deps.push(dep);
 }
 
@@ -56,8 +65,13 @@ export function addDepFromObject(
 
     const groups = nameRegex.exec(line)?.groups;
     if (groups) {
-      const dep = getDep(groups.image, true, registryAliases);
-      dep.depType = 'docker';
+      const dep: PackageDependency<
+        Record<string, any>,
+        BitbucketPipelinesDepType
+      > = {
+        ...getDep(groups.image, true, registryAliases),
+        depType: 'docker',
+      };
       deps.push(dep);
       return idx;
     }

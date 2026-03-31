@@ -4,10 +4,11 @@ import { CpanDatasource } from '../../datasource/cpan/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import * as perlVersioning from '../../versioning/perl/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { CpanfileDepType } from './dep-types.ts';
 import { cpanfile } from './language.ts';
 
 interface Ctx {
-  deps: PackageDependency[];
+  deps: PackageDependency<Record<string, any>, CpanfileDepType>[];
 
   perlVersion?: string;
 
@@ -86,7 +87,7 @@ const moduleMatch = q
     delete ctx.currentValue;
 
     if (depName) {
-      const dep: PackageDependency = {
+      const dep: PackageDependency<Record<string, any>, CpanfileDepType> = {
         depName,
       };
       if (currentValue) {
@@ -95,9 +96,9 @@ const moduleMatch = q
         dep.skipReason = 'unspecified-version';
       }
       if (phase) {
-        dep.depType = phase;
+        dep.depType = phase as CpanfileDepType;
       } else if (tempPhase) {
-        dep.depType = tempPhase;
+        dep.depType = tempPhase as CpanfileDepType;
       }
 
       dep.datasource = CpanDatasource.id;

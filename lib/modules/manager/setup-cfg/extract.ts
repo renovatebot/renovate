@@ -6,6 +6,7 @@ import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { SetupCfgDepType } from './dep-types.ts';
 
 function getSectionName(str: string): string {
   const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) ?? [];
@@ -20,7 +21,7 @@ function getSectionRecord(str: string): string {
 function getDepType(
   section: string | null,
   record: string | null,
-): null | string {
+): null | SetupCfgDepType {
   if (section === 'options') {
     if (record === 'install_requires') {
       return 'install';
@@ -42,7 +43,7 @@ function parseDep(
   line: string,
   section: string | null,
   record: string | null,
-): PackageDependency | null {
+): PackageDependency<Record<string, any>, SetupCfgDepType> | null {
   const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
   const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
@@ -73,7 +74,7 @@ function parseDep(
   const [, depName, , currVal] = packageMatches;
   const currentValue = currVal?.trim();
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<Record<string, any>, SetupCfgDepType> = {
     depName,
     packageName: normalizePythonDepName(depName),
     currentValue,
@@ -96,7 +97,7 @@ export function extractPackageFile(
   let sectionName: string | null = null;
   let sectionRecord: string | null = null;
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, SetupCfgDepType>[] = [];
 
   content
     .split(newlineRegex)

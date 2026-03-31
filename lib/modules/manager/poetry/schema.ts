@@ -21,6 +21,7 @@ import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import { DependencyGroup, ProjectSection } from '../pep621/schema.ts';
 import { depTypes, pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { PoetryDepType } from './dep-types.ts';
 
 const PoetryOptionalDependencyMixin = z
   .object({
@@ -175,7 +176,7 @@ export const PoetryDependencies = LooseRecord(
     return dep;
   }),
 ).transform((record) => {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, PoetryDepType>[] = [];
   for (const [depName, dep] of Object.entries(record)) {
     dep.depName = depName;
     if (!dep.packageName) {
@@ -195,10 +196,10 @@ export const PoetryGroupDependencies = LooseRecord(
     .object({ dependencies: PoetryDependencies })
     .transform(({ dependencies }) => dependencies),
 ).transform((record) => {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, PoetryDepType>[] = [];
   for (const [name, val] of Object.entries(record)) {
     for (const dep of Object.values(val)) {
-      dep.depType = name;
+      dep.depType = name as PoetryDepType;
       deps.push(dep);
     }
   }
@@ -335,7 +336,7 @@ export const PoetryPyProject = Toml.pipe(
         'dependency-groups': dependencyGroups,
       } = pyproject;
 
-      const deps: PackageDependency[] = [];
+      const deps: PackageDependency<Record<string, any>, PoetryDepType>[] = [];
 
       const projectDependencies = project?.dependencies;
       if (projectDependencies) {

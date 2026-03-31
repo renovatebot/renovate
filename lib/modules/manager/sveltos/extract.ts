@@ -10,6 +10,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { SveltosDepType } from './dep-types.ts';
 import { ProfileDefinition, type SveltosHelmSource } from './schema.ts';
 import { removeRepositoryName } from './util.ts';
 
@@ -36,7 +37,7 @@ export function extractPackageFile(
 export function extractDefinition(
   definition: ProfileDefinition,
   config?: ExtractConfig,
-): PackageDependency[] {
+): PackageDependency<Record<string, any>, SveltosDepType>[] {
   return processAppSpec(definition, config);
 }
 
@@ -70,15 +71,18 @@ function processHelmCharts(
 function processAppSpec(
   definition: ProfileDefinition,
   config?: ExtractConfig,
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+): PackageDependency<Record<string, any>, SveltosDepType>[] {
+  const deps: PackageDependency<Record<string, any>, SveltosDepType>[] = [];
 
   const depType = definition.kind;
 
   for (const source of coerceArray(definition.spec?.helmCharts)) {
-    const dep = processHelmCharts(source, config?.registryAliases);
-    if (dep) {
-      dep.depType = depType;
+    const baseDep = processHelmCharts(source, config?.registryAliases);
+    if (baseDep) {
+      const dep: PackageDependency<Record<string, any>, SveltosDepType> = {
+        ...baseDep,
+        depType,
+      };
       deps.push(dep);
     }
   }

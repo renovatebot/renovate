@@ -2,6 +2,7 @@ import { z } from 'zod/v3';
 import { DockerDatasource } from '../../../datasource/docker/index.ts';
 import { id as dockerVersioning } from '../../../versioning/docker/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { BazelDepType } from '../dep-types.ts';
 
 export const dockerRules = ['container_pull', '_container_pull'] as const;
 
@@ -22,7 +23,7 @@ export const DockerTarget = z
       tag,
       digest,
       registry,
-    }): PackageDependency[] => [
+    }): PackageDependency<Record<string, any>, BazelDepType>[] => [
       {
         datasource: DockerDatasource.id,
         versioning: dockerVersioning,

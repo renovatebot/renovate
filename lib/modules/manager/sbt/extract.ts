@@ -20,13 +20,14 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types.ts';
+import type { SbtDepType } from './dep-types.ts';
 import { normalizeScalaVersion, sortPackageFiles } from './util.ts';
 
 type Vars = Record<string, string>;
 
 interface Ctx {
   vars: Vars;
-  deps: PackageDependency[];
+  deps: PackageDependency<Record<string, any>, SbtDepType>[];
   registryUrls: string[];
 
   scalaVersion?: string;
@@ -37,7 +38,7 @@ interface Ctx {
   currentValue?: string;
 
   currentVarName?: string;
-  depType?: string;
+  depType?: SbtDepType;
   useScalaVersion?: boolean;
   variableName?: string;
 }
@@ -74,7 +75,7 @@ const scalaVersionMatch = q
         packageName = 'org.scala-lang:scala3-library_3';
       }
 
-      const dep: PackageDependency = {
+      const dep: PackageDependency<Record<string, any>, SbtDepType> = {
         datasource: MavenDatasource.id,
         depName: 'scala',
         packageName,
@@ -201,7 +202,7 @@ function depHandler(ctx: Ctx): Ctx {
 
   const depName = `${groupId!}:${artifactId!}`;
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<Record<string, any>, SbtDepType> = {
     datasource: SbtPackageDatasource.id,
     depName,
     packageName:
@@ -228,7 +229,7 @@ function depHandler(ctx: Ctx): Ctx {
 }
 
 function depTypeHandler(ctx: Ctx, { value: depType }: { value: string }): Ctx {
-  return { ...ctx, depType };
+  return { ...ctx, depType: depType as SbtDepType };
 }
 
 const sbtPackageMatch = q
@@ -333,7 +334,10 @@ function extractPackageFileInternal(
     const sbtVersion = regexResult?.groups?.version;
     const matchString = regexResult?.[0];
     if (sbtVersion) {
-      const sbtDependency: PackageDependency = {
+      const sbtDependency: PackageDependency<
+        Record<string, any>,
+        SbtDepType
+      > = {
         datasource: GithubReleasesDatasource.id,
         depName: 'sbt/sbt',
         packageName: 'sbt/sbt',

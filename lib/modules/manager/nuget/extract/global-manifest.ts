@@ -2,6 +2,7 @@ import { logger } from '../../../../logger/index.ts';
 import { DotnetVersionDatasource } from '../../../datasource/dotnet-version/index.ts';
 import { NugetDatasource } from '../../../datasource/nuget/index.ts';
 import type { PackageDependency, PackageFileContent } from '../../types.ts';
+import type { NugetDepType } from '../dep-types.ts';
 import { GlobalJson } from '../schema.ts';
 import type { NugetPackageDependency, Registry } from '../types.ts';
 import { applyRegistries } from '../util.ts';
@@ -11,7 +12,7 @@ export function extractMsbuildGlobalManifest(
   packageFile: string,
   registries: Registry[] | undefined,
 ): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, NugetDepType>[] = [];
   let manifest: GlobalJson;
   let extractedConstraints: Record<string, string> | undefined;
   try {
@@ -49,7 +50,7 @@ export function extractMsbuildGlobalManifest(
 
       applyRegistries(dep, registries);
 
-      deps.push(dep);
+      deps.push(dep as PackageDependency<Record<string, any>, NugetDepType>);
     }
   }
 

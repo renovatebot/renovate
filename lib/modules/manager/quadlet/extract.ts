@@ -6,6 +6,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import type { QuadletDepType } from './dep-types.ts';
 import { QuadletFile } from './schema.ts';
 
 function startsWithAny(image: string, prefixes: string[]): boolean {
@@ -40,9 +41,12 @@ function getQuadletImage(
     const cleanedImage = image
       .replace(regEx(/^docker:\/\//), '')
       .replace(regEx(/^docker-daemon:/), '');
-    const dep = getDep(cleanedImage, false, config.registryAliases);
-    if (dep) {
-      dep.depType = 'image';
+    const baseDep = getDep(cleanedImage, false, config.registryAliases);
+    if (baseDep) {
+      const dep: PackageDependency<Record<string, any>, QuadletDepType> = {
+        ...baseDep,
+        depType: 'image',
+      };
 
       deps.push(dep);
     }

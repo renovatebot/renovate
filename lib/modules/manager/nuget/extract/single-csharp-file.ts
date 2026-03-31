@@ -1,6 +1,7 @@
 import { regEx } from '../../../../util/regex.ts';
 import { NugetDatasource } from '../../../datasource/nuget/index.ts';
 import type { PackageDependency, PackageFileContent } from '../../types.ts';
+import type { NugetDepType } from '../dep-types.ts';
 import type { NugetPackageDependency, Registry } from '../types.ts';
 import { applyRegistries } from '../util.ts';
 
@@ -18,7 +19,7 @@ export function extractPackagesFromSingleCsharpFile(
   packageFile: string,
   registries: Registry[] | undefined,
 ): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, NugetDepType>[] = [];
 
   for (const match of content.matchAll(packageRegex)) {
     const { type, depName, currentValue } = match.groups!;
@@ -31,7 +32,7 @@ export function extractPackagesFromSingleCsharpFile(
     };
 
     applyRegistries(dep, registries);
-    deps.push(dep);
+    deps.push(dep as PackageDependency<Record<string, any>, NugetDepType>);
   }
 
   return { deps };

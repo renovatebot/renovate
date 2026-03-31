@@ -10,6 +10,7 @@ import { CONFIG_VALIDATION } from '../../../../../constants/error-messages.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { regEx } from '../../../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../../../types.ts';
+import type { NpmDepType } from '../../dep-types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { loadPackageJson } from '../../utils.ts';
 import type { NpmPackage, NpmPackageDependency } from '../types.ts';
@@ -26,7 +27,7 @@ export function extractPackageJson(
   packageFile: string,
 ): PackageFileContent<NpmManagerData> | null {
   logger.trace(`npm.extractPackageJson(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<Record<string, any>, NpmDepType>[] = [];
 
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug({ packageFile }, 'Ignoring vendorised package.json');
@@ -76,7 +77,7 @@ export function extractPackageJson(
           dependencies as NpmPackageDependency,
         )) {
           const depName = parseDepName(depType, key);
-          let dep: PackageDependency = {
+          let dep: PackageDependency<Record<string, any>, NpmDepType> = {
             depType,
             depName,
           };

@@ -13,6 +13,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractHeaderCommand, matchManager } from './common.ts';
+import type { PipCompileDepType } from './dep-types.ts';
 import type { DependencyBetweenFiles, PipCompileArgs } from './types.ts';
 import {
   generateMermaidGraph,
@@ -275,8 +276,10 @@ function extendWithIndirectDeps(
  * @param dep dependency extracted from lock file (requirements.txt)
  * @returns unconstrained dependency with locked version
  */
-function indirectDep(dep: PackageDependency): PackageDependency {
-  const result = {
+function indirectDep(
+  dep: PackageDependency,
+): PackageDependency<Record<string, any>, PipCompileDepType> {
+  const result: PackageDependency<Record<string, any>, PipCompileDepType> = {
     ...dep,
     lockedVersion: dep.currentVersion,
     depType: 'indirect',

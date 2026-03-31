@@ -4,6 +4,7 @@ import { regEx } from '../../../util/regex.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { Pep621DepType } from './dep-types.ts';
 import type { Pep508ParseResult } from './types.ts';
 
 const pep508Regex = regEx(
@@ -61,13 +62,13 @@ export function parsePEP508(
 export function pep508ToPackageDependency(
   depType: string,
   value: string,
-): PackageDependency | null {
+): PackageDependency<Record<string, any>, Pep621DepType> | null {
   const parsed = parsePEP508(value);
   if (isNullOrUndefined(parsed)) {
     return null;
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<Record<string, any>, Pep621DepType> = {
     packageName: normalizePythonDepName(parsed.packageName),
     depName: parsed.packageName,
     datasource: PypiDatasource.id,
