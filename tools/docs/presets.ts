@@ -6,6 +6,127 @@ function jsUcfirst(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function presetRefToLink(presetRef: string): string | null {
+  // Separate base name from arguments: ":followTag(typescript, next)" -> base=":followTag", argCount=2
+  let baseName = presetRef;
+  let argCount = 0;
+  const parenMatch = /^([^(]+)\((.+)\)$/.exec(presetRef);
+  if (parenMatch) {
+    baseName = parenMatch[1];
+    argCount = parenMatch[2].split(/,\s*/).length;
+  }
+
+  let group: string;
+  const colonIdx = baseName.indexOf(':');
+  if (colonIdx === 0) {
+    group = 'default';
+  } else if (colonIdx > 0) {
+    group = baseName.slice(0, colonIdx);
+  } else {
+    return null;
+  }
+
+  // Reconstruct the heading text as it appears on the target page,
+  // where concrete args are replaced with <arg0>, <arg1>, etc.
+  let headingText = baseName;
+  if (argCount > 0) {
+    const argList = Array.from({ length: argCount }, (_, i) => `<arg${i}>`);
+    headingText += `(${argList.join(', ')})`;
+  }
+
+  // Slugify matching python-markdown's toc extension default behavior
+  const slug = headingText
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[-\s]+/g, '-');
+
+  return `./presets-${group}.md#${slug}`;
+}
+
+function getPresetDescription(
+  presetRef: string,
+  descriptions: Map<string, string>,
+): string | undefined {
+  // Try exact match first
+  let desc = descriptions.get(presetRef);
+  if (desc) {
+    return desc;
+  }
+
+  // Parameterized preset references like ":semanticCommitType(chore)" will be looked up as `:semanticCommitType` (which is the preset name)
+  const [prefix] = presetRef.split('(');
+  if (prefix) {
+    logger.info({ prefix });
+    desc = descriptions.get(prefix);
+    if (desc) {
+      return desc;
+    }
+  }
+
+  return undefined;
+}
+
+function generateCodeBlock(
+  value: Record<string, unknown>,
+  descriptions: Map<string, string>,
+): string {
+  const json = JSON.stringify(value, null, 2);
+  const lines = json.split('\n');
+  let inExtends = false;
+  let counter = 0;
+  const annotations: {
+    num: number;
+    ref: string;
+    link: string;
+    description: string | undefined;
+  }[] = [];
+
+  const annotatedLines = lines.map((line) => {
+    if (/^\s+"extends":\s*\[/.test(line)) {
+      inExtends = true;
+      return line;
+    }
+    if (inExtends) {
+      if (/^\s+\]/.test(line)) {
+        inExtends = false;
+        return line;
+      }
+      const match = /^(\s+"([^"]+)")(,?)$/.exec(line);
+      if (match) {
+        const presetRef = match[2];
+        const link = presetRefToLink(presetRef);
+        if (link) {
+          counter++;
+          const description = getPresetDescription(presetRef, descriptions);
+          annotations.push({ num: counter, ref: presetRef, link, description });
+          // note that we use a trailing `!` to strip the comment from the resulting code block
+          return `${match[1]}${match[3]} // (${counter})!`;
+        }
+      }
+    }
+    return line;
+  });
+
+  if (annotations.length === 0) {
+    return `\n\`\`\`json\n${json}\n\`\`\`\n`;
+  }
+
+  let result = '\n``` { .json .annotate }\n';
+  result += annotatedLines.join('\n');
+  result += '\n```\n\n';
+
+  for (const ann of annotations) {
+    if (ann.description) {
+      result += `${ann.num}. [\`${ann.ref}\`](${ann.link}): ${ann.description}\n`;
+    } else {
+      result += `${ann.num}. [\`${ann.ref}\`](${ann.link})\n`;
+    }
+  }
+
+  return result;
+}
+
 function getEditUrl(name: string): string {
   const url =
     'https://github.com/renovatebot/renovate/edit/main/lib/config/presets/internal/';
@@ -47,6 +168,26 @@ edit_url: ${getEditUrl(presetName)}
 }
 
 export async function generatePresets(dist: string): Promise<void> {
+  // Calculate the descriptions for each preset ahead-of-time, as we remove them during generation
+  const descriptions = new Map<string, string>();
+  for (const [groupName, presetConfig] of Object.entries(presetGroups)) {
+    for (const [presetName, value] of Object.entries(presetConfig)) {
+      const ref =
+        groupName === 'default'
+          ? `:${presetName}`
+          : `${groupName}:${presetName}`;
+      if (ref.includes('follow')) {
+        logger.info({ ref });
+      }
+      const desc =
+        (value.description as string | undefined) ??
+        (value.packageRules?.[0]?.description as string | undefined);
+      if (desc) {
+        descriptions.set(ref, desc);
+      }
+    }
+  }
+
   let index = 0;
   for (const [name, presetConfig] of Object.entries(presetGroups)) {
     index += 1;
@@ -75,9 +216,7 @@ export async function generatePresets(dist: string): Promise<void> {
           'Preset has no description',
         );
       }
-      body += '\n```json\n';
-      body += JSON.stringify(value, null, 2);
-      body += '\n```\n';
+      body += generateCodeBlock(value, descriptions);
       body += '\n----\n';
       if (body.includes('{{arg0}}')) {
         header += '(`<arg0>`';
