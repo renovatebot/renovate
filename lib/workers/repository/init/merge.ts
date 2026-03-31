@@ -233,8 +233,7 @@ export async function mergeRenovateConfig(
       config,
     );
 
-    logger.trace('Processing npmrc in repository entry config');
-    applyNpmrc(resolvedRepoEntry);
+    applyNpmrc(resolvedRepoEntry, 'resolvedRepoEntry');
 
     const resolvedRepoEntryWithSecrets = applySecretsAndVariablesToConfig({
       config: resolvedRepoEntry,
@@ -333,7 +332,7 @@ export async function mergeRenovateConfig(
 
 export function applyNpmrc(
   config: RenovateConfig,
-  configType?: 'resolved' | 'decrypted',
+  configType?: 'resolved' | 'resolvedRepoEntry' | 'decrypted',
 ): void {
   setNpmTokenInNpmrc(config);
   if (!isString(config.npmrc)) {
