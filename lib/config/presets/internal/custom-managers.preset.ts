@@ -154,6 +154,14 @@ export const presets: Record<string, Preset> = {
           '"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
         ],
       },
+      {
+        autoReplaceStringTemplate: '"@tsconfig/node{{{major}}}"',
+        currentValueTemplate: '{{{major}}}',
+        customType: 'regex',
+        datasourceTemplate: 'npm',
+        managerFilePatterns: ['**/{j,t}sconfig.json', '**/{j,t}sconfig.*.json'],
+        matchStrings: ['"(?<depName>@tsconfig/node(?<major>\\d+))"'],
+      },
     ],
     description:
       'Update `@tsconfig/node` extends  in `tsconfig.json` and `jsconfig.json` files.',
