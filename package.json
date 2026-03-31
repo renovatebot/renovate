@@ -338,7 +338,7 @@
     "eslint-plugin-oxlint": "1.56.0",
     "expect-more-jest": "5.5.0",
     "globals": "17.4.0",
-    "graphql": "16.13.1",
+    "graphql": "16.13.2",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
     "lint-staged": "16.4.0",
