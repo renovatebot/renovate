@@ -102,14 +102,14 @@ describe('modules/manager/batect-wrapper/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: 'batect',
+            fileName: 'batect',
             stderr:
               'HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect failed: HTTPError: Request failed with status code 404 (Not Found): GET https://github.com/batect/batect/releases/download/3.4.5/batect',
           },
         },
         {
           artifactError: {
-            lockFile: 'batect.cmd',
+            fileName: 'batect.cmd',
             stderr:
               "HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect.cmd failed: HTTPError: Request failed with status code 418 (I'm a Teapot): GET https://github.com/batect/batect/releases/download/3.4.5/batect.cmd",
           },

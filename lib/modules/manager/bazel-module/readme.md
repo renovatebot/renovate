@@ -94,3 +94,16 @@ crate.spec(
     tag = "v1.0.0",
 )
 ```
+
+### Lockfile support
+
+The `bazel-module` manager updates the `MODULE.bazel.lock` file when dependencies change.
+After updating `MODULE.bazel`, Renovate runs `bazel mod deps` to regenerate the lockfile.
+
+Requirements:
+
+- A `MODULE.bazel.lock` file must already exist in the repository
+- [Bazelisk](https://github.com/bazelbuild/bazelisk) must be available (Renovate installs it automatically when using containerbase)
+- Bazelisk determines the correct Bazel version from the `.bazelversion` file in the repository (if present)
+
+If no `MODULE.bazel.lock` file is found, the lockfile update step is skipped.

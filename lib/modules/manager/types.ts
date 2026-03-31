@@ -227,7 +227,6 @@ export interface ArtifactNotice {
 
 export interface ArtifactError {
   fileName?: string;
-  lockFile?: string;
   stderr?: string;
 }
 
@@ -252,6 +251,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
 
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
+  packageFile: string;
   upgrade: Upgrade<T>;
 }
 

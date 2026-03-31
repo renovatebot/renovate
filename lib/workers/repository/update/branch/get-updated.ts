@@ -259,6 +259,7 @@ export async function getUpdatedPackageFiles(
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = await updateDependency({
+        packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
@@ -659,7 +660,7 @@ async function checkForPendingVersions(
       stderr += `\nThis is (likely) not a bug in Renovate, but due to the way your project pins dependencies, _and_ how Renovate calls your package manager to update them.\nUntil Renovate supports specifying an exact update to your package manager (https://github.com/renovatebot/renovate/issues/41624), it is recommended to directly pin your dependencies (with \`rangeStrategy=pin\` for apps, or \`rangeStrategy=widen\` for libraries)\nSee also: https://docs.renovatebot.com/dependency-pinning/`;
 
       artifactErrors.push({
-        lockFile: packageFileName,
+        fileName: packageFileName,
         stderr,
       });
     }

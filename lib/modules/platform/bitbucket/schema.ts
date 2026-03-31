@@ -93,3 +93,15 @@ export const UnresolvedPrTasks = z
   .transform((data) =>
     data.values.filter((task) => task.state === 'UNRESOLVED'),
   );
+
+const WorkspaceAccess = z.object({
+  workspace: z.object({
+    slug: z.string(),
+  }),
+});
+
+export const WorkspaceAccesses = z
+  .object({
+    values: z.array(WorkspaceAccess),
+  })
+  .transform((body) => body.values.map(({ workspace }) => workspace.slug));
