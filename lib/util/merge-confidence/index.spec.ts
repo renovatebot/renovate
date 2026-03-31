@@ -1,3 +1,4 @@
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
@@ -11,7 +12,6 @@ import {
   resetConfig,
   satisfiesConfidenceLevel,
 } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';

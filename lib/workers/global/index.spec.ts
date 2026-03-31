@@ -1,5 +1,7 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
 import * as platform from '../../modules/platform/index.ts';
@@ -8,8 +10,6 @@ import * as repositoryWorker from '../repository/index.ts';
 import * as configParser from './config/parse/index.ts';
 import * as globalWorker from './index.ts';
 import * as limits from './limits.ts';
-import { logger } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../repository/index.ts');
 vi.mock('../../util/fs/index.ts');
@@ -73,6 +73,54 @@ describe('workers/global/index', () => {
       expect(repoConfig.topLevelOrg).toBe('a');
       expect(repoConfig.parentOrg).toBe('a');
       expect(repoConfig.repository).toBe('a/b');
+    });
+
+    it('should resolve repository-level presets before merging with global config', async () => {
+      const globalConfigWithPackageRules: RenovateConfig = {
+        baseDir: '/tmp/base',
+        packageRules: [
+          {
+            description: 'global rule',
+            matchManagers: ['npm'],
+            enabled: false,
+          },
+        ],
+      };
+      const repository = {
+        repository: 'test/repo',
+        // :approveMajorUpdates has packageRules with dependencyDashboardApproval
+        extends: [':approveMajorUpdates'],
+        packageRules: [
+          {
+            description: 'repo rule',
+            matchPackageNames: ['lodash'],
+            enabled: true,
+          },
+        ],
+      };
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        globalConfigWithPackageRules,
+        repository,
+      );
+
+      // Verify packageRules exist and have the correct merge order:
+      // 1. Global config packageRules
+      // 2. Preset packageRules (from :approveMajorUpdates)
+      // 3. Repository packageRules
+      expect(repoConfig.packageRules).toMatchObject([
+        {
+          description: 'global rule',
+          matchManagers: ['npm'],
+        },
+        {
+          dependencyDashboardApproval: true,
+          matchUpdateTypes: ['major'],
+        },
+        {
+          description: 'repo rule',
+          matchPackageNames: ['lodash'],
+        },
+      ]);
     });
   });
 

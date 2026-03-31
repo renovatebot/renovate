@@ -1,4 +1,3 @@
-import { setTimeout } from 'timers/promises';
 import { isString } from '@sindresorhus/is';
 import type {
   GitItem,
@@ -13,6 +12,7 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { setTimeout } from 'timers/promises';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -514,31 +514,60 @@ export async function createPr({
       platformPrOptions.automergeStrategy === 'auto'
         ? await getMergeStrategy(pr.targetRefName!)
         : mapMergeStrategy(platformPrOptions.automergeStrategy);
-    pr = await azureApiGit.updatePullRequest(
-      {
-        autoCompleteSetBy: {
-          // TODO #22198
-          id: pr.createdBy!.id,
-        },
-        completionOptions: {
-          mergeStrategy,
-          deleteSourceBranch: true,
-          mergeCommitMessage: title,
-        },
+    const prOptions: GitPullRequest = {
+      autoCompleteSetBy: {
+        // TODO #22198
+        id: pr.createdBy!.id,
       },
+      completionOptions: {
+        mergeStrategy,
+        deleteSourceBranch: true,
+        mergeCommitMessage: title,
+      },
+    };
+
+    logger.debug(
+      {
+        prOptions,
+        repoId: config.repoId,
+        pullRequestId: pr.pullRequestId!,
+      },
+      // TODO #22198
+      `Updating PR ${pr.pullRequestId!} to specify platformAutomerge settings`,
+    );
+
+    pr = await azureApiGit.updatePullRequest(
+      prOptions,
       config.repoId,
       // TODO #22198
       pr.pullRequestId!,
     );
   }
   if (platformPrOptions?.autoApprove) {
-    await azureApiGit.createPullRequestReviewer(
+    const approver = {
+      reviewerUrl: pr.createdBy!.url,
+      vote: AzurePrVote.Approved,
+      isFlagged: false,
+      isRequired: false,
+    };
+
+    logger.debug(
       {
-        reviewerUrl: pr.createdBy!.url,
-        vote: AzurePrVote.Approved,
-        isFlagged: false,
-        isRequired: false,
+        approver,
+
+        repoId: config.repoId,
+        // TODO #22198
+        pullRequestId: pr.pullRequestId!,
+        prCreatedBy: {
+          id: pr.createdBy!.id!,
+        },
       },
+      // TODO #22198
+      `Auto-approving PR ${pr.pullRequestId!}`,
+    );
+
+    await azureApiGit.createPullRequestReviewer(
+      approver,
       config.repoId,
       // TODO #22198
       pr.pullRequestId!,
@@ -695,7 +724,7 @@ export async function ensureComment({
   } else {
     logger.debug(
       { repository: config.repository, issueNo: number, topic },
-      'Comment is already update-to-date',
+      'Comment is already up-to-date',
     );
   }
 
@@ -959,6 +988,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
         isRequired = true;
       }
       if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
+        // v8 ignore else -- TODO: add test #40625
         if (ids.filter((c) => c.id === t.id).length === 0) {
           // TODO #22198
           ids.push({ id: t.id!, name: reviewer, isRequired });

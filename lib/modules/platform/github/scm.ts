@@ -4,7 +4,7 @@ import type {
   LongCommitSha,
 } from '../../../util/git/types.ts';
 import { DefaultGitScm } from '../default-scm.ts';
-import { commitFiles, isGHApp } from './/index.ts';
+import { commitFiles, isGHApp } from './index.ts';
 
 export class GithubScm extends DefaultGitScm {
   override commitAndPush(

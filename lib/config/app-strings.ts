@@ -37,7 +37,7 @@ export function getConfigFileNames(platform?: PlatformId): string[] {
       return false;
     });
 
-    if (!['github', 'gitlab'].includes(platform)) {
+    if (!['github', 'gitlab'].includes(platform) && platform !== 'local') {
       filteredConfigFileNames.push(`.${platform}/renovate.json`);
       filteredConfigFileNames.push(`.${platform}/renovate.json5`);
     }

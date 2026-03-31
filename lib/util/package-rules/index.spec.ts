@@ -1,3 +1,4 @@
+import { hostRules } from '~test/util.ts';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
@@ -5,7 +6,6 @@ import { OrbDatasource } from '../../modules/datasource/orb/index.ts';
 import type { HostRule } from '../../types/index.ts';
 import type { MergeConfidence } from '../merge-confidence/types.ts';
 import { applyPackageRules } from './index.ts';
-import { hostRules } from '~test/util.ts';
 
 type TestConfig = PackageRuleInputConfig & {
   x?: number;
@@ -673,6 +673,74 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
+  it('handles matchRegistryUrls when missing registryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com/**',
+            'https://private.registry.com/**',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://private.registry.com/npm'],
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+
+  it('non-matches matchRegistryUrls', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchRegistryUrls: [
+            'https://registry.example.com',
+            'https://private.registry.com/npm',
+          ],
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'patch' as UpdateType,
+      registryUrls: ['https://registry.npmjs.org'],
+    };
+    const res = await applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
   describe('matchConfidence', () => {
     const hostRule: HostRule = {
       hostType: 'merge-confidence',
@@ -764,7 +832,7 @@ describe('util/package-rules/index', () => {
       expect(error).toMatchObject(new Error(MISSING_API_CREDENTIALS));
       expect(error.validationError).toBe('Missing credentials');
       expect(error.validationMessage).toBe(
-        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.',
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
       );
     });
   });
@@ -1281,5 +1349,40 @@ describe('util/package-rules/index', () => {
     const res = await applyPackageRules(config);
     expect(res.depName).toBe('node');
     expect(res.packageName).toBe('docker.io/library/node');
+  });
+
+  it('compiles sourceUrl with template helper functions', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl:
+            'https://github.com/{{replace "/" "/terraform-provider-" packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe(
+      'https://github.com/hashicorp/terraform-provider-aws',
+    );
+  });
+
+  it('compiles sourceUrl with template variables', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl: 'https://github.com/{{packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe('https://github.com/hashicorp/aws');
   });
 });

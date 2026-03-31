@@ -1,7 +1,7 @@
 import type { Parts } from './types.ts';
 
 export function extractAllParts(version: string): number[] | null {
-  const parts = version.split('.').map((x) => parseInt(x));
+  const parts = version.split('.').map((x) => parseInt(x, 10));
   const ret: number[] = [];
   for (const l of parts) {
     if (l < 0 || !isFinite(l)) {

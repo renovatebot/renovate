@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { DockerDatasource } from '../../../datasource/docker/index.ts';
 import { id as dockerVersioning } from '../../../versioning/docker/index.ts';
 import type { PackageDependency } from '../../types.ts';

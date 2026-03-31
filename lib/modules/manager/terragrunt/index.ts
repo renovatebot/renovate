@@ -7,9 +7,11 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['.terraform.lock.hcl'];
 
 export const url = 'https://terragrunt.gruntwork.io/docs';
 export const categories: Category[] = ['iac', 'terraform'];

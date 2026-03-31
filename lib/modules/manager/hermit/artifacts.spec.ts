@@ -1,3 +1,5 @@
+import { mockExecAll } from '~test/exec-util.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import {
@@ -8,8 +10,6 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -361,7 +361,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toEqual([
         {
           artifactError: {
-            lockFile: 'from: openjdk-17.0.3, to: openjdk',
+            fileName: 'from: openjdk-17.0.3, to: openjdk',
             stderr: 'error executing hermit uninstall',
           },
         },
@@ -448,7 +448,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: go-1.17 jq-1.5, to: go-1.17.1 jq-1.6',
+            fileName: 'from: go-1.17 jq-1.5, to: go-1.17.1 jq-1.6',
             stderr: 'error executing hermit install',
           },
         },
@@ -471,7 +471,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: -1.17, to: -1.17.1',
+            fileName: 'from: -1.17, to: -1.17.1',
             stderr: `invalid package to update`,
           },
         },
@@ -492,7 +492,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: go-, to: go-1.17.1',
+            fileName: 'from: go-, to: go-1.17.1',
             stderr: `invalid package to update`,
           },
         },
@@ -513,7 +513,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: go-1.17, to: go-',
+            fileName: 'from: go-1.17, to: go-',
             stderr: `invalid package to update`,
           },
         },

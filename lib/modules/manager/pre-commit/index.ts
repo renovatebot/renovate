@@ -1,6 +1,7 @@
 import { getEnv } from '../../../util/env.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+
 export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'pre-commit';
@@ -22,3 +23,5 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

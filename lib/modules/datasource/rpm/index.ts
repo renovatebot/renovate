@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { gunzip } from 'node:zlib';
-import { promisify } from 'util';
 import sax from 'sax';
+import { promisify } from 'util';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -85,8 +85,10 @@ export class RpmDatasource extends Datasource {
     );
     const response = await this.http.getText(repomdUrl.toString());
 
-    // check if repomd.xml is in XML format
-    if (!response.body.startsWith('<?xml')) {
+    const repomdBody = response.body.trimStart();
+
+    // repomd.xml may omit the XML declaration and start directly with the root element
+    if (!(repomdBody.startsWith('<?xml') || repomdBody.startsWith('<repomd'))) {
       logger.debug(
         { datasource: RpmDatasource.id, url: repomdUrl },
         'Invalid response format',
@@ -97,7 +99,7 @@ export class RpmDatasource extends Datasource {
     }
 
     // parse repomd.xml using XmlDocument
-    const xml = new XmlDocument(response.body);
+    const xml = new XmlDocument(repomdBody);
 
     const primaryData = xml.childWithAttribute('type', 'primary');
 

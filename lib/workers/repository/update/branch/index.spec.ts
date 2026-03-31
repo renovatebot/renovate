@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import { fs, git, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
@@ -10,10 +11,8 @@ import {
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
-import type {
-  ArtifactError,
-  WriteExistingFilesResult,
-} from '../../../../modules/manager/npm/post-update/types.ts';
+import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
+import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import type {
   EnsureCommentConfig,
   Pr,
@@ -48,7 +47,6 @@ import * as _getUpdated from './get-updated.ts';
 import * as branchWorker from './index.ts';
 import * as _reuse from './reuse.ts';
 import * as _schedule from './schedule.ts';
-import { fs, git, partial, platform, scm } from '~test/util.ts';
 
 vi.mock('./get-updated.ts');
 vi.mock('./schedule.ts');
@@ -108,9 +106,8 @@ describe('workers/repository/update/branch/index', () => {
 
     beforeEach(() => {
       scm.branchExists.mockResolvedValue(false);
-      reuse.shouldReuseExistingBranch.mockImplementation(
-        // eslint-disable-next-line require-await, @typescript-eslint/require-await
-        async (config) => config,
+      reuse.shouldReuseExistingBranch.mockImplementation((config) =>
+        Promise.resolve(config),
       );
       prWorker.ensurePr = vi.fn();
       prWorker.getPlatformPrOptions = vi.fn();
@@ -681,7 +678,7 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('returns if commit limit exceeded', async () => {
+    it('returns if commits per run limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
       });
@@ -701,7 +698,68 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prNo: 5,
-        result: 'commit-limit-reached',
+        result: 'commit-per-run-limit-reached',
+      });
+    });
+
+    it('does not return if commits per run limit exceeded but rebase requested', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      config.rebaseRequested = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha: '123test',
+      });
+    });
+
+    it('returns if commits hourly limit exceeded', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'commit-hourly-limit-reached',
+      });
+    });
+
+    it('does not return if commits hourly limit exceeded but rebase requested', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      config.rebaseRequested = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'pr-created',
+        commitSha: '123test',
       });
     });
 
@@ -970,6 +1028,70 @@ describe('workers/repository/update/branch/index', () => {
         result: 'error',
         commitSha: null,
       });
+    });
+
+    it('retries setting branch status checks after PR creation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 5 }),
+      });
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      await branchWorker.processBranch({
+        ...config,
+        stabilityStatus: 'green',
+        statusCheckNames: {
+          minimumReleaseAge: 'renovate/stability-days',
+          mergeConfidence: null,
+          configValidation: null,
+          artifactError: null,
+        },
+      });
+      // Called twice: once before ensurePr, once after PR creation
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry setting branch status checks when PR is not created', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+      });
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      await branchWorker.processBranch({
+        ...config,
+        stabilityStatus: 'green',
+        statusCheckNames: {
+          minimumReleaseAge: 'renovate/stability-days',
+          mergeConfidence: null,
+          configValidation: null,
+          artifactError: null,
+        },
+      });
+      // Called only once before ensurePr
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
     it('returns if branch exists but updated', async () => {
@@ -2839,6 +2961,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
         }),
@@ -2858,7 +2981,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: '123test',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
 
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating',
@@ -2877,6 +3000,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
         }),
@@ -2897,7 +3021,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
       );
@@ -3094,6 +3218,30 @@ describe('workers/repository/update/branch/index', () => {
           checkoutBranchCalledTimes - 1
         ],
       );
+    });
+
+    it('should not reattempt platform automerge without commitSha', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 123,
+          state: 'open',
+        }),
+      );
+      prWorker.getPlatformPrOptions.mockReturnValue({
+        usePlatformAutomerge: true,
+      });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      await branchWorker.processBranch(config);
+      expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
     });
 
     it('should not reattempt platform automerge in dry run', async () => {

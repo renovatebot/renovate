@@ -1,7 +1,7 @@
-import { GlobalConfig } from '../../../config/global.ts';
-import { updateArtifacts } from './index.ts';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -141,7 +141,7 @@ describe('modules/manager/flux/artifacts', () => {
     expect(res).toStrictEqual([
       {
         artifactError: {
-          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
           stderr: 'failed',
         },
       },
@@ -162,7 +162,7 @@ describe('modules/manager/flux/artifacts', () => {
     expect(res).toStrictEqual([
       {
         artifactError: {
-          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
           stderr: 'Error',
         },
       },

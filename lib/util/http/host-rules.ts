@@ -32,7 +32,6 @@ export type HostRulesGotOptions = Pick<
   | 'abortOnError'
   | 'abortIgnoreStatusCodes'
   | 'timeout'
-  | 'lookup'
   | 'agent'
   | 'http2'
   | 'https'
@@ -70,6 +69,9 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  const platform = GlobalConfig.get('platform');
+  const platformEndpoint = GlobalConfig.get('endpoint');
+
   // in the case that an API URL is used for GitHub.com, fallback to `github` hostType, and use the `url`'s host to find a `matchHost: api.github.com` (or `matchHost: github.com`)
   if (url.startsWith('https://api.github.com/')) {
     res = {
@@ -79,6 +81,19 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
       }),
       ...res,
     };
+  } else if (platform === 'github' && platformEndpoint) {
+    // Fallback to `github` hostType when the request URL targets the same host
+    // as the configured GitHub platform endpoint.
+    //
+    // This covers GitHub Enterprise Server without hardcoding URLs.
+    const requestHost = parseUrl(url)?.hostname;
+    const endpointHost = parseUrl(platformEndpoint)?.hostname;
+    if (requestHost && endpointHost && requestHost === endpointHost) {
+      res = {
+        ...hostRules.find({ hostType: 'github', url }),
+        ...res,
+      };
+    }
   }
 
   // Fallback to `gitlab` hostType

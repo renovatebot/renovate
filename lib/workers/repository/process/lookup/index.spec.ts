@@ -1,7 +1,10 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import * as hostRules from '../../../../../lib/util/host-rules.ts';
 import { getConfig } from '../../../../config/defaults.ts';
-import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.ts';
+import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { CustomDatasource } from '../../../../modules/datasource/custom/index.ts';
@@ -25,18 +28,15 @@ import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
+import * as McApi from '../../../../util/merge-confidence/index.ts';
 import {
   initConfig,
   resetConfig,
 } from '../../../../util/merge-confidence/index.ts';
-import * as McApi from '../../../../util/merge-confidence/index.ts';
 import { Result } from '../../../../util/result.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as lookup from './index.ts';
 import type { LookupUpdateConfig } from './types.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const qJson = {
   ...Fixtures.getJson('01.json'),
@@ -4907,6 +4907,95 @@ describe('workers/repository/process/lookup/index', () => {
           currentValue: '17.0.0',
           lookupName: 'openjdk',
           packageName: 'openjdk',
+          registryUrl: 'https://index.docker.io',
+        },
+        '17.0.0',
+      );
+    });
+
+    it('handles replacements - Digest configured with replacementNameTemplate and validating getDigest function call', async () => {
+      config.packageName = 'mirror-some-org/library/openjdk';
+      config.currentDigest = 'sha256:fedcba0987654321';
+      config.currentValue = '17.0.0';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      config.replacementNameTemplate = `{{{replace 'mirror-some-org/' 'new.registry.io/' packageName}}}`;
+      config.replacementVersion = '19.0.0';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '17.0.1',
+          },
+        ],
+        lookupName: 'mirror-some-org/library/openjdk',
+      });
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:fedcba0987654321');
+      getDockerDigest.mockResolvedValueOnce('sha256:pin0987654321');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBreaking: false,
+          newDigest: 'sha256:abcdef1234567890',
+          newMajor: 17,
+          newMinor: 0,
+          newPatch: 1,
+          newValue: '17.0.1',
+          newVersion: '17.0.1',
+          updateType: 'patch',
+        },
+        {
+          newDigest: 'sha256:fedcba0987654321',
+          newName: 'new.registry.io/library/openjdk',
+          newValue: '19.0.0',
+          newVersion: undefined,
+          updateType: 'replacement',
+        },
+        {
+          newDigest: 'sha256:pin0987654321',
+          newValue: '17.0.0',
+          newVersion: undefined,
+          updateType: 'digest',
+        },
+      ]);
+
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        1,
+        {
+          currentDigest: 'sha256:fedcba0987654321',
+          currentValue: '17.0.0',
+          lookupName: 'mirror-some-org/library/openjdk',
+          packageName: 'mirror-some-org/library/openjdk',
+          registryUrl: 'https://index.docker.io',
+        },
+        '17.0.1',
+      );
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        2,
+        {
+          currentDigest: undefined,
+          currentValue: '17.0.0',
+          lookupName: undefined,
+          packageName: 'new.registry.io/library/openjdk',
+          registryUrl: 'https://index.docker.io',
+        },
+        '19.0.0',
+      );
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        3,
+        {
+          currentDigest: 'sha256:fedcba0987654321',
+          currentValue: '17.0.0',
+          lookupName: 'mirror-some-org/library/openjdk',
+          packageName: 'mirror-some-org/library/openjdk',
           registryUrl: 'https://index.docker.io',
         },
         '17.0.0',

@@ -1,11 +1,11 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { id as versioning } from '../../versioning/gradle/index.ts';
 import type { GetPkgReleasesConfig, GetReleasesConfig } from '../index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GradleVersionDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const allResponse = Fixtures.get('all.json');
 

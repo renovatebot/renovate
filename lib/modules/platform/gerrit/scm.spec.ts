@@ -1,8 +1,8 @@
+import { git, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { client as _client } from './client.ts';
 import { GerritScm, configureScm } from './scm.ts';
 import type { GerritChange, GerritRevisionInfo } from './types.ts';
-import { git, partial } from '~test/util.ts';
 
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
@@ -84,7 +84,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE'],
+        pushOptions: ['notify=NONE', 'ready'],
       });
     });
 
@@ -125,7 +125,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
     });
 
@@ -174,7 +174,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main', // not new-main
-        pushOptions: ['notify=NONE'],
+        pushOptions: ['notify=NONE', 'ready'],
       });
     });
 
@@ -270,7 +270,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
     });
 
@@ -315,6 +315,7 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main',
         pushOptions: [
           'notify=NONE',
+          'ready',
           'label=Code-Review+2',
           'hashtag=hashtag1',
           'hashtag=hashtag2',
@@ -374,6 +375,7 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main',
         pushOptions: [
           'notify=NONE',
+          'ready',
           'label=Code-Review+2',
           'hashtag=hashtag1',
           'hashtag=hashtag2',

@@ -21,6 +21,10 @@ const regExps = {
   rangeOp: regEx(/\.\.[.<]/),
   exactVersion: regEx(/\.\s*exact\s*\(\s*/),
   exactVersionLabel: regEx(/\s*exact:/),
+  traitsLabel: regEx(/\s*traits\s*:/),
+  // This pattern consumes any `traits` content until the next package declaration,
+  // as the traits syntax can be quite complex and does not need to be parsed in detail for package extraction.
+  traitsConsumeToNextPackage: regEx(/.*\.\s*package\s*\(\s*/),
 };
 
 const WILDCARD = 'wildcard';
@@ -37,6 +41,8 @@ const FROM = 'from';
 const RANGE_OP = 'rangeOp';
 const EXACT_VERSION = 'exactVersion';
 const EXACT_VERSION_LABEL = 'exactVersionLabel';
+const TRAITS_LABEL = 'traitsLabel';
+const TRAITS_CONSUME_TO_NEXT_PACKAGE = 'traitsConsumeToNextPackage';
 
 const searchLabels = {
   wildcard: WILDCARD,
@@ -53,6 +59,8 @@ const searchLabels = {
   rangeOp: RANGE_OP,
   exactVersion: EXACT_VERSION,
   exactVersionLabel: EXACT_VERSION_LABEL,
+  traitsLabel: TRAITS_LABEL,
+  traitsConsumeToNextPackage: TRAITS_CONSUME_TO_NEXT_PACKAGE,
 };
 
 function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
@@ -62,7 +70,7 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
     case 'dependencies:':
       return [SPACE, BEGIN_SECTION, WILDCARD];
     case 'dependencies: [':
-      return [SPACE, PACKAGE, END_SECTION];
+      return [SPACE, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(':
       return [SPACE, URL_KEY, PACKAGE, END_SECTION];
     case '.package(url':
@@ -83,17 +91,19 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
         END_SECTION,
       ];
     case '.package(url: [depName], .exact(':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], exact:':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], from':
-      return [SPACE, COLON, PACKAGE, END_SECTION];
+      return [SPACE, COLON, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], from:':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], [value]':
-      return [SPACE, RANGE_OP, PACKAGE, END_SECTION];
+      return [SPACE, RANGE_OP, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(url: [depName], [rangeFrom][rangeOp]':
-      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+      return [SPACE, STRING_LITERAL, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
+    case 'traits:':
+      return [SPACE, TRAITS_CONSUME_TO_NEXT_PACKAGE];
     default:
       return [DEPS];
   }
@@ -229,6 +239,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
+        } else if (label === TRAITS_LABEL) {
+          state = 'traits:';
         }
         break;
       case '.package(':
@@ -377,6 +389,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         } else if (label === SPACE) {
           currentValue += substr;
         } else if (label === PACKAGE) {
+          yieldDep();
+          state = '.package(';
+        }
+        break;
+      case 'traits:':
+        if (label === TRAITS_CONSUME_TO_NEXT_PACKAGE) {
           yieldDep();
           state = '.package(';
         }

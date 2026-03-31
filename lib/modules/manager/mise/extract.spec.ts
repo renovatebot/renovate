@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -61,6 +61,7 @@ describe('modules/manager/mise/extract', () => {
       committed = "1.1.7"
       conan = "2.24.0"
       consul = "1.14.3"
+      gh = "2.87.0"
       dotenv-linter = "3.3.0"
       hivemind = "1.1.0"
       hk = "1.1.2"
@@ -69,12 +70,15 @@ describe('modules/manager/mise/extract', () => {
       lefthook = "1.11.13"
       localstack = "4.3.0"
       lychee = "0.19.1"
+      npm = "11.2.0"
       opentofu = "1.6.1"
+      packer = "1.15.0"
       pipx = "1.7.1"
       pkl = "0.28.2"
       protoc = "30.2"
       redis = "8.0.1"
       ruff = "0.11.12"
+      rumdl = "0.1.58"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
@@ -83,6 +87,7 @@ describe('modules/manager/mise/extract', () => {
       swiftformat = "0.58.0"
       swiftlint = "0.55.1"
       taplo = "0.10.0"
+      tart = "2.31.0"
       terragrunt = "0.72.6"
       tilt = "0.34.0"
       tusd = "2.8.0"
@@ -160,6 +165,13 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'hashicorp/consul',
           },
           {
+            currentValue: '2.87.0',
+            datasource: 'github-releases',
+            depName: 'gh',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'cli/cli',
+          },
+          {
             currentValue: '3.3.0',
             datasource: 'github-releases',
             depName: 'dotenv-linter',
@@ -215,11 +227,24 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'lycheeverse/lychee',
           },
           {
+            currentValue: '11.2.0',
+            datasource: 'npm',
+            depName: 'npm',
+            packageName: 'npm',
+          },
+          {
             currentValue: '1.6.1',
             datasource: 'github-releases',
             depName: 'opentofu',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '1.15.0',
+            datasource: 'github-releases',
+            depName: 'packer',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/packer',
           },
           {
             currentValue: '1.7.1',
@@ -251,6 +276,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'ruff',
             packageName: 'astral-sh/ruff',
+          },
+          {
+            currentValue: '0.1.58',
+            datasource: 'github-releases',
+            depName: 'rumdl',
+            packageName: 'rvben/rumdl',
           },
           {
             currentValue: '0.10.0',
@@ -304,6 +335,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'taplo',
             packageName: 'tamasfe/taplo',
+          },
+          {
+            currentValue: '2.31.0',
+            datasource: 'github-releases',
+            depName: 'tart',
+            packageName: 'cirruslabs/tart',
           },
           {
             currentValue: '0.72.6',
@@ -684,6 +721,47 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts github backend tools', () => {
+      const content = codeBlock`
+      [tools]
+      "github:BurntSushi/ripgrep" = "14.1.1"
+      "github:cli/cli" = "v2.64.0"
+      "github:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "github:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'github:BurntSushi/ripgrep',
+            currentValue: '14.1.1',
+            packageName: 'BurntSushi/ripgrep',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:cli/cli',
+            currentValue: 'v2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'github-releases',
+            extractVersion: '^release\\-(?<version>.+)',
+          },
+          {
+            depName: 'github:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'github-releases',
+            extractVersion: '^v(?<version>.+)',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', () => {
       const content = codeBlock`
       [tools]
@@ -936,5 +1014,57 @@ describe('modules/manager/mise/extract', () => {
         ],
       });
     });
+
+    it.each`
+      version            | currentValue
+      ${'21'}            | ${'21'}
+      ${'21.0'}          | ${'21.0'}
+      ${'temurin-21'}    | ${'21'}
+      ${'corretto-21.0'} | ${'21.0'}
+    `(
+      'uses semver-partial versioning for short java version $version',
+      ({ version, currentValue }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+              versioning: 'semver-partial',
+            },
+          ],
+        });
+      },
+    );
+
+    it.each`
+      version             | currentValue
+      ${'21.0.2'}         | ${'21.0.2'}
+      ${'temurin-21.0.2'} | ${'21.0.2'}
+    `(
+      'does not use semver-partial for full java version $version',
+      ({ version, currentValue }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+            },
+          ],
+        });
+        expect(result?.deps[0]).not.toHaveProperty('versioning');
+      },
+    );
   });
 });

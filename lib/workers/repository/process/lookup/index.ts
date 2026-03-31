@@ -33,8 +33,8 @@ import type { Timestamp } from '../../../../util/timestamp.ts';
 import { calculateAbandonment } from './abandonment.ts';
 import { getBucket } from './bucket.ts';
 import { getCurrentVersion } from './current.ts';
-import { filterInternalChecks } from './filter-checks.ts';
 import { filterVersions } from './filter.ts';
+import { filterInternalChecks } from './filter-checks.ts';
 import { generateUpdate } from './generate.ts';
 import { getRollbackUpdate } from './rollback.ts';
 import { calculateMostRecentTimestamp } from './timestamps.ts';
@@ -171,7 +171,7 @@ export async function lookupUpdates(
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: config.packageName,
-          message: `Failed to look up ${config.datasource} package ${config.packageName}`,
+          message: `Failed to look up ${config.datasource} package ${config.packageName}: ${lookupError}`,
         };
         logger.debug(
           {
@@ -679,6 +679,7 @@ export async function lookupUpdates(
           ) {
             delete getDigestConfig.lookupName;
             delete getDigestConfig.currentDigest;
+            getDigestConfig.replacementName = update.newName;
           }
 
           // TODO #22198

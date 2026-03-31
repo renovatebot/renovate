@@ -43,6 +43,7 @@ export class GerritScm extends DefaultGitScm {
       typeof commit.message === 'string' ? [commit.message] : commit.message;
 
     // In Gerrit, the change subject/title is the first line of the commit message
+    // v8 ignore else -- TODO: add test #40625
     if (commit.prTitle) {
       const firstMessageLines = message[0].split('\n');
       firstMessageLines[0] = commit.prTitle;
@@ -65,7 +66,7 @@ export class GerritScm extends DefaultGitScm {
         hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); // avoid pushing empty patch sets
       }
       if (hasChanges || commit.force) {
-        const pushOptions = ['notify=NONE'];
+        const pushOptions = ['notify=NONE', 'ready'];
         if (commit.autoApprove) {
           pushOptions.push('label=Code-Review+2');
         }
@@ -85,6 +86,7 @@ export class GerritScm extends DefaultGitScm {
           files: commit.files,
           pushOptions,
         });
+        // v8 ignore else -- TODO: add test #40625
         if (pushResult) {
           return commitSha;
         }

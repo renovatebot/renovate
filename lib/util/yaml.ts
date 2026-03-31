@@ -7,24 +7,21 @@ import type {
   ToStringOptions,
 } from 'yaml';
 import { parseAllDocuments, parseDocument, stringify } from 'yaml';
-import type { ZodType } from 'zod';
+import type { ZodType } from 'zod/v3';
 import { logger } from '../logger/index.ts';
 import { stripTemplates } from './string.ts';
 
 export interface YamlOptions<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
-> extends ParseOptions,
-    DocumentOptions,
-    SchemaOptions {
+>
+  extends ParseOptions, DocumentOptions, SchemaOptions {
   customSchema?: Schema;
   removeTemplates?: boolean;
 }
 
 interface YamlParseDocumentOptions
-  extends ParseOptions,
-    DocumentOptions,
-    SchemaOptions {
+  extends ParseOptions, DocumentOptions, SchemaOptions {
   removeTemplates?: boolean;
 }
 

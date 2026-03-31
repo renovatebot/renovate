@@ -1,6 +1,6 @@
 import * as versionings from '../../../modules/versioning/index.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
-import { presets } from './workarounds.ts';
+import { presets } from './workarounds.preset.ts';
 
 describe('config/presets/internal/workarounds', () => {
   describe('bitnamiDockerImageVersioning', () => {

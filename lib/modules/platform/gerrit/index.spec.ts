@@ -1,12 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import { git, hostRules, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { repoFingerprint } from '../util.ts';
 import { client as _client } from './client.ts';
-import { writeToConfig } from './index.ts';
 import * as gerrit from './index.ts';
+import { writeToConfig } from './index.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -20,7 +21,6 @@ import {
   TAG_PULL_REQUEST_BODY,
   mapGerritChangeToPr,
 } from './utils.ts';
-import { git, hostRules, partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -40,9 +40,9 @@ vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
-  const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
-    zone: 'utc',
-  }) as DateTime<true>;
+  const t0 = DateTime.fromISO(
+    '2025-04-14T16:33:37.000000000',
+  ).toUTC() as DateTime<true>;
 
   beforeAll(() => {
     vi.useFakeTimers();

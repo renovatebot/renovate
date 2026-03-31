@@ -1,6 +1,9 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -11,9 +14,6 @@ import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { constructPipCompileCmd } from './artifacts.ts';
 import { extractHeaderCommand } from './common.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 const datasource = vi.mocked(_datasource);
 
@@ -444,7 +444,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).toEqual([
       {
-        artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
+        artifactError: { fileName: 'requirements.txt', stderr: 'not found' },
       },
     ]);
     expect(execSnapshots).toEqual([]);
@@ -759,7 +759,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       });
       expect(results).toMatchObject([
         {
-          artifactError: { lockFile: 'requirements1.txt', stderr: 'Oh noes!' },
+          artifactError: { fileName: 'requirements1.txt', stderr: 'Oh noes!' },
         },
       ]);
     });
