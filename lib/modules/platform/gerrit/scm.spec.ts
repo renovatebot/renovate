@@ -272,6 +272,9 @@ describe('modules/platform/gerrit/scm', () => {
 
   it('deleteBranch()', async () => {
     await expect(gerritScm.deleteBranch('branchName')).toResolve();
+    expect(git.deleteBranch).toHaveBeenCalledExactlyOnceWith('branchName', {
+      localBranch: true,
+    });
   });
 
   describe('mergeToLocal', () => {

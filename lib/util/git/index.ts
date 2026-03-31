@@ -946,24 +946,29 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(branchName: string): Promise<void> {
+export async function deleteBranch(
+  branchName: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   await syncGit();
-  try {
-    const deleteCommand = ['push', '--delete', 'origin', branchName];
+  if (!options?.localBranch) {
+    try {
+      const deleteCommand = ['push', '--delete', 'origin', branchName];
 
-    if (getNoVerify().includes('push')) {
-      deleteCommand.push('--no-verify');
-    }
+      if (getNoVerify().includes('push')) {
+        deleteCommand.push('--no-verify');
+      }
 
-    await gitRetry(() => git.raw(deleteCommand));
-    logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
-    if (errChecked) {
-      throw errChecked;
+      await gitRetry(() => git.raw(deleteCommand));
+      logger.debug(`Deleted remote branch: ${branchName}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore if -- TODO: add test #40625 */
+      if (errChecked) {
+        throw errChecked;
+      }
+      logger.debug(`No remote branch to delete with name: ${branchName}`);
     }
-    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);

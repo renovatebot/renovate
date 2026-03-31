@@ -225,9 +225,9 @@ export class GerritScm extends DefaultGitScm {
     return null; // empty commit, no changes in this Gerrit Change
   }
 
-  override deleteBranch(branchName: string): Promise<void> {
+  override async deleteBranch(branchName: string): Promise<void> {
     pendingChangeBranches.delete(branchName);
-    return Promise.resolve();
+    await git.deleteBranch(branchName, { localBranch: true });
   }
 
   override async mergeToLocal(branchName: string): Promise<void> {
