@@ -68,7 +68,7 @@
     "arcus.security": "https://github.com/arcus-azure/arcus.security",
     "arcus.webapi": "https://github.com/arcus-azure/arcus.webapi",
     "arrow-kt": "https://github.com/arrow-kt/arrow",
-    "aspire": "https://github.com/dotnet/aspire",
+    "aspire": "https://github.com/microsoft/aspire",
     "aspnet aspnetwebstack": "https://github.com/aspnet/AspNetWebStack",
     "aspnet extensions": "https://github.com/aspnet/Extensions",
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
