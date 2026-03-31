@@ -9,7 +9,6 @@ export type {
   BranchCache,
   BranchUpgradeCache,
 } from '../util/cache/repository/types.ts';
-export type { MergeConfidence } from '../util/merge-confidence/types.ts';
 export type {
   ProcessResult,
   ProcessStatus,
