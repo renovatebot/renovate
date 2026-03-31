@@ -5,6 +5,7 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { FileSpanExporter } from './file-exporter.ts';
 import {
   disableInstrumentations,
   getTracerProvider,
@@ -28,6 +29,7 @@ describe('instrumentation/index', () => {
       }
     }
     delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
+    delete process.env.RENOVATE_TRACING_FILE_EXPORTER_PATH;
     delete process.env.RENOVATE_USE_CLOUD_METADATA_SERVICES;
   });
 
@@ -61,6 +63,31 @@ describe('instrumentation/index', () => {
         ],
       },
     });
+  });
+
+  it('activate file exporter', () => {
+    process.env.RENOVATE_TRACING_FILE_EXPORTER_PATH = '/tmp/test-traces.jsonl';
+
+    init();
+    const traceProvider = getTracerProvider();
+    expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(nodeProvider).toMatchObject({
+      _activeSpanProcessor: {
+        _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          expect.any(SimpleSpanProcessor),
+        ],
+      },
+    });
+    // Verify the SimpleSpanProcessor wraps a FileSpanExporter
+    const spanProcessors = (nodeProvider as any)._activeSpanProcessor
+      ._spanProcessors;
+    const fileProcessor = spanProcessors[1];
+    expect(fileProcessor._exporter).toBeInstanceOf(FileSpanExporter);
   });
 
   it('registers GitOperationSpanProcessor regardless of tracing being enabled', () => {
