@@ -39,9 +39,9 @@ vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
-  const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
-    zone: 'utc',
-  }) as DateTime<true>;
+  const t0 = DateTime.fromISO(
+    '2025-04-14T16:33:37.000000000',
+  ).toUTC() as DateTime<true>;
 
   beforeAll(() => {
     vi.useFakeTimers();

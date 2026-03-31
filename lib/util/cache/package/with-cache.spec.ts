@@ -1,13 +1,13 @@
+import { dir as tmpDir } from 'tmp-promise';
+import type { MockInstance } from 'vitest';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../memory/index.ts';
-import * as file from './file.ts';
 import * as packageCache from './index.ts';
 import { withCache } from './with-cache.ts';
 
-vi.mock('./file.ts');
-
 describe('util/cache/package/with-cache', () => {
-  const setCache = file.set;
+  let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+  let dirResult: Awaited<ReturnType<typeof tmpDir>>;
   const getValue = vi.fn();
   let count = 1;
 
@@ -15,13 +15,21 @@ describe('util/cache/package/with-cache', () => {
     vi.useRealTimers();
     GlobalConfig.reset();
     memCache.init();
-    await packageCache.init({ cacheDir: 'some-dir' });
+    dirResult = await tmpDir({ unsafeCleanup: true });
+    setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+    await packageCache.init({ cacheDir: dirResult.path });
     count = 1;
     getValue.mockImplementation(() => {
       const res = String(100 * count + 10 * count + count);
       count += 1;
       return Promise.resolve(res);
     });
+  });
+
+  afterEach(async () => {
+    setCache.mockRestore();
+    await packageCache.cleanup({});
+    await dirResult.cleanup();
   });
 
   it('caches string result', async () => {

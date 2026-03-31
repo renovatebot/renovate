@@ -80,7 +80,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['.gitlab-ci.{yml,yaml}'],
+        managerFilePatterns: ['**/*.gitlab-ci.{yml,yaml}'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -135,7 +135,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         managerFilePatterns: ['**/*.tfvars'],
         matchStrings: [
-          '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?(?: extractVersion=(?<extractVersion>.*?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
+          '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?(?: extractVersion=(?<extractVersion>.*?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
         ],
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
@@ -149,12 +149,21 @@ export const presets: Record<string, Preset> = {
         currentValueTemplate: '{{{major}}}',
         customType: 'regex',
         datasourceTemplate: 'npm',
-        managerFilePatterns: ['**/tsconfig.json', '**/tsconfig.*.json'],
+        managerFilePatterns: ['**/{j,t}sconfig.json', '**/{j,t}sconfig.*.json'],
         matchStrings: [
           '"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
         ],
       },
+      {
+        autoReplaceStringTemplate: '"@tsconfig/node{{{major}}}"',
+        currentValueTemplate: '{{{major}}}',
+        customType: 'regex',
+        datasourceTemplate: 'npm',
+        managerFilePatterns: ['**/{j,t}sconfig.json', '**/{j,t}sconfig.*.json'],
+        matchStrings: ['"(?<depName>@tsconfig/node(?<major>\\d+))"'],
+      },
     ],
-    description: 'Update `@tsconfig/node` extends  in `tsconfig.json` files.',
+    description:
+      'Update `@tsconfig/node` extends  in `tsconfig.json` and `jsconfig.json` files.',
   },
 };

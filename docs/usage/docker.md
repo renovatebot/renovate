@@ -135,6 +135,9 @@ For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 Renovate understands [Debian release code names and rolling updates schedule](https://wiki.debian.org/DebianReleases) and will offer upgrades to the latest stable release.
 For example from `debian:bullseye` to `debian:bookworm`.
 
+Renovate also supports dated container image versions for Debian, such as `debian:bookworm-20230816` or `debian:bullseye-20220101.2`.
+These are commonly used in Debian Docker images to pin to specific snapshots.
+
 The Debian codename must be in _lowercase_.
 
 For example, Renovate will offer to upgrade the following `Dockerfile` layer:
@@ -142,6 +145,13 @@ For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 ```diff
 - FROM debian:bullseye
 + FROM debian:bookworm
+```
+
+Or for dated versions:
+
+```diff
+- FROM debian:bookworm-20230816
++ FROM debian:bookworm-20230901
 ```
 
 ## Configuring/Disabling
@@ -327,7 +337,7 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v46.0.2
+  uses: renovatebot/github-action@v46.1.6
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -496,7 +506,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:43.0.9
+FROM renovate/renovate:43.99.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

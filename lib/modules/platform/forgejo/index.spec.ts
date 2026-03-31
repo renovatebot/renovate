@@ -292,13 +292,13 @@ describe('modules/platform/forgejo/index', () => {
       const scope = httpMock.scope('https://code.forgejo.org/api/v1');
       scope
         .get('/user')
-        .reply(200, mockUser)
+        .reply(200, { ...mockUser, full_name: '' })
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
       expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://code.forgejo.org/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'renovate <renovate@example.com>',
       });
     });
 
@@ -3011,6 +3011,15 @@ describe('modules/platform/forgejo/index', () => {
 
       expect(forgejo.massageMarkdown(body)).toBe(
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(forgejo.massageMarkdown(body)).toBe(
+        '[#123](issues/123) [#124](issues/124) [#125](issues/125)',
       );
     });
   });

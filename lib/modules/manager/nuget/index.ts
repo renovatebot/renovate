@@ -7,6 +7,9 @@ export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 export { bumpPackageVersion } from './update.ts';
 
+export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['packages.lock.json'];
+
 export const displayName = 'NuGet';
 export const url = 'https://learn.microsoft.com/nuget';
 export const categories: Category[] = ['dotnet'];
@@ -25,3 +28,5 @@ export const supportedDatasources = [
   DotnetVersionDatasource.id,
   NugetDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

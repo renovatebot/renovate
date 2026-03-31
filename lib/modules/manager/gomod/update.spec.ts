@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { updateDependency } from './index.ts';
@@ -15,7 +16,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v0.8.0',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(upgrade.newValue);
     });
@@ -27,7 +32,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: '1.18',
         depType: 'golang',
       };
-      const res = updateDependency({ fileContent: gomod3, upgrade });
+      const res = updateDependency({
+        fileContent: gomod3,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod3);
       expect(res).toContain(upgrade.newValue);
     });
@@ -39,7 +48,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: '1.22.2',
         depType: 'toolchain',
       };
-      const res = updateDependency({ fileContent: gomod3, upgrade });
+      const res = updateDependency({
+        fileContent: gomod3,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod3);
       expect(res).toContain(upgrade.newValue);
     });
@@ -53,6 +66,7 @@ describe('modules/manager/gomod/update', () => {
       };
       const res1 = updateDependency({
         fileContent: gomod1,
+        packageFile: 'go.mod',
         upgrade: upgrade1,
       });
       expect(res1).toBeString();
@@ -66,6 +80,7 @@ describe('modules/manager/gomod/update', () => {
       };
       const res2 = updateDependency({
         fileContent: res1!,
+        packageFile: 'go.mod',
         upgrade: upgrade2,
       });
       expect(res2).not.toEqual(res1);
@@ -78,7 +93,11 @@ describe('modules/manager/gomod/update', () => {
         managerData: { lineNumber: 2 },
         newValue: 'v0.7.0',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).toEqual(gomod1);
     });
 
@@ -92,7 +111,11 @@ describe('modules/manager/gomod/update', () => {
         updateType: 'major' as UpdateType,
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pkg/errors v1.0.0');
     });
@@ -107,7 +130,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v2.0.0',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pkg/errors/v2 v2.0.0');
     });
@@ -122,7 +149,11 @@ describe('modules/manager/gomod/update', () => {
         updateType: 'major' as UpdateType,
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('sigs.k8s.io/structured-merge-diff/v6 v6.0.0');
     });
@@ -137,7 +168,11 @@ describe('modules/manager/gomod/update', () => {
         updateType: 'major' as UpdateType,
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(
         'github.com/cucumber/common/messages/go/v19 v19.0.0',
@@ -154,7 +189,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v2.0.0',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('gopkg.in/russross/blackfriday.v2 v2.0.0');
@@ -170,7 +209,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v26.0.0+incompatible',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(
         'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible',
@@ -183,7 +226,11 @@ describe('modules/manager/gomod/update', () => {
         managerData: { lineNumber: 2 },
         newValue: 'v1.15.36',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).toBeNull();
     });
 
@@ -191,6 +238,7 @@ describe('modules/manager/gomod/update', () => {
       // TODO: #22198 bad test, uses invalid null to throwing nullref error
       const res = updateDependency({
         fileContent: null as never,
+        packageFile: 'go.mod',
         upgrade: null as never,
       });
       expect(res).toBeNull();
@@ -203,7 +251,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v1.8.0',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/fatih/color v1.8.0');
     });
@@ -215,7 +267,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v4.8.0',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(gomod2);
       expect(res).toContain(upgrade.newValue);
@@ -231,7 +287,11 @@ describe('modules/manager/gomod/update', () => {
         updateType: 'major' as UpdateType,
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/emirpasic/gods/v2 v2.0.0');
     });
@@ -246,7 +306,11 @@ describe('modules/manager/gomod/update', () => {
         updateType: 'major' as UpdateType,
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/src-d/gcfg/v3 v3.0.0');
     });
@@ -261,7 +325,11 @@ describe('modules/manager/gomod/update', () => {
         updateType: 'major' as UpdateType,
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('golang.org/x/text v1.0.0');
     });
@@ -275,7 +343,11 @@ describe('modules/manager/gomod/update', () => {
         newDigest: '123456123456abcdef',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod2);
       expect(res).toContain('github.com/spf13/jwalterweatherman 123456123456');
       expect(res).toContain(upgrade.newDigest.substring(0, 12));
@@ -290,7 +362,11 @@ describe('modules/manager/gomod/update', () => {
         newDigest: '14d3d4c51834000000',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).toEqual(gomod2);
     });
 
@@ -301,7 +377,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v1.8.0',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod2, upgrade });
+      const res = updateDependency({
+        fileContent: gomod2,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).toBeNull();
     });
 
@@ -312,7 +392,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v26.0.0',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       // Assert that the version still contains +incompatible tag.
       expect(res).toContain(
@@ -327,7 +411,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v26.0.0+incompatible',
         depType: 'require',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).not.toContain(
         'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible+incompatible',
@@ -344,7 +432,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v0.0.1',
         depType: 'replace',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pravesht/gocql v0.0.1');
     });
@@ -359,9 +451,45 @@ describe('modules/manager/gomod/update', () => {
         newMajor: 2,
         updateType: 'major' as UpdateType,
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pravesht/gocql/v2 v2.0.0');
+    });
+
+    // from #41260, a Go module with a `replace` on the same module (for this example) and a multi-line replace being converted to a single-line `replace`
+    it('handles replace line with major version update that bumps both sides of the replace', () => {
+      const gomod = codeBlock`
+        module github.com/walsm232/renovate-gomod-bug-test
+
+        go 1.25
+
+        replace (
+            github.com/grpc-ecosystem/grpc-gateway => github.com/grpc-ecosystem/grpc-gateway v1.16.0
+        )
+      `;
+
+      const upgrade = {
+        depName: 'github.com/grpc-ecosystem/grpc-gateway',
+        managerData: { multiLine: true, lineNumber: 5 },
+        newValue: 'v2.28.0',
+        depType: 'replace',
+        currentValue: 'v1.16.0',
+        newMajor: 2,
+        updateType: 'major' as UpdateType,
+      };
+      const res = updateDependency({
+        fileContent: gomod,
+        packageFile: 'go.mod',
+        upgrade,
+      });
+      expect(res).not.toEqual(gomod);
+      expect(res).toContain(
+        'github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0',
+      );
     });
 
     it('handles replace line with digest', () => {
@@ -376,7 +504,11 @@ describe('modules/manager/gomod/update', () => {
         currentDigest: '14d3d4c51834',
         newDigest: '123456123456abcdef',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(upgrade.newDigest.substring(0, 12));
     });
@@ -391,7 +523,11 @@ describe('modules/manager/gomod/update', () => {
         newMajor: 6,
         updateType: 'major' as UpdateType,
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
     });
@@ -405,20 +541,25 @@ describe('modules/manager/gomod/update', () => {
       const upgrade = {
         depName: 'k8s.io/client-go',
         managerData: { lineNumber: 3, multiLine: true },
-        newValue: 'v2.2.2',
+        newValue: 'v0.22.0',
         depType: 'replace',
         currentValue: 'v0.21.9',
         newMajor: 2,
-        updateType: 'major' as UpdateType,
+        updateType: 'minor' as UpdateType,
       };
-      const res = updateDependency({ fileContent, upgrade });
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(fileContent);
-      expect(res).toContain('k8s.io/client-go/v2 => k8s.io/client-go v2.2.2');
+      expect(res).toContain('k8s.io/client-go => k8s.io/client-go v0.22.0');
     });
 
     it('should return null for replacement', () => {
       const res = updateDependency({
         fileContent: '',
+        packageFile: 'go.mod',
         upgrade: { updateType: 'replacement' },
       });
       expect(res).toBeNull();
@@ -431,7 +572,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v1.1.1',
         depType: 'indirect',
       };
-      const res = updateDependency({ fileContent: gomod1, upgrade });
+      const res = updateDependency({
+        fileContent: gomod1,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(`${upgrade.newValue} // indirect`);
     });
@@ -443,7 +588,11 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v1.5.0',
         depType: 'indirect',
       };
-      const res = updateDependency({ fileContent: gomod3, upgrade });
+      const res = updateDependency({
+        fileContent: gomod3,
+        packageFile: 'go.mod',
+        upgrade,
+      });
       expect(res).not.toEqual(gomod2);
       expect(res).toContain(`${upgrade.newValue} // indirect`);
     });

@@ -5,6 +5,7 @@ export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Pipfile.lock'];
 
 export const url = 'https://pipenv.pypa.io/en/latest';
 export const categories: Category[] = ['python'];
@@ -14,3 +15,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

@@ -360,7 +360,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
@@ -508,7 +508,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
@@ -550,7 +550,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",

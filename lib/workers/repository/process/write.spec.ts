@@ -1,4 +1,5 @@
 import { isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
@@ -39,6 +40,7 @@ beforeEach(() => {
   limits.getConcurrentPrsCount.mockResolvedValue(0);
   limits.getConcurrentBranchesCount.mockResolvedValue(0);
   limits.getPrHourlyCount.mockResolvedValue(0);
+  limits.getCommitsHourlyCount.mockResolvedValue(0);
 });
 
 describe('workers/repository/process/write', () => {
@@ -497,6 +499,45 @@ describe('workers/repository/process/write', () => {
         sha: 'new_sha',
         baseBranch: 'base_branch',
         baseBranchSha: 'base_sha',
+        upgrades: [],
+        pristine: false,
+        automerge: false,
+        prNo: null,
+      });
+    });
+
+    it('when branch sha is different updates it and sets commitTimestamp', async () => {
+      const repoCacheObj: RepoCacheData = {
+        branches: [
+          {
+            branchName: 'branch_name',
+            sha: 'sha',
+            baseBranch: 'base_branch',
+            baseBranchSha: 'base_sha',
+            isBehindBase: true,
+            isModified: true,
+            pristine: true,
+            isConflicted: true,
+            commitFingerprint: '123',
+            upgrades: [],
+            automerge: false,
+            prNo: null,
+          },
+        ],
+      };
+      const commitDate = DateTime.fromISO('2023-05-20T14:25:30.123Z').toUTC();
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      scm.getBranchCommit.mockResolvedValueOnce('new_sha' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce('base_sha' as LongCommitSha);
+      scm.getBranchUpdateDate.mockResolvedValueOnce(commitDate);
+      await expect(
+        syncBranchState('branch_name', 'base_branch'),
+      ).resolves.toEqual({
+        branchName: 'branch_name',
+        sha: 'new_sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+        commitTimestamp: '2023-05-20T14:25:30.123Z',
         upgrades: [],
         pristine: false,
         automerge: false,

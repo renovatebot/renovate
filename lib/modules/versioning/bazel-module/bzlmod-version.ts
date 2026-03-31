@@ -39,7 +39,7 @@ export class Identifier {
     this.asString = value;
     if (Identifier.digitsOnlyMatcher.test(value)) {
       this.isDigitsOnly = true;
-      this.asNumber = parseInt(value);
+      this.asNumber = parseInt(value, 10);
     } else {
       this.isDigitsOnly = false;
       this.asNumber = 0;

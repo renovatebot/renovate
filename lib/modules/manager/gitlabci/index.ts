@@ -4,6 +4,7 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 export { extractAllPackageFiles, extractPackageFile };
+export { knownDepTypes } from './dep-types.ts';
 
 export const displayName = 'GitLab CI/CD';
 export const url = 'https://docs.gitlab.com/ee/ci';

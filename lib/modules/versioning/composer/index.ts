@@ -62,6 +62,8 @@ function convertStabilityModifier(input: string): string {
 
 function normalizeVersion(input: string): string {
   let output = input;
+  // Strip leading + prefix (not a valid composer constraint operator)
+  output = output.replace(regEx(/^\+/), '');
   output = output.replace(regEx(/(^|>|>=|\^|~)v/i), '$1');
   return convertStabilityModifier(output);
 }

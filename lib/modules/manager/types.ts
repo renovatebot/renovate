@@ -60,8 +60,9 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy?: RangeStrategy;
 }
 
-export interface PackageFileContent<T = Record<string, any>>
-  extends ManagerData<T> {
+export interface PackageFileContent<
+  T = Record<string, any>,
+> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
@@ -77,8 +78,9 @@ export interface PackageFileContent<T = Record<string, any>>
   fileFormat?: string;
 }
 
-export interface PackageFile<T = Record<string, any>>
-  extends PackageFileContent<T> {
+export interface PackageFile<
+  T = Record<string, any>,
+> extends PackageFileContent<T> {
   packageFile: string;
 }
 
@@ -129,12 +131,14 @@ export interface LookupUpdate {
  * @property {string} depName - Display name of the package. See #16012
  * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
  */
-export interface PackageDependency<T = Record<string, any>>
-  extends ManagerData<T> {
+export interface PackageDependency<
+  T = Record<string, any>,
+  DepType extends string = string,
+> extends ManagerData<T> {
   currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
-  depType?: string;
+  depType?: DepType;
   fileReplacePosition?: number;
   sharedVariableName?: string;
   lineNumber?: number;
@@ -189,7 +193,10 @@ export interface PackageDependency<T = Record<string, any>>
   isAbandoned?: boolean;
 }
 
-export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
+export interface Upgrade<
+  T = Record<string, any>,
+  DepType extends string = string,
+> extends PackageDependency<T, DepType> {
   workspace?: string;
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
@@ -224,7 +231,6 @@ export interface ArtifactNotice {
 
 export interface ArtifactError {
   fileName?: string;
-  lockFile?: string;
   stderr?: string;
 }
 
@@ -249,6 +255,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
 
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
+  packageFile: string;
   upgrade: Upgrade<T>;
 }
 
@@ -278,11 +285,34 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
-export interface ManagerApi extends ModuleApi {
+export interface DepTypeMetadata {
+  /**
+   * The raw depType set on a given PackageDependency
+   *
+   * @see PackageDependency
+   */
+  depType: string;
+  /**
+   * An alternate name for the `depType`, derived from the Manager's `prettyDepType` used.
+   *
+   * For instance, `optionalDependencies` may have a `prettyDepType` of `optionalDependency`
+   *
+   * Not supported by all Managers.
+   * */
+  prettyDepType?: string;
+  /** Human-readable description of what this depType represents */
+  description: string;
+}
+
+interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
+  knownDepTypes?: readonly DepTypeMetadata[];
+  /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
+  supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
 
@@ -321,10 +351,15 @@ export interface ManagerApi extends ModuleApi {
   ): MaybePromise<UpdateLockedResult>;
 }
 
+export type ManagerApi = ManagerApiBase &
+  // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
+  (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
+    | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
+  );
+
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig<T = Record<string, any>>
-  extends Record<string, any>,
-    ManagerData<T> {
+  extends Record<string, any>, ManagerData<T> {
   // TODO: remove null
   constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
@@ -340,6 +375,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
+  toolSettings?: ToolSettingsOptions;
 
   isLockFileMaintenance?: boolean;
 }

@@ -6,6 +6,7 @@
 #   - `env` can be specified per-step only
 #   - if `run` is used, `shell` must be explicitly specified
 name: 'Calculate matrix for `node_modules` prefetch'
+description: 'Calculate matrix for `node_modules` prefetch'
 inputs:
   repo:
     description: 'Repository name'
@@ -34,7 +35,7 @@ runs:
 
     - name: Check cache miss for MacOS
       id: macos-cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
       with:
         path: node_modules
         key: ${{ env.MACOS_KEY }}

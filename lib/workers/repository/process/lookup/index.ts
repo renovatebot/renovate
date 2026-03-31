@@ -171,7 +171,7 @@ export async function lookupUpdates(
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: config.packageName,
-          message: `Failed to look up ${config.datasource} package ${config.packageName}`,
+          message: `Failed to look up ${config.datasource} package ${config.packageName}: ${lookupError}`,
         };
         logger.debug(
           {
@@ -679,6 +679,7 @@ export async function lookupUpdates(
           ) {
             delete getDigestConfig.lookupName;
             delete getDigestConfig.currentDigest;
+            getDigestConfig.replacementName = update.newName;
           }
 
           // TODO #22198
