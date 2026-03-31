@@ -1,6 +1,13 @@
-import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isPlainObject,
+} from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { MinimumReleaseAgeBehaviour } from '../../../../config/types.ts';
+import type {
+  MinimumReleaseAgeBehaviour,
+  MinimumReleaseAgeConfig,
+} from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
@@ -17,10 +24,67 @@ import { toMs } from '../../../../util/pretty-time.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import { getUpdateType } from './update-type.ts';
 
+/** Map from update type to the corresponding delay key in MinimumReleaseAgeConfig */
+const updateTypeToDelayKey = new Map<string, keyof MinimumReleaseAgeConfig>([
+  ['major', 'delayMajor'],
+  ['minor', 'delayMinor'],
+]);
+
 export interface InternalChecksResult {
   release?: Release;
   pendingChecks: boolean;
   pendingReleases: Release[];
+}
+
+interface ResolvedMinimumReleaseAge {
+  /** Minimum age for the individual release (from default/string form) */
+  releaseMs: number;
+  /** Minimum age for the first release in the version group (from delayMajor/delayMinor keys) */
+  groupMs: number;
+}
+
+/**
+ * Resolves the effective minimum release age configuration.
+ * Supports both string form ("3 days") and object form ({ default: "3 days", delayMinor: "6 days" }).
+ */
+function resolveMinimumReleaseAge(
+  minimumReleaseAge: string | MinimumReleaseAgeConfig | null | undefined,
+  updateType: string | undefined,
+): ResolvedMinimumReleaseAge {
+  if (isNonEmptyString(minimumReleaseAge)) {
+    return {
+      releaseMs: coerceNumber(toMs(minimumReleaseAge), 0),
+      groupMs: 0,
+    };
+  }
+
+  if (isPlainObject(minimumReleaseAge)) {
+    const config = minimumReleaseAge as MinimumReleaseAgeConfig;
+    const releaseMs = config.default
+      ? coerceNumber(toMs(config.default), 0)
+      : 0;
+
+    let groupMs = 0;
+    if (updateType !== undefined) {
+      const delayKey = updateTypeToDelayKey.get(updateType);
+      if (delayKey) {
+        const typeValue = config[delayKey];
+        if (typeValue) {
+          groupMs = coerceNumber(toMs(typeValue), 0);
+        }
+      } else if (updateType === 'patch' && config.delayPatch) {
+        // For patch, the type-specific value overrides the default for individual release age
+        return {
+          releaseMs: coerceNumber(toMs(config.delayPatch), 0),
+          groupMs: 0,
+        };
+      }
+    }
+
+    return { releaseMs, groupMs };
+  }
+
+  return { releaseMs: 0, groupMs: 0 };
 }
 
 export async function filterInternalChecks(
@@ -51,26 +115,35 @@ export async function filterInternalChecks(
       'timestamp-optional': [],
     };
 
-    // Build a map of minor version group -> first release timestamp (before reversing)
-    // This is used for minimumMinorAge checks
-    // Note: sortedReleases is in ascending version order at this point, so the first
-    // occurrence of each minor key is the earliest version (e.g., x.y.0) in that group
+    // Build maps of version group -> first release timestamp (before reversing)
+    // Used for version-group-based minimumReleaseAge checks (major/minor keys)
+    // sortedReleases is in ascending version order at this point, so the first
+    // occurrence of each key is the earliest version in that group
     const minorVersionFirstTimestamp = new Map<
       string,
+      string | null | undefined
+    >();
+    const majorVersionFirstTimestamp = new Map<
+      number,
       string | null | undefined
     >();
     for (const rel of sortedReleases) {
       const major = versioningApi.getMajor(rel.version);
       const minor = versioningApi.getMinor(rel.version);
-      if (major !== null && minor !== null) {
-        const key = `${major}.${minor}`;
-        if (!minorVersionFirstTimestamp.has(key)) {
-          minorVersionFirstTimestamp.set(key, rel.releaseTimestamp);
+      if (major !== null) {
+        if (!majorVersionFirstTimestamp.has(major)) {
+          majorVersionFirstTimestamp.set(major, rel.releaseTimestamp);
+        }
+        if (minor !== null) {
+          const key = `${major}.${minor}`;
+          if (!minorVersionFirstTimestamp.has(key)) {
+            minorVersionFirstTimestamp.set(key, rel.releaseTimestamp);
+          }
         }
       }
     }
 
-    // Get current version's minor key for comparison
+    // Get current version's keys for comparison
     const currentMajor = currentVersion
       ? versioningApi.getMajor(currentVersion)
       : null;
@@ -111,16 +184,11 @@ export async function filterInternalChecks(
       candidateRelease = updatedCandidateRelease;
 
       // Now check for a minimumReleaseAge config
-      const {
-        minimumConfidence,
-        minimumMinorAge,
-        minimumReleaseAge,
-        updateType,
-      } = releaseConfig;
+      const { minimumConfidence, minimumReleaseAge, updateType } =
+        releaseConfig;
 
-      const minimumReleaseAgeMs = isNonEmptyString(minimumReleaseAge)
-        ? coerceNumber(toMs(minimumReleaseAge), 0)
-        : 0;
+      const { releaseMs: minimumReleaseAgeMs, groupMs: minimumGroupAgeMs } =
+        resolveMinimumReleaseAge(minimumReleaseAge, updateType);
 
       if (minimumReleaseAgeMs) {
         const minimumReleaseAgeBehaviour =
@@ -163,37 +231,57 @@ export async function filterInternalChecks(
         }
       }
 
-      // Now check for a minimumMinorAge config
-      const minimumMinorAgeMs = isNonEmptyString(minimumMinorAge)
-        ? coerceNumber(toMs(minimumMinorAge), 0)
-        : 0;
-
-      if (minimumMinorAgeMs) {
+      // Check version-group-based minimumReleaseAge (major/minor keys in object form)
+      if (minimumGroupAgeMs) {
+        const minimumReleaseAgeBehaviour =
+          releaseConfig.minimumReleaseAgeBehaviour;
         const candidateMajor = versioningApi.getMajor(candidateRelease.version);
-        const candidateMinor = versioningApi.getMinor(candidateRelease.version);
 
-        if (candidateMajor !== null && candidateMinor !== null) {
-          const candidateMinorKey = `${candidateMajor}.${candidateMinor}`;
+        if (updateType === 'minor') {
+          const candidateMinor = versioningApi.getMinor(
+            candidateRelease.version,
+          );
 
-          // Only apply if the minor version is different from the current version
-          if (candidateMinorKey !== currentMinorKey) {
-            const firstMinorTimestamp =
-              minorVersionFirstTimestamp.get(candidateMinorKey);
+          if (candidateMajor !== null && candidateMinor !== null) {
+            const candidateMinorKey = `${candidateMajor}.${candidateMinor}`;
 
-            if (firstMinorTimestamp) {
-              if (getElapsedMs(firstMinorTimestamp) < minimumMinorAgeMs) {
-                logger.trace(
-                  { depName, check: 'minimumMinorAge' },
-                  `Release ${candidateRelease.version} is pending - minor version ${candidateMinorKey} is not old enough`,
-                );
+            // Only apply if the minor version is different from the current version
+            if (candidateMinorKey !== currentMinorKey) {
+              const firstMinorTimestamp =
+                minorVersionFirstTimestamp.get(candidateMinorKey);
+
+              if (firstMinorTimestamp) {
+                if (getElapsedMs(firstMinorTimestamp) < minimumGroupAgeMs) {
+                  logger.trace(
+                    { depName, check: 'minimumReleaseAge' },
+                    `Release ${candidateRelease.version} is pending - minor version ${candidateMinorKey} is not old enough`,
+                  );
+                  pendingReleases.unshift(candidateRelease);
+                  continue;
+                }
+              } else if (minimumReleaseAgeBehaviour === 'timestamp-required') {
                 pendingReleases.unshift(candidateRelease);
                 continue;
               }
-            } else {
-              // No timestamp for the first minor release
-              const minimumReleaseAgeBehaviour =
-                releaseConfig.minimumReleaseAgeBehaviour;
-              if (minimumReleaseAgeBehaviour === 'timestamp-required') {
+            }
+          }
+        } else if (updateType === 'major') {
+          if (candidateMajor !== null) {
+            // Only apply if the major version is different from the current version
+            if (candidateMajor !== currentMajor) {
+              const firstMajorTimestamp =
+                majorVersionFirstTimestamp.get(candidateMajor);
+
+              if (firstMajorTimestamp) {
+                if (getElapsedMs(firstMajorTimestamp) < minimumGroupAgeMs) {
+                  logger.trace(
+                    { depName, check: 'minimumReleaseAge' },
+                    `Release ${candidateRelease.version} is pending - major version ${candidateMajor} is not old enough`,
+                  );
+                  pendingReleases.unshift(candidateRelease);
+                  continue;
+                }
+              } else if (minimumReleaseAgeBehaviour === 'timestamp-required') {
                 pendingReleases.unshift(candidateRelease);
                 continue;
               }

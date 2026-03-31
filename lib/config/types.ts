@@ -45,6 +45,13 @@ export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
 
+export interface MinimumReleaseAgeConfig {
+  default?: string;
+  delayMajor?: string;
+  delayMinor?: string;
+  delayPatch?: string;
+}
+
 // TODO: Proper typings
 /**
  * Any configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration), or:
@@ -110,8 +117,7 @@ export interface RenovateSharedConfig {
   labels?: string[];
   manager?: string;
   milestone?: number;
-  minimumReleaseAge?: Nullish<string>;
-  minimumMinorAge?: Nullish<string>;
+  minimumReleaseAge?: Nullish<string | MinimumReleaseAgeConfig>;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -621,6 +627,11 @@ export interface RenovateOptionBase {
   allowedValues?: string[];
 
   allowString?: boolean;
+
+  /**
+   * Allow object values for string-typed options
+   */
+  allowObject?: boolean;
 
   cli?: boolean;
 
