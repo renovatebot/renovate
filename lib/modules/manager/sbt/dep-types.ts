@@ -1,11 +1,5 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-/**
- * sbt depType values are dynamic: the `plugin` value is hardcoded for
- * `addSbtPlugin`/`addCompilerPlugin`, but other values come from the
- * classifier or configuration string in the build file (e.g. `% "test"`).
- * This list enumerates common known values for documentation purposes.
- */
 export const knownDepTypes = [
   {
     depType: 'plugin',

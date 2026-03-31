@@ -1,10 +1,5 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-/**
- * poetry depTypes are partially dynamic: group names from
- * `[tool.poetry.group.<name>.dependencies]` become depTypes at runtime.
- * The values below cover all known/common depTypes.
- */
 export const knownDepTypes = [
   {
     depType: 'dependencies',

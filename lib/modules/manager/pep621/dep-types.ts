@@ -1,10 +1,5 @@
 import type { DepTypeMetadata } from '../types.ts';
 
-/**
- * pep621 depTypes are partially dynamic: Hatch environment names
- * produce `tool.hatch.envs.${envName}` depTypes at runtime.
- * The values below cover all known/common depTypes.
- */
 export const knownDepTypes = [
   {
     depType: 'requires-python',
