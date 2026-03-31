@@ -35,6 +35,7 @@ export const GITHUB_API_USING_HOST_TYPES = [
   'github-releases',
   'github-release-attachments',
   'github-tags',
+  'github-digest',
   'pod',
   'hermit',
   'github-changelog',
