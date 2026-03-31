@@ -457,7 +457,7 @@ describe('modules/platform/gerrit/scm', () => {
       });
     });
 
-    it('commitAndPush() - existing change-set without new changes', async () => {
+    it('commitAndPush() - existing change without new changes', async () => {
       const existingChange = partial<GerritChange>({
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
         branch: 'main',
