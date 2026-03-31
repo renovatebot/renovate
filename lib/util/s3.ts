@@ -18,6 +18,9 @@ export function getS3Client(
     s3Instance = new S3Client({
       ...(endpoint && { endpoint }),
       ...(forcePathStyle && { forcePathStyle: true }),
+      ...(endpoint && {
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+      }),
     });
   }
   return s3Instance;

@@ -44,6 +44,9 @@ describe('util/s3', () => {
       query: undefined,
     });
     expect(client1.config.forcePathStyle).toBeTrue();
+    expect(await client1.config.requestChecksumCalculation()).toBe(
+      'WHEN_REQUIRED',
+    );
   });
 
   it('uses s3 values from globalConfig instead of GlobalConfig class', async () => {
@@ -59,5 +62,8 @@ describe('util/s3', () => {
       query: undefined,
     });
     expect(client1.config.forcePathStyle).toBeTrue();
+    expect(await client1.config.requestChecksumCalculation()).toBe(
+      'WHEN_REQUIRED',
+    );
   });
 });
