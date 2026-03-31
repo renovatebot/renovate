@@ -17,3 +17,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [MavenDatasource.id, DockerDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';
