@@ -584,10 +584,6 @@ describe('util/http/host-rules', () => {
       });
     });
 
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('fallback to github for non-listed hostType targeting GHE endpoint', () => {
       // github-digest is NOT in GITHUB_API_USING_HOST_TYPES,
       // but should still get credentials when targeting the GHE endpoint
