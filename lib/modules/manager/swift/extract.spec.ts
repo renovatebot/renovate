@@ -177,6 +177,18 @@ describe('modules/manager/swift/extract', () => {
       });
     });
 
+    it('returns null for unparseable SSH URL', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "ssh://", from: "1.0.0")
+          ]
+        )
+      `;
+      expect(extractPackageFile(content)).toBeNull();
+    });
+
     it('extracts other dependencies with git-tags datasource', () => {
       const content = `
         let package = Package(
