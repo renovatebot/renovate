@@ -692,8 +692,7 @@ export async function checkoutBranchFromRemote(
 }
 
 /**
- * Delete a virtual branch that was initialized from a non-standard ref.
- * Used by platforms like Gerrit where changes are represented as refs instead of regular branches.
+ * Delete a virtual branch and its associated remote-tracking ref.
  *
  * @param branchName Virtual branch name to delete
  */

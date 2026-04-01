@@ -164,8 +164,8 @@ export async function initRepo({
     );
   }
 
-  // Collect open Gerrit changes to initialize as virtual branches
-  // This allows the DefaultGitScm to work with Gerrit changes as if they were regular Git branches.
+  // Collect open Gerrit changes to initialize as virtual branches.
+  // This allows DefaultGitScm to treat them as regular Git branches.
   const openChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',

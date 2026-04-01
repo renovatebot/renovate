@@ -17,15 +17,16 @@ export type GitNoVerifyOption = 'commit' | 'push';
 export type LongCommitSha = string & { __longCommitSha: never };
 
 /**
- * Represents a virtual branch to initialize from a non-standard ref.
- * Used by platforms like Gerrit where changes are represented as refs instead of regular branches.
+ * Represents a virtual branch initialized from a non-standard ref.
+ * Used by platforms like Gerrit where changes are represented as refs
+ * (e.g., refs/changes/34/1234/1) instead of regular branches.
  */
 export interface VirtualBranch {
-  /** The branch name (e.g., 'renovate/typescript-5.x') */
+  /** The virtual branch name (e.g., 'renovate/typescript-5.x') */
   name: string;
-  /** The ref this branch can be fetched from (e.g., 'refs/changes/34/1234/1') */
+  /** The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1') */
   ref: string;
-  /** The commit SHA this branch points to */
+  /** The commit SHA this virtual branch points to */
   sha: LongCommitSha;
 }
 
@@ -39,8 +40,8 @@ export interface StorageConfig {
   cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
   /**
-   * Virtual branches to initialize from non-standard refs.
-   * Used by platforms like Gerrit where changes are represented as refs instead of regular branches.
+   * Virtual branches to initialize from non-standard refs (e.g., Gerrit change refs).
+   * Each virtual branch is fetched and stored as refs/remotes/origin/<name>.
    */
   virtualBranches?: VirtualBranch[];
 }

@@ -13,8 +13,8 @@ import { client } from './client.ts';
 /**
  * Gerrit SCM strategy:
  * Instead of implementing custom branch operations, we fetch all open Gerrit changes
- * as Git refs (refs/remotes/origin/branchName) after repository initialization.
- * This allows us to leverage DefaultGitScm for most operations, treating Gerrit changes
+ * as virtual branches (refs/remotes/origin/<branchName>) after repository initialization.
+ * This allows us to leverage DefaultGitScm for most operations, treating virtual branches
  * as regular Git branches, while minimizing Gerrit API requests.
  */
 
@@ -124,7 +124,7 @@ export class GerritScm extends DefaultGitScm {
     return null; // empty commit, no changes in this Gerrit Change
   }
 
-  // Delete virtual branch created from a Gerrit change ref
+  // Delete virtual branch created from a Gerrit change
   // Note: Gerrit changes themselves are abandoned through the API, not deleted as branches
   override async deleteBranch(branchName: string): Promise<void> {
     pendingChangeBranches.delete(branchName);
