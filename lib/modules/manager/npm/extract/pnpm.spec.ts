@@ -95,7 +95,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
   describe('.detectPnpmWorkspaces()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
 
       // The real implementations of these functions are used for this block;
       // they do static path manipulation.
