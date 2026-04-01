@@ -233,6 +233,17 @@ describe('modules/platform/gerrit/index', () => {
             }),
           },
         }),
+        // change without Renovate-Branch footer should be skipped
+        partial<GerritChange>({
+          _number: 99999,
+          current_revision: 'sha789' as LongCommitSha,
+          revisions: {
+            sha789: partial<GerritRevisionInfo>({
+              ref: 'refs/changes/99/99999/1',
+              commit_with_footers: 'commit message without branch footer',
+            }),
+          },
+        }),
         partial<GerritChange>({
           _number: 12346,
           created: '2025-04-14 16:33:37.000000000',
