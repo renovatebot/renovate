@@ -99,8 +99,8 @@ importers:
         specifier: 5.11.0
         version: 5.11.0
       '@renovatebot/detect-tools':
-        specifier: 2.0.0
-        version: 2.0.0
+        specifier: 2.0.1
+        version: 2.0.1
       '@renovatebot/good-enough-parser':
         specifier: 2.0.0
         version: 2.0.0
@@ -1960,8 +1960,8 @@ packages:
       '@node-rs/xxhash':
         optional: true
 
-  '@renovatebot/detect-tools@2.0.0':
-    resolution: {integrity: sha512-bdf6QcWyfXqBl4/8l96XCzyR+u28tIgKFnR+sJFeGht8u+e9fOWf5ZAZ+Mkq3qSXT4xBRwbYYE3udZC0wU2UIw==}
+  '@renovatebot/detect-tools@2.0.1':
+    resolution: {integrity: sha512-9cvKD85YA0h8UGeI/hPaHT2xqg/DrWtHhFE7FMIov9+sg67PwqUmr5Gtl6e8FE6ZZTQWeCawJCAqNRoSU8kX8A==}
     engines: {node: '>=22.12.0'}
 
   '@renovatebot/good-enough-parser@2.0.0':
@@ -8462,7 +8462,7 @@ snapshots:
     dependencies:
       cluster-key-slot: 1.1.2
 
-  '@renovatebot/detect-tools@2.0.0':
+  '@renovatebot/detect-tools@2.0.1':
     dependencies:
       fs-extra: 11.3.4
       toml-eslint-parser: 0.12.0
