@@ -125,6 +125,12 @@ export interface LookupUpdate {
   libYears?: number;
 
   version?: string;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
 }
 
 /**
@@ -191,6 +197,12 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
 }
 
 export interface Upgrade<
