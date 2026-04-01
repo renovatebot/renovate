@@ -65,6 +65,22 @@ The default values is `all`, which means all of the above detectors are used. Se
 - `github`
 - `env`
 
+### File exporter
+
+The OpenTelemetry data can also be exported into a JSON Lines (JSONL) file, in OTLP JSON format.
+
+This is configured using the `RENOVATE_TRACING_FILE_EXPORTER_PATH` environment variable.
+
+You can then ingest this data into other tools, for instance:
+
+```sh title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
+while IFS= read -r line; do
+  curl -s -X POST http://localhost:4318/v1/traces \
+    -H 'Content-Type: application/json' \
+    -d "$line"
+done < /tmp/traces.jsonl
+```
+
 ## Supported OTLP data
 
 ### Traces

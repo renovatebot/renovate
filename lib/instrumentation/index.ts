@@ -28,8 +28,11 @@ import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import { getResourceDetectors } from './detectors.ts';
+import { FileSpanExporter } from './file-exporter.ts';
 import type { RenovateSpanOptions } from './types.ts';
 import {
+  getFileExporterPath,
+  isFileExporterEnabled,
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
@@ -68,6 +71,12 @@ export function init(): void {
   if (isTraceSendingEnabled()) {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
+  }
+
+  if (isFileExporterEnabled()) {
+    spanProcessors.push(
+      new SimpleSpanProcessor(new FileSpanExporter(getFileExporterPath())),
+    );
   }
 
   const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors

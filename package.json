@@ -169,6 +169,7 @@
     "@opentelemetry/context-async-hooks": "2.6.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.213.0",
     "@opentelemetry/instrumentation": "0.213.0",
+    "@opentelemetry/otlp-transformer": "0.213.0",
     "@opentelemetry/instrumentation-bunyan": "0.58.0",
     "@opentelemetry/instrumentation-http": "0.213.0",
     "@opentelemetry/instrumentation-redis": "0.61.0",
