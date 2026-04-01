@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import type { DirectoryResult } from 'tmp-promise';
+import tmp from 'tmp-promise';
 import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
@@ -24,10 +25,12 @@ describe('workers/repository/index', () => {
   describe('renovateRepository()', () => {
     let config: RenovateConfig;
     let localDir: string;
+    let localDirResult: DirectoryResult;
 
     beforeEach(async () => {
       GlobalConfig.reset();
-      localDir = await fs.mkdtemp('/tmp/renovate-repository-');
+      localDirResult = await tmp.dir({ unsafeCleanup: true });
+      localDir = localDirResult.path;
       config = {
         ...getConfig(),
         localDir,
@@ -45,7 +48,7 @@ describe('workers/repository/index', () => {
     });
 
     afterEach(async () => {
-      await fs.remove(localDir);
+      await localDirResult?.cleanup();
       GlobalConfig.reset();
     });
 
