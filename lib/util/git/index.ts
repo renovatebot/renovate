@@ -698,19 +698,15 @@ export async function checkoutBranchFromRemote(
  * @param branchName Virtual branch name to delete
  */
 export async function deleteVirtualBranch(branchName: string): Promise<void> {
-  await syncGit();
   // Delete local branch if it exists
   await deleteBranch(branchName, { localBranch: true });
 
-  // Delete remote-tracking ref that was created from refspec
+  // Delete remote-tracking ref that was created during init
   // Note: git update-ref -d succeeds even if ref doesn't exist
   await git.raw(['update-ref', '-d', `refs/remotes/origin/${branchName}`]);
   logger.debug(
     `Deleted remote-tracking ref: refs/remotes/origin/${branchName}`,
   );
-
-  // Clean up branch commit tracking
-  delete config.branchCommits[branchName];
 }
 
 /**
