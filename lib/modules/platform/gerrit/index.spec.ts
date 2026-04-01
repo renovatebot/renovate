@@ -522,8 +522,19 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('updatePr() - with addLabels => add hashtags', async () => {
-      const change = partial<GerritChange>({});
-      clientMock.getChange.mockResolvedValueOnce(change);
+      const change = partial<GerritChange>({
+        _number: 123456,
+        created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
+        current_revision: 'some-revision' as LongCommitSha,
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
@@ -535,8 +546,19 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('updatePr() - with removeLabels => remove hashtags', async () => {
-      const change = partial<GerritChange>({});
-      clientMock.getChange.mockResolvedValueOnce(change);
+      const change = partial<GerritChange>({
+        _number: 123456,
+        created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
+        current_revision: 'some-revision' as LongCommitSha,
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
@@ -548,8 +570,19 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('updatePr() - with addLabels and removeLabels => update hashtags in single call', async () => {
-      const change = partial<GerritChange>({});
-      clientMock.getChange.mockResolvedValueOnce(change);
+      const change = partial<GerritChange>({
+        _number: 123456,
+        created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
+        current_revision: 'some-revision' as LongCommitSha,
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
@@ -604,6 +637,7 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       const pr = await gerrit.createPr({
@@ -638,6 +672,7 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       const pr = await gerrit.createPr({
@@ -675,6 +710,7 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       const pr = await gerrit.createPr({
@@ -736,6 +772,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('createPr() - add body as message and save to cache', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
       const change = partial<GerritChange>({
         _number: 123456,
         created: '2025-04-14 16:33:37.000000000',
