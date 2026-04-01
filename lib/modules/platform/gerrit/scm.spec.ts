@@ -359,7 +359,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
   });
 
-  describe('mergeToLocal', () => {
+  describe('mergeToLocal()', () => {
     it('no change exists', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       git.mergeToLocal.mockResolvedValueOnce();
@@ -446,7 +446,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitAndPush() - create first commit but does not push', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
+      clientMock.getBranchChange.mockResolvedValueOnce(null);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
         parentCommitSha: 'parentSha' as LongCommitSha,
