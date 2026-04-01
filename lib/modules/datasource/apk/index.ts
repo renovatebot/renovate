@@ -11,7 +11,7 @@ import { joinUrlParts } from '../../../util/url.ts';
 import { id as looseVersioning } from '../../versioning/loose/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { parseApkIndex } from './parser.ts';
+import { parseApkIndexFile } from './parser.ts';
 import type { ApkPackage } from './types.ts';
 
 export const apkDatasourceId = 'apk';
@@ -54,59 +54,10 @@ export class ApkDatasource extends Datasource {
   }
 
   /**
-   * Fetches the APK index file from the repository
-   * @param {string} registryUrl - The URL of the APK repository
-   * @returns {string} The uncompressed APKINDEX content of the APK index file
+   * Parses an extracted APKINDEX file (line-by-line). Exposed for tests.
    */
-  private async getApkIndex(registryUrl: string): Promise<string> {
-    const indexUrl = joinUrlParts(registryUrl, 'APKINDEX.tar.gz');
-
-    try {
-      logger.debug({ indexUrl }, 'Attempting to download APKINDEX.tar.gz');
-      const response = await this.http.getBuffer(indexUrl);
-      return await this.extractApkIndexFromTarGz(response.body);
-    } catch (err) {
-      if (err instanceof HttpError) {
-        const statusCode = err.response?.statusCode;
-        if (statusCode === 429 || (statusCode && statusCode >= 500)) {
-          throw new ExternalHostError(err);
-        }
-      }
-      throw err;
-    }
-  }
-
-  /**
-   * Extracts the APK index content from a tar.gz buffer
-   */
-  private async extractApkIndexFromTarGz(buffer: Buffer): Promise<string> {
-    const extractId = randomUUID();
-    const cacheDir = await fs.ensureCacheDir(upath.join('apk', extractId));
-    const tarFile = upath.join(cacheDir, 'APKINDEX.tar.gz');
-    const extractedFile = upath.join(cacheDir, 'APKINDEX');
-
-    try {
-      await fs.outputCacheFile(tarFile, buffer);
-
-      await tarExtract({
-        file: tarFile,
-        cwd: cacheDir,
-        filter: (path) => path === 'APKINDEX',
-      });
-
-      if (await fs.cachePathExists(extractedFile)) {
-        logger.debug('Successfully extracted APKINDEX content');
-        return await fs.readCacheFile(extractedFile, 'utf8');
-      }
-
-      logger.warn('APKINDEX file not found in tar archive');
-      return '';
-    } catch (err) /* v8 ignore next 3 -- hard to test tar parser errors */ {
-      logger.warn({ err }, 'Error extracting APK index from tar.gz');
-      return '';
-    } finally {
-      await fs.rmCache(cacheDir);
-    }
+  private async parseApkIndexFile(path: string): Promise<ApkPackage[]> {
+    return parseApkIndexFile(path);
   }
 
   /**
@@ -115,9 +66,38 @@ export class ApkDatasource extends Datasource {
   private async _getPackages(registryUrl: string): Promise<ApkPackage[]> {
     logger.debug(`Fetching APK packages from ${registryUrl}`);
 
+    const indexUrl = joinUrlParts(registryUrl, 'APKINDEX.tar.gz');
+    const extractId = randomUUID();
+    const cacheDir = await fs.ensureCacheDir(upath.join('apk', extractId));
+    const tarFile = upath.join(cacheDir, 'APKINDEX.tar.gz');
+    const extractedFile = upath.join(cacheDir, 'APKINDEX');
+
     try {
-      const indexContent = await this.getApkIndex(registryUrl);
-      const packages = parseApkIndex(indexContent);
+      logger.debug({ indexUrl }, 'Attempting to download APKINDEX.tar.gz');
+      const readStream = this.http.stream(indexUrl);
+      const writeStream = fs.createCacheWriteStream(tarFile);
+      await fs.pipeline(readStream, writeStream);
+
+      await tarExtract({
+        file: tarFile,
+        cwd: cacheDir,
+        filter: (path) => path === 'APKINDEX',
+      });
+
+      if (!(await fs.cachePathExists(extractedFile))) {
+        logger.warn('APKINDEX file not found in tar archive');
+        return [];
+      }
+
+      logger.debug('Successfully extracted APKINDEX content');
+
+      let packages: ApkPackage[] = [];
+      try {
+        packages = await this.parseApkIndexFile(extractedFile);
+      } catch (err) {
+        logger.warn({ err }, 'Error parsing APK index file');
+        return [];
+      }
 
       logger.debug(
         { registryUrl, packageCount: packages.length },
@@ -126,8 +106,20 @@ export class ApkDatasource extends Datasource {
 
       return packages;
     } catch (err) {
-      logger.warn({ registryUrl, err }, 'Failed to fetch APK packages');
-      throw err;
+      if (err instanceof HttpError) {
+        const statusCode = err.response?.statusCode;
+        if (statusCode === 429 || (statusCode && statusCode >= 500)) {
+          throw new ExternalHostError(err);
+        }
+        logger.warn({ registryUrl, err }, 'Failed to fetch APK packages');
+        throw err;
+      }
+
+      /* v8 ignore next 2 -- hard to test tar parser errors */
+      logger.warn({ err }, 'Error extracting APK index from tar.gz');
+      return [];
+    } finally {
+      await fs.rmCache(cacheDir);
     }
   }
 

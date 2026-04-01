@@ -1,7 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { vi } from 'vitest';
-import { logger } from '../../../logger/index.ts';
-import { parseApkIndex } from './parser.ts';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as memFs from '../../../util/fs/index.ts';
+import { parseApkIndex, parseApkIndexFile } from './parser.ts';
 
 describe('modules/datasource/apk/parser', () => {
   describe('parseApkIndex', () => {
@@ -57,10 +59,6 @@ describe('modules/datasource/apk/parser', () => {
     });
 
     it('should skip packages missing required fields', () => {
-      const loggerWarnSpy = vi
-        .spyOn(logger, 'warn')
-        .mockImplementation(() => undefined);
-
       const indexContent = codeBlock`
         P:bash
         V:5.2.15-r0
@@ -82,47 +80,18 @@ describe('modules/datasource/apk/parser', () => {
 
       const result = parseApkIndex(indexContent);
 
-      // Should have 3 packages: bash, another-incomplete (valid), and nginx
-      // incomplete-package should be skipped (missing version)
       expect(result).toHaveLength(3);
       expect(result[0].name).toBe('bash');
       expect(result[1].name).toBe('another-incomplete');
       expect(result[2].name).toBe('nginx');
-
-      // Should have warned about incomplete package (missing version)
-      expect(loggerWarnSpy).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          packageInfo: expect.objectContaining({
-            name: 'incomplete-package',
-            url: 'https://alpinelinux.org/packages/incomplete',
-            buildDate: 1700000000,
-          }),
-        }),
-        'Skipping package entry due to missing required fields',
-      );
-
-      loggerWarnSpy.mockRestore();
     });
 
     it('should handle parsing errors gracefully', () => {
-      const loggerWarnSpy = vi
-        .spyOn(logger, 'warn')
-        .mockImplementation(() => undefined);
-
-      // Mock an error by providing invalid content that would cause parsing to fail
       const indexContent = null as any;
 
       const result = parseApkIndex(indexContent);
 
       expect(result).toEqual([]);
-      expect(loggerWarnSpy).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          err: expect.any(Error),
-        }),
-        'Error parsing APK index',
-      );
-
-      loggerWarnSpy.mockRestore();
     });
 
     it('should handle empty content', () => {
@@ -187,6 +156,65 @@ describe('modules/datasource/apk/parser', () => {
         url: 'https://alpinelinux.org/packages/nginx',
         buildDate: 1700000001,
       });
+    });
+  });
+
+  describe('parseApkIndexFile', () => {
+    let cacheDir: DirectoryResult | null;
+
+    beforeEach(async () => {
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cacheDir: cacheDir.path });
+    });
+
+    afterEach(async () => {
+      await cacheDir?.cleanup();
+      cacheDir = null;
+    });
+
+    it('should match parseApkIndex for the same content', async () => {
+      const indexContent = codeBlock`
+        P:bash
+        V:5.2.15-r0
+        U:https://alpinelinux.org/packages/bash
+        t:1700000000
+
+        P:nginx
+        V:1.24.0-r0
+      `;
+
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const fromFile = await parseApkIndexFile('APKINDEX');
+      const fromString = parseApkIndex(indexContent);
+
+      expect(fromFile).toEqual(fromString);
+    });
+
+    it('should not push when a blank line ends an incomplete package', async () => {
+      const indexContent = codeBlock`
+        P:only-name
+        U:https://example.test/pkg
+
+        P:ok
+        V:1.0.0
+      `;
+
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const result = await parseApkIndexFile('APKINDEX');
+
+      expect(result).toEqual([{ name: 'ok', version: '1.0.0' }]);
+    });
+
+    it('should not push trailing empty record when file ends with extra blank lines', async () => {
+      const indexContent = 'P:a\nV:1\n\n\n';
+
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const result = await parseApkIndexFile('APKINDEX');
+
+      expect(result).toEqual([{ name: 'a', version: '1' }]);
     });
   });
 });

@@ -204,19 +204,15 @@ describe('modules/datasource/apk/index', () => {
         p:cmd:bash=5.3-r3
       `;
 
-      // Mock HTTP request
+      const apkDatasource = new ApkDatasource();
+      const tarGzBuffer = await createTarGz([
+        { name: 'APKINDEX', content: indexContent },
+      ]);
+
       httpMock
         .scope('https://packages.wolfi.dev')
         .get('/os/x86_64/APKINDEX.tar.gz')
-        .reply(200, Buffer.from('mock-tar-gz-data'));
-
-      // Mock the tar.gz extraction to return our test data
-      const apkDatasource = new ApkDatasource();
-      const extractSpy = vi.spyOn(
-        apkDatasource as any,
-        'extractApkIndexFromTarGz',
-      );
-      extractSpy.mockResolvedValue(indexContent);
+        .reply(200, tarGzBuffer);
 
       const result = await apkDatasource.getReleases({
         packageName: 'bash',
@@ -241,8 +237,6 @@ describe('modules/datasource/apk/index', () => {
           },
         ],
       });
-
-      extractSpy.mockRestore();
     });
 
     it('should handle packages with URL field', async () => {
@@ -264,18 +258,15 @@ describe('modules/datasource/apk/index', () => {
         p:cmd:nginx=1.28.0-r3
       `;
 
-      // Mock HTTP request
+      const apkDatasource = new ApkDatasource();
+      const tarGzBuffer = await createTarGz([
+        { name: 'APKINDEX', content: indexContent },
+      ]);
+
       httpMock
         .scope('https://dl-cdn.alpinelinux.org')
         .get('/alpine/latest-stable/main/x86_64/APKINDEX.tar.gz')
-        .reply(200, Buffer.from('mock-tar-gz-data'));
-
-      const apkDatasource = new ApkDatasource();
-      const extractSpy = vi.spyOn(
-        apkDatasource as any,
-        'extractApkIndexFromTarGz',
-      );
-      extractSpy.mockResolvedValue(indexContent);
+        .reply(200, tarGzBuffer);
 
       const result = await apkDatasource.getReleases({
         packageName: 'nginx',
@@ -294,8 +285,6 @@ describe('modules/datasource/apk/index', () => {
           },
         ],
       });
-
-      extractSpy.mockRestore();
     });
 
     it('should return null for unknown package', async () => {
@@ -316,18 +305,15 @@ describe('modules/datasource/apk/index', () => {
         p:cmd:bash=5.3-r1
       `;
 
-      // Mock HTTP request
+      const apkDatasource = new ApkDatasource();
+      const tarGzBuffer = await createTarGz([
+        { name: 'APKINDEX', content: indexContent },
+      ]);
+
       httpMock
         .scope('https://packages.wolfi.dev')
         .get('/os/x86_64/APKINDEX.tar.gz')
-        .reply(200, Buffer.from('mock-tar-gz-data'));
-
-      const apkDatasource = new ApkDatasource();
-      const extractSpy = vi.spyOn(
-        apkDatasource as any,
-        'extractApkIndexFromTarGz',
-      );
-      extractSpy.mockResolvedValue(indexContent);
+        .reply(200, tarGzBuffer);
 
       const result = await apkDatasource.getReleases({
         packageName: 'unknown-package',
@@ -335,8 +321,6 @@ describe('modules/datasource/apk/index', () => {
       });
 
       expect(result).toBeNull();
-
-      extractSpy.mockRestore();
     });
 
     it('should handle packages without buildDate', async () => {
@@ -354,18 +338,15 @@ describe('modules/datasource/apk/index', () => {
         c:abc123def456
       `;
 
-      // Mock HTTP request
+      const apkDatasource = new ApkDatasource();
+      const tarGzBuffer = await createTarGz([
+        { name: 'APKINDEX', content: indexContent },
+      ]);
+
       httpMock
         .scope('https://packages.wolfi.dev')
         .get('/os/x86_64/APKINDEX.tar.gz')
-        .reply(200, Buffer.from('mock-tar-gz-data'));
-
-      const apkDatasource = new ApkDatasource();
-      const extractSpy = vi.spyOn(
-        apkDatasource as any,
-        'extractApkIndexFromTarGz',
-      );
-      extractSpy.mockResolvedValue(indexContent);
+        .reply(200, tarGzBuffer);
 
       const result = await apkDatasource.getReleases({
         packageName: 'minimal-package',
@@ -382,8 +363,6 @@ describe('modules/datasource/apk/index', () => {
           },
         ],
       });
-
-      extractSpy.mockRestore();
     });
   });
 
@@ -473,18 +452,18 @@ describe('modules/datasource/apk/index', () => {
     });
 
     it('should handle extraction errors gracefully', async () => {
-      // Mock HTTP request
+      const apkDatasource = new ApkDatasource();
+      const tarGzBuffer = await createTarGz([
+        { name: 'APKINDEX', content: 'P:bash\nV:5.0.0\n' },
+      ]);
+
       httpMock
         .scope('https://packages.wolfi.dev')
         .get('/os/x86_64/APKINDEX.tar.gz')
-        .reply(200, Buffer.from('mock-tar-gz-data'));
+        .reply(200, tarGzBuffer);
 
-      const apkDatasource = new ApkDatasource();
-      const extractSpy = vi.spyOn(
-        apkDatasource as any,
-        'extractApkIndexFromTarGz',
-      );
-      extractSpy.mockRejectedValue(new Error('Extraction failed'));
+      const parseSpy = vi.spyOn(apkDatasource as any, 'parseApkIndexFile');
+      parseSpy.mockRejectedValue(new Error('Parse failed'));
 
       const result = await apkDatasource.getReleases({
         packageName: 'bash',
@@ -492,7 +471,7 @@ describe('modules/datasource/apk/index', () => {
       });
 
       expect(result).toBeNull();
-      extractSpy.mockRestore();
+      parseSpy.mockRestore();
     });
 
     it('should handle invalid gzip data', async () => {
