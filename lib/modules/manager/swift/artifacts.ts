@@ -13,6 +13,26 @@ import type {
 import type { PackageResolvedPin } from './schema.ts';
 import { PackageResolvedJson } from './schema.ts';
 
+/**
+ * Extract a plain semver version from a value that may contain
+ * Swift Package Manager range syntax (e.g. `from: "1.0.0"`).
+ *
+ * Package.resolved stores bare versions like `"1.0.0"`, but
+ * `dep.newVersion` may arrive with a `v` prefix or, in some
+ * edge cases, wrapped in a range operator copied from
+ * Package.swift (`from: "1.0.0"`, `exact: "1.0.0"`, etc.).
+ * Writing the range syntax verbatim produces invalid JSON.
+ */
+export function extractPlainVersion(version: string): string {
+  const rangeMatch = regEx(
+    /^(?:from|exact|upToNextMajor|upToNextMinor)\s*:\s*"([^"]+)"$/,
+  ).exec(version);
+  if (rangeMatch) {
+    return rangeMatch[1];
+  }
+  return version.replace(regEx(/^v/), '');
+}
+
 async function findPackageResolvedFiles(): Promise<string[]> {
   const fileList = await scm.getFileList();
   return fileList.filter((f) => f.endsWith('Package.resolved'));
@@ -208,7 +228,7 @@ export async function updateArtifacts({
         continue;
       }
 
-      const resolvedVersion = dep.newVersion.replace(regEx(/^v/), '');
+      const resolvedVersion = extractPlainVersion(dep.newVersion);
 
       // Skip if already up-to-date
       if (pin.state.version === resolvedVersion) {

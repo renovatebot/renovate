@@ -3,7 +3,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import * as datasource from '../../datasource/index.ts';
-import { updateArtifacts } from './artifacts.ts';
+import { extractPlainVersion, updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../datasource/index.ts', async () => {
@@ -71,6 +71,20 @@ const v3Fixture = JSON.stringify(
   null,
   2,
 );
+
+describe('modules/manager/swift/artifacts', () => {
+  it.each([
+    ['v5.10.0', '5.10.0'],
+    ['5.10.0', '5.10.0'],
+    ['from: "37.0.0"', '37.0.0'],
+    ['exact: "1.2.3"', '1.2.3'],
+    ['upToNextMajor: "2.0.0"', '2.0.0'],
+    ['upToNextMinor: "3.1.0"', '3.1.0'],
+    ['v1.0.0-beta.1', '1.0.0-beta.1'],
+  ])('extractPlainVersion(%j) => %j', (input, expected) => {
+    expect(extractPlainVersion(input)).toBe(expected);
+  });
+});
 
 describe('modules/manager/swift/artifacts', () => {
   it('returns null when no Package.resolved files exist', async () => {
@@ -199,7 +213,7 @@ describe('modules/manager/swift/artifacts', () => {
     );
   });
 
-  it('does not write `from:` range to Package.resolved', async () => {
+  it('does not write `from:` range to Package.resolved when newValue has range syntax', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2Fixture);
     vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
@@ -222,6 +236,36 @@ describe('modules/manager/swift/artifacts', () => {
     const { contents } = result![0].file as { contents: string };
     expect(contents).toContain('"version": "5.10.0"');
     expect(contents).not.toContain('from:');
+  });
+
+  it('strips `from:` range prefix from newVersion before writing to Package.resolved', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    // Simulate the scenario where newVersion arrives with the range prefix
+    // that belongs in Package.swift — this produced corrupted JSON like
+    // "version" : "from: "37.0.0"" in production (see #41534)
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'from: "5.10.0"',
+          newValue: 'from: "5.10.0"',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+    expect(contents).not.toContain('"from:');
+    // Verify the output is valid JSON
+    expect(() => JSON.parse(contents)).not.toThrow();
   });
 
   it('updates multiple pins in one call', async () => {
