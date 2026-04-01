@@ -208,17 +208,19 @@ export async function updateArtifacts({
         continue;
       }
 
+      const resolvedVersion = dep.newVersion.replace(/^v/, '');
+
       // Skip if already up-to-date
-      if (pin.state.version === newValue) {
+      if (pin.state.version === resolvedVersion) {
         logger.debug(
-          { depName: dep.depName, newValue },
+          { depName: dep.depName, resolvedVersion },
           'swift: pin already at target version',
         );
         continue;
       }
 
       const newRevision = await resolveCommitSha(dep, dep.newVersion);
-      updated = updatePinInJson(updated, pin, newValue, newRevision);
+      updated = updatePinInJson(updated, pin, resolvedVersion, newRevision);
     }
 
     if (updated !== content) {
