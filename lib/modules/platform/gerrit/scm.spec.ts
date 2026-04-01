@@ -479,7 +479,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).not.toHaveBeenCalled();
     });
 
-    it('commitAndPush() - existing change without new changes', async () => {
+    it('commitAndPush() - existing change keeps original target branch', async () => {
       const existingChange = partial<GerritChange>({
         change_id: 'Ifcd936eef0ced620040a07a337c586d0a882725b',
         branch: 'main',
