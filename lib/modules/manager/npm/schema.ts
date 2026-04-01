@@ -5,6 +5,7 @@ export const PnpmCatalogs = z.object({
   catalog: z.optional(z.record(z.string())),
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
+export type PnpmCatalogs = z.infer<typeof PnpmCatalogs>;
 
 export const YarnCatalogs = z.object({
   catalog: z.optional(z.record(z.string())),

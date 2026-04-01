@@ -10,11 +10,11 @@ export function updatePnpmCatalogDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  const { depType, managerData, depName } = upgrade;
+  const { depType, depName } = upgrade;
 
   const catalogName = depType?.split('.').at(-1);
 
-  /* v8 ignore next -- needs test */
+  /* v8 ignore if -- needs test */
   if (!isString(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
@@ -28,11 +28,11 @@ export function updatePnpmCatalogDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
-    `npm.updatePnpmCatalogDependency(): ${depType}:${/* v8 ignore next -- needs test */ managerData?.catalogName}.${depName} = ${newValue}`,
+    `npm.updatePnpmCatalogDependency(): ${depType}:${catalogName}.${depName} = ${newValue}`,
   );
 
-  let document;
-  let parsedContents;
+  let document: Document;
+  let parsedContents: PnpmCatalogs;
 
   try {
     // In order to preserve the original formatting as much as possible, we want
@@ -82,7 +82,7 @@ export function updatePnpmCatalogDependency({
     return null;
   }
 
-  /* v8 ignore next 3 -- this should not happen in practice, but we must satisfy the types */
+  /* v8 ignore if -- this should not happen in practice, but we must satisfy the types */
   if (!modifiedDocument.contents?.srcToken) {
     return null;
   }
@@ -118,7 +118,7 @@ function changeDependencyIn(
   }
 
   if (newName) {
-    /* v8 ignore next 3 -- the try..catch block above already throws if a key is an alias */
+    /* v8 ignore if -- the try..catch block above already throws if a key is an alias */
     if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }
