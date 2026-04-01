@@ -17,6 +17,7 @@ describe('modules/platform/gerrit/scm', () => {
 
   beforeEach(() => {
     configureScm('test/repo');
+    pendingChangeBranches.clear();
   });
 
   describe('pushForReview()', () => {
@@ -112,7 +113,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
   });
 
-  describe('mergeToLocal', () => {
+  describe('mergeToLocal()', () => {
     it('uses local merge when there is a pending change branch', async () => {
       pendingChangeBranches.add('renovate/onboarding');
       git.mergeToLocal.mockResolvedValueOnce();
@@ -158,7 +159,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitAndPush() - create first commit but does not push', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
+      clientMock.getBranchChange.mockResolvedValueOnce(null);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
         parentCommitSha: 'parentSha' as LongCommitSha,
