@@ -8,6 +8,7 @@ import type {
 } from '../types.ts';
 
 export const id = 'local';
+export const experimental = true;
 
 export function initPlatform(_params: PlatformParams): Promise<PlatformResult> {
   return Promise.resolve({

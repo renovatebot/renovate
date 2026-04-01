@@ -1,7 +1,8 @@
 import { isNumber } from '@sindresorhus/is';
-import { getConfig } from '../../../config/defaults.ts';
-import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 import type { RenovateConfig } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 
 vi.mock('../../../util/git/semantic.ts');
 
@@ -234,6 +235,81 @@ describe('workers/repository/updates/flatten', () => {
         ),
       ).toHaveLength(2);
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
+    });
+
+    it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {
+      // TODO #22198
+      config.lockFileMaintenance!.enabled = true;
+      config.packageRules = [
+        {
+          matchUpdateTypes: ['major', 'lockFileMaintenance'],
+          groupName: 'group-lock-major',
+        },
+      ];
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                currentValue: '1.0.0',
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(2);
+      const lockFileUpdate = res.find(
+        (u) => u.updateType === 'lockFileMaintenance',
+      );
+      const regularUpdate = res.find(
+        (u) => u.updateType !== 'lockFileMaintenance',
+      );
+      expect(lockFileUpdate!.branchName).toContain('lock-file-maintenance');
+      expect(regularUpdate!.branchName).not.toContain('lock-file-maintenance');
+      expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
+    });
+
+    describe('hasAttestation is taken from the current value', () => {
+      it.each([[true], [false], [undefined]])(
+        'current attestation %s, new attestation %s',
+        async (currentAttestation) => {
+          config = getConfig(); // HACK
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'foo',
+                    currentValue: '1.0.0',
+                    hasAttestation: currentAttestation,
+                    updates: [
+                      {
+                        newValue: '2.0.0',
+                        // but the new update may have a different value
+                        hasAttestation: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          const res = await flattenUpdates(config, packageFiles);
+          expect(res).toHaveLength(1);
+          expect(res[0].hasAttestation).toEqual(currentAttestation);
+        },
+      );
     });
   });
 });

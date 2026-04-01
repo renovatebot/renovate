@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export const Release = z.object({

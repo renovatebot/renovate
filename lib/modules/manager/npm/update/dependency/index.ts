@@ -116,13 +116,22 @@ function replaceAsString(
 
 export function updateDependency({
   fileContent,
+  packageFile: packageFileName,
   upgrade,
 }: UpdateDependencyConfig): string | null {
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
-    return updatePnpmCatalogDependency({ fileContent, upgrade });
+    return updatePnpmCatalogDependency({
+      fileContent,
+      packageFile: packageFileName,
+      upgrade,
+    });
   }
   if (upgrade.depType?.startsWith('yarn.catalog')) {
-    return updateYarnrcCatalogDependency({ fileContent, upgrade });
+    return updateYarnrcCatalogDependency({
+      fileContent,
+      packageFile: packageFileName,
+      upgrade,
+    });
   }
 
   const { depType, managerData } = upgrade;

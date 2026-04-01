@@ -1,10 +1,11 @@
 import URL from 'node:url';
-import { setTimeout } from 'timers/promises';
 import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import semver from 'semver';
 import type { Options, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
+import { setTimeout } from 'timers/promises';
 import upath from 'upath';
 import { getConfigFileNames } from '../../config/app-strings.ts';
 import { GlobalConfig } from '../../config/global.ts';
@@ -24,12 +25,13 @@ import { withInstrumenting } from '../../instrumentation/with-instrumenting.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { GitProtocol } from '../../types/git.ts';
-import { incLimitedValue } from '../../workers/global/limits.ts';
+import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
+import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
 import {
@@ -113,9 +115,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
     round++;
   }
 
-  // Can't be `undefined` here.
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
-  throw lastError;
+  throw lastError!;
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -547,10 +547,11 @@ export const syncGit = withInstrumenting(
     }
 
     if (config.virtualBranches?.length) {
-      const refspecs = config.virtualBranches.map(
-        (branch) => `${branch.ref}:refs/remotes/origin/${branch.name}`,
-      );
-      await fetchRevSpec(...refspecs);
+      const refs = config.virtualBranches.map((branch) => branch.ref);
+      await fetchRevSpec(...refs);
+      for (const branch of config.virtualBranches) {
+        await setVirtualBranch(branch.name, branch.sha);
+      }
       logger.debug(`Fetched ${config.virtualBranches.length} virtual branches`);
     }
 
@@ -587,6 +588,22 @@ export function getBranchCommit(branchName: string): LongCommitSha | null {
   return config.branchCommits?.[branchName] || null;
 }
 
+// Return the date of the latest commit for a branch
+export async function getBranchUpdateDate(
+  branchName: string,
+): Promise<DateTime | null> {
+  const branchSha = config.branchCommits[branchName];
+  if (!branchSha) {
+    return null;
+  }
+  try {
+    return await getCommitDate(branchSha);
+  } catch (err) {
+    logger.debug({ err, branchName }, 'Error getting branch update date');
+    return null;
+  }
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   // v8 ignore else -- TODO: add test #40625
@@ -621,7 +638,7 @@ export async function checkoutBranch(
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])
     ).trim() as LongCommitSha;
-    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    const latestCommitDate = await getCommitDate(config.currentBranchSha);
     // v8 ignore else -- TODO: add test #40625
     if (latestCommitDate) {
       logger.debug(
@@ -676,38 +693,46 @@ export async function checkoutBranchFromRemote(
 }
 
 /**
- * Delete a virtual branch that was initialized from a non-standard ref.
- * Used by platforms like Gerrit where changes are represented as refs instead of regular branches.
+ * Delete a virtual branch and its associated remote-tracking ref.
  *
  * @param branchName Virtual branch name to delete
  */
 export async function deleteVirtualBranch(branchName: string): Promise<void> {
-  await syncGit();
   // Delete local branch if it exists
-  try {
-    await deleteLocalBranch(branchName);
-    logger.debug(`Deleted local branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- TODO: add test */
-    if (errChecked) {
-      throw errChecked;
-    }
-    logger.debug(
-      { err, branchName },
-      `No local branch to delete with name: ${branchName}`,
-    );
-  }
+  await deleteBranch(branchName, { localBranch: true });
 
-  // Delete remote-tracking ref that was created from refspec
+  // Delete remote-tracking ref that was created during init
   // Note: git update-ref -d succeeds even if ref doesn't exist
   await git.raw(['update-ref', '-d', `refs/remotes/origin/${branchName}`]);
   logger.debug(
     `Deleted remote-tracking ref: refs/remotes/origin/${branchName}`,
   );
+}
 
-  // Clean up branch commit tracking
-  delete config.branchCommits[branchName];
+/**
+ * Set a virtual branch's remote-tracking ref and commit tracking.
+ * Used both during init (to create virtual branches from fetched refs)
+ * and after pushing (to keep tracking in sync with the remote).
+ *
+ * @param branchName Virtual branch name to set
+ * @param commitSha The commit SHA the virtual branch points to.
+ */
+export async function setVirtualBranch(
+  branchName: string,
+  commitSha: LongCommitSha,
+): Promise<void> {
+  await git.raw(['update-ref', `refs/remotes/origin/${branchName}`, commitSha]);
+  config.branchCommits[branchName] = commitSha;
+  config.branchIsModified[branchName] = false;
+}
+
+/**
+ * Update a virtual branch's tracking to match the current local branch.
+ * Resolves the SHA from the local branch and delegates to setVirtualBranch.
+ */
+export async function updateVirtualBranch(branchName: string): Promise<void> {
+  const commitSha = (await git.revparse([branchName])).trim() as LongCommitSha;
+  await setVirtualBranch(branchName, commitSha);
 }
 
 export async function resetHardFromRemote(
@@ -980,24 +1005,29 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(branchName: string): Promise<void> {
+export async function deleteBranch(
+  branchName: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   await syncGit();
-  try {
-    const deleteCommand = ['push', '--delete', 'origin', branchName];
+  if (!options?.localBranch) {
+    try {
+      const deleteCommand = ['push', '--delete', 'origin', branchName];
 
-    if (getNoVerify().includes('push')) {
-      deleteCommand.push('--no-verify');
-    }
+      if (getNoVerify().includes('push')) {
+        deleteCommand.push('--no-verify');
+      }
 
-    await gitRetry(() => git.raw(deleteCommand));
-    logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
-    if (errChecked) {
-      throw errChecked;
+      await gitRetry(() => git.raw(deleteCommand));
+      logger.debug(`Deleted remote branch: ${branchName}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore if -- TODO: add test #40625 */
+      if (errChecked) {
+        throw errChecked;
+      }
+      logger.debug(`No remote branch to delete with name: ${branchName}`);
     }
-    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);
@@ -1014,7 +1044,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+export async function mergeToLocal(
+  refSpecToMerge: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -1028,8 +1061,12 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await fetchRevSpec(refSpecToMerge);
-    await gitRetry(() => git.merge(['FETCH_HEAD']));
+    if (options?.localBranch) {
+      await git.merge([refSpecToMerge]);
+    } else {
+      await fetchRevSpec(refSpecToMerge);
+      await gitRetry(() => git.merge(['FETCH_HEAD']));
+    }
   } catch (err) {
     logger.debug(
       {
@@ -1081,13 +1118,18 @@ export async function mergeBranch(branchName: string): Promise<void> {
   }
 }
 
+async function getCommitDate(ref: LongCommitSha | string): Promise<DateTime> {
+  const output = await git.show(['-s', '--format=%cI', ref]);
+  return DateTime.fromISO(output.trim()).toUTC();
+}
+
 export async function getBranchLastCommitTime(
   branchName: string,
 ): Promise<Date> {
   await syncGit();
   try {
-    const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
-    return new Date(Date.parse(time));
+    const time = await getCommitDate('origin/' + branchName);
+    return time.toJSDate();
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     /* v8 ignore next 3 -- TODO: add test */
@@ -1136,6 +1178,9 @@ export async function getFile(
     const content = await git.show([
       'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
     ]);
+
+    logWarningIfUnicodeHiddenCharactersInPackageFile(filePath, content);
+
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
@@ -1349,6 +1394,7 @@ export async function pushCommit({
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
+    incCountValue('HourlyCommits');
     result = true;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     handleCommitError(err, sourceRef, files);

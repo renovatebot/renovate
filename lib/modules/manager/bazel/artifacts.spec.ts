@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
 import { codeBlock } from 'common-tags';
-import type { UpdateArtifact } from '../types.ts';
-import { updateArtifacts } from './index.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './index.ts';
 
 describe('modules/manager/bazel/artifacts', () => {
   it('updates commit-based http archive', async () => {

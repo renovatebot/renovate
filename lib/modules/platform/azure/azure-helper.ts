@@ -91,6 +91,7 @@ export async function getFile(
           logger.warn({ filePath }, 'Unable to find file');
           return null;
         }
+        // v8 ignore else -- TODO: add test #40625
         if (result.data.typeKey === 'GitUnresolvableToCommitException') {
           logger.warn({ branchName }, 'Unable to find branch');
           return null;
@@ -159,12 +160,9 @@ export async function getMergeMethod(
     .map((p: PolicyConfiguration) => p.settings)[0];
 
   logger.debug(
+    { policyConfigurations },
     // TODO: types (#22198)
-    `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
-      policyConfigurations,
-      null,
-      4,
-    )}`,
+    `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy`,
   );
 
   try {

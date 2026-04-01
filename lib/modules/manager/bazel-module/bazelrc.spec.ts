@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { fs } from '~test/util.ts';
 import {
   BazelOption,
   CommandEntry,
@@ -8,7 +9,6 @@ import {
   read,
   sanitizeOptions,
 } from './bazelrc.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

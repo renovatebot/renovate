@@ -4,6 +4,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import * as swiftVersioning from '../../versioning/swift/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 export { getRangeStrategy } from './range.ts';
 

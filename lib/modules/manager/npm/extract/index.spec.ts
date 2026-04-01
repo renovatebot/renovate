@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { ExtractConfig } from '../../types.ts';
 import { extractAllPackageFiles } from '../index.ts';
 import * as npmExtract from './index.ts';
 import { postExtract } from './post/index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 
@@ -27,7 +27,9 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);

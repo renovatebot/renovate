@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 // TODO #22198
 import { isArray, isNonEmptyArray } from '@sindresorhus/is';
+import crypto from 'crypto';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -144,6 +144,18 @@ export async function postUpgradeCommandsExecutor(
                 RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: dataFilePath,
               };
             }
+            if (upgrade.postUpgradeTasks?.installTools) {
+              execOpts.toolConstraints ??= [];
+
+              for (const [tool] of Object.entries(
+                upgrade.postUpgradeTasks?.installTools,
+              )) {
+                execOpts.toolConstraints.push({
+                  toolName: tool,
+                  constraint: upgrade.constraints?.[tool],
+                });
+              }
+            }
             const execResult = await exec(compiledCmd, execOpts);
 
             logger.debug(
@@ -152,7 +164,7 @@ export async function postUpgradeCommandsExecutor(
             );
           } catch (error) {
             artifactErrors.push({
-              lockFile: upgrade.packageFile,
+              fileName: upgrade.packageFile,
               stderr: sanitize(error.message),
             });
           }
@@ -165,7 +177,7 @@ export async function postUpgradeCommandsExecutor(
             'Post-upgrade task did not match any on allowedCommands list',
           );
           artifactErrors.push({
-            lockFile: upgrade.packageFile,
+            fileName: upgrade.packageFile,
             stderr: sanitize(
               `Post-upgrade command '${compiledCmd}' has not been added to the allowed list in allowedCommands`,
             ),

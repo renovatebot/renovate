@@ -1,8 +1,11 @@
 import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
+import { parse as parseJsonc } from 'jsonc-weaver';
 import type { DirectoryJSON } from 'memfs';
 import { fs as memfs, vol } from 'memfs';
-import type { TDataOut } from 'memfs/lib/encoding.js';
+
+type TDataOut = string | Buffer;
+
 import upath from 'upath';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -57,6 +60,23 @@ export class Fixtures {
    */
   static getJson<T = any>(name: string, fixturesRoot = '.'): T {
     return JSON.parse(
+      realFs.readFileSync(
+        upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
+        {
+          encoding: 'utf-8',
+        },
+      ),
+    ) as T;
+  }
+
+  /**
+   * Returns content from fixture file from __fixtures__ folder and parses as JSONC
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getJsonc<T = any>(name: string, fixturesRoot = '.'): T {
+    return parseJsonc(
       realFs.readFileSync(
         upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
         {

@@ -49,13 +49,13 @@ async function packageJsonConfigExists(): Promise<boolean> {
 async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   return (
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
-      prTitle: config.onboardingPrTitle,
+      branchName: getInheritedOrGlobal('onboardingBranch')!,
+      prTitle: getInheritedOrGlobal('onboardingPrTitle'),
       state: '!open',
       targetBranch: config.baseBranch,
     })) ??
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
+      branchName: getInheritedOrGlobal('onboardingBranch')!,
       prTitle: getSemanticCommitPrTitle(config),
       state: '!open',
       targetBranch: config.baseBranch,
@@ -79,7 +79,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // - An onboarding cache is present, and
   // - The current default branch SHA matches the default SHA found in the cache
   // Also if there is a closed pr skip using cache as it is outdated
-  if (config.requireConfig === 'optional' && config.onboarding === false) {
+  if (
+    config.requireConfig === 'optional' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     // Return early and avoid checking for config files
     return true;
   }
@@ -94,7 +97,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // if onboarding cache is present and base branch has not been updated; branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
-    config.onboarding &&
+    getInheritedOrGlobal('onboarding') &&
     !closedOnboardingPr &&
     isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha ===
@@ -144,7 +147,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
-  if (config.requireConfig === 'required' && config.onboarding === false) {
+  if (
+    config.requireConfig === 'required' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
@@ -197,7 +203,7 @@ export async function getOnboardingPr(
   config: RenovateConfig,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
-    config.onboardingBranch!,
+    getInheritedOrGlobal('onboardingBranch')!,
     config.baseBranch,
   );
 }

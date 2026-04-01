@@ -3,14 +3,14 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { DockerDatasource } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
 
 const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
@@ -2811,7 +2811,7 @@ describe('modules/datasource/docker/index', () => {
         .twice()
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull',
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"',
         })
         .get('/visualon/drone-git/tags/list?n=10000')
         .reply(401, '', {

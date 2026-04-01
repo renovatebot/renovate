@@ -11,6 +11,10 @@
           {
             "path": "tmp/docs.tgz",
             "label": "docs.tgz"
+          },
+          {
+            "path": "tmp/mkdocs-site.tgz",
+            "label": "mkdocs-site.tgz"
           }
         ]
       }

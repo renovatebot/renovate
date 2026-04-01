@@ -102,7 +102,10 @@ export function getDepWarningsPR(
   warningText = emojify(`\n---\n\n> :warning: **Warning**\n> \n`);
   warningText += '> Some dependencies could not be looked up. ';
   if (dependencyDashboard) {
-    warningText += `Check the Dependency Dashboard for more information.\n\n`;
+    const depDashboardMd = config.dependencyDashboardIssue
+      ? `[Dependency Dashboard](../issues/${config.dependencyDashboardIssue})`
+      : 'Dependency Dashboard';
+    warningText += `Check the ${depDashboardMd} for more information.\n\n`;
   } else {
     warningText += `Check the warning logs for more information.\n\n`;
   }

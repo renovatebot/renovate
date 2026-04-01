@@ -1,14 +1,14 @@
 import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { getDependentPackageFiles } from './package-tree.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { scm } from '~test/util.ts';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('~test/fixtures.js')>(
-      '~test/fixtures.js',
+    await vi.importActual<typeof import('~test/fixtures.ts')>(
+      '~test/fixtures.ts',
     )
   ).fsExtra(),
 );

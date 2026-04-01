@@ -1,3 +1,5 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -31,8 +33,6 @@ import {
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import handleError from './error.ts';
-import { logger, partial } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('./error-config.ts');
 
