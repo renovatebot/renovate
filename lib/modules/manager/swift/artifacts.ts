@@ -208,7 +208,7 @@ export async function updateArtifacts({
         continue;
       }
 
-      const resolvedVersion = dep.newVersion.replace(/^v/, '');
+      const resolvedVersion = dep.newVersion.replace(regEx(/^v/), '');
 
       // Skip if already up-to-date
       if (pin.state.version === resolvedVersion) {
