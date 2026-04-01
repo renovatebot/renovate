@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { git, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { client as _client } from './client.ts';
-import { GerritScm, configureScm } from './scm.ts';
+import { GerritScm, configureScm, pendingChangeBranches } from './scm.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -17,6 +17,7 @@ describe('modules/platform/gerrit/scm', () => {
 
   beforeEach(() => {
     configureScm('test/repo', 'user');
+    pendingChangeBranches.clear();
   });
 
   describe('isBranchBehindBase()', () => {
@@ -270,10 +271,18 @@ describe('modules/platform/gerrit/scm', () => {
     });
   });
 
-  it('deleteBranch()', async () => {
-    await expect(gerritScm.deleteBranch('branchName')).toResolve();
-    expect(git.deleteBranch).toHaveBeenCalledExactlyOnceWith('branchName', {
-      localBranch: true,
+  describe('deleteBranch()', () => {
+    it('deletes local branch', async () => {
+      await expect(gerritScm.deleteBranch('branchName')).toResolve();
+      expect(git.deleteBranch).toHaveBeenCalledExactlyOnceWith('branchName', {
+        localBranch: true,
+      });
+    });
+
+    it('clears pending change branch', async () => {
+      pendingChangeBranches.add('renovate/pending');
+      await gerritScm.deleteBranch('renovate/pending');
+      expect(pendingChangeBranches.has('renovate/pending')).toBeFalse();
     });
   });
 
@@ -299,21 +308,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('uses local merge when there is a pending change branch', async () => {
-      // Creates a pending change branch
-      clientMock.getBranchChange.mockResolvedValueOnce(null);
-      git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha' as LongCommitSha,
-        parentCommitSha: 'parentSha' as LongCommitSha,
-        files: [],
-      });
-      await gerritScm.commitAndPush({
-        branchName: 'renovate/onboarding',
-        baseBranch: 'main',
-        message: 'commit msg',
-        files: [],
-        prTitle: 'Configure Renovate',
-      });
-
+      pendingChangeBranches.add('renovate/onboarding');
       git.mergeToLocal.mockResolvedValueOnce();
       await expect(gerritScm.mergeToLocal('renovate/onboarding')).toResolve();
       expect(clientMock.findChanges).not.toHaveBeenCalled();

@@ -21,7 +21,7 @@ export function configureScm(repo: string, login: string): void {
 }
 
 /** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
-const pendingChangeBranches = new Set<string>();
+export const pendingChangeBranches = new Set<string>();
 
 export async function pushForReview(options: {
   sourceRef: string;
