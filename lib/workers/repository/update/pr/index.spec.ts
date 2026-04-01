@@ -1070,6 +1070,41 @@ describe('workers/repository/update/pr/index', () => {
             });
           });
         });
+        // TODO #42312
+        describe('when attestation is removed in an intermediate version', () => {
+          const dummyUpgrade = partial<BranchUpgradeConfig>({
+            branchName: sourceBranch,
+            depType: 'foo',
+            depName: 'bar',
+            manager: 'npm',
+            currentVersion: '1.2.3',
+            newVersion: '2.3.4',
+            releases: [
+              // previous versions between our currentVersion and newVersion have gaps in attestations
+              { version: '1.2.4', attestation: false },
+              { version: '1.3.0', attestation: false },
+              { version: '2.0.0', attestation: false },
+
+              // but the update we're updating to has attestation information
+              { version: '2.3.4', attestation: true },
+            ],
+          });
+
+          it('does not warn the user', async () => {
+            platform.createPr.mockResolvedValueOnce(pr);
+
+            const res = await ensurePr({
+              ...config,
+              // the current release has an attestation
+              hasAttestation: true,
+              upgrades: [dummyUpgrade],
+            });
+
+            expect(res).toEqual({ type: 'with-pr', pr });
+            const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+            expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
+          });
+        });
       });
     });
 
