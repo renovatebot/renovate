@@ -235,6 +235,36 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
+    it('commitAndPush() - existing change without new changes', async () => {
+      const existingChange = partial<GerritChange>({
+        change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
+        branch: 'main',
+      });
+      clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
+      git.prepareCommit.mockResolvedValueOnce(null); //no changes
+
+      expect(
+        await gerritScm.commitAndPush({
+          branchName: 'renovate/dependency-1.x',
+          baseBranch: 'main',
+          message: ['commit msg'],
+          files: [],
+          prTitle: 'pr title',
+        }),
+      ).toBeNull();
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
+        baseBranch: 'main',
+        branchName: 'renovate/dependency-1.x',
+        files: [],
+        message: [
+          'pr title',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
+        ],
+        prTitle: 'pr title',
+      });
+      expect(git.pushCommit).toHaveBeenCalledTimes(0);
+    });
+
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
       const existingChange = partial<GerritChange>({
         _number: 123456,
