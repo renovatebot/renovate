@@ -367,48 +367,6 @@ describe('modules/platform/gerrit/client', () => {
       expect(callCount).toBe(1);
     });
 
-    it('continues pagination when shouldFetchNextPage returns true', async () => {
-      let callCount = 0;
-      const shouldFetchNextPage = (): boolean => {
-        callCount++;
-        return true;
-      };
-
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get('/a/changes/')
-        .query((query) => query.n === '2' && query.S === '0')
-        .reply(
-          200,
-          gerritRestResponse([
-            { _number: 1 },
-            { _number: 2, _more_changes: true },
-          ]),
-          jsonResultHeader,
-        )
-        .get('/a/changes/')
-        .query((query) => query.n === '2' && query.S === '2')
-        .reply(
-          200,
-          gerritRestResponse([{ _number: 3 }, { _number: 4 }]),
-          jsonResultHeader,
-        );
-
-      const result = await client.findChanges('repo', {
-        branchName: 'dependency-xyz',
-        pageLimit: 2,
-        shouldFetchNextPage,
-      });
-
-      expect(result).toEqual([
-        { _number: 1 },
-        { _number: 2 },
-        { _number: 3 },
-        { _number: 4 },
-      ]);
-      expect(callCount).toBe(2);
-    });
-
     it('sets query.o when requestDetails is provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)

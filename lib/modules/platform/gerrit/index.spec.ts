@@ -523,49 +523,43 @@ describe('modules/platform/gerrit/index', () => {
       );
     });
 
-    it('updatePr() - with addLabels => add hashtags', async () => {
-      const change = makeChange();
-      const pr = mapGerritChangeToPr(change)!;
-      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
-      await gerrit.updatePr({
-        number: 123456,
-        prTitle: change.subject,
+    it.each([
+      {
+        desc: 'addLabels only',
         addLabels: ['label1', 'label2'],
-      });
-      expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
-        add: ['label1', 'label2'],
-      });
-    });
-
-    it('updatePr() - with removeLabels => remove hashtags', async () => {
-      const change = makeChange();
-      const pr = mapGerritChangeToPr(change)!;
-      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
-      await gerrit.updatePr({
-        number: 123456,
-        prTitle: change.subject,
+        removeLabels: undefined,
+        expected: { add: ['label1', 'label2'] },
+      },
+      {
+        desc: 'removeLabels only',
+        addLabels: undefined,
         removeLabels: ['old-label'],
-      });
-      expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
-        remove: ['old-label'],
-      });
-    });
-
-    it('updatePr() - with addLabels and removeLabels => update hashtags in single call', async () => {
-      const change = makeChange();
-      const pr = mapGerritChangeToPr(change)!;
-      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
-      await gerrit.updatePr({
-        number: 123456,
-        prTitle: change.subject,
+        expected: { remove: ['old-label'] },
+      },
+      {
+        desc: 'addLabels and removeLabels',
         addLabels: ['new-label'],
         removeLabels: ['old-label'],
-      });
-      expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
-        add: ['new-label'],
-        remove: ['old-label'],
-      });
-    });
+        expected: { add: ['new-label'], remove: ['old-label'] },
+      },
+    ])(
+      'updatePr() - hashtags with $desc',
+      async ({ addLabels, removeLabels, expected }) => {
+        const change = makeChange();
+        const pr = mapGerritChangeToPr(change)!;
+        prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+        await gerrit.updatePr({
+          number: 123456,
+          prTitle: change.subject,
+          addLabels,
+          removeLabels,
+        });
+        expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(
+          123456,
+          expected,
+        );
+      },
+    );
 
     it('updatePr() - targetBranch set => move the change', async () => {
       const change = makeChange({ branch: 'main' });
@@ -610,6 +604,10 @@ describe('modules/platform/gerrit/index', () => {
         'body',
         TAG_PULL_REQUEST_BODY,
       );
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({ number: 123456 }),
+      );
     });
 
     it('createPr() - with autoApprove', async () => {
@@ -632,12 +630,6 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
-      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        'body',
-        TAG_PULL_REQUEST_BODY,
-      );
     });
 
     it('createPr() - with labels', async () => {
@@ -663,12 +655,6 @@ describe('modules/platform/gerrit/index', () => {
           'hashtag=label2',
         ],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
-      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        'body',
-        TAG_PULL_REQUEST_BODY,
-      );
     });
 
     it('createPr() - no change found after push => rejects', async () => {
@@ -700,31 +686,6 @@ describe('modules/platform/gerrit/index', () => {
         `Failed to push commit to refs/for/target to create Gerrit change`,
       );
       expect(git.updateVirtualBranch).not.toHaveBeenCalled();
-    });
-
-    it('createPr() - add body as message and save to cache', async () => {
-      git.pushCommit.mockResolvedValueOnce(true);
-      const change = makeChange({ messages: [] });
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      const pr = await gerrit.createPr({
-        sourceBranch: 'source',
-        targetBranch: 'target',
-        prTitle: 'title',
-        prBody: 'body',
-        platformPrOptions: {
-          autoApprove: false,
-        },
-      });
-      expect(pr).toHaveProperty('number', 123456);
-      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        'body',
-        TAG_PULL_REQUEST_BODY,
-      );
-      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        expect.objectContaining({ number: 123456 }),
-      );
     });
   });
 

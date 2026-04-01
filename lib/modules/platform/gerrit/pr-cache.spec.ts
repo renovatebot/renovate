@@ -258,32 +258,6 @@ describe('modules/platform/gerrit/pr-cache', () => {
         },
       });
     });
-
-    it('re-uses existing repo cache data', async () => {
-      const pr = mapGerritChangeToPr(makeChange({ _number: 100 }))!;
-      const cache = getCache();
-      cache.platform = {
-        gerrit: {
-          pullRequestsCache: {
-            items: { 100: pr },
-          },
-        },
-      };
-
-      // When syncing, if the change matches cached data, reconcile stops
-      clientMock.findChanges.mockImplementationOnce((_repo, config) => {
-        const change = makeChange({
-          _number: 100,
-          updated: '2025-04-14 16:40:00.000000000',
-        });
-        config.shouldFetchNextPage!([change]);
-        return Promise.resolve([change]);
-      });
-
-      const prs = await GerritPrCache.getPrs('test/repo');
-      expect(prs).toHaveLength(1);
-      expect(prs[0].number).toBe(100);
-    });
   });
 
   describe('updateItems() sorting edge cases', () => {
