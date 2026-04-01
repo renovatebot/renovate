@@ -333,6 +333,21 @@ describe('modules/platform/gerrit/index', () => {
       ).resolves.toBeNull();
     });
 
+    it('findPr() - state !open matches closed PRs from cache', async () => {
+      const pr = mapGerritChangeToPr(
+        makeChange({ status: 'ABANDONED', branch: 'master' }),
+        { sourceBranch: 'branch' },
+      )!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.findPr({
+          branchName: 'branch',
+          state: '!open',
+          targetBranch: 'master',
+        }),
+      ).resolves.toMatchObject({ sourceBranch: 'branch' });
+    });
+
     it('findPr() - filters by branchName, targetBranch, and prTitle from cache', async () => {
       const pr = mapGerritChangeToPr(
         makeChange({ status: 'NEW', branch: 'master', subject: 'my title' }),
