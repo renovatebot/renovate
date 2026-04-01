@@ -934,6 +934,27 @@ describe('modules/manager/pep621/processors/uv', () => {
         });
       });
 
+      it('sets UV_EXCLUDE_NEWER for non-maintenance upgrade-package command', async () => {
+        const updatedDeps = [
+          { packageName: 'dep1', depType: depTypes.dependencies },
+        ];
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'folder/pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              minimumReleaseAge: '3 days',
+            },
+            updatedDeps,
+          },
+          parsePyProject('')!,
+        );
+        expect(execSnapshots[0].cmd).toBe('uv lock --upgrade-package dep1');
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          UV_EXCLUDE_NEWER: '2026-03-10T00:00:00.000Z',
+        });
+      });
+
       it('skips UV_EXCLUDE_NEWER when minimumReleaseAge absent', async () => {
         await processor.updateArtifacts(
           {
