@@ -61,16 +61,6 @@ export class GerritScm extends DefaultGitScm {
   ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
 
-    // TODO: this can be optimzed further by avoiding client.getBranchChange()
-    // since the change was initialized locally as commit.branchName.
-    //
-    // Note the change should be pushed to refs/for/<existing change branch>
-    // instead of refs/for/<target branch>, for the case when a change will be
-    // moved to a different target branch.
-    //
-    // Not sure how to get the existing change branch without querying Gerrit API
-    // though. Maybe by storing this additional information when initializing the
-    // virtual branches?
     const existingChange = await client.getBranchChange(repository, {
       branchName: commit.branchName,
       state: 'open',
