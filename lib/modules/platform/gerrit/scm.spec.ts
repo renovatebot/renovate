@@ -157,7 +157,7 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
-    it('commitAndPush() - create first commit', async () => {
+    it('commitAndPush() - create first commit but does not push', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
