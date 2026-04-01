@@ -164,6 +164,9 @@ export interface RepoCacheData {
     'bitbucket-server'?: {
       pullRequestsCache?: unknown;
     };
+    gerrit?: {
+      pullRequestsCache?: unknown;
+    };
   };
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;

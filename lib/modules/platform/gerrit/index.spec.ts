@@ -318,6 +318,43 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
+    it('findPr() - filters by state from cache', async () => {
+      const pr = mapGerritChangeToPr(
+        makeChange({ status: 'NEW', branch: 'master' }),
+        { sourceBranch: 'branch' },
+      )!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.findPr({
+          branchName: 'branch',
+          state: 'closed',
+          targetBranch: 'master',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('findPr() - filters by branchName, targetBranch, and prTitle from cache', async () => {
+      const pr = mapGerritChangeToPr(
+        makeChange({ status: 'NEW', branch: 'master', subject: 'my title' }),
+        { sourceBranch: 'branch' },
+      )!;
+      // branchName mismatch
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.findPr({ branchName: 'other-branch' }),
+      ).resolves.toBeNull();
+      // targetBranch mismatch
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.findPr({ branchName: 'branch', targetBranch: 'develop' }),
+      ).resolves.toBeNull();
+      // prTitle mismatch
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.findPr({ branchName: 'branch', prTitle: 'wrong title' }),
+      ).resolves.toBeNull();
+    });
+
     it('findPr() - refreshCache bypasses cache and queries client', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
@@ -397,6 +434,19 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getPr() - not found with refreshCache', async () => {
       clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
+      await expect(gerrit.getPr(123456, true)).resolves.toBeNull();
+    });
+
+    it('getPr() - refreshCache returns null when change has no branch footer', async () => {
+      const change = makeChange({
+        current_revision: 'rev1' as LongCommitSha,
+        revisions: {
+          rev1: partial<GerritRevisionInfo>({
+            commit_with_footers: 'no branch footer',
+          }),
+        },
+      });
+      clientMock.getChange.mockResolvedValueOnce(change);
       await expect(gerrit.getPr(123456, true)).resolves.toBeNull();
     });
 
@@ -701,6 +751,21 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
+    it('getBranchPr() - filters out non-matching branches and closed PRs', async () => {
+      const wrongBranch = mapGerritChangeToPr(
+        makeChange({ _number: 111, status: 'NEW' }),
+        { sourceBranch: 'other-branch' },
+      )!;
+      const closedPr = mapGerritChangeToPr(
+        makeChange({ _number: 222, status: 'ABANDONED' }),
+        { sourceBranch: 'renovate/dependency-1.x' },
+      )!;
+      prCacheMock.getPrs.mockResolvedValueOnce([wrongBranch, closedPr]);
+      await expect(
+        gerrit.getBranchPr('renovate/dependency-1.x'),
+      ).resolves.toBeNull();
+    });
+
     it('getBranchPr() - found even without targetBranch', async () => {
       const change = makeChange({ status: 'NEW' });
       const pr = mapGerritChangeToPr(change, {
@@ -775,6 +840,15 @@ describe('modules/platform/gerrit/index', () => {
           updatedAt: '2025-04-14T16:50:00.000000000',
         }),
       );
+    });
+
+    it('mergePr() - submit returns non-MERGED status', async () => {
+      const pr = mapGerritChangeToPr(makeChange())!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      clientMock.submitChange.mockResolvedValueOnce(
+        partial<GerritChange>({ status: 'NEW' }),
+      );
+      await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeFalse();
     });
 
     it('mergePr() - PR not found in cache', async () => {
