@@ -28,3 +28,5 @@ export const supportedDatasources = [
   DotnetVersionDatasource.id,
   NugetDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

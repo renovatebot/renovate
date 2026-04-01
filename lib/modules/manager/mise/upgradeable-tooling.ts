@@ -4,6 +4,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
@@ -353,6 +354,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^lychee-v(?<version>\\S+)',
     },
   },
+  npm: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'npm',
+      datasource: NpmDatasource.id,
+    },
+  },
   opentofu: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -477,6 +485,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'tamasfe/taplo',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  tart: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'cirruslabs/tart',
       datasource: GithubReleasesDatasource.id,
     },
   },
