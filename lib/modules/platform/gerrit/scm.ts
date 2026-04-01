@@ -51,6 +51,7 @@ export async function pushForReview(options: {
   });
   if (result) {
     pendingChangeBranches.delete(options.sourceRef);
+    await git.updateVirtualBranch(options.sourceRef);
   }
   return result;
 }

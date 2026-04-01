@@ -547,10 +547,11 @@ export const syncGit = withInstrumenting(
     }
 
     if (config.virtualBranches?.length) {
-      const refspecs = config.virtualBranches.map(
-        (branch) => `${branch.ref}:refs/remotes/origin/${branch.name}`,
-      );
-      await fetchRevSpec(...refspecs);
+      const refs = config.virtualBranches.map((branch) => branch.ref);
+      await fetchRevSpec(...refs);
+      for (const branch of config.virtualBranches) {
+        await setVirtualBranch(branch.name, branch.sha);
+      }
       logger.debug(`Fetched ${config.virtualBranches.length} virtual branches`);
     }
 
@@ -710,6 +711,32 @@ export async function deleteVirtualBranch(branchName: string): Promise<void> {
 
   // Clean up branch commit tracking
   delete config.branchCommits[branchName];
+}
+
+/**
+ * Set a virtual branch's remote-tracking ref and commit tracking.
+ * Used both during init (to create virtual branches from fetched refs)
+ * and after pushing (to keep tracking in sync with the remote).
+ *
+ * @param branchName Virtual branch name to set
+ * @param commitSha The commit SHA the virtual branch points to.
+ */
+export async function setVirtualBranch(
+  branchName: string,
+  commitSha: LongCommitSha,
+): Promise<void> {
+  await git.raw(['update-ref', `refs/remotes/origin/${branchName}`, commitSha]);
+  config.branchCommits[branchName] = commitSha;
+  config.branchIsModified[branchName] = false;
+}
+
+/**
+ * Update a virtual branch's tracking to match the current local branch.
+ * Resolves the SHA from the local branch and delegates to setVirtualBranch.
+ */
+export async function updateVirtualBranch(branchName: string): Promise<void> {
+  const commitSha = (await git.revparse([branchName])).trim() as LongCommitSha;
+  await setVirtualBranch(branchName, commitSha);
 }
 
 export async function resetHardFromRemote(

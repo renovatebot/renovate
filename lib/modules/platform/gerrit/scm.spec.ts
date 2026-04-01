@@ -35,6 +35,9 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready'],
       });
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/feat',
+      );
     });
 
     it('adds hashtag push options for each label', async () => {
@@ -58,6 +61,9 @@ describe('modules/platform/gerrit/scm', () => {
           'hashtag=priority:high',
         ],
       });
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/feat',
+      );
     });
 
     it('clears pending change branch on success', async () => {
@@ -71,6 +77,9 @@ describe('modules/platform/gerrit/scm', () => {
         }),
       ).resolves.toBeTrue();
       expect(pendingChangeBranches.has('renovate/feat')).toBeFalse();
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/feat',
+      );
     });
 
     it('keeps pending change branch when push fails', async () => {
@@ -84,6 +93,7 @@ describe('modules/platform/gerrit/scm', () => {
         }),
       ).resolves.toBeFalse();
       expect(pendingChangeBranches.has('renovate/feat')).toBeTrue();
+      expect(git.updateVirtualBranch).not.toHaveBeenCalled();
     });
   });
 
@@ -178,6 +188,8 @@ describe('modules/platform/gerrit/scm', () => {
       });
       // For new changes, push should NOT be called - it will be done by createPr()
       expect(git.pushCommit).not.toHaveBeenCalled();
+      // Virtual branch is not updated until createPr() pushes the change
+      expect(git.updateVirtualBranch).not.toHaveBeenCalled();
     });
 
     it('commitAndPush() - existing change without new changes', async () => {
@@ -218,6 +230,9 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main', // not new-main
         pushOptions: ['notify=NONE', 'ready'],
       });
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/dependency-1.x',
+      );
     });
 
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
@@ -260,6 +275,9 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main',
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/dependency-1.x',
+      );
     });
   });
 });

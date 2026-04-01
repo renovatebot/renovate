@@ -437,6 +437,7 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready'],
       });
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
@@ -473,6 +474,7 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
@@ -512,6 +514,7 @@ describe('modules/platform/gerrit/index', () => {
           'hashtag=label2',
         ],
       });
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
@@ -532,6 +535,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Could not find the Gerrit change after pushing to refs/for/target`,
       );
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
     });
 
     it('createPr() - push fails => rejects', async () => {
@@ -546,6 +550,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Failed to push commit to refs/for/target to create Gerrit change`,
       );
+      expect(git.updateVirtualBranch).not.toHaveBeenCalled();
     });
   });
 
