@@ -2,7 +2,12 @@ import { DateTime } from 'luxon';
 import { git, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { client as _client } from './client.ts';
-import { GerritScm, configureScm, pendingChangeBranches } from './scm.ts';
+import {
+  GerritScm,
+  configureScm,
+  pendingChangeBranches,
+  pushForReview,
+} from './scm.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -268,6 +273,74 @@ describe('modules/platform/gerrit/scm', () => {
       expect(result!.toISO()).toBe('2023-05-20T14:25:30.123Z');
       expect(result!.zone.name).toBe('UTC');
       expect(git.getBranchUpdateDate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('pushForReview()', () => {
+    it('pushes to refs/for/<targetBranch> and returns true on success', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready'],
+      });
+    });
+
+    it('adds hashtag push options for each label', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+          labels: ['team:backend', 'priority:high'],
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: [
+          'notify=NONE',
+          'ready',
+          'hashtag=team:backend',
+          'hashtag=priority:high',
+        ],
+      });
+    });
+
+    it('clears pending change branch on success', async () => {
+      pendingChangeBranches.add('renovate/feat');
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeTrue();
+      expect(pendingChangeBranches.has('renovate/feat')).toBeFalse();
+    });
+
+    it('keeps pending change branch when push fails', async () => {
+      pendingChangeBranches.add('renovate/feat');
+      git.pushCommit.mockResolvedValueOnce(false);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeFalse();
+      expect(pendingChangeBranches.has('renovate/feat')).toBeTrue();
     });
   });
 
