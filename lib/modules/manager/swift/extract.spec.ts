@@ -114,6 +114,69 @@ describe('modules/manager/swift/extract', () => {
       });
     });
 
+    it('extracts GitHub dependencies from SCP-style SSH URL', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "git@github.com:example/repo.git", from: "1.0.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: 'from: "1.0.0"',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitLab dependencies from SCP-style SSH URL', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "git@gitlab.com:group/project.git", from: "2.0.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'gitlab-tags',
+            depName: 'group/project',
+            currentValue: 'from: "2.0.0"',
+          },
+        ],
+      });
+    });
+
+    it('extracts dependencies from ssh:// URL', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "ssh://git@github.com/example/repo.git", from: "1.0.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: 'from: "1.0.0"',
+          },
+        ],
+      });
+    });
+
     it('extracts other dependencies with git-tags datasource', () => {
       const content = `
         let package = Package(
