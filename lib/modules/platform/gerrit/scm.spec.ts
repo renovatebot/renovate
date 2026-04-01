@@ -1,7 +1,12 @@
 import { git, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { client as _client } from './client.ts';
-import { GerritScm, configureScm } from './scm.ts';
+import {
+  GerritScm,
+  configureScm,
+  pendingChangeBranches,
+  pushForReview,
+} from './scm.ts';
 import type { GerritChange, GerritRevisionInfo } from './types.ts';
 
 vi.mock('./client.ts');
@@ -14,30 +19,92 @@ describe('modules/platform/gerrit/scm', () => {
     configureScm('test/repo');
   });
 
-  describe('deleteBranch()', async () => {
-    await expect(gerritScm.deleteBranch('renovate/test-branch')).toResolve();
-    expect(git.deleteVirtualBranch).toHaveBeenCalledExactlyOnceWith(
-      'renovate/test-branch',
-    );
+  describe('pushForReview()', () => {
+    it('pushes to refs/for/<targetBranch> and returns true on success', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready'],
+      });
+    });
+
+    it('adds hashtag push options for each label', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+          labels: ['team:backend', 'priority:high'],
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: [
+          'notify=NONE',
+          'ready',
+          'hashtag=team:backend',
+          'hashtag=priority:high',
+        ],
+      });
+    });
+
+    it('clears pending change branch on success', async () => {
+      pendingChangeBranches.add('renovate/feat');
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeTrue();
+      expect(pendingChangeBranches.has('renovate/feat')).toBeFalse();
+    });
+
+    it('keeps pending change branch when push fails', async () => {
+      pendingChangeBranches.add('renovate/feat');
+      git.pushCommit.mockResolvedValueOnce(false);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeFalse();
+      expect(pendingChangeBranches.has('renovate/feat')).toBeTrue();
+    });
+  });
+
+  describe('deleteBranch()', () => {
+    it('deletes virtual branch', async () => {
+      await expect(gerritScm.deleteBranch('branchName')).toResolve();
+      expect(git.deleteVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'branchName',
+      );
+    });
+
+    it('clears pending change branch', async () => {
+      pendingChangeBranches.add('renovate/pending');
+      await gerritScm.deleteBranch('renovate/pending');
+      expect(pendingChangeBranches.has('renovate/pending')).toBeFalse();
+    });
   });
 
   describe('mergeToLocal', () => {
     it('uses local merge when there is a pending change branch', async () => {
-      // Creates a pending change branch
-      clientMock.getBranchChange.mockResolvedValueOnce(null);
-      git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha' as LongCommitSha,
-        parentCommitSha: 'parentSha' as LongCommitSha,
-        files: [],
-      });
-      await gerritScm.commitAndPush({
-        branchName: 'renovate/onboarding',
-        baseBranch: 'main',
-        message: 'commit msg',
-        files: [],
-        prTitle: 'Configure Renovate',
-      });
-
+      pendingChangeBranches.add('renovate/onboarding');
       git.mergeToLocal.mockResolvedValueOnce();
       await expect(gerritScm.mergeToLocal('renovate/onboarding')).toResolve();
       expect(clientMock.findChanges).not.toHaveBeenCalled();

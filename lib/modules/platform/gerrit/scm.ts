@@ -29,7 +29,7 @@ export function configureScm(repo: string): void {
 // git.fetchRevSpec() can also be replaced with some local git command.
 
 /** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
-const pendingChangeBranches = new Set<string>();
+export const pendingChangeBranches = new Set<string>();
 
 export async function pushForReview(options: {
   sourceRef: string;
