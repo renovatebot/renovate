@@ -1,4 +1,6 @@
-import { Readable } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { createZstdCompress } from 'node:zlib';
 import type { GetObjectCommandInput } from '@aws-sdk/client-s3';
 import {
   GetObjectCommand,
@@ -28,11 +30,25 @@ describe('util/git/s3-persist', () => {
     await fs.remove(tmpDir);
   });
 
-  function expectedGetParams(): GetObjectCommandInput {
+  function expectedGetParams(
+    fileName = 'git-data.tar.zst',
+  ): GetObjectCommandInput {
     return {
       Bucket: 'my-bucket',
-      Key: 'renovate-git/github/org/repo/git-data.tar.gz',
+      Key: `renovate-git/github/org/repo/${fileName}`,
     };
+  }
+
+  async function createArchive(
+    sourceDir: string,
+    entries: string[],
+  ): Promise<Buffer> {
+    const pack = tar.create({ cwd: sourceDir }, entries);
+    const compressionStream = createZstdCompress();
+    const body = new PassThrough();
+    const bodyPromise = streamToBuffer(body);
+    await pipeline(pack, compressionStream, body);
+    return await bodyPromise;
   }
 
   async function createValidArchive(sourceDir: string): Promise<Buffer> {
@@ -41,24 +57,14 @@ describe('util/git/s3-persist', () => {
     await fs.writeFile(`${gitDir}/HEAD`, 'ref: refs/heads/main\n');
     await fs.writeFile(`${gitDir}/config`, '[core]\n');
 
-    const pack = tar.create({ gzip: true, cwd: sourceDir }, ['.git']);
-    const chunks: Buffer[] = [];
-    for await (const chunk of pack) {
-      chunks.push(Buffer.from(chunk as Uint8Array));
-    }
-    return Buffer.concat(chunks);
+    return await createArchive(sourceDir, ['.git']);
   }
 
   async function createCorruptArchive(sourceDir: string): Promise<Buffer> {
     await fs.ensureDir(`${sourceDir}/not-git`);
     await fs.writeFile(`${sourceDir}/not-git/file.txt`, 'data');
 
-    const pack = tar.create({ gzip: true, cwd: sourceDir }, ['not-git']);
-    const chunks: Buffer[] = [];
-    for await (const chunk of pack) {
-      chunks.push(Buffer.from(chunk as Uint8Array));
-    }
-    return Buffer.concat(chunks);
+    return await createArchive(sourceDir, ['not-git']);
   }
 
   async function streamToBuffer(
@@ -97,7 +103,7 @@ describe('util/git/s3-persist', () => {
       expect(result).toBeTrue();
       expect(await fs.pathExists(`${tmpDir}/.git/HEAD`)).toBeTrue();
       expect(logger.debug).toHaveBeenCalledWith(
-        { key: 'renovate-git/github/org/repo/git-data.tar.gz' },
+        { key: 'renovate-git/github/org/repo/git-data.tar.zst' },
         'restoreGitDataFromS3() - success',
       );
       expect(logger.warn).not.toHaveBeenCalled();
@@ -159,7 +165,7 @@ describe('util/git/s3-persist', () => {
       expect(result).toBeFalse();
       expect(await fs.pathExists(`${tmpDir}/.git`)).toBeFalse();
       expect(logger.warn).toHaveBeenCalledWith(
-        { key: 'renovate-git/github/org/repo/git-data.tar.gz' },
+        { key: 'renovate-git/github/org/repo/git-data.tar.zst' },
         'restoreGitDataFromS3() - archive extracted but .git/HEAD not found, cleaning up',
       );
     });
@@ -207,7 +213,7 @@ describe('util/git/s3-persist', () => {
       const call = s3Mock.commandCalls(GetObjectCommand)[0];
       expect(call.args[0].input).toEqual({
         Bucket: 'my-bucket',
-        Key: 'renovate-git/github/org/repo/git-data.tar.gz',
+        Key: 'renovate-git/github/org/repo/git-data.tar.zst',
       });
     });
 
@@ -231,7 +237,7 @@ describe('util/git/s3-persist', () => {
       const call = s3Mock.commandCalls(GetObjectCommand)[0];
       expect(call.args[0].input).toEqual({
         Bucket: 'my-bucket',
-        Key: 'github/org/repo/git-data.tar.gz',
+        Key: 'github/org/repo/git-data.tar.zst',
       });
     });
 
@@ -255,7 +261,7 @@ describe('util/git/s3-persist', () => {
       const call = s3Mock.commandCalls(GetObjectCommand)[0];
       expect(call.args[0].input).toEqual({
         Bucket: 'my-bucket',
-        Key: 'renovate-git/gitlab/group/subgroup/repo/git-data.tar.gz',
+        Key: 'renovate-git/gitlab/group/subgroup/repo/git-data.tar.zst',
       });
     });
   });
@@ -275,12 +281,12 @@ describe('util/git/s3-persist', () => {
       expect(calls).toHaveLength(1);
       expect(calls[0].args[0].input.Bucket).toBe('my-bucket');
       expect(calls[0].args[0].input.Key).toBe(
-        'renovate-git/github/org/repo/git-data.tar.gz',
+        'renovate-git/github/org/repo/git-data.tar.zst',
       );
-      expect(calls[0].args[0].input.ContentType).toBe('application/gzip');
+      expect(calls[0].args[0].input.ContentType).toBe('application/zstd');
       expect(calls[0].args[0].input.Body).toBeInstanceOf(Readable);
       expect(logger.debug).toHaveBeenCalledWith(
-        { key: 'renovate-git/github/org/repo/git-data.tar.gz' },
+        { key: 'renovate-git/github/org/repo/git-data.tar.zst' },
         'archiveGitDataToS3() - success',
       );
     });

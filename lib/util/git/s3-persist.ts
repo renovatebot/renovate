@@ -1,5 +1,6 @@
 import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { createZstdCompress, createZstdDecompress } from 'node:zlib';
 import type {
   GetObjectCommandInput,
   PutObjectCommandInput,
@@ -12,10 +13,25 @@ import { instrument } from '../../instrumentation/index.ts';
 import { logger } from '../../logger/index.ts';
 import { getS3Client, parseS3Url } from '../s3.ts';
 
+interface GitArchiveFormat {
+  contentType: string;
+  fileName: string;
+  getCompressStream: () => NodeJS.ReadWriteStream;
+  getDecompressStream: () => NodeJS.ReadWriteStream;
+}
+
+const gitArchiveFormat: GitArchiveFormat = {
+  contentType: 'application/zstd',
+  fileName: 'git-data.tar.zst',
+  getCompressStream: () => createZstdCompress(),
+  getDecompressStream: () => createZstdDecompress(),
+};
+
 function getS3Key(
   s3Url: string,
   platform: string,
   repository: string,
+  fileName = gitArchiveFormat.fileName,
 ): { bucket: string; key: string } {
   const parsed = parseS3Url(s3Url);
   if (!parsed) {
@@ -31,7 +47,7 @@ function getS3Key(
   }
   return {
     bucket: parsed.Bucket,
-    key: `${prefix}${platform}/${repository}/git-data.tar.gz`,
+    key: `${prefix}${platform}/${repository}/${fileName}`,
   };
 }
 
@@ -60,7 +76,11 @@ export async function restoreGitDataFromS3(
         return false;
       }
 
-      await pipeline(body, tar.extract({ cwd: localDir }));
+      await pipeline(
+        body,
+        gitArchiveFormat.getDecompressStream(),
+        tar.extract({ cwd: localDir }),
+      );
 
       const gitHead = upath.join(localDir, '.git/HEAD');
       if (await fs.pathExists(gitHead)) {
@@ -102,22 +122,22 @@ export async function archiveGitDataToS3(
     const { bucket, key } = getS3Key(s3Url, platform, repository);
 
     try {
-      const archiveStream = tar.create(
-        { gzip: true, cwd: localDir, portable: true },
-        ['.git'],
-      );
+      const archiveStream = tar.create({ cwd: localDir, portable: true }, [
+        '.git',
+      ]);
+      const compressionStream = gitArchiveFormat.getCompressStream();
       const body = new PassThrough();
 
       const s3Params: PutObjectCommandInput = {
         Bucket: bucket,
         Key: key,
         Body: body,
-        ContentType: 'application/gzip',
+        ContentType: gitArchiveFormat.contentType,
       };
 
       await Promise.all([
         getS3Client().send(new PutObjectCommand(s3Params)),
-        pipeline(archiveStream, body),
+        pipeline(archiveStream, compressionStream, body),
       ]);
       logger.debug({ key }, 'archiveGitDataToS3() - success');
     } catch (err) {

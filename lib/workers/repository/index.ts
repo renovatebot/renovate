@@ -17,6 +17,10 @@ import { getInheritedOrGlobal } from '../../util/common.ts';
 import { removeDanglingContainers } from '../../util/exec/docker/index.ts';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs/index.ts';
 import { isCloned } from '../../util/git/index.ts';
+import {
+  archiveGitDataToS3,
+  restoreGitDataFromS3,
+} from '../../util/git/s3-persist.ts';
 import { detectSemanticCommits } from '../../util/git/semantic.ts';
 import * as queue from '../../util/http/queue.ts';
 import * as throttle from '../../util/http/throttle.ts';
@@ -84,8 +88,6 @@ export async function renovateRepository(
           repoConfig.persistRepoData &&
           repoConfig.persistRepoDataType?.startsWith('s3://')
         ) {
-          const { restoreGitDataFromS3 } =
-            await import('../../util/git/s3-persist.ts');
           const platform = GlobalConfig.get('platform')!;
           const restored = await restoreGitDataFromS3(
             localDir,
@@ -210,7 +212,6 @@ export async function renovateRepository(
     repoConfig.persistRepoData &&
     repoConfig.persistRepoDataType?.startsWith('s3://')
   ) {
-    const { archiveGitDataToS3 } = await import('../../util/git/s3-persist.ts');
     const platform = GlobalConfig.get('platform')!;
     await archiveGitDataToS3(
       localDir,
