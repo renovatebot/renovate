@@ -1009,10 +1009,7 @@ describe('workers/repository/update/pr/index', () => {
                 manager: 'npm',
                 currentVersion: '1.2.3',
                 newVersion: '2.3.4',
-                releases: [
-                  { version: '1.2.3', attestation: currentAttestation },
-                  { version: '2.3.4', attestation: newAttestation },
-                ],
+                releases: [{ version: '2.3.4', attestation: newAttestation }],
               });
 
               it('does not warn the user', async () => {
@@ -1020,6 +1017,7 @@ describe('workers/repository/update/pr/index', () => {
 
                 const res = await ensurePr({
                   ...config,
+                  hasAttestation: currentAttestation,
                   upgrades: [dummyUpgrade],
                 });
 
@@ -1039,7 +1037,7 @@ describe('workers/repository/update/pr/index', () => {
             currentVersion: '1.2.3',
             newVersion: '2.3.4',
             releases: [
-              { version: '1.2.3', attestation: true },
+              // but the update we're updating to does not
               { version: '2.3.4', attestation: false },
             ],
           });
@@ -1049,6 +1047,8 @@ describe('workers/repository/update/pr/index', () => {
 
             const res = await ensurePr({
               ...config,
+              // the current release has an attestation
+              hasAttestation: true,
               upgrades: [dummyUpgrade],
             });
 
