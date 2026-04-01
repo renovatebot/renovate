@@ -7,7 +7,7 @@ import {
   pendingChangeBranches,
   pushForReview,
 } from './scm.ts';
-import type { GerritChange, GerritRevisionInfo } from './types.ts';
+import type { GerritChange } from './types.ts';
 
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
@@ -143,7 +143,6 @@ describe('modules/platform/gerrit/scm', () => {
           branchName: 'renovate/dependency-1.x',
           state: 'open',
           targetBranch: 'main',
-          requestDetails: ['CURRENT_REVISION'],
         },
       );
     });
@@ -176,7 +175,6 @@ describe('modules/platform/gerrit/scm', () => {
           ),
         ],
         prTitle: 'pr title',
-        force: true,
       });
       // For new changes, push should NOT be called - it will be done by createPr()
       expect(git.pushCommit).not.toHaveBeenCalled();
@@ -186,10 +184,6 @@ describe('modules/platform/gerrit/scm', () => {
       const existingChange = partial<GerritChange>({
         change_id: 'Ifcd936eef0ced620040a07a337c586d0a882725b',
         branch: 'main',
-        current_revision: 'commitSha' as LongCommitSha,
-        revisions: {
-          commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
-        },
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
@@ -198,7 +192,6 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);
-      git.hasDiff.mockResolvedValueOnce(true);
 
       expect(
         await gerritScm.commitAndPush({
@@ -218,11 +211,7 @@ describe('modules/platform/gerrit/scm', () => {
           'Renovate-Branch: renovate/dependency-1.x\nChange-Id: Ifcd936eef0ced620040a07a337c586d0a882725b',
         ],
         prTitle: 'pr title',
-        force: true,
       });
-      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
-        'refs/changes/1/2',
-      );
       expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
@@ -236,10 +225,6 @@ describe('modules/platform/gerrit/scm', () => {
         _number: 123456,
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
         branch: 'main',
-        current_revision: 'commitSha' as LongCommitSha,
-        revisions: {
-          commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
-        },
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
@@ -248,8 +233,6 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);
-      git.hasDiff.mockResolvedValueOnce(true);
-
       expect(
         await gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
@@ -270,11 +253,7 @@ describe('modules/platform/gerrit/scm', () => {
         ],
         prTitle: 'pr title',
         autoApprove: true,
-        force: true,
       });
-      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
-        'refs/changes/1/2',
-      );
       expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',

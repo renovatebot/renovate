@@ -23,11 +23,6 @@ export function configureScm(repo: string): void {
   repository = repo;
 }
 
-// TODO: this can be optimzed further by avoiding client.findChanges() since the change was initialized locally as commit.branchName.
-// Note the change should be pushed to refs/for/<existing change branch> instead of just targetBranch, for the case when a change will be moved to a different target branch.
-// Not sure how to get the existing change branch without querying Gerrit API though. Maybe by storing this additional information when initializing the changes as branches?
-// git.fetchRevSpec() can also be replaced with some local git command.
-
 /** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
 export const pendingChangeBranches = new Set<string>();
 
@@ -65,14 +60,23 @@ export class GerritScm extends DefaultGitScm {
     commit: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
+
+    // TODO: this can be optimzed further by avoiding client.getBranchChange()
+    // since the change was initialized locally as commit.branchName.
+    //
+    // Note the change should be pushed to refs/for/<existing change branch>
+    // instead of refs/for/<target branch>, for the case when a change will be
+    // moved to a different target branch.
+    //
+    // Not sure how to get the existing change branch without querying Gerrit API
+    // though. Maybe by storing this additional information when initializing the
+    // virtual branches?
     const existingChange = await client.getBranchChange(repository, {
       branchName: commit.branchName,
       state: 'open',
       targetBranch: commit.baseBranch,
-      requestDetails: ['CURRENT_REVISION'],
     });
 
-    let hasChanges = true;
     const message =
       typeof commit.message === 'string' ? [commit.message] : commit.message;
 
@@ -89,30 +93,27 @@ export class GerritScm extends DefaultGitScm {
       ...message,
       `Renovate-Branch: ${commit.branchName}\nChange-Id: ${changeId}`,
     ];
-    const commitResult = await git.prepareCommit({ ...commit, force: true });
+    // prepareCommit already checks hasDiff('HEAD', 'origin/<branchName>') when
+    // force is not set, which works because virtual branches are fetched as
+    // refs/remotes/origin/<branchName> during init.  This avoids pushing empty
+    // patch sets without a separate diff check.
+    const commitResult = await git.prepareCommit(commit);
     if (commitResult) {
       const { commitSha } = commitResult;
       if (existingChange) {
-        const currentRevision =
-          existingChange.revisions![existingChange.current_revision!];
-        const fetchRefSpec = currentRevision.ref;
-        await git.fetchRevSpec(fetchRefSpec); // fetch current ChangeSet for git diff
-        hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); // avoid pushing empty patch sets
-        if (hasChanges || commit.force) {
-          // Since the change already exists, we push to the same target branch to
-          // avoid creating a new change if the base branch has changed.
-          // updatePr() will later take care of moving the existing change to a
-          // different base branch if needed.
-          const pushResult = await pushForReview({
-            sourceRef: commit.branchName,
-            targetBranch: existingChange.branch,
-            files: commit.files,
-            autoApprove: commit.autoApprove,
-          });
-          /* v8 ignore else -- should never happen */
-          if (pushResult) {
-            return commitSha;
-          }
+        // Since the change already exists, we push to the same target branch to
+        // avoid creating a new change if the base branch has changed.
+        // updatePr() will later take care of moving the existing change to a
+        // different base branch if needed.
+        const pushResult = await pushForReview({
+          sourceRef: commit.branchName,
+          targetBranch: existingChange.branch,
+          files: commit.files,
+          autoApprove: commit.autoApprove,
+        });
+        /* v8 ignore else -- should never happen */
+        if (pushResult) {
+          return commitSha;
         }
       } else {
         logger.debug(`Commit prepared, push deferred to createPr()`);
