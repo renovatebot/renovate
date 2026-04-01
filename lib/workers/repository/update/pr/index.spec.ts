@@ -998,6 +998,7 @@ describe('workers/repository/update/pr/index', () => {
             [true, true],
             [false, true],
             [false, false],
+            [undefined, undefined],
           ])(
             'current attestation %s, new attestation %s',
             (currentAttestation, newAttestation) => {
