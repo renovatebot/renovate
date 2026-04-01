@@ -11,6 +11,7 @@ import {
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
+import type { ReattemptPlatformAutomergeConfig } from '../types.ts';
 import * as bitbucket from './index.ts';
 
 vi.mock('timers/promises');
@@ -1935,6 +1936,37 @@ describe('modules/platform/bitbucket-server/index', () => {
         );
       });
 
+      it('platform-native automerge returns early if usePlatformAutomerge is false', async () => {
+        const scope = await initRepo();
+        scope
+          .post(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+          )
+          .reply(200, {
+            isLastPage: true,
+            values: [],
+          });
+
+        await bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformPrOptions: {
+            usePlatformAutomerge: false,
+          },
+        });
+
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.stringContaining('tryPrAutomerge'),
+        );
+      });
+
       it('platform-native automerge returns early if Bitbucket Server <= 8.15.0 is used', async () => {
         const scope = await initRepo();
         scope
@@ -2004,6 +2036,64 @@ describe('modules/platform/bitbucket-server/index', () => {
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: expect.any(Error), prNumber: 5 },
           expect.stringContaining('automerge: fail'),
+        );
+      });
+    });
+
+    describe('reattemptPlatformAutomerge()', () => {
+      const pr: ReattemptPlatformAutomergeConfig = {
+        number: 123,
+        platformPrOptions: { usePlatformAutomerge: true },
+      };
+
+      it('should reattempt automerge', async () => {
+        const scope = await initRepo();
+        scope
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/123`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .post(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
+          )
+          .reply(200);
+
+        // Simulate version >= 8.15.0
+        vi.spyOn(semver, 'lt').mockReturnValue(false);
+
+        await bitbucket.reattemptPlatformAutomerge(pr);
+
+        expect(logger.logger.debug).toHaveBeenLastCalledWith(
+          'PR platform automerge re-attempted...prNo: 123',
+        );
+      });
+
+      it('handles unknown error', async () => {
+        const scope = await initRepo();
+        scope
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/123`,
+          )
+          .replyWithError('unknown error');
+
+        await bitbucket.reattemptPlatformAutomerge(pr);
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: expect.any(Error) },
+          'Error re-attempting PR platform automerge',
+        );
+      });
+
+      it('handles missing prNo', async () => {
+        await initRepo();
+        await bitbucket.reattemptPlatformAutomerge({
+          ...pr,
+          number: null as any,
+        });
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: expect.objectContaining({ message: REPOSITORY_NOT_FOUND }) },
+          'Error re-attempting PR platform automerge',
         );
       });
     });

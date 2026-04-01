@@ -29,7 +29,7 @@ async function cleanUpBranches(
     try {
       // get base branch from branch name if base branches are configured
       // use default branch if no base branches are configured
-      // use defaul branch name if no match (can happen when base branches are configured later)
+      // use default branch name if no match (can happen when base branches are configured later)
       const baseBranch =
         baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
       const pr = await platform.findPr({
@@ -150,6 +150,10 @@ export async function pruneStaleBranches(
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
+    return;
+  }
+  if (!config.defaultBranch) {
+    logger.debug('No defaultBranch set - skipping branch pruning');
     return;
   }
   // TODO: types (#22198)

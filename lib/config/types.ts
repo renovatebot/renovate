@@ -367,6 +367,7 @@ export interface RenovateConfig
     RenovateInternalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
+  reportFormatting?: boolean;
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
@@ -576,6 +577,7 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchRepositories?: string[];
   matchSourceUrls?: string[];
+  matchRegistryUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   matchJsonata?: string[];
   overrideDatasource?: string;

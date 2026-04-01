@@ -1,8 +1,8 @@
 import { isArray, isObject } from '@sindresorhus/is';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
 import { getCustomManagers } from '../../modules/manager/custom/index.ts';
 import { getManagers } from '../../modules/manager/index.ts';
-import { getPlatformList } from '../../modules/platform/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
@@ -506,6 +506,16 @@ const options: Readonly<RenovateOptions>[] = [
     experimental: true,
   },
   {
+    name: 'reportFormatting',
+    description:
+      'If set to `true`, Renovate will format the report JSON with Prettier before writing.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    cli: false,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
@@ -649,7 +659,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.25.2',
+    default: 'ghcr.io/renovatebot/base-image:13.33.2',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1050,7 +1060,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'platform',
     description: 'Platform type of repository.',
     type: 'string',
-    allowedValues: getPlatformList(),
+    allowedValues: [...PLATFORM_HOST_TYPES],
     default: 'github',
     globalOnly: true,
   },
@@ -1595,6 +1605,20 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     allowString: true,
     stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchRegistryUrls',
+    description:
+      'A list of URLs (or URL patterns) to match against registryUrls.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    patternMatch: true,
     parents: ['packageRules'],
     mergeable: true,
     cli: false,

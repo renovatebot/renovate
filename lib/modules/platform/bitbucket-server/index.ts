@@ -41,8 +41,10 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -457,7 +459,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   } else {
-    logger.debug(`Renovate did not find a PR for branch #${branchName}`);
+    logger.debug(`Renovate did not find a PR for branch ${branchName}`);
   }
   return pr ?? null;
 }
@@ -1089,11 +1091,28 @@ export async function createPr({
     pr,
   );
 
-  if (platformPrOptions?.usePlatformAutomerge) {
-    await tryPrAutomerge(pr.number, pr.version!);
-  }
+  await tryPrAutomerge(pr.number, pr.version!, platformPrOptions);
 
   return pr;
+}
+
+export async function reattemptPlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  logger.debug(`reattemptPlatformAutomerge(${number})`);
+
+  try {
+    const pr = await getPr(number, true);
+    if (!pr) {
+      throw new Error(REPOSITORY_NOT_FOUND);
+    }
+    await tryPrAutomerge(pr.number, pr.version!, platformPrOptions);
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
+  }
 }
 
 export async function updatePr({
@@ -1242,8 +1261,13 @@ export async function mergePr({
 async function tryPrAutomerge(
   prNumber: number,
   prVersion: number,
+  platformPrOptions?: PlatformPrOptions,
 ): Promise<void> {
-  logger.debug(`automergePr(${prNumber})`);
+  if (!platformPrOptions?.usePlatformAutomerge) {
+    return;
+  }
+
+  logger.debug(`tryPrAutomerge(${prNumber})`);
 
   if (semver.lt(defaults.version, '8.15.0')) {
     logger.debug(
