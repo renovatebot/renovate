@@ -92,7 +92,7 @@ function getReadableCronSchedule(scheduleText: string[]): string[] | null {
               throwExceptionOnParseError: false,
             })
             .replace('Every minute, ', ''),
-        ) + ` ( ${cron} )`,
+        ) + ` (\`${cron}\`)`,
     );
   } catch {
     return null;
