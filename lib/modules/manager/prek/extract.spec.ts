@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/util.ts';
@@ -11,17 +12,54 @@ vi.mock('../../../util/host-rules.ts', () => mockDeep());
 const filename = 'prek.toml';
 
 const validPrekConfig = Fixtures.get('valid.prek.toml');
-const noReposPrekConfig = Fixtures.get('no_repos.prek.toml');
-const missingRevPrekConfig = Fixtures.get('missing_rev.prek.toml');
-const invalidUrlPrekConfig = Fixtures.get('invalid_url.prek.toml');
-const enterprisePrekConfig = Fixtures.get('enterprise.prek.toml');
 const additionalDependenciesPrekConfig = Fixtures.get(
   'additional_dependencies.prek.toml',
 );
-const malformedTypedRepoPrekConfig = Fixtures.get(
-  'malformed_typed_repo.prek.toml',
-);
-const customGitlabHostPrekConfig = Fixtures.get('custom_gitlab_host.prek.toml');
+
+const noReposPrekConfig = codeBlock`
+  minimum_prek_version = "0.1.0"
+`;
+
+const missingRevPrekConfig = codeBlock`
+  [[repos]]
+  repo = "https://github.com/pre-commit/pre-commit-hooks"
+
+  [[repos]]
+  repo = "https://github.com/rhysd/actionlint"
+  rev = "v1.7.7"
+`;
+
+const invalidUrlPrekConfig = codeBlock`
+  [[repos]]
+  repo = "not_a_valid_url"
+  rev = "v1.0.0"
+
+  [[repos]]
+  repo = "https://github.com/pre-commit/pre-commit-hooks"
+  rev = "v1.0.0"
+`;
+
+const enterprisePrekConfig = codeBlock`
+  [[repos]]
+  repo = "https://enterprise.com/pre-commit/pre-commit-hooks"
+  rev = "v1.0.0"
+`;
+
+const malformedTypedRepoPrekConfig = codeBlock`
+  [[repos]]
+  repo = "https://github.com/pre-commit/pre-commit-hooks"
+  rev = 1
+
+  [[repos]]
+  repo = "https://github.com/rhysd/actionlint"
+  rev = "v1.7.7"
+`;
+
+const customGitlabHostPrekConfig = codeBlock`
+  [[repos]]
+  repo = "https://gitlab.enterprise.com/pre-commit/pre-commit-hooks"
+  rev = "v1.0.0"
+`;
 
 describe('modules/manager/prek/extract', () => {
   beforeEach(() => {

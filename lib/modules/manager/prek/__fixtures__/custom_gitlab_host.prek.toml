@@ -1,3 +1,0 @@
-[[repos]]
-repo = "https://gitlab.enterprise.com/pre-commit/pre-commit-hooks"
-rev = "v1.0.0"
