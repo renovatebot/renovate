@@ -95,6 +95,17 @@ describe('workers/repository/update/pr/body/config-description', () => {
       );
     });
 
+    it('summarizes both branch creation and automerge schedules', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        schedule: ['* 1 * * *', '* * 2 * 1'],
+        automergeSchedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
+      });
+      expect(res).toContain(
+        '**Schedule**: Branch creation - Between 01:00 AM and 01:59 AM ( * 1 * * * ), On day 2 of the month, and on Monday ( * * 2 * 1 ) (UTC), Automerge - "before 6am on Monday,after 3pm on Tuesday" (UTC).',
+      );
+    });
+
     it('renders recreateClosed=true', () => {
       const res = getPrConfigDescription({
         ...config,
