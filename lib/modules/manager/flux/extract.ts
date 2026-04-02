@@ -307,16 +307,21 @@ function resolveResourceManifest(
           // Attempt to find the exact block spanning `tag: ...` to `digest: ...` (or vice-versa) in the source content
           const escapedTag = escapeRegExp(resource.spec.ref.tag);
           const escapedDigest = escapeRegExp(resource.spec.ref.digest);
-          // Regex handles both ordering: tag before digest, or digest before tag.
-          // Allows optional single or double quotes around the values.
-          const multilineRegEx = regEx(
-            `(tag\\s*:\\s*["']?${escapedTag}["']?[\\s\\S]+?digest\\s*:\\s*["']?${escapedDigest}["']?)|(digest\\s*:\\s*["']?${escapedDigest}["']?[\\s\\S]+?tag\\s*:\\s*["']?${escapedTag}["']?)`,
+          const tagFirstRegex = regEx(
+            `ref\\s*:[\\s\\S]+?tag\\s*:\\s*["']?${escapedTag}["']?[\\s\\S]+?digest\\s*:\\s*["']?${escapedDigest}["']?`,
           );
-          const match = multilineRegEx.exec(content);
+          const digestFirstRegex = regEx(
+            `ref\\s*:[\\s\\S]+?digest\\s*:\\s*["']?${escapedDigest}["']?[\\s\\S]+?tag\\s*:\\s*["']?${escapedTag}["']?`,
+          );
+
+          const tagFirstMatch = tagFirstRegex.exec(content);
+          const digestFirstMatch = digestFirstRegex.exec(content);
+          const match = tagFirstMatch ?? digestFirstMatch;
+
           if (match) {
             combinedDep.replaceString = match[0];
             // We use the literals directly for replacement to preserve any surrounding quotes if they exist in the match
-            if (match[1]) {
+            if (tagFirstMatch) {
               // tag came first
               combinedDep.autoReplaceStringTemplate = match[0]
                 .replace(resource.spec.ref.tag, '{{newValue}}')
