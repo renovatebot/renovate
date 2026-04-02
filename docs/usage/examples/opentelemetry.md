@@ -1,6 +1,6 @@
 # OpenTelemetry
 
-Requirements:
+Requirementss:
 
 - docker-compose
 
