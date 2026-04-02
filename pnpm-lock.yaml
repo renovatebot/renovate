@@ -432,9 +432,6 @@ importers:
       '@types/github-url-from-git':
         specifier: 1.5.3
         version: 1.5.3
-      '@types/global-agent':
-        specifier: 3.0.0
-        version: 3.0.0
       '@types/ini':
         specifier: 4.1.1
         version: 4.1.1
@@ -2548,9 +2545,6 @@ packages:
 
   '@types/github-url-from-git@1.5.3':
     resolution: {integrity: sha512-0vnjtdEpqLTRBlgkzXsRaAQ0T8Nx48fW7qWl/Y5a4MTXEL2mXFV8rNPiFPCYrJFPOeyUJRzNzcs91MgJd+fFSA==}
-
-  '@types/global-agent@3.0.0':
-    resolution: {integrity: sha512-OmvaPJtTaY/wd1hxelLJmf8oKQpmKZdrlfQ+MWL59eKSEHJDDEifIo69248bdJ0yLIN+iMNQ6sKMtnwU6AxajA==}
 
   '@types/http-cache-semantics@4.2.0':
     resolution: {integrity: sha512-L3LgimLHXtGkWikKnsPg0/VFx9OGZaC+eN1u4r+OB1XRqH3meBIAVC2zr1WdMH+RHmnRkqliQAOHNJ/E0j/e0Q==}
@@ -8865,8 +8859,6 @@ snapshots:
       '@types/node': 24.12.0
 
   '@types/github-url-from-git@1.5.3': {}
-
-  '@types/global-agent@3.0.0': {}
 
   '@types/http-cache-semantics@4.2.0': {}
 
