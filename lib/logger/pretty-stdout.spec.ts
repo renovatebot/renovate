@@ -1,4 +1,6 @@
 import * as util from 'node:util';
+import { codeBlock } from 'common-tags';
+import { partial } from '~test/util.ts';
 import * as prettyStdout from './pretty-stdout.ts';
 import type { BunyanRecord } from './types.ts';
 
@@ -42,14 +44,12 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns plain text when colorize is false', () => {
-      const rec = {
+      const rec = partial<BunyanRecord>({
         foo: 'bar',
         repository: 'a/b',
         module: 'test',
-      };
-      expect(prettyStdout.getMeta(rec as any, false)).toBe(
-        ' (repository=a/b) [test]',
-      );
+      });
+      expect(prettyStdout.getMeta(rec, false)).toBe(' (repository=a/b) [test]');
     });
   });
 
@@ -113,7 +113,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('formats record without colors', () => {
-      const rec: BunyanRecord = {
+      const rec = partial<BunyanRecord>({
         level: 10,
         msg: 'test message',
         v: 0,
@@ -121,13 +121,12 @@ describe('logger/pretty-stdout', () => {
           a: 'b',
           d: ['e', 'f'],
         },
-      };
+      });
       expect(prettyStdout.formatRecord(rec, false)).toEqual(
-        [
-          `TRACE: test message`,
-          `       "config": {"a": "b", "d": ["e", "f"]}`,
-          ``,
-        ].join('\n'),
+        codeBlock`
+          TRACE: test message
+                 "config": {"a": "b", "d": ["e", "f"]}
+        ` + '\n',
       );
     });
   });
@@ -135,12 +134,12 @@ describe('logger/pretty-stdout', () => {
   describe('RenovateStream', () => {
     it('writes formatted data to destination', () => {
       const chunks: string[] = [];
-      const destination = {
+      const destination = partial<NodeJS.WritableStream>({
         write: (chunk: string) => {
           chunks.push(chunk);
           return true;
         },
-      } as NodeJS.WritableStream;
+      });
 
       const stream = new prettyStdout.RenovateStream(destination);
       const rec: BunyanRecord = {
@@ -156,12 +155,12 @@ describe('logger/pretty-stdout', () => {
 
     it('writes without colors when colorize is false', () => {
       const chunks: string[] = [];
-      const destination = {
+      const destination = partial<NodeJS.WritableStream>({
         write: (chunk: string) => {
           chunks.push(chunk);
           return true;
         },
-      } as NodeJS.WritableStream;
+      });
 
       const stream = new prettyStdout.RenovateStream(destination, {
         colorize: false,
@@ -173,8 +172,7 @@ describe('logger/pretty-stdout', () => {
       };
 
       stream.write(rec);
-      expect(chunks).toHaveLength(1);
-      expect(chunks[0]).toEqual([`TRACE: test message`, ``].join('\n'));
+      expect(chunks).toEqual(['TRACE: test message\n']);
     });
   });
 });
