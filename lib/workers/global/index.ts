@@ -36,6 +36,7 @@ import * as queue from '../../util/http/queue.ts';
 import * as throttle from '../../util/http/throttle.ts';
 import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
+import { coerceString } from '../../util/string.ts';
 import * as repositoryWorker from '../repository/index.ts';
 import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
@@ -267,8 +268,7 @@ function repositoryToOwnerAndRepo(fullName: string): {
   repo: string;
 } {
   const parts = fullName.split('/');
-  // v8 ignore else -- TODO: add test #40625
-  const repo = parts.pop() ?? '';
+  const repo = coerceString(parts.pop());
   const owner = parts.join('/');
   return { owner, repo };
 }

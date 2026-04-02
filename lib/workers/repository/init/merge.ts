@@ -23,6 +23,7 @@ import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { parseJson } from '../../../util/common.ts';
 import { setUserEnv } from '../../../util/env.ts';
@@ -31,7 +32,9 @@ import * as hostRules from '../../../util/host-rules.ts';
 import * as queue from '../../../util/http/queue.ts';
 import * as throttle from '../../../util/http/throttle.ts';
 import { maskToken } from '../../../util/mask.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
 import { getOnboardingConfig } from '../onboarding/branch/config.ts';
 import {
   getOnboardingConfigFromCache,
@@ -103,7 +106,7 @@ export async function detectRepoFileConfig(
   if (OnboardingState.onboardingCacheValid) {
     configFileName = getOnboardingFileNameFromCache();
   } else {
-    configFileName = (await detectConfigFile()) ?? undefined;
+    configFileName = coerceString(await detectConfigFile());
   }
 
   if (!configFileName) {
@@ -202,7 +205,7 @@ export async function mergeRenovateConfig(
       configFileParsed: await getOnboardingConfig(config),
     };
   }
-  const configFileParsed = repoConfig?.configFileParsed ?? {};
+  const configFileParsed = coerceObject(repoConfig?.configFileParsed);
   const resolvedRepoConfig = await resolveStaticRepoConfig(
     configFileParsed,
     process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
@@ -219,11 +222,14 @@ export async function mergeRenovateConfig(
     const repoEntry = repoEntryConfig as RenovateConfig;
     const toResolve: RenovateConfig = {
       ...repoEntry,
-      extends: [...(returnConfig.extends ?? []), ...(repoEntry.extends ?? [])],
+      extends: [
+        ...coerceArray(returnConfig.extends),
+        ...coerceArray(repoEntry.extends),
+      ],
       ignorePresets: [
-        ...(returnConfig.ignorePresets ?? []),
-        ...(repoEntry.ignorePresets ?? []),
-        ...(resolvedRepoConfig.ignorePresets ?? []),
+        ...coerceArray(returnConfig.ignorePresets),
+        ...coerceArray(repoEntry.ignorePresets),
+        ...coerceArray(resolvedRepoConfig.ignorePresets),
       ],
     };
     delete returnConfig.extends;
@@ -247,8 +253,8 @@ export async function mergeRenovateConfig(
 
   if (isNonEmptyArray(returnConfig.extends)) {
     resolvedRepoConfig.extends = [
-      ...returnConfig.extends,
-      ...(resolvedRepoConfig.extends ?? []),
+      ...coerceArray(returnConfig.extends),
+      ...coerceArray(resolvedRepoConfig.extends),
     ];
     delete returnConfig.extends;
   }
@@ -266,7 +272,7 @@ export async function mergeRenovateConfig(
   }
   if (migratedConfig.warnings) {
     returnConfig.warnings = [
-      ...(returnConfig.warnings ?? []),
+      ...coerceArray(returnConfig.warnings),
       ...migratedConfig.warnings,
     ];
   }
@@ -300,12 +306,12 @@ export async function mergeRenovateConfig(
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
     secrets: mergeChildConfig(
-      config.secrets ?? {},
-      resolvedConfig.secrets ?? {},
+      coerceObject(config.secrets),
+      coerceObject(resolvedConfig.secrets),
     ),
     variables: mergeChildConfig(
-      config.variables ?? {},
-      resolvedConfig.variables ?? {},
+      coerceObject(config.variables),
+      coerceObject(resolvedConfig.variables),
     ),
   });
 
@@ -464,7 +470,10 @@ export function mergeStaticConfig(
 ): AllConfig {
   // merge extends
   if (isNonEmptyArray(staticRepoConfig.extends)) {
-    config.extends = [...staticRepoConfig.extends, ...(config.extends ?? [])];
+    config.extends = [
+      ...staticRepoConfig.extends,
+      ...coerceArray(config.extends),
+    ];
     delete staticRepoConfig.extends;
   }
 
