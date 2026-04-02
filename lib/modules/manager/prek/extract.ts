@@ -184,11 +184,12 @@ function findDependencies(
       }
     }
 
-    const rev = item.rev?.trim();
-    if (!repo || !rev) {
+    if (!repo || isLogicalRepo(repo)) {
       continue;
     }
-    if (isLogicalRepo(repo)) {
+
+    const rev = item.rev?.trim();
+    if (!rev) {
       continue;
     }
     const depKey = getShaPinnedDepKey(repo, rev);
