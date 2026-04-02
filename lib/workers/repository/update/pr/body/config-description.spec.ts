@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import type { BranchConfig } from '../../../../types.ts';
 import { getPrConfigDescription } from './config-description.ts';
 
@@ -47,7 +48,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
         schedule: ['* 1 * * * *'],
         timezone: 'Europe/Istanbul',
       });
-      expect(res).toContain(`in timezone Europe/Istanbul`);
+      expect(res).toContain(`(in timezone Europe/Istanbul)`);
     });
 
     it('renders UTC as the default timezone', () => {
@@ -55,9 +56,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
         ...config,
         schedule: ['* 1 * * *'],
       });
-      expect(res).toContain(
-        'Between 01:00 AM and 01:59 AM ( * 1 * * * ) (UTC)',
-      );
+      expect(res).toContain('Between 01:00 AM and 01:59 AM ( * 1 * * * )');
     });
 
     it('summarizes cron schedules', () => {
@@ -65,8 +64,9 @@ describe('workers/repository/update/pr/body/config-description', () => {
         ...config,
         schedule: ['* 1 * * *', '* * 2 * 1'],
       });
+      expect(res).toContain('- Between 01:00 AM and 01:59 AM ( * 1 * * * )');
       expect(res).toContain(
-        'Between 01:00 AM and 01:59 AM ( * 1 * * * ), On day 2 of the month, and on Monday ( * * 2 * 1 ) (UTC)',
+        '- On day 2 of the month, and on Monday ( * * 2 * 1 )',
       );
     });
 
@@ -75,14 +75,12 @@ describe('workers/repository/update/pr/body/config-description', () => {
         ...config,
         schedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
       });
-      expect(res).toContain(
-        '"before 6am on Monday,after 3pm on Tuesday" (UTC)',
-      );
+      expect(res).toContain('"before 6am on Monday,after 3pm on Tuesday"');
     });
 
     it('renders undefined schedule', () => {
       const res = getPrConfigDescription(config);
-      expect(res).toContain(`At any time (no schedule defined).`);
+      expect(res).toContain(`At any time (no schedule defined)`);
     });
 
     it('summarizes cron schedules (for automergeSchedule)', () => {
@@ -90,8 +88,9 @@ describe('workers/repository/update/pr/body/config-description', () => {
         ...config,
         automergeSchedule: ['* 1 * * *', '* * 2 * 1'],
       });
+      expect(res).toContain('- Between 01:00 AM and 01:59 AM ( * 1 * * * )');
       expect(res).toContain(
-        'Between 01:00 AM and 01:59 AM ( * 1 * * * ), On day 2 of the month, and on Monday ( * * 2 * 1 ) (UTC)',
+        '- On day 2 of the month, and on Monday ( * * 2 * 1 )',
       );
     });
 
@@ -101,9 +100,16 @@ describe('workers/repository/update/pr/body/config-description', () => {
         schedule: ['* 1 * * *', '* * 2 * 1'],
         automergeSchedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
       });
-      expect(res).toContain(
-        '**Schedule**: Branch creation - Between 01:00 AM and 01:59 AM ( * 1 * * * ), On day 2 of the month, and on Monday ( * * 2 * 1 ) (UTC), Automerge - "before 6am on Monday,after 3pm on Tuesday" (UTC).',
-      );
+      const expected = codeBlock`
+        **Schedule**: (UTC)
+        - Branch creation
+          - Between 01:00 AM and 01:59 AM ( * 1 * * * )
+          - On day 2 of the month, and on Monday ( * * 2 * 1 )
+        - Automerge
+          - "before 6am on Monday,after 3pm on Tuesday"
+      `;
+
+      expect(res).toContain(expected);
     });
 
     it('renders recreateClosed=true', () => {
