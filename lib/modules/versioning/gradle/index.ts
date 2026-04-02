@@ -221,7 +221,9 @@ function getNewValue({
   }
 
   const mavenRange = parseMavenBasedRange(currentValue);
-  if (mavenRange?.preferredVal) {
+  // if there is a preferred version, handle it. Ignore pin strategy, where
+  // having a preferred version wouldn't make any sense.
+  if (mavenRange?.preferredVal && rangeStrategy !== 'pin') {
     const { leftVal, rightVal, preferredVal } = mavenRange;
     const baseRange = currentValue.slice(
       0,
