@@ -631,6 +631,42 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
       expect(finalWrittenContent).not.toContain('oldhash123');
       expect(finalWrittenContent).not.toContain('oldwrapperhash456');
+      expect(fs.deleteLocalFile).toHaveBeenCalledWith(
+        '.mvn/wrapper/maven-wrapper.jar',
+      );
+    });
+
+    it('should not attempt to delete old JAR file if doing a Maven Wrapper update', async () => {
+      const propertiesWithChecksums = codeBlock`
+        distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+        distributionSha256Sum=oldhash123
+        wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+        wrapperSha256Sum=oldwrapperhash456
+      `;
+
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip',
+        )
+        .reply(200, Buffer.from('fake-maven-content'))
+        .get(
+          '/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar',
+        )
+        .reply(200, Buffer.from('fake-wrapper-content'));
+      mockMavenFileChangedInGit();
+      mockExecAll({ stdout: '', stderr: '' });
+      // Mock readLocalFile to return content after wrapper:wrapper runs
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithChecksums);
+
+      await updateArtifacts({
+        packageFileName: 'mvnw',
+        newPackageFileContent: propertiesWithChecksums,
+        updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
     });
 
     it('should preserve old checksum when fetch fails', async () => {

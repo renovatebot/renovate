@@ -19,7 +19,6 @@ export default {
         if (!filename.includes('/lib/')) {
           return {};
         }
-
         return {
           ImportDeclaration(node) {
             if (TOOLS_IMPORT_PATTERN.test(node.source.value)) {
@@ -56,7 +55,7 @@ export default {
               if (!descr) {
                 context.report({
                   node,
-                  message: `Test root describe must have arguments`,
+                  message: 'Test root describe must have arguments',
                 });
                 return;
               }

@@ -21,7 +21,7 @@ import { asRawCommand } from './utils.ts';
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
 vi.mock('./hermit.ts', async () => ({
-  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit')),
+  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit.ts')),
   getHermitEnvs: vi.fn(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
