@@ -461,6 +461,34 @@ describe('modules/manager/swift/artifacts', () => {
     expect(contents).toContain('"version": "5.10.0"');
   });
 
+  it('matches pin when Package.resolved uses ssh:// URL', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const sshFixture = v2Fixture.replace(
+      '"https://github.com/Alamofire/Alamofire"',
+      '"ssh://git@github.com/Alamofire/Alamofire.git"',
+    );
+    fs.readLocalFile.mockResolvedValue(sshFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
   it('falls back to basic normalization for host-only URLs', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     const hostOnlyFixture = JSON.stringify(
