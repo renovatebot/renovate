@@ -11,34 +11,34 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns empty string if empty rec', () => {
-      expect(prettyStdout.getMeta({} as any)).toBeEmptyString();
+      expect(prettyStdout.getMeta(partial<BunyanRecord>())).toBeEmptyString();
     });
 
     it('returns empty string if no meta fields', () => {
-      const rec = {
+      const rec = partial<BunyanRecord>({
         foo: 'bar',
-      };
-      expect(prettyStdout.getMeta(rec as any)).toBeEmptyString();
+      });
+      expect(prettyStdout.getMeta(rec)).toBeEmptyString();
     });
 
     it('supports single meta', () => {
-      const rec = {
+      const rec = partial<BunyanRecord>({
         foo: 'bar',
         repository: 'a/b',
-      };
-      expect(prettyStdout.getMeta(rec as any)).toEqual(
+      });
+      expect(prettyStdout.getMeta(rec)).toEqual(
         util.styleText('gray', ' (repository=a/b)'),
       );
     });
 
     it('supports multi meta', () => {
-      const rec = {
+      const rec = partial<BunyanRecord>({
         foo: 'bar',
         branch: 'c',
         repository: 'a/b',
         module: 'test',
-      };
-      expect(prettyStdout.getMeta(rec as any)).toEqual(
+      });
+      expect(prettyStdout.getMeta(rec)).toEqual(
         util.styleText('gray', ' (repository=a/b, branch=c) [test]'),
       );
     });
@@ -59,26 +59,28 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns empty string if empty rec', () => {
-      expect(prettyStdout.getDetails({} as any)).toBeEmptyString();
+      expect(
+        prettyStdout.getDetails(partial<BunyanRecord>()),
+      ).toBeEmptyString();
     });
 
     it('returns empty string if all are meta fields', () => {
-      const rec = {
+      const rec = partial<BunyanRecord>({
         branch: 'bar',
         v: 0,
-      };
-      expect(prettyStdout.getDetails(rec as any)).toBeEmptyString();
+      });
+      expect(prettyStdout.getDetails(rec)).toBeEmptyString();
     });
 
     it('supports a config', () => {
-      const rec = {
+      const rec = partial<BunyanRecord>({
         v: 0,
         config: {
           a: 'b',
           d: ['e', 'f'],
         },
-      };
-      expect(prettyStdout.getDetails(rec as any)).toBe(
+      });
+      expect(prettyStdout.getDetails(rec)).toBe(
         `       "config": {"a": "b", "d": ["e", "f"]}\n`,
       );
     });
