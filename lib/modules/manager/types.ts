@@ -30,7 +30,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   skipInstalls?: boolean | null;
   repository?: string;
   currentDigest?: string;
-  newDigest?: string;
+  newDigest?: string | null;
 }
 
 export interface UpdateArtifactsConfig {
@@ -216,7 +216,7 @@ export interface Upgrade<
   lockFiles?: string[];
   manager?: string;
   name?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newFrom?: string;
   newMajor?: number;
   newName?: string;
