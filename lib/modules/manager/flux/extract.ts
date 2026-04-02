@@ -48,6 +48,7 @@ function readManifest(
     return {
       kind: 'system',
       file: packageFile,
+      content,
       version: versionMatch[1],
       components: versionMatch[2],
     };
@@ -56,6 +57,7 @@ function readManifest(
   return {
     kind: 'resource',
     file: packageFile,
+    content,
     resources: parseYaml(content, {
       customSchema: FluxResource,
       failureBehaviour: 'filter',
@@ -409,17 +411,15 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
   const results: PackageFile<FluxManagerData>[] = [];
-  const fileContents: Record<string, string> = {}; // Add a map to cache content
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
     if (content) {
-      fileContents[file] = content;
-    } // Cache it
-    // TODO #22198
-    const manifest = readManifest(content!, file);
-    if (manifest) {
-      manifests.push(manifest);
+      // TODO #22198
+      const manifest = readManifest(content, file);
+      if (manifest) {
+        manifests.push(manifest);
+      }
     }
   }
 
@@ -432,15 +432,12 @@ export async function extractAllPackageFiles(
         deps = resolveSystemManifest(manifest);
         break;
       case 'resource': {
-        const content = fileContents[manifest.file]; // Retrieve it natively
-        if (content) {
-          deps = resolveResourceManifest(
-            manifest,
-            helmRepositories,
-            config.registryAliases,
-            content,
-          );
-        }
+        deps = resolveResourceManifest(
+          manifest,
+          helmRepositories,
+          config.registryAliases,
+          manifest.content,
+        );
         break;
       }
     }
