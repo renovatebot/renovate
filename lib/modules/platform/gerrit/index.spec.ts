@@ -16,11 +16,7 @@ import type {
   GerritProjectInfo,
   GerritRevisionInfo,
 } from './types.ts';
-import {
-  REQUEST_DETAILS_FOR_PRS,
-  TAG_PULL_REQUEST_BODY,
-  mapGerritChangeToPr,
-} from './utils.ts';
+import { TAG_PULL_REQUEST_BODY, mapGerritChangeToPr } from './utils.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -369,47 +365,6 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.findPr({ branchName: 'branch', prTitle: 'wrong title' }),
       ).resolves.toBeNull();
     });
-
-    it('findPr() - refreshCache bypasses cache and queries client', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      await expect(
-        gerrit.findPr({
-          branchName: 'branch',
-          state: 'open',
-          targetBranch: 'master',
-          refreshCache: true,
-        }),
-      ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        expect.objectContaining({
-          branchName: 'branch',
-          state: 'open',
-          targetBranch: 'master',
-          singleChange: true,
-          requestDetails: REQUEST_DETAILS_FOR_PRS,
-        }),
-      );
-      expect(prCacheMock.getPrs).not.toHaveBeenCalled();
-    });
-
-    it('findPr() - refreshCache found and saves to cache', async () => {
-      const change = makeChange();
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      prCacheMock.setPr.mockResolvedValueOnce();
-      await expect(
-        gerrit.findPr({
-          branchName: 'branch',
-          state: 'open',
-          targetBranch: 'master',
-          refreshCache: true,
-        }),
-      ).resolves.toHaveProperty('number', 123456);
-      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        expect.objectContaining({ number: 123456 }),
-      );
-    });
   });
 
   describe('getPr()', () => {
@@ -427,47 +382,6 @@ describe('modules/platform/gerrit/index', () => {
       await expect(gerrit.getPr(123456)).resolves.toBeNull();
       expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.getChange).not.toHaveBeenCalled();
-    });
-
-    it('getPr() - refreshCache bypasses cache, queries client, and saves to cache', async () => {
-      const change = makeChange();
-      clientMock.getChange.mockResolvedValueOnce(change);
-      prCacheMock.setPr.mockResolvedValueOnce();
-      await expect(gerrit.getPr(123456, true)).resolves.toEqual(
-        mapGerritChangeToPr(change),
-      );
-      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        REQUEST_DETAILS_FOR_PRS,
-      );
-      expect(prCacheMock.getPrs).not.toHaveBeenCalled();
-      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        expect.objectContaining({ number: 123456 }),
-      );
-    });
-
-    it('getPr() - not found with refreshCache', async () => {
-      clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
-      await expect(gerrit.getPr(123456, true)).resolves.toBeNull();
-    });
-
-    it('getPr() - refreshCache returns null when change has no branch footer', async () => {
-      const change = makeChange({
-        current_revision: 'rev1' as LongCommitSha,
-        revisions: {
-          rev1: partial<GerritRevisionInfo>({
-            commit_with_footers: 'no branch footer',
-          }),
-        },
-      });
-      clientMock.getChange.mockResolvedValueOnce(change);
-      await expect(gerrit.getPr(123456, true)).resolves.toBeNull();
-    });
-
-    it('getPr() - other error with refreshCache', async () => {
-      clientMock.getChange.mockRejectedValueOnce(new Error('other error'));
-      await expect(gerrit.getPr(123456, true)).rejects.toThrow('other error');
     });
   });
 
@@ -753,20 +667,6 @@ describe('modules/platform/gerrit/index', () => {
       ).resolves.toHaveProperty('number', 123456);
       expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.findChanges).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('refreshPr()', () => {
-    it('refreshPr()', async () => {
-      const change = makeChange();
-      clientMock.getChange.mockResolvedValueOnce(change);
-      prCacheMock.setPr.mockResolvedValueOnce();
-      await expect(gerrit.refreshPr(123456)).toResolve();
-      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        REQUEST_DETAILS_FOR_PRS,
-      );
-      expect(prCacheMock.setPr).toHaveBeenCalled();
     });
   });
 

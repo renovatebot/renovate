@@ -219,97 +219,47 @@ export async function initRepo({
 }
 
 export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
-  if (!findPRConfig.refreshCache) {
-    const prs = await GerritPrCache.getPrs(config.repository!);
-    // Find matching PR from cache
-    const cached = prs.find((pr) => {
-      if (
-        findPRConfig.branchName &&
-        pr.sourceBranch !== findPRConfig.branchName
-      ) {
-        return false;
-      }
-      if (
-        findPRConfig.targetBranch &&
-        pr.targetBranch !== findPRConfig.targetBranch
-      ) {
-        return false;
-      }
-      if (findPRConfig.prTitle && pr.title !== findPRConfig.prTitle) {
-        return false;
-      }
-      if (
-        findPRConfig.state !== undefined &&
-        findPRConfig.state !== 'all' &&
-        pr.state !== findPRConfig.state &&
-        !(findPRConfig.state === '!open' && pr.state !== 'open')
-      ) {
-        return false;
-      }
-      return true;
-    });
-    logger.trace(
-      `findPr: using cached gerrit change ${cached?.number} for ${findPRConfig.branchName}`,
-    );
-    return cached ?? null;
-  }
-
-  const change = (
-    await client.findChanges(config.repository!, {
-      ...findPRConfig,
-      singleChange: true,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
-  if (!change) {
-    return null;
-  }
-  const pr = mapGerritChangeToPr(change, {
-    sourceBranch: findPRConfig.branchName,
-  })!;
-
-  logger.debug(`findPr: saving gerrit change ${pr.number} to cache`);
-  await GerritPrCache.setPr(config.repository!, pr);
-
-  return pr;
-}
-
-export async function refreshPr(number: number): Promise<void> {
-  // refresh cache
-  await getPr(number, true);
-}
-
-export async function getPr(
-  number: number,
-  refreshCache?: boolean,
-): Promise<Pr | null> {
-  if (!refreshCache) {
-    const prs = await GerritPrCache.getPrs(config.repository!);
-    const cached = prs.find((pr) => pr.number === number) ?? null;
-    logger.trace(
-      `getPr: using cached gerrit change ${cached?.sourceBranch} for ${number}`,
-    );
-    return cached;
-  }
-
-  let change: GerritChange;
-  try {
-    change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
-  } catch (err) {
-    if (err.statusCode === 404) {
-      return null;
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  // Find matching PR from cache
+  const cached = prs.find((pr) => {
+    if (
+      findPRConfig.branchName &&
+      pr.sourceBranch !== findPRConfig.branchName
+    ) {
+      return false;
     }
-    throw err;
-  }
-  const pr = mapGerritChangeToPr(change);
-  if (!pr) {
-    return null;
-  }
+    if (
+      findPRConfig.targetBranch &&
+      pr.targetBranch !== findPRConfig.targetBranch
+    ) {
+      return false;
+    }
+    if (findPRConfig.prTitle && pr.title !== findPRConfig.prTitle) {
+      return false;
+    }
+    if (
+      findPRConfig.state !== undefined &&
+      findPRConfig.state !== 'all' &&
+      pr.state !== findPRConfig.state &&
+      !(findPRConfig.state === '!open' && pr.state !== 'open')
+    ) {
+      return false;
+    }
+    return true;
+  });
+  logger.trace(
+    `findPr: using cached gerrit change ${cached?.number} for ${findPRConfig.branchName}`,
+  );
+  return cached ?? null;
+}
 
-  logger.debug(`getPr: saving gerrit change ${number} to cache`);
-  await GerritPrCache.setPr(config.repository!, pr);
-
-  return pr;
+export async function getPr(number: number): Promise<Pr | null> {
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  const cached = prs.find((pr) => pr.number === number) ?? null;
+  logger.trace(
+    `getPr: using cached gerrit change ${cached?.sourceBranch} for ${number}`,
+  );
+  return cached;
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
