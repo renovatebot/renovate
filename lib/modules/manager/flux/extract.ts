@@ -308,10 +308,10 @@ function resolveResourceManifest(
           const escapedTag = escapeRegExp(resource.spec.ref.tag);
           const escapedDigest = escapeRegExp(resource.spec.ref.digest);
           const tagFirstRegex = regEx(
-            `ref\\s*:[\\s\\S]+?tag\\s*:\\s*["']?${escapedTag}["']?[\\s\\S]+?digest\\s*:\\s*["']?${escapedDigest}["']?`,
+            `ref\\s*:[\\s\\S]+?["']?tag["']?\\s*:\\s*["']?${escapedTag}["']?[\\s\\S]+?["']?digest["']?\\s*:\\s*["']?${escapedDigest}["']?`,
           );
           const digestFirstRegex = regEx(
-            `ref\\s*:[\\s\\S]+?digest\\s*:\\s*["']?${escapedDigest}["']?[\\s\\S]+?tag\\s*:\\s*["']?${escapedTag}["']?`,
+            `ref\\s*:[\\s\\S]+?["']?digest["']?\\s*:\\s*["']?${escapedDigest}["']?[\\s\\S]+?["']?tag["']?\\s*:\\s*["']?${escapedTag}["']?`,
           );
 
           const tagFirstMatch = tagFirstRegex.exec(content);
@@ -335,12 +335,9 @@ function resolveResourceManifest(
           } else {
             logger.debug(
               { file: manifest.file, name: resource.metadata.name },
-              'Could not find exact tag/digest block in content, auto-replace might fail',
+              'Could not find exact tag/digest block in content, skipping extraction',
             );
-            // fallback (will likely fail auto-replace if not formatted this way, but avoids breaking tests outright)
-            combinedDep.replaceString = `${resource.spec.ref.tag}@${resource.spec.ref.digest}`;
-            combinedDep.autoReplaceStringTemplate =
-              '{{newValue}}@{{newDigest}}';
+            combinedDep.skipReason = 'invalid-value';
           }
 
           deps.push(combinedDep);
