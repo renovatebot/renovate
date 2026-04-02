@@ -203,6 +203,19 @@ describe('workers/global/index', () => {
     await expect(globalWorker.start()).resolves.toBe(0);
   });
 
+  it('does not log info message when log level is not info', async () => {
+    logger.logLevel.mockImplementation(() => 'debug');
+    parseConfigs.mockResolvedValueOnce({
+      baseDir: '/tmp/base',
+      cacheDir: '/tmp/cache',
+      repositories: [],
+    });
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(logger.logger.info).not.toHaveBeenCalledExactlyOnceWith(
+      expect.stringContaining('Set LOG_LEVEL=debug'),
+    );
+  });
+
   describe('processes platforms', () => {
     it('github', async () => {
       parseConfigs.mockResolvedValueOnce({

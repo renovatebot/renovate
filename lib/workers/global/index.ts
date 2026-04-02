@@ -245,7 +245,6 @@ export async function start(): Promise<number> {
     }
   } finally {
     await globalFinalize(config!);
-    // v8 ignore else -- TODO: add test #40625
     if (logLevel() === 'info') {
       logger.info(
         `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
