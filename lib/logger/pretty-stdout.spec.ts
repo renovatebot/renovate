@@ -40,6 +40,17 @@ describe('logger/pretty-stdout', () => {
         util.styleText('gray', ' (repository=a/b, branch=c) [test]'),
       );
     });
+
+    it('returns plain text when colorize is false', () => {
+      const rec = {
+        foo: 'bar',
+        repository: 'a/b',
+        module: 'test',
+      };
+      expect(prettyStdout.getMeta(rec as any, false)).toBe(
+        ' (repository=a/b) [test]',
+      );
+    });
   });
 
   describe('getDetails(rec)', () => {
@@ -99,6 +110,71 @@ describe('logger/pretty-stdout', () => {
           ``,
         ].join('\n'),
       );
+    });
+
+    it('formats record without colors', () => {
+      const rec: BunyanRecord = {
+        level: 10,
+        msg: 'test message',
+        v: 0,
+        config: {
+          a: 'b',
+          d: ['e', 'f'],
+        },
+      };
+      expect(prettyStdout.formatRecord(rec, false)).toEqual(
+        [
+          `TRACE: test message`,
+          `       "config": {"a": "b", "d": ["e", "f"]}`,
+          ``,
+        ].join('\n'),
+      );
+    });
+  });
+
+  describe('RenovateStream', () => {
+    it('writes formatted data to destination', () => {
+      const chunks: string[] = [];
+      const destination = {
+        write: (chunk: string) => {
+          chunks.push(chunk);
+          return true;
+        },
+      } as NodeJS.WritableStream;
+
+      const stream = new prettyStdout.RenovateStream(destination);
+      const rec: BunyanRecord = {
+        level: 10,
+        msg: 'test message',
+        v: 0,
+      };
+
+      stream.write(rec);
+      expect(chunks).toHaveLength(1);
+      expect(chunks[0]).toContain('test message');
+    });
+
+    it('writes without colors when colorize is false', () => {
+      const chunks: string[] = [];
+      const destination = {
+        write: (chunk: string) => {
+          chunks.push(chunk);
+          return true;
+        },
+      } as NodeJS.WritableStream;
+
+      const stream = new prettyStdout.RenovateStream(destination, {
+        colorize: false,
+      });
+      const rec: BunyanRecord = {
+        level: 10,
+        msg: 'test message',
+        v: 0,
+      };
+
+      stream.write(rec);
+      expect(chunks).toHaveLength(1);
+      expect(chunks[0]).toEqual([`TRACE: test message`, ``].join('\n'));
     });
   });
 });
