@@ -148,6 +148,17 @@ export async function ensureOnboardingPr(
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
         );
+
+  const configFile = getDefaultConfigFileName();
+  prTemplate += emojify(
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
+  );
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
+  prTemplate += '\n\n';
   // TODO #22198
   prTemplate += emojify(
     `
