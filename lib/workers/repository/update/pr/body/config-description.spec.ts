@@ -102,6 +102,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
       });
       const expected = codeBlock`
         **Schedule**: (UTC)
+
         - Branch creation
           - Between 01:00 AM and 01:59 AM (\`* 1 * * *\`)
           - On day 2 of the month, and on Monday (\`* * 2 * 1\`)

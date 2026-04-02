@@ -13,7 +13,7 @@ export function getPrConfigDescription(config: BranchConfig): string {
   } else {
     prBody += `(UTC)`;
   }
-  prBody += '\n';
+  prBody += '\n\n'; // to ensure that Markdown renderers will note that the Schedule is a different element to the list
 
   prBody +=
     '- Branch creation\n' +
