@@ -232,7 +232,7 @@ function getNewValue({
       rangeStrategy,
       newVersion,
     });
-    // istanbul ignore if: the implementation has a non-null return type
+    // v8 ignore if: the implementation has a non-null return type
     if (newBaseRange === null) {
       return null;
     }
