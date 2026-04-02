@@ -1377,9 +1377,7 @@ If the list of allowed commands is empty then no commands will be executed.
 `customUpdateCommands` can be applied to specific dependencies using `packageRules`.
 For running commands _after_ a file has already been updated by Renovate, see [`postUpgradeTasks`](#postupgradetasks) instead.
 
-Example — using the Backstage CLI to bump all Backstage packages at once:
-
-```json
+```json title="Example — using the Backstage CLI to bump all Backstage packages at once"
 {
   "customManagers": [
     {
