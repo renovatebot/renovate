@@ -21,3 +21,15 @@ export const TerraformProviderV2Response = z.object({
 export type TerraformProviderV2Response = z.infer<
   typeof TerraformProviderV2Response
 >;
+
+const OpenTofuProviderVersion = z.object({
+  id: z.string(),
+  published: z.string().optional(),
+});
+
+export const OpenTofuProviderDocsResponse = z.object({
+  versions: OpenTofuProviderVersion.array().optional(),
+});
+export type OpenTofuProviderDocsResponse = z.infer<
+  typeof OpenTofuProviderDocsResponse
+>;
