@@ -52,5 +52,12 @@ describe('util/git/semantic', () => {
       const res = await detectSemanticCommits();
       expect(res).toBe('enabled');
     });
+
+    it('detects true on breaking changes with scope', async () => {
+      config.semanticCommits = undefined;
+      git.getCommitMessages.mockResolvedValue(['fix(scope)!: foo']);
+      const res = await detectSemanticCommits();
+      expect(res).toBe('enabled');
+    });
   });
 });

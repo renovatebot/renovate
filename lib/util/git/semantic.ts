@@ -16,9 +16,9 @@ export async function detectSemanticCommits(): Promise<DetectedSemanticCommit> {
   }
   const commitMessages = await getCommitMessages();
   logger.trace(`commitMessages=${JSON.stringify(commitMessages)}`);
-  const type = detect(commitMessages);
-  logger.debug(`semanticCommits: detected "${type}"`);
-  if (type > 0) {
+  const score = detectSemanticCommitScore(commitMessages);
+  logger.debug(`semanticCommits: score=${score}`);
+  if (score > 0) {
     logger.debug(`semanticCommits: enabled`);
     cache.semanticCommits = 'enabled';
   } else {
@@ -36,7 +36,7 @@ export async function detectSemanticCommits(): Promise<DetectedSemanticCommit> {
  * @param commitMessages commit messages to check
  * @returns A number greater than zero if more semantic commits than non-semantic commits, less than zero if more non-semantic commits than semantic commits, or zero if equal number of semantic and non-semantic commits
  */
-function detect(commitMessages: string[]): number {
+function detectSemanticCommitScore(commitMessages: string[]): number {
   const angular = regEx(/^(\w*)(?:\((.*)\))?!?: (.*)$/);
 
   return commitMessages.reduce((count, message) => {
