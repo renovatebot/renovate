@@ -71,13 +71,14 @@ function mockThirdPartyRegistryLookup(variant: MockVariant): void {
 
 describe('modules/datasource/terraform-provider/index', () => {
   describe('getReleases', () => {
-    it.each([
-      ['empty results', 'empty'],
-      ['404 responses', '404'],
-      ['unknown errors', 'error'],
-    ] as const)(
-      'returns null when both default registries return %s',
-      async (_, variant) => {
+    it.each`
+      description         | variant
+      ${'empty results'}  | ${'empty'}
+      ${'404 responses'}  | ${'404'}
+      ${'unknown errors'} | ${'error'}
+    `(
+      'returns null when both default registries return $description',
+      async ({ variant }) => {
         mockDefaultRegistryLookup(variant);
 
         expect(
@@ -141,13 +142,14 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
     });
 
-    it.each([
-      ['empty results', 'empty'],
-      ['404 responses', '404'],
-      ['unknown errors', 'error'],
-    ] as const)(
-      'returns null when a third-party registry returns %s',
-      async (_, variant) => {
+    it.each`
+      description         | variant
+      ${'empty results'}  | ${'empty'}
+      ${'404 responses'}  | ${'404'}
+      ${'unknown errors'} | ${'error'}
+    `(
+      'returns null when a third-party registry returns $description',
+      async ({ variant }) => {
         mockThirdPartyRegistryLookup(variant);
 
         expect(
