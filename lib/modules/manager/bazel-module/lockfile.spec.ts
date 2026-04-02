@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
+import { env, fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -12,6 +12,7 @@ vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
 const adminConfig: RepoGlobalConfig = {
+  allowedUnsafeExecutions: ['bazelModDeps'],
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
@@ -187,5 +188,23 @@ describe('modules/manager/bazel-module/lockfile', () => {
         },
       },
     ]);
+  });
+
+  it('returns null when bazelModDeps is not allowed', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    const execSnapshots = mockExecAll();
+
+    const result = await updateBazelLockfile(
+      'MODULE.bazel.lock',
+      'MODULE.bazel',
+      undefined,
+      undefined,
+    );
+
+    expect(result).toBeNull();
+    expect(execSnapshots).toBeEmptyArray();
+    expect(logger.logger.once.warn).toHaveBeenCalledWith(
+      'Bazel command, `bazel mod deps --lockfile_mode=update`, was requested to run, but `bazelModDeps` is not permitted in the allowedUnsafeExecutions',
+    );
   });
 });

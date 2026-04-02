@@ -29,3 +29,5 @@ export const supportedDatasources = [
   PypiDatasource.id,
   GoDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

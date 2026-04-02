@@ -367,6 +367,7 @@ export interface RenovateConfig
     RenovateInternalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
+  reportFormatting?: boolean;
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
@@ -554,7 +555,10 @@ export type MergeStrategy =
   | 'squash';
 
 // This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution = 'goGenerate' | 'gradleWrapper';
+export type AllowedUnsafeExecution =
+  | 'bazelModDeps'
+  | 'goGenerate'
+  | 'gradleWrapper';
 
 // TODO: Proper typings
 export interface PackageRule
