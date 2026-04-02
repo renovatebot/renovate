@@ -28,9 +28,7 @@ function normalizeUrl(url: string): string {
       // Normalize to host/full_name form to allow cross-protocol matching
       // e.g. https://github.com/owner/repo, git@github.com:owner/repo.git
       //   -> github.com/owner/repo
-      const fullName = parsed.full_name
-        .replace(regEx(/\.git$/), '')
-        .replace(regEx(/\/$/), '');
+      const fullName = parsed.full_name.replace(regEx(/\/$/), '');
       return `${parsed.resource}/${fullName}`.toLowerCase();
     }
   } catch {
