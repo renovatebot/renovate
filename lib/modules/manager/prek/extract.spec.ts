@@ -640,7 +640,6 @@ rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.4`;
     it('extracts local hook additional_dependencies and ignores meta/builtin hook additional_dependencies from valid logical repos', () => {
       const config = `[[repos]]
 repo = "local"
-rev = "v1.0.0"
 
 [[repos.hooks]]
 id = "local-hook"
@@ -651,7 +650,6 @@ additional_dependencies = [
 
 [[repos]]
 repo = "meta"
-rev = "v1.0.0"
 
 [[repos.hooks]]
 id = "meta-hook"
@@ -662,7 +660,6 @@ additional_dependencies = [
 
 [[repos]]
 repo = "builtin"
-rev = "v1.0.0"
 
 [[repos.hooks]]
 id = "builtin-hook"
