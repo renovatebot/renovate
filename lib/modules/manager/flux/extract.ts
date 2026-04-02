@@ -409,12 +409,12 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
   const results: PackageFile<FluxManagerData>[] = [];
-  const fileContents = new Map<string, string>(); // Add a map to cache content
+  const fileContents: Record<string, string> = {}; // Add a map to cache content
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
     if (content) {
-      fileContents.set(file, content);
+      fileContents[file] = content;
     } // Cache it
     // TODO #22198
     const manifest = readManifest(content!, file);
@@ -432,7 +432,7 @@ export async function extractAllPackageFiles(
         deps = resolveSystemManifest(manifest);
         break;
       case 'resource': {
-        const content = fileContents.get(manifest.file); // Retrieve it natively
+        const content = fileContents[manifest.file]; // Retrieve it natively
         if (content) {
           deps = resolveResourceManifest(
             manifest,
