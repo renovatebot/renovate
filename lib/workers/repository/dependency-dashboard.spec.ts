@@ -1486,7 +1486,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'These dependencies are either deprecated or have replacements available',
+            'The following dependencies are either deprecated or have replacements available.',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',

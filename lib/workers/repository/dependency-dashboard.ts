@@ -455,7 +455,7 @@ export async function ensureDependencyDashboard(
     issueBody += '## Deprecations / Replacements\n';
     issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
-      'These dependencies are either deprecated or have replacements available:\n\n';
+      'The following dependencies are either deprecated or have replacements available.\n\n';
     issueBody += '| Datasource | Package | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -702,20 +702,19 @@ export function getAbandonedPackagesMd(
     return '';
   }
 
-  let abandonedMd = emojify(
-    '## Abandoned Dependencies\n\n> :information_source: **Note**\n> \n',
-  );
+  let abandonedMd = '## Abandoned Dependencies\n\n';
+  abandonedMd +=
+    'These following dependencies have not received updates for an extended period and may be unmaintained.\n\n';
 
+  abandonedMd += '<details>\n';
+  abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
+
+  abandonedMd = emojify('> :information_source: **Note**\n> \n');
   abandonedMd +=
     'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
-  abandonedMd +=
-    '> These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
-
-  abandonedMd += '<details>\n';
-  abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
   abandonedMd += '| Datasource | Package | Last Updated |\n';
   abandonedMd += '|------------|------|-------------|\n';
 
