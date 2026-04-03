@@ -704,7 +704,7 @@ export function getAbandonedPackagesMd(
 
   let abandonedMd = '## Abandoned Dependencies\n\n';
   abandonedMd +=
-    'These following dependencies have not received updates for an extended period and may be unmaintained.\n\n';
+    'The following dependencies have not received updates for an extended period and may be unmaintained.\n\n';
 
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
