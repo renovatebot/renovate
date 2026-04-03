@@ -12,6 +12,7 @@ import type { Release } from '../../../datasource/types.ts';
 import { get as getVersioning } from '../../../versioning/index.ts';
 import type {
   UpdateArtifact,
+  UpdateArtifactsConfig,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
@@ -30,7 +31,7 @@ import {
 function getLatestAllowedVersion(
   lock: ProviderLock,
   releases: Release[],
-  config: UpdateArtifact['config'],
+  config: UpdateArtifactsConfig,
 ): string | null {
   const versioning = getVersioning(getDefaultVersioning('terraform-provider'));
   const satisfyingReleases = releases.filter((release) =>
@@ -91,7 +92,7 @@ function getLatestAllowedVersion(
 
 async function updateAllLocks(
   locks: ProviderLock[],
-  config: UpdateArtifact['config'],
+  config: UpdateArtifactsConfig,
 ): Promise<ProviderLockUpdate[]> {
   const updates = await p.map(
     locks,
