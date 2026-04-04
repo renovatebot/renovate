@@ -29,13 +29,18 @@ export type TerraformProviderV2Response = z.infer<
   typeof TerraformProviderV2Response
 >;
 
-const OpenTofuProviderVersion = z.object({
-  id: z.string(),
-  published: z.string().optional(),
-});
+const OpenTofuProviderVersion = z
+  .object({
+    id: z.string(),
+    published: z.string().optional(),
+  })
+  .transform((version) => ({
+    version: version.id.replace(/^v/, ''),
+    releaseTimestamp: MaybeTimestamp.parse(version.published),
+  }));
 
 export const OpenTofuProviderDocsResponse = z.object({
-  versions: OpenTofuProviderVersion.array().optional(),
+  versions: LooseArray(OpenTofuProviderVersion).catch([]),
 });
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse

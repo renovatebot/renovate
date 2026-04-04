@@ -152,10 +152,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       OpenTofuProviderDocsResponse,
     );
     return {
-      releases: (res.versions ?? []).map((version) => ({
-        version: version.id.replace(regEx(/^v/), ''),
-        releaseTimestamp: asTimestamp(version.published),
-      })),
+      releases: res.versions,
       homepage: `https://search.opentofu.org/provider/${repository}`,
     };
   }
