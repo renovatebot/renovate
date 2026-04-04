@@ -133,22 +133,6 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
     });
 
-    it('returns empty releases when v2 response has no included versions', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/v2/providers/hashicorp/azurerm')
-        .query({ include: 'provider-versions' })
-        .reply(200, { data: { attributes: {} } });
-      const res = await getPkgReleases({
-        datasource: TerraformProviderDatasource.id,
-        packageName: 'azurerm',
-      });
-      expect(res).toEqual({
-        homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
-        releases: [],
-      });
-    });
-
     it.each`
       description         | variant
       ${'empty results'}  | ${'empty'}

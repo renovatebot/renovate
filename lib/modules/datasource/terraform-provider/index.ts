@@ -4,7 +4,6 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
@@ -52,7 +51,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the Terraform Registry v2 API and the OpenTofu registry docs API (used when the registry URL is `registry.opentofu.org`, which queries `api.opentofu.org`).';
+    'The release timestamp is only available for `registry.terraform.io` (v2 API) and `registry.opentofu.org` (via `api.opentofu.org`). Other registries using the Provider Registry Protocol do not provide timestamps.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the the `source` field in the results.';
@@ -122,19 +121,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       providerUrl,
       TerraformProviderV2Response,
     );
-    const dep: ReleaseResult = {
-      releases: (res.included ?? [])
-        .filter((resource) => resource.type === 'provider-versions')
-        .map((resource) => ({
-          version: resource.attributes.version,
-          releaseTimestamp: asTimestamp(resource.attributes['published-at']),
-        })),
+    return {
+      releases: res.included,
+      sourceUrl: res.data.attributes.source,
+      homepage: `${registryUrl}/providers/${repository}`,
     };
-    if (res.data.attributes.source) {
-      dep.sourceUrl = res.data.attributes.source;
-    }
-    dep.homepage = `${registryUrl}/providers/${repository}`;
-    return dep;
   }
 
   /**
