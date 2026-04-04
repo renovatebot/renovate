@@ -1,8 +1,10 @@
+import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { isXmlElement } from '../nuget/util.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -17,14 +19,9 @@ const scopeNames = new Set([
   'system',
 ]);
 
-function isXmlElement(node: unknown): node is XmlDocument {
-  const n = node as { type?: string };
-  return n?.type === 'element';
-}
-
 function readAttributeRange(
   content: string,
-  node: XmlDocument,
+  node: XmlElement,
   attrName: string,
   attrValue: string,
 ): { valuePosition: number; valueLength: number } | null {
@@ -64,7 +61,7 @@ function getDependencyType(scope: string | undefined): string {
 
 function collectDependency(
   content: string,
-  node: XmlDocument,
+  node: XmlElement,
 ): PackageDependency | null {
   const { groupId, artifactId, version, scope } = node.attr;
 
@@ -90,7 +87,7 @@ function collectDependency(
 
 function walkNode(
   content: string,
-  node: XmlDocument,
+  node: XmlElement | XmlDocument,
   deps: PackageDependency[],
 ): void {
   for (const child of node.children) {
