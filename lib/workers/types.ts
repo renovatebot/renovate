@@ -110,6 +110,7 @@ export interface BranchUpgradeConfig
   hasReleaseNotes?: boolean;
   homepage?: string;
 
+  disableChangeLog?: boolean;
   changelogContent?: string;
   changelogUrl?: string;
   dependencyUrl?: string;

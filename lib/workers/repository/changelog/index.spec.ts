@@ -10,6 +10,13 @@ vi.mocked(getChangeLogJSON).mockResolvedValue({
 });
 
 describe('workers/repository/changelog/index', () => {
+  it('skips changelog fetch when disableChangeLog is set', async () => {
+    const branches = [partial<BranchUpgradeConfig>({ disableChangeLog: true })];
+    await embedChangelogs(branches);
+    expect(getChangeLogJSON).not.toHaveBeenCalled();
+    expect(branches[0].logJSON).toEqual({ hasReleaseNotes: false });
+  });
+
   it('embedChangelogs', async () => {
     vi.mocked(getChangeLogJSON).mockResolvedValueOnce({
       hasReleaseNotes: true,

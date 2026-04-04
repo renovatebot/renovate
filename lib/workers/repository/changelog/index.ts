@@ -10,7 +10,11 @@ export async function embedChangelog(
     return;
   }
 
-  if (upgrade.changelogContent === undefined) {
+  if (upgrade.disableChangeLog) {
+    upgrade.logJSON = {
+      hasReleaseNotes: false,
+    };
+  } else if (upgrade.changelogContent === undefined) {
     upgrade.logJSON = await getChangeLogJSON(upgrade);
   } else {
     upgrade.logJSON = {

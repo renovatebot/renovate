@@ -1351,6 +1351,36 @@ describe('util/package-rules/index', () => {
     expect(res.packageName).toBe('docker.io/library/node');
   });
 
+  it('propagates disableChangeLog from matching packageRule', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['npm'],
+          disableChangeLog: true,
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.disableChangeLog).toBeTrue();
+  });
+
+  it('does not set disableChangeLog when packageRule does not match', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['pypi'],
+          disableChangeLog: true,
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.disableChangeLog).toBeUndefined();
+  });
+
   it('compiles sourceUrl with template helper functions', async () => {
     const config: TestConfig = {
       datasource: 'terraform-provider',

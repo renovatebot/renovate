@@ -1755,6 +1755,17 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'disableChangeLog',
+    description:
+      'Set to true to disable fetching of changelogs for matching packages.',
+    type: 'boolean',
+    stage: 'pr',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+    default: false,
+  },
+  {
     name: 'changelogUrl',
     description:
       'Set a custom URL for the changelog. Renovate will put this URL in the PR body text.',

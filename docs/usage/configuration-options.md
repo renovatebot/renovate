@@ -1772,6 +1772,8 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs-and-tools) to allow Renovate to fetch changelogs notes from `github.com`.
 
+See [`packageRules.disableChangeLog`](#packagerulesdisablechangelog) for package-level control over changelogs.
+
 <!-- prettier-ignore -->
 !!! note
     Renovate can only show changelogs from some platforms and some package managers.
@@ -3144,6 +3146,35 @@ To read the changelogs you must use the link.
     Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Forgejo, Gitea, GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
+### packageRules.disableChangeLog
+
+Set to `true` to prevent Renovate from fetching changelogs/release notes.
+This is useful when fetching changelogs from a particular source is is
+time-consuming, broken, or simply undesired. See [`fetchChangeLogs`](#fetchchangelogs)
+for broad control over fetching changelogs.
+
+The following disables fetching of changelogs for any package in aws-sdk-go-v2:
+
+```json
+{
+    {
+      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+      "disableChangeLog": true
+    }
+}
+```
+
+The following disables fetching of changelogs for any package sourced from GitHub.com:
+
+```json
+{
+    {
+      "matchSourceUrls": ["https://github.com/**"],
+      "disableChangeLog": false
+    }
+}
+```
 
 ### packageRules.matchBaseBranches
 
