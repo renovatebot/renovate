@@ -195,7 +195,7 @@ jobs:
           os: ${{ runner.os }}
           save-cache: true
 
-  lint-eslint:
+  lint-oxlint:
     needs:
       - setup-build
     runs-on: ubuntu-latest
@@ -218,26 +218,6 @@ jobs:
 
       - name: Lint with biome
         run: pnpm biome-ci
-
-      - name: Restore eslint cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: .cache/eslint
-          # we need to add the hash because eslint cache doesn't detect plugin changes
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
-
-      - name: Lint with eslint
-        run: pnpm eslint-ci
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-
-      - name: Save eslint cache
-        if: github.event_name == 'push'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: .cache/eslint
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-prettier:
     needs:
@@ -767,7 +747,7 @@ jobs:
     needs:
       - setup-build
       - build-docker
-      - lint-eslint
+      - lint-oxlint
       - lint-prettier
       - lint-docs
       - lint-other

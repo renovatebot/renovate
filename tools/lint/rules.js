@@ -1,7 +1,7 @@
+// @ts-nocheck
 const CWD = process.cwd();
 const TOOLS_IMPORT_PATTERN = /(?:^|\/|\.\.\/)tools\//;
 
-/** @type {import('eslint').ESLint.Plugin} */
 export default {
   meta: {
     name: 'renovate',
