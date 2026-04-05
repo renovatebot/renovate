@@ -186,6 +186,10 @@ async function updatePnpmWorkspace(
   for (const upgrade of upgrades) {
     let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
     const newVersion = upgrade.newVersion ?? upgrade.newValue;
+    // For pnpm overrides with range selectors (e.g. "pkg@<=1.0.0"), depName contains
+    // the full key including the selector. Use packageName (bare package name) for
+    // minimumReleaseAgeExclude entries which require exact versions only.
+    const excludeDepName = upgrade.packageName ?? upgrade.depName;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
     if (excludeNode && !isSeq(excludeNode)) {
@@ -195,8 +199,8 @@ async function updatePnpmWorkspace(
     if (!excludeNode) {
       logger.debug('Adding new exclude block');
       excludeNode = doc.createNode([]) as YAMLSeq;
-      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
-      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
       excludeNode.items.push(newItem);
       doc.set('minimumReleaseAgeExclude', excludeNode);
       updated = true;
@@ -204,7 +208,7 @@ async function updatePnpmWorkspace(
     }
 
     const { item: matchedItem, allExcluded } = getMatchedItem(
-      upgrade.depName!,
+      excludeDepName!,
       excludeNode.items,
     );
 
@@ -214,12 +218,12 @@ async function updatePnpmWorkspace(
 
     if (isScalar<string>(matchedItem)) {
       // if we have a comment before the list, which includes the dependency
-      if (excludeNode?.commentBefore?.includes(`${upgrade.depName}@`)) {
+      if (excludeNode?.commentBefore?.includes(`${excludeDepName}@`)) {
         // and it doesn't already have the version included in it
         if (
           !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
             excludeNode.commentBefore,
-            upgrade.depName,
+            excludeDepName,
             newVersion,
           )
         ) {
@@ -237,7 +241,7 @@ async function updatePnpmWorkspace(
         if (
           !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
             matchedItem.commentBefore,
-            upgrade.depName,
+            excludeDepName,
             newVersion,
           )
         ) {
@@ -247,14 +251,14 @@ async function updatePnpmWorkspace(
           updated = true;
         }
       } else {
-        matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+        matchedItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
         updated = true;
       }
 
       if (
         !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
           matchedItem.value,
-          upgrade.depName,
+          excludeDepName,
           newVersion,
         )
       ) {
@@ -263,8 +267,8 @@ async function updatePnpmWorkspace(
       }
     } else {
       // add new entry
-      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
-      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
 
       excludeNode.items.push(newItem);
       updated = true;
