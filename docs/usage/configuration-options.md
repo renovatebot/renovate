@@ -3158,10 +3158,10 @@ The following disables fetching of changelogs for any package in aws-sdk-go-v2:
 
 ```json
 {
-    {
-      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
-      "disableChangeLog": true
-    }
+  "packageRules": {
+    "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+    "disableChangeLog": true
+  }
 }
 ```
 
@@ -3169,10 +3169,10 @@ The following disables fetching of changelogs for any package sourced from GitHu
 
 ```json
 {
-    {
-      "matchSourceUrls": ["https://github.com/**"],
-      "disableChangeLog": false
-    }
+  "packageRules": {
+    "matchSourceUrls": ["https://github.com/**"],
+    "disableChangeLog": false
+  }
 }
 ```
 
