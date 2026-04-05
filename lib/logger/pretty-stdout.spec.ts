@@ -84,6 +84,44 @@ describe('logger/pretty-stdout', () => {
         `       "config": {"a": "b", "d": ["e", "f"]}\n`,
       );
     });
+
+    it('formats err.stack as readable multi-line output', () => {
+      const rec = partial<BunyanRecord>({
+        v: 0,
+        err: {
+          message: 'something broke',
+          stack: 'Error: something broke\n    at foo (file.js:1:1)',
+        },
+      });
+      expect(prettyStdout.getDetails(rec)).toBe(
+        prettyStdout.indent(
+          codeBlock`
+            "err": {"message": "something broke"}
+            Error: something broke
+                at foo (file.js:1:1)
+          `,
+          true,
+        ) + '\n',
+      );
+    });
+
+    it('formats err.stack without other err fields', () => {
+      const rec = partial<BunyanRecord>({
+        v: 0,
+        err: {
+          stack: 'Error: oops\n    at bar (file.js:2:2)',
+        },
+      });
+      expect(prettyStdout.getDetails(rec)).toBe(
+        prettyStdout.indent(
+          codeBlock`
+            Error: oops
+                at bar (file.js:2:2)
+          `,
+          true,
+        ) + '\n',
+      );
+    });
   });
 
   describe('formatRecord(rec)', () => {

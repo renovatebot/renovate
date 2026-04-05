@@ -3,6 +3,7 @@
 
 import { Writable } from 'node:stream';
 import * as util from 'node:util';
+import { isNonEmptyObject, isPlainObject, isString } from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { regEx } from '../util/regex.ts';
 import type { BunyanRecord } from './types.ts';
@@ -85,6 +86,24 @@ export function getDetails(rec: BunyanRecord): string {
   if (remainingKeys.length === 0) {
     return '';
   }
+
+  // Handle err.stack specially for readable multi-line output
+  const err = recFiltered.err;
+  if (isPlainObject(err) && isString(err.stack)) {
+    const { stack, ...errRest } = err;
+    recFiltered.err = isNonEmptyObject(errRest) ? errRest : undefined;
+    const parts: string[] = [];
+    for (const key of remainingKeys) {
+      if (key === 'err' && recFiltered.err === undefined) {
+        continue;
+      }
+      parts.push(indent(`"${key}": ${stringify(recFiltered[key])}`, true));
+    }
+    const jsonPart = parts.join(',\n');
+    const stackPart = indent(stack, true);
+    return jsonPart ? `${jsonPart}\n${stackPart}\n` : `${stackPart}\n`;
+  }
+
   return `${remainingKeys
     .map((key) => `${indent(`"${key}": ${stringify(recFiltered[key])}`, true)}`)
     .join(',\n')}\n`;
