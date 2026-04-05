@@ -164,9 +164,7 @@ describe('logger/pretty-stdout', () => {
         },
       });
 
-      const stream = new prettyStdout.RenovateStream(destination, {
-        colorize: false,
-      });
+      const stream = new prettyStdout.RenovateStream(destination, false);
       const rec: BunyanRecord = {
         level: 10,
         msg: 'test message',

@@ -102,10 +102,7 @@ export class RenovateStream extends Writable {
   private colorize: boolean;
   private destination: NodeJS.WritableStream;
 
-  constructor(
-    destination: NodeJS.WritableStream,
-    { colorize = true }: { colorize?: boolean } = {},
-  ) {
+  constructor(destination: NodeJS.WritableStream, colorize = true) {
     super({ objectMode: true });
     this.colorize = colorize;
     this.destination = destination;

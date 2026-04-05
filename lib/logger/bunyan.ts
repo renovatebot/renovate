@@ -70,9 +70,9 @@ function createLogFileStream(logFile: string): BunyanStream {
       flags: 'w',
       encoding: 'utf8',
     });
-    file.stream = new RenovateStream(fileStream, { colorize: false });
+    const prettyFile = new RenovateStream(fileStream, false);
+    file.stream = prettyFile;
     file.type = 'raw';
-    delete file.path;
   }
 
   return file;
