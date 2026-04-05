@@ -67,7 +67,7 @@ function createLogFileStream(logFile: string): BunyanStream {
     logFileFormat === 'pretty'
   ) {
     const fileStream = fs.createWriteStream(logFile, {
-      flags: 'w',
+      flags: 'a',
       encoding: 'utf8',
     });
     const prettyFile = new RenovateStream(fileStream, false);
