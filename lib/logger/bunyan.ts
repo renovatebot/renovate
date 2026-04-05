@@ -73,6 +73,7 @@ function createLogFileStream(logFile: string): BunyanStream {
     const prettyFile = new RenovateStream(fileStream, false);
     file.stream = prettyFile;
     file.type = 'raw';
+    delete file.path;
   }
 
   return file;
