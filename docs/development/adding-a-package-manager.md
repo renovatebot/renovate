@@ -22,6 +22,8 @@ The manager's `index.ts` file supports the following values or functions:
 | `extractAllPackageFiles`      | yes      | yes   |
 | `getRangeStrategy`            | yes      |       |
 | `categories`                  | yes      |       |
+| `knownDepTypes`               | yes      |       |
+| `supportsDynamicDepTypesNote` | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
@@ -82,6 +84,24 @@ For example, pinning or _not_ pinning a dependency, depending on other values in
 The `npm` manager uses the `getRangeStrategy` function to pin `devDependencies` but not `dependencies`, unless the package file is detected as an app.
 
 If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
+
+### `knownDepTypes` (optional)
+
+Use this to document any dependency types (`depType`) that the manager can extract.
+
+Only set the `prettyDepType` if the Manager sets it on the `Upgrade`.
+
+Use `description` to provide a human-readable description which will be found in the documentation for the Manager.
+
+This should be placed in `dep-types.ts`.
+
+### `supportsDynamicDepTypesNote` (optional)
+
+Use this to provide a Markdown note about dynamically generated `depType` values that can't be listed in `knownDepTypes`.
+
+This note will be rendered after the `knownDepTypes` table (regardless of whether any known `depTypes` are present).
+
+This should be placed in `dep-types.ts`.
 
 ### `supportsLockFileMaintenance` (optional)
 

@@ -27,7 +27,9 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
