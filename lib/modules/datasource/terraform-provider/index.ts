@@ -25,7 +25,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-provider';
 
   static readonly hashicorpReleaseUrl = 'https://releases.hashicorp.com';
-  static readonly terraformRegistryUrl = 'https://registry.terraform.io';
 
   static readonly defaultRegistryUrls = [
     TerraformProviderDatasource.terraformRegistryUrl,
@@ -151,7 +150,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const repository = TerraformProviderDatasource.getRepository({
       packageName,
     });
-    const serviceDiscovery: ServiceDiscoveryResult =
+    const serviceDiscovery =
       await this.getTerraformServiceDiscoveryResult(registryUrl);
     const backendURL = createSDBackendURL(
       registryUrl,
