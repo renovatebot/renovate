@@ -126,8 +126,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       ae-cvss-calculator:
-        specifier: 1.0.11
-        version: 1.0.11
+        specifier: 1.0.12
+        version: 1.0.12
       agentkeepalive:
         specifier: 4.6.0
         version: 4.6.0
@@ -261,8 +261,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       minimatch:
-        specifier: 10.2.4
-        version: 10.2.4
+        specifier: 10.2.5
+        version: 10.2.5
       moo:
         specifier: 0.5.3
         version: 0.5.3
@@ -370,11 +370,11 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(commander@14.0.3)
       '@containerbase/istanbul-reports-html':
-        specifier: 1.1.41
-        version: 1.1.41
+        specifier: 1.1.42
+        version: 1.1.42
       '@containerbase/semantic-release-pnpm':
-        specifier: 1.3.31
-        version: 1.3.31(semantic-release@25.0.3(typescript@5.9.3))
+        specifier: 1.3.32
+        version: 1.3.32(semantic-release@25.0.3(typescript@5.9.3))
       '@hyrious/marshal':
         specifier: 0.3.3
         version: 0.3.3
@@ -388,8 +388,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.3(typescript@5.9.3))
       '@smithy/util-stream':
-        specifier: 4.5.20
-        version: 4.5.20
+        specifier: 4.5.21
+        version: 4.5.21
       '@types/aws4':
         specifier: 1.11.6
         version: 1.11.6
@@ -991,12 +991,12 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@containerbase/istanbul-reports-html@1.1.41':
-    resolution: {integrity: sha512-4Dm4uiln1p+SwxDn3/SXmTSHYTWfPhXuZDLsHu14Z4rq6HTtKE2nhgfjkcx4nG8j/GQgm+av8ufTYsn8q+cEpg==}
+  '@containerbase/istanbul-reports-html@1.1.42':
+    resolution: {integrity: sha512-pfgmajJEDMQh15BTvQn9G8Rtj8fHpy/cPMuQ3c56qXryGLvcy6WRgWS4ZgKr37jvnwUtiNkEIrBZ5yCn0Mdnyg==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
-  '@containerbase/semantic-release-pnpm@1.3.31':
-    resolution: {integrity: sha512-B2BPPA6YQP0ge5S0q7vjZXrXxxUiGhqLG99yVHWN3bcexkT18rolHIlRBMsIHZwByi28HpqnS0gRodTLasMWUA==}
+  '@containerbase/semantic-release-pnpm@1.3.32':
+    resolution: {integrity: sha512-8XPLip0UnG8G41ZZ+dpc2nyODPzLXMNuIdKp3AFqXKN4apYR2O1qpwtxQzMYt/3uoSbxG9CTdjkWDQN3Th+jPQ==}
     engines: {node: ^22.11.0 || ^24}
     peerDependencies:
       semantic-release: ^24.0.0 || ^25.0.0
@@ -2353,10 +2353,6 @@ packages:
     resolution: {integrity: sha512-qQQsIvL0MGIbUjeSrg0/VlQ3jGNKyM3/2iU3FPNgy01z+Sp4OvcaxbgIoFOTvB61ZoohtutuOvOcgmhbD0katQ==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/util-stream@4.5.20':
-    resolution: {integrity: sha512-4yXLm5n/B5SRBR2p8cZ90Sbv4zL4NKsgxdzCzp/83cXw2KxLEumt5p+GAVyRNZgQOSrzXn9ARpO0lUe8XSlSDw==}
-    engines: {node: '>=18.0.0'}
-
   '@smithy/util-stream@4.5.21':
     resolution: {integrity: sha512-KzSg+7KKywLnkoKejRtIBXDmwBfjGvg1U1i/etkC7XSWUyFCoLno1IohV2c74IzQqdhX5y3uE44r/8/wuK+A7Q==}
     engines: {node: '>=18.0.0'}
@@ -2660,8 +2656,8 @@ packages:
     resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
     engines: {node: '>=12.0'}
 
-  ae-cvss-calculator@1.0.11:
-    resolution: {integrity: sha512-Rhe/7hJ+9rFmDvcoIg2vNva1Lzm1gHZC5GJzhT6RceoCl9ZCK+fOl1cqKrvQsxSWoUITrt+ew73WPKpoDyilBQ==}
+  ae-cvss-calculator@1.0.12:
+    resolution: {integrity: sha512-YVO+dhb8sZubNeL9pqSlN5hyZGC8hkAwnThnd3EimUGZtJEMeuy4kMb7zMCAsBiMr/RxklH0oY7DCsFV/B7peg==}
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -4488,8 +4484,8 @@ packages:
   minimalistic-assert@1.0.1:
     resolution: {integrity: sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==}
 
-  minimatch@10.2.4:
-    resolution: {integrity: sha512-oRjTw/97aTBN0RHbYCdtF1MQfvusSIBQM0IZEgzl6426+8jSC0nF1a/GmnVLpfB9yyr6g6FTqWqiZVbxrtaCIg==}
+  minimatch@10.2.5:
+    resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
     engines: {node: 18 || 20 || >=22}
 
   minimist@1.2.8:
@@ -7033,12 +7029,12 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@containerbase/istanbul-reports-html@1.1.41':
+  '@containerbase/istanbul-reports-html@1.1.42':
     dependencies:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
 
-  '@containerbase/semantic-release-pnpm@1.3.31(semantic-release@25.0.3(typescript@5.9.3))':
+  '@containerbase/semantic-release-pnpm@1.3.32(semantic-release@25.0.3(typescript@5.9.3))':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
@@ -8353,17 +8349,6 @@ snapshots:
       '@smithy/types': 4.13.1
       tslib: 2.8.1
 
-  '@smithy/util-stream@4.5.20':
-    dependencies:
-      '@smithy/fetch-http-handler': 5.3.15
-      '@smithy/node-http-handler': 4.5.1
-      '@smithy/types': 4.13.1
-      '@smithy/util-base64': 4.3.2
-      '@smithy/util-buffer-from': 4.2.2
-      '@smithy/util-hex-encoding': 4.2.2
-      '@smithy/util-utf8': 4.2.2
-      tslib: 2.8.1
-
   '@smithy/util-stream@4.5.21':
     dependencies:
       '@smithy/fetch-http-handler': 5.3.15
@@ -8725,7 +8710,7 @@ snapshots:
 
   adm-zip@0.5.16: {}
 
-  ae-cvss-calculator@1.0.11: {}
+  ae-cvss-calculator@1.0.12: {}
 
   agent-base@7.1.4: {}
 
@@ -9276,7 +9261,7 @@ snapshots:
     dependencies:
       '@one-ini/wasm': 0.2.1
       commander: 14.0.3
-      minimatch: 10.2.4
+      minimatch: 10.2.5
       semver: 7.7.4
 
   electron-to-chromium@1.5.328: {}
@@ -9672,7 +9657,7 @@ snapshots:
 
   glob@13.0.6:
     dependencies:
-      minimatch: 10.2.4
+      minimatch: 10.2.5
       minipass: 7.1.3
       path-scurry: 2.0.2
 
@@ -10731,7 +10716,7 @@ snapshots:
 
   minimalistic-assert@1.0.1: {}
 
-  minimatch@10.2.4:
+  minimatch@10.2.5:
     dependencies:
       brace-expansion: 5.0.5
 
@@ -11895,7 +11880,7 @@ snapshots:
     dependencies:
       '@istanbuljs/schema': 0.1.3
       glob: 13.0.6
-      minimatch: 10.2.4
+      minimatch: 10.2.5
 
   thenify-all@1.6.0:
     dependencies:
