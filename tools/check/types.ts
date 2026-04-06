@@ -1,16 +1,17 @@
 import type { ExecaChildProcess } from 'execa';
 
 export interface CliArgs {
-  noFix: boolean;
+  fix: boolean;
   noTest: boolean;
-  full: boolean;
   base: string;
+  targets: string[];
 }
 
 export interface ParallelCheck {
   name: string;
   cmd: string;
   args: string[];
+  env?: Record<string, string>;
 }
 
 export interface CheckResult {

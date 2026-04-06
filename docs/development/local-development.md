@@ -155,10 +155,13 @@ Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 ### Quick Local CI
 
-For fast iteration during development, use `pnpm check`, which runs all checks in parallel and only tests the shards affected by your changes:
+For fast iteration during development, use `pnpm check`, which runs lint and tests in parallel:
 
 ```bash
 pnpm check
+pnpm check lib/util/http        # scope to a directory
+pnpm check lib/util/hash.ts     # scope to a file
+pnpm check --fix lib/util/http  # auto-fix only
 ```
 
 ### Vitest

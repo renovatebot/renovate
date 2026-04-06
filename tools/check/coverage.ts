@@ -118,27 +118,51 @@ function extractFileCoverage(
   };
 }
 
-export function parseCoverageJson(
+export function loadCoverage(
   coverageDir: string,
-  changedFiles: string[],
-): CoverageInfo[] {
+): Map<string, CoverageData[string]> | null {
   const data = loadCoverageFile(coverageDir);
   if (!data) {
-    return [];
+    return null;
   }
+  return normalizeCoveragePaths(data);
+}
 
-  const normalized = normalizeCoveragePaths(data);
+export function getCoverageForFiles(
+  coverage: Map<string, CoverageData[string]>,
+  files: string[],
+): CoverageInfo[] {
   const results: CoverageInfo[] = [];
-
-  for (const file of changedFiles) {
+  for (const file of files) {
     if (!isSourceFile(file)) {
       continue;
     }
-    const info = extractFileCoverage(file, normalized);
+    const info = extractFileCoverage(file, coverage);
     if (info) {
       results.push(info);
     }
   }
+  return results;
+}
 
+export function getCoverageForDir(
+  coverage: Map<string, CoverageData[string]>,
+  dir: string,
+): CoverageInfo[] {
+  const absDir = upath.resolve(process.cwd(), dir) + '/';
+  const results: CoverageInfo[] = [];
+  for (const absPath of coverage.keys()) {
+    if (!absPath.startsWith(absDir)) {
+      continue;
+    }
+    const relPath = upath.relative(process.cwd(), absPath);
+    if (!isSourceFile(relPath)) {
+      continue;
+    }
+    const info = extractFileCoverage(relPath, coverage);
+    if (info) {
+      results.push(info);
+    }
+  }
   return results;
 }
