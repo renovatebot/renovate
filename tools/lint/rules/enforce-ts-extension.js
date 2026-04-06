@@ -9,10 +9,7 @@ const VI_METHODS = new Set([
 
 /** @param {string} value */
 function isLocalPath(value) {
-  if (value.startsWith('.')) {
-    return true;
-  }
-  return value.startsWith('~');
+  return value.startsWith('.') || value.startsWith('~');
 }
 
 /** @param {string} value */
