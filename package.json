@@ -192,7 +192,7 @@
     "@sindresorhus/is": "7.2.0",
     "@yarnpkg/core": "4.6.0",
     "@yarnpkg/parsers": "3.0.3",
-    "ae-cvss-calculator": "1.0.11",
+    "ae-cvss-calculator": "1.0.12",
     "agentkeepalive": "4.6.0",
     "async-mutex": "0.5.0",
     "aws4": "1.13.2",
