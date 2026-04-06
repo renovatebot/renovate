@@ -91,13 +91,12 @@ describe('modules/manager/ant/extract', () => {
     expect(extractPackageFile('<<< not xml >>>', 'build.xml')).toBeNull();
   });
 
-  it('returns null for build.xml with no dependencies', () => {
-    expect(
-      extractPackageFile(
-        '<project><target name="build" /></project>',
-        'build.xml',
-      ),
-    ).toBeNull();
+  it('returns null for build.xml with no dependencies', async () => {
+    fs.readLocalFile.mockResolvedValue(
+      '<project><target name="build" /></project>',
+    );
+
+    await expect(extractAllPackageFiles({}, ['build.xml'])).resolves.toBeNull();
   });
 
   it('ignores dependency nodes without version', () => {
