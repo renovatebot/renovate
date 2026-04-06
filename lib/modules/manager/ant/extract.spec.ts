@@ -6,18 +6,13 @@ vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/ant/extract', () => {
   it('extracts inline version dependencies from build.xml', async () => {
-    const files: Record<string, string> = {
-      'build.xml': codeBlock`
-        <project>
-          <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="4.13.2" scope="test" />
-          </artifact:dependencies>
-        </project>
-      `,
-    };
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      return Promise.resolve(files[fileName] ?? null);
-    });
+    fs.readLocalFile.mockResolvedValue(codeBlock`
+      <project>
+        <artifact:dependencies>
+          <dependency groupId="junit" artifactId="junit" version="4.13.2" scope="test" />
+        </artifact:dependencies>
+      </project>
+    `);
 
     await expect(extractAllPackageFiles({}, ['build.xml'])).resolves.toEqual([
       {
@@ -36,20 +31,15 @@ describe('modules/manager/ant/extract', () => {
   });
 
   it('extracts multiple dependencies', async () => {
-    const files: Record<string, string> = {
-      'build.xml': codeBlock`
-        <project>
-          <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="4.13.2" scope="test" />
-            <dependency groupId="org.slf4j" artifactId="slf4j-api" version="1.7.36" scope="compile" />
-            <dependency groupId="org.apache.commons" artifactId="commons-lang3" version="3.12.0" scope="runtime" />
-          </artifact:dependencies>
-        </project>
-      `,
-    };
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      return Promise.resolve(files[fileName] ?? null);
-    });
+    fs.readLocalFile.mockResolvedValue(codeBlock`
+      <project>
+        <artifact:dependencies>
+          <dependency groupId="junit" artifactId="junit" version="4.13.2" scope="test" />
+          <dependency groupId="org.slf4j" artifactId="slf4j-api" version="1.7.36" scope="compile" />
+          <dependency groupId="org.apache.commons" artifactId="commons-lang3" version="3.12.0" scope="runtime" />
+        </artifact:dependencies>
+      </project>
+    `);
 
     const result = await extractAllPackageFiles({}, ['build.xml']);
 
@@ -78,18 +68,13 @@ describe('modules/manager/ant/extract', () => {
   });
 
   it('defaults depType to compile when no scope is set', async () => {
-    const files: Record<string, string> = {
-      'build.xml': codeBlock`
-        <project>
-          <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="4.13.2" />
-          </artifact:dependencies>
-        </project>
-      `,
-    };
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      return Promise.resolve(files[fileName] ?? null);
-    });
+    fs.readLocalFile.mockResolvedValue(codeBlock`
+      <project>
+        <artifact:dependencies>
+          <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+        </artifact:dependencies>
+      </project>
+    `);
 
     const result = await extractAllPackageFiles({}, ['build.xml']);
 
@@ -119,41 +104,29 @@ describe('modules/manager/ant/extract', () => {
   });
 
   it('returns null for build.xml with no dependencies', async () => {
-    const files: Record<string, string> = {
-      'build.xml': '<project><target name="build" /></project>',
-    };
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      return Promise.resolve(files[fileName] ?? null);
-    });
+    fs.readLocalFile.mockResolvedValue(
+      '<project><target name="build" /></project>',
+    );
 
     await expect(extractAllPackageFiles({}, ['build.xml'])).resolves.toBeNull();
   });
 
   it('ignores dependency nodes without version', async () => {
-    const files: Record<string, string> = {
-      'build.xml': codeBlock`
-        <project>
-          <artifact:dependencies>
-            <dependency groupId="org.example" artifactId="lib" />
-          </artifact:dependencies>
-        </project>
-      `,
-    };
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      return Promise.resolve(files[fileName] ?? null);
-    });
+    fs.readLocalFile.mockResolvedValue(codeBlock`
+      <project>
+        <artifact:dependencies>
+          <dependency groupId="org.example" artifactId="lib" />
+        </artifact:dependencies>
+      </project>
+    `);
 
     await expect(extractAllPackageFiles({}, ['build.xml'])).resolves.toBeNull();
   });
 
   it('extracts dependencies with single-quoted attributes', async () => {
-    const files: Record<string, string> = {
-      'build.xml':
-        "<project><artifact:dependencies><dependency groupId='junit' artifactId='junit' version='4.13.2' /></artifact:dependencies></project>",
-    };
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      return Promise.resolve(files[fileName] ?? null);
-    });
+    fs.readLocalFile.mockResolvedValue(
+      "<project><artifact:dependencies><dependency groupId='junit' artifactId='junit' version='4.13.2' /></artifact:dependencies></project>",
+    );
 
     const result = await extractAllPackageFiles({}, ['build.xml']);
 
@@ -172,20 +145,15 @@ describe('modules/manager/ant/extract', () => {
 
   it('does not revisit the same file', async () => {
     let readCount = 0;
-    const files: Record<string, string> = {
-      'build.xml': codeBlock`
+    fs.readLocalFile.mockImplementation(() => {
+      readCount++;
+      return Promise.resolve(codeBlock`
         <project>
           <artifact:dependencies>
             <dependency groupId="junit" artifactId="junit" version="4.13.2" />
           </artifact:dependencies>
         </project>
-      `,
-    };
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      if (fileName === 'build.xml') {
-        readCount++;
-      }
-      return Promise.resolve(files[fileName] ?? null);
+      `);
     });
 
     const result = await extractAllPackageFiles({}, ['build.xml', 'build.xml']);
