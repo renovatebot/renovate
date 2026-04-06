@@ -47,6 +47,7 @@
     ],
     "no-unassigned-vars": "error",
 
+    "renovate/enforce-ts-extension": "error",
     "renovate/no-tools-import": "error",
 
     "typescript/await-thenable": "error",
@@ -172,7 +173,8 @@
       "files": ["**/*.js", "**/*.mjs", "**/*.cjs"],
       "rules": {
         "typescript/restrict-template-expressions": "off",
-        "typescript/explicit-function-return-type": "off"
+        "typescript/explicit-function-return-type": "off",
+        "renovate/enforce-ts-extension": "off"
       }
     }
   ],

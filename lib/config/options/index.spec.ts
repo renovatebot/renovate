@@ -3,7 +3,7 @@ import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { getOptions } from './index.ts';
 
-vi.unmock('../../modules/platform');
+vi.unmock('../../modules/platform/index.ts');
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {

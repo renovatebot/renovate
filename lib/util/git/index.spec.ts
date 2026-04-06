@@ -20,13 +20,13 @@ import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
 
-vi.mock('./conflicts-cache');
-vi.mock('./behind-base-branch-cache');
-vi.mock('./modified-cache');
+vi.mock('./conflicts-cache.ts');
+vi.mock('./behind-base-branch-cache.ts');
+vi.mock('./modified-cache.ts');
 vi.mock('timers/promises');
-vi.mock('../cache/repository');
-vi.mock('./auth');
-vi.unmock('.');
+vi.mock('../cache/repository/index.ts');
+vi.mock('./auth.ts');
+vi.unmock('./index.ts');
 
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
