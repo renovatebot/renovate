@@ -147,6 +147,30 @@ describe('modules/manager/ant/extract', () => {
     await expect(extractAllPackageFiles({}, ['build.xml'])).resolves.toBeNull();
   });
 
+  it('extracts dependencies with single-quoted attributes', async () => {
+    fs.readLocalFile.mockImplementation((fileName: string) => {
+      const files: Record<string, string> = {
+        'build.xml':
+          "<project><artifact:dependencies><dependency groupId='junit' artifactId='junit' version='4.13.2' /></artifact:dependencies></project>",
+      };
+      return Promise.resolve(files[fileName] ?? null);
+    });
+
+    const result = await extractAllPackageFiles({}, ['build.xml']);
+
+    expect(result).toEqual([
+      {
+        packageFile: 'build.xml',
+        deps: [
+          expect.objectContaining({
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+          }),
+        ],
+      },
+    ]);
+  });
+
   it('does not revisit the same file', async () => {
     let readCount = 0;
     fs.readLocalFile.mockImplementation((fileName: string) => {

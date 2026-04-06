@@ -26,6 +26,7 @@ function readAttributeRange(
   attrName: string,
   attrValue: string,
 ): { valuePosition: number; valueLength: number } | null {
+  /* v8 ignore next -- xmldoc always sets startTagPosition */
   const startTagPosition = node.startTagPosition ?? node.position;
   /* v8 ignore next 3 -- xmldoc always sets startTagPosition */
   if (isNullOrUndefined(startTagPosition)) {

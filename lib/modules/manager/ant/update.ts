@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
@@ -34,7 +35,7 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   const { currentValue, newValue, fileReplacePosition } = upgrade;
 
-  if (fileReplacePosition === undefined || fileReplacePosition === null) {
+  if (isNullOrUndefined(fileReplacePosition)) {
     logger.debug('ant manager: missing fileReplacePosition');
     return null;
   }
