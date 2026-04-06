@@ -1,19 +1,16 @@
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { regEx } from '../../../util/regex.ts';
-import { coerceString } from '../../../util/string.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { isHttpUrl } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { TerraformDatasource } from './base.ts';
 import type {
-  RegistryRepository,
   ServiceDiscoveryResult,
   TerraformModuleVersions,
   TerraformRelease,
 } from './types.ts';
-import { createSDBackendURL } from './utils.ts';
+import { createSDBackendURL, getRegistryRepository } from './utils.ts';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-module';
@@ -53,7 +50,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     }
 
     const { registry: registryUrlNormalized, repository } =
-      TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
+      getRegistryRepository(packageName, registryUrl);
     logger.trace(
       { registryUrlNormalized, terraformRepository: repository },
       'terraform-module.getReleases()',
@@ -184,34 +181,14 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     return dep;
   }
 
-  private static getRegistryRepository(
-    packageName: string,
-    registryUrl: string | undefined,
-  ): RegistryRepository {
-    let registry: string;
-    const split = packageName.split('/');
-    if (split.length > 3 && split[0].includes('.')) {
-      [registry] = split;
-      split.shift();
-    } else {
-      registry = coerceString(registryUrl);
-    }
-    if (!regEx(/^https?:\/\//).test(registry)) {
-      registry = `https://${registry}`;
-    }
-    const repository = split.join('/');
-    return {
-      registry,
-      repository,
-    };
-  }
-
   private static getCacheKey({
     packageName,
     registryUrl,
   }: GetReleasesConfig): string {
-    const { registry, repository } =
-      TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
+    const { registry, repository } = getRegistryRepository(
+      packageName,
+      registryUrl,
+    );
     return `${registry}/${repository}`;
   }
 }
