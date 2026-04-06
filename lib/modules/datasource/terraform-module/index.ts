@@ -5,8 +5,8 @@ import { isHttpUrl } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { TerraformDatasource } from './base.ts';
+import type { ServiceDiscoveryResult } from './schema.ts';
 import type {
-  ServiceDiscoveryResult,
   TerraformModuleVersions,
   TerraformRelease,
 } from './types.ts';

@@ -2,10 +2,10 @@ import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
 import { isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import type {
-  RegistryRepository,
   ServiceDiscoveryEndpointType,
   ServiceDiscoveryResult,
-} from './types.ts';
+} from './schema.ts';
+import type { RegistryRepository } from './types.ts';
 
 export function createSDBackendURL(
   registryURL: string,

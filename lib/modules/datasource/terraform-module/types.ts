@@ -30,10 +30,3 @@ export interface TerraformModuleVersionsModules {
 export interface TerraformModuleVersionsModuleVersion {
   version: string;
 }
-
-export interface ServiceDiscoveryResult {
-  'modules.v1'?: string;
-  'providers.v1'?: string;
-}
-
-export type ServiceDiscoveryEndpointType = 'modules.v1' | 'providers.v1';
