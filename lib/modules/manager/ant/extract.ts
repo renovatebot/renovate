@@ -8,6 +8,7 @@ import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
+  PackageFileContent,
 } from '../types.ts';
 
 const scopeNames = new Set([
@@ -61,21 +62,10 @@ function walkNode(
   }
 }
 
-async function walkXmlFile(
+export function extractPackageFile(
+  content: string,
   packageFile: string,
-  visitedFiles: Set<string>,
-): Promise<PackageFile | null> {
-  if (visitedFiles.has(packageFile)) {
-    return null;
-  }
-  visitedFiles.add(packageFile);
-
-  const content = await readLocalFile(packageFile, 'utf8');
-  if (!content) {
-    logger.debug(`ant manager: could not read ${packageFile}`);
-    return null;
-  }
-
+): PackageFileContent | null {
   let doc: XmlDocument;
   try {
     doc = new XmlDocument(content);
@@ -91,7 +81,30 @@ async function walkXmlFile(
     return null;
   }
 
-  return { packageFile, deps };
+  return { deps };
+}
+
+async function walkXmlFile(
+  packageFile: string,
+  visitedFiles: Set<string>,
+): Promise<PackageFile | null> {
+  if (visitedFiles.has(packageFile)) {
+    return null;
+  }
+  visitedFiles.add(packageFile);
+
+  const content = await readLocalFile(packageFile, 'utf8');
+  if (!content) {
+    logger.debug(`ant manager: could not read ${packageFile}`);
+    return null;
+  }
+
+  const result = extractPackageFile(content, packageFile);
+  if (!result) {
+    return null;
+  }
+
+  return { packageFile, ...result };
 }
 
 export async function extractAllPackageFiles(
