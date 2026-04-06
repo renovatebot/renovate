@@ -39,6 +39,9 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 }
 ```
 
+Actions pinned to a bare SHA without a version comment are disabled by default, because Renovate cannot determine which branch or tag the SHA belongs to.
+To enable updates for these dependencies, add a package rule matching `matchManagers: ["github-actions"]` with `enabled: true`.
+
 ### Non-semver refs (branches and feature tags)
 
 Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
