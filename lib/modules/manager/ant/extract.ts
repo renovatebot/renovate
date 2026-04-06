@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
@@ -27,7 +28,7 @@ function readAttributeRange(
 ): { valuePosition: number; valueLength: number } | null {
   const startTagPosition = node.startTagPosition ?? node.position;
   /* v8 ignore next 3 -- xmldoc always sets startTagPosition */
-  if (startTagPosition === undefined || startTagPosition === null) {
+  if (isNullOrUndefined(startTagPosition)) {
     return null;
   }
 

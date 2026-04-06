@@ -13,6 +13,7 @@ describe('modules/manager/ant/update', () => {
 
     const result = updateDependency({
       fileContent,
+      packageFile: 'build.xml',
       upgrade: {
         depName: 'junit:junit',
         currentValue: '4.13.2',
@@ -27,6 +28,7 @@ describe('modules/manager/ant/update', () => {
   it('returns null when fileReplacePosition is missing', () => {
     const result = updateDependency({
       fileContent: '<project />',
+      packageFile: 'build.xml',
       upgrade: {
         depName: 'junit:junit',
         currentValue: '1.0',
@@ -40,6 +42,7 @@ describe('modules/manager/ant/update', () => {
   it('returns null when newValue is missing', () => {
     const result = updateDependency({
       fileContent: '<project />',
+      packageFile: 'build.xml',
       upgrade: {
         depName: 'junit:junit',
         currentValue: '1.0',
@@ -59,6 +62,7 @@ describe('modules/manager/ant/update', () => {
 
     const result = updateDependency({
       fileContent,
+      packageFile: 'build.xml',
       upgrade: {
         depName: 'junit:junit',
         currentValue: '4.13.3',
@@ -79,6 +83,7 @@ describe('modules/manager/ant/update', () => {
 
     const result = updateDependency({
       fileContent,
+      packageFile: 'build.xml',
       upgrade: {
         depName: 'junit:junit',
         currentValue: '4.13.2',
@@ -96,6 +101,7 @@ describe('modules/manager/ant/update', () => {
 
     const result = updateDependency({
       fileContent,
+      packageFile: 'build.xml',
       upgrade: {
         depName: 'junit:junit',
         currentValue: '4.13.2',
@@ -110,6 +116,7 @@ describe('modules/manager/ant/update', () => {
   it('returns null when no quote is found before position', () => {
     const result = updateDependency({
       fileContent: 'no-quotes-here',
+      packageFile: 'build.xml',
       upgrade: {
         depName: 'org.example:lib',
         currentValue: '1.0.0',
