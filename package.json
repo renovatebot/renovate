@@ -355,7 +355,7 @@
     "tsdown": "0.21.7",
     "type-fest": "5.5.0",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.57.2",
+    "typescript-eslint": "8.58.0",
     "unified": "11.0.5",
     "vite": "8.0.0-beta.18",
     "vite-tsconfig-paths": "6.1.1",
