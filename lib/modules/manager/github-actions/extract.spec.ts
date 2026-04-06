@@ -524,6 +524,78 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('disables naked SHA pins without version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        currentValue: undefined,
+        enabled: false,
+      });
+    });
+
+    it('disables naked short SHA pins without version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigestShort: 'c85c95e',
+        currentValue: undefined,
+        enabled: false,
+      });
+    });
+
+    it('does not disable SHA pins with version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        currentValue: 'v4',
+      });
+      expect(res?.deps[0].enabled).toBeUndefined();
+    });
+
+    it('does not disable short SHA pins with version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e # v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigestShort: 'c85c95e',
+        currentValue: 'v4',
+      });
+      expect(res?.deps[0].enabled).toBeUndefined();
+    });
+
     it('extracts actions with fqdn', () => {
       const res = extractPackageFile(
         codeBlock`

@@ -130,6 +130,10 @@ function extractRepositoryAction(
     dep.currentValue = ref;
   }
 
+  if (!dep.currentValue) {
+    dep.enabled = false;
+  }
+
   const isVersionLike =
     dep.currentValue && versionLikeRe.test(dep.currentValue);
   if (!dep.datasource && dep.currentValue && !isVersionLike) {
