@@ -1,7 +1,7 @@
 import { z } from 'zod/v3';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
-import { Release, ReleaseResult } from '../types.ts';
+import type { Release, ReleaseResult } from '../types.ts';
 
 const ProviderAttributes = z.object({
   source: z.string().optional(),
