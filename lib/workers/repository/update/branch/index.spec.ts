@@ -1211,6 +1211,7 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch({ ...config, automerge: true });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith({
