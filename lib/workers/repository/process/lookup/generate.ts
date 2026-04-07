@@ -4,7 +4,7 @@ import type { Release } from '../../../../modules/datasource/index.ts';
 import { runUpdateEnrichments } from '../../../../modules/enrichment/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
-import type { RangeStrategy } from '../../../../types/index.ts';
+import type { RangeStrategy, UpdateType } from '../../../../types/index.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
@@ -94,32 +94,6 @@ export async function generateUpdate(
     // But we should not add that as default behavior until we stop treating non-LTS versions as unstable first
     update.isBreaking = update.updateType === 'major';
   }
-  const { datasource, packageName, packageRules } = config;
-  const enrichResult = await runUpdateEnrichments(
-    {
-      datasource,
-      packageName,
-      currentVersion,
-      newVersion,
-      updateType: update.updateType,
-    },
-    config,
-  );
-  // Apply enrichment metadata to the update (e.g. mergeConfidenceLevel from Phase 1b)
-  if (enrichResult.metadata?.mergeConfidenceLevel !== undefined) {
-    update.mergeConfidenceLevel = enrichResult.metadata
-      .mergeConfidenceLevel as MergeConfidence;
-  }
-  // TODO(Phase 1b): remove once merge-confidence is migrated to an enrichment module
-  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
-    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
-      datasource,
-      packageName,
-      currentVersion,
-      newVersion,
-      update.updateType,
-    );
-  }
   if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
@@ -133,5 +107,49 @@ export async function generateUpdate(
   ) {
     update.isBump = true;
   }
+
+  await applyEnrichment(
+    config,
+    currentVersion,
+    newVersion,
+    update,
+    update.updateType,
+  );
+
   return update;
+}
+
+async function applyEnrichment(
+  config: LookupUpdateConfig,
+  currentVersion: string,
+  newVersion: string,
+  update: LookupUpdate,
+  updateType: UpdateType,
+): Promise<void> {
+  const { datasource, packageName, packageRules } = config;
+  const enrichResult = await runUpdateEnrichments(
+    {
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType,
+    },
+    config,
+  );
+  // Apply enrichment metadata to the update
+  if (enrichResult.metadata?.mergeConfidenceLevel !== undefined) {
+    update.mergeConfidenceLevel = enrichResult.metadata
+      .mergeConfidenceLevel as MergeConfidence;
+  }
+  // TODO remove in #42421
+  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
+    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType,
+    );
+  }
 }
