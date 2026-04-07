@@ -113,11 +113,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       providerUrl,
       TerraformProviderV2Response,
     );
-    return {
-      releases: res.included,
-      sourceUrl: res.data.attributes.source,
-      homepage: `${registryUrl}/providers/${repository}`,
-    };
+    res.homepage = `${registryUrl}/providers/${repository}`;
+    return res;
   }
 
   /**
