@@ -149,6 +149,10 @@ export async function ensureOnboardingPr(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
         );
 
+  prTemplate += emojify(
+    `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+  );
+
   const configFile = getDefaultConfigFileName();
   prTemplate += emojify(
     `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
