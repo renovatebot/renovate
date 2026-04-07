@@ -25,6 +25,7 @@ import { sanitizeMarkdown } from '../../../util/markdown.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { titleCase } from '../../../util/string.ts';
+import { datasourceToOsvEcosystem } from '../../../util/vulnerability/ecosystem.ts';
 import {
   getFixedVersionConstraint,
   getLastAffectedVersionConstraint,
@@ -43,21 +44,7 @@ export class Vulnerabilities {
 
   private osvOffline: OsvOffline;
 
-  private static readonly datasourceEcosystemMap: Record<
-    string,
-    Ecosystem | undefined
-  > = {
-    crate: 'crates.io',
-    go: 'Go',
-    hackage: 'Hackage',
-    hex: 'Hex',
-    maven: 'Maven',
-    npm: 'npm',
-    nuget: 'NuGet',
-    packagist: 'Packagist',
-    pypi: 'PyPI',
-    rubygems: 'RubyGems',
-  };
+  private static readonly datasourceEcosystemMap = datasourceToOsvEcosystem;
 
   private constructor(osvOffline: OsvOffline) {
     this.osvOffline = osvOffline;
