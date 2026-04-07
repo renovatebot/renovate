@@ -1,10 +1,14 @@
 import { git } from '~test/util.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
+import * as _enrichment from '../../modules/enrichment/index.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { globalInitialize } from './initialize.ts';
 
+vi.mock('../../modules/enrichment/index.ts');
+
 const initPlatform = vi.mocked(_initPlatform);
+const enrichment = vi.mocked(_enrichment);
 
 describe('workers/global/initialize', () => {
   beforeEach(() => {
@@ -22,6 +26,13 @@ describe('workers/global/initialize', () => {
       const config: RenovateConfig = { prCommitsPerRunLimit: 2 };
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
+    });
+
+    it('calls initEnrichments during global initialization', async () => {
+      const config: RenovateConfig = {};
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await globalInitialize(config);
+      expect(enrichment.initEnrichments).toHaveBeenCalledOnce();
     });
 
     it('supports containerbase', async () => {

@@ -1,4 +1,5 @@
 import { logger, scm } from '~test/util.ts';
+import * as _enrichment from '../../../modules/enrichment/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
@@ -13,12 +14,14 @@ import {
   lookup,
   update,
 } from './extract-update.ts';
+import * as _fetch from './fetch.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 
 vi.mock('./write.ts');
 vi.mock('./sort.ts');
 vi.mock('./fetch.ts');
+vi.mock('../../../modules/enrichment/index.ts');
 vi.mock('./vulnerabilities.ts', () => {
   return {
     __esModule: true,
@@ -34,6 +37,8 @@ vi.mock('../extract/index.ts');
 vi.mock('../../../util/cache/repository/index.ts');
 
 const branchify = vi.mocked(_branchify);
+const enrichment = vi.mocked(_enrichment);
+const fetch = vi.mocked(_fetch);
 const repositoryCache = vi.mocked(_repositoryCache);
 
 describe('workers/repository/process/extract-update', () => {
@@ -157,6 +162,23 @@ describe('workers/repository/process/extract-update', () => {
       await lookup(config, packageFiles);
 
       expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
+    });
+
+    it('calls runRepositoryEnrichments after fetchUpdates during lookup', async () => {
+      const config = { repoIsOnboarded: true };
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+
+      const packageFiles = await extract(config);
+      await lookup(config, packageFiles);
+
+      expect(
+        enrichment.runRepositoryEnrichments,
+      ).toHaveBeenCalledExactlyOnceWith(config, packageFiles);
+      const fetchOrder = fetch.fetchUpdates.mock.invocationCallOrder[0];
+      const enrichOrder =
+        enrichment.runRepositoryEnrichments.mock.invocationCallOrder[0];
+      expect(fetchOrder).toBeLessThan(enrichOrder);
     });
   });
 

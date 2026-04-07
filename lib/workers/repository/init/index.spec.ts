@@ -2,6 +2,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _secrets from '../../../config/secrets.ts';
+import * as _enrichment from '../../../modules/enrichment/index.ts';
 import * as _onboarding from '../onboarding/branch/index.ts';
 import * as _apis from './apis.ts';
 import * as _config from './config.ts';
@@ -15,6 +16,7 @@ vi.mock('../init/config.ts');
 vi.mock('../init/merge.ts');
 vi.mock('../../../config/secrets.ts');
 vi.mock('../../../config/variables.ts');
+vi.mock('../../../modules/enrichment/index.ts');
 vi.mock('../../../modules/platform/index.ts', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
@@ -23,6 +25,7 @@ vi.unmock('../../../util/mutex.ts');
 
 const apis = vi.mocked(_apis);
 const config = vi.mocked(_config);
+const enrichment = vi.mocked(_enrichment);
 const merge = vi.mocked(_merge);
 const onboarding = vi.mocked(_onboarding);
 const secrets = vi.mocked(_secrets);
@@ -47,6 +50,18 @@ describe('workers/repository/init/index', () => {
       );
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toEqual({});
+    });
+
+    it('calls initRepoEnrichments during repo initialization', async () => {
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
+      onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      config.getRepoConfig.mockResolvedValueOnce({});
+      merge.mergeRenovateConfig.mockResolvedValueOnce({});
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>(),
+      );
+      await initRepo({});
+      expect(enrichment.initRepoEnrichments).toHaveBeenCalledOnce();
     });
 
     it('warns on unsupported options', async () => {
