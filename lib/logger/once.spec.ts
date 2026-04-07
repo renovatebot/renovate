@@ -1,7 +1,7 @@
 import { init, logger } from './index.ts';
 import { once, reset } from './once.ts';
 
-vi.unmock('.');
+vi.unmock('./index.ts');
 
 // init logger
 await init();
