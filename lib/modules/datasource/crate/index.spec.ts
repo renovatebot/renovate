@@ -18,7 +18,7 @@ import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
 import type { RegistryConfigSchema } from './schema.ts';
 
-vi.unmock('../../../util/mutex');
+vi.unmock('../../../util/mutex.ts');
 vi.mock('simple-git');
 const simpleGit = vi.mocked(_simpleGit);
 
