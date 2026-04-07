@@ -229,7 +229,7 @@
     "json-stringify-pretty-compact": "4.0.0",
     "json5": "2.2.3",
     "jsonata": "2.1.0",
-    "jsonc-weaver": "0.2.2",
+    "jsonc-weaver": "0.2.4",
     "klona": "2.0.6",
     "luxon": "3.7.2",
     "markdown-it": "14.1.1",
@@ -272,7 +272,7 @@
   "optionalDependencies": {
     "better-sqlite3": "12.8.0",
     "openpgp": "6.3.0",
-    "re2": "1.23.3"
+    "re2": "1.24.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.6",
@@ -293,6 +293,7 @@
     "@types/changelog-filename-regex": "2.0.2",
     "@types/clean-git-ref": "2.0.2",
     "@types/common-tags": "1.8.4",
+    "@types/estree": "1.0.8",
     "@types/fs-extra": "11.0.4",
     "@types/github-url-from-git": "1.5.3",
     "@types/global-agent": "3.0.0",

@@ -346,6 +346,8 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
+    permissions:
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -358,6 +360,11 @@ jobs:
         uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
         with:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
+        with:
+          version: v1.23.1
 
   test:
     needs: [setup, prefetch]
