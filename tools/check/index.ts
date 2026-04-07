@@ -297,13 +297,21 @@ async function main(): Promise<void> {
     }
   }
 
-  const parallelChecks = [...lintChecks, ...testChecks];
   await runChecksParallel(
-    parallelChecks,
+    lintChecks,
     fixChecks.length,
     progress,
     processManager,
   );
+
+  if (testChecks.length > 0) {
+    await runChecksParallel(
+      testChecks,
+      fixChecks.length + lintChecks.length,
+      progress,
+      processManager,
+    );
+  }
 
   stopRenderLoop(processManager);
   renderProgress(progress);
