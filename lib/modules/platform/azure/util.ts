@@ -1,3 +1,4 @@
+import { isPlainObject } from '@sindresorhus/is';
 import type {
   GitPullRequest,
   GitRepository,
@@ -136,11 +137,7 @@ export function isProbablyJwt(token: string): boolean {
     const header = JSON.parse(
       Buffer.from(parts[0], 'base64url').toString('utf8'),
     );
-    return (
-      typeof header === 'object' &&
-      header !== null &&
-      ('typ' in header || 'alg' in header)
-    );
+    return isPlainObject(header) && ('typ' in header || 'alg' in header);
   } catch {
     return false;
   }
