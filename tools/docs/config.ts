@@ -290,6 +290,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     .filter(
       (option) => !!option.globalOnly === bot && !managers.has(option.name),
     )
+    .filter((option) => option.undocumented)
     .forEach((option) => {
       // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
@@ -312,6 +313,13 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
           );
         }
         lookupKeys = [option.name];
+      }
+
+      // don't allow undocumented config options to be documented
+      if (option.undocumented && lookupKeys.includes(option.name)) {
+        throw new Error(
+          `Config option "${option.name}" is marked as undocumented, but has an entry in ${configFile}`,
+        );
       }
 
       el.cli = getCliName(option);

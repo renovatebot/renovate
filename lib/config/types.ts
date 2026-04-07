@@ -685,6 +685,15 @@ export interface RenovateOptionBase {
    * Conditions that must be met for this option to be required.
    */
   requiredIf?: RenovateRequiredOption[];
+
+  /**
+   * Whether the configuration option should not appear in documentation.
+   *
+   * This does not get inserted into documentation pages, or the JSON Schema.
+   *
+   * This should be used alongside `experimental.`
+   */
+  undocumented?: boolean;
 }
 
 export interface RenovateRequiredOption {
