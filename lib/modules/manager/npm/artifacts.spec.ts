@@ -703,6 +703,46 @@ minimumReleaseAgeExclude:
       expect(res).toBeNull();
     });
 
+    it('preserves catalog changes in pnpm-workspace.yaml when adding minimumReleaseAgeExclude', async () => {
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          minimumReleaseAge: 10080
+          catalog:
+            effect: ^3.19.0`,
+      );
+      const newPackageFileContent = codeBlock`
+        minimumReleaseAge: 10080
+        catalog:
+          effect: ^3.20.0`;
+      const res = await updateArtifacts({
+        packageFileName: 'pnpm-workspace.yaml',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'effect',
+            depType: 'pnpm.catalog.default',
+            currentValue: '^3.19.0',
+            newVersion: '3.20.0',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent,
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\ncatalog:\n  effect: ^3.20.0\nminimumReleaseAgeExclude:\n  # Renovate security update: effect@3.20.0\n  - effect@3.20.0\n',
+          },
+        },
+      ]);
+    });
+
     it('handles multiple security upgrades correctly (bug fix test)', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
