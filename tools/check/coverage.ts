@@ -41,14 +41,18 @@ function groupConsecutiveNumbers(numbers: number[]): string[] {
   return ranges;
 }
 
-function loadCoverageFile(coverageDir: string): CoverageData | null {
+async function loadCoverageFile(
+  coverageDir: string,
+): Promise<CoverageData | null> {
   const coverageFile = upath.resolve(coverageDir, 'coverage-final.json');
-  if (!fs.existsSync(coverageFile)) {
+  if (!(await fs.pathExists(coverageFile))) {
     return null;
   }
 
   try {
-    const rawJson: unknown = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+    const rawJson: unknown = JSON.parse(
+      await fs.readFile(coverageFile, 'utf8'),
+    );
     const parseResult = CoverageJson.safeParse(rawJson);
     return parseResult.success ? parseResult.data : null;
   } catch {
@@ -118,10 +122,10 @@ function extractFileCoverage(
   };
 }
 
-export function loadCoverage(
+export async function loadCoverage(
   coverageDir: string,
-): Map<string, CoverageData[string]> | null {
-  const data = loadCoverageFile(coverageDir);
+): Promise<Map<string, CoverageData[string]> | null> {
+  const data = await loadCoverageFile(coverageDir);
   if (!data) {
     return null;
   }

@@ -155,7 +155,7 @@ function toSourcePath(target: string): string | null {
 }
 
 async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
-  const coverageData = loadCoverage('./coverage');
+  const coverageData = await loadCoverage('./coverage');
   if (!coverageData) {
     return [];
   }
