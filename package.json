@@ -298,6 +298,7 @@
     "@types/clean-git-ref": "2.0.2",
     "@types/common-tags": "1.8.4",
     "@types/eslint-config-prettier": "6.11.3",
+    "@types/estree": "1.0.8",
     "@types/fs-extra": "11.0.4",
     "@types/github-url-from-git": "1.5.3",
     "@types/global-agent": "3.0.0",
