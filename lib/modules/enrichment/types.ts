@@ -2,6 +2,7 @@ import type { PackageRule, RenovateConfig } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/base.ts';
 import type { BranchStatus, UpdateType } from '../../types/index.ts';
 import type { SkipReason } from '../../types/skip-reason.ts';
+import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { PackageFile } from '../manager/types.ts';
 
 export interface EnrichmentDependencyContext {
@@ -27,7 +28,7 @@ export type EnrichmentRepositoryResult = Pick<EnrichmentResult, 'packageRules'>;
 export interface EnrichmentResult {
   /** PackageRules to inject (for vulnerability alerts, etc.) */
   packageRules?: PackageRule[];
-  /** Metadata available for matchJsonata and downstream processing */
+  /** Arbitrary metadata available for matchJsonata. Renovate does not interpret these values. */
   metadata?: Record<string, unknown>;
   /** PR body notes to append */
   prBodyNotes?: string[];
@@ -42,6 +43,8 @@ export interface EnrichmentResult {
   skipReason?: SkipReason;
   /** Links providing context for the skip */
   skipReferences?: string[];
+  /** Merge confidence level for this update */
+  mergeConfidenceLevel?: MergeConfidence;
 }
 
 /** Describes a metadata field that an enrichment module produces */

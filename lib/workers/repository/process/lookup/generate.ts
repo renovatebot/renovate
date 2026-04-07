@@ -7,7 +7,6 @@ import type { VersioningApi } from '../../../../modules/versioning/index.ts';
 import type { RangeStrategy, UpdateType } from '../../../../types/index.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
-import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
 import type { LookupUpdateConfig } from './types.ts';
 import { getUpdateType } from './update-type.ts';
 
@@ -137,10 +136,9 @@ async function applyEnrichment(
     },
     config,
   );
-  // Apply enrichment metadata to the update
-  if (enrichResult.metadata?.mergeConfidenceLevel !== undefined) {
-    update.mergeConfidenceLevel = enrichResult.metadata
-      .mergeConfidenceLevel as MergeConfidence;
+  // Apply enrichment results to the update
+  if (enrichResult.mergeConfidenceLevel !== undefined) {
+    update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
   }
   // TODO remove in #42421
   if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
