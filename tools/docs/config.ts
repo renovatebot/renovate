@@ -314,6 +314,13 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         lookupKeys = [option.name];
       }
 
+      // don't allow undocumented config options to be documented
+      if (option.undocumented && lookupKeys.includes(option.name)) {
+        throw new Error(
+          `Config option "${option.name}" is marked as undocumented, but has an entry in ${configFile}`,
+        );
+      }
+
       el.cli = getCliName(option);
       el.env = getEnvName(option);
       stringifyArrays(el);

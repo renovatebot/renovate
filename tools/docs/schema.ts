@@ -267,6 +267,11 @@ export async function generateSchema(
   }
 
   const configurationOptions = getOptions().filter((o) => {
+    // never include undocumented options
+    if (o.undocumented) {
+      return false;
+    }
+
     // always allow non-global options
     if (!o.globalOnly) {
       return true;
