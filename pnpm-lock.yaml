@@ -2491,6 +2491,9 @@ packages:
   '@types/json-dup-key-validator@1.0.2':
     resolution: {integrity: sha512-zJSAGITlz2nFT7xcKsvns8UifwSJpKuhgsdZj7+WoxiixiGnIefNiLK2uNhEICRkI9S2ccU6RYdqPS7iJRtU7Q==}
 
+  '@types/json-schema@7.0.15':
+    resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
   '@types/jsonfile@6.1.4':
     resolution: {integrity: sha512-D5qGUYwjvnNNextdU59/+fI+spnwtTFmyQP0h+PfIOSkNfpU6AOICUOkm4i0OnSk+NyjdPJrxCDro0sJsWlRpQ==}
 
@@ -8492,6 +8495,8 @@ snapshots:
   '@types/jsesc@2.5.1': {}
 
   '@types/json-dup-key-validator@1.0.2': {}
+
+  '@types/json-schema@7.0.15': {}
 
   '@types/jsonfile@6.1.4':
     dependencies:
