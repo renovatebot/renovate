@@ -1,11 +1,13 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
+import { runUpdateEnrichments } from '../../../../modules/enrichment/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
 import type { RangeStrategy } from '../../../../types/index.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
 import type { LookupUpdateConfig } from './types.ts';
 import { getUpdateType } from './update-type.ts';
 
@@ -93,8 +95,24 @@ export async function generateUpdate(
     update.isBreaking = update.updateType === 'major';
   }
   const { datasource, packageName, packageRules } = config;
+  const enrichResult = await runUpdateEnrichments(
+    {
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType: update.updateType,
+    },
+    config,
+  );
+  // Apply enrichment metadata to the update (e.g. mergeConfidenceLevel from Phase 1b)
+  if (enrichResult.metadata?.mergeConfidenceLevel !== undefined) {
+    update.mergeConfidenceLevel = enrichResult.metadata
+      .mergeConfidenceLevel as MergeConfidence;
+  }
+  // TODO(Phase 1b): remove once merge-confidence is migrated to an enrichment module
   if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
-    update.mergeConfidenceLevel = await getMergeConfidenceLevel(
+    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
       datasource,
       packageName,
       currentVersion,

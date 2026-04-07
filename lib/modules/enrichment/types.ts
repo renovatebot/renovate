@@ -17,6 +17,13 @@ export interface EnrichmentUpdateContext extends EnrichmentDependencyContext {
   updateType?: UpdateType;
 }
 
+/**
+ * Result from a repository-scoped enrichment.
+ * Only packageRules are applicable at this scope — prBodyNotes, statusChecks,
+ * skipReason etc. are per-update concepts and belong in enrichUpdate().
+ */
+export type EnrichmentRepositoryResult = Pick<EnrichmentResult, 'packageRules'>;
+
 export interface EnrichmentResult {
   /** PackageRules to inject (for vulnerability alerts, etc.) */
   packageRules?: PackageRule[];
@@ -85,7 +92,7 @@ export interface EnrichmentApi extends ModuleApi {
   enrichRepository?(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
-  ): Promise<EnrichmentResult>;
+  ): Promise<EnrichmentRepositoryResult>;
 
   /** Runs per dependency (e.g. OpenSSF Scorecard by sourceUrl) */
   enrichDependency?(

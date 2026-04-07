@@ -4,6 +4,7 @@ import type { PackageFile } from '../manager/types.ts';
 import api from './api.ts';
 import type {
   EnrichmentApi,
+  EnrichmentRepositoryResult,
   EnrichmentResult,
   EnrichmentUpdateContext,
 } from './types.ts';
@@ -86,7 +87,7 @@ export async function runUpdateEnrichments(
 
 function applyRepositoryResult(
   config: RenovateConfig,
-  result: EnrichmentResult,
+  result: EnrichmentRepositoryResult,
 ): void {
   if (result.packageRules?.length) {
     config.packageRules ??= [];
