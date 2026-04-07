@@ -539,6 +539,7 @@ describe('modules/manager/github-actions/extract', () => {
         currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
         currentValue: undefined,
         enabled: false,
+        skipReason: 'unversioned-reference',
       });
     });
 
@@ -557,6 +558,7 @@ describe('modules/manager/github-actions/extract', () => {
         currentDigestShort: 'c85c95e',
         currentValue: undefined,
         enabled: false,
+        skipReason: 'unversioned-reference',
       });
     });
 

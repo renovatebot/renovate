@@ -43,6 +43,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "depType": "action",
     "enabled": false,
     "replaceString": "docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145",
+    "skipReason": "unversioned-reference",
     "versioning": "docker",
   },
   {

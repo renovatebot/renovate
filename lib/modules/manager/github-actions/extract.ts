@@ -132,6 +132,7 @@ function extractRepositoryAction(
 
   if (!dep.currentValue) {
     dep.enabled = false;
+    dep.skipReason = 'unversioned-reference';
   }
 
   const isVersionLike =
