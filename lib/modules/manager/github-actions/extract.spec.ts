@@ -570,12 +570,19 @@ describe('modules/manager/github-actions/extract', () => {
         `,
         'workflow.yml',
       );
-      expect(res?.deps[0]).toMatchObject({
+      expect(res?.deps[0]).toEqual({
         depName: 'actions/checkout',
-        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        commitMessageTopic: '{{{depName}}} action',
+        versioning: 'docker',
+        depType: 'action',
+        replaceString:
+          'actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
         currentValue: 'v4',
+        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        datasource: 'github-tags',
       });
-      expect(res?.deps[0].enabled).toBeUndefined();
     });
 
     it('does not disable short SHA pins with version comment', () => {
@@ -588,12 +595,18 @@ describe('modules/manager/github-actions/extract', () => {
         `,
         'workflow.yml',
       );
-      expect(res?.deps[0]).toMatchObject({
+      expect(res?.deps[0]).toEqual({
         depName: 'actions/checkout',
-        currentDigestShort: 'c85c95e',
+        commitMessageTopic: '{{{depName}}} action',
+        versioning: 'docker',
+        depType: 'action',
+        replaceString: 'actions/checkout@c85c95e # v4',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
         currentValue: 'v4',
+        currentDigestShort: 'c85c95e',
+        datasource: 'github-tags',
       });
-      expect(res?.deps[0].enabled).toBeUndefined();
     });
 
     it('extracts actions with fqdn', () => {
