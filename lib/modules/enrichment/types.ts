@@ -26,25 +26,42 @@ export interface EnrichmentUpdateContext extends EnrichmentDependencyContext {
 export type EnrichmentRepositoryResult = Pick<EnrichmentResult, 'packageRules'>;
 
 export interface EnrichmentResult {
-  /** PackageRules to inject (for vulnerability alerts, etc.) */
+  /** PackageRules to inject (for vulnerability alerts, etc.)
+   *
+   * Will append to the existing value, if any.
+   */
   packageRules?: PackageRule[];
+  /** PR body notes to append.
+   *
+   * Will append to the existing value, if any.
+   */
+  prBodyNotes?: string[];
+
+  /**
+   * Whether this dependency should be not updated, for a given reason
+   *
+   * Will override the `skipReason` already on the dependency.
+   * */
+  skipReason?: SkipReason;
+  /** Links providing context for the skip */
+  skipReferences?: string[];
+
+  /** Merge confidence level for this update
+   *
+   * Will override the existing value, if any.
+   */
+  mergeConfidenceLevel?: MergeConfidence;
+
   /** Arbitrary metadata available for matchJsonata. Renovate does not interpret these values. */
   metadata?: Record<string, unknown>;
-  /** PR body notes to append */
-  prBodyNotes?: string[];
+
   /** Status check to set on branches */
   statusCheck?: {
-    context: string;
+    context: string; // TODO doc statusCheckNames
     status: BranchStatus;
     description: string;
     url?: string;
   };
-  /** Whether this dependency should be not updated, for a given reason */
-  skipReason?: SkipReason;
-  /** Links providing context for the skip */
-  skipReferences?: string[];
-  /** Merge confidence level for this update */
-  mergeConfidenceLevel?: MergeConfidence;
 }
 
 /** Describes a metadata field that an enrichment module produces */
