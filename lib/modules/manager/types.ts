@@ -116,6 +116,8 @@ export interface LookupUpdate {
   updateTypes?: UpdateType[];
   isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
+  prBodyNotes?: string[];
+  skipReason?: SkipReason;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;

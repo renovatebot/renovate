@@ -5620,12 +5620,10 @@ describe('workers/repository/process/lookup/index', () => {
         runUpdateEnrichmentsSpy.mockRestore();
       });
 
-      it('applies mergeConfidenceLevel from enrichment metadata', async () => {
+      it('applies mergeConfidenceLevel from enrichment result', async () => {
         const spy = vi
           .spyOn(enrichmentApi, 'runUpdateEnrichments')
-          .mockResolvedValue({
-            metadata: { mergeConfidenceLevel: 'high' },
-          });
+          .mockResolvedValue({ mergeConfidenceLevel: 'high' });
         config.currentValue = '3.7.0';
         config.packageName = 'webpack';
         config.datasource = NpmDatasource.id;
@@ -5639,6 +5637,46 @@ describe('workers/repository/process/lookup/index', () => {
         ).unwrapOrThrow();
 
         expect(updates[0].mergeConfidenceLevel).toBe('high');
+        spy.mockRestore();
+      });
+
+      it('applies prBodyNotes from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ prBodyNotes: ['some advisory note'] });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].prBodyNotes).toEqual(['some advisory note']);
+        spy.mockRestore();
+      });
+
+      it('applies skipReason from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ skipReason: 'vulnerable' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].skipReason).toBe('vulnerable');
         spy.mockRestore();
       });
     });

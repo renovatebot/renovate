@@ -140,6 +140,12 @@ async function applyEnrichment(
   if (enrichResult.mergeConfidenceLevel !== undefined) {
     update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
   }
+  if (enrichResult.prBodyNotes?.length) {
+    update.prBodyNotes = enrichResult.prBodyNotes;
+  }
+  if (enrichResult.skipReason !== undefined) {
+    update.skipReason = enrichResult.skipReason;
+  }
   // TODO remove in #42421
   if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
     update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
