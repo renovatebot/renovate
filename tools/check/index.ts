@@ -9,7 +9,6 @@
  * Options:
  *   --fix             Run fixers only (oxlint-fix, biome-fix, prettier-fix)
  *   --no-test         Skip tests
- *   --base <branch>   Compare against different base branch (default: main)
  */
 
 import { readdirSync } from 'node:fs';
@@ -21,7 +20,6 @@ import {
   loadCoverage,
 } from './coverage.ts';
 import { runChecksParallel, runCommand } from './execution.ts';
-import { getChangedFiles } from './git.ts';
 import {
   ANSI,
   formatCompletedLine,
@@ -160,15 +158,12 @@ async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
     return [];
   }
 
-  if (args.targets.length === 0) {
-    const changedFiles = await getChangedFiles(args.base);
-    return getCoverageForFiles(coverageData, changedFiles);
-  }
+  const targets = args.targets.length > 0 ? args.targets : ['.'];
 
   const coverage: CoverageInfo[] = [];
   const sourceFiles: string[] = [];
 
-  for (const t of args.targets) {
+  for (const t of targets) {
     const source = toSourcePath(t);
     if (source) {
       sourceFiles.push(source);
@@ -186,7 +181,6 @@ function parseCliArgs(): CliArgs {
     options: {
       fix: { type: 'boolean', default: false },
       'no-test': { type: 'boolean', default: false },
-      base: { type: 'string', default: 'main' },
     },
     allowPositionals: true,
   });
@@ -194,7 +188,6 @@ function parseCliArgs(): CliArgs {
   return {
     fix: values.fix ?? false,
     noTest: values['no-test'] ?? false,
-    base: values.base ?? 'main',
     targets: positionals,
   };
 }
