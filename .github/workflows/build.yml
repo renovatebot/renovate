@@ -195,7 +195,7 @@ jobs:
           os: ${{ runner.os }}
           save-cache: true
 
-  lint-eslint:
+  lint-oxlint:
     needs:
       - setup-build
     runs-on: ubuntu-latest
@@ -218,26 +218,6 @@ jobs:
 
       - name: Lint with biome
         run: pnpm biome-ci
-
-      - name: Restore eslint cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: .cache/eslint
-          # we need to add the hash because eslint cache doesn't detect plugin changes
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
-
-      - name: Lint with eslint
-        run: pnpm eslint-ci
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-
-      - name: Save eslint cache
-        if: github.event_name == 'push'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: .cache/eslint
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-prettier:
     needs:
@@ -366,6 +346,8 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
+    permissions:
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -378,6 +360,11 @@ jobs:
         uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
         with:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
+        with:
+          version: v1.23.1
 
   test:
     needs: [setup, prefetch]
@@ -437,7 +424,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
           use_oidc: true
           report_type: test_results
@@ -490,7 +477,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -767,7 +754,7 @@ jobs:
     needs:
       - setup-build
       - build-docker
-      - lint-eslint
+      - lint-oxlint
       - lint-prettier
       - lint-docs
       - lint-other
@@ -825,7 +812,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@9e2c008ec1b3662cb83d8ccdf68b2f0168c7f5d9 # v4.5.9
+        uses: containerbase/internal-tools@6f958b07613524a169bb0de81783a5129daa6bc8 # v4.5.13
         with:
           command: docker-config
 
@@ -933,7 +920,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
 
   notify-release-failure:
     runs-on: ubuntu-latest

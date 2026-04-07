@@ -24,9 +24,12 @@ import type {
 export class TerraformProviderDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-provider';
 
+  static readonly hashicorpReleaseUrl = 'https://releases.hashicorp.com';
+  static readonly terraformRegistryUrl = 'https://registry.terraform.io';
+
   static readonly defaultRegistryUrls = [
-    'https://registry.terraform.io',
-    'https://releases.hashicorp.com',
+    TerraformProviderDatasource.terraformRegistryUrl,
+    TerraformProviderDatasource.hashicorpReleaseUrl,
   ];
 
   static repositoryRegex = regEx(/^hashicorp\/(?<packageName>\S+)$/);
@@ -61,28 +64,24 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       `terraform-provider.getDependencies() packageName: ${packageName}`,
     );
 
-    if (registryUrl === this.defaultRegistryUrls[1]) {
-      return await this.queryReleaseBackend(packageName, registryUrl);
-    }
-    const repository = TerraformProviderDatasource.getRepository({
-      packageName,
-    });
-    const serviceDiscovery =
-      await this.getTerraformServiceDiscoveryResult(registryUrl);
-
-    if (registryUrl === this.defaultRegistryUrls[0]) {
-      return await this.queryRegistryExtendedApi(
+    if (registryUrl === TerraformProviderDatasource.terraformRegistryUrl) {
+      const repository = TerraformProviderDatasource.getRepository({
+        packageName,
+      });
+      const serviceDiscovery =
+        await this.getTerraformServiceDiscoveryResult(registryUrl);
+      return await this.queryTerraformRegistry(
         serviceDiscovery,
         registryUrl,
         repository,
       );
     }
+    if (registryUrl === TerraformProviderDatasource.hashicorpReleaseUrl) {
+      return await this.queryReleaseBackend(packageName, registryUrl);
+    }
 
-    return await this.queryRegistryVersions(
-      serviceDiscovery,
-      registryUrl,
-      repository,
-    );
+    // Fall back to the standard Provider Registry Protocol for other registries.
+    return await this.queryProviderRegistry(registryUrl, packageName);
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -103,11 +102,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   /**
-   * this uses the api that terraform registry has in addition to the base api
-   * this endpoint provides more information, such as release date
-   * this api is undocumented.
+   * Query the Terraform Registry using the undocumented extended provider API.
+   * This provides more information than the base Provider Registry Protocol,
+   * such as the release date for the latest version and the source URL.
    */
-  private async queryRegistryExtendedApi(
+  private async queryTerraformRegistry(
     serviceDiscovery: ServiceDiscoveryResult,
     registryUrl: string,
     repository: string,
@@ -141,14 +140,19 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   /**
-   * this version uses the Provider Registry Protocol that all registries are required to implement
+   * Query a registry using the Provider Registry Protocol that all registries
+   * are required to implement.
    * https://www.terraform.io/internals/provider-registry-protocol
    */
-  private async queryRegistryVersions(
-    serviceDiscovery: ServiceDiscoveryResult,
+  private async queryProviderRegistry(
     registryUrl: string,
-    repository: string,
+    packageName: string,
   ): Promise<ReleaseResult> {
+    const repository = TerraformProviderDatasource.getRepository({
+      packageName,
+    });
+    const serviceDiscovery: ServiceDiscoveryResult =
+      await this.getTerraformServiceDiscoveryResult(registryUrl);
     const backendURL = createSDBackendURL(
       registryUrl,
       'providers.v1',
@@ -200,7 +204,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     repository: string,
     version: string,
   ): Promise<TerraformBuild[] | null> {
-    if (registryURL === TerraformProviderDatasource.defaultRegistryUrls[1]) {
+    if (registryURL === TerraformProviderDatasource.hashicorpReleaseUrl) {
       // check if registryURL === secondary backend
       const repositoryRegexResult =
         TerraformProviderDatasource.repositoryRegex.exec(repository)?.groups;
@@ -356,7 +360,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<VersionDetailResponse> {
     return (
       await this.http.getJsonUnchecked<VersionDetailResponse>(
-        `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`,
+        `${TerraformProviderDatasource.hashicorpReleaseUrl}/${backendLookUpName}/${version}/index.json`,
       )
     ).body;
   }
