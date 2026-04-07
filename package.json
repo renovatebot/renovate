@@ -389,6 +389,9 @@
       "@yarnpkg/core@4.5.0>tar": "$tar",
       "esbuild": "$esbuild",
       "vite": "$vite"
+    },
+    "patchedDependencies": {
+      "global-agent": "patches/global-agent.patch"
     }
   }
 }
