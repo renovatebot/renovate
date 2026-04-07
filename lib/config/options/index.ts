@@ -6,6 +6,7 @@ import { getManagers } from '../../modules/manager/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
+import { getUndocumentedOptions } from './undocumented.ts';
 
 const options: Readonly<RenovateOptions>[] = [
   {
@@ -2113,17 +2114,6 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
   },
-  /*
-   * Undocumented experimental feature
-  {
-    name: 'minimumConfidence',
-    description:
-      'Minimum Merge confidence level to filter by. Requires authentication to work.',
-    type: 'string',
-    allowedValues: ['low', 'neutral', 'high', 'very high'],
-    default: 'low',
-  },
-  */
   {
     name: 'internalChecksFilter',
     description: 'When and how to filter based on internal checks.',
@@ -3478,6 +3468,8 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
   },
+
+  ...getUndocumentedOptions(),
 ];
 
 export function getOptions(): Readonly<RenovateOptions>[] {

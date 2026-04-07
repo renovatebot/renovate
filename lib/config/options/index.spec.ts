@@ -89,4 +89,13 @@ describe('config/options/index', () => {
       }
     }
   });
+
+  describe('every "undocumented" option is marked as experimental', () => {
+    const opts = getOptions();
+    for (const option of opts.filter((o) => o.undocumented)) {
+      it(`${option.name}: undocumented, and marked as experimental`, () => {
+        expect(option.experimental).toBeTrue();
+      });
+    }
+  });
 });
