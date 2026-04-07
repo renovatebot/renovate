@@ -30,7 +30,6 @@ export function getConfigDesc(
   // TODO: remove unused parameter
   _packageFiles?: Record<string, PackageFile[]>,
 ): string {
-  // TODO: type (#22198)
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   const descriptionArr = getDescriptionArray(config);

@@ -212,25 +212,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       'returns if PR does not need updating' +
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
-        /*
-TODO before
-
-
-stdout | lib/workers/repository/onboarding/pr/index.spec.ts > workers/repository/onboarding/pr/index > ensureOnboardingPr() > returns if PR does not need updating(onboardingRebaseCheckbox="false")
-{
-e: '30029ee05ed80b34d2f743afda6e78fe20247a1eedaa9ce6a8070045c229ebfa',
-prBodyHash: '30029ee05ed80b34d2f743afda6e78fe20247a1eedaa9ce6a8070045c229ebfa'
-}
-
-stdout | lib/workers/repository/onboarding/pr/index.spec.ts > workers/repository/onboarding/pr/index > ensureOnboardingPr() > returns if PR does not need updating(onboardingRebaseCheckbox="true")
-{
-e: '6aa71f8cb7b1503b883485c8f5bd564b31923b9c7fa765abe2a7338af40e03b1',
-prBodyHash: '6aa71f8cb7b1503b883485c8f5bd564b31923b9c7fa765abe2a7338af40e03b1'
-}
-        const hash =
-          '30029ee05ed80b34d2f743afda6e78fe20247a1eedaa9ce6a8070045c229ebfa'; // no rebase checkbox PR hash
-
-*/
         const hash =
           '4b0e83aaa5acee225d5b8af756a1f55eb1d3fe70aa5759d03cf708187ebec4df'; // no rebase checkbox PR hash
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
