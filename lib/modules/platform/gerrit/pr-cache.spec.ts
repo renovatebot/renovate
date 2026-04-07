@@ -218,28 +218,6 @@ describe('modules/platform/gerrit/pr-cache', () => {
     });
   });
 
-  describe('forceRefresh()', () => {
-    it('clears cache and re-fetches all changes', async () => {
-      const change1 = makeChange({ _number: 100 });
-      mockFindChanges([change1]);
-
-      // Populate cache
-      await GerritPrCache.getPrs('test/repo');
-
-      // Force refresh should clear and re-fetch
-      const change2 = makeChange({ _number: 200 });
-      // Two calls: one from init (memCache cleared), one from sync(true)
-      mockFindChanges([change2]);
-      mockFindChanges([change2]);
-
-      await GerritPrCache.forceRefresh('test/repo');
-
-      const prs = await GerritPrCache.getPrs('test/repo');
-      expect(prs).toHaveLength(1);
-      expect(prs[0].number).toBe(200);
-    });
-  });
-
   describe('repo cache persistence', () => {
     it('persists data to repo cache', async () => {
       const change = makeChange();

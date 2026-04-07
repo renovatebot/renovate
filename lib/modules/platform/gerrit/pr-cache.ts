@@ -122,13 +122,8 @@ export class GerritPrCache {
     return true;
   }
 
-  private async sync(forceRefresh = false): Promise<GerritPrCache> {
-    if (forceRefresh) {
-      logger.debug('Force refreshing Gerrit PR cache');
-      this.cache.items = {};
-    } else {
-      logger.debug('Syncing Gerrit PR cache');
-    }
+  private async sync(): Promise<GerritPrCache> {
+    logger.debug('Syncing Gerrit PR cache');
 
     // Determine page size based on whether cache exists
     const pageLimit = this.items.length
@@ -153,12 +148,6 @@ export class GerritPrCache {
 
     logger.debug(`Synced ${this.items.length} changes to cache`);
     return this;
-  }
-
-  static async forceRefresh(repository: string): Promise<void> {
-    memCache.set('gerrit-pr-cache-synced', undefined);
-    const prCache = await GerritPrCache.init(repository);
-    await prCache.sync(true);
   }
 
   /**
