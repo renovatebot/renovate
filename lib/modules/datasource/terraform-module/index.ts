@@ -4,10 +4,7 @@ import { isHttpUrl } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { TerraformDatasource } from './base.ts';
-import {
-  TerraformModuleResponse,
-  TerraformModuleVersionsResponse,
-} from './schema.ts';
+import { TerraformModuleResponse, ProtocolModuleResponse } from './schema.ts';
 import { createSDBackendURL, getRegistryRepository } from './utils.ts';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
@@ -65,12 +62,18 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       'terraform-module.getReleases()',
     );
 
-    if (TerraformModuleDatasource.extendedApiRegistryUrls.includes(registry)) {
-      return await this.queryTerraformRegistry(registry, repository);
-    }
+    try {
+      if (
+        TerraformModuleDatasource.extendedApiRegistryUrls.includes(registry)
+      ) {
+        return await this.queryTerraformRegistry(registry, repository);
+      }
 
-    // Use the standard Module Registry Protocol for other conformant registries.
-    return await this.queryModuleRegistry(registry, repository);
+      // Use the standard Module Registry Protocol for other conformant registries.
+      return await this.queryModuleRegistry(registry, repository);
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -80,10 +83,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         key: TerraformModuleDatasource.getCacheKey(config),
         fallback: true,
       },
-      () =>
-        this._getReleases(config).catch((err: Error) =>
-          this.handleGenericErrors(err),
-        ),
+      () => this._getReleases(config),
     );
   }
 
@@ -141,7 +141,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     );
     const { body: res } = await this.http.getJson(
       pkgUrl,
-      TerraformModuleVersionsResponse,
+      ProtocolModuleResponse,
     );
     return {
       releases: res.versions,

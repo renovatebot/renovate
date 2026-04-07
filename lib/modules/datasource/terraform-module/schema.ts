@@ -9,8 +9,8 @@ export const ServiceDiscoveryResponse = z.object({
   'providers.v1': z.string().optional(),
 });
 
-export type ServiceDiscoveryResult = z.infer<typeof ServiceDiscoveryResponse>;
-export type ServiceDiscoveryEndpointType = keyof ServiceDiscoveryResult;
+export type ServiceDiscoveryResponse = z.infer<typeof ServiceDiscoveryResponse>;
+export type ServiceDiscoveryEndpointType = keyof ServiceDiscoveryResponse;
 
 export const TerraformModuleResponse = z
   .object({
@@ -32,7 +32,7 @@ export const TerraformModuleResponse = z
     ),
   }));
 
-export type TerraformRelease = z.infer<typeof TerraformModuleResponse>;
+export type TerraformModuleResponse = z.infer<typeof TerraformModuleResponse>;
 
 export const TerraformModuleVersion = z
   .object({ version: z.string() })
@@ -48,7 +48,7 @@ export const TerraformModule = z
     'Empty versions array in module response',
   );
 
-export const TerraformModuleVersionsResponse = z
+export const ProtocolModuleResponse = z
   .object({ modules: LooseArray(TerraformModule) })
   .refine(
     ({ modules }) => isNonEmptyArray(modules),
@@ -56,6 +56,4 @@ export const TerraformModuleVersionsResponse = z
   )
   .transform(({ modules: [module] }) => module);
 
-export type TerraformModuleVersions = z.infer<
-  typeof TerraformModuleVersionsResponse
->;
+export type ProtocolModuleResponse = z.infer<typeof ProtocolModuleResponse>;

@@ -3,7 +3,6 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { ServiceDiscoveryResult } from './schema.ts';
 import { ServiceDiscoveryResponse } from './schema.ts';
 
 const terraformId = 'terraform';
@@ -16,7 +15,7 @@ export abstract class TerraformDatasource extends Datasource {
 
   private async _getTerraformServiceDiscoveryResult(
     registryUrl: string,
-  ): Promise<ServiceDiscoveryResult> {
+  ): Promise<ServiceDiscoveryResponse> {
     const discoveryURL = TerraformDatasource.getDiscoveryUrl(registryUrl);
     const { body: res } = await this.http.getJson(
       discoveryURL,
@@ -27,7 +26,7 @@ export abstract class TerraformDatasource extends Datasource {
 
   getTerraformServiceDiscoveryResult(
     registryUrl: string,
-  ): Promise<ServiceDiscoveryResult> {
+  ): Promise<ServiceDiscoveryResponse> {
     return withCache(
       {
         namespace: `datasource-${terraformId}`,

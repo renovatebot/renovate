@@ -8,7 +8,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
-import type { ServiceDiscoveryResult } from '../terraform-module/schema.ts';
+import type { ServiceDiscoveryResponse } from '../terraform-module/schema.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import type {
@@ -106,7 +106,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
    * such as the release date for the latest version and the source URL.
    */
   private async queryTerraformRegistry(
-    serviceDiscovery: ServiceDiscoveryResult,
+    serviceDiscovery: ServiceDiscoveryResponse,
     registryUrl: string,
     repository: string,
   ): Promise<ReleaseResult> {

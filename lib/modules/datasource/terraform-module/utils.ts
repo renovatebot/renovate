@@ -3,14 +3,14 @@ import { coerceString } from '../../../util/string.ts';
 import { isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import type {
   ServiceDiscoveryEndpointType,
-  ServiceDiscoveryResult,
+  ServiceDiscoveryResponse,
 } from './schema.ts';
 import type { RegistryRepository } from './types.ts';
 
 export function createSDBackendURL(
   registryURL: string,
   sdType: ServiceDiscoveryEndpointType,
-  sdResult: ServiceDiscoveryResult,
+  sdResult: ServiceDiscoveryResponse,
   subPath: string,
 ): string {
   const sdEndpoint = sdResult[sdType] ?? '';
@@ -28,8 +28,7 @@ export function getRegistryRepository(
   let registry: string;
   const split = packageName.split('/');
   if (split.length > 3 && split[0].includes('.')) {
-    [registry] = split;
-    split.shift();
+    registry = split.shift()!;
   } else {
     registry = coerceString(registryUrl);
   }
