@@ -57,7 +57,6 @@ function getPresetDescription(
   // Parameterized preset references like ":semanticCommitType(chore)" will be looked up as `:semanticCommitType` (which is the preset name)
   const [prefix] = presetRef.split('(');
   if (prefix) {
-    logger.info({ prefix });
     desc = descriptions.get(prefix);
     if (desc) {
       return desc;
@@ -176,9 +175,6 @@ export async function generatePresets(dist: string): Promise<void> {
         groupName === 'default'
           ? `:${presetName}`
           : `${groupName}:${presetName}`;
-      if (ref.includes('follow')) {
-        logger.info({ ref });
-      }
       const desc =
         (value.description as string | undefined) ??
         (value.packageRules?.[0]?.description as string | undefined);
