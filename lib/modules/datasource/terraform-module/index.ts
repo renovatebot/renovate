@@ -4,7 +4,7 @@ import { isHttpUrl } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { TerraformDatasource } from './base.ts';
-import { TerraformModuleResponse, ProtocolModuleResponse } from './schema.ts';
+import { ProtocolModuleResponse, TerraformModuleResponse } from './schema.ts';
 import { createSDBackendURL, getRegistryRepository } from './utils.ts';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
