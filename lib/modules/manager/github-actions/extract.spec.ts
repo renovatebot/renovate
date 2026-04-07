@@ -1324,6 +1324,56 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'zizmor',
+          depType: 'uses-with',
+          packageName: 'zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {
+          version: 'v1.23.1',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.23.1',
+          datasource: 'pypi',
+          depName: 'zizmor',
+          depType: 'uses-with',
+          packageName: 'zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {
+          version: '1.23.1',
+        },
+      },
+      expected: [
+        {
+          currentValue: '1.23.1',
+          datasource: 'pypi',
+          depName: 'zizmor',
+          depType: 'uses-with',
+          packageName: 'zizmor',
+        },
+      ],
+    },
   ])('extract from $step.uses', ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
