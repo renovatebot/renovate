@@ -905,8 +905,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   describe('getCommitMessages()', () => {
-    it('returns commit messages', async () => {
-      expect(await git.getCommitMessages()).toEqual([
+    it('returns commit messages without merge commits', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.merge(['--no-ff', 'origin/renovate/future_branch']);
+      expect((await git.getCommitMessages()).sort()).toEqual([
+        'future message',
         'master message',
         'past message',
       ]);
