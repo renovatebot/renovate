@@ -1,5 +1,6 @@
 import type { Merge } from 'type-fest';
 import type {
+  FetchChangeLogsOptions,
   GroupConfig,
   LegacyAdminConfig,
   RenovateConfig,
@@ -110,7 +111,7 @@ export interface BranchUpgradeConfig
   hasReleaseNotes?: boolean;
   homepage?: string;
 
-  disableChangeLog?: boolean;
+  fetchChangeLogs?: FetchChangeLogsOptions;
   changelogContent?: string;
   changelogUrl?: string;
   dependencyUrl?: string;

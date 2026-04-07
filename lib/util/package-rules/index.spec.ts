@@ -1351,34 +1351,34 @@ describe('util/package-rules/index', () => {
     expect(res.packageName).toBe('docker.io/library/node');
   });
 
-  it('propagates disableChangeLog from matching packageRule', async () => {
+  it('propagates fetchChangeLogs from matching packageRule', async () => {
     const config: TestConfig = {
       datasource: 'npm',
       depName: 'some-dep',
       packageRules: [
         {
           matchDatasources: ['npm'],
-          disableChangeLog: true,
+          fetchChangeLogs: 'off',
         },
       ],
     };
     const res = await applyPackageRules(config);
-    expect(res.disableChangeLog).toBeTrue();
+    expect(res.fetchChangeLogs).toBe('off');
   });
 
-  it('does not set disableChangeLog when packageRule does not match', async () => {
+  it('does not set fetchChangeLogs when packageRule does not match', async () => {
     const config: TestConfig = {
       datasource: 'npm',
       depName: 'some-dep',
       packageRules: [
         {
           matchDatasources: ['pypi'],
-          disableChangeLog: true,
+          fetchChangeLogs: 'off',
         },
       ],
     };
     const res = await applyPackageRules(config);
-    expect(res.disableChangeLog).toBeUndefined();
+    expect(res.fetchChangeLogs).toBeUndefined();
   });
 
   it('compiles sourceUrl with template helper functions', async () => {

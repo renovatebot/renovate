@@ -565,7 +565,7 @@ export interface PackageRule
   extends RenovateSharedConfig, RenovateInternalConfig, UpdateConfig {
   allowedVersions?: string;
   description?: string | string[];
-  disableChangeLog?: boolean;
+  fetchChangeLogs?: FetchChangeLogsOptions;
   matchBaseBranches?: string[];
   matchCategories?: string[];
   matchConfidence?: MergeConfidence[];
@@ -759,7 +759,7 @@ export interface PackageRuleInputConfig extends RenovateConfig {
   updateType?: UpdateType;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
-  disableChangeLog?: boolean;
+  fetchChangeLogs?: FetchChangeLogsOptions;
   sourceUrl?: string | null;
   categories?: string[];
   baseBranch?: string;

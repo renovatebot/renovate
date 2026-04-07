@@ -1772,7 +1772,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs-and-tools) to allow Renovate to fetch changelogs notes from `github.com`.
 
-See [`packageRules.disableChangeLog`](#packagerulesdisablechangelog) for package-level control over changelogs.
+The value of `fetchChangeLogs` may be overridden at the package-level using [`packageRules.fetchChangeLogs`](#packagerulesfetchchangelogs).
 
 <!-- prettier-ignore -->
 !!! note
@@ -3147,31 +3147,30 @@ To read the changelogs you must use the link.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
-### packageRules.disableChangeLog
+### packageRules.fetchChangeLogs
 
-Set to `true` to prevent Renovate from fetching changelogs/release notes.
-This is useful when fetching changelogs from a particular source is is
-time-consuming, broken, or simply undesired. See [`fetchChangeLogs`](#fetchchangelogs)
-for broad control over fetching changelogs.
+Overrides the top-level [`fetchChangeLogs`](#fetchchangelogs) using the same values (`off`, `pr`, `branch`).
 
-The following disables fetching of changelogs for any package in aws-sdk-go-v2:
+The following disables fetching of changelogs for any package in aws-sdk-go-v2,
+which can be time-consuming due to the repository's large number of tags:
 
 ```json
 {
   "packageRules": {
     "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
-    "disableChangeLog": true
+    "fetchChangeLogs": "off"
   }
 }
 ```
 
-The following disables fetching of changelogs for any package sourced from GitHub.com:
+The following re-enables fetching of changelogs when creating pull-requests for lodash updates.
 
 ```json
 {
+  "fetchChangeLogs": "off",
   "packageRules": {
-    "matchSourceUrls": ["https://github.com/**"],
-    "disableChangeLog": false
+    "matchSourceUrls": ["https://github.com/lodash/lodash"],
+    "fetchChangeLogs": "pr"
   }
 }
 ```

@@ -1,6 +1,8 @@
+import type { FetchChangeLogsOptions } from '../../../config/types.ts';
 import * as p from '../../../util/promises.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
+import type { EmbedChangelogsOptions } from './types.ts';
 
 export async function embedChangelog(
   upgrade: BranchUpgradeConfig,
@@ -10,11 +12,7 @@ export async function embedChangelog(
     return;
   }
 
-  if (upgrade.disableChangeLog) {
-    upgrade.logJSON = {
-      hasReleaseNotes: false,
-    };
-  } else if (upgrade.changelogContent === undefined) {
+  if (upgrade.changelogContent === undefined) {
     upgrade.logJSON = await getChangeLogJSON(upgrade);
   } else {
     upgrade.logJSON = {
@@ -47,8 +45,30 @@ export async function embedChangelog(
   }
 }
 
-export async function embedChangelogs(
-  branches: BranchUpgradeConfig[],
-): Promise<void> {
-  await p.map(branches, embedChangelog, { concurrency: 10 });
+// Merges the top-level fetchChangeLogs value with the upgrade's fetchChangeLogs value (prioritizing the latter, if defined).
+function resolveFetchChangeLogs(
+  fetchChangeLogs?: FetchChangeLogsOptions,
+  upgradeFetchChangeLogs?: FetchChangeLogsOptions,
+): FetchChangeLogsOptions {
+  // Default to 'pr' if top-level fetchChangeLogs is undefined.
+  let fetchChangeLogsResolved: FetchChangeLogsOptions = fetchChangeLogs ?? 'pr';
+  if (upgradeFetchChangeLogs) {
+    // Override using the upgrade's fetchChangeLogs value.
+    fetchChangeLogsResolved = upgradeFetchChangeLogs;
+  }
+  return fetchChangeLogsResolved;
+}
+
+export async function embedChangelogs({
+  branches,
+  stage,
+  fetchChangeLogs,
+}: EmbedChangelogsOptions): Promise<void> {
+  // Filter down to branch upgrades that match the stage and fetchChangeLogs configuration.
+  const upgrades = branches.filter(
+    (upgrade) =>
+      resolveFetchChangeLogs(fetchChangeLogs, upgrade.fetchChangeLogs) ===
+      stage,
+  );
+  await p.map(upgrades, embedChangelog, { concurrency: 10 });
 }

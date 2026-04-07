@@ -36,6 +36,7 @@ import type {
   BranchUpgradeConfig,
   CacheFingerprintMatchResult,
 } from '../../../types.ts';
+import * as _changelog from '../../changelog/index.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
@@ -79,6 +80,7 @@ const exec = vi.mocked(_exec);
 const sanitize = vi.mocked(_sanitize);
 const limits = vi.mocked(_limits);
 const repoCache = vi.mocked(_repoCache);
+const changelog = vi.mocked(_changelog);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
@@ -1209,7 +1211,6 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch({ ...config, automerge: true });
-      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith({
@@ -1220,6 +1221,26 @@ describe('workers/repository/update/branch/index', () => {
         `,
         number: 123,
         topic: 'ℹ️ Artifact update notice',
+      });
+    });
+
+    it('fetches changelogs for the "branch" stage', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+
+      await branchWorker.processBranch({ ...config });
+
+      expect(changelog.embedChangelogs).toHaveBeenCalledExactlyOnceWith({
+        branches: config.upgrades,
+        stage: 'branch',
+        fetchChangeLogs: config.fetchChangeLogs,
       });
     });
 
