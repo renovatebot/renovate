@@ -3984,6 +3984,49 @@ describe('modules/platform/github/index', () => {
           },
         ]);
       });
+
+      it('should not pass commit message headline/body for rebase merge', async () => {
+        const scope = await mockScope({
+          squashMergeAllowed: false,
+          mergeCommitAllowed: false,
+          rebaseMergeAllowed: true,
+        });
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeCommitMessage:
+              'Update dependency foo to v1.2.3\n\nSome commit body',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+
+        const trace = httpMock.getTrace();
+        expect(trace).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'REBASE',
+              },
+            },
+          },
+        ]);
+
+        const automergeTrace = trace.at(-1);
+        expect(
+          automergeTrace?.graphql?.variables?.commitHeadline,
+        ).toBeUndefined();
+        expect(automergeTrace?.graphql?.variables?.commitBody).toBeUndefined();
+      });
     });
 
     describe('milestone', () => {
