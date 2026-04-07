@@ -593,4 +593,34 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     });
     expect(testContent).toBeNull();
   });
+
+  it('handles workspace overrides', () => {
+    const upgrade = {
+      depType: 'pnpm-workspace.overrides',
+      depName: 'react',
+      newValue: '19.0.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      overrides:
+        react: 18.3.1
+
+      catalogs:
+        react17:
+          react: 19.0.0
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      overrides:
+        react: 19.0.0
+
+      catalogs:
+        react17:
+          react: 19.0.0
+
+    `);
+  });
 });

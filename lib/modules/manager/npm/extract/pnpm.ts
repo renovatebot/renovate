@@ -8,7 +8,6 @@ import {
 } from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
-import type { z } from 'zod/v3';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -19,6 +18,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type { PackageFile, PackageFileContent } from '../../types.ts';
+import { pnpmWorkspaceOverrides } from '../dep-types.ts';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
 import type { PnpmCatalogs, PnpmWorkspaceFile } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
@@ -256,8 +256,6 @@ function getLockedDependencyVersions(
   return res;
 }
 
-type PnpmCatalogs = z.TypeOf<typeof PnpmCatalogs>;
-
 export async function extractPnpmWorkspaceFile(
   workspaceFile: PnpmWorkspaceFile,
   packageFile: string,
@@ -275,7 +273,7 @@ export async function extractPnpmWorkspaceFile(
       // flat syntax: `parent>parent>child`
       const packageName =
         parsePkgAndParentSelector(overridesKey).targetPkg.name;
-      const depType = 'pnpm.overrides';
+      const depType = pnpmWorkspaceOverrides;
       deps.push({
         depName: overridesKey,
         packageName,

@@ -3,10 +3,11 @@ import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger/index.ts';
 import type { UpdateDependencyConfig } from '../../../types.ts';
-import { PnpmCatalogs } from '../../schema.ts';
+import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
+import { PnpmWorkspaceFile } from '../../schema.ts';
 import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
 
-export function updatePnpmCatalogDependency({
+export function updatePnpmWorkspaceDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
@@ -14,10 +15,10 @@ export function updatePnpmCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  /* v8 ignore if -- needs test */
-  if (!isString(catalogName)) {
+  /* v8 ignore if -- should not happen */
+  if (!isString(catalogName) && depType !== pnpmWorkspaceOverrides) {
     logger.error(
-      'No catalogName was found; this is likely an extraction error.',
+      'No catalogName or override was found; this is likely an extraction error.',
     );
     return null;
   }
@@ -28,11 +29,11 @@ export function updatePnpmCatalogDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
-    `npm.updatePnpmCatalogDependency(): ${depType}:${catalogName}.${depName} = ${newValue}`,
+    `npm.updatePnpmWorkspaceDependency(): ${depType}:${catalogName ?? 'overrides'}.${depName} = ${newValue}`,
   );
 
   let document: Document;
-  let parsedContents: PnpmCatalogs;
+  let parsedContents: PnpmWorkspaceFile;
 
   try {
     // In order to preserve the original formatting as much as possible, we want
@@ -42,7 +43,7 @@ export function updatePnpmCatalogDependency({
     // values. Thus, we use both an annotated AST and a JS representation; the
     // former for manipulation, and the latter for querying/validation.
     document = parseDocument(fileContent, { keepSourceTokens: true });
-    parsedContents = PnpmCatalogs.parse(document.toJS());
+    parsedContents = PnpmWorkspaceFile.parse(fileContent);
   } catch (err) {
     logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
     return null;
@@ -53,11 +54,13 @@ export function updatePnpmCatalogDependency({
   // Thus, we must check which entry is being used, to reference it from / set
   // it in the right place.
   const usesImplicitDefaultCatalog = parsedContents.catalog !== undefined;
+  const isCatalogUpdate = catalogName && depType !== pnpmWorkspaceOverrides;
 
-  const oldVersion =
-    catalogName === 'default' && usesImplicitDefaultCatalog
+  const oldVersion = isCatalogUpdate
+    ? catalogName === 'default' && usesImplicitDefaultCatalog
       ? parsedContents.catalog?.[depName!]
-      : parsedContents.catalogs?.[catalogName]?.[depName!];
+      : parsedContents.catalogs?.[catalogName]?.[depName!]
+    : parsedContents.overrides?.[depName!];
 
   if (oldVersion === newValue) {
     logger.trace('Version is already updated');
@@ -65,11 +68,13 @@ export function updatePnpmCatalogDependency({
   }
 
   // Update the value
-  const path = getDepPath({
-    depName: depName!,
-    catalogName,
-    usesImplicitDefaultCatalog,
-  });
+  const path = isCatalogUpdate
+    ? getDepPath({
+        depName: depName!,
+        catalogName,
+        usesImplicitDefaultCatalog,
+      })
+    : ['overrides', depName!];
 
   const modifiedDocument = changeDependencyIn(document, path, {
     newValue,

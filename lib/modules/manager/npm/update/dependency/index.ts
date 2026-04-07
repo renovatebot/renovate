@@ -4,6 +4,7 @@ import { logger } from '../../../../../logger/index.ts';
 import { escapeRegExp, regEx } from '../../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../../util/string.ts';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types.ts';
+import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
 import type {
   DependenciesMeta,
   NpmPackage,
@@ -12,7 +13,7 @@ import type {
 } from '../../extract/types.ts';
 import type { NpmDepType, NpmManagerData } from '../../types.ts';
 import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
-import { updatePnpmCatalogDependency } from './pnpm.ts';
+import { updatePnpmWorkspaceDependency } from './pnpm.ts';
 import { updateYarnrcCatalogDependency } from './yarn.ts';
 
 function renameObjKey(
@@ -119,8 +120,11 @@ export function updateDependency({
   packageFile: packageFileName,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  if (upgrade.depType?.startsWith('pnpm.catalog')) {
-    return updatePnpmCatalogDependency({
+  if (
+    upgrade.depType?.startsWith('pnpm.catalog') ||
+    upgrade.depType === pnpmWorkspaceOverrides
+  ) {
+    return updatePnpmWorkspaceDependency({
       fileContent,
       packageFile: packageFileName,
       upgrade,
