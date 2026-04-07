@@ -17,17 +17,16 @@ export const TerraformModuleResponse = z
     source: z.string().optional(),
     versions: z.array(z.string()),
     version: z.string(),
-    published_at: z.string(),
+    published_at: MaybeTimestamp,
   })
   .transform((resource) => ({
     source: resource.source,
     versions: resource.versions.map(
       (version): Release => ({
         version,
-        releaseTimestamp:
-          version === resource.version
-            ? MaybeTimestamp.parse(resource.published_at)
-            : undefined,
+        ...(version === resource.version && {
+          releaseTimestamp: resource.published_at,
+        }),
       }),
     ),
   }));
