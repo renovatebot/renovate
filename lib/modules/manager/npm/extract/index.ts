@@ -221,6 +221,7 @@ export async function extractAllPackageFiles(
             parsedPnpmWorkspaceYaml.data,
             packageFile,
           );
+          // v8 ignore else -- TODO: add test #40625
           if (deps) {
             npmFiles.push({
               ...deps,

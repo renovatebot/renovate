@@ -15,7 +15,7 @@ export function updatePnpmWorkspaceDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  /* v8 ignore if -- should not happen */
+  // should never happen
   if (!isString(catalogName) && depType !== pnpmWorkspaceOverrides) {
     logger.error(
       'No catalogName or override was found; this is likely an extraction error.',
@@ -29,7 +29,7 @@ export function updatePnpmWorkspaceDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
-    `npm.updatePnpmWorkspaceDependency(): ${depType}:${catalogName ?? 'overrides'}.${depName} = ${newValue}`,
+    `npm.updatePnpmWorkspaceDependency(): ${depType}:${depName} = ${newValue}`,
   );
 
   let document: Document;
@@ -130,6 +130,7 @@ function changeDependencyIn(
     CST.setScalarValue(relevantNode.srcToken.key, newName);
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (newValue) {
     // We only support scalar values when substituting. This explicitly avoids
     // substituting aliases, since those can be resolved from a shared location,

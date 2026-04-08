@@ -1,7 +1,21 @@
 import { codeBlock } from 'common-tags';
+import { logger, partial } from '~test/util.ts';
+import type { UpdateDependencyConfig } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
+import { updatePnpmWorkspaceDependency } from './pnpm.ts';
 
 describe('modules/manager/npm/update/dependency/pnpm', () => {
+  it('returns null on invalid input', () => {
+    expect(
+      updatePnpmWorkspaceDependency(
+        partial<UpdateDependencyConfig>({ upgrade: {} }),
+      ),
+    ).toBeNull();
+    expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith(
+      'No catalogName or override was found; this is likely an extraction error.',
+    );
+  });
+
   it('handles implicit default catalog dependency', () => {
     const upgrade = {
       depType: 'pnpm.catalog.default',

@@ -55,6 +55,7 @@ function replaceAsString(
       [newValue]: parsedContents[depType]![oldValue],
     })[oldValue];
   } else if (depType === 'dependenciesMeta') {
+    // v8 ignore else -- TODO: add test #40625
     if (oldValue !== newValue) {
       parsedContents.dependenciesMeta = renameObjKey(
         // TODO #22198
@@ -70,6 +71,7 @@ function replaceAsString(
       parents,
       depName,
     );
+    // v8 ignore else -- TODO: add test #40625
     if (depObjectReference) {
       depObjectReference[overrideDepName] = newValue;
     }
@@ -110,8 +112,8 @@ function replaceAsString(
         return testContent;
       }
     }
-    /* v8 ignore next 3 -- needs test */
   }
+  // v8 ignore next -- TODO: add test #40625
   throw new Error();
 }
 
@@ -156,6 +158,7 @@ export function updateDependency({
       newValue = `${depName}@${newValue}`;
     } else if (isOverrideObject(upgrade)) {
       overrideDepParents = managerData?.parents;
+      // v8 ignore else -- TODO: add test #40625
       if (overrideDepParents) {
         // old version when there is an object as a value in overrides block
         const { depObjectReference, overrideDepName } = overrideDepPosition(
@@ -163,6 +166,7 @@ export function updateDependency({
           overrideDepParents,
           depName,
         );
+        // v8 ignore else -- TODO: add test #40625
         if (depObjectReference) {
           oldVersion = depObjectReference[overrideDepName]!;
         }
@@ -300,6 +304,7 @@ function overrideDepPosition(
   const lastParent = parents[parents.length - 1];
   let overrideDep: OverrideDependency = overrideBlock;
   for (const parent of parents) {
+    // v8 ignore else -- TODO: add test #40625
     if (overrideDep) {
       overrideDep = overrideDep[parent] as Record<string, RecursiveOverride>;
     }
