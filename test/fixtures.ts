@@ -8,7 +8,7 @@ type TDataOut = string | Buffer;
 
 import upath from 'upath';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// oxlint-disable-next-line typescript/no-require-imports
 const realFs: typeof import('node:fs') = require('node:fs'); // used to bypass vitest mock
 
 /**
