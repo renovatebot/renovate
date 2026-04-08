@@ -46,7 +46,7 @@ export async function initEnrichments(config: RenovateConfig): Promise<void> {
 export async function initRepoEnrichments(
   config: RenovateConfig,
 ): Promise<void> {
-  await instrument('initEnrichments', async () => {
+  await instrument('initRepoEnrichments', async () => {
     for (const [, enrichment] of getEnrichments()) {
       if (enrichment.initRepo) {
         logger.debug(
