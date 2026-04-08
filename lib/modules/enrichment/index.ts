@@ -20,11 +20,11 @@ function getEnabledEnrichments(config: RenovateConfig): EnrichmentApi[] {
 
 /**
  * Global initialization: called once at global worker start.
- * Calls init() on all enabled enrichment modules.
+ * Calls init() on all enrichment modules.
  */
 export async function initEnrichments(config: RenovateConfig): Promise<void> {
   await instrument('initEnrichments', async () => {
-    for (const enrichment of getEnabledEnrichments(config)) {
+    for (const [, enrichment] of getEnrichments()) {
       if (enrichment.init) {
         logger.debug(
           { moduleId: enrichment.id },
@@ -47,7 +47,7 @@ export async function initRepoEnrichments(
   config: RenovateConfig,
 ): Promise<void> {
   await instrument('initEnrichments', async () => {
-    for (const enrichment of getEnabledEnrichments(config)) {
+    for (const [, enrichment] of getEnrichments()) {
       if (enrichment.initRepo) {
         logger.debug(
           { moduleId: enrichment.id },

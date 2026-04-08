@@ -1,7 +1,4 @@
-import type {
-  PackageRule,
-  RenovateConfig,
-} from '../../config/types.ts';
+import type { PackageRule, RenovateConfig } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/base.ts';
 import type { UpdateType } from '../../types/index.ts';
 import type { SkipReason } from '../../types/skip-reason.ts';
@@ -104,7 +101,11 @@ export interface EnrichmentApi extends ModuleApi {
   /** Per-repo initialization, called once per repository */
   initRepo?(config: RenovateConfig): Promise<void>;
 
-  /** Whether this enrichment is enabled for the current config */
+  /**
+   * Whether this enrichment is enabled for the current config
+   *
+   * Modules may dynamically determine this based on configuration, or statically determine this in their `init` method.
+   * */
   isEnabled(config: RenovateConfig): boolean;
 
   /** Runs once with all package files (e.g. vulnerability alerts) */

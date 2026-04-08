@@ -39,25 +39,20 @@ describe('modules/enrichment/index', () => {
   });
 
   describe('initEnrichments()', () => {
-    it('calls init() on enabled enrichments', async () => {
-      const initFn = vi.fn();
-      api.set('a', createMockEnrichment({ id: 'a', init: initFn }));
-      await initEnrichments({} as RenovateConfig);
-      expect(initFn).toHaveBeenCalledOnce();
-    });
-
-    it('skips disabled enrichments', async () => {
-      const initFn = vi.fn();
+    it('calls init() on all enrichments, regardless of whether they are enabled or disabled', async () => {
+      api.set('a', createMockEnrichment({ id: 'a' }));
+      const disabledInitFn = vi.fn();
       api.set(
-        'a',
+        'b',
         createMockEnrichment({
-          id: 'a',
-          init: initFn,
+          id: 'b',
+          init: disabledInitFn,
           isEnabled: () => false,
         }),
       );
+
       await initEnrichments({} as RenovateConfig);
-      expect(initFn).not.toHaveBeenCalled();
+      expect(disabledInitFn).toHaveBeenCalledOnce();
     });
 
     it('skips enrichments without init()', async () => {
@@ -69,25 +64,27 @@ describe('modules/enrichment/index', () => {
   });
 
   describe('initRepoEnrichments()', () => {
-    it('calls initRepo() on enabled enrichments', async () => {
-      const initRepoFn = vi.fn();
-      api.set('a', createMockEnrichment({ id: 'a', initRepo: initRepoFn }));
-      await initRepoEnrichments({} as RenovateConfig);
-      expect(initRepoFn).toHaveBeenCalledOnce();
-    });
-
-    it('skips disabled enrichments', async () => {
-      const initRepoFn = vi.fn();
+    it('calls initRepo() on all enrichments, regardless of whether they are enabled or disabled', async () => {
+      api.set('a', createMockEnrichment({ id: 'a' }));
+      const disabledInitFn = vi.fn();
       api.set(
-        'a',
+        'b',
         createMockEnrichment({
-          id: 'a',
-          initRepo: initRepoFn,
+          id: 'b',
+          initRepo: disabledInitFn,
           isEnabled: () => false,
         }),
       );
+
       await initRepoEnrichments({} as RenovateConfig);
-      expect(initRepoFn).not.toHaveBeenCalled();
+      expect(disabledInitFn).toHaveBeenCalledOnce();
+    });
+
+    it('skips enrichments without initRepo()', async () => {
+      api.set('a', createMockEnrichment({ id: 'a' }));
+      await expect(
+        initRepoEnrichments({} as RenovateConfig),
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -137,6 +134,20 @@ describe('modules/enrichment/index', () => {
 
     it('skips enrichments without enrichRepository()', async () => {
       api.set('a', createMockEnrichment({ id: 'a' }));
+      const config: RenovateConfig = {};
+      await runRepositoryEnrichments(config, {});
+      expect(config.packageRules).toBeUndefined();
+    });
+
+    it('skips disabled enrichments', async () => {
+      api.set(
+        'a',
+        createMockEnrichment({
+          id: 'a',
+          enrichRepository: vi.fn().mockResolvedValue({}),
+          isEnabled: () => false,
+        }),
+      );
       const config: RenovateConfig = {};
       await runRepositoryEnrichments(config, {});
       expect(config.packageRules).toBeUndefined();
@@ -210,6 +221,19 @@ describe('modules/enrichment/index', () => {
         createMockEnrichment({
           id: 'a',
           enrichUpdate: vi.fn().mockResolvedValue(null),
+        }),
+      );
+      const result = await runUpdateEnrichments(context, {} as RenovateConfig);
+      expect(result).toEqual({});
+    });
+
+    it('skips disabled enrichments results', async () => {
+      api.set(
+        'a',
+        createMockEnrichment({
+          id: 'a',
+          enrichUpdate: vi.fn().mockResolvedValue(null),
+          isEnabled: () => false,
         }),
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
