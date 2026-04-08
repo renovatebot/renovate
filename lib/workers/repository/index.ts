@@ -260,7 +260,7 @@ async function cleanupLocalDir(
   if (localDir && !repoConfig.persistRepoData) {
     try {
       await deleteLocalFile('.');
-    } catch (err) /* istanbul ignore if */ {
+    } catch (err) {
       logger.warn({ err }, 'localDir deletion error');
     }
   }
