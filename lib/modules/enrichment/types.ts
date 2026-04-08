@@ -2,9 +2,9 @@ import type { PackageRule, RenovateConfig } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/base.ts';
 import type { UpdateType } from '../../types/index.ts';
 import type { SkipReason } from '../../types/skip-reason.ts';
-import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { PackageFile } from '../manager/types.ts';
 import type { StatusCheckConfig } from '../platform/types.ts';
+import type { MergeConfidence } from './merge-confidence/types.ts';
 
 export interface EnrichmentDependencyContext {
   datasource: string;

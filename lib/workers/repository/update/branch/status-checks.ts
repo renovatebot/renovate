@@ -1,12 +1,12 @@
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
+import { isActiveConfidenceLevel } from '../../../../modules/enrichment/merge-confidence/index.ts';
+import type { MergeConfidence } from '../../../../modules/enrichment/merge-confidence/types.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import type { BranchStatusConfig } from '../../../../modules/platform/types.ts';
 import type { BranchStatus } from '../../../../types/index.ts';
-import { isActiveConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
-import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
 import { coerceString } from '../../../../util/string.ts';
 import { joinUrlParts } from '../../../../util/url.ts';
 

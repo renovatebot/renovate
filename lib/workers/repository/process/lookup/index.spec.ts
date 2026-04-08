@@ -18,6 +18,11 @@ import { NpmDatasource } from '../../../../modules/datasource/npm/index.ts';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist/index.ts';
 import { PypiDatasource } from '../../../../modules/datasource/pypi/index.ts';
 import * as enrichmentApi from '../../../../modules/enrichment/index.ts';
+import * as McApi from '../../../../modules/enrichment/merge-confidence/index.ts';
+import {
+  initConfig,
+  resetConfig,
+} from '../../../../modules/enrichment/merge-confidence/index.ts';
 import { id as composerVersioningId } from '../../../../modules/versioning/composer/index.ts';
 import { id as debianVersioningId } from '../../../../modules/versioning/debian/index.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
@@ -29,11 +34,6 @@ import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
-import * as McApi from '../../../../util/merge-confidence/index.ts';
-import {
-  initConfig,
-  resetConfig,
-} from '../../../../util/merge-confidence/index.ts';
 import { Result } from '../../../../util/result.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as lookup from './index.ts';
@@ -5538,7 +5538,7 @@ describe('workers/repository/process/lookup/index', () => {
         ]);
       });
 
-      it('does not get a merge confidence level when no packageRule is set', async () => {
+      it('gets a merge confidence level even when no matchConfidence packageRule is set', async () => {
         config.currentValue = '3.7.0';
         config.packageName = 'webpack';
         config.datasource = NpmDatasource.id;
@@ -5546,16 +5546,20 @@ describe('workers/repository/process/lookup/index', () => {
           .scope('https://registry.npmjs.org')
           .get('/webpack')
           .reply(200, webpackJson);
+        httpMock
+          .scope(defaultApiBaseUrl)
+          .get('/api/mc/json/npm/webpack/3.7.0/3.8.1')
+          .reply(200, { confidence: 'high' });
 
         const { updates } = await Result.wrap(
           lookup.lookupUpdates(config),
         ).unwrapOrThrow();
 
-        expect(getMergeConfidenceSpy).toHaveBeenCalledTimes(0);
         expect(updates).toEqual([
           {
             bucket: 'non-major',
             isBreaking: false,
+            mergeConfidenceLevel: 'high',
             newMajor: 3,
             newMinor: 8,
             newPatch: 1,

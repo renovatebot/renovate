@@ -7,6 +7,7 @@ import type {
   ValidationMessage,
 } from '../config/types.ts';
 import type { Release } from '../modules/datasource/types.ts';
+import type { MergeConfidence } from '../modules/enrichment/merge-confidence/types.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
@@ -18,7 +19,6 @@ import type {
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
 import type { FileChange } from '../util/git/types.ts';
-import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
 import type {
   ChangeLogRelease,

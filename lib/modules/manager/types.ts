@@ -14,9 +14,9 @@ import type {
   StageName,
 } from '../../types/index.ts';
 import type { FileChange } from '../../util/git/types.ts';
-import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 import type { RegistryStrategy } from '../datasource/index.ts';
+import type { MergeConfidence } from '../enrichment/merge-confidence/types.ts';
 import type { StatusCheckConfig } from '../platform/types.ts';
 import type { CustomExtractConfig } from './custom/types.ts';
 

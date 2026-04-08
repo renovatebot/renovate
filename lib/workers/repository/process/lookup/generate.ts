@@ -1,15 +1,13 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
 import type { RangeStrategy } from '../../../../types/index.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
-import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import type { LookupUpdateConfig } from './types.ts';
 import { getUpdateType } from './update-type.ts';
 
-export async function generateUpdate(
+export function generateUpdate(
   config: LookupUpdateConfig,
   currentValue: string | undefined,
   versioningApi: VersioningApi,
@@ -17,7 +15,7 @@ export async function generateUpdate(
   currentVersion: string,
   bucket: string,
   release: Release,
-): Promise<LookupUpdate> {
+): LookupUpdate {
   const newVersion = release.version;
   const update: LookupUpdate = {
     bucket,
