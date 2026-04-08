@@ -1,4 +1,9 @@
-import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyString,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import type {
   UpdateType,
@@ -867,7 +872,7 @@ async function applyEnrichment(
   // Apply enrichment results to the update
   if (
     enrichResult.mergeConfidenceLevel !== undefined &&
-    packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))
+    config.packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))
   ) {
     update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
   }

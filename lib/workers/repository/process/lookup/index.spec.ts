@@ -5538,7 +5538,7 @@ describe('workers/repository/process/lookup/index', () => {
         ]);
       });
 
-      it('gets a merge confidence level even when no matchConfidence packageRule is set', async () => {
+      it('does not get a merge confidence level when no matchConfidence packageRule is set', async () => {
         config.currentValue = '3.7.0';
         config.packageName = 'webpack';
         config.datasource = NpmDatasource.id;
@@ -5546,10 +5546,6 @@ describe('workers/repository/process/lookup/index', () => {
           .scope('https://registry.npmjs.org')
           .get('/webpack')
           .reply(200, webpackJson);
-        httpMock
-          .scope(defaultApiBaseUrl)
-          .get('/api/mc/json/npm/webpack/3.7.0/3.8.1')
-          .reply(200, { confidence: 'high' });
 
         const { updates } = await Result.wrap(
           lookup.lookupUpdates(config),
@@ -5559,7 +5555,6 @@ describe('workers/repository/process/lookup/index', () => {
           {
             bucket: 'non-major',
             isBreaking: false,
-            mergeConfidenceLevel: 'high',
             newMajor: 3,
             newMinor: 8,
             newPatch: 1,
