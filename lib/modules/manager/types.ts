@@ -135,7 +135,6 @@ export interface LookupUpdate {
    */
   hasAttestation?: boolean;
 
-  // TODO do we want this logged?
   statusChecks?: StatusCheckConfig[];
 }
 

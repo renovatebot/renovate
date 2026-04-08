@@ -92,6 +92,17 @@ export async function generateUpdate(
     // But we should not add that as default behavior until we stop treating non-LTS versions as unstable first
     update.isBreaking = update.updateType === 'major';
   }
+  // TODO remove in #42421
+  const { datasource, packageName, packageRules } = config;
+  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
+    update.mergeConfidenceLevel = await getMergeConfidenceLevel(
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      update.updateType,
+    );
+  }
   if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
@@ -105,18 +116,5 @@ export async function generateUpdate(
   ) {
     update.isBump = true;
   }
-
-  // TODO remove in #42421
-  const { datasource, packageName, packageRules } = config;
-  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
-    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
-      datasource,
-      packageName,
-      currentVersion,
-      newVersion,
-      update.updateType,
-    );
-  }
-
   return update;
 }
