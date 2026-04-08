@@ -5663,7 +5663,7 @@ describe('workers/repository/process/lookup/index', () => {
       it('applies skipReason from enrichment result', async () => {
         const spy = vi
           .spyOn(enrichmentApi, 'runUpdateEnrichments')
-          .mockResolvedValue({ skipReason: 'vulnerable' });
+          .mockResolvedValue({ skipReason: 'internal-error' });
         config.currentValue = '3.7.0';
         config.packageName = 'webpack';
         config.datasource = NpmDatasource.id;
@@ -5676,7 +5676,7 @@ describe('workers/repository/process/lookup/index', () => {
           lookup.lookupUpdates(config),
         ).unwrapOrThrow();
 
-        expect(updates[0].skipReason).toBe('vulnerable');
+        expect(updates[0].skipReason).toBe('internal-error');
         spy.mockRestore();
       });
     });
