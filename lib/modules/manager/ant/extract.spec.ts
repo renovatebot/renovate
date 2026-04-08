@@ -10,10 +10,6 @@ import type { AntProp } from './types.ts';
 vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/ant/extract', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
   describe('extractPackageFile', () => {
     it('extracts inline version dependencies from build.xml', () => {
       expect(

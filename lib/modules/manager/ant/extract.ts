@@ -3,7 +3,6 @@ import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import { isXmlElement } from '../nuget/util.ts';
 import type {
@@ -12,7 +11,17 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types.ts';
+import {
+  applyProps,
+  collectProperties,
+  collectPropertyFileRefs,
+  findAttrValuePosition,
+  parsePropertiesFile,
+  resolveChainedProps,
+} from './properties.ts';
 import type { AntProp } from './types.ts';
+
+export { parsePropertiesFile } from './properties.ts';
 
 const scopeNames = new Set([
   'compile',
@@ -22,9 +31,6 @@ const scopeNames = new Set([
   'system',
 ]);
 
-const placeholderRegex = regEx(/\$\{([^}]+)}/g);
-const fullPlaceholderRegex = regEx(/^\$\{([^}]+)}$/);
-
 function getDependencyType(scope: string | undefined): string {
   if (scope && scopeNames.has(scope)) {
     return scope;
@@ -32,123 +38,9 @@ function getDependencyType(scope: string | undefined): string {
   return 'compile';
 }
 
-const placeholderTestRegex = regEx(/\$\{[^}]+}/);
-const propertySeparatorRegex = regEx(/^([^=:\s]+)\s*[=:\s]\s*(.*)$/);
-
-function containsPlaceholder(str: string | null | undefined): boolean {
-  return !!str && placeholderTestRegex.test(str);
-}
-
-/**
- * Find the byte offset of an attribute's value in raw XML content.
- * Returns the offset of the first character of the value (after the opening quote).
- */
-function findAttrValuePosition(
-  content: string,
-  node: XmlElement,
-  attrName: string,
-): number {
-  const startTag = node.startTagPosition!;
-  const tagEnd = content.indexOf('>', startTag);
-  const tagContent = content.slice(startTag, tagEnd + 1);
-
-  const attrPattern = regEx(`${attrName}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`);
-  const match = attrPattern.exec(tagContent)!;
-
-  const valueInMatch = match[1] ?? match[2];
-  const valueOffset = match[0].indexOf(valueInMatch);
-  return startTag + match.index + valueOffset;
-}
-
-/**
- * Parse a .properties file into a map of property names to AntProp.
- * Implements first-definition-wins: if a key already exists in the map, it is not overwritten.
- */
-export function parsePropertiesFile(
-  content: string,
-  packageFile: string,
-  props: Record<string, AntProp>,
-): void {
-  let offset = 0;
-  for (const rawLine of content.split('\n')) {
-    const line = rawLine.trim();
-    // Skip comments and blank lines
-    if (line.startsWith('#') || line.startsWith('!') || line === '') {
-      offset += rawLine.length + 1; // +1 for newline
-      continue;
-    }
-
-    // Match key=value, key:value, or key value (first separator wins)
-    const separatorMatch = propertySeparatorRegex.exec(line);
-    if (separatorMatch) {
-      const key = separatorMatch[1];
-      const val = separatorMatch[2].trim();
-
-      // First-definition-wins
-      if (!(key in props)) {
-        // fileReplacePosition points to the start of the value in the raw content
-        const lineStart = offset + rawLine.indexOf(line);
-        const keyEnd = line.indexOf(separatorMatch[2]);
-        const fileReplacePosition = lineStart + keyEnd;
-
-        props[key] = { val, fileReplacePosition, packageFile };
-      }
-    }
-
-    offset += rawLine.length + 1;
-  }
-}
-
 interface RawDep {
   dep: PackageDependency;
   depPackageFile: string;
-}
-
-/**
- * Collect inline <property name="..." value="..."/> elements.
- * Implements first-definition-wins.
- */
-function collectProperties(
-  node: XmlElement | XmlDocument,
-  content: string,
-  packageFile: string,
-  props: Record<string, AntProp>,
-): void {
-  for (const child of node.children) {
-    if (!isXmlElement(child)) {
-      continue;
-    }
-
-    if (child.name === 'property') {
-      const name = child.attr.name;
-      const value = child.attr.value;
-      if (name && value && !(name in props)) {
-        const pos = findAttrValuePosition(content, child, 'value');
-        props[name] = { val: value, fileReplacePosition: pos, packageFile };
-      }
-    }
-
-    collectProperties(child, content, packageFile, props);
-  }
-}
-
-/**
- * Collect <property file="..."/> references to external properties files.
- */
-function collectPropertyFileRefs(node: XmlElement | XmlDocument): string[] {
-  const files: string[] = [];
-  for (const child of node.children) {
-    if (!isXmlElement(child)) {
-      continue;
-    }
-
-    if (child.name === 'property' && child.attr.file) {
-      files.push(child.attr.file);
-    }
-
-    files.push(...collectPropertyFileRefs(child));
-  }
-  return files;
 }
 
 function collectDependency(
@@ -195,54 +87,6 @@ function walkNode(
       walkNode(child, rawDeps, packageFile, content);
     }
   }
-}
-
-/**
- * Apply property resolution to a dependency.
- * Handles chained references with circular detection.
- */
-function applyProps(
-  rawDep: RawDep,
-  props: Record<string, AntProp>,
-): PackageDependency {
-  const { dep, depPackageFile } = rawDep;
-  const currentValue = dep.currentValue;
-
-  if (!currentValue || !containsPlaceholder(currentValue)) {
-    return dep;
-  }
-
-  // Check if the entire version is a single property reference
-  const fullMatch = fullPlaceholderRegex.exec(currentValue);
-  if (!fullMatch) {
-    // Partial placeholder in version string - not supported for updates
-    dep.skipReason = 'version-placeholder';
-    return dep;
-  }
-
-  const propKey = fullMatch[1];
-  const prop = props[propKey];
-  if (!prop) {
-    dep.skipReason = 'version-placeholder';
-    return dep;
-  }
-
-  // After resolveChainedProps, prop.val is either fully resolved or still contains
-  // placeholders (meaning circular or unresolvable)
-  if (containsPlaceholder(prop.val)) {
-    dep.skipReason = 'recursive-placeholder';
-    return dep;
-  }
-
-  dep.currentValue = prop.val;
-  dep.sharedVariableName = propKey;
-  dep.fileReplacePosition = prop.fileReplacePosition;
-  if (prop.packageFile !== depPackageFile) {
-    dep.editFile = prop.packageFile;
-  }
-  // propSource is used to route deps to the correct PackageFile
-  dep.propSource = prop.packageFile;
-  return dep;
 }
 
 export function extractPackageFile(
@@ -341,7 +185,9 @@ export async function extractAllPackageFiles(
   resolveChainedProps(allProps);
 
   // Apply property resolution to all dependencies
-  const resolvedDeps = allRawDeps.map((rawDep) => applyProps(rawDep, allProps));
+  const resolvedDeps = allRawDeps.map((rawDep) =>
+    applyProps(rawDep.dep, rawDep.depPackageFile, allProps),
+  );
 
   if (resolvedDeps.length === 0) {
     return null;
@@ -368,57 +214,4 @@ export async function extractAllPackageFiles(
   }
 
   return results;
-}
-
-/**
- * Resolve chained property references within the property map itself.
- * E.g., if prop A = "${B}" and prop B = "1.0", resolve A to "1.0".
- * Marks circular properties by setting val to a placeholder that will be caught later.
- */
-function resolveChainedProps(props: Record<string, AntProp>): void {
-  const resolved = new Map<string, string | null>(); // null = circular
-
-  function resolve(key: string, chain: Set<string>): string | null {
-    if (resolved.has(key)) {
-      return resolved.get(key)!;
-    }
-    if (chain.has(key)) {
-      // Circular reference detected
-      resolved.set(key, null);
-      return null;
-    }
-    const prop = props[key];
-    if (!prop) {
-      return null;
-    }
-    if (!containsPlaceholder(prop.val)) {
-      resolved.set(key, prop.val);
-      return prop.val;
-    }
-
-    chain.add(key);
-    let isCircular = false;
-    const val = prop.val.replace(placeholderRegex, (match, refKey: string) => {
-      const refResult = resolve(refKey, chain);
-      if (refResult === null) {
-        isCircular = true;
-        return match;
-      }
-      return refResult;
-    });
-    chain.delete(key);
-
-    if (isCircular) {
-      resolved.set(key, null);
-      return null;
-    }
-
-    resolved.set(key, val);
-    prop.val = val;
-    return val;
-  }
-
-  for (const key of Object.keys(props)) {
-    resolve(key, new Set());
-  }
 }
