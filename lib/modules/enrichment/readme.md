@@ -10,4 +10,4 @@ Enrichment Modules provide a way to enrich Renovate's discovered packages and th
 
 - add additional `packageRules`, for instance to add vulnerability information
 - skip dependencies/update(s) using `skipReason`s
-- provide additional metadata that can be used with `matchJsonata`
+- add branch status checks

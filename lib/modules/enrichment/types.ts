@@ -53,23 +53,8 @@ export interface EnrichmentResult {
    */
   mergeConfidenceLevel?: MergeConfidence;
 
-  /** Arbitrary metadata available for matchJsonata. Renovate does not interpret these values. */
-  metadata?: Record<string, unknown>;
-
   /** Status check(s) to set on branches */
   statusChecks?: StatusCheckConfig[];
-}
-
-/** Describes a metadata field that an enrichment module produces */
-export interface EnrichmentMetadataField {
-  /** The key name in EnrichmentResult.metadata */
-  key: string;
-  /** Human-readable description of what this field represents */
-  description: string;
-  /** The TypeScript/JSON type of the value */
-  type: 'string' | 'number' | 'boolean' | 'object';
-  /** Example value for documentation */
-  example?: unknown;
 }
 
 /** Describes what an enrichment module can produce */
@@ -88,12 +73,10 @@ export interface EnrichmentCapabilities {
    * @see https://docs.renovatebot.com/merge-confidence/
    * */
   producesMergeConfidenceMetadata?: boolean;
-  /** Metadata fields this module produces (available for matchJsonata) */
-  metadataFields?: readonly EnrichmentMetadataField[];
 }
 
 /**
- * Enrichment allows adding additional metadata to Renovate's discovered packages (and their updates), and allows more control over whether updates should be skipped, blocked or have additional metadata that can be used with `matchJsonata`.
+ * Enrichment allows adding additional metadata to Renovate's discovered packages (and their updates), and allows more control over whether updates should be skipped or blocked.
  */
 export interface EnrichmentApi extends ModuleApi {
   readonly id: string;

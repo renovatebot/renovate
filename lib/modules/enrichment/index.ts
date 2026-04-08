@@ -149,9 +149,6 @@ function mergeResult(
     { moduleId, source, target: { ...target } },
     `Merging EnrichmentResult for module '${moduleId}'`,
   );
-  if (source.metadata) {
-    target.metadata = { ...target.metadata, ...source.metadata };
-  }
   if (source.mergeConfidenceLevel !== undefined) {
     target.mergeConfidenceLevel = source.mergeConfidenceLevel;
   }

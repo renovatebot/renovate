@@ -194,7 +194,7 @@ describe('modules/enrichment/index', () => {
       updateType: 'patch',
     };
 
-    it('returns merged metadata from enrichments', async () => {
+    it('returns merged results from enrichments', async () => {
       api.set(
         'a',
         createMockEnrichment({
@@ -206,31 +206,6 @@ describe('modules/enrichment/index', () => {
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
       expect(result).toEqual({ mergeConfidenceLevel: 'high' });
-    });
-
-    it('merges metadata from multiple enrichments', async () => {
-      api.set(
-        'a',
-        createMockEnrichment({
-          id: 'a',
-          enrichUpdate: vi.fn().mockResolvedValue({
-            mergeConfidenceLevel: 'high',
-            metadata: { score: 8 },
-          }),
-        }),
-      );
-      api.set(
-        'b',
-        createMockEnrichment({
-          id: 'b',
-          enrichUpdate: vi.fn().mockResolvedValue({ metadata: { score: 8 } }),
-        }),
-      );
-      const result = await runUpdateEnrichments(context, {} as RenovateConfig);
-      expect(result).toEqual({
-        mergeConfidenceLevel: 'high',
-        metadata: { score: 8 },
-      });
     });
 
     it('logs the result after enriching an update', async () => {
