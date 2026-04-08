@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../config/types.ts';
+import { instrument } from '../../instrumentation/index.ts';
 import { logger } from '../../logger/index.ts';
 import type { PackageFile } from '../manager/types.ts';
 import api from './api.ts';
@@ -22,12 +23,20 @@ function getEnabledEnrichments(config: RenovateConfig): EnrichmentApi[] {
  * Calls init() on all enabled enrichment modules.
  */
 export async function initEnrichments(config: RenovateConfig): Promise<void> {
-  for (const enrichment of getEnabledEnrichments(config)) {
-    if (enrichment.init) {
-      logger.debug(`Initializing enrichment: ${enrichment.id}`);
-      await enrichment.init(config);
+  await instrument('initEnrichments', async () => {
+    for (const enrichment of getEnabledEnrichments(config)) {
+      if (enrichment.init) {
+        logger.debug(
+          { moduleId: enrichment.id },
+          `Initializing enrichment: ${enrichment.id}`,
+        );
+        await instrument(
+          `init ${enrichment.id}`,
+          async () => await enrichment.init!(config),
+        ); // TODO type
+      }
     }
-  }
+  });
 }
 
 /**
@@ -39,7 +48,10 @@ export async function initRepoEnrichments(
 ): Promise<void> {
   for (const enrichment of getEnabledEnrichments(config)) {
     if (enrichment.initRepo) {
-      logger.debug(`Initializing enrichment for repo: ${enrichment.id}`);
+      logger.debug(
+        { moduleId: enrichment.id },
+        `Initializing enrichment for repo: ${enrichment.id}`,
+      );
       await enrichment.initRepo(config);
     }
   }
@@ -55,7 +67,10 @@ export async function runRepositoryEnrichments(
 ): Promise<void> {
   for (const enrichment of getEnabledEnrichments(config)) {
     if (enrichment.enrichRepository) {
-      logger.debug(`Running repository enrichment: ${enrichment.id}`);
+      logger.debug(
+        { moduleId: enrichment.id },
+        `Running repository enrichment: ${enrichment.id}`,
+      );
       const result = await enrichment.enrichRepository(config, packageFiles);
       applyRepositoryResult(config, result);
     }
@@ -95,13 +110,23 @@ function applyRepositoryResult(
   }
 }
 
-function mergeResult(moduleId: string, target: EnrichmentResult, source: EnrichmentResult): void {
-  console.log({ moduleId, source, target })
+/**
+ * Merge `EnrichmentResult`s from source -> target
+ */
+function mergeResult(
+  moduleId: string,
+  target: EnrichmentResult,
+  source: EnrichmentResult,
+): void {
+  logger.trace(
+    { moduleId, source, target: { ...target } },
+    `Merging EnrichmentResult for module '${moduleId}'`,
+  );
   if (source.metadata) {
     target.metadata = { ...target.metadata, ...source.metadata };
   }
   if (source.mergeConfidenceLevel !== undefined) {
-    target.mergeConfidenceLevel = source.mergeConfidenceLevel
+    target.mergeConfidenceLevel = source.mergeConfidenceLevel;
   }
   if (source.prBodyNotes) {
     target.prBodyNotes ??= [];
@@ -110,7 +135,16 @@ function mergeResult(moduleId: string, target: EnrichmentResult, source: Enrichm
   if (source.statusCheck) {
     target.statusCheck = source.statusCheck;
   }
-  if (source.skipReason && !target.skipReason) {
+  if (source.skipReason) {
+    if (
+      target.skipReason !== undefined &&
+      target.skipReason !== source.skipReason
+    ) {
+      logger.debug(
+        { moduleId, source, target: { ...target } },
+        `Overwriting previously set \`skipReason\` from module '${moduleId}'`,
+      );
+    }
     target.skipReason = source.skipReason;
     target.skipReferences = source.skipReferences;
   }
