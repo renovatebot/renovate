@@ -5,7 +5,7 @@ import {
   formatMissingLabels,
   getExpectedModuleLabels,
   getMissingModuleLabels,
-} from '../../tools/sync-module-labels.ts';
+} from '../../tools/utils/sync-module-labels.ts';
 
 describe('other/sync-module-labels', () => {
   it('creates module labels with the expected metadata', () => {

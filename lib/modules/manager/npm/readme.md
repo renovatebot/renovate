@@ -1,18 +1,3 @@
-The following `depTypes` are currently supported by the npm manager :
-
-- `dependencies`
-- `devDependencies`
-- `optionalDependencies`
-- `peerDependencies`
-- `engines` : Renovate will update any `node`, `npm` and `yarn` version specified under `engines`.
-- `volta` : Renovate will update any `node`, `npm`, `pnpm` and `yarn` version specified under `volta`.
-- `packageManager`
-- `overrides`
-- `resolutions`
-- `pnpm.overrides`
-- `pnpm.catalog` or `pnpm.catalog.<name>`. [Matches any default and named pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs).
-- `yarn.catalog` or `yarn.catalogs.<name>`. [Matches any default and named yarn catalogs](https://yarnpkg.com/features/catalogs).
-
 ### npm problems and workarounds
 
 #### Invalid lock file (npm ci fails)

@@ -2,6 +2,7 @@ import { HexDatasource } from '../../datasource/hex/index.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 export { getRangeStrategy } from './range.ts';
 
