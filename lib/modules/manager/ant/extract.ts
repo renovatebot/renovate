@@ -1,4 +1,4 @@
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
@@ -319,9 +319,9 @@ async function walkXmlFile(
   collectProperties(doc, content, packageFile, allProps);
 
   // Load external .properties files
-  const baseDir = dirname(packageFile);
+  const baseDir = upath.dirname(packageFile);
   for (const ref of propertyFileRefs) {
-    const propFilePath = ref.startsWith('/') ? ref : join(baseDir, ref);
+    const propFilePath = ref.startsWith('/') ? ref : upath.join(baseDir, ref);
 
     if (visitedFiles.has(propFilePath)) {
       continue;
