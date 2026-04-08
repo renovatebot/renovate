@@ -26,7 +26,7 @@ import type { RenovateLogger } from './renovate-logger.ts';
 
 const logContext = 'initial_context';
 
-vi.unmock('.');
+vi.unmock('./index.ts');
 vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => 'initial_context'),
 }));
