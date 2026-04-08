@@ -17,8 +17,8 @@ import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 import type { RegistryStrategy } from '../datasource/index.ts';
+import type { StatusCheckConfig } from '../platform/types.ts';
 import type { CustomExtractConfig } from './custom/types.ts';
-import { StatusCheckConfig } from '../platform/types.ts';
 
 export interface ManagerData<T> {
   managerData?: T;
@@ -254,15 +254,15 @@ export interface ArtifactError {
 
 export type UpdateArtifactsResult =
   | {
-    file?: FileChange;
-    notice?: ArtifactNotice;
-    artifactError?: undefined;
-  }
+      file?: FileChange;
+      notice?: ArtifactNotice;
+      artifactError?: undefined;
+    }
   | {
-    file?: undefined;
-    notice?: undefined;
-    artifactError?: ArtifactError;
-  };
+      file?: undefined;
+      notice?: undefined;
+      artifactError?: ArtifactError;
+    };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;

@@ -67,7 +67,6 @@ async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
   await setArtifactErrorStatus(config);
   await setStability(config);
   await setConfidence(config);
-  // TODO do we need to handle update.branchName ?
   await setStatusChecksFromUpdates(config.branchName, config.updates);
 }
 
