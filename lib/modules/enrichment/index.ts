@@ -33,7 +33,7 @@ export async function initEnrichments(config: RenovateConfig): Promise<void> {
         await instrument(
           `init ${enrichment.id}`,
           async () => await enrichment.init!(config),
-        ); // TODO type
+        );
       }
     }
   });
@@ -46,15 +46,20 @@ export async function initEnrichments(config: RenovateConfig): Promise<void> {
 export async function initRepoEnrichments(
   config: RenovateConfig,
 ): Promise<void> {
-  for (const enrichment of getEnabledEnrichments(config)) {
-    if (enrichment.initRepo) {
-      logger.debug(
-        { moduleId: enrichment.id },
-        `Initializing enrichment for repo: ${enrichment.id}`,
-      );
-      await enrichment.initRepo(config);
+  await instrument('initEnrichments', async () => {
+    for (const enrichment of getEnabledEnrichments(config)) {
+      if (enrichment.initRepo) {
+        logger.debug(
+          { moduleId: enrichment.id },
+          `Initializing enrichment for repo: ${enrichment.id}`,
+        );
+        await instrument(
+          `initRepo ${enrichment.id}`,
+          async () => await enrichment.initRepo!(config),
+        );
+      }
     }
-  }
+  });
 }
 
 /**
@@ -65,16 +70,21 @@ export async function runRepositoryEnrichments(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
-  for (const enrichment of getEnabledEnrichments(config)) {
-    if (enrichment.enrichRepository) {
-      logger.debug(
-        { moduleId: enrichment.id },
-        `Running repository enrichment: ${enrichment.id}`,
-      );
-      const result = await enrichment.enrichRepository(config, packageFiles);
-      applyRepositoryResult(config, result);
+  await instrument('runRepositoryEnrichments', async () => {
+    for (const enrichment of getEnabledEnrichments(config)) {
+      if (enrichment.enrichRepository) {
+        logger.debug(
+          { moduleId: enrichment.id },
+          `Running repository enrichment: ${enrichment.id}`,
+        );
+        const result = await instrument(
+          `enrichRepository ${enrichment.id}`,
+          async () => await enrichment.enrichRepository!(config, packageFiles),
+        );
+        applyRepositoryResult(config, result);
+      }
     }
-  }
+  });
 }
 
 /**
