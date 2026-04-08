@@ -83,7 +83,7 @@ export async function runRepositoryEnrichments(
         );
         logger.debug(
           { moduleId: enrichment.id, result },
-          `Enriched repository using ${enrichment.id}`,
+          `Enriched repository: ${enrichment.id}`,
         );
         applyRepositoryResult(config, result);
       }
@@ -111,13 +111,13 @@ export async function runUpdateEnrichments(
         if (!result) {
           logger.debug(
             { moduleId: enrichment.id, result, context },
-            `No enrichment update found by ${enrichment.id}`,
+            `No enrichment update found: ${enrichment.id}`,
           );
           continue;
         }
         logger.debug(
           { moduleId: enrichment.id, result, context },
-          `Enriched update using ${enrichment.id}`,
+          `Enriched update: ${enrichment.id}`,
         );
         mergeResult(enrichment.id, merged, result);
       }

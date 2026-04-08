@@ -146,7 +146,7 @@ describe('modules/enrichment/index', () => {
       await runRepositoryEnrichments({} as RenovateConfig, {});
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { moduleId: 'a', result },
-        'Enriched repository using a',
+        'Enriched repository: a',
       );
     });
 
@@ -250,7 +250,7 @@ describe('modules/enrichment/index', () => {
           result: { mergeConfidenceLevel: 'high' },
           context,
         },
-        'Enriched update using a',
+        'Enriched update: a',
       );
     });
 
@@ -269,7 +269,7 @@ describe('modules/enrichment/index', () => {
           result: null,
           context,
         },
-        'No enrichment update found by a',
+        'No enrichment update found: a',
       );
     });
 
