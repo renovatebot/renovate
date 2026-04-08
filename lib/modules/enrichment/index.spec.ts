@@ -184,12 +184,10 @@ describe('modules/enrichment/index', () => {
         'a',
         createMockEnrichment({
           id: 'a',
-          enrichUpdate: vi
-            .fn()
-            .mockResolvedValue({
-              mergeConfidenceLevel: 'high',
-              metadata: { score: 8 },
-            }),
+          enrichUpdate: vi.fn().mockResolvedValue({
+            mergeConfidenceLevel: 'high',
+            metadata: { score: 8 },
+          }),
         }),
       );
       api.set(
