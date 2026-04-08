@@ -11,6 +11,7 @@ import {
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as _enrichment from '../../../../modules/enrichment/index.ts';
+import * as _mergeConfidence from '../../../../modules/enrichment/merge-confidence/index.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
 import type {
@@ -31,7 +32,6 @@ import type {
   LongCommitSha,
   StatusResult,
 } from '../../../../util/git/types.ts';
-import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import * as _sanitize from '../../../../util/sanitize.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as _limits from '../../../global/limits.ts';
@@ -64,7 +64,7 @@ vi.mock('../pr/automerge.ts');
 vi.mock('../../changelog/index.ts');
 vi.mock('../../../../util/exec/index.ts');
 vi.mock('../../../../modules/enrichment/index.ts');
-vi.mock('../../../../util/merge-confidence/index.ts');
+vi.mock('../../../../modules/enrichment/merge-confidence/index.ts');
 vi.mock('../../../../util/sanitize.ts');
 vi.mock('../../../../util/fs/index.ts');
 vi.mock('../../../global/limits.ts');

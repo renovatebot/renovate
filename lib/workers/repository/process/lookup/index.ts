@@ -36,7 +36,6 @@ import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
-import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
@@ -844,7 +843,7 @@ async function applyEnrichment(
   update: LookupUpdate,
   updateType?: UpdateType,
 ): Promise<void> {
-  const { datasource, packageName, packageRules } = config;
+  const { datasource, packageName } = config;
   const enrichResult = await runUpdateEnrichments(
     {
       datasource,
@@ -873,7 +872,7 @@ async function applyEnrichment(
   // Apply enrichment results to the update
   if (
     enrichResult.mergeConfidenceLevel !== undefined &&
-    packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))
+    config.packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))
   ) {
     update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
   }
@@ -893,16 +892,6 @@ async function applyEnrichment(
       `Setting skipReason on \`${packageName}\` to \`${enrichResult.skipReason}\`, was \`${update.skipReason}\``,
     );
     update.skipReason = enrichResult.skipReason; // TODO log when overwriting
-  }
-  // TODO remove in #42421
-  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
-    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
-      datasource,
-      packageName,
-      currentVersion,
-      newVersion,
-      updateType!,
-    );
   }
 
   if (enrichResult.statusChecks) {

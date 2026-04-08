@@ -9,7 +9,7 @@ import type {
   PackageRuleInputConfig,
 } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
-import { getApiToken } from '../merge-confidence/index.ts';
+import { getApiToken } from '../../modules/enrichment/merge-confidence/index.ts';
 import { Matcher } from './base.ts';
 
 export class MergeConfidenceMatcher extends Matcher {

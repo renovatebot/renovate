@@ -19,6 +19,11 @@ import {
   WORKER_FILE_UPDATE_FAILED,
 } from '../../../../constants/error-messages.ts';
 import { logger, removeMeta } from '../../../../logger/index.ts';
+import {
+  getMergeConfidenceLevel,
+  isActiveConfidenceLevel,
+  satisfiesConfidenceLevel,
+} from '../../../../modules/enrichment/merge-confidence/index.ts';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
 import {
   ensureComment,
@@ -30,11 +35,6 @@ import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getElapsedMs } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
-import {
-  getMergeConfidenceLevel,
-  isActiveConfidenceLevel,
-  satisfiesConfidenceLevel,
-} from '../../../../util/merge-confidence/index.ts';
 import { coerceNumber } from '../../../../util/number.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import * as template from '../../../../util/template/index.ts';

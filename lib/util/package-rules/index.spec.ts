@@ -3,8 +3,8 @@ import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
 import { OrbDatasource } from '../../modules/datasource/orb/index.ts';
+import type { MergeConfidence } from '../../modules/enrichment/merge-confidence/types.ts';
 import type { HostRule } from '../../types/index.ts';
-import type { MergeConfidence } from '../merge-confidence/types.ts';
 import { applyPackageRules } from './index.ts';
 
 type TestConfig = PackageRuleInputConfig & {

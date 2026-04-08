@@ -1,6 +1,7 @@
 import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
+import type { MergeConfidence } from '../modules/enrichment/merge-confidence/types.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
 import type {
@@ -12,7 +13,6 @@ import type {
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
-import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
 
 export type RenovateConfigStage =

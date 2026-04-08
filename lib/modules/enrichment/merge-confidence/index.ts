@@ -1,16 +1,24 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.preset.ts';
-import type { AllConfig, UpdateType } from '../../config/types.ts';
-import { logger } from '../../logger/index.ts';
-import { ExternalHostError } from '../../types/errors/external-host-error.ts';
-import * as packageCache from '../cache/package/index.ts';
-import * as hostRules from '../host-rules.ts';
-import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
-import { Http } from '../http/index.ts';
-import { regEx } from '../regex.ts';
-import { ensureTrailingSlash, joinUrlParts } from '../url.ts';
-import { MERGE_CONFIDENCE } from './common.ts';
-import type { MergeConfidence } from './types.ts';
+import { supportedDatasources as presetSupportedDatasources } from '../../../config/presets/internal/merge-confidence.preset.ts';
+import type {
+  AllConfig,
+  RenovateConfig,
+  UpdateType,
+} from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
+import type {
+  EnrichmentApi,
+  EnrichmentResult,
+  EnrichmentUpdateContext,
+} from '../types.ts';
+import { MERGE_CONFIDENCE, type MergeConfidence } from './types.ts';
 
 const hostType = 'merge-confidence';
 const http = new Http(hostType);
@@ -187,40 +195,6 @@ async function queryApi(
   return confidence;
 }
 
-/**
- * Checks the health of the Merge Confidence API by attempting to authenticate with it.
- *
- * @returns Resolves when the API health check is completed successfully.
- *
- * @throws {ExternalHostError} if a timeout, connection reset error, authentication failure, or internal server error occurs during the request.
- *
- * @remarks
- * This function first checks that the API base URL and an authentication bearer token are defined before attempting to
- * authenticate with the API. If either the base URL or token is not defined, it will immediately return
- * without making a request.
- */
-export async function initMergeConfidence(config: AllConfig): Promise<void> {
-  initConfig(config);
-
-  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
-    logger.trace('merge confidence API usage is disabled');
-    return;
-  }
-
-  const url = joinUrlParts(apiBaseUrl, 'api/mc/availability');
-  try {
-    await http.get(url);
-  } catch (err) {
-    apiErrorHandler(err);
-  }
-
-  logger.debug(
-    { supportedDatasources },
-    'merge confidence API - successfully authenticated',
-  );
-  return;
-}
-
 function getApiBaseUrl(mergeConfidenceEndpoint: string | undefined): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
   const baseFromEnv = mergeConfidenceEndpoint ?? defaultBaseUrl;
@@ -272,3 +246,69 @@ function apiErrorHandler(err: any): void {
 
   logger.warn({ err }, 'error fetching merge confidence data');
 }
+
+const mergeConfidenceEnrichment: EnrichmentApi = {
+  id: 'merge-confidence',
+  capabilities: {
+    producesMergeConfidenceMetadata: true,
+  },
+
+  isEnabled(_config: RenovateConfig): boolean {
+    return !isNullOrUndefined(apiBaseUrl) && !isNullOrUndefined(token);
+  },
+
+  async init(config: RenovateConfig): Promise<void> {
+    initConfig(config as AllConfig);
+
+    if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
+      logger.trace('merge confidence API usage is disabled');
+      return;
+    }
+
+    const url = joinUrlParts(apiBaseUrl, 'api/mc/availability');
+    try {
+      await http.get(url);
+    } catch (err) {
+      apiErrorHandler(err);
+    }
+
+    logger.debug(
+      { supportedDatasources },
+      'merge confidence API - successfully authenticated',
+    );
+    return;
+  },
+
+  async enrichUpdate(
+    context: EnrichmentUpdateContext,
+    _config: RenovateConfig,
+  ): Promise<EnrichmentResult | null> {
+    const { datasource, packageName, currentVersion, newVersion, updateType } =
+      context;
+
+    if (!currentVersion || !updateType) {
+      return null;
+    }
+
+    const mergeConfidenceLevel = await getMergeConfidenceLevel(
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType,
+    );
+
+    if (mergeConfidenceLevel === undefined) {
+      return null;
+    }
+
+    return { mergeConfidenceLevel };
+  },
+
+  cleanup(): Promise<void> {
+    resetConfig();
+    return Promise.resolve();
+  },
+};
+
+export default mergeConfidenceEnrichment;
