@@ -1,6 +1,14 @@
-import { isNonEmptyArray, isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyString,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { UpdateType, ValidationMessage } from '../../../../config/types.ts';
+import type {
+  UpdateType,
+  ValidationMessage,
+} from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -20,12 +28,15 @@ import {
   supportsDigests,
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
+import { runUpdateEnrichments } from '../../../../modules/enrichment/index.ts';
 import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
+import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
@@ -43,9 +54,6 @@ import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
 } from './utils.ts';
-import { LookupUpdate } from '../../../../modules/manager/types.ts';
-import { runUpdateEnrichments } from '../../../../modules/enrichment/index.ts';
-import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 
 async function getTimestamp(
   config: LookupUpdateConfig,
@@ -258,9 +266,9 @@ export async function lookupUpdates(
       const allSatisfyingVersions =
         (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
           ? allVersions.filter((v) =>
-            // TODO #22198
-            versioningApi.matches(v.version, compareValue!),
-          )
+              // TODO #22198
+              versioningApi.matches(v.version, compareValue!),
+            )
           : allVersions;
       if (!allSatisfyingVersions.length) {
         logger.debug(
@@ -275,8 +283,9 @@ export async function lookupUpdates(
           res.warnings.push({
             topic: config.packageName,
             // TODO: types (#22198)
-            message: `Can't find version matching ${compareValue!} for ${config.datasource
-              } package ${config.packageName}`,
+            message: `Can't find version matching ${compareValue!} for ${
+              config.datasource
+            } package ${config.packageName}`,
           });
           return Result.ok(res);
         }
@@ -513,24 +522,13 @@ export async function lookupUpdates(
         );
 
         // TODO set the enrichment here
-        if (update.updateType) { // TODO else
-          const { datasource, packageName, packageRules } = config;
-          const enrichResult = await runUpdateEnrichments(
-            {
-              datasource,
-              packageName,
-              currentVersion,
-              newVersion,
-              updateType: update.updateType,
-            },
-            config,
-          );
-          // await applyEnrichment(config, currentVersion, newVersion, update, update.updateType)
-          if (enrichResult.statusChecks) {
-            update.statusChecks ??= []
-            update.statusChecks.push(...enrichResult.statusChecks)
-          }
-        }
+        await applyEnrichment(
+          config,
+          currentVersion,
+          newVersion,
+          update,
+          update.updateType,
+        );
 
         // #29034
         if (
@@ -799,8 +797,8 @@ export async function lookupUpdates(
     const release =
       res.updates.length > 0
         ? dependency?.releases.find(
-          (r) => r.version === res.updates[0].newValue,
-        )
+            (r) => r.version === res.updates[0].newValue,
+          )
         : null;
 
     if (release?.changelogContent) {
@@ -844,7 +842,7 @@ async function applyEnrichment(
   currentVersion: string,
   newVersion: string,
   update: LookupUpdate,
-  updateType: UpdateType,
+  updateType?: UpdateType,
 ): Promise<void> {
   const { datasource, packageName, packageRules } = config;
   const enrichResult = await runUpdateEnrichments(
@@ -902,5 +900,10 @@ async function applyEnrichment(
       newVersion,
       updateType,
     );
+  }
+
+  if (enrichResult.statusChecks) {
+    update.statusChecks ??= [];
+    update.statusChecks.push(...enrichResult.statusChecks);
   }
 }
