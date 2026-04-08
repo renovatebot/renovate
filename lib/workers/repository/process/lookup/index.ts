@@ -1,6 +1,6 @@
-import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { ValidationMessage } from '../../../../config/types.ts';
+import type { UpdateType, ValidationMessage } from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -43,6 +43,9 @@ import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
 } from './utils.ts';
+import { LookupUpdate } from '../../../../modules/manager/types.ts';
+import { runUpdateEnrichments } from '../../../../modules/enrichment/index.ts';
+import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 
 async function getTimestamp(
   config: LookupUpdateConfig,
@@ -255,9 +258,9 @@ export async function lookupUpdates(
       const allSatisfyingVersions =
         (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
           ? allVersions.filter((v) =>
-              // TODO #22198
-              versioningApi.matches(v.version, compareValue!),
-            )
+            // TODO #22198
+            versioningApi.matches(v.version, compareValue!),
+          )
           : allVersions;
       if (!allSatisfyingVersions.length) {
         logger.debug(
@@ -272,9 +275,8 @@ export async function lookupUpdates(
           res.warnings.push({
             topic: config.packageName,
             // TODO: types (#22198)
-            message: `Can't find version matching ${compareValue!} for ${
-              config.datasource
-            } package ${config.packageName}`,
+            message: `Can't find version matching ${compareValue!} for ${config.datasource
+              } package ${config.packageName}`,
           });
           return Result.ok(res);
         }
@@ -509,6 +511,26 @@ export async function lookupUpdates(
           bucket,
           release,
         );
+
+        // TODO set the enrichment here
+        if (update.updateType) { // TODO else
+          const { datasource, packageName, packageRules } = config;
+          const enrichResult = await runUpdateEnrichments(
+            {
+              datasource,
+              packageName,
+              currentVersion,
+              newVersion,
+              updateType: update.updateType,
+            },
+            config,
+          );
+          // await applyEnrichment(config, currentVersion, newVersion, update, update.updateType)
+          if (enrichResult.statusChecks) {
+            update.statusChecks ??= []
+            update.statusChecks.push(...enrichResult.statusChecks)
+          }
+        }
 
         // #29034
         if (
@@ -777,8 +799,8 @@ export async function lookupUpdates(
     const release =
       res.updates.length > 0
         ? dependency?.releases.find(
-            (r) => r.version === res.updates[0].newValue,
-          )
+          (r) => r.version === res.updates[0].newValue,
+        )
         : null;
 
     if (release?.changelogContent) {
@@ -815,4 +837,70 @@ export async function lookupUpdates(
     res.skipReason = 'internal-error';
   }
   return Result.ok(res);
+}
+
+async function applyEnrichment(
+  config: LookupUpdateConfig,
+  currentVersion: string,
+  newVersion: string,
+  update: LookupUpdate,
+  updateType: UpdateType,
+): Promise<void> {
+  const { datasource, packageName, packageRules } = config;
+  const enrichResult = await runUpdateEnrichments(
+    {
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType,
+    },
+    config,
+  );
+  logger.trace(
+    {
+      source: enrichResult,
+      target: {
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+        updateType,
+        ...update,
+      },
+    },
+    'Merging EnrichmentResult for update',
+  );
+
+  // Apply enrichment results to the update
+  if (enrichResult.mergeConfidenceLevel !== undefined) {
+    update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
+  }
+  if (enrichResult.prBodyNotes?.length) {
+    // NOTE that at this point, no `prBodyNotes` should be set
+    update.prBodyNotes = enrichResult.prBodyNotes;
+  }
+  if (enrichResult.skipReason !== undefined) {
+    logger.trace(
+      {
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+        updateType,
+      },
+      `Setting skipReason on \`${packageName}\` to \`${enrichResult.skipReason}\`, was \`${update.skipReason}\``,
+    );
+    update.skipReason = enrichResult.skipReason; // TODO log when overwriting
+  }
+  // TODO remove in #42421
+  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
+    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType,
+    );
+  }
 }

@@ -18,6 +18,7 @@ import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 import type { RegistryStrategy } from '../datasource/index.ts';
 import type { CustomExtractConfig } from './custom/types.ts';
+import { StatusCheckConfig } from '../platform/types.ts';
 
 export interface ManagerData<T> {
   managerData?: T;
@@ -133,6 +134,9 @@ export interface LookupUpdate {
    * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
    */
   hasAttestation?: boolean;
+
+  // TODO do we want this logged?
+  statusChecks?: StatusCheckConfig[];
 }
 
 /**
@@ -250,15 +254,15 @@ export interface ArtifactError {
 
 export type UpdateArtifactsResult =
   | {
-      file?: FileChange;
-      notice?: ArtifactNotice;
-      artifactError?: undefined;
-    }
+    file?: FileChange;
+    notice?: ArtifactNotice;
+    artifactError?: undefined;
+  }
   | {
-      file?: undefined;
-      notice?: undefined;
-      artifactError?: ArtifactError;
-    };
+    file?: undefined;
+    notice?: undefined;
+    artifactError?: ArtifactError;
+  };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;

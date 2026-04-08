@@ -1103,17 +1103,17 @@ describe('workers/repository/update/branch/index', () => {
         statusChecks: [
           {
             context: 'artifactError',
-            status: 'red',
+            state: 'red',
             description: 'An unknown error occurred',
           },
           {
             context: 'minimumReleaseAge',
-            status: 'yellow',
+            state: 'yellow',
             description: 'It is not yet ready',
           },
           {
             context: 'mergeConfidence',
-            status: 'yellow',
+            state: 'yellow',
             description: `We wouldn't recommend it`,
           },
         ],
@@ -3264,7 +3264,7 @@ describe('workers/repository/update/branch/index', () => {
         commit.commitFilesToBranch.mock.invocationCallOrder[0],
       ).toBeLessThan(
         scm.checkoutBranch.mock.invocationCallOrder[
-          checkoutBranchCalledTimes - 1
+        checkoutBranchCalledTimes - 1
         ],
       );
     });

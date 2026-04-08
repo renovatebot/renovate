@@ -6,6 +6,7 @@ import type {
   LookupUpdate,
   RangeConfig,
 } from '../../../../modules/manager/types.ts';
+import { BranchStatusConfig, StatusCheckConfig } from '../../../../modules/platform/types.ts';
 import type { SkipReason } from '../../../../types/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';

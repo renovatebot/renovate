@@ -107,13 +107,13 @@ export async function generateUpdate(
     update.isBump = true;
   }
 
-  await applyEnrichment(
-    config,
-    currentVersion,
-    newVersion,
-    update,
-    update.updateType,
-  );
+  // await applyEnrichment(
+  //   config,
+  //   currentVersion,
+  //   newVersion,
+  //   update,
+  //   update.updateType,
+  // );
 
   return update;
 }

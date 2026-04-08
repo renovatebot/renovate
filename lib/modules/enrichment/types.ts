@@ -1,13 +1,13 @@
 import type {
   PackageRule,
   RenovateConfig,
-  StatusCheckKey,
 } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/base.ts';
-import type { BranchStatus, UpdateType } from '../../types/index.ts';
+import type { UpdateType } from '../../types/index.ts';
 import type { SkipReason } from '../../types/skip-reason.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { PackageFile } from '../manager/types.ts';
+import type { StatusCheckConfig } from '../platform/types.ts';
 
 export interface EnrichmentDependencyContext {
   datasource: string;
@@ -60,12 +60,7 @@ export interface EnrichmentResult {
   metadata?: Record<string, unknown>;
 
   /** Status check(s) to set on branches */
-  statusChecks?: {
-    context: StatusCheckKey;
-    status: BranchStatus;
-    description: string;
-    url?: string;
-  }[];
+  statusChecks?: StatusCheckConfig[];
 }
 
 /** Describes a metadata field that an enrichment module produces */
