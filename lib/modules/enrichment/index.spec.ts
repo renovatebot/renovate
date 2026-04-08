@@ -375,11 +375,13 @@ describe('modules/enrichment/index', () => {
         createMockEnrichment({
           id: 'a',
           enrichUpdate: vi.fn().mockResolvedValue({
-            statusCheck: {
-              context: 'check-a',
-              status: 'green' as const,
-              description: 'a passed',
-            },
+            statusChecks: [
+              {
+                context: 'check-a',
+                state: 'green' as const,
+                description: 'a passed',
+              },
+            ],
           }),
         }),
       );
@@ -388,19 +390,20 @@ describe('modules/enrichment/index', () => {
         createMockEnrichment({
           id: 'b',
           enrichUpdate: vi.fn().mockResolvedValue({
-            statusCheck: {
-              context: 'check-b',
-              status: 'yellow' as const,
-              description: 'b pending',
-            },
+            statusChecks: [
+              {
+                context: 'check-b',
+                state: 'yellow' as const,
+                description: 'b pending',
+              },
+            ],
           }),
         }),
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
       expect(result.statusChecks).toBeDefined();
-      expect(result.statusChecks!).toHaveLength(2);
-      expect(result.statusChecks![0].context).toEqual('check-a');
-      expect(result.statusChecks![1].context).toEqual('check-a');
+      expect(result.statusChecks!).toHaveLength(1);
+      expect(result.statusChecks![0].context).toEqual('check-b');
     });
 
     it('adds a trace log when merging `EnrichmentResult`s', async () => {
@@ -409,11 +412,13 @@ describe('modules/enrichment/index', () => {
         createMockEnrichment({
           id: 'a',
           enrichUpdate: vi.fn().mockResolvedValue({
-            statusCheck: {
-              context: 'check-a',
-              status: 'green' as const,
-              description: 'a passed',
-            },
+            statusChecks: [
+              {
+                context: 'check-a',
+                state: 'green' as const,
+                description: 'a passed',
+              },
+            ],
           }),
         }),
       );
@@ -422,11 +427,13 @@ describe('modules/enrichment/index', () => {
         createMockEnrichment({
           id: 'b',
           enrichUpdate: vi.fn().mockResolvedValue({
-            statusCheck: {
-              context: 'check-b',
-              status: 'yellow' as const,
-              description: 'b pending',
-            },
+            statusChecks: [
+              {
+                context: 'check-b',
+                state: 'yellow' as const,
+                description: 'b pending',
+              },
+            ],
           }),
         }),
       );
@@ -438,11 +445,13 @@ describe('modules/enrichment/index', () => {
         {
           moduleId: 'a',
           source: {
-            statusCheck: {
-              context: 'check-a',
-              status: 'green',
-              description: 'a passed',
-            },
+            statusChecks: [
+              {
+                context: 'check-a',
+                state: 'green',
+                description: 'a passed',
+              },
+            ],
           },
           target: {},
         },
@@ -453,18 +462,22 @@ describe('modules/enrichment/index', () => {
         {
           moduleId: 'b',
           source: {
-            statusCheck: {
-              context: 'check-b',
-              status: 'yellow',
-              description: 'b pending',
-            },
+            statusChecks: [
+              {
+                context: 'check-b',
+                state: 'yellow',
+                description: 'b pending',
+              },
+            ],
           },
           target: {
-            statusCheck: {
-              context: 'check-a',
-              status: 'green',
-              description: 'a passed',
-            },
+            statusChecks: [
+              {
+                context: 'check-a',
+                state: 'green',
+                description: 'a passed',
+              },
+            ],
           },
         },
         "Merging EnrichmentResult for module 'b'",
