@@ -13,7 +13,10 @@ import { logger } from '../../../../logger/index.ts';
 import * as _enrichment from '../../../../modules/enrichment/index.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
-import type { ArtifactError } from '../../../../modules/manager/types.ts';
+import type {
+  ArtifactError,
+  LookupUpdate,
+} from '../../../../modules/manager/types.ts';
 import type {
   EnsureCommentConfig,
   Pr,
@@ -1099,25 +1102,39 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('sets branch status if the EnrichmentResult includes status checks', async () => {
-      enrichment.runUpdateEnrichments.mockResolvedValue({
-        statusChecks: [
-          {
-            context: 'artifactError',
-            state: 'red',
-            description: 'An unknown error occurred',
-          },
-          {
-            context: 'minimumReleaseAge',
-            state: 'yellow',
-            description: 'It is not yet ready',
-          },
-          {
-            context: 'mergeConfidence',
-            state: 'yellow',
-            description: `We wouldn't recommend it`,
-          },
-        ],
-      });
+      const updates: LookupUpdate[] = [
+        {
+          // an update for one dependency
+          branchName: 'renovate/renovate-group',
+          newValue: '5.5.5',
+          updateType: 'major',
+          statusChecks: [
+            {
+              context: 'artifactError',
+              state: 'red',
+              description: 'An unknown error occurred',
+            },
+            {
+              context: 'minimumReleaseAge',
+              state: 'yellow',
+              description: 'It is not yet ready',
+            },
+          ],
+        },
+        // another dependency being updated on this branch
+        {
+          branchName: 'renovate/renovate-group',
+          newValue: '43.1.1',
+          updateType: 'minor',
+          statusChecks: [
+            {
+              context: 'mergeConfidence',
+              state: 'yellow',
+              description: `We wouldn't recommend it`,
+            },
+          ],
+        },
+      ];
 
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -1138,9 +1155,32 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchStatusCheck.mockResolvedValue(null);
       await branchWorker.processBranch({
         ...config,
+        branchName: 'renovate/renovate-group',
+        updates,
       });
-      // Called only once before ensurePr
+      // called for each distinct status check
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(3);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          branchName: 'renovate/renovate-group',
+          context: 'artifactError',
+          state: 'red',
+        }),
+      );
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          branchName: 'renovate/renovate-group',
+          context: 'minimumReleaseAge',
+          state: 'yellow',
+        }),
+      );
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          branchName: 'renovate/renovate-group',
+          context: 'mergeConfidence',
+          state: 'yellow',
+        }),
+      );
     });
 
     it('returns if branch exists but updated', async () => {
@@ -3264,7 +3304,7 @@ describe('workers/repository/update/branch/index', () => {
         commit.commitFilesToBranch.mock.invocationCallOrder[0],
       ).toBeLessThan(
         scm.checkoutBranch.mock.invocationCallOrder[
-        checkoutBranchCalledTimes - 1
+          checkoutBranchCalledTimes - 1
         ],
       );
     });

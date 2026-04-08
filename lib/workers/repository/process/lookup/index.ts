@@ -898,7 +898,7 @@ async function applyEnrichment(
       packageName,
       currentVersion,
       newVersion,
-      updateType,
+      updateType!,
     );
   }
 

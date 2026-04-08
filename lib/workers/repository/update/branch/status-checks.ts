@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import type { BranchStatusConfig } from '../../../../modules/platform/types.ts';
 import type { BranchStatus } from '../../../../types/index.ts';
@@ -139,4 +140,29 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     state: config.confidenceStatus,
     url: docsLink,
   });
+}
+
+/**
+ * Primarily used with statuses set by Enrichment modules.
+ */
+export async function setStatusChecksFromUpdates(
+  branchName: string,
+  updates: LookupUpdate[] | undefined,
+): Promise<void> {
+  if (!updates) {
+    return;
+  }
+
+  for (const update of updates) {
+    if (!update.statusChecks) {
+      continue;
+    }
+
+    for (const check of update.statusChecks) {
+      await setStatusCheck({
+        branchName,
+        ...check,
+      });
+    }
+  }
 }
