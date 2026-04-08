@@ -614,6 +614,7 @@ export async function getCommitMessages(): Promise<string[]> {
     const res = await git.log({
       n: 20,
       format: { message: '%s' },
+      '--no-merges': null,
     });
     return res.all.map((commit) => commit.message);
   } catch /* v8 ignore next -- TODO: add test #40625 */ {

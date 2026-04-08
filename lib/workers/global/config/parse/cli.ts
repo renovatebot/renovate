@@ -53,13 +53,14 @@ function createProgram(): Command<[string[]]> {
     .on('--help', helpConsole);
 }
 
-export function parseEarlyFlags(input: string[] = process.argv): void {
-  createProgram().allowUnknownOption().allowExcessArguments().parse(input);
-}
-
-export function getConfig(input: string[]): AllConfig {
-  // massage migrated configuration keys
-  const argv = input
+/**
+ * Massage migrated configuration keys.
+ * This must run before any Commander parse call so that
+ * deprecated/bare flags like `--dry-run` (no value) are rewritten
+ * before Commander tries to consume them.
+ */
+function migrateArgs(input: string[]): string[] {
+  return input
     .map((a) =>
       a
         .replace(
@@ -86,6 +87,17 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--recreate-closed', '--recreate-when=always'),
     )
     .filter((a) => !a.startsWith('--git-fs'));
+}
+
+export function parseEarlyFlags(input: string[] = process.argv): void {
+  createProgram()
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .parse(migrateArgs(input));
+}
+
+export function getConfig(input: string[]): AllConfig {
+  const argv = migrateArgs(input);
   const options = getOptions();
 
   const config: Record<string, any> = {};
