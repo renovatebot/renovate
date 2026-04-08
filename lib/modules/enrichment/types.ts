@@ -56,7 +56,7 @@ export interface EnrichmentResult {
   metadata?: Record<string, unknown>;
 
   /** Status check to set on branches */
-  statusCheck?: {
+  statusCheck?: { // TODO multiple
     context: string; // TODO doc statusCheckNames
     status: BranchStatus;
     description: string;

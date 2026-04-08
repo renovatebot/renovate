@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import type { RenovateConfig } from '../../config/types.ts';
 import api from './api.ts';
 import {
@@ -7,7 +8,7 @@ import {
   runRepositoryEnrichments,
   runUpdateEnrichments,
 } from './index.ts';
-import type { EnrichmentApi, EnrichmentResult } from './types.ts';
+import type { EnrichmentApi, EnrichmentResult, EnrichmentUpdateContext } from './types.ts';
 
 function createMockEnrichment(
   overrides: Partial<EnrichmentApi> = {},
@@ -152,7 +153,7 @@ describe('modules/enrichment/index', () => {
   });
 
   describe('runUpdateEnrichments()', () => {
-    const context = {
+    const context: EnrichmentUpdateContext = {
       datasource: 'npm',
       packageName: 'lodash',
       currentVersion: '4.17.20',
@@ -167,11 +168,11 @@ describe('modules/enrichment/index', () => {
           id: 'a',
           enrichUpdate: vi
             .fn()
-            .mockResolvedValue({ metadata: { confidence: 'high' } }),
+            .mockResolvedValue({ mergeConfidenceLevel: 'high' }),
         }),
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
-      expect(result.metadata).toEqual({ confidence: 'high' });
+      expect(result).toEqual({ mergeConfidenceLevel: 'high' });
     });
 
     it('merges metadata from multiple enrichments', async () => {
@@ -181,7 +182,7 @@ describe('modules/enrichment/index', () => {
           id: 'a',
           enrichUpdate: vi
             .fn()
-            .mockResolvedValue({ metadata: { confidence: 'high' } }),
+            .mockResolvedValue({ mergeConfidenceLevel: 'high', metadata: { score: 8 } }),
         }),
       );
       api.set(
@@ -192,7 +193,7 @@ describe('modules/enrichment/index', () => {
         }),
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
-      expect(result.metadata).toEqual({ confidence: 'high', score: 8 });
+      expect(result).toEqual({ mergeConfidenceLevel: 'high', metadata: { score: 8 } });
     });
 
     it('skips null results', async () => {
@@ -207,7 +208,7 @@ describe('modules/enrichment/index', () => {
       expect(result).toEqual({});
     });
 
-    it('collects prBodyNotes from multiple enrichments', async () => {
+    it('combines prBodyNotes from multiple enrichments', async () => {
       api.set(
         'a',
         createMockEnrichment({
@@ -230,30 +231,117 @@ describe('modules/enrichment/index', () => {
       expect(result.prBodyNotes).toEqual(['note from a', 'note from b']);
     });
 
-    it('keeps first skipReason only', async () => {
-      api.set(
-        'a',
-        createMockEnrichment({
-          id: 'a',
-          enrichUpdate: vi
-            .fn()
-            .mockResolvedValue({ skipReason: 'disabled' as const }),
-        }),
-      );
-      api.set(
-        'b',
-        createMockEnrichment({
-          id: 'b',
-          enrichUpdate: vi
-            .fn()
-            .mockResolvedValue({ skipReason: 'ignored' as const }),
-        }),
-      );
-      const result = await runUpdateEnrichments(context, {} as RenovateConfig);
-      expect(result.skipReason).toBe('disabled');
-    });
+    describe('skipReason', () => {
+      it('is added when set', async () => {
+        api.set(
+          'a',
+          createMockEnrichment({
+            id: 'a',
+            enrichUpdate: vi
+              .fn()
+              .mockResolvedValue({ skipReason: 'disabled' as const }),
+          }),
+        );
 
-    it('uses last statusCheck', async () => {
+        const result = await runUpdateEnrichments(context, {} as RenovateConfig);
+        expect(result.skipReason).toBe('disabled');
+      });
+
+      it('includes skipReferences if set alongside a skipReason', async () => {
+        api.set(
+          'a',
+          createMockEnrichment({
+            id: 'a',
+            enrichUpdate: vi
+              .fn()
+              .mockResolvedValue({
+                skipReason: 'disabled' as const,
+                skipReferences: [
+                  'https://docs.example.com/deprecation',
+                  'https://docs.example.com/removal',
+                ],
+              }),
+          }),
+        );
+
+        const result = await runUpdateEnrichments(context, {} as RenovateConfig);
+        expect(result.skipReferences).toEqual([
+          'https://docs.example.com/deprecation',
+          'https://docs.example.com/removal',
+        ]);
+      });
+
+      it('ignores skipReferences if no skipReason is set', async () => {
+        api.set(
+          'a',
+          createMockEnrichment({
+            id: 'a',
+            enrichUpdate: vi
+              .fn()
+              .mockResolvedValue({
+                skipReferences: [
+                  'https://docs.example.com/deprecation',
+                  'https://docs.example.com/removal',
+                ],
+              }),
+          }),
+        );
+
+        const result = await runUpdateEnrichments(context, {} as RenovateConfig);
+        expect(result.skipReferences).toBeUndefined();
+      });
+
+      describe('when multiple skipReasons', () => {
+        it('keeps last skipReason', async () => {
+          api.set(
+            'a',
+            createMockEnrichment({
+              id: 'a',
+              enrichUpdate: vi
+                .fn()
+                .mockResolvedValue({ skipReason: 'disabled' as const }),
+            }),
+          );
+          api.set(
+            'b',
+            createMockEnrichment({
+              id: 'b',
+              enrichUpdate: vi
+                .fn()
+                .mockResolvedValue({ skipReason: 'ignored' as const }),
+            }),
+          );
+          const result = await runUpdateEnrichments(context, {} as RenovateConfig);
+          expect(result.skipReason).toBe('disabled');
+        });
+
+        it('debug logs when overwriting', async () => {
+          api.set(
+            'a',
+            createMockEnrichment({
+              id: 'a',
+              enrichUpdate: vi
+                .fn()
+                .mockResolvedValue({ skipReason: 'disabled' as const }),
+            }),
+          );
+          api.set(
+            'b',
+            createMockEnrichment({
+              id: 'b',
+              enrichUpdate: vi
+                .fn()
+                .mockResolvedValue({ skipReason: 'ignored' as const }),
+            }),
+          );
+          await runUpdateEnrichments(context, {} as RenovateConfig);
+
+          expect(logger.logger.debug).toHaveBeenCalledWith('TODO');
+        });
+      })
+    })
+
+    it('uses last statusCheck', async () => { // TODO rename
       api.set(
         'a',
         createMockEnrichment({
@@ -282,6 +370,52 @@ describe('modules/enrichment/index', () => {
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
       expect(result.statusCheck?.context).toBe('check-b');
+    });
+
+    it('adds a trace log when merging `EnrichmentResult`s', async () => {
+      api.set(
+        'a',
+        createMockEnrichment({
+          id: 'a',
+          enrichUpdate: vi.fn().mockResolvedValue({
+            statusCheck: {
+              context: 'check-a',
+              status: 'green' as const,
+              description: 'a passed',
+            },
+          }),
+        }),
+      );
+      api.set(
+        'b',
+        createMockEnrichment({
+          id: 'b',
+          enrichUpdate: vi.fn().mockResolvedValue({
+            statusCheck: {
+              context: 'check-b',
+              status: 'yellow' as const,
+              description: 'b pending',
+            },
+          }),
+        }),
+      );
+
+      await runUpdateEnrichments(context, {} as RenovateConfig);
+
+      expect(logger.logger.trace).toHaveBeenCalledWith({
+        module: 'a',
+        source: {
+        },
+        target: {
+        },
+      }, 'Merging EnrichmentResult for module \'a\'');
+      expect(logger.logger.trace).toHaveBeenCalledWith({
+        module: 'b',
+        source: {
+        },
+        target: {
+        },
+      }, 'Merging EnrichmentResult for module \'b\'');
     });
 
     it('returns empty result when no enrichments are registered', async () => {

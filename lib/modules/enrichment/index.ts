@@ -78,7 +78,7 @@ export async function runUpdateEnrichments(
       if (!result) {
         continue;
       }
-      mergeResult(merged, result);
+      mergeResult(enrichment.id, merged, result);
     }
   }
 
@@ -95,9 +95,13 @@ function applyRepositoryResult(
   }
 }
 
-function mergeResult(target: EnrichmentResult, source: EnrichmentResult): void {
+function mergeResult(moduleId: string, target: EnrichmentResult, source: EnrichmentResult): void {
+  console.log({ moduleId, source, target })
   if (source.metadata) {
     target.metadata = { ...target.metadata, ...source.metadata };
+  }
+  if (source.mergeConfidenceLevel !== undefined) {
+    target.mergeConfidenceLevel = source.mergeConfidenceLevel
   }
   if (source.prBodyNotes) {
     target.prBodyNotes ??= [];
