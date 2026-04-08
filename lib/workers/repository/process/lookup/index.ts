@@ -508,7 +508,7 @@ export async function lookupUpdates(
           return Result.ok(res);
         }
         const newVersion = release.version;
-        const update = generateUpdate(
+        const update = await generateUpdate(
           config,
           compareValue,
           versioningApi,

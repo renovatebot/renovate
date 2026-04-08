@@ -251,14 +251,6 @@ const mergeConfidenceEnrichment: EnrichmentApi = {
   id: 'merge-confidence',
   capabilities: {
     producesMergeConfidenceMetadata: true,
-    metadataFields: [
-      {
-        key: 'mergeConfidenceLevel',
-        description: 'Confidence level for this update',
-        type: 'string',
-        example: 'high',
-      },
-    ],
   },
 
   isEnabled(_config: RenovateConfig): boolean {
