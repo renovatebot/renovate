@@ -250,6 +250,7 @@ function apiErrorHandler(err: any): void {
 const mergeConfidenceEnrichment: EnrichmentApi = {
   id: 'merge-confidence',
   capabilities: {
+    producesMergeConfidenceMetadata: true,
     metadataFields: [
       {
         key: 'mergeConfidenceLevel',
