@@ -22,7 +22,7 @@ import {
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -49,8 +49,8 @@ import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
-  AggregatedVulnerabilities,
   AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
@@ -70,7 +70,6 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
-import { normalizeNamePerEcosystem } from '../utils/github-alerts.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
@@ -85,9 +84,10 @@ import { getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
-  GithubVulnerabilityAlert,
+  GithubVulnerabilityAlerts,
 } from './schema.ts';
 import type {
+  AggregatedVulnerabilities,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
@@ -2087,13 +2087,13 @@ export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
 }
 
-export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
   /* v8 ignore next */
-  if (config.hasVulnerabilityAlertsEnabled === false) {
+  if (!config.hasVulnerabilityAlertsEnabled) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
   }
-  let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
+  let vulnerabilityAlerts: GithubVulnerabilityAlerts | undefined;
   try {
     vulnerabilityAlerts = (
       await githubApi.getJson(
@@ -2103,7 +2103,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
-        GithubVulnerabilityAlert,
+        GithubVulnerabilityAlerts,
       )
     ).body;
   } catch (err) /* v8 ignore next */ {
@@ -2137,7 +2137,8 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         } = alert.security_vulnerability;
         const patch = firstPatchedVersion?.identifier;
 
-        const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
+        const normalizedName =
+          ecosystem === 'pip' ? normalizePythonDepName(name) : name;
         alert.security_vulnerability.package.name = normalizedName;
         const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;
