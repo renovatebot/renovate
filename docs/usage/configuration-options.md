@@ -747,7 +747,7 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 
 ## commitMessagePrefix
 
-This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
+This is used to alter `commitMessage` and `prTitle` (which also affects how it's displayed in the Dependency Dashboard) without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
 ## commitMessageSuffix
@@ -4430,6 +4430,7 @@ This feature works with the following managers:
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
+- [`fleet`](modules/manager/fleet/index.md)
 - [`flux`](modules/manager/flux/index.md)
 - [`github-actions`](modules/manager/github-actions/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)

@@ -20,6 +20,14 @@ const v2Fixture = JSON.stringify(
   {
     pins: [
       {
+        identity: 'by-commit',
+        kind: 'remoteSourceControl',
+        location: 'https://github.com/example/by-commit',
+        state: {
+          revision: 'decaf',
+        },
+      },
+      {
         identity: 'alamofire',
         kind: 'remoteSourceControl',
         location: 'https://github.com/Alamofire/Alamofire',
@@ -189,6 +197,31 @@ describe('modules/manager/swift/artifacts', () => {
     expect(contents).toContain(
       '"revision": "c8ed701b513cf5177118a175d85c4c06d8f9f97c"',
     );
+  });
+
+  it('does not write `from:` range to Package.resolved', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: '5.10.0',
+          newValue: 'from: "5.10.0"',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+    expect(contents).not.toContain('from:');
   });
 
   it('updates multiple pins in one call', async () => {

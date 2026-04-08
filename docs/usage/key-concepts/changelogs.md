@@ -28,7 +28,7 @@ For more details, see [Private packages, looking up changelogs](../getting-start
 
 ## Relevant configuration options
 
-### [`fetchChangelogs`](../configuration-options.md#fetchchangelogs)
+### [`fetchChangeLogs`](../configuration-options.md#fetchchangelogs)
 
 Set to `off` if changelog fetching is causing a problem.
 

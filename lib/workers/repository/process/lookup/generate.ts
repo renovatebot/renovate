@@ -23,6 +23,7 @@ export async function generateUpdate(
     bucket,
     newVersion,
     newValue: null!,
+    hasAttestation: release.attestation,
   };
 
   // istanbul ignore if

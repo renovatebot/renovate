@@ -19,3 +19,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id, CondaDatasource.id];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

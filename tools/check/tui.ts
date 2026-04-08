@@ -179,22 +179,13 @@ export function printCoverageReport(coverage: CoverageInfo[]): void {
     return;
   }
 
-  console.log('Coverage:');
+  console.log('');
+  console.log('Not covered:');
 
-  const minDots = 3;
-  const longestPath = Math.max(...coverage.map((c) => c.file.length));
-  const coverageWidth = Math.max(TUI.NAME_WIDTH, longestPath + 1 + minDots);
+  const pathWidth = Math.max(...coverage.map((c) => c.file.length)) + 2;
 
   for (const info of coverage) {
-    const pct = Math.round(info.percentage);
-    const hasGaps = info.uncoveredLines.length > 0;
-    const status = hasGaps ? '✗' : '✓';
-    const nameCol = `${info.file} `.padEnd(coverageWidth, '.');
-    console.log(`  ${nameCol} ${status}  ${pct}%`);
-
-    if (hasGaps) {
-      const lineRefs = info.uncoveredLines.map((l) => `L${l}`).join(', ');
-      console.log(`    ${lineRefs}`);
-    }
+    const lineRefs = info.uncoveredLines.map((l) => `L${l}`).join(', ');
+    console.log(`  ${info.file.padEnd(pathWidth)}${lineRefs}`);
   }
 }

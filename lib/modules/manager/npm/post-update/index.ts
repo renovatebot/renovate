@@ -247,6 +247,15 @@ export async function writeUpdatedPackageFiles(
     logger.debug('No files found');
     return;
   }
+  // prefer artifact content when it updates the same file (e.g. pnpm-workspace.yaml)
+  const artifactContents = new Map<string, string>();
+  if (config.updatedArtifacts) {
+    for (const artifact of config.updatedArtifacts) {
+      if (artifact.type === 'addition' && artifact.contents) {
+        artifactContents.set(artifact.path, artifact.contents.toString());
+      }
+    }
+  }
   const supportedLockFiles = ['package-lock.json', 'yarn.lock'];
   for (const packageFile of config.updatedPackageFiles) {
     if (packageFile.type !== 'addition') {
@@ -270,8 +279,10 @@ export async function writeUpdatedPackageFiles(
     ) {
       continue;
     }
+    const contents =
+      artifactContents.get(packageFile.path) ?? packageFile.contents!;
     logger.debug(`Writing ${packageFile.path}`);
-    await writeLocalFile(packageFile.path, packageFile.contents!);
+    await writeLocalFile(packageFile.path, contents);
   }
 }
 
@@ -538,10 +549,9 @@ export async function getAdditionalFiles(
       /* v8 ignore next -- needs test */
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
         for (const upgrade of config.upgrades) {
-          /* eslint-disable no-useless-escape */
           if (
             res.stderr.includes(
-              `Couldn't find any versions for \\\"${upgrade.depName}\\\"`,
+              `Couldn't find any versions for \\"${upgrade.depName}\\"`,
             )
           ) {
             logger.debug(
@@ -555,7 +565,6 @@ export async function getAdditionalFiles(
               NpmDatasource.id,
             );
           }
-          /* eslint-enable no-useless-escape */
         }
       }
 
