@@ -162,12 +162,14 @@ export interface EnsureIssueConfig {
   shouldReOpen?: boolean;
   confidential?: boolean;
 }
-export interface BranchStatusConfig {
-  branchName: string;
+export interface StatusCheckConfig {
   context: string;
   description: string;
   state: BranchStatus;
   url?: string;
+}
+export interface BranchStatusConfig extends StatusCheckConfig {
+  branchName: string;
 }
 export interface FindPRConfig {
   branchName: string;
