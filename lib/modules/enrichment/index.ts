@@ -142,8 +142,8 @@ function mergeResult(
     target.prBodyNotes ??= [];
     target.prBodyNotes.push(...source.prBodyNotes);
   }
-  if (source.statusCheck) {
-    target.statusCheck = source.statusCheck;
+  if (source.statusChecks) {
+    target.statusChecks = source.statusChecks;
   }
   if (source.skipReason) {
     if (

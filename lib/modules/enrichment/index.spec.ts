@@ -398,7 +398,7 @@ describe('modules/enrichment/index', () => {
         }),
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
-      expect(result.statusCheck?.context).toBe('check-b');
+      expect(result.statusChecks?.context).toBe('check-b');
     });
 
     it('adds a trace log when merging `EnrichmentResult`s', async () => {
