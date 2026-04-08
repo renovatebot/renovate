@@ -2089,7 +2089,7 @@ export function maxBodyLength(): number {
 
 export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
   /* v8 ignore next */
-  if (!config.hasVulnerabilityAlertsEnabled) {
+  if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
   }
