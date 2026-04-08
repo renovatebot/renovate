@@ -4,6 +4,7 @@ import * as tar from 'tar';
 import { getProblems, logger } from '../../lib/logger/index.ts';
 import { generateConfig } from './config.ts';
 import { generateDatasources } from './datasources.ts';
+import { generateEnrichment } from './enrichment.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
 import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
@@ -41,6 +42,9 @@ export async function generateDocs(
     // datasources
     logger.info('* datasources');
     await generateDatasources(dist, openItems.datasources);
+
+    logger.info('* enrichment');
+    await generateEnrichment(dist, []); // TODO #42477
 
     // managers
     logger.info('* managers');
