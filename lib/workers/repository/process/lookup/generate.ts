@@ -1,10 +1,9 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
-import { runUpdateEnrichments } from '../../../../modules/enrichment/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
-import type { RangeStrategy, UpdateType } from '../../../../types/index.ts';
+import type { RangeStrategy } from '../../../../types/index.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import type { LookupUpdateConfig } from './types.ts';
@@ -107,79 +106,17 @@ export async function generateUpdate(
     update.isBump = true;
   }
 
-  // await applyEnrichment(
-  //   config,
-  //   currentVersion,
-  //   newVersion,
-  //   update,
-  //   update.updateType,
-  // );
-
-  return update;
-}
-
-async function applyEnrichment(
-  config: LookupUpdateConfig,
-  currentVersion: string,
-  newVersion: string,
-  update: LookupUpdate,
-  updateType: UpdateType,
-): Promise<void> {
-  const { datasource, packageName, packageRules } = config;
-  const enrichResult = await runUpdateEnrichments(
-    {
-      datasource,
-      packageName,
-      currentVersion,
-      newVersion,
-      updateType,
-    },
-    config,
-  );
-  logger.trace(
-    {
-      source: enrichResult,
-      target: {
-        datasource,
-        packageName,
-        currentVersion,
-        newVersion,
-        updateType,
-        ...update,
-      },
-    },
-    'Merging EnrichmentResult for update',
-  );
-
-  // Apply enrichment results to the update
-  if (enrichResult.mergeConfidenceLevel !== undefined) {
-    update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
-  }
-  if (enrichResult.prBodyNotes?.length) {
-    // NOTE that at this point, no `prBodyNotes` should be set
-    update.prBodyNotes = enrichResult.prBodyNotes;
-  }
-  if (enrichResult.skipReason !== undefined) {
-    logger.trace(
-      {
-        datasource,
-        packageName,
-        currentVersion,
-        newVersion,
-        updateType,
-      },
-      `Setting skipReason on \`${packageName}\` to \`${enrichResult.skipReason}\`, was \`${update.skipReason}\``,
-    );
-    update.skipReason = enrichResult.skipReason; // TODO log when overwriting
-  }
   // TODO remove in #42421
+  const { datasource, packageName, packageRules } = config;
   if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
     update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
       datasource,
       packageName,
       currentVersion,
       newVersion,
-      updateType,
+      update.updateType,
     );
   }
+
+  return update;
 }

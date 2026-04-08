@@ -369,8 +369,7 @@ describe('modules/enrichment/index', () => {
       });
     });
 
-    it('uses last statusCheck', async () => {
-      // TODO rename
+    it('merges multiple statusChecks', async () => {
       api.set(
         'a',
         createMockEnrichment({
@@ -398,7 +397,10 @@ describe('modules/enrichment/index', () => {
         }),
       );
       const result = await runUpdateEnrichments(context, {} as RenovateConfig);
-      expect(result.statusChecks?.context).toBe('check-b');
+      expect(result.statusChecks).toBeDefined();
+      expect(result.statusChecks!).toHaveLength(2);
+      expect(result.statusChecks![0].context).toEqual('check-a');
+      expect(result.statusChecks![1].context).toEqual('check-a');
     });
 
     it('adds a trace log when merging `EnrichmentResult`s', async () => {
