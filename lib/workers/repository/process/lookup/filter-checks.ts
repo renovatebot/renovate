@@ -4,13 +4,13 @@ import type { MinimumReleaseAgeBehaviour } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
-import type { VersioningApi } from '../../../../modules/versioning/index.ts';
-import { getElapsedMs } from '../../../../util/date.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
-} from '../../../../util/merge-confidence/index.ts';
+} from '../../../../modules/enrichment/merge-confidence/index.ts';
+import type { VersioningApi } from '../../../../modules/versioning/index.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
 import { coerceNumber } from '../../../../util/number.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { toMs } from '../../../../util/pretty-time.ts';

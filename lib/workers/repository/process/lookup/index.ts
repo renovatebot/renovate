@@ -1,9 +1,4 @@
-import {
-  isNonEmptyArray,
-  isNonEmptyString,
-  isString,
-  isUndefined,
-} from '@sindresorhus/is';
+import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import type {
   UpdateType,
@@ -36,7 +31,6 @@ import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
-import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
@@ -509,7 +503,7 @@ export async function lookupUpdates(
           return Result.ok(res);
         }
         const newVersion = release.version;
-        const update = await generateUpdate(
+        const update = generateUpdate(
           config,
           compareValue,
           versioningApi,
@@ -844,7 +838,7 @@ async function applyEnrichment(
   update: LookupUpdate,
   updateType?: UpdateType,
 ): Promise<void> {
-  const { datasource, packageName, packageRules } = config;
+  const { datasource, packageName } = config;
   const enrichResult = await runUpdateEnrichments(
     {
       datasource,
@@ -893,16 +887,6 @@ async function applyEnrichment(
       `Setting skipReason on \`${packageName}\` to \`${enrichResult.skipReason}\`, was \`${update.skipReason}\``,
     );
     update.skipReason = enrichResult.skipReason; // TODO log when overwriting
-  }
-  // TODO remove in #42421
-  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
-    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
-      datasource,
-      packageName,
-      currentVersion,
-      newVersion,
-      updateType!,
-    );
   }
 
   if (enrichResult.statusChecks) {

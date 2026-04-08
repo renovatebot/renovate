@@ -4,3 +4,5 @@ export const MERGE_CONFIDENCE = [
   'high',
   'very high',
 ] as const;
+
+export type MergeConfidence = (typeof MERGE_CONFIDENCE)[number];

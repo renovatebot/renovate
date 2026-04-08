@@ -7,10 +7,10 @@ import type {
   Release,
   ReleaseResult,
 } from '../../../../modules/datasource/index.ts';
+import * as _mergeConfidence from '../../../../modules/enrichment/merge-confidence/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { clone } from '../../../../util/clone.ts';
 import * as _dateUtil from '../../../../util/date.ts';
-import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import { filterInternalChecks } from './filter-checks.ts';
@@ -19,7 +19,7 @@ import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 vi.mock('../../../../util/date.ts');
 const dateUtil = vi.mocked(_dateUtil);
 
-vi.mock('../../../../util/merge-confidence/index.ts');
+vi.mock('../../../../modules/enrichment/merge-confidence/index.ts');
 const mergeConfidence = vi.mocked(_mergeConfidence);
 
 vi.mock('../../../../modules/datasource/common.ts');

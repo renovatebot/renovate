@@ -2,12 +2,12 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types.ts';
+import type { MergeConfidence } from '../../../../modules/enrichment/merge-confidence/types.ts';
 import type {
   LookupUpdate,
   RangeConfig,
 } from '../../../../modules/manager/types.ts';
 import type { SkipReason } from '../../../../types/index.ts';
-import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 
 export interface FilterConfig {
