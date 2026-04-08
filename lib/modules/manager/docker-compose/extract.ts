@@ -1,7 +1,12 @@
 import { isString, isTruthy } from '@sindresorhus/is';
+import { type Document, type Node, isNode } from 'yaml';
 import { logger } from '../../../logger/index.ts';
+import { isSkipComment } from '../../../util/ignore.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { parseSingleYaml } from '../../../util/yaml.ts';
+import {
+  parseSingleYaml,
+  parseSingleYamlDocument,
+} from '../../../util/yaml.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { ExtractConfig, PackageFileContent } from '../types.ts';
 import { DockerComposeFile } from './schema.ts';
@@ -35,11 +40,13 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.debug(`docker-compose.extractPackageFile(${packageFile})`);
   let config: DockerComposeFile;
+  let rawConfig: Document;
   try {
     config = parseSingleYaml(content, {
       customSchema: DockerComposeFile,
       removeTemplates: true,
     });
+    rawConfig = parseSingleYamlDocument(content, { removeTemplates: true });
   } catch (err) {
     logger.debug(
       { err, packageFile },
@@ -60,17 +67,40 @@ export function extractPackageFile(
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
-    const deps = Object.values(
+    const deps = Object.entries(
       services || /* istanbul ignore next: can never happen */ {},
     )
-      .concat(Object.values(extensions))
-      .filter((service) => isString(service?.image) && !service?.build)
-      .map((service) => {
+      .concat(Object.entries(extensions))
+      .filter(([_, service]) => isString(service?.image) && !service?.build)
+      .map(([serviceName, service]) => {
         const dep = getDep(service.image, true, extractConfig.registryAliases);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
         // istanbul ignore if
         if (!lineNumber) {
           return null;
+        }
+        let comment: string | null | undefined;
+        // covers use cases for...
+        for (const paths of [
+          // fragments and compose v1
+          [serviceName, 'image'],
+          // compose v3
+          ['services', serviceName, 'image'],
+          // compose with extensions
+          ['extensions', serviceName, 'image'],
+        ]) {
+          if (isNode(rawConfig.getIn(paths, true))) {
+            comment = (rawConfig.getIn(paths, true) as Node).comment;
+            break;
+          }
+        }
+
+        if (
+          comment !== undefined &&
+          comment !== null &&
+          isSkipComment(comment.trim())
+        ) {
+          dep.skipReason = 'ignored';
         }
         return dep;
       })

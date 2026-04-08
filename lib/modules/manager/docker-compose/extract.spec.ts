@@ -229,5 +229,66 @@ describe('modules/manager/docker-compose/extract', () => {
         ],
       });
     });
+
+    it('ignores dependency when skip comment is present', () => {
+      const compose = codeBlock`
+      version: "3"
+      services:
+        nginx:
+          image: quay.io/nginx:0.0.1 #renovate: ignore
+    `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/nginx',
+            packageName: 'quay.io/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+            skipReason: 'ignored',
+          },
+        ],
+      });
+    });
+
+    it('ignores dependency when skip comment is present in fragment', () => {
+      const compose = codeBlock`
+        ---
+        x-shared_setting: &shared_settings
+          image: debian:11 #renovate: ignore
+          # Other shared properties here
+
+        services:
+          service-a:
+            <<: *shared_settings
+            environment:
+              - SERVICE=a
+          service-b:
+            <<: *shared_settings
+            environment:
+              - SERVICE=b
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '11',
+            datasource: 'docker',
+            depName: 'debian',
+            packageName: 'debian',
+            replaceString: 'debian:11',
+            skipReason: 'ignored',
+            versioning: 'debian',
+          },
+        ],
+      });
+    });
   });
 });
