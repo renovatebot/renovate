@@ -5627,6 +5627,7 @@ describe('workers/repository/process/lookup/index', () => {
         config.currentValue = '3.7.0';
         config.packageName = 'webpack';
         config.datasource = NpmDatasource.id;
+        config.packageRules = [{ matchConfidence: ['high'] }];
         httpMock
           .scope('https://registry.npmjs.org')
           .get('/webpack')
@@ -5637,6 +5638,26 @@ describe('workers/repository/process/lookup/index', () => {
         ).unwrapOrThrow();
 
         expect(updates[0].mergeConfidenceLevel).toBe('high');
+        spy.mockRestore();
+      });
+
+      it('does not apply mergeConfidenceLevel from enrichment result when no matchConfidence packageRule is set', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ mergeConfidenceLevel: 'high' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].mergeConfidenceLevel).toBeUndefined();
         spy.mockRestore();
       });
 
@@ -5714,7 +5735,8 @@ describe('workers/repository/process/lookup/index', () => {
           lookup.lookupUpdates(config),
         ).unwrapOrThrow();
 
-        expect(updates[0].statusChecks).toEqual( // TODO
+        expect(updates[0].statusChecks).toEqual(
+          // TODO
           // expect(res.statusChecks).toEqual( // TODO
           [
             {
@@ -5733,10 +5755,9 @@ describe('workers/repository/process/lookup/index', () => {
               description: `We wouldn't recommend it`,
             },
           ],
-        )
+        );
         spy.mockRestore();
       });
-
 
       it('trace logs when skipReason is set from enrichment result', async () => {
         const spy = vi

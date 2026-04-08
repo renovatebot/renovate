@@ -871,7 +871,10 @@ async function applyEnrichment(
   );
 
   // Apply enrichment results to the update
-  if (enrichResult.mergeConfidenceLevel !== undefined) {
+  if (
+    enrichResult.mergeConfidenceLevel !== undefined &&
+    packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))
+  ) {
     update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
   }
   if (enrichResult.prBodyNotes?.length) {
