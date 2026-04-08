@@ -82,8 +82,12 @@ export interface EnrichmentCapabilities {
   producesStatusChecks?: boolean;
   /** Whether this module can produce skipReasons */
   producesSkipReasons?: boolean;
-  /** Whether this module can produce mergeConfidenceLevel */
-  producesMergeConfidenceLevel?: boolean;
+  /**
+   * Whether this module can produce metadata that is used by Merge Confidence
+   *
+   * @see https://docs.renovatebot.com/merge-confidence/
+   * */
+  producesMergeConfidenceMetadata?: boolean;
   /** Metadata fields this module produces (available for matchJsonata) */
   metadataFields?: readonly EnrichmentMetadataField[];
 }
