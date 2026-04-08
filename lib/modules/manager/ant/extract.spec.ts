@@ -528,6 +528,112 @@ describe('modules/manager/ant/extract', () => {
     });
   });
 
+  describe('edge cases', () => {
+    it('handles unparseable XML returned by readLocalFile', async () => {
+      fs.readLocalFile.mockResolvedValue('<<< not xml >>>');
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toBeNull();
+    });
+
+    it('handles absolute path in property file reference', async () => {
+      fs.readLocalFile.mockImplementation((file: string) => {
+        if (file === 'build.xml') {
+          return Promise.resolve(codeBlock`
+            <project>
+              <property file="/absolute/versions.properties"/>
+              <artifact:dependencies>
+                <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+              </artifact:dependencies>
+            </project>
+          `);
+        }
+        if (file === '/absolute/versions.properties') {
+          return Promise.resolve('junit.version=4.13.2\n');
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: '/absolute/versions.properties',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+              sharedVariableName: 'junit.version',
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('skips duplicate property file references', async () => {
+      let propsReadCount = 0;
+      fs.readLocalFile.mockImplementation((file: string) => {
+        if (file === 'build.xml') {
+          return Promise.resolve(codeBlock`
+            <project>
+              <property file="versions.properties"/>
+              <property file="versions.properties"/>
+              <artifact:dependencies>
+                <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+              </artifact:dependencies>
+            </project>
+          `);
+        }
+        if (file === 'versions.properties') {
+          propsReadCount++;
+          return Promise.resolve('junit.version=4.13.2\n');
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(propsReadCount).toBe(1);
+      expect(result).toEqual([
+        {
+          packageFile: 'versions.properties',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('handles chain referencing undefined property', async () => {
+      fs.readLocalFile.mockResolvedValue(codeBlock`
+        <project>
+          <property name="a" value="${'${nonexistent}'}"/>
+          <artifact:dependencies>
+            <dependency groupId="junit" artifactId="junit" version="${'${a}'}" />
+          </artifact:dependencies>
+        </project>
+      `);
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              skipReason: 'recursive-placeholder',
+            }),
+          ],
+        },
+      ]);
+    });
+  });
+
   describe('parsePropertiesFile', () => {
     it('parses key=value pairs', () => {
       const props: Record<string, AntProp> = {};
@@ -567,6 +673,17 @@ describe('modules/manager/ant/extract', () => {
       parsePropertiesFile('key:value\n', 'test.properties', props);
 
       expect(props.key).toEqual(expect.objectContaining({ val: 'value' }));
+    });
+
+    it('skips malformed lines without separators', () => {
+      const props: Record<string, AntProp> = {};
+      parsePropertiesFile(
+        'key=value\nmalformed_line_no_separator\nother=val\n',
+        'test.properties',
+        props,
+      );
+
+      expect(Object.keys(props)).toEqual(['key', 'other']);
     });
 
     it('implements first-definition-wins', () => {

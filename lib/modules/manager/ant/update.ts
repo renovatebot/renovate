@@ -17,7 +17,6 @@ export function updateDependency({
 
   // Find the end of the value (closing quote or end of line for .properties files)
   let endIndex: number;
-  // Check if we're inside an XML attribute (preceded by a quote)
   const quoteChar = leftPart.at(-1);
   if (quoteChar === '"' || quoteChar === "'") {
     endIndex = rightPart.indexOf(quoteChar);
@@ -25,11 +24,6 @@ export function updateDependency({
     // .properties file: value ends at newline or EOF
     const newlineIndex = rightPart.indexOf('\n');
     endIndex = newlineIndex === -1 ? rightPart.length : newlineIndex;
-  }
-
-  if (endIndex === -1) {
-    logger.debug({ depName }, 'Could not find end of value');
-    return null;
   }
 
   const currentFound = rightPart.slice(0, endIndex);

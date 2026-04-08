@@ -33,6 +33,7 @@ function getDependencyType(scope: string | undefined): string {
 }
 
 const placeholderTestRegex = regEx(/\$\{[^}]+}/);
+const propertySeparatorRegex = regEx(/^([^=:\s]+)\s*[=:\s]\s*(.*)$/);
 
 function containsPlaceholder(str: string | null | undefined): boolean {
   return !!str && placeholderTestRegex.test(str);
@@ -46,26 +47,13 @@ function findAttrValuePosition(
   content: string,
   node: XmlElement,
   attrName: string,
-): number | null {
-  // Search from the node's start position in the content
-  const startTag = node.startTagPosition;
-  if (startTag === undefined || startTag === null) {
-    return null;
-  }
-
-  // Find the closing of this element's start tag
+): number {
+  const startTag = node.startTagPosition!;
   const tagEnd = content.indexOf('>', startTag);
-  if (tagEnd === -1) {
-    return null;
-  }
   const tagContent = content.slice(startTag, tagEnd + 1);
 
-  // Match attrName="value" or attrName='value'
   const attrPattern = regEx(`${attrName}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`);
-  const match = attrPattern.exec(tagContent);
-  if (!match) {
-    return null;
-  }
+  const match = attrPattern.exec(tagContent)!;
 
   const valueInMatch = match[1] ?? match[2];
   const valueOffset = match[0].indexOf(valueInMatch);
@@ -91,7 +79,7 @@ export function parsePropertiesFile(
     }
 
     // Match key=value, key:value, or key value (first separator wins)
-    const separatorMatch = regEx(/^([^=:\s]+)\s*[=:\s]\s*(.*)$/).exec(line);
+    const separatorMatch = propertySeparatorRegex.exec(line);
     if (separatorMatch) {
       const key = separatorMatch[1];
       const val = separatorMatch[2].trim();
@@ -136,9 +124,7 @@ function collectProperties(
       const value = child.attr.value;
       if (name && value && !(name in props)) {
         const pos = findAttrValuePosition(content, child, 'value');
-        if (pos !== null) {
-          props[name] = { val: value, fileReplacePosition: pos, packageFile };
-        }
+        props[name] = { val: value, fileReplacePosition: pos, packageFile };
       }
     }
 
@@ -184,11 +170,7 @@ function collectDependency(
     registryUrls: [],
   };
 
-  // Track the position of the version attribute value for inline versions
-  const pos = findAttrValuePosition(content, node, 'version');
-  if (pos !== null) {
-    dep.fileReplacePosition = pos;
-  }
+  dep.fileReplacePosition = findAttrValuePosition(content, node, 'version');
 
   return { dep, depPackageFile: packageFile };
 }
@@ -385,7 +367,7 @@ export async function extractAllPackageFiles(
     results.push({ packageFile, deps });
   }
 
-  return results.length > 0 ? results : null;
+  return results;
 }
 
 /**
