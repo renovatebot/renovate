@@ -2919,7 +2919,7 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`pypi`](./modules/datasource/pypi/index.md)
 - [`rubygems`](./modules/datasource/rubygems/index.md)
 
-The entire database is downloaded locally by [renovate-offline](https://github.com/renovatebot/osv-offline) and queried offline.
+The entire database is downloaded locally by [osv-offline](https://github.com/renovatebot/osv-offline) and queried offline.
 
 ## packageRules
 
