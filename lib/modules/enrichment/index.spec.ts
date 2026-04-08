@@ -132,6 +132,24 @@ describe('modules/enrichment/index', () => {
       ]);
     });
 
+    it('logs the result after enriching repository', async () => {
+      const result = {
+        packageRules: [{ matchPackageNames: ['lodash'] }],
+      };
+      api.set(
+        'a',
+        createMockEnrichment({
+          id: 'a',
+          enrichRepository: vi.fn().mockResolvedValue(result),
+        }),
+      );
+      await runRepositoryEnrichments({} as RenovateConfig, {});
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { moduleId: 'a', result },
+        'Enriched repository using a',
+      );
+    });
+
     it('skips enrichments without enrichRepository()', async () => {
       api.set('a', createMockEnrichment({ id: 'a' }));
       const config: RenovateConfig = {};
@@ -213,6 +231,46 @@ describe('modules/enrichment/index', () => {
         mergeConfidenceLevel: 'high',
         metadata: { score: 8 },
       });
+    });
+
+    it('logs the result after enriching an update', async () => {
+      api.set(
+        'a',
+        createMockEnrichment({
+          id: 'a',
+          enrichUpdate: vi
+            .fn()
+            .mockResolvedValue({ mergeConfidenceLevel: 'high' }),
+        }),
+      );
+      await runUpdateEnrichments(context, {} as RenovateConfig);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          moduleId: 'a',
+          result: { mergeConfidenceLevel: 'high' },
+          context,
+        },
+        'Enriched update using a',
+      );
+    });
+
+    it('logs when no enrichment update is found', async () => {
+      api.set(
+        'a',
+        createMockEnrichment({
+          id: 'a',
+          enrichUpdate: vi.fn().mockResolvedValue(null),
+        }),
+      );
+      await runUpdateEnrichments(context, {} as RenovateConfig);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          moduleId: 'a',
+          result: null,
+          context,
+        },
+        'No enrichment update found by a',
+      );
     });
 
     it('skips null results', async () => {

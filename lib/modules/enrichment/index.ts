@@ -81,6 +81,10 @@ export async function runRepositoryEnrichments(
           `enrichRepository ${enrichment.id}`,
           async () => await enrichment.enrichRepository!(config, packageFiles),
         );
+        logger.debug(
+          { moduleId: enrichment.id, result },
+          `Enriched repository using ${enrichment.id}`,
+        );
         applyRepositoryResult(config, result);
       }
     }
@@ -95,19 +99,32 @@ export async function runUpdateEnrichments(
   context: EnrichmentUpdateContext,
   config: RenovateConfig,
 ): Promise<EnrichmentResult> {
-  const merged: EnrichmentResult = {};
+  return await instrument('runUpdateEnrichments', async () => {
+    const merged: EnrichmentResult = {};
 
-  for (const enrichment of getEnabledEnrichments(config)) {
-    if (enrichment.enrichUpdate) {
-      const result = await enrichment.enrichUpdate(context, config);
-      if (!result) {
-        continue;
+    for (const enrichment of getEnabledEnrichments(config)) {
+      if (enrichment.enrichUpdate) {
+        const result = await instrument(
+          `enrichUpdate ${enrichment.id}`,
+          async () => await enrichment.enrichUpdate!(context, config),
+        );
+        if (!result) {
+          logger.debug(
+            { moduleId: enrichment.id, result, context },
+            `No enrichment update found by ${enrichment.id}`,
+          );
+          continue;
+        }
+        logger.debug(
+          { moduleId: enrichment.id, result, context },
+          `Enriched update using ${enrichment.id}`,
+        );
+        mergeResult(enrichment.id, merged, result);
       }
-      mergeResult(enrichment.id, merged, result);
     }
-  }
 
-  return merged;
+    return merged;
+  });
 }
 
 function applyRepositoryResult(
