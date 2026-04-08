@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import * as hostRules from '../../../../../lib/util/host-rules.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.preset.ts';
@@ -5677,6 +5677,65 @@ describe('workers/repository/process/lookup/index', () => {
         ).unwrapOrThrow();
 
         expect(updates[0].skipReason).toBe('internal-error');
+        spy.mockRestore();
+      });
+
+      it('trace logs when skipReason is set from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ skipReason: 'internal-error' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+
+        expect(logger.logger.trace).toHaveBeenCalledWith(
+          {
+            datasource: 'npm',
+            packageName: 'webpack',
+            currentVersion: '3.7.0',
+            newVersion: '3.8.1',
+            updateType: 'minor',
+          },
+          'Setting skipReason on `webpack` to `internal-error`, was `undefined`',
+        );
+
+        spy.mockRestore();
+      });
+
+      it('trace logs when merging EnrichmentResult', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ skipReason: 'internal-error' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+
+        expect(logger.logger.trace).toHaveBeenCalledWith(
+          {
+            source: {
+              skipReason: 'internal-error',
+            },
+
+            target: expect.objectContaining({
+              packageName: 'webpack',
+              datasource: 'npm',
+            }),
+          },
+          'Merging EnrichmentResult for update',
+        );
+
         spy.mockRestore();
       });
     });

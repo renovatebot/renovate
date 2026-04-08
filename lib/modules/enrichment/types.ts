@@ -118,12 +118,6 @@ export interface EnrichmentApi extends ModuleApi {
     packageFiles: Record<string, PackageFile[]>,
   ): Promise<EnrichmentRepositoryResult>;
 
-  /** Runs per dependency (e.g. OpenSSF Scorecard by sourceUrl) */
-  enrichDependency?(
-    context: EnrichmentDependencyContext,
-    config: RenovateConfig,
-  ): Promise<EnrichmentResult | null>;
-
   /** Runs per update candidate (e.g. merge confidence) */
   enrichUpdate?(
     context: EnrichmentUpdateContext,

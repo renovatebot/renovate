@@ -136,15 +136,41 @@ async function applyEnrichment(
     },
     config,
   );
+  logger.trace(
+    {
+      source: enrichResult,
+      target: {
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+        updateType,
+        ...update,
+      },
+    },
+    'Merging EnrichmentResult for update',
+  );
+
   // Apply enrichment results to the update
   if (enrichResult.mergeConfidenceLevel !== undefined) {
     update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
   }
   if (enrichResult.prBodyNotes?.length) {
+    // NOTE that at this point, no `prBodyNotes` should be set
     update.prBodyNotes = enrichResult.prBodyNotes;
   }
   if (enrichResult.skipReason !== undefined) {
-    update.skipReason = enrichResult.skipReason;
+    logger.trace(
+      {
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+        updateType,
+      },
+      `Setting skipReason on \`${packageName}\` to \`${enrichResult.skipReason}\`, was \`${update.skipReason}\``,
+    );
+    update.skipReason = enrichResult.skipReason; // TODO log when overwriting
   }
   // TODO remove in #42421
   if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {

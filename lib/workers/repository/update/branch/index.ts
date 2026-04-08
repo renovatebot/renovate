@@ -63,6 +63,7 @@ async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
   await setArtifactErrorStatus(config);
   await setStability(config);
   await setConfidence(config);
+  // TODO needs to set the status checks
 }
 
 async function rebaseCheck(
