@@ -5,6 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { scm } from '../../../modules/platform/scm.ts';
+import { isNotNullOrUndefined } from '../../../util/array.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
@@ -236,12 +237,12 @@ export async function lookup(
     config,
     packageFiles,
   );
+  reportMaliciousSkippedDependencies(packageFiles);
   logger.debug(
     { baseBranch: config.baseBranch, config: packageFiles },
     'packageFiles with updates',
   );
   sortBranches(branches);
-  reportMaliciousSkippedDependencies(packageFiles);
   return { branches, branchList, packageFiles };
 }
 
@@ -255,7 +256,7 @@ export function reportMaliciousSkippedDependencies(
   for (const [manager, packageFiles] of Object.entries(allPackageFiles)) {
     for (const packageFile of packageFiles) {
       for (const dep of packageFile.deps) {
-        if (dep.skipReason === 'malicious') {
+        if (dep.skipReason === 'malicious-version-in-use') {
           logger.warn(
             {
               packageFile: packageFile.packageFile,
@@ -264,7 +265,26 @@ export function reportMaliciousSkippedDependencies(
               manager: manager,
               datasource: dep.datasource,
             },
-            `Dependency ${dep.depName} will not be updated as it malicious`,
+            `Dependency ${dep.depName} is currently using a malicious version`,
+          );
+
+          // and make sure that it then gets updates proposed in the update phase
+          delete dep.skipReason;
+          delete dep.skipStage;
+        } else if (dep.skipReason === 'malicious-update-proposed') {
+          const newVersions = dep.updates
+            ?.map((u) => u.newVersion ?? u.newValue)
+            .filter(isNotNullOrUndefined);
+          logger.warn(
+            {
+              packageFile: packageFile.packageFile,
+              depName: dep.depName,
+              packageName: dep.packageName,
+              manager: manager,
+              datasource: dep.datasource,
+              newVersions,
+            },
+            `Dependency ${dep.depName} has update(s) proposed which would update you to a malicious version - skipping`,
           );
         }
       }

@@ -47,9 +47,17 @@ export type SkipReason =
   | 'github-token-required'
   | 'inherited-dependency'
   /**
-   * The dependency has been detected as explicitly malicious, and should not be updated.
+   * The dependency has been detected as explicitly malicious.
+   *
+   * This reason should be removed before the update phase, so updates can be determined.
    */
-  | 'malicious';
+  | 'malicious-version-in-use'
+  /**
+   * The dependency has a new dependency version available which has been marked as malicious.
+   *
+   * Renovate will not propose any updates, and leave you on the version you are currently on, which is currently known as safe.
+   */
+  | 'malicious-update-proposed';
 
 export type StageName =
   | 'current-timestamp'
