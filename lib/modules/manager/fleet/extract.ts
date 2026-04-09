@@ -43,7 +43,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   };
 }
 
-function extractFleetHelmBlock(
+export function extractFleetHelmBlock(
   doc: FleetHelmBlock,
   config: ExtractConfig,
 ): PackageDependency {
@@ -65,7 +65,7 @@ function extractFleetHelmBlock(
       false,
       config.registryAliases,
     );
-
+    delete dockerDep.replaceString;
     return {
       ...dockerDep,
       depType: 'fleet',

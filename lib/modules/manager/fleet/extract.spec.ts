@@ -1,7 +1,9 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { partial } from '~test/util.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { ExtractConfig } from '../types.ts';
+import { extractFleetHelmBlock } from './extract.ts';
 import { extractPackageFile } from './index.ts';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
@@ -129,6 +131,29 @@ kind: Fleet
           },
         ]);
       });
+
+      it('should correctly extract an OCI chart with registryAliases', () => {
+        const sample = {
+          depName: 'registry.example.com/bitnamicharts/redis',
+          packageName: 'registry-1.docker.io/bitnamicharts/redis',
+          currentValue: '18.12.1',
+          depType: 'fleet',
+          datasource: DockerDatasource.id,
+          pinDigests: false,
+          currentDigest: undefined,
+        };
+        const pkg = extractFleetHelmBlock(
+          {
+            version: sample.currentValue,
+            chart: 'oci://registry.example.com/bitnamicharts/redis',
+          },
+          {
+            registryAliases: { 'registry.example.com': 'registry-1.docker.io' },
+          },
+        );
+        expect(pkg).toEqual(sample);
+      });
+
       it('should parse valid configuration with target customization', () => {
         const result = extractPackageFile(
           validFleetYamlWithCustom,
