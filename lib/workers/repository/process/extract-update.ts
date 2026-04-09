@@ -236,12 +236,12 @@ export async function lookup(
     config,
     packageFiles,
   );
+  reportMaliciousSkippedDependencies(packageFiles);
   logger.debug(
     { baseBranch: config.baseBranch, config: packageFiles },
     'packageFiles with updates',
   );
   sortBranches(branches);
-  reportMaliciousSkippedDependencies(packageFiles);
   return { branches, branchList, packageFiles };
 }
 
