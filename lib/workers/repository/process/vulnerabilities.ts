@@ -217,6 +217,17 @@ export class Vulnerabilities {
           continue;
         }
 
+        this.skipMaliciousPackages(
+          ecosystem,
+          packageName,
+          depVersion,
+          versioningApi,
+          dep,
+          packageFileConfig.manager,
+          packageFileConfig.packageFile,
+          osvVulnerability,
+        );
+
         for (const affected of osvVulnerability.affected ?? []) {
           const isVulnerable = this.isPackageVulnerable(
             ecosystem,
@@ -258,6 +269,78 @@ export class Vulnerabilities {
         'Error fetching vulnerability information for package',
       );
       return null;
+    }
+  }
+
+  private skipMaliciousPackages(
+    ecosystem: Ecosystem,
+    packageName: string,
+    depVersion: string,
+    versioningApi: VersioningApi,
+    dep: PackageDependency<Record<string, any>, string>,
+    manager: string | undefined,
+    packageFile: string,
+    osvVulnerability: Osv.Vulnerability,
+  ): void {
+    // the OpenSSF's Malicious Packages (https://github.com/ossf/malicious-packages) is a source of advisories through osv.dev, which takes various sources of advisories, and will re-publish them with more specific information about their malicious usage
+    if (osvVulnerability.id.startsWith('MAL-')) {
+      // is the current dependency vulnerable?
+      for (const affected of osvVulnerability.affected ?? []) {
+        // is the current dependency vulnerable?
+        const isVulnerable = this.isPackageVulnerable(
+          ecosystem,
+          packageName,
+          depVersion,
+          affected,
+          versioningApi,
+        );
+
+        if (isVulnerable) {
+          logger.debug(
+            {
+              packageFile: packageFile,
+              depName: dep.depName,
+              packageName: dep.packageName,
+              manager: manager,
+              datasource: dep.datasource,
+              currentVersion: depVersion,
+            },
+            `Marking ${dep.depName} as skipReason=malicious-version-in-use, as it is affected by ${osvVulnerability.id}`,
+          );
+          dep.skipReason = 'malicious-version-in-use';
+          dep.skipStage = 'lookup';
+        }
+
+        // or are any of the updates vulnerable?
+        for (const update of dep.updates ?? []) {
+          const newVersion = update.newVersion ?? update.newValue!;
+
+          const isUpdateVulnerable = this.isPackageVulnerable(
+            ecosystem,
+            packageName,
+            newVersion,
+            affected,
+            versioningApi,
+          );
+
+          if (isUpdateVulnerable) {
+            logger.debug(
+              {
+                packageFile: packageFile,
+                depName: dep.depName,
+                packageName: dep.packageName,
+                manager: manager,
+                datasource: dep.datasource,
+                currentVersion: depVersion,
+                newVersion,
+              },
+              `Marking ${dep.depName}'s update to ${newVersion} as skipReason=malicious-update-proposed, as it is affected by ${osvVulnerability.id}`,
+            );
+            dep.skipReason = 'malicious-update-proposed';
+            dep.skipStage = 'lookup';
+          }
+        }
+      }
     }
   }
 

@@ -2921,6 +2921,20 @@ Renovate only queries the OSV database for dependencies that use one of these da
 
 The entire database is downloaded locally by [renovate-offline](https://github.com/renovatebot/osv-offline) and queried offline.
 
+<!-- markdownlint-disable MD001 -->
+
+### Malicious package detection and protection
+
+<!-- prettier-ignore -->
+!!! note
+    This functionality is currently experimental, being actively worked on, and will soon be available for usage outside of `osvVulnerabilityAlerts`.
+
+If Renovate detects a malicious dependency using data from OSV, it will surface this in log warnings, and prevent PRs from being created.
+
+If you currently have a dependency that is using a malicious version, Renovate will report this via a warning log.
+
+If Renovate finds a dependency update available, and that dependency update is found to be malicious, Renovate will skip **any updates to the dependency**, marking it with `skipReason: malicious-update-proposed`, and report this via a warning log.
+
 ## packageRules
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
