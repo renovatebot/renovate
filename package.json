@@ -326,7 +326,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.3.1",
     "emojibase-data": "17.0.0",
-    "esbuild": "0.27.5",
+    "esbuild": "0.27.7",
     "expect-more-jest": "5.5.0",
     "graphql": "16.13.2",
     "husky": "9.1.7",
