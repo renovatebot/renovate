@@ -1,5 +1,7 @@
 import type { DepTypeMetadata } from '../types.ts';
 
+export const pnpmWorkspaceOverrides = 'pnpm-workspace.overrides' as const;
+
 export const knownDepTypes = [
   {
     depType: 'dependencies',
@@ -55,6 +57,11 @@ export const knownDepTypes = [
     depType: 'pnpm.overrides',
     prettyDepType: 'overrides',
     description: 'Listed under `pnpm.overrides`',
+  },
+  {
+    depType: pnpmWorkspaceOverrides,
+    prettyDepType: 'overrides',
+    description: 'Listed under `overrides` in a pnpm workspace YAML file',
   },
 ] as const satisfies readonly DepTypeMetadata[];
 
