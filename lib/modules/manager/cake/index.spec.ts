@@ -129,7 +129,13 @@ describe('modules/manager/cake/index', () => {
     const content = codeBlock`#addin nuget:?package=Contoso.SomePackage&version=1.2.3`;
     await extractPackageFile(content, 'build.cake', config);
 
-    expect(applyRegistriesSpy).toHaveBeenCalled();
+    expect(applyRegistriesSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        depName: 'Contoso.SomePackage',
+        currentValue: '1.2.3',
+      }),
+      undefined,
+    );
   });
 
   it('calls applyRegistries to honor nuget.config files if present for InstallTools', async () => {
@@ -144,6 +150,12 @@ describe('modules/manager/cake/index', () => {
       `;
     await extractPackageFile(content, 'build.cs', config);
 
-    expect(applyRegistriesSpy).toHaveBeenCalled();
+    expect(applyRegistriesSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        depName: 'Good.Tool',
+        currentValue: '1.2.3',
+      }),
+      undefined,
+    );
   });
 });

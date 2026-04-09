@@ -85,7 +85,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   _config: ExtractConfig,
-): Promise<PackageFileContent | null> {
+): Promise<PackageFileContent> {
   const deps: NugetPackageDependency[] = [];
   const registries = await getConfiguredRegistries(packageFile);
 
