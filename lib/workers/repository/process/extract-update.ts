@@ -241,7 +241,35 @@ export async function lookup(
     'packageFiles with updates',
   );
   sortBranches(branches);
+  reportMaliciousSkippedDependencies(packageFiles);
   return { branches, branchList, packageFiles };
+}
+
+export function reportMaliciousSkippedDependencies(
+  allPackageFiles: Record<string, PackageFile<Record<string, any>>[]>,
+): void {
+  if (allPackageFiles === undefined) {
+    return;
+  }
+
+  for (const [manager, packageFiles] of Object.entries(allPackageFiles)) {
+    for (const packageFile of packageFiles) {
+      for (const dep of packageFile.deps) {
+        if (dep.skipReason === 'malicious') {
+          logger.warn(
+            {
+              packageFile: packageFile.packageFile,
+              depName: dep.depName,
+              packageName: dep.packageName,
+              manager: manager,
+              datasource: dep.datasource,
+            },
+            `Dependency ${dep.depName} will not be updated as it malicious`,
+          );
+        }
+      }
+    }
+  }
 }
 
 export async function update(
