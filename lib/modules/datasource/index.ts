@@ -11,7 +11,7 @@ import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
-import { DatasourceCacheStats } from '../../util/stats.ts';
+import { DatasourceCacheStats, GetReleasesStats } from '../../util/stats.ts';
 import { trimTrailingSlash } from '../../util/url.ts';
 import * as versioning from '../versioning/index.ts';
 import datasources from './api.ts';
@@ -86,7 +86,10 @@ async function getRegistryReleases(
     DatasourceCacheStats.miss(datasource.id, registryUrl, config.packageName);
   }
 
-  const res = await datasource.getReleases({ ...config, registryUrl });
+  const res = await getReleasesInstrumented(datasource, {
+    ...config,
+    registryUrl,
+  });
   if (res?.releases.length) {
     res.registryUrl ??= registryUrl;
   }
@@ -371,7 +374,7 @@ async function fetchReleases(
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
-      dep = await datasource.getReleases(config);
+      dep = await getReleasesInstrumented(datasource, config);
     }
   } catch (err) {
     if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
@@ -388,6 +391,18 @@ async function fetchReleases(
   addMetaData(dep, datasourceName, config.packageName);
   dep = { ...dep, ...applyReplacements(config) };
   return dep;
+}
+
+function getReleasesInstrumented(
+  datasource: DatasourceApi,
+  config: GetReleasesConfig,
+): Promise<ReleaseResult | null> {
+  return GetReleasesStats.wrap(
+    datasource.id,
+    config.registryUrl ?? '',
+    config.packageName,
+    () => datasource.getReleases(config),
+  );
 }
 
 function fetchCachedReleases(
