@@ -351,7 +351,7 @@
     "vite": "8.0.5",
     "vite-tsconfig-paths": "6.1.1",
     "vitest": "4.1.2",
-    "vitest-mock-extended": "3.1.0"
+    "vitest-mock-extended": "3.1.1"
   },
   "packageManager": "pnpm@10.33.0",
   "files": [
