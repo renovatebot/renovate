@@ -30,7 +30,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   skipInstalls?: boolean | null;
   repository?: string;
   currentDigest?: string;
-  newDigest?: string;
+  newDigest?: string | null;
 }
 
 export interface UpdateArtifactsConfig {
@@ -97,7 +97,7 @@ export interface LookupUpdate {
   isReplacement?: boolean;
   isSingleVersion?: boolean;
   isVulnerabilityAlert?: boolean;
-  newDigest?: string;
+  newDigest?: string | null;
   newMajor?: number;
   newMinor?: number;
   newPatch?: number;
@@ -125,6 +125,12 @@ export interface LookupUpdate {
   libYears?: number;
 
   version?: string;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
 }
 
 /**
@@ -191,6 +197,12 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
 }
 
 export interface Upgrade<
@@ -204,7 +216,7 @@ export interface Upgrade<
   lockFiles?: string[];
   manager?: string;
   name?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newFrom?: string;
   newMajor?: number;
   newName?: string;

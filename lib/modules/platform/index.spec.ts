@@ -6,8 +6,8 @@ import api from './api.ts';
 import * as platform from './index.ts';
 import type { Platform } from './types.ts';
 
-vi.unmock('.');
-vi.unmock('./scm');
+vi.unmock('./index.ts');
+vi.unmock('./scm.ts');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {

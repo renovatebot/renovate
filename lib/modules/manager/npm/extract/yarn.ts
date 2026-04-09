@@ -68,10 +68,11 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
+  // TODO: fix type #22198
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml); /* v8 ignore next -- needs test */
-  } catch (err) {
+    conf = parseSyml(yarnrcYml);
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
   }
   const paths = [
@@ -91,6 +92,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
+  // v8 ignore else -- TODO: add test #40625
   if (isString(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {
