@@ -2,6 +2,7 @@ import { isNonEmptyArray } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
+import { runRepositoryEnrichments } from '../../../modules/enrichment/index.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { scm } from '../../../modules/platform/scm.ts';
@@ -230,6 +231,7 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
+  await runRepositoryEnrichments(config, packageFiles);
   memCache.cleanDatasourceKeys();
   calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(

@@ -5,6 +5,7 @@ import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
+import { initEnrichments } from '../../modules/enrichment/index.ts';
 import { initPlatform } from '../../modules/platform/index.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
 import { setEmojiConfig } from '../../util/emoji.ts';
@@ -94,6 +95,7 @@ export async function globalInitialize(
   setGlobalHostRules(config);
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);
+  await initEnrichments(config);
   return config;
 }
 

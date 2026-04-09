@@ -1,6 +1,14 @@
-import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyString,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { ValidationMessage } from '../../../../config/types.ts';
+import type {
+  UpdateType,
+  ValidationMessage,
+} from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -20,12 +28,15 @@ import {
   supportsDigests,
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
+import { runUpdateEnrichments } from '../../../../modules/enrichment/index.ts';
 import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
+import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
@@ -510,6 +521,15 @@ export async function lookupUpdates(
           release,
         );
 
+        // TODO set the enrichment here
+        await applyEnrichment(
+          config,
+          currentVersion,
+          newVersion,
+          update,
+          update.updateType,
+        );
+
         // #29034
         if (
           config.manager === 'gomod' &&
@@ -815,4 +835,78 @@ export async function lookupUpdates(
     res.skipReason = 'internal-error';
   }
   return Result.ok(res);
+}
+
+async function applyEnrichment(
+  config: LookupUpdateConfig,
+  currentVersion: string,
+  newVersion: string,
+  update: LookupUpdate,
+  updateType?: UpdateType,
+): Promise<void> {
+  const { datasource, packageName, packageRules } = config;
+  const enrichResult = await runUpdateEnrichments(
+    {
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType,
+    },
+    config,
+  );
+  logger.trace(
+    {
+      source: enrichResult,
+      target: {
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+        updateType,
+        ...update,
+      },
+    },
+    'Merging EnrichmentResult for update',
+  );
+
+  // Apply enrichment results to the update
+  if (
+    enrichResult.mergeConfidenceLevel !== undefined &&
+    packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))
+  ) {
+    update.mergeConfidenceLevel = enrichResult.mergeConfidenceLevel;
+  }
+  if (enrichResult.prBodyNotes?.length) {
+    // NOTE that at this point, no `prBodyNotes` should be set
+    update.prBodyNotes = enrichResult.prBodyNotes;
+  }
+  if (enrichResult.skipReason !== undefined) {
+    logger.trace(
+      {
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+        updateType,
+      },
+      `Setting skipReason on \`${packageName}\` to \`${enrichResult.skipReason}\`, was \`${update.skipReason}\``,
+    );
+    update.skipReason = enrichResult.skipReason; // TODO log when overwriting
+  }
+  // TODO remove in #42421
+  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
+    update.mergeConfidenceLevel ??= await getMergeConfidenceLevel(
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      updateType!,
+    );
+  }
+
+  if (enrichResult.statusChecks) {
+    update.statusChecks ??= [];
+    update.statusChecks.push(...enrichResult.statusChecks);
+  }
 }

@@ -17,6 +17,7 @@ import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 import type { RegistryStrategy } from '../datasource/index.ts';
+import type { StatusCheckConfig } from '../platform/types.ts';
 import type { CustomExtractConfig } from './custom/types.ts';
 
 export interface ManagerData<T> {
@@ -116,6 +117,8 @@ export interface LookupUpdate {
   updateTypes?: UpdateType[];
   isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
+  prBodyNotes?: string[];
+  skipReason?: SkipReason;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;
@@ -131,6 +134,8 @@ export interface LookupUpdate {
    * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
    */
   hasAttestation?: boolean;
+
+  statusChecks?: StatusCheckConfig[];
 }
 
 /**

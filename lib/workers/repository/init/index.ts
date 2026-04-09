@@ -3,6 +3,7 @@ import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { setRepositoryLogLevelRemaps } from '../../../logger/remap.ts';
+import { initRepoEnrichments } from '../../../modules/enrichment/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { clone } from '../../../util/clone.ts';
@@ -71,6 +72,7 @@ export async function initRepo(
   });
   setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
+  await initRepoEnrichments(config);
   // istanbul ignore if
   if (config.printConfig) {
     logger.info(

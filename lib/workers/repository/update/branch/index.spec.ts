@@ -10,9 +10,13 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import * as _enrichment from '../../../../modules/enrichment/index.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
-import type { ArtifactError } from '../../../../modules/manager/types.ts';
+import type {
+  ArtifactError,
+  LookupUpdate,
+} from '../../../../modules/manager/types.ts';
 import type {
   EnsureCommentConfig,
   Pr,
@@ -59,6 +63,7 @@ vi.mock('../pr/index.ts');
 vi.mock('../pr/automerge.ts');
 vi.mock('../../changelog/index.ts');
 vi.mock('../../../../util/exec/index.ts');
+vi.mock('../../../../modules/enrichment/index.ts');
 vi.mock('../../../../util/merge-confidence/index.ts');
 vi.mock('../../../../util/sanitize.ts');
 vi.mock('../../../../util/fs/index.ts');
@@ -72,6 +77,7 @@ const reuse = vi.mocked(_reuse);
 const npmPostExtract = vi.mocked(_npmPostExtract);
 const automerge = vi.mocked(_automerge);
 const commit = vi.mocked(_commit);
+const enrichment = vi.mocked(_enrichment);
 const mergeConfidence = vi.mocked(_mergeConfidence);
 const prAutomerge = vi.mocked(_prAutomerge);
 const prWorker = vi.mocked(_prWorker);
@@ -123,6 +129,7 @@ describe('workers/repository/update/branch/index', () => {
         manager: 'some-manager',
         major: undefined,
       } satisfies BranchConfig;
+      enrichment.runUpdateEnrichments.mockResolvedValue({});
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('123test' as LongCommitSha);
 
@@ -1092,6 +1099,88 @@ describe('workers/repository/update/branch/index', () => {
       });
       // Called only once before ensurePr
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets branch status if the EnrichmentResult includes status checks', async () => {
+      const updates: LookupUpdate[] = [
+        {
+          // an update for one dependency
+          branchName: 'renovate/renovate-group',
+          newValue: '5.5.5',
+          updateType: 'major',
+          statusChecks: [
+            {
+              context: 'artifactError',
+              state: 'red',
+              description: 'An unknown error occurred',
+            },
+            {
+              context: 'minimumReleaseAge',
+              state: 'yellow',
+              description: 'It is not yet ready',
+            },
+          ],
+        },
+        // another dependency being updated on this branch
+        {
+          branchName: 'renovate/renovate-group',
+          newValue: '43.1.1',
+          updateType: 'minor',
+          statusChecks: [
+            {
+              context: 'mergeConfidence',
+              state: 'yellow',
+              description: `We wouldn't recommend it`,
+            },
+          ],
+        },
+      ];
+
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+      });
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      await branchWorker.processBranch({
+        ...config,
+        branchName: 'renovate/renovate-group',
+        updates,
+      });
+      // called for each distinct status check
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(3);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          branchName: 'renovate/renovate-group',
+          context: 'artifactError',
+          state: 'red',
+        }),
+      );
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          branchName: 'renovate/renovate-group',
+          context: 'minimumReleaseAge',
+          state: 'yellow',
+        }),
+      );
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          branchName: 'renovate/renovate-group',
+          context: 'mergeConfidence',
+          state: 'yellow',
+        }),
+      );
     });
 
     it('returns if branch exists but updated', async () => {

@@ -57,12 +57,17 @@ import { getUpdatedPackageFiles } from './get-updated.ts';
 import { handleClosedPr, handleModifiedPr } from './handle-existing.ts';
 import { shouldReuseExistingBranch } from './reuse.ts';
 import { isScheduledNow } from './schedule.ts';
-import { setConfidence, setStability } from './status-checks.ts';
+import {
+  setConfidence,
+  setStability,
+  setStatusChecksFromUpdates,
+} from './status-checks.ts';
 
 async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
   await setArtifactErrorStatus(config);
   await setStability(config);
   await setConfidence(config);
+  await setStatusChecksFromUpdates(config.branchName, config.updates);
 }
 
 async function rebaseCheck(

@@ -92,6 +92,7 @@ export async function generateUpdate(
     // But we should not add that as default behavior until we stop treating non-LTS versions as unstable first
     update.isBreaking = update.updateType === 'major';
   }
+  // TODO remove in #42421
   const { datasource, packageName, packageRules } = config;
   if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
     update.mergeConfidenceLevel = await getMergeConfidenceLevel(

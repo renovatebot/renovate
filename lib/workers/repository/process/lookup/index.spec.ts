@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import * as hostRules from '../../../../../lib/util/host-rules.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.preset.ts';
@@ -17,6 +17,7 @@ import { MavenDatasource } from '../../../../modules/datasource/maven/index.ts';
 import { NpmDatasource } from '../../../../modules/datasource/npm/index.ts';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist/index.ts';
 import { PypiDatasource } from '../../../../modules/datasource/pypi/index.ts';
+import * as enrichmentApi from '../../../../modules/enrichment/index.ts';
 import { id as composerVersioningId } from '../../../../modules/versioning/composer/index.ts';
 import { id as debianVersioningId } from '../../../../modules/versioning/debian/index.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
@@ -5586,6 +5587,235 @@ describe('workers/repository/process/lookup/index', () => {
         ).unwrapOrThrow();
 
         expect(updates).toBeEmptyArray();
+      });
+
+      it('calls runUpdateEnrichments for each update candidate', async () => {
+        const runUpdateEnrichmentsSpy = vi.spyOn(
+          enrichmentApi,
+          'runUpdateEnrichments',
+        );
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).not.toBeEmpty();
+        expect(runUpdateEnrichmentsSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            datasource: NpmDatasource.id,
+            packageName: 'webpack',
+            currentVersion: '3.7.0',
+            newVersion: '3.8.1',
+            updateType: 'minor',
+          }),
+          expect.anything(),
+        );
+        runUpdateEnrichmentsSpy.mockRestore();
+      });
+
+      it('applies mergeConfidenceLevel from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ mergeConfidenceLevel: 'high' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        config.packageRules = [{ matchConfidence: ['high'] }];
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].mergeConfidenceLevel).toBe('high');
+        spy.mockRestore();
+      });
+
+      it('does not apply mergeConfidenceLevel from enrichment result when no matchConfidence packageRule is set', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ mergeConfidenceLevel: 'high' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].mergeConfidenceLevel).toBeUndefined();
+        spy.mockRestore();
+      });
+
+      it('applies prBodyNotes from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ prBodyNotes: ['some advisory note'] });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].prBodyNotes).toEqual(['some advisory note']);
+        spy.mockRestore();
+      });
+
+      it('applies skipReason from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ skipReason: 'internal-error' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].skipReason).toBe('internal-error');
+        spy.mockRestore();
+      });
+
+      it('applies statusChecks from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({
+            statusChecks: [
+              {
+                context: 'artifactError',
+                state: 'red',
+                description: 'An unknown error occurred',
+              },
+              {
+                context: 'minimumReleaseAge',
+                state: 'yellow',
+                description: 'It is not yet ready',
+              },
+              {
+                context: 'mergeConfidence',
+                state: 'yellow',
+                description: `We wouldn't recommend it`,
+              },
+            ],
+          });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates[0].statusChecks).toEqual(
+          // TODO
+          // expect(res.statusChecks).toEqual( // TODO
+          [
+            {
+              context: 'artifactError',
+              state: 'red',
+              description: 'An unknown error occurred',
+            },
+            {
+              context: 'minimumReleaseAge',
+              state: 'yellow',
+              description: 'It is not yet ready',
+            },
+            {
+              context: 'mergeConfidence',
+              state: 'yellow',
+              description: `We wouldn't recommend it`,
+            },
+          ],
+        );
+        spy.mockRestore();
+      });
+
+      it('trace logs when skipReason is set from enrichment result', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ skipReason: 'internal-error' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+
+        expect(logger.logger.trace).toHaveBeenCalledWith(
+          {
+            datasource: 'npm',
+            packageName: 'webpack',
+            currentVersion: '3.7.0',
+            newVersion: '3.8.1',
+            updateType: 'minor',
+          },
+          'Setting skipReason on `webpack` to `internal-error`, was `undefined`',
+        );
+
+        spy.mockRestore();
+      });
+
+      it('trace logs when merging EnrichmentResult', async () => {
+        const spy = vi
+          .spyOn(enrichmentApi, 'runUpdateEnrichments')
+          .mockResolvedValue({ skipReason: 'internal-error' });
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+
+        expect(logger.logger.trace).toHaveBeenCalledWith(
+          {
+            source: {
+              skipReason: 'internal-error',
+            },
+
+            target: expect.objectContaining({
+              packageName: 'webpack',
+              datasource: 'npm',
+            }),
+          },
+          'Merging EnrichmentResult for update',
+        );
+
+        spy.mockRestore();
       });
     });
 
