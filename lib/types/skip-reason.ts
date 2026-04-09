@@ -45,7 +45,11 @@ export type SkipReason =
   | 'missing-depname'
   | 'recursive-placeholder'
   | 'github-token-required'
-  | 'inherited-dependency';
+  | 'inherited-dependency'
+  /**
+   * The dependency has been detected as explicitly malicious, and should not be updated.
+   */
+  | 'malicious';
 
 export type StageName =
   | 'current-timestamp'
