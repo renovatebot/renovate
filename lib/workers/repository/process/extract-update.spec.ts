@@ -158,6 +158,60 @@ describe('workers/repository/process/extract-update', () => {
 
       expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
     });
+
+    it('logs a warning for each skipReason=malicious', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depType: 'devDependencies',
+                depName: 'axios',
+                currentValue: '1.14.1',
+                datasource: 'npm',
+                prettyDepType: 'devDependency',
+                lockedVersion: '1.14.1',
+                updates: [],
+                packageName: 'axios',
+
+                // most importantly
+                skipReason: 'malicious',
+              },
+              // not malicious
+              {
+                depType: 'devDependencies',
+                depName: 'axios',
+                currentValue: '1.14.0',
+                datasource: 'npm',
+                prettyDepType: 'devDependency',
+                lockedVersion: '1.14.0',
+                updates: [],
+                packageName: 'axios',
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+
+      const config = {
+        repoIsOnboarded: true,
+        baseBranch: 'main',
+      };
+
+      await lookup(config, packageFiles);
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          packageFile: 'package.json',
+          depName: 'axios',
+          packageName: 'axios',
+          manager: 'npm',
+          datasource: 'npm',
+        },
+        'Dependency axios will not be updated as it malicious',
+      );
+    });
   });
 
   describe('isCacheExtractValid()', () => {
