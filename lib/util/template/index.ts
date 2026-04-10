@@ -114,6 +114,12 @@ for (const [name, fn] of Object.entries(helpers)) {
 // Export helper names derived from the same source used to register them
 export const templateHelperNames = Object.keys(helpers) as readonly string[];
 
+/**
+ * Config options whose **values** are exposed as template variables.
+ * e.g. `groupName` is in this list because you can write `{{groupName}}` inside a template.
+ * This is distinct from `supportsTemplating`, which marks options whose values
+ * are themselves *compiled* as Handlebars templates via `template.compile()`.
+ */
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
@@ -145,6 +151,11 @@ export const exposedConfigOptions = [
   'sourceDirectory',
 ];
 
+/**
+ * Runtime-generated fields available as template variables.
+ * These are not config options — they are computed during Renovate's run
+ * (e.g. `depName`, `newVersion`, `isMajor`) and made available in templates.
+ */
 export const allowedFields = {
   baseBranch: 'The baseBranch for this branch/PR',
   body: 'The body of the release notes',
@@ -249,6 +260,11 @@ export const allowedFields = {
 
 type CompileInput<T = Record<string, unknown>> = T;
 
+/**
+ * The complete set of field names that may be referenced inside a Handlebars template.
+ * Union of runtime fields (`allowedFields`) and config options (`exposedConfigOptions`).
+ * Used by the compile proxy to warn on unknown variable references.
+ */
 const allowedTemplateFields = new Set([
   ...Object.keys(allowedFields),
   ...exposedConfigOptions,
