@@ -827,6 +827,40 @@ describe('modules/datasource/pypi/index', () => {
     expect(googleAuth).toHaveBeenCalledTimes(1);
   });
 
+  it('sanitizes GAR userinfo when Google auth is used', async () => {
+    httpMock
+      .scope('https://someregion-python.pkg.dev/some-project/some-repo/simple/')
+      .get('/dj-database-url/')
+      .reply(200, htmlResponse);
+    const config = {
+      registryUrls: [
+        'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple/',
+      ],
+    };
+    googleAuth.mockImplementationOnce(
+      // TODO: fix typing
+      vi.fn<any>(
+        class {
+          getAccessToken = vi.fn().mockResolvedValue('some-token');
+        },
+      ),
+    );
+    expect(
+      await getPkgReleases({
+        datasource,
+        ...config,
+        constraints: { python: '2.7' },
+        packageName: 'dj-database-url',
+      }),
+    ).toMatchObject({
+      isPrivate: true,
+      registryUrl:
+        'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple',
+      releases: djDatabaseUrlSimpleReleases,
+    });
+    expect(googleAuth).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores an invalid URL when checking for auth headers', async () => {
     const config = {
       registryUrls: ['not-a-url/simple/'],
