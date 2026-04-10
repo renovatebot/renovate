@@ -4,7 +4,6 @@ import { isXmlElement } from '../nuget/util.ts';
 import type { PackageDependency } from '../types.ts';
 import type { AntProp } from './types.ts';
 
-const placeholderRegex = regEx(/\$\{([^}]+)}/g);
 const fullPlaceholderRegex = regEx(/^\$\{([^}]+)}$/);
 const placeholderTestRegex = regEx(/\$\{[^}]+}/);
 const propertySeparatorRegex = regEx(/^([^=:\s]+)\s*[=:\s]\s*(.*)$/);
@@ -171,6 +170,58 @@ export function applyProps(
 }
 
 /**
+ * Resolve a single property key, following chained references.
+ * Returns the resolved value or null if circular/unresolvable.
+ */
+function resolveKey(
+  key: string,
+  props: Record<string, AntProp>,
+  resolved: Map<string, string | null>,
+  chain: Set<string>,
+): string | null {
+  if (resolved.has(key)) {
+    return resolved.get(key)!;
+  }
+  if (chain.has(key)) {
+    // Circular reference detected
+    resolved.set(key, null);
+    return null;
+  }
+  const prop = props[key];
+  if (!prop) {
+    return null;
+  }
+  if (!containsPlaceholder(prop.val)) {
+    resolved.set(key, prop.val);
+    return prop.val;
+  }
+
+  chain.add(key);
+  let isCircular = false;
+  const val = prop.val.replace(
+    regEx(/\$\{([^}]+)}/g),
+    (match, refKey: string) => {
+      const refResult = resolveKey(refKey, props, resolved, chain);
+      if (refResult === null) {
+        isCircular = true;
+        return match;
+      }
+      return refResult;
+    },
+  );
+  chain.delete(key);
+
+  if (isCircular) {
+    resolved.set(key, null);
+    return null;
+  }
+
+  resolved.set(key, val);
+  prop.val = val;
+  return val;
+}
+
+/**
  * Resolve chained property references within the property map itself.
  * E.g., if prop A = "${B}" and prop B = "1.0", resolve A to "1.0".
  * Marks circular properties by setting val to a placeholder that will be caught later.
@@ -178,47 +229,7 @@ export function applyProps(
 export function resolveChainedProps(props: Record<string, AntProp>): void {
   const resolved = new Map<string, string | null>(); // null = circular
 
-  function resolve(key: string, chain: Set<string>): string | null {
-    if (resolved.has(key)) {
-      return resolved.get(key)!;
-    }
-    if (chain.has(key)) {
-      // Circular reference detected
-      resolved.set(key, null);
-      return null;
-    }
-    const prop = props[key];
-    if (!prop) {
-      return null;
-    }
-    if (!containsPlaceholder(prop.val)) {
-      resolved.set(key, prop.val);
-      return prop.val;
-    }
-
-    chain.add(key);
-    let isCircular = false;
-    const val = prop.val.replace(placeholderRegex, (match, refKey: string) => {
-      const refResult = resolve(refKey, chain);
-      if (refResult === null) {
-        isCircular = true;
-        return match;
-      }
-      return refResult;
-    });
-    chain.delete(key);
-
-    if (isCircular) {
-      resolved.set(key, null);
-      return null;
-    }
-
-    resolved.set(key, val);
-    prop.val = val;
-    return val;
-  }
-
   for (const key of Object.keys(props)) {
-    resolve(key, new Set());
+    resolveKey(key, props, resolved, new Set());
   }
 }

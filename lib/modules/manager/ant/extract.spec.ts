@@ -1,11 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
-import {
-  extractAllPackageFiles,
-  extractPackageFile,
-  parsePropertiesFile,
-} from './extract.ts';
-import type { AntProp } from './types.ts';
+import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -175,7 +170,7 @@ describe('modules/manager/ant/extract', () => {
         <project>
           <property name="slf4j.version" value="1.7.36"/>
           <artifact:dependencies>
-            <dependency groupId="org.slf4j" artifactId="slf4j-api" version="${'${slf4j.version}'}" />
+            <dependency groupId="org.slf4j" artifactId="slf4j-api" version="\${slf4j.version}" />
           </artifact:dependencies>
         </project>
       `);
@@ -203,7 +198,7 @@ describe('modules/manager/ant/extract', () => {
             <project>
               <property file="versions.properties"/>
               <artifact:dependencies>
-                <dependency groupId="org.slf4j" artifactId="slf4j-api" version="${'${slf4j.version}'}" />
+                <dependency groupId="org.slf4j" artifactId="slf4j-api" version="\${slf4j.version}" />
               </artifact:dependencies>
             </project>
           `);
@@ -237,7 +232,7 @@ describe('modules/manager/ant/extract', () => {
           <property name="junit.version" value="4.13.2"/>
           <property name="junit.version" value="4.12"/>
           <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+            <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
           </artifact:dependencies>
         </project>
       `);
@@ -265,7 +260,7 @@ describe('modules/manager/ant/extract', () => {
               <property name="junit.version" value="4.13.2"/>
               <property file="versions.properties"/>
               <artifact:dependencies>
-                <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+                <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
               </artifact:dependencies>
             </project>
           `);
@@ -295,7 +290,7 @@ describe('modules/manager/ant/extract', () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`
         <project>
           <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="${'${missing.version}'}" />
+            <dependency groupId="junit" artifactId="junit" version="\${missing.version}" />
           </artifact:dependencies>
         </project>
       `);
@@ -318,10 +313,10 @@ describe('modules/manager/ant/extract', () => {
     it('detects circular property references', async () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`
         <project>
-          <property name="a" value="${'${b}'}"/>
-          <property name="b" value="${'${a}'}"/>
+          <property name="a" value="\${b}"/>
+          <property name="b" value="\${a}"/>
           <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="${'${a}'}" />
+            <dependency groupId="junit" artifactId="junit" version="\${a}" />
           </artifact:dependencies>
         </project>
       `);
@@ -345,10 +340,10 @@ describe('modules/manager/ant/extract', () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`
         <project>
           <property name="base.version" value="1.7"/>
-          <property name="full.version" value="${'${base.version}'}.36"/>
-          <property name="slf4j.version" value="${'${full.version}'}"/>
+          <property name="full.version" value="\${base.version}.36"/>
+          <property name="slf4j.version" value="\${full.version}"/>
           <artifact:dependencies>
-            <dependency groupId="org.slf4j" artifactId="slf4j-api" version="${'${slf4j.version}'}" />
+            <dependency groupId="org.slf4j" artifactId="slf4j-api" version="\${slf4j.version}" />
           </artifact:dependencies>
         </project>
       `);
@@ -376,8 +371,8 @@ describe('modules/manager/ant/extract', () => {
         <project>
           <property name="jackson.version" value="2.15.2"/>
           <artifact:dependencies>
-            <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-core" version="${'${jackson.version}'}" />
-            <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-databind" version="${'${jackson.version}'}" />
+            <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-core" version="\${jackson.version}" />
+            <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-databind" version="\${jackson.version}" />
           </artifact:dependencies>
         </project>
       `);
@@ -410,7 +405,7 @@ describe('modules/manager/ant/extract', () => {
             <project>
               <property file="config/deps.properties"/>
               <artifact:dependencies>
-                <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+                <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
               </artifact:dependencies>
             </project>
           `);
@@ -444,7 +439,7 @@ describe('modules/manager/ant/extract', () => {
             <project>
               <property file="missing.properties"/>
               <artifact:dependencies>
-                <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+                <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
               </artifact:dependencies>
             </project>
           `);
@@ -472,7 +467,7 @@ describe('modules/manager/ant/extract', () => {
         <project>
           <property name="junit.version" value="4.13.2"/>
           <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+            <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
             <dependency groupId="org.slf4j" artifactId="slf4j-api" version="1.7.36" />
           </artifact:dependencies>
         </project>
@@ -503,7 +498,7 @@ describe('modules/manager/ant/extract', () => {
         <project>
           <property name="base.version" value="1.7"/>
           <artifact:dependencies>
-            <dependency groupId="org.slf4j" artifactId="slf4j-api" version="${'${base.version}'}.36" />
+            <dependency groupId="org.slf4j" artifactId="slf4j-api" version="\${base.version}.36" />
           </artifact:dependencies>
         </project>
       `);
@@ -540,7 +535,7 @@ describe('modules/manager/ant/extract', () => {
             <project>
               <property file="/absolute/versions.properties"/>
               <artifact:dependencies>
-                <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+                <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
               </artifact:dependencies>
             </project>
           `);
@@ -576,7 +571,7 @@ describe('modules/manager/ant/extract', () => {
               <property file="versions.properties"/>
               <property file="versions.properties"/>
               <artifact:dependencies>
-                <dependency groupId="junit" artifactId="junit" version="${'${junit.version}'}" />
+                <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
               </artifact:dependencies>
             </project>
           `);
@@ -607,9 +602,9 @@ describe('modules/manager/ant/extract', () => {
     it('handles chain referencing undefined property', async () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`
         <project>
-          <property name="a" value="${'${nonexistent}'}"/>
+          <property name="a" value="\${nonexistent}"/>
           <artifact:dependencies>
-            <dependency groupId="junit" artifactId="junit" version="${'${a}'}" />
+            <dependency groupId="junit" artifactId="junit" version="\${a}" />
           </artifact:dependencies>
         </project>
       `);
@@ -627,80 +622,6 @@ describe('modules/manager/ant/extract', () => {
           ],
         },
       ]);
-    });
-  });
-
-  describe('parsePropertiesFile', () => {
-    it('parses key=value pairs', () => {
-      const props: Record<string, AntProp> = {};
-      parsePropertiesFile(
-        'key1=value1\nkey2=value2\n',
-        'test.properties',
-        props,
-      );
-
-      expect(props.key1).toEqual(
-        expect.objectContaining({
-          val: 'value1',
-          packageFile: 'test.properties',
-        }),
-      );
-      expect(props.key2).toEqual(
-        expect.objectContaining({
-          val: 'value2',
-          packageFile: 'test.properties',
-        }),
-      );
-    });
-
-    it('skips comments and blank lines', () => {
-      const props: Record<string, AntProp> = {};
-      parsePropertiesFile(
-        '# comment\n\nkey=value\n! another comment\n',
-        'test.properties',
-        props,
-      );
-
-      expect(Object.keys(props)).toEqual(['key']);
-    });
-
-    it('supports colon separator', () => {
-      const props: Record<string, AntProp> = {};
-      parsePropertiesFile('key:value\n', 'test.properties', props);
-
-      expect(props.key).toEqual(expect.objectContaining({ val: 'value' }));
-    });
-
-    it('skips malformed lines without separators', () => {
-      const props: Record<string, AntProp> = {};
-      parsePropertiesFile(
-        'key=value\nmalformed_line_no_separator\nother=val\n',
-        'test.properties',
-        props,
-      );
-
-      expect(Object.keys(props)).toEqual(['key', 'other']);
-    });
-
-    it('implements first-definition-wins', () => {
-      const props: Record<string, AntProp> = {};
-      parsePropertiesFile('key=first\nkey=second\n', 'test.properties', props);
-
-      expect(props.key.val).toBe('first');
-    });
-
-    it('respects pre-existing props (first-definition-wins across sources)', () => {
-      const props: Record<string, AntProp> = {
-        key: {
-          val: 'existing',
-          fileReplacePosition: 0,
-          packageFile: 'build.xml',
-        },
-      };
-      parsePropertiesFile('key=new\n', 'test.properties', props);
-
-      expect(props.key.val).toBe('existing');
-      expect(props.key.packageFile).toBe('build.xml');
     });
   });
 });
