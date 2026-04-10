@@ -704,6 +704,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
         ],
         upgrades: [
           {
+            branchName: 'test-branch',
+            manager: 'npm',
             newVersion: '2.5.3',
           },
         ],
@@ -758,6 +760,41 @@ describe('workers/repository/update/branch/bump-versions', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: '.release-version' },
         'bumpVersions(test): No upgrades found in branch config for match type',
+      );
+    });
+
+    it('should log debug when newVersion is not found in upgrades for match type', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            name: 'test',
+            filePatterns: ['\\.release-version'],
+            bumpType: 'match',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { file: '.release-version' },
+        'bumpVersions(test): No newVersion found in branch upgrades for match type',
       );
     });
   });
