@@ -692,5 +692,73 @@ describe('workers/repository/update/branch/bump-versions', () => {
         ],
       });
     });
+
+    it('should use matched version when bumpType is match', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'match',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [
+          {
+            newVersion: '2.5.3',
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: '.release-version',
+            contents: '2.5.3',
+          },
+        ],
+      });
+    });
+
+    it('should log debug when no upgrades found for match type', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            name: 'test',
+            filePatterns: ['\\.release-version'],
+            bumpType: 'match',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { file: '.release-version' },
+        'bumpVersions(test): No upgrades found in branch config for match type',
+      );
+    });
   });
 });
