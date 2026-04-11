@@ -148,14 +148,13 @@ export class PackageCacheFile extends PackageCacheBase {
       return undefined;
     }
 
-    if (cacheIndexEntry.metadata !== undefined) {
-      const metadata = parseCacheIndexMetadata(cacheIndexEntry.metadata);
+    if (cacheIndexEntry.metadata === undefined) {
+      return await this.readLegacyCachedValue<T>(namespace, key, cacheIndexKey);
+    }
 
-      if (metadata === undefined || isExpired(metadata.expiry)) {
-        await this.removeLogicalCacheEntry(namespace, key);
-        return undefined;
-      }
+    const metadata = parseCacheIndexMetadata(cacheIndexEntry.metadata);
 
+    if (metadata !== undefined && !isExpired(metadata.expiry)) {
       return await this.readCurrentCachedValue<T>(
         namespace,
         key,
@@ -163,7 +162,8 @@ export class PackageCacheFile extends PackageCacheBase {
       );
     }
 
-    return await this.readLegacyCachedValue<T>(namespace, key, cacheIndexKey);
+    await this.removeLogicalCacheEntry(namespace, key);
+    return undefined;
   }
 
   override async set(
@@ -287,18 +287,13 @@ export class PackageCacheFile extends PackageCacheBase {
       const storedEntry = await cacache.get(this.cachePath, cacheIndexKey);
       const legacyPayload = parseLegacyPayload(storedEntry.data);
 
-      if (!legacyPayload) {
-        await this.removeLogicalCacheEntry(namespace, key);
-        return undefined;
+      if (legacyPayload !== undefined && !isExpired(legacyPayload.expiry)) {
+        logger.trace({ namespace, key }, 'Returning cached value');
+        return await decodeLegacyStoredValue<T>(legacyPayload);
       }
 
-      if (isExpired(legacyPayload.expiry)) {
-        await this.removeLogicalCacheEntry(namespace, key);
-        return undefined;
-      }
-
-      logger.trace({ namespace, key }, 'Returning cached value');
-      return await decodeLegacyStoredValue<T>(legacyPayload);
+      await this.removeLogicalCacheEntry(namespace, key);
+      return undefined;
     } catch (err) {
       logger.trace({ err, namespace, key }, 'Cache miss');
       return undefined;
