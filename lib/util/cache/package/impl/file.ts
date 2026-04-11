@@ -1,10 +1,85 @@
+import { isPlainObject } from '@sindresorhus/is';
 import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
-import { compressToBase64, decompressFromBase64 } from '../../../compress.ts';
+import {
+  compressToBuffer,
+  decompressFromBase64,
+  decompressFromBuffer,
+} from '../../../compress.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
+
+const currentCacheFormat = 'br-json';
+const currentCacheVersion = 2;
+
+interface PackageCacheLegacyEntry {
+  compress: true;
+  expiry: string;
+  value: string;
+}
+
+interface PackageCacheMetadata {
+  expiry: string;
+  format: typeof currentCacheFormat;
+  version: typeof currentCacheVersion;
+}
+
+function parseCacheMetadata(value: unknown): PackageCacheMetadata | undefined {
+  if (!isPlainObject(value)) {
+    return undefined;
+  }
+
+  const { expiry, format, version } = value;
+
+  if (
+    typeof expiry !== 'string' ||
+    format !== currentCacheFormat ||
+    version !== currentCacheVersion
+  ) {
+    return undefined;
+  }
+
+  return { expiry, format, version };
+}
+
+function parseLegacyCacheEntry(
+  data: Buffer,
+): PackageCacheLegacyEntry | undefined {
+  const parsed: unknown = JSON.parse(data.toString());
+  if (!isPlainObject(parsed)) {
+    return undefined;
+  }
+
+  const { compress, expiry, value } = parsed;
+
+  if (
+    compress !== true ||
+    typeof expiry !== 'string' ||
+    typeof value !== 'string'
+  ) {
+    return undefined;
+  }
+
+  return {
+    compress,
+    expiry,
+    value,
+  };
+}
+
+async function deserializeCurrentValue<T>(data: Buffer): Promise<T> {
+  const json = await decompressFromBuffer(data);
+  return JSON.parse(json) as T;
+}
+
+async function deserializeLegacyValue<T>(
+  entry: PackageCacheLegacyEntry,
+): Promise<T> {
+  const json = await decompressFromBase64(entry.value);
+  return JSON.parse(json) as T;
+}
 
 export class PackageCacheFile extends PackageCacheBase {
   static create(cacheDir: string): PackageCacheFile {
@@ -24,36 +99,101 @@ export class PackageCacheFile extends PackageCacheBase {
     return `${namespace}-${key}`;
   }
 
+  private async putCurrentEntry(
+    cacheKey: string,
+    serializedValue: string,
+    expiry: string,
+  ): Promise<void> {
+    const compressedValue = await compressToBuffer(serializedValue);
+    await cacache.put(this.cacheFileName, cacheKey, compressedValue, {
+      metadata: {
+        expiry,
+        format: currentCacheFormat,
+        version: currentCacheVersion,
+      },
+    });
+  }
+
+  private async getLegacy<T>(
+    namespace: PackageCacheNamespace,
+    key: string,
+    cacheKey: string,
+  ): Promise<T | undefined> {
+    const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
+    const legacyEntry = parseLegacyCacheEntry(cacheEntry.data);
+
+    if (!legacyEntry) {
+      await this.rm(namespace, key);
+      return undefined;
+    }
+
+    const expiry = DateTime.fromISO(legacyEntry.expiry);
+    if (!expiry.isValid || DateTime.local() >= expiry) {
+      await this.rm(namespace, key);
+      return undefined;
+    }
+
+    logger.trace({ namespace, key }, 'Returning cached value');
+    return await deserializeLegacyValue<T>(legacyEntry);
+  }
+
+  private async migrateLegacyEntry(cacheKey: string): Promise<boolean> {
+    const legacyEntry = await cacache.get(this.cacheFileName, cacheKey);
+    let cachedValue: PackageCacheLegacyEntry | undefined;
+
+    try {
+      cachedValue = parseLegacyCacheEntry(legacyEntry.data);
+    } catch {
+      logger.debug('Error parsing cached value - deleting');
+    }
+
+    if (!cachedValue) {
+      await this.rmEntry(cacheKey);
+      return true;
+    }
+
+    const expiry = DateTime.fromISO(cachedValue.expiry);
+    if (!expiry.isValid || DateTime.local() >= expiry) {
+      await this.rmEntry(cacheKey);
+      return true;
+    }
+
+    const serializedValue = await decompressFromBase64(cachedValue.value);
+    await this.putCurrentEntry(cacheKey, serializedValue, cachedValue.expiry);
+    return false;
+  }
+
   override async get<T = unknown>(
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
     try {
-      const entry = await cacache.get(
-        this.cacheFileName,
-        this.getKey(namespace, key),
-      );
-      const raw = entry.data.toString();
-      const cached = JSON.parse(raw);
+      const cacheKey = this.getKey(namespace, key);
+      const cacheInfo = await cacache.get.info(this.cacheFileName, cacheKey);
 
-      if (!cached) {
+      if (!cacheInfo) {
         return undefined;
       }
 
-      const expiry = DateTime.fromISO(cached.expiry);
-      if (!expiry.isValid || DateTime.local() >= expiry) {
-        await this.rm(namespace, key);
-        return undefined;
+      if (cacheInfo.metadata !== undefined) {
+        const metadata = parseCacheMetadata(cacheInfo.metadata);
+        if (!metadata) {
+          await this.rm(namespace, key);
+          return undefined;
+        }
+
+        const expiry = DateTime.fromISO(metadata.expiry);
+        if (!expiry.isValid || DateTime.local() >= expiry) {
+          await this.rm(namespace, key);
+          return undefined;
+        }
+
+        const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
+        logger.trace({ namespace, key }, 'Returning cached value');
+        return await deserializeCurrentValue<T>(cacheEntry.data);
       }
 
-      logger.trace({ namespace, key }, 'Returning cached value');
-
-      if (!cached.compress) {
-        return cached.value;
-      }
-
-      const json = await decompressFromBase64(cached.value);
-      return JSON.parse(json);
+      return await this.getLegacy<T>(namespace, key, cacheKey);
     } catch {
       logger.trace({ namespace, key }, 'Cache miss');
     }
@@ -68,14 +208,12 @@ export class PackageCacheFile extends PackageCacheBase {
   ): Promise<void> {
     logger.trace({ namespace, key, hardTtlMinutes }, 'Saving cached value');
     const serialized = JSON.stringify(value);
-    const compressedValue = await compressToBase64(serialized);
-    const expiry = DateTime.local().plus({ minutes: hardTtlMinutes });
-    const payload = JSON.stringify({
-      compress: true,
-      value: compressedValue,
-      expiry,
-    });
-    await cacache.put(this.cacheFileName, this.getKey(namespace, key), payload);
+    const expiry = DateTime.local().plus({ minutes: hardTtlMinutes }).toISO();
+    if (!expiry) {
+      throw new Error('Invalid package cache expiry');
+    }
+
+    await this.putCurrentEntry(this.getKey(namespace, key), serialized, expiry);
   }
 
   override async destroy(): Promise<void> {
@@ -88,28 +226,26 @@ export class PackageCacheFile extends PackageCacheBase {
       try {
         totalCount += 1;
         const cacheEntry = item as unknown as cacache.CacheObject;
-        const entry = await cacache.get(this.cacheFileName, cacheEntry.key);
-        let cached: { expiry?: string } | undefined;
-        try {
-          const raw = entry.data.toString();
-          cached = JSON.parse(raw);
-        } catch {
-          logger.debug('Error parsing cached value - deleting');
-        }
 
-        if (cached) {
-          if (!cached.expiry) {
+        if (cacheEntry.metadata !== undefined) {
+          const metadata = parseCacheMetadata(cacheEntry.metadata);
+          if (!metadata) {
+            await this.rmEntry(cacheEntry.key);
+            deletedCount += 1;
             continue;
           }
-          const expiry = DateTime.fromISO(cached.expiry);
+
+          const expiry = DateTime.fromISO(metadata.expiry);
           if (expiry.isValid && DateTime.local() <= expiry) {
             continue;
           }
+
+          await this.rmEntry(cacheEntry.key);
+          deletedCount += 1;
+          continue;
         }
 
-        await cacache.rm.entry(this.cacheFileName, cacheEntry.key);
-        await cacache.rm.content(this.cacheFileName, cacheEntry.integrity);
-        deletedCount += 1;
+        deletedCount += (await this.migrateLegacyEntry(cacheEntry.key)) ? 1 : 0;
       } catch (err) {
         logger.trace({ err }, 'Error cleaning up cache entry');
         errorCount += 1;
@@ -129,6 +265,10 @@ export class PackageCacheFile extends PackageCacheBase {
     key: string,
   ): Promise<void> {
     logger.trace({ namespace, key }, 'Removing cache entry');
-    await cacache.rm.entry(this.cacheFileName, this.getKey(namespace, key));
+    await this.rmEntry(this.getKey(namespace, key));
+  }
+
+  private async rmEntry(cacheKey: string): Promise<void> {
+    await cacache.rm.entry(this.cacheFileName, cacheKey);
   }
 }
