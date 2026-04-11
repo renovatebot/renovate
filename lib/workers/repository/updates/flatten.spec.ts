@@ -1,6 +1,7 @@
 import { isNumber } from '@sindresorhus/is';
 import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
 import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 
 vi.mock('../../../util/git/semantic.ts');
@@ -276,6 +277,39 @@ describe('workers/repository/updates/flatten', () => {
       expect(lockFileUpdate!.branchName).toContain('lock-file-maintenance');
       expect(regularUpdate!.branchName).not.toContain('lock-file-maintenance');
       expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
+    });
+
+    describe('hasAttestation is taken from the current value', () => {
+      it.each([[true], [false], [undefined]])(
+        'current attestation %s, new attestation %s',
+        async (currentAttestation) => {
+          config = getConfig(); // HACK
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'foo',
+                    currentValue: '1.0.0',
+                    hasAttestation: currentAttestation,
+                    updates: [
+                      {
+                        newValue: '2.0.0',
+                        // but the new update may have a different value
+                        hasAttestation: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          const res = await flattenUpdates(config, packageFiles);
+          expect(res).toHaveLength(1);
+          expect(res[0].hasAttestation).toEqual(currentAttestation);
+        },
+      );
     });
   });
 });

@@ -4,6 +4,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
@@ -351,6 +352,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'lycheeverse/lychee',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^lychee-v(?<version>\\S+)',
+    },
+  },
+  npm: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'npm',
+      datasource: NpmDatasource.id,
     },
   },
   opentofu: {

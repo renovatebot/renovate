@@ -22,3 +22,5 @@ export const supportedDatasources = [
   DartVersionDatasource.id,
   FlutterVersionDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

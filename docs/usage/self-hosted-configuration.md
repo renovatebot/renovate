@@ -156,6 +156,7 @@ Allowed options:
 
 | Option          | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.  |
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
@@ -1362,6 +1363,10 @@ Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 Renovate also supports connecting to Redis clusters as well. In order to connect to a cluster, provide the connection string using the `redis+cluster` or `rediss+cluster` schema as appropriate.
 
 Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
+
+## reportFormatting
+
+This option only applies when [`reportType`](#reporttype) is `file` or `s3`.
 
 ## reportPath
 

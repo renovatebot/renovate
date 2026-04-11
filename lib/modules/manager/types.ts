@@ -30,7 +30,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   skipInstalls?: boolean | null;
   repository?: string;
   currentDigest?: string;
-  newDigest?: string;
+  newDigest?: string | null;
 }
 
 export interface UpdateArtifactsConfig {
@@ -97,7 +97,7 @@ export interface LookupUpdate {
   isReplacement?: boolean;
   isSingleVersion?: boolean;
   isVulnerabilityAlert?: boolean;
-  newDigest?: string;
+  newDigest?: string | null;
   newMajor?: number;
   newMinor?: number;
   newPatch?: number;
@@ -125,6 +125,12 @@ export interface LookupUpdate {
   libYears?: number;
 
   version?: string;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
 }
 
 /**
@@ -133,11 +139,12 @@ export interface LookupUpdate {
  */
 export interface PackageDependency<
   T = Record<string, any>,
+  DepType extends string = string,
 > extends ManagerData<T> {
   currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
-  depType?: string;
+  depType?: DepType;
   fileReplacePosition?: number;
   sharedVariableName?: string;
   lineNumber?: number;
@@ -190,9 +197,18 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
 }
 
-export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
+export interface Upgrade<
+  T = Record<string, any>,
+  DepType extends string = string,
+> extends PackageDependency<T, DepType> {
   workspace?: string;
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
@@ -200,7 +216,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   lockFiles?: string[];
   manager?: string;
   name?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newFrom?: string;
   newMajor?: number;
   newName?: string;
@@ -251,6 +267,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
 
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
+  packageFile: string;
   upgrade: Upgrade<T>;
 }
 
@@ -280,10 +297,32 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
+export interface DepTypeMetadata {
+  /**
+   * The raw depType set on a given PackageDependency
+   *
+   * @see PackageDependency
+   */
+  depType: string;
+  /**
+   * An alternate name for the `depType`, derived from the Manager's `prettyDepType` used.
+   *
+   * For instance, `optionalDependencies` may have a `prettyDepType` of `optionalDependency`
+   *
+   * Not supported by all Managers.
+   * */
+  prettyDepType?: string;
+  /** Human-readable description of what this depType represents */
+  description: string;
+}
+
 interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
+  knownDepTypes?: readonly DepTypeMetadata[];
+  /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
+  supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
   lockFileNames?: string[];
   supersedesManagers?: string[];

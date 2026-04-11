@@ -28,6 +28,7 @@
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
     ],
+    "oxlint": ["oxlint", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
@@ -68,7 +69,10 @@
     "arcus.security": "https://github.com/arcus-azure/arcus.security",
     "arcus.webapi": "https://github.com/arcus-azure/arcus.webapi",
     "arrow-kt": "https://github.com/arrow-kt/arrow",
-    "aspire": "https://github.com/dotnet/aspire",
+    "aspire": [
+      "https://github.com/dotnet/aspire",
+      "https://github.com/microsoft/aspire"
+    ],
     "aspnet aspnetwebstack": "https://github.com/aspnet/AspNetWebStack",
     "aspnet extensions": "https://github.com/aspnet/Extensions",
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
@@ -415,6 +419,7 @@
     "hibernate-search": "https://github.com/hibernate/hibernate-search",
     "hibernate-tools": "https://github.com/hibernate/hibernate-tools",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
+    "hocuspocus": "https://github.com/ueberdosis/hocuspocus",
     "html-eslint": "https://github.com/yeonjuan/html-eslint",
     "humanizer": "https://github.com/Humanizr/Humanizer",
     "immich": "https://github.com/immich-app/immich",
@@ -597,10 +602,6 @@
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
     "orpc": "https://github.com/middleapi/orpc",
-    "oxlint": [
-      "https://github.com/oxc-project/oxc",
-      "https://github.com/oxc-project/eslint-plugin-oxlint"
-    ],
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
