@@ -18,21 +18,25 @@ interface LegacyPayload {
   value: string;
 }
 
-interface CacheMetadata {
+interface CacheIndexMetadata {
   expiry: string;
   version: number;
 }
 
-interface CacheEntry {
+interface CacheIndexEntry {
   key: string;
   integrity: string;
   metadata?: unknown;
 }
 
-type CacheSweepResult =
-  | { status: 'deleted'; digest: string }
-  | { status: 'kept'; digest: string }
-  | { status: 'migrated'; liveDigest: string; replacedDigest: string };
+type CacheIndexSweepResult =
+  | { status: 'deleted'; contentDigest: string }
+  | { status: 'kept'; contentDigest: string }
+  | {
+      status: 'migrated';
+      liveContentDigest: string;
+      replacedContentDigest: string;
+    };
 
 function parseJsonSafe<T = unknown>(text: string): T | undefined {
   try {
@@ -51,7 +55,9 @@ function isExpired(expiry: string): boolean {
   return DateTime.local() >= expiryDateTime;
 }
 
-function parseCacheMetadata(value: unknown): CacheMetadata | undefined {
+function parseCacheIndexMetadata(
+  value: unknown,
+): CacheIndexMetadata | undefined {
   if (!isPlainObject(value) || !isString(value.expiry)) {
     return undefined;
   }
@@ -83,7 +89,7 @@ function parseLegacyPayload(data: Buffer): LegacyPayload | undefined {
   return { expiry, value };
 }
 
-function isCacheEntry(value: unknown): value is CacheEntry {
+function isCacheIndexEntry(value: unknown): value is CacheIndexEntry {
   if (!isPlainObject(value)) {
     return false;
   }
@@ -91,7 +97,7 @@ function isCacheEntry(value: unknown): value is CacheEntry {
   return isNonEmptyString(value.key) && isNonEmptyString(value.integrity);
 }
 
-async function decodeStoredValue<T>(data: Buffer): Promise<T> {
+async function decodeCurrentStoredValue<T>(data: Buffer): Promise<T> {
   const json = await decompressFromBuffer(data);
   const parsed = parseJsonSafe<T>(json);
 
@@ -102,7 +108,7 @@ async function decodeStoredValue<T>(data: Buffer): Promise<T> {
   return parsed;
 }
 
-async function decodeLegacyPayloadValue<T>(payload: LegacyPayload): Promise<T> {
+async function decodeLegacyStoredValue<T>(payload: LegacyPayload): Promise<T> {
   const json = await decompressFromBase64(payload.value);
   const parsed = parseJsonSafe<T>(json);
 
@@ -131,9 +137,9 @@ export class PackageCacheFile extends PackageCacheBase {
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
-    const cacheKey = this.getCacheKey(namespace, key);
+    const cacheIndexKey = this.getCacheIndexKey(namespace, key);
     const cacheIndexEntry = await this.getCacheIndexEntry(
-      cacheKey,
+      cacheIndexKey,
       namespace,
       key,
     );
@@ -143,17 +149,21 @@ export class PackageCacheFile extends PackageCacheBase {
     }
 
     if (cacheIndexEntry.metadata !== undefined) {
-      const metadata = parseCacheMetadata(cacheIndexEntry.metadata);
+      const metadata = parseCacheIndexMetadata(cacheIndexEntry.metadata);
 
       if (metadata === undefined || isExpired(metadata.expiry)) {
-        await this.removeCacheEntry(namespace, key);
+        await this.removeLogicalCacheEntry(namespace, key);
         return undefined;
       }
 
-      return await this.getCurrentValue<T>(namespace, key, cacheKey);
+      return await this.readCurrentCachedValue<T>(
+        namespace,
+        key,
+        cacheIndexKey,
+      );
     }
 
-    return await this.getLegacyValue<T>(namespace, key, cacheKey);
+    return await this.readLegacyCachedValue<T>(namespace, key, cacheIndexKey);
   }
 
   override async set(
@@ -166,8 +176,12 @@ export class PackageCacheFile extends PackageCacheBase {
     const serialized = JSON.stringify(value);
     const expiry = DateTime.local().plus({ minutes: hardTtlMinutes }).toISO();
 
-    const cacheKey = this.getCacheKey(namespace, key);
-    await this.writeSerializedCacheEntry(cacheKey, serialized, expiry);
+    const cacheIndexKey = this.getCacheIndexKey(namespace, key);
+    await this.writeSerializedCacheIndexEntry(
+      cacheIndexKey,
+      serialized,
+      expiry,
+    );
   }
 
   override async destroy(): Promise<void> {
@@ -178,41 +192,41 @@ export class PackageCacheFile extends PackageCacheBase {
     let errorCount = 0;
 
     const startTime = Date.now();
-    const candidateDigests = new Set<string>();
-    const liveDigests = new Set<string>();
+    const candidateContentDigests = new Set<string>();
+    const liveContentDigests = new Set<string>();
 
     for await (const item of cacache.ls.stream(this.cachePath)) {
       totalCount += 1;
-      if (!isCacheEntry(item)) {
+      if (!isCacheIndexEntry(item)) {
         logger.trace('Invalid cache index entry stream payload');
         errorCount += 1;
         continue;
       }
 
-      const cacheSweepResult = await this.safeClassifyCacheIndexEntry(item);
-      if (cacheSweepResult === undefined) {
+      const sweepResult = await this.trySweepCacheIndexEntry(item);
+      if (sweepResult === undefined) {
         errorCount += 1;
         continue;
       }
 
-      if (cacheSweepResult.status === 'deleted') {
+      if (sweepResult.status === 'deleted') {
         deletedCount += 1;
-        candidateDigests.add(cacheSweepResult.digest);
+        candidateContentDigests.add(sweepResult.contentDigest);
         continue;
       }
 
-      if (cacheSweepResult.status === 'kept') {
-        liveDigests.add(cacheSweepResult.digest);
+      if (sweepResult.status === 'kept') {
+        liveContentDigests.add(sweepResult.contentDigest);
         continue;
       }
 
-      candidateDigests.add(cacheSweepResult.replacedDigest);
-      liveDigests.add(cacheSweepResult.liveDigest);
+      candidateContentDigests.add(sweepResult.replacedContentDigest);
+      liveContentDigests.add(sweepResult.liveContentDigest);
     }
 
-    errorCount += await this.cleanupUnreferencedContent(
-      candidateDigests,
-      liveDigests,
+    errorCount += await this.removeUnreferencedContent(
+      candidateContentDigests,
+      liveContentDigests,
     );
 
     if (errorCount > 0) {
@@ -224,100 +238,103 @@ export class PackageCacheFile extends PackageCacheBase {
     );
   }
 
-  private getCacheKey(namespace: PackageCacheNamespace, key: string): string {
+  private getCacheIndexKey(
+    namespace: PackageCacheNamespace,
+    key: string,
+  ): string {
     return `${namespace}-${key}`;
   }
 
   private async getCacheIndexEntry(
-    cacheKey: string,
+    cacheIndexKey: string,
     namespace: PackageCacheNamespace,
     key: string,
-  ): Promise<CacheEntry | null> {
+  ): Promise<CacheIndexEntry | null> {
     try {
-      return await cacache.get.info(this.cachePath, cacheKey);
+      return await cacache.get.info(this.cachePath, cacheIndexKey);
     } catch (err) {
       logger.trace({ err, namespace, key }, 'Cache miss');
       return null;
     }
   }
 
-  private async writeCacheEntry(
-    cacheKey: string,
+  private async writeCacheIndexEntry(
+    cacheIndexKey: string,
     compressedValue: Buffer,
     expiry: string,
   ): Promise<string> {
     const metadata = { version: CACHE_VERSION, expiry };
-    return await cacache.put(this.cachePath, cacheKey, compressedValue, {
+    return await cacache.put(this.cachePath, cacheIndexKey, compressedValue, {
       metadata,
     });
   }
 
-  private async writeSerializedCacheEntry(
-    cacheKey: string,
+  private async writeSerializedCacheIndexEntry(
+    cacheIndexKey: string,
     serializedValue: string,
     expiry: string,
   ): Promise<void> {
     const compressedValue = await compressToBuffer(serializedValue);
-    await this.writeCacheEntry(cacheKey, compressedValue, expiry);
+    await this.writeCacheIndexEntry(cacheIndexKey, compressedValue, expiry);
   }
 
-  private async getLegacyValue<T>(
+  private async readLegacyCachedValue<T>(
     namespace: PackageCacheNamespace,
     key: string,
-    cacheKey: string,
+    cacheIndexKey: string,
   ): Promise<T | undefined> {
     try {
-      const cacheEntry = await cacache.get(this.cachePath, cacheKey);
-      const legacyPayload = parseLegacyPayload(cacheEntry.data);
+      const storedEntry = await cacache.get(this.cachePath, cacheIndexKey);
+      const legacyPayload = parseLegacyPayload(storedEntry.data);
 
       if (!legacyPayload) {
-        await this.removeCacheEntry(namespace, key);
+        await this.removeLogicalCacheEntry(namespace, key);
         return undefined;
       }
 
       if (isExpired(legacyPayload.expiry)) {
-        await this.removeCacheEntry(namespace, key);
+        await this.removeLogicalCacheEntry(namespace, key);
         return undefined;
       }
 
       logger.trace({ namespace, key }, 'Returning cached value');
-      return await decodeLegacyPayloadValue<T>(legacyPayload);
+      return await decodeLegacyStoredValue<T>(legacyPayload);
     } catch (err) {
       logger.trace({ err, namespace, key }, 'Cache miss');
       return undefined;
     }
   }
 
-  private async getCurrentValue<T>(
+  private async readCurrentCachedValue<T>(
     namespace: PackageCacheNamespace,
     key: string,
-    cacheKey: string,
+    cacheIndexKey: string,
   ): Promise<T | undefined> {
     try {
-      const cacheEntry = await cacache.get(this.cachePath, cacheKey);
+      const storedEntry = await cacache.get(this.cachePath, cacheIndexKey);
       logger.trace({ namespace, key }, 'Returning cached value');
-      return await decodeStoredValue<T>(cacheEntry.data);
+      return await decodeCurrentStoredValue<T>(storedEntry.data);
     } catch (err) {
       logger.trace({ err, namespace, key }, 'Cache miss');
       return undefined;
     }
   }
 
-  private async migrateLegacyCacheEntry(
-    cacheKey: string,
-    digest: string,
-  ): Promise<CacheSweepResult> {
-    const legacyEntry = await cacache.get(this.cachePath, cacheKey);
+  private async migrateLegacyCacheIndexEntry(
+    cacheIndexKey: string,
+    contentDigest: string,
+  ): Promise<CacheIndexSweepResult> {
+    const legacyEntry = await cacache.get(this.cachePath, cacheIndexKey);
     const legacyPayload = parseLegacyPayload(legacyEntry.data);
 
     if (!legacyPayload) {
-      await this.removeCacheIndexEntry(cacheKey);
-      return { digest, status: 'deleted' };
+      await this.removeCacheIndexEntry(cacheIndexKey);
+      return { status: 'deleted', contentDigest };
     }
 
     if (isExpired(legacyPayload.expiry)) {
-      await this.removeCacheIndexEntry(cacheKey);
-      return { digest, status: 'deleted' };
+      await this.removeCacheIndexEntry(cacheIndexKey);
+      return { status: 'deleted', contentDigest };
     }
 
     const compressedValue = Buffer.from(legacyPayload.value, 'base64');
@@ -326,81 +343,84 @@ export class PackageCacheFile extends PackageCacheBase {
     try {
       serializedValue = await decompressFromBuffer(compressedValue);
     } catch {
-      await this.removeCacheIndexEntry(cacheKey);
-      return { digest, status: 'deleted' };
+      await this.removeCacheIndexEntry(cacheIndexKey);
+      return { status: 'deleted', contentDigest };
     }
 
     if (parseJsonSafe(serializedValue) === undefined) {
-      await this.removeCacheIndexEntry(cacheKey);
-      return { digest, status: 'deleted' };
+      await this.removeCacheIndexEntry(cacheIndexKey);
+      return { status: 'deleted', contentDigest };
     }
 
-    const migratedDigest = await this.writeCacheEntry(
-      cacheKey,
+    const liveContentDigest = await this.writeCacheIndexEntry(
+      cacheIndexKey,
       compressedValue,
       legacyPayload.expiry,
     );
 
     return {
-      liveDigest: migratedDigest,
-      replacedDigest: digest,
       status: 'migrated',
+      liveContentDigest,
+      replacedContentDigest: contentDigest,
     };
   }
 
-  private async classifyCacheIndexEntry(
-    cacheEntry: CacheEntry,
-  ): Promise<CacheSweepResult> {
+  private async sweepCacheIndexEntry(
+    cacheIndexEntry: CacheIndexEntry,
+  ): Promise<CacheIndexSweepResult> {
     const {
-      key: cacheKey,
+      key: cacheIndexKey,
       metadata: rawMetadata,
-      integrity: digest,
-    } = cacheEntry;
+      integrity: contentDigest,
+    } = cacheIndexEntry;
 
     if (rawMetadata === undefined) {
-      return this.migrateLegacyCacheEntry(cacheKey, digest);
+      return this.migrateLegacyCacheIndexEntry(cacheIndexKey, contentDigest);
     }
 
-    const parsedMetadata = parseCacheMetadata(rawMetadata);
+    const parsedMetadata = parseCacheIndexMetadata(rawMetadata);
     if (!parsedMetadata) {
-      await this.removeCacheIndexEntry(cacheKey);
-      return { digest, status: 'deleted' };
+      await this.removeCacheIndexEntry(cacheIndexKey);
+      return { status: 'deleted', contentDigest };
     }
 
     if (isExpired(parsedMetadata.expiry)) {
-      await this.removeCacheIndexEntry(cacheKey);
-      return { digest, status: 'deleted' };
+      await this.removeCacheIndexEntry(cacheIndexKey);
+      return { status: 'deleted', contentDigest };
     }
 
-    return { digest, status: 'kept' };
+    return { status: 'kept', contentDigest };
   }
 
-  private async safeClassifyCacheIndexEntry(
-    cacheEntry: CacheEntry,
-  ): Promise<CacheSweepResult | undefined> {
+  private async trySweepCacheIndexEntry(
+    cacheIndexEntry: CacheIndexEntry,
+  ): Promise<CacheIndexSweepResult | undefined> {
     try {
-      return await this.classifyCacheIndexEntry(cacheEntry);
+      return await this.sweepCacheIndexEntry(cacheIndexEntry);
     } catch (err) {
       logger.trace({ err }, 'Error classifying cache entry');
       return undefined;
     }
   }
 
-  private async cleanupUnreferencedContent(
-    candidateDigests: ReadonlySet<string>,
-    liveDigests: ReadonlySet<string>,
+  private async removeUnreferencedContent(
+    candidateContentDigests: ReadonlySet<string>,
+    liveContentDigests: ReadonlySet<string>,
   ): Promise<number> {
     let errorCount = 0;
 
-    for (const digest of candidateDigests) {
-      if (liveDigests.has(digest)) {
+    for (const contentDigest of candidateContentDigests) {
+      if (liveContentDigests.has(contentDigest)) {
         continue;
       }
 
       try {
-        await cacache.rm.content(this.cachePath, digest);
+        await cacache.rm.content(this.cachePath, contentDigest);
       } catch (err) {
-        logger.trace({ err, digest }, 'Error cleaning up cache content');
+        logger.trace(
+          { err, digest: contentDigest },
+          'Error cleaning up cache content',
+        );
         errorCount += 1;
       }
     }
@@ -408,15 +428,15 @@ export class PackageCacheFile extends PackageCacheBase {
     return errorCount;
   }
 
-  private async removeCacheEntry(
+  private async removeLogicalCacheEntry(
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<void> {
     logger.trace({ namespace, key }, 'Removing cache entry');
-    await this.removeCacheIndexEntry(this.getCacheKey(namespace, key));
+    await this.removeCacheIndexEntry(this.getCacheIndexKey(namespace, key));
   }
 
-  private async removeCacheIndexEntry(cacheKey: string): Promise<void> {
-    await cacache.rm.entry(this.cachePath, cacheKey);
+  private async removeCacheIndexEntry(cacheIndexKey: string): Promise<void> {
+    await cacache.rm.entry(this.cachePath, cacheIndexKey);
   }
 }

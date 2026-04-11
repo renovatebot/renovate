@@ -243,6 +243,29 @@ describe('util/cache/package/impl/file', () => {
       expect(cacacheGet).not.toHaveBeenCalled();
     });
 
+    it('skips invalid cache index stream payloads during cleanup', async () => {
+      await cache.set(namespace, 'valid', 1234, 5);
+      const validEntry = await cacache.get.info(
+        cacheFileName,
+        cacheKey('valid'),
+      );
+      const lsStreamSpy = vi.spyOn(cacache.ls, 'stream').mockImplementation(
+        () =>
+          (function* () {
+            yield 'invalid-cache-index-entry';
+            yield validEntry!;
+          })() as unknown as ReturnType<typeof cacache.ls.stream>,
+      );
+
+      await cache.destroy();
+
+      const cacheKeys = await getCacheKeys();
+
+      expect(cacheKeys).toEqual([cacheKey('valid')]);
+
+      lsStreamSpy.mockRestore();
+    });
+
     it('lazily migrates valid legacy entries without recompressing them', async () => {
       const { expiry, payload, compressedValue } = await putLegacyEntry(
         'legacy-valid-key',
@@ -379,6 +402,21 @@ describe('util/cache/package/impl/file', () => {
       expect(cacheKeys).not.toContain('invalid-legacy-payload');
     });
 
+    it('removes legacy entries with invalid compressed content during migration', async () => {
+      const payload = JSON.stringify({
+        compress: true,
+        value: Buffer.from('not-compressed').toString('base64'),
+        expiry: getExpiry(5),
+      });
+      await cacache.put(cacheFileName, 'invalid-legacy-content', payload);
+
+      await cache.destroy();
+
+      const cacheKeys = await getCacheKeys();
+
+      expect(cacheKeys).not.toContain('invalid-legacy-content');
+    });
+
     it('removes invalid legacy entries without expiry', async () => {
       const compressedValue = await compressToBase64(
         JSON.stringify('no-expiry'),
@@ -440,6 +478,32 @@ describe('util/cache/package/impl/file', () => {
       const cacheKeys = await getCacheKeys();
 
       expect(cacheKeys).not.toContain('unsupported-version');
+    });
+
+    it('continues when content cleanup fails', async () => {
+      await cache.set(namespace, 'valid', 1234, 5);
+      await cache.set(
+        namespace,
+        'expired-only-key',
+        { value: 'expired-only' },
+        -5,
+      );
+      const expiredInfo = await cacache.get.info(
+        cacheFileName,
+        cacheKey('expired-only-key'),
+      );
+      const expiredDigest = expiredInfo!.integrity;
+      const rmContentSpy = vi
+        .spyOn(cacache.rm, 'content')
+        .mockRejectedValueOnce(new Error('error'));
+
+      await expect(cache.destroy()).resolves.toBeUndefined();
+
+      expect(rmContentSpy).toHaveBeenCalledWith(cacheFileName, expiredDigest);
+      await expectNoCacheEntry(cacheKey('expired-only-key'));
+      await expect(cache.get(namespace, 'valid')).resolves.toBe(1234);
+
+      rmContentSpy.mockRestore();
     });
 
     it('continues on cleanup errors', async () => {
