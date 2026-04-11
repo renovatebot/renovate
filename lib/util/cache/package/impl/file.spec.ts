@@ -74,7 +74,6 @@ describe('util/cache/package/impl/file', () => {
 
       expect(info?.metadata).toEqual({
         expiry: expect.any(String),
-        format: 'br-json',
         version: 2,
       });
       expect(cachedValue).toBe('1234');
@@ -214,7 +213,6 @@ describe('util/cache/package/impl/file', () => {
       expect(cacheKeys).toEqual(['legacy-valid-key']);
       expect(validInfo?.metadata).toEqual({
         expiry,
-        format: 'br-json',
         version: 2,
       });
       expect(validValue).toBe('1234');
