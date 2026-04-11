@@ -7,7 +7,7 @@
   "automergeType": "pr",
   "prCreation": "immediate",
   "ignorePresets": [":ignoreModulesAndTests"],
-  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "**/testdata/**", "**/vendor/**", "test/**"],
   "rebaseWhen": "conflicted",
   "baseBranches": ["$default", "next"],
   "dockerfile": {
