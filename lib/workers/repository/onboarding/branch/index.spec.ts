@@ -45,9 +45,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       config = getConfig();
       config.repository = 'some/repo';
       GlobalConfig.set({
+        onboarding: true,
         onboardingBranch: config.onboardingBranch,
         requireConfig: config.requireConfig,
-        onboarding: true,
       });
       OnboardingState.prUpdateRequested = false;
       scm.getFileList.mockResolvedValue([]);
@@ -171,9 +171,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       config.requireConfig = 'optional';
       config.onboarding = false;
       GlobalConfig.set({
+        onboarding: false,
         onboardingBranch: config.onboardingBranch,
         requireConfig: 'optional',
-        onboarding: false,
       });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
@@ -194,9 +194,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       config.requireConfig = 'ignored';
       config.onboarding = false;
       GlobalConfig.set({
+        onboarding: false,
         onboardingBranch: config.onboardingBranch,
         requireConfig: 'ignored',
-        onboarding: false,
       });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
