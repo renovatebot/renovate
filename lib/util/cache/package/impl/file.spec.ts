@@ -24,6 +24,12 @@ describe('util/cache/package/impl/file', () => {
     );
   };
 
+  const expectNoContent = async (digest: string): Promise<void> => {
+    await expect(cacache.get.hasContent(cacheFileName, digest)).resolves.toBe(
+      false,
+    );
+  };
+
   function getExpiry(minutes: number): string {
     const expiry = DateTime.local().plus({ minutes }).toISO();
     if (!expiry) {
@@ -243,6 +249,11 @@ describe('util/cache/package/impl/file', () => {
         1234,
         5,
       );
+      const legacyInfo = await cacache.get.info(
+        cacheFileName,
+        'legacy-valid-key',
+      );
+      const legacyDigest = legacyInfo!.integrity;
 
       await cache.destroy();
 
@@ -263,6 +274,8 @@ describe('util/cache/package/impl/file', () => {
       expect(validEntry.data.equals(migratedBuffer)).toBe(true);
       expect(validValue).toBe('1234');
       expect(validEntry.data.toString()).not.toBe(payload);
+
+      await expectNoContent(legacyDigest);
     });
 
     it('uses migrated metadata for subsequent cleanup passes', async () => {
@@ -284,6 +297,16 @@ describe('util/cache/package/impl/file', () => {
     it('does not delete shared content used by surviving entries', async () => {
       await cache.set(namespace, 'expired-shared-key', 1234, -5);
       await cache.set(namespace, 'valid-shared-key', 1234, 5);
+      const expiredInfo = await cacache.get.info(
+        cacheFileName,
+        cacheKey('expired-shared-key'),
+      );
+      const expiredDigest = expiredInfo!.integrity;
+      const validInfo = await cacache.get.info(
+        cacheFileName,
+        cacheKey('valid-shared-key'),
+      );
+      const validDigest = validInfo!.integrity;
 
       await cache.destroy();
 
@@ -292,8 +315,31 @@ describe('util/cache/package/impl/file', () => {
 
       expect(cacheKeys).toEqual([cacheKey('valid-shared-key')]);
       expect(validEntry).toBe(1234);
+      expect(expiredDigest).toBe(validDigest);
+      expect(
+        await cacache.get.hasContent(cacheFileName, validDigest),
+      ).toBeTruthy();
 
       await expectNoCacheEntry(cacheKey('expired-shared-key'));
+    });
+
+    it('removes content for expired entries that are no longer referenced', async () => {
+      await cache.set(
+        namespace,
+        'expired-only-key',
+        { value: 'expired-only' },
+        -5,
+      );
+      const expiredInfo = await cacache.get.info(
+        cacheFileName,
+        cacheKey('expired-only-key'),
+      );
+      const expiredDigest = expiredInfo!.integrity;
+
+      await cache.destroy();
+
+      await expectNoCacheEntry(cacheKey('expired-only-key'));
+      await expectNoContent(expiredDigest);
     });
 
     it('removes expired legacy and invalid entries', async () => {

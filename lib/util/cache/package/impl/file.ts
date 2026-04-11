@@ -24,10 +24,16 @@ interface CacheMetadata {
   version: number;
 }
 
-type LegacyMigrationStatus = 'deleted' | 'migrated';
-type CacheCleanupStatus = 'deleted' | 'kept';
+type CacheCleanupResult =
+  | { digest: string; status: 'deleted' }
+  | { digest: string; status: 'kept' }
+  | {
+      liveDigest: string;
+      replacedDigest: string;
+      status: 'migrated';
+    };
 
-function parseJsonSafe<T>(text: string): T | undefined {
+function parseJsonSafe<T = unknown>(text: string): T | undefined {
   try {
     return JSON.parse(text) as T;
   } catch {
@@ -35,13 +41,13 @@ function parseJsonSafe<T>(text: string): T | undefined {
   }
 }
 
-function isExpired(expiry: string, now: DateTime = DateTime.local()): boolean {
+function isExpired(expiry: string): boolean {
   const expiryDateTime = DateTime.fromISO(expiry);
   if (!expiryDateTime.isValid) {
     return true;
   }
 
-  return now >= expiryDateTime;
+  return DateTime.local() >= expiryDateTime;
 }
 
 function parseCacheMetadata(value: unknown): CacheMetadata | undefined {
@@ -61,7 +67,7 @@ function parseCacheMetadata(value: unknown): CacheMetadata | undefined {
 function parseLegacyCachePayload(
   data: Buffer,
 ): PackageCacheLegacyEntry | undefined {
-  const parsed = parseJsonSafe<unknown>(data.toString());
+  const parsed = parseJsonSafe(data.toString());
   if (parsed === undefined) {
     logger.debug('Error parsing cached value - deleting');
     return undefined;
@@ -143,9 +149,9 @@ export class PackageCacheFile extends PackageCacheBase {
     cacheKey: string,
     compressedValue: Buffer,
     expiry: string,
-  ): Promise<void> {
+  ): Promise<string> {
     const metadata = { version: CACHE_VERSION, expiry };
-    await cacache.put(this.cacheFileName, cacheKey, compressedValue, {
+    return await cacache.put(this.cacheFileName, cacheKey, compressedValue, {
       metadata,
     });
   }
@@ -203,18 +209,19 @@ export class PackageCacheFile extends PackageCacheBase {
 
   private async migrateLegacyCacheEntry(
     cacheKey: string,
-  ): Promise<LegacyMigrationStatus> {
+    digest: string,
+  ): Promise<CacheCleanupResult> {
     const legacyEntry = await cacache.get(this.cacheFileName, cacheKey);
     const cachedValue = parseLegacyCachePayload(legacyEntry.data);
 
     if (!cachedValue) {
       await this.rmEntry(cacheKey);
-      return 'deleted';
+      return { digest, status: 'deleted' };
     }
 
     if (isExpired(cachedValue.expiry)) {
       await this.rmEntry(cacheKey);
-      return 'deleted';
+      return { digest, status: 'deleted' };
     }
 
     const compressedValue = Buffer.from(cachedValue.value, 'base64');
@@ -224,46 +231,78 @@ export class PackageCacheFile extends PackageCacheBase {
       serializedValue = await decompressFromBuffer(compressedValue);
     } catch {
       await this.rmEntry(cacheKey);
-      return 'deleted';
+      return { digest, status: 'deleted' };
     }
 
-    if (parseJsonSafe<unknown>(serializedValue) === undefined) {
+    if (parseJsonSafe(serializedValue) === undefined) {
       await this.rmEntry(cacheKey);
-      return 'deleted';
+      return { digest, status: 'deleted' };
     }
 
-    await this.putCacheEntry(cacheKey, compressedValue, cachedValue.expiry);
-    return 'migrated';
-  }
+    const migratedDigest = await this.putCacheEntry(
+      cacheKey,
+      compressedValue,
+      cachedValue.expiry,
+    );
 
-  private async cleanupLegacyCacheEntry(
-    cacheKey: string,
-  ): Promise<CacheCleanupStatus> {
-    const migrationResult = await this.migrateLegacyCacheEntry(cacheKey);
-    if (migrationResult === 'deleted') {
-      return 'deleted';
-    }
-
-    return 'kept';
+    return {
+      liveDigest: migratedDigest,
+      replacedDigest: digest,
+      status: 'migrated',
+    };
   }
 
   private async cleanupEntry(
     cacheKey: string,
     rawMetadata: unknown,
-    now: DateTime,
-  ): Promise<CacheCleanupStatus> {
+    digest: string,
+  ): Promise<CacheCleanupResult> {
     const metadata = parseCacheMetadata(rawMetadata);
     if (!metadata) {
       await this.rmEntry(cacheKey);
-      return 'deleted';
+      return { digest, status: 'deleted' };
     }
 
-    if (isExpired(metadata.expiry, now)) {
+    if (isExpired(metadata.expiry)) {
       await this.rmEntry(cacheKey);
-      return 'deleted';
+      return { digest, status: 'deleted' };
     }
 
-    return 'kept';
+    return { digest, status: 'kept' };
+  }
+
+  private async getCleanupResult(
+    cacheEntry: cacache.CacheObject,
+  ): Promise<CacheCleanupResult> {
+    const { integrity: digest } = cacheEntry;
+
+    if (cacheEntry.metadata === undefined) {
+      return this.migrateLegacyCacheEntry(cacheEntry.key, digest);
+    }
+
+    return this.cleanupEntry(cacheEntry.key, cacheEntry.metadata, digest);
+  }
+
+  private async cleanupContent(
+    candidateDigests: ReadonlySet<string>,
+    liveDigests: ReadonlySet<string>,
+  ): Promise<number> {
+    let errorCount = 0;
+
+    for (const digest of candidateDigests) {
+      if (liveDigests.has(digest)) {
+        continue;
+      }
+
+      try {
+        await cacache.rm.content(this.cacheFileName, digest);
+      } catch (err) {
+        logger.trace({ err, digest }, 'Error cleaning up cache content');
+        errorCount += 1;
+      }
+    }
+
+    return errorCount;
   }
 
   override async get<T = unknown>(
@@ -306,29 +345,43 @@ export class PackageCacheFile extends PackageCacheBase {
 
   override async destroy(): Promise<void> {
     logger.debug('Checking file package cache for expired items');
+
     let totalCount = 0;
     let deletedCount = 0;
     let errorCount = 0;
+
     const startTime = Date.now();
-    const now = DateTime.local();
+    const candidateDigests = new Set<string>();
+    const liveDigests = new Set<string>();
+
     for await (const item of cacache.ls.stream(this.cacheFileName)) {
       try {
         totalCount += 1;
         const cacheEntry = item as unknown as cacache.CacheObject;
 
-        const cleanupResult =
-          cacheEntry.metadata === undefined
-            ? await this.cleanupLegacyCacheEntry(cacheEntry.key)
-            : await this.cleanupEntry(cacheEntry.key, cacheEntry.metadata, now);
+        const cleanupResult = await this.getCleanupResult(cacheEntry);
 
-        if (cleanupResult === 'deleted') {
-          deletedCount += 1;
+        switch (cleanupResult.status) {
+          case 'deleted':
+            deletedCount += 1;
+            candidateDigests.add(cleanupResult.digest);
+            break;
+          case 'kept':
+            liveDigests.add(cleanupResult.digest);
+            break;
+          case 'migrated':
+            candidateDigests.add(cleanupResult.replacedDigest);
+            liveDigests.add(cleanupResult.liveDigest);
+            break;
         }
       } catch (err) {
         logger.trace({ err }, 'Error cleaning up cache entry');
         errorCount += 1;
       }
     }
+
+    errorCount += await this.cleanupContent(candidateDigests, liveDigests);
+
     if (errorCount > 0) {
       logger.debug(`Error count cleaning up cache: ${errorCount}`);
     }
