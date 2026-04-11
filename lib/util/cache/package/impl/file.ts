@@ -202,7 +202,7 @@ export class PackageCacheFile extends PackageCacheBase {
     return 'kept';
   }
 
-  private async cleanupEntryWithMetadata(
+  private async cleanupEntry(
     cacheKey: string,
     rawMetadata: unknown,
     now: DateTime,
@@ -283,11 +283,7 @@ export class PackageCacheFile extends PackageCacheBase {
         const cleanupResult =
           cacheEntry.metadata === undefined
             ? await this.cleanupLegacyCacheEntry(cacheEntry.key)
-            : await this.cleanupEntryWithMetadata(
-                cacheEntry.key,
-                cacheEntry.metadata,
-                now,
-              );
+            : await this.cleanupEntry(cacheEntry.key, cacheEntry.metadata, now);
 
         if (cleanupResult === 'deleted') {
           deletedCount += 1;
