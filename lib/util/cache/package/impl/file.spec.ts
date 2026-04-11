@@ -9,12 +9,6 @@ import {
 } from '../../../compress.ts';
 import { PackageCacheFile } from './file.ts';
 
-declare module 'luxon' {
-  interface TSSettings {
-    throwOnInvalid: true;
-  }
-}
-
 describe('util/cache/package/impl/file', () => {
   let tmpDir: DirectoryResult;
   let cacheDir: string;
@@ -93,18 +87,6 @@ describe('util/cache/package/impl/file', () => {
         version: cacheVersion,
       });
       expect(cachedValue).toBe('1234');
-    });
-
-    it('throws for invalid computed expiry', async () => {
-      const localSpy = vi
-        .spyOn(DateTime, 'local')
-        .mockReturnValue(DateTime.fromISO('invalid'));
-
-      await expect(cache.set(namespace, 'key', 1234, 5)).rejects.toThrow(
-        'Invalid package cache expiry',
-      );
-
-      localSpy.mockRestore();
     });
   });
 

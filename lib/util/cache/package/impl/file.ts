@@ -143,31 +143,41 @@ export class PackageCacheFile extends PackageCacheBase {
     key: string,
     cacheKey: string,
   ): Promise<T | undefined> {
-    const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
-    const legacyEntry = parseLegacyCachePayload(cacheEntry.data);
+    try {
+      const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
+      const legacyEntry = parseLegacyCachePayload(cacheEntry.data);
 
-    if (!legacyEntry) {
-      await this.rm(namespace, key);
+      if (!legacyEntry) {
+        await this.rm(namespace, key);
+        return undefined;
+      }
+
+      if (isExpiredAt(legacyEntry.expiry, DateTime.local())) {
+        await this.rm(namespace, key);
+        return undefined;
+      }
+
+      logger.trace({ namespace, key }, 'Returning cached value');
+      return await decodeLegacyValue<T>(legacyEntry);
+    } catch (err) {
+      logger.trace({ err, namespace, key }, 'Cache miss');
       return undefined;
     }
-
-    if (isExpiredAt(legacyEntry.expiry, DateTime.local())) {
-      await this.rm(namespace, key);
-      return undefined;
-    }
-
-    logger.trace({ namespace, key }, 'Returning cached value');
-    return await decodeLegacyValue<T>(legacyEntry);
   }
 
   private async getValue<T>(
     namespace: PackageCacheNamespace,
     key: string,
     cacheKey: string,
-  ): Promise<T> {
-    const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
-    logger.trace({ namespace, key }, 'Returning cached value');
-    return await decodeValue<T>(cacheEntry.data);
+  ): Promise<T | undefined> {
+    try {
+      const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
+      logger.trace({ namespace, key }, 'Returning cached value');
+      return await decodeValue<T>(cacheEntry.data);
+    } catch (err) {
+      logger.trace({ err, namespace, key }, 'Cache miss');
+      return undefined;
+    }
   }
 
   private async migrateLegacyCacheEntry(
@@ -225,30 +235,25 @@ export class PackageCacheFile extends PackageCacheBase {
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
-    try {
-      const cacheKey = this.getKey(namespace, key);
-      const cacheInfo = await cacache.get.info(this.cacheFileName, cacheKey);
-      const now = DateTime.local();
+    const cacheKey = this.getKey(namespace, key);
+    const cacheInfo = await cacache.get.info(this.cacheFileName, cacheKey);
+    const now = DateTime.local();
 
-      if (!cacheInfo) {
+    if (!cacheInfo) {
+      return undefined;
+    }
+
+    if (cacheInfo.metadata !== undefined) {
+      const metadata = parseCacheMetadata(cacheInfo.metadata);
+      if (metadata === undefined || isExpiredAt(metadata.expiry, now)) {
+        await this.rm(namespace, key);
         return undefined;
       }
 
-      if (cacheInfo.metadata !== undefined) {
-        const metadata = parseCacheMetadata(cacheInfo.metadata);
-        if (metadata === undefined || isExpiredAt(metadata.expiry, now)) {
-          await this.rm(namespace, key);
-          return undefined;
-        }
-
-        return await this.getValue<T>(namespace, key, cacheKey);
-      }
-
-      return await this.getLegacy<T>(namespace, key, cacheKey);
-    } catch {
-      logger.trace({ namespace, key }, 'Cache miss');
+      return await this.getValue<T>(namespace, key, cacheKey);
     }
-    return undefined;
+
+    return await this.getLegacy<T>(namespace, key, cacheKey);
   }
 
   override async set(
@@ -260,9 +265,6 @@ export class PackageCacheFile extends PackageCacheBase {
     logger.trace({ namespace, key, hardTtlMinutes }, 'Saving cached value');
     const serialized = JSON.stringify(value);
     const expiry = DateTime.local().plus({ minutes: hardTtlMinutes }).toISO();
-    if (!expiry) {
-      throw new Error('Invalid package cache expiry');
-    }
 
     const cacheKey = this.getKey(namespace, key);
     await this.putCacheEntry(cacheKey, serialized, expiry);
