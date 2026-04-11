@@ -41,7 +41,7 @@ describe('util/cache/package/impl/file', () => {
     cacheEntryKey: string,
     value: unknown,
     ttlMinutes: number,
-  ): Promise<{ expiry: string; payload: string }> {
+  ): Promise<{ expiry: string; payload: string; compressedValue: string }> {
     const expiry = getExpiry(ttlMinutes);
     const compressedValue = await compressToBase64(JSON.stringify(value));
     const payload = JSON.stringify({
@@ -50,7 +50,7 @@ describe('util/cache/package/impl/file', () => {
       expiry,
     });
     await cacache.put(cacheFileName, cacheEntryKey, payload);
-    return { expiry, payload };
+    return { expiry, payload, compressedValue };
   }
 
   beforeEach(async () => {
@@ -237,8 +237,8 @@ describe('util/cache/package/impl/file', () => {
       expect(cacacheGet).not.toHaveBeenCalled();
     });
 
-    it('lazily migrates valid legacy entries without deleting them', async () => {
-      const { expiry, payload } = await putLegacyEntry(
+    it('lazily migrates valid legacy entries without recompressing them', async () => {
+      const { expiry, payload, compressedValue } = await putLegacyEntry(
         'legacy-valid-key',
         1234,
         5,
@@ -253,12 +253,14 @@ describe('util/cache/package/impl/file', () => {
       );
       const validEntry = await cacache.get(cacheFileName, 'legacy-valid-key');
       const validValue = await decompressFromBuffer(validEntry.data);
+      const migratedBuffer = Buffer.from(compressedValue, 'base64');
 
       expect(cacheKeys).toEqual(['legacy-valid-key']);
       expect(validInfo?.metadata).toEqual({
         expiry,
         version: cacheVersion,
       });
+      expect(validEntry.data.equals(migratedBuffer)).toBe(true);
       expect(validValue).toBe('1234');
       expect(validEntry.data.toString()).not.toBe(payload);
     });

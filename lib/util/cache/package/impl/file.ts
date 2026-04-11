@@ -141,14 +141,22 @@ export class PackageCacheFile extends PackageCacheBase {
 
   private async putCacheEntry(
     cacheKey: string,
-    serializedValue: string,
+    compressedValue: Buffer,
     expiry: string,
   ): Promise<void> {
-    const compressedValue = await compressToBuffer(serializedValue);
     const metadata = { version: CACHE_VERSION, expiry };
     await cacache.put(this.cacheFileName, cacheKey, compressedValue, {
       metadata,
     });
+  }
+
+  private async putSerializedCacheEntry(
+    cacheKey: string,
+    serializedValue: string,
+    expiry: string,
+  ): Promise<void> {
+    const compressedValue = await compressToBuffer(serializedValue);
+    await this.putCacheEntry(cacheKey, compressedValue, expiry);
   }
 
   private async getLegacy<T>(
@@ -209,9 +217,11 @@ export class PackageCacheFile extends PackageCacheBase {
       return 'deleted';
     }
 
+    const compressedValue = Buffer.from(cachedValue.value, 'base64');
+
     let serializedValue: string;
     try {
-      serializedValue = await decompressFromBase64(cachedValue.value);
+      serializedValue = await decompressFromBuffer(compressedValue);
     } catch {
       await this.rmEntry(cacheKey);
       return 'deleted';
@@ -222,7 +232,7 @@ export class PackageCacheFile extends PackageCacheBase {
       return 'deleted';
     }
 
-    await this.putCacheEntry(cacheKey, serializedValue, cachedValue.expiry);
+    await this.putCacheEntry(cacheKey, compressedValue, cachedValue.expiry);
     return 'migrated';
   }
 
@@ -291,7 +301,7 @@ export class PackageCacheFile extends PackageCacheBase {
     const expiry = DateTime.local().plus({ minutes: hardTtlMinutes }).toISO();
 
     const cacheKey = this.getKey(namespace, key);
-    await this.putCacheEntry(cacheKey, serialized, expiry);
+    await this.putSerializedCacheEntry(cacheKey, serialized, expiry);
   }
 
   override async destroy(): Promise<void> {
