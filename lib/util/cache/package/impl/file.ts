@@ -19,15 +19,15 @@ interface PackageCacheLegacyEntry {
   value: string;
 }
 
-interface PackageCacheMetadata {
+interface CacheMetadata {
   expiry: string;
   version: number;
 }
 
-type PackageCacheLegacyMigrationResult = 'deleted' | 'migrated';
-type PackageCacheCleanupResult = 'deleted' | 'kept';
+type LegacyMigrationStatus = 'deleted' | 'migrated';
+type CacheCleanupStatus = 'deleted' | 'kept';
 
-function parseJson<T>(text: string): T | undefined {
+function parseJsonSafe<T>(text: string): T | undefined {
   try {
     return JSON.parse(text) as T;
   } catch {
@@ -35,7 +35,7 @@ function parseJson<T>(text: string): T | undefined {
   }
 }
 
-function isExpired(expiry: string, now: DateTime): boolean {
+function isExpiredAt(expiry: string, now: DateTime): boolean {
   const expiryDateTime = DateTime.fromISO(expiry);
   if (!expiryDateTime.isValid) {
     return true;
@@ -44,7 +44,7 @@ function isExpired(expiry: string, now: DateTime): boolean {
   return now >= expiryDateTime;
 }
 
-function parseCacheMetadata(value: unknown): PackageCacheMetadata | undefined {
+function parseCacheMetadata(value: unknown): CacheMetadata | undefined {
   if (!isPlainObject(value)) {
     return undefined;
   }
@@ -58,10 +58,10 @@ function parseCacheMetadata(value: unknown): PackageCacheMetadata | undefined {
   return { expiry, version };
 }
 
-function parseLegacyCacheEntry(
+function parseLegacyCachePayload(
   data: Buffer,
 ): PackageCacheLegacyEntry | undefined {
-  const parsed = parseJson<unknown>(data.toString());
+  const parsed = parseJsonSafe<unknown>(data.toString());
   if (parsed === undefined) {
     logger.debug('Error parsing cached value - deleting');
     return undefined;
@@ -84,9 +84,9 @@ function parseLegacyCacheEntry(
   return { compress, expiry, value };
 }
 
-async function deserializeCurrentValue<T>(data: Buffer): Promise<T> {
+async function decodeValue<T>(data: Buffer): Promise<T> {
   const json = await decompressFromBuffer(data);
-  const parsed = parseJson<T>(json);
+  const parsed = parseJsonSafe<T>(json);
 
   if (parsed === undefined) {
     throw new Error('Failed to deserialize cached value');
@@ -95,11 +95,11 @@ async function deserializeCurrentValue<T>(data: Buffer): Promise<T> {
   return parsed;
 }
 
-async function deserializeLegacyValue<T>(
+async function decodeLegacyValue<T>(
   entry: PackageCacheLegacyEntry,
 ): Promise<T> {
   const json = await decompressFromBase64(entry.value);
-  const parsed = parseJson<T>(json);
+  const parsed = parseJsonSafe<T>(json);
 
   if (parsed === undefined) {
     throw new Error('Failed to deserialize cached value');
@@ -126,7 +126,7 @@ export class PackageCacheFile extends PackageCacheBase {
     return `${namespace}-${key}`;
   }
 
-  private async putCurrentEntry(
+  private async putCacheEntry(
     cacheKey: string,
     serializedValue: string,
     expiry: string,
@@ -144,57 +144,57 @@ export class PackageCacheFile extends PackageCacheBase {
     cacheKey: string,
   ): Promise<T | undefined> {
     const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
-    const legacyEntry = parseLegacyCacheEntry(cacheEntry.data);
+    const legacyEntry = parseLegacyCachePayload(cacheEntry.data);
 
     if (!legacyEntry) {
       await this.rm(namespace, key);
       return undefined;
     }
 
-    if (isExpired(legacyEntry.expiry, DateTime.local())) {
+    if (isExpiredAt(legacyEntry.expiry, DateTime.local())) {
       await this.rm(namespace, key);
       return undefined;
     }
 
     logger.trace({ namespace, key }, 'Returning cached value');
-    return await deserializeLegacyValue<T>(legacyEntry);
+    return await decodeLegacyValue<T>(legacyEntry);
   }
 
-  private async getCurrent<T>(
+  private async getValue<T>(
     namespace: PackageCacheNamespace,
     key: string,
     cacheKey: string,
   ): Promise<T> {
     const cacheEntry = await cacache.get(this.cacheFileName, cacheKey);
     logger.trace({ namespace, key }, 'Returning cached value');
-    return await deserializeCurrentValue<T>(cacheEntry.data);
+    return await decodeValue<T>(cacheEntry.data);
   }
 
-  private async migrateLegacyEntry(
+  private async migrateLegacyCacheEntry(
     cacheKey: string,
-  ): Promise<PackageCacheLegacyMigrationResult> {
+  ): Promise<LegacyMigrationStatus> {
     const legacyEntry = await cacache.get(this.cacheFileName, cacheKey);
-    const cachedValue = parseLegacyCacheEntry(legacyEntry.data);
+    const cachedValue = parseLegacyCachePayload(legacyEntry.data);
 
     if (!cachedValue) {
       await this.rmEntry(cacheKey);
       return 'deleted';
     }
 
-    if (isExpired(cachedValue.expiry, DateTime.local())) {
+    if (isExpiredAt(cachedValue.expiry, DateTime.local())) {
       await this.rmEntry(cacheKey);
       return 'deleted';
     }
 
     const serializedValue = await decompressFromBase64(cachedValue.value);
-    await this.putCurrentEntry(cacheKey, serializedValue, cachedValue.expiry);
+    await this.putCacheEntry(cacheKey, serializedValue, cachedValue.expiry);
     return 'migrated';
   }
 
-  private async cleanupLegacyEntry(
+  private async cleanupLegacyCacheEntry(
     cacheKey: string,
-  ): Promise<PackageCacheCleanupResult> {
-    const migrationResult = await this.migrateLegacyEntry(cacheKey);
+  ): Promise<CacheCleanupStatus> {
+    const migrationResult = await this.migrateLegacyCacheEntry(cacheKey);
     if (migrationResult === 'deleted') {
       return 'deleted';
     }
@@ -202,18 +202,18 @@ export class PackageCacheFile extends PackageCacheBase {
     return 'kept';
   }
 
-  private async cleanupEntry(
+  private async cleanupEntryWithMetadata(
     cacheKey: string,
     rawMetadata: unknown,
     now: DateTime,
-  ): Promise<PackageCacheCleanupResult> {
+  ): Promise<CacheCleanupStatus> {
     const metadata = parseCacheMetadata(rawMetadata);
     if (!metadata) {
       await this.rmEntry(cacheKey);
       return 'deleted';
     }
 
-    if (isExpired(metadata.expiry, now)) {
+    if (isExpiredAt(metadata.expiry, now)) {
       await this.rmEntry(cacheKey);
       return 'deleted';
     }
@@ -236,12 +236,12 @@ export class PackageCacheFile extends PackageCacheBase {
 
       if (cacheInfo.metadata !== undefined) {
         const metadata = parseCacheMetadata(cacheInfo.metadata);
-        if (metadata === undefined || isExpired(metadata.expiry, now)) {
+        if (metadata === undefined || isExpiredAt(metadata.expiry, now)) {
           await this.rm(namespace, key);
           return undefined;
         }
 
-        return await this.getCurrent<T>(namespace, key, cacheKey);
+        return await this.getValue<T>(namespace, key, cacheKey);
       }
 
       return await this.getLegacy<T>(namespace, key, cacheKey);
@@ -265,7 +265,7 @@ export class PackageCacheFile extends PackageCacheBase {
     }
 
     const cacheKey = this.getKey(namespace, key);
-    await this.putCurrentEntry(cacheKey, serialized, expiry);
+    await this.putCacheEntry(cacheKey, serialized, expiry);
   }
 
   override async destroy(): Promise<void> {
@@ -282,8 +282,12 @@ export class PackageCacheFile extends PackageCacheBase {
 
         const cleanupResult =
           cacheEntry.metadata === undefined
-            ? await this.cleanupLegacyEntry(cacheEntry.key)
-            : await this.cleanupEntry(cacheEntry.key, cacheEntry.metadata, now);
+            ? await this.cleanupLegacyCacheEntry(cacheEntry.key)
+            : await this.cleanupEntryWithMetadata(
+                cacheEntry.key,
+                cacheEntry.metadata,
+                now,
+              );
 
         if (cleanupResult === 'deleted') {
           deletedCount += 1;
