@@ -35,7 +35,7 @@ function parseJsonSafe<T>(text: string): T | undefined {
   }
 }
 
-function isExpiredAt(expiry: string, now: DateTime): boolean {
+function isExpired(expiry: string, now: DateTime = DateTime.local()): boolean {
   const expiryDateTime = DateTime.fromISO(expiry);
   if (!expiryDateTime.isValid) {
     return true;
@@ -126,6 +126,19 @@ export class PackageCacheFile extends PackageCacheBase {
     return `${namespace}-${key}`;
   }
 
+  private async getCacheInfo(
+    cacheKey: string,
+    namespace: PackageCacheNamespace,
+    key: string,
+  ): Promise<cacache.CacheObject | null> {
+    try {
+      return await cacache.get.info(this.cacheFileName, cacheKey);
+    } catch (err) {
+      logger.trace({ err, namespace, key }, 'Cache miss');
+      return null;
+    }
+  }
+
   private async putCacheEntry(
     cacheKey: string,
     serializedValue: string,
@@ -152,7 +165,7 @@ export class PackageCacheFile extends PackageCacheBase {
         return undefined;
       }
 
-      if (isExpiredAt(legacyEntry.expiry, DateTime.local())) {
+      if (isExpired(legacyEntry.expiry)) {
         await this.rm(namespace, key);
         return undefined;
       }
@@ -191,12 +204,24 @@ export class PackageCacheFile extends PackageCacheBase {
       return 'deleted';
     }
 
-    if (isExpiredAt(cachedValue.expiry, DateTime.local())) {
+    if (isExpired(cachedValue.expiry)) {
       await this.rmEntry(cacheKey);
       return 'deleted';
     }
 
-    const serializedValue = await decompressFromBase64(cachedValue.value);
+    let serializedValue: string;
+    try {
+      serializedValue = await decompressFromBase64(cachedValue.value);
+    } catch {
+      await this.rmEntry(cacheKey);
+      return 'deleted';
+    }
+
+    if (parseJsonSafe<unknown>(serializedValue) === undefined) {
+      await this.rmEntry(cacheKey);
+      return 'deleted';
+    }
+
     await this.putCacheEntry(cacheKey, serializedValue, cachedValue.expiry);
     return 'migrated';
   }
@@ -223,7 +248,7 @@ export class PackageCacheFile extends PackageCacheBase {
       return 'deleted';
     }
 
-    if (isExpiredAt(metadata.expiry, now)) {
+    if (isExpired(metadata.expiry, now)) {
       await this.rmEntry(cacheKey);
       return 'deleted';
     }
@@ -236,8 +261,7 @@ export class PackageCacheFile extends PackageCacheBase {
     key: string,
   ): Promise<T | undefined> {
     const cacheKey = this.getKey(namespace, key);
-    const cacheInfo = await cacache.get.info(this.cacheFileName, cacheKey);
-    const now = DateTime.local();
+    const cacheInfo = await this.getCacheInfo(cacheKey, namespace, key);
 
     if (!cacheInfo) {
       return undefined;
@@ -245,7 +269,7 @@ export class PackageCacheFile extends PackageCacheBase {
 
     if (cacheInfo.metadata !== undefined) {
       const metadata = parseCacheMetadata(cacheInfo.metadata);
-      if (metadata === undefined || isExpiredAt(metadata.expiry, now)) {
+      if (metadata === undefined || isExpired(metadata.expiry)) {
         await this.rm(namespace, key);
         return undefined;
       }

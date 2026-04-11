@@ -97,6 +97,16 @@ describe('util/cache/package/impl/file', () => {
       expect(res).toBeUndefined();
     });
 
+    it('returns undefined when cache info lookup fails', async () => {
+      const cacheInfoSpy = vi
+        .spyOn(cacache.get, 'info')
+        .mockRejectedValue(new Error('error'));
+
+      await expect(cache.get(namespace, 'key')).resolves.toBeUndefined();
+
+      cacheInfoSpy.mockRestore();
+    });
+
     it('expires cached entries', async () => {
       await cache.set(namespace, 'key', 1234, -5);
 
@@ -303,6 +313,22 @@ describe('util/cache/package/impl/file', () => {
       await expectNoCacheEntry('invalid');
 
       expect(expiredPayload).toContain('"compress":true');
+    });
+
+    it('removes legacy entries with malformed decompressed payloads', async () => {
+      const compressedValue = await compressToBase64('not-json');
+      const payload = JSON.stringify({
+        compress: true,
+        value: compressedValue,
+        expiry: getExpiry(5),
+      });
+      await cacache.put(cacheFileName, 'invalid-legacy-payload', payload);
+
+      await cache.destroy();
+
+      const cacheKeys = await getCacheKeys();
+
+      expect(cacheKeys).not.toContain('invalid-legacy-payload');
     });
 
     it('removes invalid legacy entries without expiry', async () => {
