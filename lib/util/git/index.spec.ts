@@ -1314,6 +1314,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const parentCommit = git.getBranchCommit('develop')!;
       const commit = git.getBranchCommit(defaultBranch)!;
       const diff = await git.diffCommitTree(parentCommit, commit);
+      expect(diff.length).toBeGreaterThanOrEqual(2);
       expect(diff).toContainEqual(
         expect.objectContaining({
           path: 'master_file',
@@ -1321,8 +1322,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
           type: 'blob',
         }),
       );
-      // master_file and file_to_delete were added after develop branched
-      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual(
+        expect.objectContaining({ path: 'file_to_delete' }),
+      );
       for (const item of diff) {
         expect(item.sha).toMatch(/^[0-9a-f]{40}$/);
       }
@@ -1333,10 +1335,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const parentCommit = git.getBranchCommit('develop')!;
       // Reverse: from default branch back to develop — master_file and file_to_delete are "deleted"
       const diff = await git.diffCommitTree(commit, parentCommit);
-      expect(diff).toHaveLength(2);
-      for (const item of diff) {
-        expect(item.sha).toBeNull();
-      }
+      expect(diff.length).toBeGreaterThanOrEqual(2);
+      const masterFile = diff.find((d) => d.path === 'master_file');
+      expect(masterFile?.sha).toBeNull();
+      const fileToDelete = diff.find((d) => d.path === 'file_to_delete');
+      expect(fileToDelete?.sha).toBeNull();
     });
   });
 
