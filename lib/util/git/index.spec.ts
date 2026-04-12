@@ -1299,6 +1299,47 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
+  describe('getCommitTreeSha', () => {
+    it('returns the tree SHA for a commit', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      const treeSha = await git.getCommitTreeSha(commit);
+      expect(treeSha).toBeString();
+      expect(treeSha).toHaveLength(40);
+      expect(treeSha).toMatch(/^[0-9a-f]{40}$/);
+    });
+  });
+
+  describe('diffCommitTree', () => {
+    it('returns changed files between two commits', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const diff = await git.diffCommitTree(parentCommit, commit);
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'master_file',
+          mode: '100644',
+          type: 'blob',
+        }),
+      );
+      // master_file and file_to_delete were added after develop branched
+      expect(diff).toHaveLength(2);
+      for (const item of diff) {
+        expect(item.sha).toMatch(/^[0-9a-f]{40}$/);
+      }
+    });
+
+    it('returns deletions with sha null', async () => {
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const parentCommit = git.getBranchCommit('develop')!;
+      // Reverse: from default branch back to develop — master_file and file_to_delete are "deleted"
+      const diff = await git.diffCommitTree(commit, parentCommit);
+      expect(diff).toHaveLength(2);
+      for (const item of diff) {
+        expect(item.sha).toBeNull();
+      }
+    });
+  });
+
   describe('getRepoStatus', () => {
     it('should pass options into git status', async () => {
       await git.checkoutBranch('renovate/nested_files');
