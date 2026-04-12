@@ -90,7 +90,6 @@ export interface ReleaseResult {
   homepage?: string | undefined;
   gitRef?: string;
   sourceUrl?: string | null;
-  sourceTag?: string;
   sourceDirectory?: string;
   registryUrl?: string;
   replacementName?: string;

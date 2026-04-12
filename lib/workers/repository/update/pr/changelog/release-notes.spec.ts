@@ -243,7 +243,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
-    it('uses sourceTag in cache key', async () => {
+    it('uses gitRef in cache key', async () => {
       githubReleasesMock.mockResolvedValue([
         {
           id: 123,
@@ -263,7 +263,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
       ]);
 
-      const input = {
+      const firstInput = {
         project: partial<ChangeLogProject>({
           type: 'github',
           repository: 'facebook/react-native',
@@ -274,22 +274,36 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         versions: [
           partial<ChangeLogRelease>({
             version: '1.0.0',
+            gitRef: 'custom-a/1.0.0',
+            compare: { url: '' },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      const secondInput = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          repository: 'facebook/react-native',
+          packageName: 'unrelated-package',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            gitRef: 'custom-b/1.0.0',
             compare: { url: '' },
           }),
         ],
       } satisfies ChangeLogResult;
 
       const firstRes = await addReleaseNotes(
-        input,
-        partial<BranchUpgradeConfig>({
-          sourceTag: 'custom-a/1.0.0',
-        }),
+        firstInput,
+        partial<BranchUpgradeConfig>(),
       );
       const secondRes = await addReleaseNotes(
-        input,
-        partial<BranchUpgradeConfig>({
-          sourceTag: 'custom-b/1.0.0',
-        }),
+        secondInput,
+        partial<BranchUpgradeConfig>(),
       );
 
       expect(firstRes?.versions?.[0]?.releaseNotes?.url).toBe(
@@ -300,7 +314,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
     });
 
-    it('uses legacy cache key when sourceTag is not set', async () => {
+    it('uses legacy cache key when gitRef is not set', async () => {
       const packageCacheGetSpy = vi.spyOn(packageCache, 'get');
       githubReleasesMock.mockResolvedValueOnce([
         {
@@ -338,7 +352,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       packageCacheGetSpy.mockRestore();
     });
 
-    it('includes sourceDirectory and sourceTag in cache key', async () => {
+    it('includes sourceDirectory and gitRef in cache key', async () => {
       const packageCacheGetSpy = vi.spyOn(packageCache, 'get');
       githubReleasesMock.mockResolvedValueOnce([
         {
@@ -363,17 +377,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         versions: [
           partial<ChangeLogRelease>({
             version: '1.0.0',
+            gitRef: 'custom-a/1.0.0',
             compare: { url: '' },
           }),
         ],
       } satisfies ChangeLogResult;
 
-      await addReleaseNotes(
-        input,
-        partial<BranchUpgradeConfig>({
-          sourceTag: 'custom-a/1.0.0',
-        }),
-      );
+      await addReleaseNotes(input, partial<BranchUpgradeConfig>());
 
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
@@ -382,47 +392,48 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       packageCacheGetSpy.mockRestore();
     });
 
-    it('treats empty sourceTag as unset in cache key', async () => {
-      const packageCacheGetSpy = vi.spyOn(packageCache, 'get');
+    it('matches release notes using gitRef when the tag differs from the version', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {
           id: 123,
-          version: 'v1.0.0',
+          version: 'random-prefix-1.0.1',
           releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'https://example.com/v1.0.0',
-          description: 'release',
-          name: 'release',
+          url: 'https://example.com/wrong',
+          description: 'wrong body',
+          name: 'some/dep',
+        },
+        {
+          id: 456,
+          version: 'my-custom-tag/1.0.1',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'https://example.com/correct',
+          description: 'correct body',
+          name: 'some/dep',
         },
       ]);
 
-      const input = {
-        project: partial<ChangeLogProject>({
-          type: 'github',
-          repository: 'facebook/react-native',
-          packageName: 'unrelated-package',
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'exampleDep',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.1',
+          gitRef: 'my-custom-tag/1.0.1',
         }),
-        versions: [
-          partial<ChangeLogRelease>({
-            version: '1.0.0',
-            compare: { url: '' },
-          }),
-        ],
-      } satisfies ChangeLogResult;
-
-      await addReleaseNotes(
-        input,
-        partial<BranchUpgradeConfig>({
-          sourceTag: '',
-        }),
+        partial<BranchUpgradeConfig>(),
       );
 
-      expect(packageCacheGetSpy).toHaveBeenCalledWith(
-        'changelog-github-notes@v2',
-        'facebook/react-native:1.0.0',
-      );
-      packageCacheGetSpy.mockRestore();
+      expect(res).toEqual({
+        url: 'https://example.com/correct',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 456,
+        tag: 'my-custom-tag/1.0.1',
+        name: 'some/dep',
+        body: 'correct body\n',
+      });
     });
 
     it('returns ChangeLogResult without release notes', async () => {
@@ -1280,174 +1291,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: 'app-1.0.0',
         name: 'some/dep',
         body: 'some body\n',
-      });
-    });
-
-    it('matches release notes using sourceTag', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        {
-          id: 123,
-          version: `random-prefix-1.0.0`,
-          releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'wrong/url/tag.com',
-          description: 'wrong body',
-          name: 'some/dep',
-        },
-        {
-          id: 456,
-          version: `my-custom-tag/1.0.1`,
-          releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'correct/url/tag.com',
-          description: 'some body',
-          name: 'some/dep',
-        },
-      ]);
-      const res = await getReleaseNotes(
-        {
-          ...githubProject,
-          repository: 'some/other-repository',
-          packageName: 'exampleDep',
-        },
-        partial<ChangeLogRelease>({
-          version: '1.0.1',
-          gitRef: '1.0.1',
-        }),
-        partial<BranchUpgradeConfig>({
-          sourceTag: 'my-custom-tag/1.0.1',
-        }),
-      );
-      expect(res).toEqual({
-        url: 'correct/url/tag.com',
-        notesSourceUrl:
-          'https://api.github.com/repos/some/other-repository/releases',
-        id: 456,
-        tag: 'my-custom-tag/1.0.1',
-        name: 'some/dep',
-        body: 'some body\n',
-      });
-    });
-
-    it('prefers sourceTag over fallback version tag matching', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        {
-          id: 111,
-          version: 'v1.0.1',
-          releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'fallback/url/tag.com',
-          description: 'fallback body',
-          name: 'some/dep',
-        },
-        {
-          id: 222,
-          version: 'my-custom-tag/1.0.1',
-          releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'source-tag/url.com',
-          description: 'source tag body',
-          name: 'some/dep',
-        },
-      ]);
-      const res = await getReleaseNotes(
-        {
-          ...githubProject,
-          repository: 'some/other-repository',
-          packageName: 'exampleDep',
-        },
-        partial<ChangeLogRelease>({
-          version: '1.0.1',
-          gitRef: '1.0.1',
-        }),
-        partial<BranchUpgradeConfig>({
-          sourceTag: 'my-custom-tag/1.0.1',
-        }),
-      );
-      expect(res).toEqual({
-        url: 'source-tag/url.com',
-        notesSourceUrl:
-          'https://api.github.com/repos/some/other-repository/releases',
-        id: 222,
-        tag: 'my-custom-tag/1.0.1',
-        name: 'some/dep',
-        body: 'source tag body\n',
-      });
-    });
-
-    it('falls back when sourceTag is configured but missing', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        {
-          id: 111,
-          version: 'v1.0.1',
-          releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'fallback/url/tag.com',
-          description: 'fallback body',
-          name: 'some/dep',
-        },
-      ]);
-      const res = await getReleaseNotes(
-        {
-          ...githubProject,
-          repository: 'some/other-repository',
-          packageName: 'exampleDep',
-        },
-        partial<ChangeLogRelease>({
-          version: '1.0.1',
-          gitRef: '1.0.1',
-        }),
-        partial<BranchUpgradeConfig>({
-          sourceTag: 'missing-tag/1.0.1',
-        }),
-      );
-      expect(res).toEqual({
-        url: 'fallback/url/tag.com',
-        notesSourceUrl:
-          'https://api.github.com/repos/some/other-repository/releases',
-        id: 111,
-        tag: 'v1.0.1',
-        name: 'some/dep',
-        body: 'fallback body\n',
-      });
-    });
-
-    it('treats empty sourceTag as unset when matching release notes', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        {
-          id: 111,
-          version: 'v1.0.1',
-          releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'fallback/url/tag.com',
-          description: 'fallback body',
-          name: 'some/dep',
-        },
-        {
-          id: 222,
-          version: 'my-custom-tag/1.0.1',
-          releaseTimestamp: '2020-01-01' as Timestamp,
-          url: 'source-tag/url.com',
-          description: 'source tag body',
-          name: 'some/dep',
-        },
-      ]);
-      const res = await getReleaseNotes(
-        {
-          ...githubProject,
-          repository: 'some/other-repository',
-          packageName: 'exampleDep',
-        },
-        partial<ChangeLogRelease>({
-          version: '1.0.1',
-          gitRef: '1.0.1',
-        }),
-        partial<BranchUpgradeConfig>({
-          sourceTag: '',
-        }),
-      );
-      expect(res).toEqual({
-        url: 'fallback/url/tag.com',
-        notesSourceUrl:
-          'https://api.github.com/repos/some/other-repository/releases',
-        id: 111,
-        tag: 'v1.0.1',
-        name: 'some/dep',
-        body: 'fallback body\n',
       });
     });
   });
