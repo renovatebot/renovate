@@ -61,6 +61,7 @@ const scalaVersionMatch = q
       const scalaVersion = ctx.vars[varName];
       if (scalaVersion) {
         ctx.scalaVersion = scalaVersion;
+        ctx.variableName = varName;
       }
       return ctx;
     }),
@@ -82,6 +83,11 @@ const scalaVersionMatch = q
         separateMinorPatch: true,
       };
       ctx.scalaVersion = normalizeScalaVersion(ctx.scalaVersion);
+      if (ctx.variableName) {
+        dep.sharedVariableName = ctx.variableName;
+        dep.variableName = ctx.variableName;
+        delete ctx.variableName;
+      }
       ctx.deps.push(dep);
     }
     return ctx;
