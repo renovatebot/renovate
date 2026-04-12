@@ -56,6 +56,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -74,6 +75,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -92,6 +94,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -110,6 +113,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -128,6 +132,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'scala',
           packageName: 'org.scala-lang:scala-library',
@@ -147,6 +152,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'scala',
           packageName: 'org.scala-lang:scala-library',
@@ -167,6 +173,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -190,6 +197,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -215,6 +223,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -240,6 +249,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -262,6 +272,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -280,6 +291,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -298,6 +310,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -319,6 +332,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           depName: 'org.example:foo',
           packageName: 'org.example:foo_2.13',
@@ -340,6 +354,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           updateType: 'replacement',
           depName: 'org.scalatestplus:mockito-3-12',
@@ -360,6 +375,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           updateType: 'replacement',
           depName: 'org.scalatestplus:mockito-3-12',
@@ -379,6 +395,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           updateType: 'replacement',
           depName: 'com.fasterxml.jackson:jackson-bom',
@@ -402,6 +419,7 @@ describe('modules/manager/sbt/update', () => {
 
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
+        packageFile: 'build.sbt',
         upgrade: {
           updateType: 'replacement',
           depName: 'org.scalatestplus:mockito-3-12',
