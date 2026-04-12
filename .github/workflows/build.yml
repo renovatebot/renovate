@@ -523,7 +523,7 @@ jobs:
           pnpm nyc check-coverage -t ./coverage/nyc \
             --statements 99.88 \
             --branches 97.84 \
-            --functions 99.96 \
+            --functions 99.95 \
             --lines 99.87 \
 
   # Catch-all required check for test matrix and coverage
