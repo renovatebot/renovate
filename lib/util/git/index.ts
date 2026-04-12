@@ -1499,7 +1499,7 @@ const treeItemRegex = regEx(
 );
 
 const diffTreeLineRegex = regEx(
-  /^:(?<oldMode>\d{6})\s+(?<newMode>\d{6})\s+(?<oldSha>[0-9a-f]{40})\s+(?<newSha>[0-9a-f]{40})\s+(?<status>\w)\t(?<path>.+)$/,
+  /^:(?<oldMode>\d{6})\s+(?<newMode>\d{6})\s+(?<oldSha>[0-9a-f]{40})\s+(?<newSha>[0-9a-f]{40})\s+(?<status>[A-Z]\d*)\t(?<paths>.+)$/,
 );
 
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
@@ -1561,6 +1561,16 @@ export interface DiffTreeItem {
   sha: LongCommitSha | null;
 }
 
+function treeTypeFromMode(mode: string): 'blob' | 'tree' | 'commit' {
+  if (mode === '160000') {
+    return 'commit';
+  }
+  if (mode === '040000') {
+    return 'tree';
+  }
+  return 'blob';
+}
+
 /**
  * Return only the files that changed between two commits.
  * Deletions have `sha: null` (for use with GitHub's `base_tree` API).
@@ -1580,14 +1590,37 @@ export async function diffCommitTree(
   for (const line of output.split(newlineRegex)) {
     const matchGroups = diffTreeLineRegex.exec(line)?.groups;
     if (matchGroups) {
-      const { oldMode, newMode, newSha, status, path } = matchGroups;
-      if (status === 'D') {
-        result.push({ path, mode: oldMode, type: 'blob', sha: null });
-      } else {
+      const { oldMode, newMode, newSha, status, paths } = matchGroups;
+      const statusCode = status[0];
+      // R/C have two tab-separated paths (old\tnew); A/M/D/T have one
+      const [sourcePath, targetPath] = paths.split('\t');
+      if (statusCode === 'D') {
         result.push({
-          path,
+          path: sourcePath,
+          mode: oldMode,
+          type: treeTypeFromMode(oldMode),
+          sha: null,
+        });
+      } else if (statusCode === 'R') {
+        // Rename: delete source, add target
+        result.push({
+          path: sourcePath,
+          mode: oldMode,
+          type: treeTypeFromMode(oldMode),
+          sha: null,
+        });
+        result.push({
+          path: targetPath,
           mode: newMode,
-          type: 'blob',
+          type: treeTypeFromMode(newMode),
+          sha: newSha as LongCommitSha,
+        });
+      } else {
+        // A (add), M (modify), T (type change), C (copy)
+        result.push({
+          path: targetPath ?? sourcePath,
+          mode: newMode,
+          type: treeTypeFromMode(newMode),
           sha: newSha as LongCommitSha,
         });
       }
