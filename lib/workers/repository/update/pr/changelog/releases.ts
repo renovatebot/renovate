@@ -5,6 +5,7 @@ import {
   getPkgReleases,
   isGetPkgReleasesConfig,
 } from '../../../../../modules/datasource/index.ts';
+import { postprocessRelease } from '../../../../../modules/datasource/postprocess-release.ts';
 import type { VersioningApi } from '../../../../../modules/versioning/index.ts';
 import { get } from '../../../../../modules/versioning/index.ts';
 import { coerceArray } from '../../../../../util/array.ts';
@@ -87,12 +88,28 @@ export async function getInRangeReleases(
       }
     }
 
+    const hydratedReleases: Release[] = [];
+    for (const release of releases) {
+      const hydratedRelease = await postprocessRelease(
+        {
+          datasource,
+          packageName: config.packageName,
+          registryUrl: config.registryUrl,
+          registryUrls: config.registryUrls,
+        },
+        release,
+      );
+      if (hydratedRelease) {
+        hydratedReleases.push(hydratedRelease);
+      }
+    }
+
     if (version.valueToVersion) {
-      for (const release of coerceArray(releases)) {
+      for (const release of coerceArray(hydratedReleases)) {
         release.version = version.valueToVersion(release.version);
       }
     }
-    return releases;
+    return hydratedReleases;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getInRangeReleases err');
     logger.debug(`Error getting releases for ${depName} from ${datasource}`);

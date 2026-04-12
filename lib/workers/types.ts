@@ -118,7 +118,6 @@ export interface BranchUpgradeConfig
   minimumGroupSize?: number;
   releaseNotesSummaryTitle?: string;
   sourceUrl?: string;
-  sourceTag?: string;
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
