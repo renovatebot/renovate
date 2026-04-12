@@ -354,7 +354,7 @@ describe('modules/platform/github/index', () => {
       httpMock
         .scope(githubApiHost, {
           reqheaders: {
-            authorization: 'token ghs_123test',
+            authorization: 'Bearer ghs_123test',
           },
         })
         .post('/graphql')
@@ -450,7 +450,7 @@ describe('modules/platform/github/index', () => {
       httpMock
         .scope('https://ghe.renovatebot.com', {
           reqheaders: {
-            authorization: 'token ghs_123test',
+            authorization: 'Bearer ghs_123test',
           },
         })
         .head('/')

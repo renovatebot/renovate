@@ -64,6 +64,7 @@ export function determineLockFileDirs(
   const pnpmShrinkwrapDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
+    // v8 ignore else -- TODO: add test #40625
     if (
       upgrade.updateType === 'lockFileMaintenance' ||
       upgrade.isRemediation === true ||
@@ -138,7 +139,7 @@ export async function writeExistingFiles(
     'Writing package.json files',
   );
   for (const packageFile of npmFiles) {
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (!packageFile.managerData) {
       continue;
     }
@@ -155,8 +156,7 @@ export async function writeExistingFiles(
     ) {
       try {
         await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
@@ -167,8 +167,7 @@ export async function writeExistingFiles(
       let existingNpmLock: string;
       try {
         existingNpmLock = (await getFile(npmLock)) ?? '';
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ err }, 'Error reading npm lock file');
         existingNpmLock = '';
       }
@@ -208,6 +207,7 @@ export async function writeExistingFiles(
             }
           }
         }
+        // v8 ignore else -- TODO: add test #40625
         if (widens.length) {
           logger.debug(
             `Removing ${String(widens)} from ${npmLock} to force an update`,
@@ -220,14 +220,14 @@ export async function writeExistingFiles(
                 delete npmLockParsed.dependencies![depName];
               });
             }
-            /* v8 ignore next -- needs test */
-          } catch {
+          } catch /* v8 ignore next -- TODO: add test #40625 */ {
             logger.warn(
               { npmLock },
               'Error massaging package-lock.json for widen',
             );
           }
         }
+        // v8 ignore else -- TODO: add test #40625
         if (lockFileChanged) {
           logger.debug('Massaging npm lock file before writing to disk');
           existingNpmLock = composeLockFile(npmLockParsed, detectedIndent);
@@ -246,6 +246,15 @@ export async function writeUpdatedPackageFiles(
   if (!config.updatedPackageFiles) {
     logger.debug('No files found');
     return;
+  }
+  // prefer artifact content when it updates the same file (e.g. pnpm-workspace.yaml)
+  const artifactContents = new Map<string, string>();
+  if (config.updatedArtifacts) {
+    for (const artifact of config.updatedArtifacts) {
+      if (artifact.type === 'addition' && artifact.contents) {
+        artifactContents.set(artifact.path, artifact.contents.toString());
+      }
+    }
   }
   const supportedLockFiles = ['package-lock.json', 'yarn.lock'];
   for (const packageFile of config.updatedPackageFiles) {
@@ -270,8 +279,10 @@ export async function writeUpdatedPackageFiles(
     ) {
       continue;
     }
+    const contents =
+      artifactContents.get(packageFile.path) ?? packageFile.contents!;
     logger.debug(`Writing ${packageFile.path}`);
-    await writeLocalFile(packageFile.path, packageFile.contents!);
+    await writeLocalFile(packageFile.path, contents);
   }
 }
 
@@ -375,8 +386,7 @@ export async function updateYarnBinary(
         isExecutable: true,
       },
     );
-    /* v8 ignore next -- needs test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.error({ err }, 'Error updating Yarn binary');
   }
   return existingYarnrcYmlContent && yarnrcYml;
@@ -429,9 +439,9 @@ export async function getAdditionalFiles(
       hostType: 'github',
       url: 'https://api.github.com/',
     }));
-    token = token ? /* v8 ignore next */ `${token}@` : token;
-    /* v8 ignore next -- needs test */
-  } catch (err) {
+    // v8 ignore next -- TODO: add test #40625
+    token = token ? `${token}@` : token;
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
   const tokenRe = regEx(`${token ?? ''}`, 'g', false);
@@ -506,6 +516,7 @@ export async function getAdditionalFiles(
     if (additionalYarnRcYml) {
       yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
       existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
+      // v8 ignore else -- TODO: add test #40625
       if (existingYarnrcYmlContent) {
         try {
           // TODO: use schema (#9610)
@@ -538,10 +549,9 @@ export async function getAdditionalFiles(
       /* v8 ignore next -- needs test */
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
         for (const upgrade of config.upgrades) {
-          /* eslint-disable no-useless-escape */
           if (
             res.stderr.includes(
-              `Couldn't find any versions for \\\"${upgrade.depName}\\\"`,
+              `Couldn't find any versions for \\"${upgrade.depName}\\"`,
             )
           ) {
             logger.debug(
@@ -555,7 +565,6 @@ export async function getAdditionalFiles(
               NpmDatasource.id,
             );
           }
-          /* eslint-enable no-useless-escape */
         }
       }
 

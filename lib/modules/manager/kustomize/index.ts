@@ -21,3 +21,5 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
   HelmDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

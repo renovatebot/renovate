@@ -9,11 +9,11 @@ import { mapPrFromScmToRenovate } from './mapper.ts';
 import type { PullRequest, Repo, User } from './schema.ts';
 import type { PrFilterByState } from './types.ts';
 
-vi.mock('../util');
-vi.mock('../../../util/git');
+vi.mock('../util.ts');
+vi.mock('../../../util/git/index.ts');
 
-const endpoint = 'https://localhost:8080';
-const baseUrl = `${endpoint}/scm/api/v2`;
+const endpoint = 'https://localhost:8080/scm/';
+const baseUrl = `${endpoint}api/v2`;
 const token = 'TEST_TOKEN';
 
 const user: User = {
