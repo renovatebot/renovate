@@ -1498,6 +1498,10 @@ const treeItemRegex = regEx(
   /^(?<mode>\d{6})\s+(?<type>blob|tree|commit)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/,
 );
 
+const diffTreeLineRegex = regEx(
+  /^:(?<oldMode>\d{6})\s+(?<newMode>\d{6})\s+(?<oldSha>[0-9a-f]{40})\s+(?<newSha>[0-9a-f]{40})\s+(?<status>\w)\t(?<path>.+)$/,
+);
+
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
 
 /**
@@ -1525,9 +1529,7 @@ const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
 export async function listCommitTree(
   commitSha: LongCommitSha,
 ): Promise<TreeItem[]> {
-  const commitOutput = await git.catFile(['-p', commitSha]);
-  /* v8 ignore next -- will never happen */
-  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  const treeSha = await getCommitTreeSha(commitSha);
   const contents = await git.catFile(['-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];
@@ -1536,6 +1538,59 @@ export async function listCommitTree(
     if (matchGroups) {
       const { path, mode, type, sha } = matchGroups;
       result.push({ path, mode, type, sha: sha as LongCommitSha });
+    }
+  }
+  return result;
+}
+
+/**
+ * Get the tree SHA for a commit.
+ */
+export async function getCommitTreeSha(
+  commitSha: LongCommitSha,
+): Promise<LongCommitSha> {
+  const commitOutput = await git.catFile(['-p', commitSha]);
+  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  return treeSha as LongCommitSha;
+}
+
+export interface DiffTreeItem {
+  path: string;
+  mode: string;
+  type: string;
+  sha: LongCommitSha | null;
+}
+
+/**
+ * Return only the files that changed between two commits.
+ * Deletions have `sha: null` (for use with GitHub's `base_tree` API).
+ */
+export async function diffCommitTree(
+  parentCommitSha: LongCommitSha,
+  commitSha: LongCommitSha,
+): Promise<DiffTreeItem[]> {
+  const output = await git.raw([
+    'diff-tree',
+    '-r',
+    '--no-commit-id',
+    parentCommitSha,
+    commitSha,
+  ]);
+  const result: DiffTreeItem[] = [];
+  for (const line of output.split(newlineRegex)) {
+    const matchGroups = diffTreeLineRegex.exec(line)?.groups;
+    if (matchGroups) {
+      const { oldMode, newMode, newSha, status, path } = matchGroups;
+      if (status === 'D') {
+        result.push({ path, mode: oldMode, type: 'blob', sha: null });
+      } else {
+        result.push({
+          path,
+          mode: newMode,
+          type: 'blob',
+          sha: newSha as LongCommitSha,
+        });
+      }
     }
   }
   return result;

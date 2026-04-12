@@ -29,7 +29,8 @@ import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import {
-  listCommitTree,
+  diffCommitTree,
+  getCommitTreeSha,
   pushCommitToRenovateRef,
 } from '../../../util/git/index.ts';
 import type {
@@ -2164,15 +2165,15 @@ async function pushFiles(
     // Push the commit to GitHub using a custom ref
     // The associated blobs will be pushed automatically
     await pushCommitToRenovateRef(commitSha, branchName);
-    // Get all the blobs which the commit/tree points to
-    // The blob SHAs will be the same locally as on GitHub
-    const treeItems = await listCommitTree(commitSha);
 
-    // For reasons unknown, we need to recreate our tree+commit on GitHub
-    // Attempting to reuse the tree or commit SHA we pushed does not work
+    // Use base_tree with only changed files to avoid org ruleset
+    // file-path restrictions on unchanged files (#42554)
+    const baseTreeSha = await getCommitTreeSha(parentCommitSha);
+    const treeItems = await diffCommitTree(parentCommitSha, commitSha);
+
     const treeRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/trees`,
-      { body: { tree: treeItems } },
+      { body: { base_tree: baseTreeSha, tree: treeItems } },
     );
     const treeSha = treeRes.body.sha;
 
