@@ -1,4 +1,5 @@
 import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
+import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -17,6 +18,9 @@ import { getSourceUrl } from './common.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import type { VersionInfo } from './types.ts';
+
+/** TODO #42566 */
+const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
@@ -81,7 +85,11 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const res = await this.getVersionsWithInfo(url, packageName);
+        const res = await this.getVersionsWithInfo(
+          url,
+          packageName,
+          config.constraintsFiltering,
+        );
         if (res.releases.length) {
           result = res;
           break;
@@ -187,6 +195,66 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
+  /**
+   * Retrieve the `go` directive for a given Go Module.
+   *
+   * NOTE that this means the `go` directive, not the `toolchain` directive.
+   */
+  async retrieveGoDirectiveForModule(
+    baseUrl: string,
+    packageName: string,
+    version: string,
+  ): Promise<string | undefined> {
+    return withCache(
+      {
+        namespace: `datasource-${GoProxyDatasource.id}`,
+        key: GoProxyDatasource.getVersionedCacheKey(packageName, version),
+        fallback: true,
+        // a module's `go.mod` should /never/ change after it's published. If going via the Go Proxy and the Go Checksum Database, a change in this value will result in build failures.
+        ttlMinutes: 100 * 24 * 60,
+      },
+      () => this._retrieveGoDirectiveForModule(baseUrl, packageName, version),
+    );
+  }
+
+  async _retrieveGoDirectiveForModule(
+    baseUrl: string,
+    packageName: string,
+    version: string,
+  ): Promise<string | undefined> {
+    const url = joinUrlParts(
+      baseUrl,
+      this.encodeCase(packageName),
+      '@v',
+      `${version}.mod`,
+    );
+    const res = await this.http.getText(url);
+
+    let goDirective: string | undefined = undefined;
+
+    for (const line of res.body.split('\n')) {
+      const goVersionMatches = goVersionRegex.exec(line)?.groups;
+      if (goVersionMatches) {
+        goDirective = goVersionMatches.version;
+        break;
+      }
+    }
+
+    if (!goDirective) {
+      return goDirective;
+    }
+
+    // always return it in full SemVer format, which can then be matched on using `semver` or `semver-coerced`
+    const parts = goDirective.split('.');
+    if (parts.length === 1) {
+      return `${parts[0]}.0.0`;
+    } else if (parts.length === 2) {
+      return `${parts[0]}.${parts[1]}.0`;
+    } else {
+      return `${parts[0]}.${parts[1]}.${parts[2]}`;
+    }
+  }
+
   async getLatestVersion(
     baseUrl: string,
     packageName: string,
@@ -208,6 +276,7 @@ export class GoProxyDatasource extends Datasource {
   async getVersionsWithInfo(
     baseUrl: string,
     packageName: string,
+    constraintsFiltering: ConstraintsFilter | undefined,
   ): Promise<ReleaseResult> {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
@@ -254,6 +323,31 @@ export class GoProxyDatasource extends Datasource {
             return { version };
           }
         });
+
+        if (constraintsFiltering === 'strict') {
+          releases = await p.map(releases, async (rel) => {
+            try {
+              const goDirective = await this.retrieveGoDirectiveForModule(
+                baseUrl,
+                packageName,
+                rel.version,
+              );
+              if (goDirective) {
+                rel.constraints ??= {};
+                rel.constraints['%goMod'] ??= [];
+                rel.constraints['%goMod'].push(goDirective);
+              }
+            } catch (err) {
+              logger.trace(
+                { err },
+                `Can't obtain \`go\` directive from ${baseUrl}`,
+              );
+            }
+
+            return rel;
+          });
+        }
+
         result.releases.push(...releases);
       } catch (err) {
         const potentialHttpError =
@@ -298,5 +392,12 @@ export class GoProxyDatasource extends Datasource {
     const noproxy = parseNoproxy();
     // TODO: types (#22198)
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
+  }
+
+  static getVersionedCacheKey(packageName: string, version: string): string {
+    const goproxy = getEnv().GOPROXY;
+    const noproxy = parseNoproxy();
+    // TODO: types (#22198)
+    return `${packageName}@@${version}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }
