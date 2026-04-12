@@ -116,13 +116,13 @@ describe('util/cache/package/impl/redis', () => {
     });
 
     describe('get', () => {
-      it('returns current-format cached value', async () => {
+      it('returns value from cache payload', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
         const value = { foo: 'bar' };
-        const compressedValue = await compressToBase64(JSON.stringify(value));
+        const payloadValue = await compressToBase64(JSON.stringify(value));
 
         const payload = JSON.stringify({
-          value: compressedValue,
+          value: payloadValue,
           expiry: DateTime.local().plus({ minutes: 5 }),
         });
         clientMock.get.mockResolvedValueOnce(payload);
@@ -183,7 +183,7 @@ describe('util/cache/package/impl/redis', () => {
     });
 
     describe('set', () => {
-      it('stores value in current format', async () => {
+      it('stores payload with value and expiry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
         await cache.set('_test-namespace', 'key', { foo: 'bar' }, 10);

@@ -31,7 +31,7 @@ describe('util/cache/package/impl/file', () => {
       expect(res).toBe(1234);
     });
 
-    it('stores payload in current format', async () => {
+    it('stores payload with value and expiry', async () => {
       await cache.set('_test-namespace', 'key', 1234, 5);
 
       const entry = await cacache.get(cacheFileName, '_test-namespace-key');
@@ -111,7 +111,7 @@ describe('util/cache/package/impl/file', () => {
       expect(res).toBeUndefined();
     });
 
-    it('retrieves current-format value', async () => {
+    it('retrieves value from cache payload', async () => {
       const value = await compressToBase64(JSON.stringify(1234));
       const expiry = DateTime.local().plus({ minutes: 5 });
       const payload = JSON.stringify({ value, expiry });
