@@ -1,6 +1,7 @@
 import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
+  RpmMetadataSource,
 } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/index.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
@@ -32,6 +33,7 @@ export interface GetReleasesConfig {
   packageName: string;
   registryUrl?: string;
   currentValue?: string;
+  rpmMetadataSource?: RpmMetadataSource;
 }
 
 export interface GetPkgReleasesConfig {
@@ -52,6 +54,7 @@ export interface GetPkgReleasesConfig {
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
   registryStrategy?: RegistryStrategy;
+  rpmMetadataSource?: RpmMetadataSource;
 }
 
 export interface Release {
