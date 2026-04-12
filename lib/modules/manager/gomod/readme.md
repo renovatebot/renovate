@@ -21,6 +21,49 @@ If you are sure you want to always bump it to latest, then you need the followin
 In `go.mod`, the `toolchain` directive essentially means "Use this exact version of go".
 Unlike the `go` directive, it's valid to keep bumping this, and you should see updates to it proposed by default.
 
+### Only suggesting updates that match your `go` directive
+
+In `go.mod`, the `go` directive essentially means "Compatible with this version or later".
+It is generally recommended for Go projects to _not_ bump this version unless necessary, and as [noted above](#updating-of-go-mod-and-toolchain-directives), Renovate doesn't update this.
+
+However, dependency updates can lead to a package you rely on bumping their `go` directive, which means you can't accept the proposed update without also bumping your `go` directive.
+
+To make this simpler, you can use [`constraintsFiltering=strict`](../../../configuration-options.md#constraintsfiltering) to make sure that Renovate will only propose updates that match the [`constraints`](../../../configuration-options.md#constraints) you specify.
+
+For example, given the `go.mod`:
+
+```gomod
+module example
+
+go 1.24.0
+
+require golang.org/x/mod v0.32.0
+```
+
+We can then configure Renovate to set the same constraint when updating any Go dependencies:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "packageRules": [
+    {
+      "description": "Ensure source compatibility with Go version used by this project",
+      "matchManagers": ["gomod"],
+      "constraintsFiltering": "strict",
+      "constraints": {
+        "go": "1.24.0"
+      }
+    }
+  ]
+}
+```
+
+In this case, Renovate would only propose an update to a version of `golang.org/x/mod` that supports Go 1.24.0.
+
+<!-- prettier-ignore -->
+!!! note
+    It is recommended to read the [`constraintsFiltering`](../../../configuration-options.md#constraintsfiltering) documentation and [Language constraints and upgrading](../../../language-constraints-and-upgrading.md) for more information about how the filtering works and how _strict_ this can be.
+
 ### Post-Update Options
 
 You might be interested in the following `postUpdateOptions`:
