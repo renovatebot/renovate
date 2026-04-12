@@ -99,9 +99,7 @@ export async function getInRangeReleases(
         },
         release,
       );
-      if (hydratedRelease) {
-        hydratedReleases.push(hydratedRelease);
-      }
+      hydratedReleases.push(hydratedRelease ?? release);
     }
 
     if (version.valueToVersion) {

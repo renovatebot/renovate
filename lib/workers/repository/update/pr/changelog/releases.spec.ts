@@ -161,8 +161,33 @@ describe('workers/repository/update/pr/changelog/releases', () => {
 
       expect(res).toEqual([
         { version: '1.0.0' },
+        { version: '1.0.1' },
         { version: '1.1.0', gitRef: 'release/1.1.0' },
       ]);
+    });
+
+    it('keeps the original release when postprocessing rejects it', async () => {
+      vi.mocked(datasource.getPkgReleases).mockReset();
+      vi.mocked(datasource.getPkgReleases).mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+      });
+
+      vi.spyOn(releasePostprocess, 'postprocessRelease').mockImplementation(
+        (_config, release) =>
+          Promise.resolve(release.version === '1.0.0' ? null : release),
+      );
+
+      const config = partial<BranchUpgradeConfig>({
+        datasource: 'some-datasource',
+        packageName: 'some-depname',
+        versioning: npmVersioning.id,
+        currentVersion: '1.0.0',
+        newVersion: '1.1.0',
+      });
+
+      const res = await releases.getInRangeReleases(config);
+
+      expect(res).toEqual([{ version: '1.0.0' }, { version: '1.1.0' }]);
     });
 
     it('uses the release registryUrl when hydrating merged-registry releases', async () => {
