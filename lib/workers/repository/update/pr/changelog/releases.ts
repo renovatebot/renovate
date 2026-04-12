@@ -94,7 +94,7 @@ export async function getInRangeReleases(
         {
           datasource,
           packageName: config.packageName,
-          registryUrl: config.registryUrl,
+          registryUrl: release.registryUrl ?? config.registryUrl,
           registryUrls: config.registryUrls,
         },
         release,

@@ -164,5 +164,54 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         { version: '1.1.0', gitRef: 'release/1.1.0' },
       ]);
     });
+
+    it('uses the release registryUrl when hydrating merged-registry releases', async () => {
+      vi.mocked(datasource.getPkgReleases).mockReset();
+      vi.mocked(datasource.getPkgReleases).mockResolvedValueOnce({
+        releases: [
+          { version: '1.0.0', registryUrl: 'https://registry-a.example' },
+          { version: '1.1.0', registryUrl: 'https://registry-b.example' },
+        ],
+      });
+
+      const postprocessSpy = vi
+        .spyOn(releasePostprocess, 'postprocessRelease')
+        .mockImplementation((_config, release) => Promise.resolve(release));
+
+      const config = partial<BranchUpgradeConfig>({
+        datasource: 'some-datasource',
+        packageName: 'some-depname',
+        versioning: npmVersioning.id,
+        currentVersion: '1.0.0',
+        newVersion: '1.1.0',
+        registryUrls: [
+          'https://registry-a.example',
+          'https://registry-b.example',
+        ],
+      });
+
+      await releases.getInRangeReleases(config);
+
+      expect(postprocessSpy).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          registryUrl: 'https://registry-a.example',
+        }),
+        expect.objectContaining({
+          version: '1.0.0',
+          registryUrl: 'https://registry-a.example',
+        }),
+      );
+      expect(postprocessSpy).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          registryUrl: 'https://registry-b.example',
+        }),
+        expect.objectContaining({
+          version: '1.1.0',
+          registryUrl: 'https://registry-b.example',
+        }),
+      );
+    });
   });
 });
