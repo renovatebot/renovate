@@ -6,9 +6,8 @@ describe('modules/datasource/maven/schema', () => {
   it('trims release metadata to the fields used by Renovate', () => {
     const input = Fixtures.get('metadata.xml');
 
-    expect(CachedMavenXml.parse(input)).toMatchInlineSnapshot(
-      `
-      "<?xml version="1.0" encoding="UTF-8"?>
+    expect(CachedMavenXml.parse(input)).toEqual(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
       <metadata>
         <versioning>
           <latest>2.0.0</latest>
@@ -24,17 +23,15 @@ describe('modules/datasource/maven/schema', () => {
             <version>2.0.0</version>
           </versions>
         </versioning>
-      </metadata>"
-      `,
-    );
+      </metadata>
+    `);
   });
 
   it('trims snapshot metadata to the fields used by Renovate', () => {
     const input = Fixtures.get('metadata-snapshot-version.xml');
 
-    expect(CachedMavenXml.parse(input)).toMatchInlineSnapshot(
-      `
-      "<?xml version="1.0" encoding="UTF-8"?>
+    expect(CachedMavenXml.parse(input)).toEqual(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
       <metadata>
         <version>1.0.3-SNAPSHOT</version>
         <versioning>
@@ -43,9 +40,8 @@ describe('modules/datasource/maven/schema', () => {
             <buildNumber>3</buildNumber>
           </snapshot>
         </versioning>
-      </metadata>"
-      `,
-    );
+      </metadata>
+    `);
   });
 
   it('trims pom files to the fields used by Renovate', () => {
@@ -75,9 +71,8 @@ describe('modules/datasource/maven/schema', () => {
       </project>
     `;
 
-    expect(CachedMavenXml.parse(input)).toMatchInlineSnapshot(
-      `
-      "<?xml version="1.0" encoding="UTF-8"?>
+    expect(CachedMavenXml.parse(input)).toEqual(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
       <project>
         <groupId>org.example</groupId>
         <url>https://package.example.org/about</url>
@@ -97,9 +92,8 @@ describe('modules/datasource/maven/schema', () => {
           <artifactId>package-parent</artifactId>
           <version>1.2.3</version>
         </parent>
-      </project>"
-      `,
-    );
+      </project>
+    `);
   });
 
   it('preserves empty relocation tags', () => {
@@ -113,13 +107,13 @@ describe('modules/datasource/maven/schema', () => {
       </project>
     `;
 
-    expect(CachedMavenXml.parse(input)).toMatchInlineSnapshot(`
-      "<?xml version="1.0" encoding="UTF-8"?>
+    expect(CachedMavenXml.parse(input)).toEqual(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
       <project>
         <distributionManagement>
           <relocation />
         </distributionManagement>
-      </project>"
+      </project>
     `);
   });
 
