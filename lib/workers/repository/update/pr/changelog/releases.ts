@@ -9,6 +9,7 @@ import { postprocessRelease } from '../../../../../modules/datasource/postproces
 import type { VersioningApi } from '../../../../../modules/versioning/index.ts';
 import { get } from '../../../../../modules/versioning/index.ts';
 import { coerceArray } from '../../../../../util/array.ts';
+import * as p from '../../../../../util/promises.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 
 function matchesMMP(
@@ -88,8 +89,7 @@ export async function getInRangeReleases(
       }
     }
 
-    const hydratedReleases: Release[] = [];
-    for (const release of releases) {
+    const hydratedReleases = await p.map(releases, async (release) => {
       const hydratedRelease = await postprocessRelease(
         {
           datasource,
@@ -99,8 +99,8 @@ export async function getInRangeReleases(
         },
         release,
       );
-      hydratedReleases.push(hydratedRelease ?? release);
-    }
+      return hydratedRelease ?? release;
+    });
 
     if (version.valueToVersion) {
       for (const release of coerceArray(hydratedReleases)) {
