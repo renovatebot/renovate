@@ -47,9 +47,10 @@ export function updateDependency({
 
   const [groupId, artifactId] = depName!.split(':', 2);
 
-  // Handle Scala version updates (depName is 'scala', not 'groupId:artifactId')
-  if (depName === 'scala') {
-    if (newValue && currentValue && newValue !== currentValue) {
+  // Update the version
+  if (newValue && currentValue && newValue !== currentValue) {
+    // Handle Scala version updates early (depName is 'scala', not 'groupId:artifactId')
+    if (depName === 'scala') {
       if (sharedVariableName) {
         logger.debug(
           { depName, sharedVariableName, currentValue, newValue },
@@ -78,12 +79,10 @@ export function updateDependency({
         );
         updatedContent = updatedContent.replace(pattern, `$1"${newValue}"`);
       }
+      // Early return, no replacement expected for Scala version updates
+      return updatedContent;
     }
-    return updatedContent;
-  }
 
-  // Update the version
-  if (newValue && currentValue && newValue !== currentValue) {
     if (sharedVariableName) {
       logger.debug(
         { depName, sharedVariableName, currentValue, newValue },

@@ -168,24 +168,6 @@ describe('modules/manager/sbt/update', () => {
         `);
     });
 
-    // Limit case for code coverage
-    it('should not do anything if Scala version is already up-to-date', () => {
-      const simpleContent = codeBlock`scalaVersion := "2.13.18"`;
-
-      const res = sbtUpdater.updateDependency({
-        fileContent: simpleContent,
-        packageFile: 'build.sbt',
-        upgrade: {
-          depName: 'scala',
-          packageName: 'org.scala-lang:scala-library',
-          currentValue: '2.13.18',
-          newValue: '2.13.18',
-        },
-      });
-
-      expect(res).toEqual(codeBlock`scalaVersion := "2.13.18"`);
-    });
-
     it('should update version outside of libraryDependencies as well', () => {
       const simpleContent = codeBlock`dependencyOverrides += "org.example" %% "foo" % "1.0.0" % Test`;
 
