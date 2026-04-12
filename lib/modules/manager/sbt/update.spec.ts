@@ -139,6 +139,29 @@ describe('modules/manager/sbt/update', () => {
       expect(res).toEqual(codeBlock`scalaVersion := "2.13.18"`);
     });
 
+    it('should update Scala version with a shared variable', () => {
+      const simpleContent = codeBlock`
+      val TheScalaVersion = "2.13.17"
+      scalaVersion := TheScalaVersion
+      `;
+
+      const res = sbtUpdater.updateDependency({
+        fileContent: simpleContent,
+        upgrade: {
+          depName: 'scala',
+          packageName: 'org.scala-lang:scala-library',
+          currentValue: '2.13.17',
+          newValue: '2.13.18',
+          sharedVariableName: 'TheScalaVersion',
+        },
+      });
+
+      expect(res).toEqual(codeBlock`
+        val TheScalaVersion = "2.13.18"
+        scalaVersion := TheScalaVersion
+        `);
+    });
+
     it('should update version outside of libraryDependencies as well', () => {
       const simpleContent = codeBlock`dependencyOverrides += "org.example" %% "foo" % "1.0.0" % Test`;
 
