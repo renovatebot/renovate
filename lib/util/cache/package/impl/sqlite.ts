@@ -30,6 +30,8 @@ async function decompress<T>(input: Buffer): Promise<T> {
 }
 
 export class PackageCacheSqlite extends PackageCacheBase {
+  private static readonly busyTimeoutMs = 100;
+
   static async create(cacheDir: string): Promise<PackageCacheSqlite> {
     const Sqlite = await sqlite();
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
@@ -51,7 +53,7 @@ export class PackageCacheSqlite extends PackageCacheBase {
   private readonly deleteExpiredRows: Statement<unknown[]>;
   private readonly countStatement: Statement<unknown[]>;
 
-  private readonly client: Database;
+  readonly client: Database;
 
   private constructor(client: Database) {
     super();
@@ -59,6 +61,7 @@ export class PackageCacheSqlite extends PackageCacheBase {
 
     client.pragma('journal_mode = WAL');
     client.pragma("encoding = 'UTF-8'");
+    client.pragma(`busy_timeout = ${PackageCacheSqlite.busyTimeoutMs}`);
 
     client
       .prepare(
@@ -111,40 +114,60 @@ export class PackageCacheSqlite extends PackageCacheBase {
     value: unknown,
     hardTtlMinutes: number,
   ): Promise<void> {
-    const compressedData = await compress(value);
-    const ttlSeconds = hardTtlMinutes * 60;
-    this.upsertStatement.run({
-      namespace,
-      key,
-      data: compressedData,
-      ttlSeconds,
-    });
+    try {
+      const compressedData = await compress(value);
+      const ttlSeconds = hardTtlMinutes * 60;
+      this.upsertStatement.run({
+        namespace,
+        key,
+        data: compressedData,
+        ttlSeconds,
+      });
+    } catch (err) {
+      logger.once.warn({ err }, 'Error while setting SQLite cache value');
+    }
   }
 
   override async get<T = unknown>(
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
-    const data = this.getStatement.get({ namespace, key }) as
-      | Buffer
-      | undefined;
+    try {
+      const data = this.getStatement.get({ namespace, key }) as
+        | Buffer
+        | undefined;
 
-    if (!data) {
+      if (!data) {
+        logger.trace({ namespace, key }, 'Cache miss');
+        return undefined;
+      }
+
+      return await decompress<T>(data);
+    } catch (err) {
+      logger.once.warn({ err }, 'Error while reading SQLite cache value');
       return undefined;
     }
-
-    return await decompress<T>(data);
   }
 
   override destroy(): Promise<void> {
-    const startTime = Date.now();
-    const totalCount = this.countStatement.get() as number;
-    const { changes: deletedCount } = this.deleteExpiredRows.run();
-    const durationMs = Date.now() - startTime;
-    logger.debug(
-      `SQLite package cache: deleted ${deletedCount} of ${totalCount} entries in ${durationMs}ms`,
-    );
-    this.client.close();
+    try {
+      const startTime = Date.now();
+      const totalCount = this.countStatement.get() as number;
+      const { changes: deletedCount } = this.deleteExpiredRows.run();
+      const durationMs = Date.now() - startTime;
+      logger.debug(
+        `SQLite package cache: deleted ${deletedCount} of ${totalCount} entries in ${durationMs}ms`,
+      );
+    } catch (err) {
+      logger.warn({ err }, 'SQLite package cache cleanup failed');
+    }
+
+    try {
+      this.client.close();
+    } catch (err) {
+      logger.warn({ err }, 'SQLite package cache close failed');
+    }
+
     return Promise.resolve();
   }
 }
