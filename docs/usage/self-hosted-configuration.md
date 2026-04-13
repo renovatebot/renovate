@@ -455,7 +455,6 @@ Other valid cache namespaces are as follows:
 - `datasource-go-proxy`
 - `datasource-go`
 - `datasource-golang-version`
-- `datasource-graalvm-version`
 - `datasource-gradle-version`
 - `datasource-helm`
 - `datasource-hermit`
