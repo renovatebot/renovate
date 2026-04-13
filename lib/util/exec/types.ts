@@ -62,9 +62,21 @@ export function isToolName(value: unknown): value is ToolName {
  * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
  */
 const additionalConstraintNames = [
-  'go',
+  /**
+   * Used in the `gomod` manager to specify a tag github.com/marwan-at-work/mod.
+   *
+   * Must be prefixed with `v`.
+   */
   'gomodMod',
+  /**
+   * Used in the `jenkins-plugins` datasource to specify a minimum version of the Jenkins that a plugin must support.
+   */
   'jenkins',
+  /**
+   * Used in the `pip-compile` manager datasource to specify a version of `pip-tools` to use.
+   *
+   * @deprecated TODO remove in #42599
+   */
   'pipTools',
 ] as const;
 
