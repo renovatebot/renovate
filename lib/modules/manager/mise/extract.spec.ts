@@ -1262,6 +1262,22 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('skips lockedVersion when tool not in lock file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+        ruby = "3.3"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.lockFiles).toEqual(['mise.lock']);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        lockedVersion: '20.11.0',
+      });
+      expect(result?.deps[1]).not.toHaveProperty('lockedVersion');
+    });
+
     it('extracts first lockedVersion when multiple versions exist', async () => {
       const multiVersionLockFileContent = codeBlock`
         [[tools.python]]
