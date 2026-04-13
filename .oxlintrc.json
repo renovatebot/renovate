@@ -153,6 +153,12 @@
       }
     },
     {
+      "files": ["lib/logger/browser.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
       "files": [
         "*.config.cjs",
         "*.config.cts",
