@@ -1,6 +1,8 @@
 import { logger } from '../../../logger/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
+// For external .properties files: updateDependency is necessary
+// because extractPackageFile can't reconstruct dep metadata from a .properties file alone
 export function updateDependency({
   fileContent,
   upgrade,
