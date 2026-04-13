@@ -219,6 +219,11 @@ Must be prefixed with \`v\`.`,
     description:
       'Used in the `cpanfile` manager to track Perl version required.',
   },
+  {
+    name: '%goMod',
+    description:
+      'Used in the `gomod` manager to determine the [minimum version of Go required to use this module](https://go.dev/ref/mod#go-mod-file-go).\n\nNote that this is prefixed with a `%` to explicilty note that this is not a tool that Containerbase knows.',
+  },
 ] as const satisfies ConstraintDefinition[];
 
 /**

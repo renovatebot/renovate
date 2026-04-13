@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { getDefaultVersioning } from '../../datasource/common.ts';
+import * as allVersioning from '../../versioning/index.ts';
 import { extractPackageFile } from './index.ts';
 
 const gomod1 = Fixtures.get('1/go-mod');
@@ -122,6 +124,12 @@ describe('modules/manager/gomod/extract', () => {
             datasource: 'go',
           },
         ],
+        extractedConstraints: {
+          '%goMod': '~1.23.x',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
       });
     });
 
@@ -172,6 +180,12 @@ describe('modules/manager/gomod/extract', () => {
             versioning: 'loose',
           },
         ],
+        extractedConstraints: {
+          '%goMod': '~1.25.x',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
       });
     });
 
@@ -236,6 +250,13 @@ describe('modules/manager/gomod/extract', () => {
             datasource: 'go',
           },
         ],
+        extractedConstraints: {
+          '%goMod': '~1.23.x',
+          golang: '1.23.3',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
       });
     });
 
@@ -495,6 +516,90 @@ describe('modules/manager/gomod/extract', () => {
           skipReason: 'invalid-version',
         },
       ],
+      extractedConstraints: {
+        '%goMod': '~1.19.x',
+      },
+      constraintsVersioning: {
+        '%goMod': 'semver-coerced',
+      },
+    });
+  });
+
+  it.each(['1.19', '1.19.0', '1.19.5'])(
+    'extracts `go` directive %s as a `%goMod` extracted constraint as a SemVer-minor compatible range',
+    (goDirective) => {
+      const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+        go ${goDirective}
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            managerData: {
+              lineNumber: 1,
+            },
+            depName: 'go',
+            depType: 'golang',
+            currentValue: goDirective,
+            datasource: 'golang-version',
+            versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
+          },
+        ],
+        extractedConstraints: {
+          // NOTE that this is extracted as a range for the whole SemVer minor version
+          '%goMod': '~1.19.x',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
+      });
+    },
+  );
+
+  describe('the extracted version can be used as a SemVer constraint', () => {
+    const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+        go 1.19
+      `;
+    const res = extractPackageFile(goMod);
+
+    const datasourceVersioningName = getDefaultVersioning(
+      res!.deps[0].datasource,
+    );
+    // NOTE that this is not the `go-mod-directive` versioning, as that comes from `constraintsVersioning`
+    expect(datasourceVersioningName).toEqual('semver');
+
+    expect(res!.constraintsVersioning).toBeDefined();
+    const versioningName = res!.constraintsVersioning!['%goMod'];
+    expect(versioningName).toBeDefined();
+
+    const versioning = allVersioning.get(versioningName);
+    expect(versioning).toBeDefined();
+
+    const constraint = res!.extractedConstraints!['%goMod']!;
+    it(`${constraint} is a valid constraint`, () => {
+      expect(versioning.isValid(constraint)).toBeTrue();
+    });
+
+    it('matches version 1.19, even though it is not valid SemVer', () => {
+      expect(versioning.matches('1.19', constraint)).toBeTrue();
+    });
+
+    it('matches the current SemVer minor', () => {
+      expect(versioning.matches('1.19.0', constraint)).toBeTrue();
+      expect(versioning.matches('1.19.10', constraint)).toBeTrue();
+    });
+
+    it('does not match the next SemVer minor', () => {
+      expect(versioning.matches('1.20.0', constraint)).toBeFalse();
+      expect(versioning.matches('1.20.10', constraint)).toBeFalse();
+    });
+
+    it('does not match the previous SemVer minor', () => {
+      expect(versioning.matches('1.18.0', constraint)).toBeFalse();
+      expect(versioning.matches('1.18.5', constraint)).toBeFalse();
     });
   });
 });
