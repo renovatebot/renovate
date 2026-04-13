@@ -32,7 +32,8 @@ describe('util/exec/containerbase', () => {
       process.env.CONTAINERBASE = 'true';
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
-        { toolName: 'invalid' as ToolName },
+        // @ts-expect-error -- intentionally using invalid constraint names
+        { toolName: 'invalid' },
       ];
       expect(isDynamicInstall(toolConstraints)).toBeFalse();
     });
