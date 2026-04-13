@@ -63,9 +63,25 @@ export function isToolName(value: unknown): value is ToolName {
  */
 const additionalConstraintNames = [
   /**
-   * Used in the `gomod` manager to specify a tag github.com/marwan-at-work/mod.
+   * Used in the `gomod` manager to specify the version of the Go toolchain to use.
+   *
+   * In precedence order:
+   *
+   * 1. config: `constraints.go`
+   * 1. `go.mod`: `toolchain` directive
+   * 1. `go.mod`: `go` directive
+   *
+   * NOTE that the `constraints.golang` is not used (https://github.com/renovatebot/renovate/issues/42601)
+   *
+   * @deprecated TODO remove in #42600
+   */
+  'go',
+  /**
+   * Used in the `gomod` manager to specify a tag for `github.com/marwan-at-work/mod`.
    *
    * Must be prefixed with `v`.
+   *
+   * @see https://github.com/marwan-at-work/mod
    */
   'gomodMod',
   /**
