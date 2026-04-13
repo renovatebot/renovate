@@ -1,7 +1,57 @@
 import type { Options as ExecaOptions } from 'execa';
 
+/**
+ * A `tool` that Containerbase supports.
+ *
+ * TODO #41849 replace with upstream types
+ */
+export type ToolName =
+  | 'bazelisk'
+  | 'bun'
+  | 'bundler'
+  | 'cocoapods'
+  | 'composer'
+  | 'conan'
+  | 'copier'
+  | 'corepack'
+  | 'devbox'
+  | 'dotnet'
+  | 'erlang'
+  | 'elixir'
+  | 'flux'
+  | 'gleam'
+  | 'golang'
+  | 'gradle'
+  | 'hashin'
+  | 'helm'
+  | 'helmfile'
+  | 'java'
+  | 'java-maven'
+  | 'jb'
+  | 'kustomize'
+  | 'maven'
+  | 'nix'
+  | 'node'
+  | 'npm'
+  | 'pdm'
+  | 'php'
+  | 'pip-tools'
+  | 'pipenv'
+  | 'pnpm'
+  | 'pixi'
+  | 'poetry'
+  | 'python'
+  | 'ruby'
+  | 'rust'
+  | 'uv'
+  | 'yarn'
+  | 'yarn-slim'
+  | 'dart'
+  | 'flutter'
+  | 'vendir';
+
 export interface ToolConstraint {
-  toolName: string;
+  toolName: ToolName;
   constraint?: string | null;
 }
 

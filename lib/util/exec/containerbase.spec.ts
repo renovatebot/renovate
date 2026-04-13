@@ -5,7 +5,7 @@ import {
   isDynamicInstall,
   resolveConstraint,
 } from './containerbase.ts';
-import type { ToolConstraint } from './types.ts';
+import type { ToolConstraint, ToolName } from './types.ts';
 
 vi.mock('../../modules/datasource/index.ts');
 
@@ -32,7 +32,7 @@ describe('util/exec/containerbase', () => {
       process.env.CONTAINERBASE = 'true';
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
-        { toolName: 'invalid' },
+        { toolName: 'invalid' as ToolName },
       ];
       expect(isDynamicInstall(toolConstraints)).toBeFalse();
     });
@@ -107,9 +107,9 @@ describe('util/exec/containerbase', () => {
     });
 
     it('throws for unknown tools', async () => {
-      await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
-        'Invalid tool to install: whoops',
-      );
+      await expect(
+        resolveConstraint({ toolName: 'whoops' as ToolName }),
+      ).rejects.toThrow('Invalid tool to install: whoops');
     });
 
     it('throws no releases', async () => {

@@ -8,7 +8,7 @@ import { addMeta, logger } from '../../../../logger/index.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { exec } from '../../../../util/exec/index.ts';
-import type { ExecOptions } from '../../../../util/exec/types.ts';
+import type { ExecOptions, ToolName } from '../../../../util/exec/types.ts';
 import {
   ensureLocalDir,
   localPathIsFile,
@@ -151,7 +151,7 @@ export async function postUpgradeCommandsExecutor(
                 upgrade.postUpgradeTasks?.installTools,
               )) {
                 execOpts.toolConstraints.push({
-                  toolName: tool,
+                  toolName: tool as ToolName,
                   constraint: upgrade.constraints?.[tool],
                 });
               }
