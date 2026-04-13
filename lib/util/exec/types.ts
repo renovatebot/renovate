@@ -59,9 +59,7 @@ export function isToolName(value: unknown): value is ToolName {
 }
 
 /**
- * Additional ecosystem-specific constraint keys that aren't Containerbase
- * tools (e.g. `jenkins` for Jenkins plugins, `gomodMod` for Go modules mode,
- * `go` as the legacy alias for `golang`).
+ * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
  */
 const extraConstraintNames = ['go', 'gomodMod', 'jenkins', 'pipTools'] as const;
 
