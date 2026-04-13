@@ -1,5 +1,5 @@
 import { logger } from '~test/util.ts';
-import { GithubContentResponse, GithubVulnerabilityAlert } from './schema.ts';
+import { GithubContentResponse, GithubVulnerabilityAlerts } from './schema.ts';
 
 describe('modules/platform/github/schema', () => {
   it('should be parse directory response', () => {
@@ -109,7 +109,7 @@ describe('modules/platform/github/schema', () => {
   });
 
   it('should skip vulnerability alerts with unsupported ecosystems', () => {
-    const result = GithubVulnerabilityAlert.parse([
+    const result = GithubVulnerabilityAlerts.parse([
       {
         dismissed_reason: null,
         security_advisory: {
@@ -142,7 +142,7 @@ describe('modules/platform/github/schema', () => {
   });
 
   it('should log vulnerability alerts with parse errors', () => {
-    const { data, success } = GithubVulnerabilityAlert.safeParse([
+    const { data, success } = GithubVulnerabilityAlerts.safeParse([
       {
         dismissed_reason: null,
         security_advisory: {
@@ -167,7 +167,7 @@ describe('modules/platform/github/schema', () => {
   });
 
   it('should filter vulnerability alerts with missing security_vulnerability', () => {
-    const { data, success } = GithubVulnerabilityAlert.safeParse([
+    const { data, success } = GithubVulnerabilityAlerts.safeParse([
       {
         dismissed_reason: null,
         security_advisory: {

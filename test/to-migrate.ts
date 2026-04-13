@@ -6,7 +6,7 @@ import type {
 import type { RenovateConfig } from '../lib/config/types.ts';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+  // oxlint-disable-next-line typescript/no-namespace
   namespace jest {
     interface Matchers<R> {
       toMigrate(

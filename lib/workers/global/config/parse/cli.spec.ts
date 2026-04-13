@@ -225,5 +225,11 @@ describe('workers/global/config/parse/cli', () => {
       stdoutSpy.mockRestore();
       exitSpy.mockRestore();
     });
+
+    it('does not error when --dry-run is the last argument', () => {
+      expect(() =>
+        cli.parseEarlyFlags([...argv, 'myrepo', '--dry-run']),
+      ).not.toThrow();
+    });
   });
 });
