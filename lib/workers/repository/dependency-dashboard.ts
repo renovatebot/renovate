@@ -709,7 +709,7 @@ export function getAbandonedPackagesMd(
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
-  abandonedMd = emojify('> :information_source: **Note**\n> \n');
+  abandonedMd += emojify('> :information_source: **Note**\n> \n');
   abandonedMd +=
     'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
   abandonedMd +=
