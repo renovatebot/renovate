@@ -13,8 +13,6 @@ import type {
 } from '../types.ts';
 import {
   applyProps,
-  collectProperties,
-  collectPropertyFileRefs,
   findAttrValuePosition,
   parsePropertiesFile,
   resolveChainedProps,
@@ -113,6 +111,71 @@ export function extractPackageFile(
   return { deps };
 }
 
+/**
+ * Walk an XML node tree in document order, processing properties,
+ * property file references, and dependencies as they appear.
+ */
+async function walkNodeInOrder(
+  node: XmlElement | XmlDocument,
+  packageFile: string,
+  content: string,
+  visitedFiles: Set<string>,
+  allProps: Record<string, AntProp>,
+  allRawDeps: RawDep[],
+): Promise<void> {
+  const baseDir = upath.dirname(packageFile);
+
+  for (const child of node.children) {
+    if (!isXmlElement(child)) {
+      continue;
+    }
+
+    if (child.name === 'property') {
+      // Handle inline property definition
+      const name = child.attr.name;
+      const value = child.attr.value;
+      if (name && value && !(name in allProps)) {
+        const pos = findAttrValuePosition(content, child, 'value');
+        allProps[name] = { val: value, fileReplacePosition: pos, packageFile };
+      }
+
+      // Handle property file reference
+      const file = child.attr.file;
+      if (file) {
+        const propFilePath = file.startsWith('/')
+          ? file
+          : upath.join(baseDir, file);
+
+        if (!visitedFiles.has(propFilePath)) {
+          visitedFiles.add(propFilePath);
+          const propContent = await readLocalFile(propFilePath, 'utf8');
+          if (propContent) {
+            parsePropertiesFile(propContent, propFilePath, allProps);
+          } else {
+            logger.debug(
+              `ant manager: could not read properties file ${propFilePath}`,
+            );
+          }
+        }
+      }
+    } else if (child.name === 'dependency') {
+      const rawDep = collectDependency(child, packageFile, content);
+      if (rawDep) {
+        allRawDeps.push(rawDep);
+      }
+    } else {
+      await walkNodeInOrder(
+        child,
+        packageFile,
+        content,
+        visitedFiles,
+        allProps,
+        allRawDeps,
+      );
+    }
+  }
+}
+
 async function walkXmlFile(
   packageFile: string,
   visitedFiles: Set<string>,
@@ -138,80 +201,66 @@ async function walkXmlFile(
     return;
   }
 
-  // Collect property file references first (order matters for first-definition-wins)
-  const propertyFileRefs = collectPropertyFileRefs(doc);
-
-  // Collect inline properties (first-definition-wins: inline before file refs)
-  collectProperties(doc, content, packageFile, allProps);
-
-  // Load external .properties files
-  const baseDir = upath.dirname(packageFile);
-  for (const ref of propertyFileRefs) {
-    const propFilePath = ref.startsWith('/') ? ref : upath.join(baseDir, ref);
-
-    if (visitedFiles.has(propFilePath)) {
-      continue;
-    }
-    visitedFiles.add(propFilePath);
-
-    const propContent = await readLocalFile(propFilePath, 'utf8');
-    if (!propContent) {
-      logger.debug(
-        `ant manager: could not read properties file ${propFilePath}`,
-      );
-      continue;
-    }
-
-    parsePropertiesFile(propContent, propFilePath, allProps);
-  }
-
-  // Collect dependencies
-  walkNode(doc, allRawDeps, packageFile, content);
+  await walkNodeInOrder(
+    doc,
+    packageFile,
+    content,
+    visitedFiles,
+    allProps,
+    allRawDeps,
+  );
 }
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[] | null> {
-  const visitedFiles = new Set<string>();
-  const allProps: Record<string, AntProp> = {};
-  const allRawDeps: RawDep[] = [];
+  const results: PackageFile[] = [];
+  const seen = new Set<string>();
 
   for (const packageFile of packageFiles) {
+    if (seen.has(packageFile)) {
+      continue;
+    }
+    seen.add(packageFile);
+
+    const visitedFiles = new Set<string>();
+    const allProps: Record<string, AntProp> = {};
+    const allRawDeps: RawDep[] = [];
+
     await walkXmlFile(packageFile, visitedFiles, allProps, allRawDeps);
-  }
 
-  // Resolve chained property values before applying to deps
-  resolveChainedProps(allProps);
+    // Resolve chained property values before applying to deps
+    resolveChainedProps(allProps);
 
-  // Apply property resolution to all dependencies
-  const resolvedDeps = allRawDeps.map((rawDep) =>
-    applyProps(rawDep.dep, rawDep.depPackageFile, allProps),
-  );
+    // Apply property resolution to all dependencies
+    const resolvedDeps = allRawDeps.map((rawDep) =>
+      applyProps(rawDep.dep, rawDep.depPackageFile, allProps),
+    );
 
-  if (resolvedDeps.length === 0) {
-    return null;
-  }
-
-  // Group deps by their target file (propSource or original packageFile)
-  const fileMap = new Map<string, PackageDependency[]>();
-  for (let i = 0; i < resolvedDeps.length; i++) {
-    const dep = resolvedDeps[i];
-    const targetFile = dep.propSource ?? allRawDeps[i].depPackageFile;
-    if (!fileMap.has(targetFile)) {
-      fileMap.set(targetFile, []);
+    if (resolvedDeps.length === 0) {
+      continue;
     }
-    fileMap.get(targetFile)!.push(dep);
-  }
 
-  const results: PackageFile[] = [];
-  for (const [packageFile, deps] of fileMap) {
-    // Clean up internal propSource field
-    for (const dep of deps) {
-      delete dep.propSource;
+    // Group deps by their target file (propSource or original packageFile)
+    const fileMap = new Map<string, PackageDependency[]>();
+    for (let i = 0; i < resolvedDeps.length; i++) {
+      const dep = resolvedDeps[i];
+      const targetFile = dep.propSource ?? allRawDeps[i].depPackageFile;
+      if (!fileMap.has(targetFile)) {
+        fileMap.set(targetFile, []);
+      }
+      fileMap.get(targetFile)!.push(dep);
     }
-    results.push({ packageFile, deps });
+
+    for (const [pkgFile, deps] of fileMap) {
+      // Clean up internal propSource field
+      for (const dep of deps) {
+        delete dep.propSource;
+      }
+      results.push({ packageFile: pkgFile, deps });
+    }
   }
 
-  return results;
+  return results.length > 0 ? results : null;
 }
