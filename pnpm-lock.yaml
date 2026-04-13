@@ -370,11 +370,11 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(commander@14.0.3)
       '@containerbase/istanbul-reports-html':
-        specifier: 1.1.42
-        version: 1.1.42
+        specifier: 1.1.43
+        version: 1.1.43
       '@containerbase/semantic-release-pnpm':
-        specifier: 1.3.32
-        version: 1.3.32(semantic-release@25.0.3(typescript@5.9.3))
+        specifier: 1.3.33
+        version: 1.3.33(semantic-release@25.0.3(typescript@5.9.3))
       '@hyrious/marshal':
         specifier: 0.3.3
         version: 0.3.3
@@ -544,8 +544,8 @@ importers:
         specifier: 4.57.1
         version: 4.57.1(tslib@2.8.1)
       nock:
-        specifier: 14.0.11
-        version: 14.0.11
+        specifier: 14.0.12
+        version: 14.0.12
       npm-run-all2:
         specifier: 8.0.4
         version: 8.0.4
@@ -994,12 +994,12 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@containerbase/istanbul-reports-html@1.1.42':
-    resolution: {integrity: sha512-pfgmajJEDMQh15BTvQn9G8Rtj8fHpy/cPMuQ3c56qXryGLvcy6WRgWS4ZgKr37jvnwUtiNkEIrBZ5yCn0Mdnyg==}
+  '@containerbase/istanbul-reports-html@1.1.43':
+    resolution: {integrity: sha512-7YJRMjGkTHSmWQiP7kQZr2AvbWI8mimig1qqy35/EVpvo6BCLtmw/QLk2BjTLel8MKTVlzLPa1lVoAfpDHHezQ==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
-  '@containerbase/semantic-release-pnpm@1.3.32':
-    resolution: {integrity: sha512-8XPLip0UnG8G41ZZ+dpc2nyODPzLXMNuIdKp3AFqXKN4apYR2O1qpwtxQzMYt/3uoSbxG9CTdjkWDQN3Th+jPQ==}
+  '@containerbase/semantic-release-pnpm@1.3.33':
+    resolution: {integrity: sha512-FKlF05pZ2X+BNV7IoGzCiyEAbW40HGzg/X7oBd2lE298GbTBkyFZlAuNxhD0pN5NageTuIEbVlwL/0KwF0p8rQ==}
     engines: {node: ^22.11.0 || ^24}
     peerDependencies:
       semantic-release: ^24.0.0 || ^25.0.0
@@ -4467,8 +4467,8 @@ packages:
   nise@6.1.4:
     resolution: {integrity: sha512-vSA4IpRHRWZkmotu61SvF45Jirq4CTLT3KKOWJPsPMtxtOBOlxcAlXfv/OrWxkzAJiCBrvdfWvGQjHT7r7+Qqg==}
 
-  nock@14.0.11:
-    resolution: {integrity: sha512-u5xUnYE+UOOBA6SpELJheMCtj2Laqx15Vl70QxKo43Wz/6nMHXS7PrEioXLjXAwhmawdEMNImwKCcPhBJWbKVw==}
+  nock@14.0.12:
+    resolution: {integrity: sha512-kZM3bHV0KzhHH6E2eRszHyML/w87AUzLBwupNTHohtYWP9fZYgUPmCbSKq6ITfEEmHqN4/p0MscvUipT4P5Qsg==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.89.0:
@@ -6910,12 +6910,12 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@containerbase/istanbul-reports-html@1.1.42':
+  '@containerbase/istanbul-reports-html@1.1.43':
     dependencies:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
 
-  '@containerbase/semantic-release-pnpm@1.3.32(semantic-release@25.0.3(typescript@5.9.3))':
+  '@containerbase/semantic-release-pnpm@1.3.33(semantic-release@25.0.3(typescript@5.9.3))':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
@@ -10627,7 +10627,7 @@ snapshots:
       just-extend: 6.2.0
       path-to-regexp: 8.4.0
 
-  nock@14.0.11:
+  nock@14.0.12:
     dependencies:
       '@mswjs/interceptors': 0.41.3
       json-stringify-safe: 5.0.1
