@@ -32,7 +32,6 @@
     "git-check": "node tools/check-git-version.mjs",
     "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage",
     "vitest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage",
-    "vitest:bench": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest bench --logHeapUsage",
     "lint": "run-s ls-lint type-check oxlint biome prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s oxlint-fix biome-fix prettier-fix markdown-lint-fix",
     "check": "node tools/check/index.ts",
