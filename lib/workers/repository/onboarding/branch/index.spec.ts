@@ -169,7 +169,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles skipped onboarding combined with requireConfig = optional', async () => {
       config.requireConfig = 'optional';
-      config.onboarding = false;
       GlobalConfig.set({
         onboarding: false,
         onboardingBranch: config.onboardingBranch,
@@ -192,7 +191,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles skipped onboarding, requireConfig=ignored', async () => {
       config.requireConfig = 'ignored';
-      config.onboarding = false;
       GlobalConfig.set({
         onboarding: false,
         onboardingBranch: config.onboardingBranch,
