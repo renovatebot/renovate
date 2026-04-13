@@ -3,7 +3,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { ReleaseResult } from '../types.ts';
-import type { MiseJavaRelease, PackageConfig } from './types.ts';
+import { MiseJavaRelease, type PackageConfig } from './types.ts';
 
 export const graalvmRegistryUrl = 'https://mise-java.jdx.dev/';
 
@@ -42,11 +42,7 @@ export async function getGraalvmReleases(
   };
 
   try {
-    const response = await http.getJsonUnchecked<MiseJavaRelease[]>(url);
-
-    if (!response.body) {
-      return null;
-    }
+    const response = await http.getJson(url, MiseJavaRelease.array().catch([]));
 
     // Filter by vendor and image_type
     const filteredReleases = response.body

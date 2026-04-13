@@ -70,7 +70,7 @@ export async function getAdoptiumReleases(
       if (err.response?.statusCode !== 404) {
         throw new ExternalHostError(err);
       }
-      // 404 is handled by getPageReleases, so if we get here with a non-HTTP error, throw it
+      // 404 is handled by getPageReleases, so if we get here it's an unexpected 404
       return null;
     }
     throw err;

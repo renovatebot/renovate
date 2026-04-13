@@ -579,7 +579,7 @@ describe('modules/datasource/java-version/index', () => {
   describe('getGraalvmReleases', () => {
     it('re-throws non-HttpError', async () => {
       const mockHttp = {
-        getJsonUnchecked: vi.fn().mockRejectedValue(new Error('unexpected')),
+        getJson: vi.fn().mockRejectedValue(new Error('unexpected')),
       } as unknown as Http;
 
       await expect(

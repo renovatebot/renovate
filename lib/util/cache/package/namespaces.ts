@@ -69,7 +69,6 @@ export const packageCacheNamespaces = [
   'datasource-go-proxy',
   'datasource-go',
   'datasource-golang-version',
-  'datasource-graalvm-version',
   'datasource-gradle-version',
   'datasource-helm',
   'datasource-hermit',
