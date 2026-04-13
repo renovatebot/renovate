@@ -2935,6 +2935,8 @@ If you currently have a dependency that is using a malicious version, Renovate w
 
 If Renovate finds a dependency update available, and that dependency update is found to be malicious, Renovate will skip **any updates to the dependency**, marking it with `skipReason: malicious-update-proposed`, and report this via a warning log.
 
+<!-- markdownlint-enable MD001 -->
+
 ## packageRules
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
