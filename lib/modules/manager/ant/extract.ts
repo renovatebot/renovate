@@ -182,9 +182,6 @@ async function walkXmlFile(
   allProps: Record<string, AntProp>,
   allRawDeps: RawDep[],
 ): Promise<void> {
-  if (visitedFiles.has(packageFile)) {
-    return;
-  }
   visitedFiles.add(packageFile);
 
   const content = await readLocalFile(packageFile, 'utf8');

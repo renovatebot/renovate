@@ -493,6 +493,33 @@ describe('modules/manager/ant/extract', () => {
       ]);
     });
 
+    it('ignores dependency without version during property resolution', async () => {
+      fs.readLocalFile.mockResolvedValue(codeBlock`
+        <project>
+          <property name="junit.version" value="4.13.2"/>
+          <artifact:dependencies>
+            <dependency groupId="org.example" artifactId="lib" />
+            <dependency groupId="junit" artifactId="junit" version="\${junit.version}" />
+          </artifact:dependencies>
+        </project>
+      `);
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+              sharedVariableName: 'junit.version',
+            }),
+          ],
+        },
+      ]);
+    });
+
     it('skips partial placeholder in version string', async () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`
         <project>
