@@ -52,28 +52,25 @@ export async function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [];
-  const tools = misefile.tools;
 
-  if (tools) {
-    for (const [name, toolData] of Object.entries(tools)) {
-      const version = parseVersion(toolData);
-      // Parse the tool options in the tool name
-      const { name: depName, options: optionsInName } =
-        optionInToolNameRegex.exec(name.trim())!.groups!;
-      const delimiterIndex = name.indexOf(':');
-      const backend = depName.substring(0, delimiterIndex);
-      const toolName = depName.substring(delimiterIndex + 1);
-      const options = parseOptions(
-        optionsInName,
-        isNonEmptyObject(toolData) ? toolData : {},
-      );
-      const toolConfig =
-        version === null
-          ? null
-          : getToolConfig(backend, toolName, version, options);
-      const dep = createDependency(depName, version, toolConfig);
-      deps.push(dep);
-    }
+  for (const [name, toolData] of Object.entries(misefile.tools)) {
+    const version = parseVersion(toolData);
+    // Parse the tool options in the tool name
+    const { name: depName, options: optionsInName } =
+      optionInToolNameRegex.exec(name.trim())!.groups!;
+    const delimiterIndex = name.indexOf(':');
+    const backend = depName.substring(0, delimiterIndex);
+    const toolName = depName.substring(delimiterIndex + 1);
+    const options = parseOptions(
+      optionsInName,
+      isNonEmptyObject(toolData) ? toolData : {},
+    );
+    const toolConfig =
+      version === null
+        ? null
+        : getToolConfig(backend, toolName, version, options);
+    const dep = createDependency(depName, version, toolConfig);
+    deps.push(dep);
   }
 
   if (!deps.length) {
@@ -90,14 +87,12 @@ export async function extractPackageFile(
     if (lockFileParsed.success) {
       result.lockFiles = [lockFileName];
       for (const dep of deps) {
-        if (dep.depName) {
-          const lockedVersion = getLockedVersion(
-            lockFileParsed.data,
-            dep.depName,
-          );
-          if (lockedVersion) {
-            dep.lockedVersion = lockedVersion;
-          }
+        const lockedVersion = getLockedVersion(
+          lockFileParsed.data,
+          dep.depName!,
+        );
+        if (lockedVersion) {
+          dep.lockedVersion = lockedVersion;
         }
       }
     } else {
