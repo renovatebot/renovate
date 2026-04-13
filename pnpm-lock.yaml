@@ -373,8 +373,8 @@ importers:
         specifier: 1.1.43
         version: 1.1.43
       '@containerbase/semantic-release-pnpm':
-        specifier: 1.3.32
-        version: 1.3.32(semantic-release@25.0.3(typescript@5.9.3))
+        specifier: 1.3.33
+        version: 1.3.33(semantic-release@25.0.3(typescript@5.9.3))
       '@hyrious/marshal':
         specifier: 0.3.3
         version: 0.3.3
@@ -998,8 +998,8 @@ packages:
     resolution: {integrity: sha512-7YJRMjGkTHSmWQiP7kQZr2AvbWI8mimig1qqy35/EVpvo6BCLtmw/QLk2BjTLel8MKTVlzLPa1lVoAfpDHHezQ==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
-  '@containerbase/semantic-release-pnpm@1.3.32':
-    resolution: {integrity: sha512-8XPLip0UnG8G41ZZ+dpc2nyODPzLXMNuIdKp3AFqXKN4apYR2O1qpwtxQzMYt/3uoSbxG9CTdjkWDQN3Th+jPQ==}
+  '@containerbase/semantic-release-pnpm@1.3.33':
+    resolution: {integrity: sha512-FKlF05pZ2X+BNV7IoGzCiyEAbW40HGzg/X7oBd2lE298GbTBkyFZlAuNxhD0pN5NageTuIEbVlwL/0KwF0p8rQ==}
     engines: {node: ^22.11.0 || ^24}
     peerDependencies:
       semantic-release: ^24.0.0 || ^25.0.0
@@ -6915,7 +6915,7 @@ snapshots:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
 
-  '@containerbase/semantic-release-pnpm@1.3.32(semantic-release@25.0.3(typescript@5.9.3))':
+  '@containerbase/semantic-release-pnpm@1.3.33(semantic-release@25.0.3(typescript@5.9.3))':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
