@@ -72,7 +72,7 @@ const scalaVersionMatch = q
       .op('.')
       .sym((ctx, { value: varName }) => {
         // build the full variable name from what we saved earlier
-        const dottedVariableName = ctx.currentVarName + '.' + varName;
+        const dottedVariableName = `${ctx.currentVarName}.${varName}`;
         const currentValue = ctx.vars[dottedVariableName];
         if (currentValue) {
           ctx.scalaVersion = currentValue;
@@ -218,7 +218,7 @@ const versionMatch = q.alt<Ctx>(
     .op('.')
     .sym((ctx, { value: varName }) => {
       // build the full variable name from what we saved earlier
-      const dottedVariableName = ctx.currentVarName + '.' + varName;
+      const dottedVariableName = `${ctx.currentVarName}.${varName}`;
       const currentValue = ctx.vars[dottedVariableName];
       if (currentValue) {
         ctx.currentValue = currentValue;
