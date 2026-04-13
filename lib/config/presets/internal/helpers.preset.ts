@@ -43,13 +43,14 @@ export const presets: Record<string, Preset> = {
       {
         changelogUrl:
           '{{sourceUrl}}/-/compare/{{currentDigest}}...{{newDigest}}',
-        matchDatasources: [
-          'git-refs',
-          'git-tags',
-          'gitlab-releases',
-          'gitlab-tags',
-        ],
+        matchDatasources: ['git-refs', 'git-tags'],
         matchSourceUrls: ['https://gitlab.com/**'],
+        matchUpdateTypes: ['digest'],
+      },
+      {
+        changelogUrl:
+          '{{sourceUrl}}/-/compare/{{currentDigest}}...{{newDigest}}',
+        matchDatasources: ['gitlab-releases', 'gitlab-tags'],
         matchUpdateTypes: ['digest'],
       },
     ],
