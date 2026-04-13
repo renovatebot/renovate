@@ -4,7 +4,7 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { range } from '../../../util/range.ts';
 import { getPkgReleases } from '../index.ts';
-import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
+import { getAdoptiumReleases } from './adoptium.ts';
 import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
 
 function getPath(page: number, imageType = 'jdk', args = ''): string {
