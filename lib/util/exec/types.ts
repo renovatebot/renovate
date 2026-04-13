@@ -61,23 +61,35 @@ export function isToolName(value: unknown): value is ToolName {
 /**
  * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
  */
-const extraConstraintNames = ['go', 'gomodMod', 'jenkins', 'pipTools'] as const;
+const additionalConstraintNames = [
+  'go',
+  'gomodMod',
+  'jenkins',
+  'pipTools',
+] as const;
 
 /**
- * A name usable as a key in a `constraints` record.
- *
- * Includes all `ToolName`s, plus `extraConstraintNames`.
+ * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
  */
-export type ConstraintName = ToolName | (typeof extraConstraintNames)[number];
+export type AdditionalConstraintName =
+  (typeof additionalConstraintNames)[number];
+
+export function isAdditionalConstraintName(
+  value: unknown,
+): value is AdditionalConstraintName {
+  return (
+    isString(value) &&
+    additionalConstraintNames.includes(value as AdditionalConstraintName)
+  );
+}
+
+/**
+ * A name usable as a key in a `constraints` record, which may be tools that Containerbase supports.
+ */
+export type ConstraintName = ToolName | AdditionalConstraintName;
 
 export function isConstraintName(value: unknown): value is ConstraintName {
-  return (
-    isToolName(value) ||
-    (isString(value) &&
-      extraConstraintNames.includes(
-        value as (typeof extraConstraintNames)[number],
-      ))
-  );
+  return isToolName(value) || isAdditionalConstraintName(value);
 }
 
 export interface ToolConstraint {

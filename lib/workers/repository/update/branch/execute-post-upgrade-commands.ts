@@ -10,7 +10,7 @@ import { coerceArray } from '../../../../util/array.ts';
 import { exec } from '../../../../util/exec/index.ts';
 import {
   type ExecOptions,
-  isConstraintName,
+  isExtraConstraintName,
   isToolName,
 } from '../../../../util/exec/types.ts';
 import {
@@ -155,7 +155,7 @@ export async function postUpgradeCommandsExecutor(
                 upgrade.postUpgradeTasks?.installTools,
               )) {
                 const validTool = isToolName(tool);
-                const validConstraint = isConstraintName(tool);
+                const validConstraint = isExtraConstraintName(tool);
                 if (!validTool) {
                   logger.debug(
                     {
