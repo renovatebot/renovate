@@ -693,12 +693,12 @@ describe('workers/repository/update/branch/bump-versions', () => {
       });
     });
 
-    it('should use matched version when bumpType is match', async () => {
+    it('should use matched version when bumpType is sync', async () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
-            bumpType: 'match',
+            bumpType: 'sync',
             matchStrings: ['^(?<version>.+)$'],
           },
         ],
@@ -733,13 +733,13 @@ describe('workers/repository/update/branch/bump-versions', () => {
       });
     });
 
-    it('should log debug when no upgrades found for match type', async () => {
+    it('should log debug when no upgrades found for sync type', async () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
             name: 'test',
             filePatterns: ['\\.release-version'],
-            bumpType: 'match',
+            bumpType: 'sync',
             matchStrings: ['^(?<version>.+)$'],
           },
         ],
@@ -759,17 +759,17 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: '.release-version' },
-        'bumpVersions(test): No upgrades found in branch config for match type',
+        'bumpVersions(test): No upgrades found in branch config for sync type',
       );
     });
 
-    it('should log debug when newVersion is not found in upgrades for match type', async () => {
+    it('should log debug when newVersion is not found in upgrades for sync type', async () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
             name: 'test',
             filePatterns: ['\\.release-version'],
-            bumpType: 'match',
+            bumpType: 'sync',
             matchStrings: ['^(?<version>.+)$'],
           },
         ],
@@ -794,7 +794,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: '.release-version' },
-        'bumpVersions(test): No newVersion found in branch upgrades for match type',
+        'bumpVersions(test): No newVersion found in branch upgrades for sync type',
       );
     });
   });

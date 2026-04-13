@@ -144,22 +144,22 @@ async function bumpVersion(
       try {
         const bumpType = compile(rawBumpType, branchConfig);
 
-        // Handle 'match' type - use version from branch upgrades
-        if (bumpType === 'match') {
+        // Handle 'sync' type - use version from branch upgrades
+        if (bumpType === 'sync') {
           if (branchConfig.upgrades?.length) {
             // Use the newVersion from the first upgrade
             newVersion = branchConfig.upgrades[0].newVersion ?? null;
             if (!newVersion) {
               logger.debug(
                 { file: filePath },
-                `${bumpVersionsDescr}: No newVersion found in branch upgrades for match type`,
+                `${bumpVersionsDescr}: No newVersion found in branch upgrades for sync type`,
               );
               continue;
             }
           } else {
             logger.debug(
               { file: filePath },
-              `${bumpVersionsDescr}: No upgrades found in branch config for match type`,
+              `${bumpVersionsDescr}: No upgrades found in branch config for sync type`,
             );
             continue;
           }
