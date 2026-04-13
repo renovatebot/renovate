@@ -84,7 +84,7 @@ describe('workers/repository/process/fetch', () => {
 
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
-      config.constraints = { some: 'different' };
+      config.constraints = { some: 'different' } as never;
       const packageFiles: any = {
         maven: [
           {

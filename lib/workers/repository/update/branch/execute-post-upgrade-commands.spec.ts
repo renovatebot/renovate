@@ -4,6 +4,7 @@ import upath from 'upath';
 import { fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as _exec from '../../../../util/exec/index.ts';
+import type { ConstraintName, ToolName } from '../../../../util/exec/types.ts';
 import * as _gitAuth from '../../../../util/git/auth.ts';
 import type { StatusResult } from '../../../../util/git/types.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
@@ -910,8 +911,8 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
     describe('when using installTools', () => {
       interface TestCase {
         description: string;
-        constraints?: Record<string, string>;
-        installTools: Record<string, Record<never, never>>;
+        constraints?: Partial<Record<ConstraintName, string>>;
+        installTools: Partial<Record<ToolName, Record<never, never>>>;
         expected: { toolName: string; constraint: string | undefined }[];
       }
 
@@ -945,6 +946,27 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           constraints: undefined,
           installTools: { node: {} },
           expected: [{ toolName: 'node', constraint: undefined }],
+        },
+        {
+          description: `a constraint that isn't a valid tool is ignored (without being referenced by \`installTools\`)`,
+          constraints: {
+            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            jenkins: '1.566.0',
+          },
+          installTools: {},
+          expected: [],
+        },
+        {
+          description: `a constraint that isn't a valid tool is ignored (when referenced by \`installTools\`)`,
+          constraints: {
+            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            jenkins: '1.566.0',
+          },
+          installTools: {
+            // not a valid tool name
+            jenkins: {},
+          } as never,
+          expected: [],
         },
       ])('$description', async ({ constraints, installTools, expected }) => {
         const commands = partial<BranchUpgradeConfig>([

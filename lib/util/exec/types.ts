@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
 
 /**
@@ -5,50 +6,81 @@ import type { Options as ExecaOptions } from 'execa';
  *
  * TODO #41849 replace with upstream types
  */
-export type ToolName =
-  | 'bazelisk'
-  | 'bun'
-  | 'bundler'
-  | 'cocoapods'
-  | 'composer'
-  | 'conan'
-  | 'copier'
-  | 'corepack'
-  | 'devbox'
-  | 'dotnet'
-  | 'erlang'
-  | 'elixir'
-  | 'flux'
-  | 'gleam'
-  | 'golang'
-  | 'gradle'
-  | 'hashin'
-  | 'helm'
-  | 'helmfile'
-  | 'java'
-  | 'java-maven'
-  | 'jb'
-  | 'kustomize'
-  | 'maven'
-  | 'nix'
-  | 'node'
-  | 'npm'
-  | 'pdm'
-  | 'php'
-  | 'pip-tools'
-  | 'pipenv'
-  | 'pnpm'
-  | 'pixi'
-  | 'poetry'
-  | 'python'
-  | 'ruby'
-  | 'rust'
-  | 'uv'
-  | 'yarn'
-  | 'yarn-slim'
-  | 'dart'
-  | 'flutter'
-  | 'vendir';
+const toolNames = [
+  'bazelisk',
+  'bun',
+  'bundler',
+  'cocoapods',
+  'composer',
+  'conan',
+  'copier',
+  'corepack',
+  'devbox',
+  'dotnet',
+  'erlang',
+  'elixir',
+  'flux',
+  'gleam',
+  'golang',
+  'gradle',
+  'hashin',
+  'helm',
+  'helmfile',
+  'java',
+  'java-maven',
+  'jb',
+  'kustomize',
+  'maven',
+  'nix',
+  'node',
+  'npm',
+  'pdm',
+  'php',
+  'pip-tools',
+  'pipenv',
+  'pnpm',
+  'pixi',
+  'poetry',
+  'python',
+  'ruby',
+  'rust',
+  'uv',
+  'yarn',
+  'yarn-slim',
+  'dart',
+  'flutter',
+  'vendir',
+] as const;
+
+export type ToolName = (typeof toolNames)[number];
+
+export function isToolName(value: unknown): value is ToolName {
+  return isString(value) && toolNames.includes(value as ToolName);
+}
+
+/**
+ * Additional ecosystem-specific constraint keys that aren't Containerbase
+ * tools (e.g. `jenkins` for Jenkins plugins, `gomodMod` for Go modules mode,
+ * `go` as the legacy alias for `golang`).
+ */
+const extraConstraintNames = ['go', 'gomodMod', 'jenkins', 'pipTools'] as const;
+
+/**
+ * A name usable as a key in a `constraints` record.
+ *
+ * Includes all `ToolName`s, plus `extraConstraintNames`.
+ */
+export type ConstraintName = ToolName | (typeof extraConstraintNames)[number];
+
+export function isConstraintName(value: unknown): value is ConstraintName {
+  return (
+    isToolName(value) ||
+    (isString(value) &&
+      extraConstraintNames.includes(
+        value as (typeof extraConstraintNames)[number],
+      ))
+  );
+}
 
 export interface ToolConstraint {
   toolName: ToolName;

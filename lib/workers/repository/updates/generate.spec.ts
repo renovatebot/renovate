@@ -191,7 +191,7 @@ describe('workers/repository/updates/generate', () => {
           automerge: true,
           constraints: {
             foo: '1.0.0',
-          },
+          } as never,
         },
         {
           manager: 'some-manager',
@@ -211,7 +211,7 @@ describe('workers/repository/updates/generate', () => {
           constraints: {
             foo: '1.0.0',
             bar: '2.0.0',
-          },
+          } as never,
         },
         {
           manager: 'some-manager',
