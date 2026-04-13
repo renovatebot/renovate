@@ -32,6 +32,8 @@ export interface GetReleasesConfig {
   packageName: string;
   registryUrl?: string;
   currentValue?: string;
+  constraints?: Record<string, string>;
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface GetPkgReleasesConfig {

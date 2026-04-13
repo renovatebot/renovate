@@ -234,3 +234,7 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 ### Self-hosting examples
 
 For more examples on running Renovate self-hosted, read our [Self-hosted examples](../examples/self-hosting.md) page.
+
+### Community tools
+
+There are also some [community-maintained tools](../community-tools.md) which may help running Renovate.
