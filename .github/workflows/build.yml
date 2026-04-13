@@ -364,7 +364,7 @@ jobs:
       - name: Run zizmor
         uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
         with:
-          version: v1.23.1
+          version: v1.24.1
 
   test:
     needs: [setup, prefetch]
