@@ -423,6 +423,105 @@ describe('workers/repository/process/vulnerabilities', () => {
         expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
       });
 
+      it('handles a MAL- advisory with no affected field', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['1.14.1'],
+              },
+            ],
+          },
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-9999',
+            aliases: [],
+          },
+        ]);
+
+        await expect(
+          vulnerabilities.appendVulnerabilityPackageRules(config, packageFiles),
+        ).resolves.not.toThrow();
+      });
+
+      it('handles a malicious dependency where updates is undefined', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['1.14.1'],
+              },
+            ],
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+          'malicious-version-in-use',
+        );
+      });
+
       describe('when a malicious dependency update is proposed', () => {
         it('applies to dependency updates, and sets malicious-update-proposed', async () => {
           const packageFiles: Record<string, PackageFile[]> = {
@@ -558,6 +657,63 @@ describe('workers/repository/process/vulnerabilities', () => {
             },
             "Marking axios's update to 1.14.1 as skipReason=malicious-update-proposed, as it is affected by MAL-2026-2307",
           );
+        });
+
+        it('falls back to update.newValue when newVersion is missing, and skips updates that are not malicious', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newValue: '1.14.2',
+                      },
+                      {
+                        newValue: '1.14.1',
+                      },
+                    ],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+          getVulnerabilitiesMock.mockResolvedValueOnce([
+            {
+              modified: '2026-04-07T14:41:20Z',
+              published: '2026-03-31T03:15:49Z',
+              schema_version: '1.7.4',
+              id: 'MAL-2026-2307',
+              aliases: ['GHSA-fw8c-xr5c-95f9'],
+              affected: [
+                {
+                  package: {
+                    ecosystem: 'npm',
+                    name: 'axios',
+                  },
+                  versions: ['1.14.1'],
+                },
+              ],
+            },
+          ]);
+
+          await vulnerabilities.appendVulnerabilityPackageRules(
+            config,
+            packageFiles,
+          );
+
+          expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+            'malicious-update-proposed',
+          );
+          expect(packageFiles.npm[0].deps[0].skipStage).toEqual('lookup');
         });
       });
     });
