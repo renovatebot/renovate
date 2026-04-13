@@ -277,7 +277,7 @@ export class Vulnerabilities {
     packageName: string,
     depVersion: string,
     versioningApi: VersioningApi,
-    dep: PackageDependency<Record<string, any>, string>,
+    dep: PackageDependency,
     manager: string | undefined,
     packageFile: string,
     osvVulnerability: Osv.Vulnerability,
