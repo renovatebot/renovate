@@ -1,4 +1,5 @@
 import cacache from 'cacache';
+import { LRUCache } from 'lru-cache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -14,7 +15,12 @@ export class PackageCacheFile extends PackageCacheBase {
   }
 
   private readonly cacheFileName: string;
-  private readonly expiryMap = new Map<string, DateTime>();
+
+  private readonly expiryMap = new LRUCache<string, DateTime>({
+    // Assuming 50 bytes per entry, this limits the memory footprint of this
+    // to around 5MB.
+    max: 100000,
+  });
 
   private constructor(cacheFileName: string) {
     super();
