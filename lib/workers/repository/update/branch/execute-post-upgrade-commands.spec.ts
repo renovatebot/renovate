@@ -1096,7 +1096,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           config,
         );
 
-        expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             tool: 'jenkins',
             validTool: false,

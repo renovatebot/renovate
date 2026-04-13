@@ -157,7 +157,7 @@ export async function postUpgradeCommandsExecutor(
                 const validTool = isToolName(tool);
                 const validConstraint = isConstraintName(tool);
                 if (!validTool) {
-                  logger.debug(
+                  logger.warn(
                     {
                       tool,
                       validTool,
