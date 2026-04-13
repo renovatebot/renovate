@@ -84,7 +84,8 @@ describe('workers/repository/process/fetch', () => {
 
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
-      config.constraints = { some: 'different' } as never;
+      // @ts-expect-error -- intentionally using invalid constraint names
+      config.constraints = { some: 'different' };
       const packageFiles: any = {
         maven: [
           {

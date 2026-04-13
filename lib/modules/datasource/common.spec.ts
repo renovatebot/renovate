@@ -218,15 +218,16 @@ describe('modules/datasource/common', () => {
         datasource: 'foo',
         packageName: 'bar',
         constraintsFiltering: 'strict' as const,
-        constraints: { baz: '^1.0.0', qux: 'invalid' } as never,
+        constraints: { baz: '^1.0.0', qux: 'invalid' },
       };
       const releaseResult = {
         releases: [
           { version: '1.0.0' },
-          { version: '2.0.0', constraints: { baz: [undefined] } as never },
+          { version: '2.0.0', constraints: { baz: [undefined] } },
           { version: '3.0.0', constraints: { baz: ['^0.9.0', 'invalid'] } },
         ],
       } as unknown as ReleaseResult;
+      // @ts-expect-error -- intentionally using invalid constraint names
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });

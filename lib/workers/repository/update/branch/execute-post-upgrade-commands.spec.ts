@@ -963,9 +963,8 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             jenkins: '1.566.0',
           },
           installTools: {
-            // not a valid tool name
             jenkins: {},
-          } as never,
+          } as never, // TODO can't tighten the type constraints, as the arguments to the test function don't match
           expected: [],
         },
       ])('$description', async ({ constraints, installTools, expected }) => {
