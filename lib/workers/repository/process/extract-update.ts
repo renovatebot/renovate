@@ -225,19 +225,35 @@ async function fetchVulnerabilities(
   }
 }
 
+async function flagMaliciousPackages(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>,
+): Promise<void> {
+  if (config.osvVulnerabilityAlerts) {
+    logger.debug('flagMaliciousPackages() - osvVulnerabilityAlerts=true');
+    try {
+      const vulnerabilities = await Vulnerabilities.create();
+      await vulnerabilities.flagMaliciousPackages(config, packageFiles);
+    } catch (err) {
+      logger.warn({ err }, 'Unable to flag malicious packages');
+    }
+  }
+}
+
 export async function lookup(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
+  await flagMaliciousPackages(config, packageFiles);
+  reportMaliciousSkippedDependencies(packageFiles);
   memCache.cleanDatasourceKeys();
   calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
     packageFiles,
   );
-  reportMaliciousSkippedDependencies(packageFiles);
   logger.debug(
     { baseBranch: config.baseBranch, config: packageFiles },
     'packageFiles with updates',

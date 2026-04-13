@@ -226,10 +226,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           },
         ]);
 
-        await vulnerabilities.appendVulnerabilityPackageRules(
-          config,
-          packageFiles,
-        );
+        await vulnerabilities.flagMaliciousPackages(config, packageFiles);
 
         expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
           'malicious-version-in-use',
@@ -238,14 +235,6 @@ describe('workers/repository/process/vulnerabilities', () => {
         // and it does not apply to the dependency that doesn't match
         expect(packageFiles.pip[0].deps[0].skipReason).toBeUndefined();
         expect(packageFiles.pip[0].deps[0].skipStage).toBeUndefined();
-
-        // validation to make sure that these were both valid advisories
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Vulnerability MAL-2026-2307 affects axios 1.14.1',
-        );
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Vulnerability GHSA-jxr6-qrxx-2ph2 affects num2words 0.5.15',
-        );
       });
 
       it('are logged', async () => {
@@ -348,10 +337,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           },
         ]);
 
-        await vulnerabilities.appendVulnerabilityPackageRules(
-          config,
-          packageFiles,
-        );
+        await vulnerabilities.flagMaliciousPackages(config, packageFiles);
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
@@ -415,10 +401,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           },
         ]);
 
-        await vulnerabilities.appendVulnerabilityPackageRules(
-          config,
-          packageFiles,
-        );
+        await vulnerabilities.flagMaliciousPackages(config, packageFiles);
 
         expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
       });
@@ -470,7 +453,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         ]);
 
         await expect(
-          vulnerabilities.appendVulnerabilityPackageRules(config, packageFiles),
+          vulnerabilities.flagMaliciousPackages(config, packageFiles),
         ).resolves.not.toThrow();
       });
 
@@ -512,10 +495,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           },
         ]);
 
-        await vulnerabilities.appendVulnerabilityPackageRules(
-          config,
-          packageFiles,
-        );
+        await vulnerabilities.flagMaliciousPackages(config, packageFiles);
 
         expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
           'malicious-version-in-use',
@@ -576,10 +556,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             },
           ]);
 
-          await vulnerabilities.appendVulnerabilityPackageRules(
-            config,
-            packageFiles,
-          );
+          await vulnerabilities.flagMaliciousPackages(config, packageFiles);
 
           expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
             'malicious-update-proposed',
@@ -640,10 +617,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             },
           ]);
 
-          await vulnerabilities.appendVulnerabilityPackageRules(
-            config,
-            packageFiles,
-          );
+          await vulnerabilities.flagMaliciousPackages(config, packageFiles);
 
           expect(logger.logger.debug).toHaveBeenCalledWith(
             {
@@ -705,10 +679,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             },
           ]);
 
-          await vulnerabilities.appendVulnerabilityPackageRules(
-            config,
-            packageFiles,
-          );
+          await vulnerabilities.flagMaliciousPackages(config, packageFiles);
 
           expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
             'malicious-update-proposed',
