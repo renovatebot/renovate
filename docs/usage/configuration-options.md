@@ -2923,7 +2923,7 @@ The entire database is downloaded locally by [renovate-offline](https://github.c
 
 <!-- markdownlint-disable MD001 -->
 
-### Malicious package detection and protection
+#### Malicious package detection and protection
 
 <!-- prettier-ignore -->
 !!! note
