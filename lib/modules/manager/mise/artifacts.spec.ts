@@ -282,7 +282,92 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: updateToolCmd,
+        options: {
+          env: expect.objectContaining({ MISE_ENV: 'test' }),
+        },
+      },
+    ]);
+  });
+
+  it('uses --local flag for local config files', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('new content');
+    fs.writeLocalFile.mockResolvedValueOnce();
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['mise.local.lock'],
+      }),
+    );
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.local.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'new content',
+          path: 'mise.local.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'mise lock --local node' }]);
+  });
+
+  it('uses --local flag and MISE_ENV for env-specific local config files', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    fs.writeLocalFile.mockResolvedValueOnce();
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: [],
+      }),
+    );
+
+    await updateArtifacts({
+      packageFileName: 'mise.test.local.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: 'some content',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'mise lock --local node',
+        options: {
+          env: expect.objectContaining({ MISE_ENV: 'test' }),
+        },
+      },
+    ]);
+  });
+
+  it('uses --local flag for lock file maintenance on local config', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    fs.writeLocalFile.mockResolvedValueOnce();
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: [],
+      }),
+    );
+
+    await updateArtifacts({
+      packageFileName: 'mise.local.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: 'some content',
+      config: lockMaintenanceConfig,
+    });
+
+    expect(execSnapshots).toMatchObject([{ cmd: 'mise lock --local' }]);
   });
 
   // Note: Docker and install mode tests are not included here because mise

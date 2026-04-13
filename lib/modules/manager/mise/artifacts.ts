@@ -14,7 +14,11 @@ import type {
   UpdateLockedConfig,
   UpdateLockedResult,
 } from '../types.ts';
-import { getLockFileName, getLockedVersion } from './lockfile.ts';
+import {
+  getConfigType,
+  getLockFileName,
+  getLockedVersion,
+} from './lockfile.ts';
 import { MiseLockFile } from './schema.ts';
 
 /**
@@ -36,19 +40,25 @@ export async function updateArtifacts({
 
   await writeLocalFile(packageFileName, newPackageFileContent);
 
+  const { isLocal, env } = getConfigType(packageFileName);
+  const localFlag = isLocal ? ' --local' : '';
+
   let cmd: string;
   if (config.isLockFileMaintenance) {
-    cmd = 'mise lock';
+    cmd = `mise lock${localFlag}`;
   } else {
     const tools = updatedDeps
       .map(({ depName }) => depName)
       .filter(isNonEmptyStringAndNotWhitespace)
       .map((depName) => quote(depName))
       .join(' ');
-    cmd = tools ? `mise lock ${tools}` : 'mise lock';
+    cmd = tools ? `mise lock${localFlag} ${tools}` : `mise lock${localFlag}`;
   }
 
   const extraEnv: ExtraEnv = {};
+  if (env) {
+    extraEnv.MISE_ENV = env;
+  }
   const token = findGithubToken(
     hostRules.find({
       hostType: 'github',

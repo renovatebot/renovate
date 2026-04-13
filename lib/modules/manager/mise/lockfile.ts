@@ -2,26 +2,40 @@ import upath from 'upath';
 import { regEx } from '../../../util/regex.ts';
 import type { MiseLockFile } from './schema.ts';
 
+export interface MiseConfigType {
+  /** True when config filename contains `.local.` (e.g. mise.local.toml) */
+  isLocal: boolean;
+  /** Environment name extracted from filename, e.g. 'test' for mise.test.toml */
+  env?: string;
+}
+
+/**
+ * Parses the config file name to determine its type (local, env-specific, or default).
+ * Used to derive the correct lock file name and `mise lock` flags.
+ */
+export function getConfigType(configPath: string): MiseConfigType {
+  const filename = upath.basename(configPath);
+  const isLocal = filename.includes('.local.');
+  // Patterns: mise.{env}.toml, mise.{env}.local.toml, .mise.{env}.toml, config.{env}.toml
+  const envMatch = regEx(
+    /^(?:\.?mise|config)\.([^.]+)(?:\.local)?\.toml$/,
+  ).exec(filename);
+  const env = envMatch?.[1] === 'local' ? undefined : envMatch?.[1];
+  return { isLocal, env };
+}
+
 /**
  * Derives the lock file path from a mise config file path.
  * Matches mise's lockfile_path_for_config() logic from src/lockfile.rs
  */
 export function getLockFileName(configPath: string): string {
-  const filename = upath.basename(configPath);
   const dirname = upath.dirname(configPath);
   const parentDirname = upath.basename(dirname);
 
   // For conf.d files, lock file goes in parent directory
   const lockDir = parentDirname === 'conf.d' ? upath.dirname(dirname) : dirname;
 
-  const isLocal = filename.includes('.local.');
-
-  // Extract environment from filename
-  // Patterns: mise.{env}.toml, mise.{env}.local.toml, .mise.{env}.toml, config.{env}.toml
-  const envMatch = regEx(
-    /^(?:\.?mise|config)\.([^.]+)(?:\.local)?\.toml$/,
-  ).exec(filename);
-  const env = envMatch?.[1] === 'local' ? undefined : envMatch?.[1];
+  const { isLocal, env } = getConfigType(configPath);
 
   let lockFileName: string;
   if (env && isLocal) {

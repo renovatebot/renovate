@@ -1,7 +1,28 @@
-import { getLockFileName, getLockedVersion } from './lockfile.ts';
+import {
+  getConfigType,
+  getLockFileName,
+  getLockedVersion,
+} from './lockfile.ts';
 import type { MiseLockFile } from './schema.ts';
 
 describe('modules/manager/mise/lockfile', () => {
+  describe('getConfigType()', () => {
+    it.each`
+      configPath                | isLocal  | env
+      ${'mise.toml'}            | ${false} | ${undefined}
+      ${'.mise.toml'}           | ${false} | ${undefined}
+      ${'mise.local.toml'}      | ${true}  | ${undefined}
+      ${'mise.test.toml'}       | ${false} | ${'test'}
+      ${'mise.test.local.toml'} | ${true}  | ${'test'}
+      ${'config.toml'}          | ${false} | ${undefined}
+    `(
+      'returns isLocal=$isLocal env=$env for $configPath',
+      ({ configPath, isLocal, env }) => {
+        expect(getConfigType(configPath)).toEqual({ isLocal, env });
+      },
+    );
+  });
+
   describe('getLockFileName()', () => {
     it.each`
       configPath                    | expected
