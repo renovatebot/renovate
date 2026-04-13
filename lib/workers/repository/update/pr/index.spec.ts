@@ -1268,7 +1268,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           bodyFingerprint: fingerprint(generatePrBodyFingerprintConfig(config)),
-          lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
+          lastEdited: '2020-01-20T00:00:00Z',
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         const res = await ensurePr({ ...config, autoApprove: true });
