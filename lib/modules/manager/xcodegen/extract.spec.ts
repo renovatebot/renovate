@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { logger } from '~test/util.ts';
 import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/xcodegen/extract', () => {
@@ -8,7 +9,11 @@ describe('modules/manager/xcodegen/extract', () => {
     });
 
     it('returns null for invalid YAML', () => {
-      expect(extractPackageFile(':::', 'project.yml')).toBeNull();
+      expect(extractPackageFile('nothing here: [', 'project.yml')).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ packageFile: 'project.yml' }),
+        'Parsing XcodeGen project YAML failed',
+      );
     });
 
     it('returns null for YAML without packages', () => {
