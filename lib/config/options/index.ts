@@ -2107,6 +2107,13 @@ const options: Readonly<RenovateOptions>[] = [
     default: true,
   },
   {
+    name: 'dependencyDashboardReportSchedules',
+    description:
+      'Controls whether waiting schedule descriptions are reported in the dependency dashboard.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'internalChecksAsSuccess',
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
