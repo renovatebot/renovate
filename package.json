@@ -350,7 +350,7 @@
     "unified": "11.0.5",
     "vite": "8.0.5",
     "vitest": "4.1.2",
-    "vitest-mock-extended": "3.1.1"
+    "vitest-mock-extended": "4.0.0"
   },
   "packageManager": "pnpm@10.33.0",
   "files": [
