@@ -125,7 +125,7 @@ describe('workers/repository/process/extract-update', () => {
         osvVulnerabilityAlerts: true,
       };
       const appendVulnerabilityPackageRulesMock = vi.fn();
-      createVulnerabilitiesMock.mockResolvedValueOnce({
+      createVulnerabilitiesMock.mockResolvedValue({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
@@ -134,16 +134,8 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
-      expect(
-        appendVulnerabilityPackageRulesMock,
-      ).toHaveBeenCalledExactlyOnceWith(
-        {
-          repoIsOnboarded: true,
-          osvVulnerabilityAlerts: true,
-        },
-        undefined,
-      );
+      expect(createVulnerabilitiesMock).toHaveBeenCalledTimes(2);
+      expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledTimes(2);
     });
 
     it('handles exception when fetching vulnerabilities', async () => {
@@ -158,7 +150,7 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
+      expect(createVulnerabilitiesMock).toHaveBeenCalledTimes(2);
     });
 
     describe('malicious package detection', () => {
@@ -213,38 +205,38 @@ describe('workers/repository/process/extract-update', () => {
           // the first time, we're checking what updates are available, so don't modify anything
           appendVulnerabilityPackageRulesMock.mockImplementationOnce(
             async (
-              config: any,
-              packageFiles: Record<string, PackageFile[]>,
+              _config: any,
+              _packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
               // no-op
             },
           );
 
           fetch.fetchUpdates.mockImplementation(
-            async (
-              config: any,
+            (
+              _config: any,
               packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
               packageFiles.npm[0].deps[0].updates = [
                 // MAL-2026-2307
                 { newVersion: '1.14.1' },
               ];
+              return Promise.resolve();
             },
           );
 
-          // the next itme we
           appendVulnerabilityPackageRulesMock.mockImplementationOnce(
-            async (
-              config: any,
+            (
+              _config: any,
               packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
-              const updates = packageFiles?.npm[0]?.deps[0]?.updates
+              const updates = packageFiles?.npm[0]?.deps[0]?.updates;
 
-              if (updates && updates[0]?.newVersion === '1.14.1'
-              ) {
+              if (updates && updates[0]?.newVersion === '1.14.1') {
                 packageFiles.npm[0].deps[0].skipReason =
                   'malicious-update-proposed';
               }
+              return Promise.resolve();
             },
           );
 
