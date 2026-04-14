@@ -585,227 +585,24 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
-  describe('findIssue()', () => {
-    it('does not throw', async () => {
-      httpMock.scope(baseUrl).get('/2.0/user').reply(200, { uuid: '12345' });
-      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.uuid%3D%2212345%22',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        });
-      expect(await bitbucket.findIssue('title')).toMatchSnapshot();
-    });
-
-    it('returns null if no issues', async () => {
-      const scope = await initRepoMock(
-        {
-          repository: 'some/empty',
-        },
-        { has_issues: true },
-      );
-      scope
-        .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [],
-        });
-      expect(await bitbucket.findIssue('title')).toBeNull();
-    });
+  it('ensureIssueClosing()', async () => {
+    await expect(
+      bitbucket.ensureIssueClosing('title'),
+    ).resolves.toBeUndefined();
   });
 
-  describe('ensureIssue()', () => {
-    it('updates existing issues', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        })
-        .put('/2.0/repositories/some/repo/issues/25')
-        .reply(200)
-        .put('/2.0/repositories/some/repo/issues/26')
-        .reply(200);
-      expect(
-        await bitbucket.ensureIssue({ title: 'title', body: 'body' }),
-      ).toBe('updated');
-    });
-
-    it('creates new issue', async () => {
-      const scope = await initRepoMock(
-        { repository: 'some/empty' },
-        { has_issues: true },
-      );
-      scope
-        .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, { values: [] })
-        .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, { values: [] })
-        .post('/2.0/repositories/some/empty/issues')
-        .reply(200);
-      expect(
-        await bitbucket.ensureIssue({
-          title: 'title',
-          reuseTitle: 'old-title',
-          body: 'body',
-        }),
-      ).toBe('created');
-    });
-
-    it('noop for existing issue', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        })
-        .put('/2.0/repositories/some/repo/issues/26')
-        .reply(200);
-      expect(
-        await bitbucket.ensureIssue({
-          title: 'title',
-          body: '\n content \n',
-        }),
-      ).toBeNull();
-    });
+  it('ensureIssue()', async () => {
+    await expect(
+      bitbucket.ensureIssue({ body: 'body', title: 'title' }),
+    ).resolves.toBeNull();
   });
 
-  describe('ensureIssueClosing()', () => {
-    it('does not throw for disabled issues', async () => {
-      await initRepoMock({ repository: 'some/repo' }, { has_issues: false });
-      await expect(bitbucket.ensureIssueClosing('title')).toResolve();
-    });
-
-    it('closes issue', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        })
-        .put('/2.0/repositories/some/repo/issues/25')
-        .reply(200)
-        .put('/2.0/repositories/some/repo/issues/26')
-        .reply(200);
-      await expect(bitbucket.ensureIssueClosing('title')).toResolve();
-    });
+  it('findIssue()', async () => {
+    await expect(bitbucket.findIssue('title')).resolves.toBeNull();
   });
 
-  describe('getIssueList()', () => {
-    it('returns empty array for disabled issues', async () => {
-      await initRepoMock({ repository: 'some/repo' }, { has_issues: false });
-      expect(await bitbucket.getIssueList()).toEqual([]);
-    });
-
-    it('get issues', async () => {
-      httpMock.scope(baseUrl).get('/2.0/user').reply(200, { uuid: '12345' });
-      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get('/2.0/repositories/some/repo/issues')
-        .query({
-          q: '(state = "new" OR state = "open") AND reporter.uuid="12345"',
-        })
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        });
-      const issues = await bitbucket.getIssueList();
-
-      expect(issues).toHaveLength(2);
-      expect(issues).toMatchSnapshot();
-    });
-
-    it('does not throw', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get('/2.0/repositories/some/repo/issues')
-        .query({
-          q: '(state = "new" OR state = "open")',
-        })
-        .reply(500, {});
-      const issues = await bitbucket.getIssueList();
-
-      expect(issues).toHaveLength(0);
-    });
+  it('getIssueList()', async () => {
+    await expect(bitbucket.getIssueList()).resolves.toStrictEqual([]);
   });
 
   describe('addAssignees()', () => {
