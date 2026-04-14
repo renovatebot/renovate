@@ -12,20 +12,20 @@ describe('util/schedule', () => {
 
     it('converts a simple daily cron expression', () => {
       expect(getReadableCronSchedule(['* 5 * * *'])).toEqual([
-        'At 05:00 AM (`* 5 * * *`)',
+        'Between 05:00 AM and 05:59 AM (`* 5 * * *`)',
       ]);
     });
 
     it('converts a weekly cron expression', () => {
       expect(getReadableCronSchedule(['* 5 * * 1'])).toEqual([
-        'At 05:00 AM, only on Monday (`* 5 * * 1`)',
+        'Between 05:00 AM and 05:59 AM, only on Monday (`* 5 * * 1`)',
       ]);
     });
 
     it('converts multiple cron expressions', () => {
       expect(getReadableCronSchedule(['* 5 * * 1', '* 5 * * 3'])).toEqual([
-        'At 05:00 AM, only on Monday (`* 5 * * 1`)',
-        'At 05:00 AM, only on Wednesday (`* 5 * * 3`)',
+        'Between 05:00 AM and 05:59 AM, only on Monday (`* 5 * * 1`)',
+        'Between 05:00 AM and 05:59 AM, only on Wednesday (`* 5 * * 3`)',
       ]);
     });
 
