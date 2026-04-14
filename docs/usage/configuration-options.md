@@ -613,6 +613,7 @@ Supported values are:
 - `patch`
 - `minor`
 - `major`
+- `sync`
 
 This field supports templates for conditional logic.
 For example:
@@ -624,6 +625,32 @@ For example:
 ```
 
 In this example, the bump type is set to `patch` for patch updates and `minor` for all other cases.
+
+**Using `sync` to sync with dependency updates**
+
+The `sync` type is special: it uses the same version as the dependency manager update that triggered the branch.
+This is useful when you want to keep version files in sync with actual dependency updates.
+
+For example, if you have a `.release-version` file that should always match the version of a specific dependency:
+
+```json
+{
+  "bumpVersions": [
+    {
+      "filePatterns": [".release-version"],
+      "bumpType": "sync",
+      "matchStrings": ["^(?<version>.+)$"]
+    }
+  ]
+}
+```
+
+When Renovate updates a dependency to version `2.5.3`, it will also update the `.release-version` file to `2.5.3`.
+
+<!-- prettier-ignore -->
+!!! note
+    When using `bumpType: "sync"`, Renovate uses the `newVersion` from the first upgrade in the branch.
+    If no upgrades are found in the branch, the version bump will be skipped and a debug message will be logged.
 
 ### bumpVersions.filePatterns
 
