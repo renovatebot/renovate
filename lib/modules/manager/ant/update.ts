@@ -22,9 +22,26 @@ export function updateDependency({
   if (quoteChar === '"' || quoteChar === "'") {
     endIndex = rightPart.indexOf(quoteChar);
   } else {
-    // .properties file: value ends at newline or EOF
+    // Could be a .properties file or a substring inside a coords attribute
     const newlineIndex = rightPart.indexOf('\n');
-    endIndex = newlineIndex === -1 ? rightPart.length : newlineIndex;
+    const lineEnd = newlineIndex === -1 ? rightPart.length : newlineIndex;
+
+    // Check for closing quote before newline (indicates coords attribute)
+    const nearestQuote = [
+      rightPart.indexOf('"'),
+      rightPart.indexOf("'"),
+    ].filter((i) => i !== -1 && i < lineEnd);
+
+    if (nearestQuote.length > 0) {
+      // Inside a quoted attribute (coords) - version ends at : or closing quote
+      const quoteEnd = Math.min(...nearestQuote);
+      const colonIndex = rightPart.indexOf(':');
+      endIndex =
+        colonIndex !== -1 && colonIndex < quoteEnd ? colonIndex : quoteEnd;
+    } else {
+      // .properties file: value ends at newline or EOF
+      endIndex = lineEnd;
+    }
   }
 
   const currentFound = rightPart.slice(0, endIndex);

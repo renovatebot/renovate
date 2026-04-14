@@ -119,6 +119,42 @@ describe('modules/manager/ant/update', () => {
     expect(result).toBeNull();
   });
 
+  it('updates version within coords attribute', () => {
+    const fileContent =
+      '<project><dependency coords="junit:junit:4.13.2" /></project>';
+
+    const result = updateDependency({
+      fileContent,
+      packageFile: 'build.xml',
+      upgrade: {
+        depName: 'junit:junit',
+        currentValue: '4.13.2',
+        newValue: '4.13.3',
+        fileReplacePosition: fileContent.indexOf('4.13.2'),
+      },
+    });
+
+    expect(result).toContain('coords="junit:junit:4.13.3"');
+  });
+
+  it('updates version within 4-part coords attribute', () => {
+    const fileContent =
+      '<project><dependency coords="junit:junit:4.13.2:test" /></project>';
+
+    const result = updateDependency({
+      fileContent,
+      packageFile: 'build.xml',
+      upgrade: {
+        depName: 'junit:junit',
+        currentValue: '4.13.2',
+        newValue: '4.13.3',
+        fileReplacePosition: fileContent.indexOf('4.13.2'),
+      },
+    });
+
+    expect(result).toContain('coords="junit:junit:4.13.3:test"');
+  });
+
   it('returns null when value at position does not match', () => {
     const fileContent =
       '<dependency groupId="junit" artifactId="junit" version="9.9.9" />';
