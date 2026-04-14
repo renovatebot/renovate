@@ -44,9 +44,21 @@ describe('modules/manager/xcodegen/extract', () => {
           RxClient:
             path: ../RxClient
       `;
-      const result = extractPackageFile(content, 'project.yml');
-      expect(result).not.toBeNull();
-      expect(result!.deps).toHaveLength(2);
+      expect(extractPackageFile(content, 'project.yml')).toEqual({
+        deps: [
+          {
+            depName: 'Yams',
+            packageName: 'jpsim/Yams',
+            datasource: 'github-tags',
+            currentValue: '2.0.0',
+            depType: 'from',
+          },
+          {
+            depName: 'RxClient',
+            skipReason: 'path-dependency',
+          },
+        ],
+      });
     });
 
     it('extracts remote package with url and from', () => {
