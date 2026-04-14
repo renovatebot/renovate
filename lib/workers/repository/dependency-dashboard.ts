@@ -14,6 +14,7 @@ import { platform } from '../../modules/platform/index.ts';
 import { coerceArray } from '../../util/array.ts';
 import { emojify } from '../../util/emoji.ts';
 import { regEx } from '../../util/regex.ts';
+import { getReadableCronSchedule } from '../../util/schedule.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
@@ -226,6 +227,9 @@ function getListItem(branch: BranchConfig, type: string): string {
     // TODO: types (#22198)
     ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
+  if (type === 'unschedule' && branch.schedule?.length) {
+    item += ` → [Schedule: ${getReadableCronSchedule(branch.schedule)?.join(',')}]`;
+  }
   if (uniquePackages.length < 2) {
     return item + '\n';
   }

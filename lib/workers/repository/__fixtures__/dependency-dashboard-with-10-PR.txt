@@ -12,8 +12,8 @@ The following branches are pending approval. To create them, click on a checkbox
 
 The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
- - [ ] <!-- unschedule-branch=branchName3 -->pr3
- - [ ] <!-- unschedule-branch=branchName4 -->pr4
+ - [ ] <!-- unschedule-branch=branchName3 -->pr3 → [Schedule: Between 12:00 AM and 03:59 AM (`* 0-3 * * *`)]
+ - [ ] <!-- unschedule-branch=branchName4 -->pr4 → [Schedule: Between 12:00 AM and 03:59 AM (`* 0-3 * * *`)]
  - [ ] <!-- create-all-awaiting-schedule-prs -->🔐 **Create all awaiting schedule PRs at once** 🔐
 
 ## Rate-Limited
