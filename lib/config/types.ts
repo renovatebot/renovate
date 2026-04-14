@@ -11,6 +11,7 @@ import type {
   SkipReason,
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
+import type { ConstraintName, ToolName } from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -305,7 +306,7 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
-  installTools?: Record<string, Record<never, never>>;
+  installTools?: Partial<Record<ToolName, Record<never, never>>>;
 }
 
 export type UpdateConfig<
@@ -451,7 +452,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
   variables?: Record<string, string>;
 
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
