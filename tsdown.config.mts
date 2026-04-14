@@ -59,5 +59,7 @@ export default defineConfig({
   sourcemap: true,
   platform: 'node',
   fixedExtension: false,
-  external: /^(?![./]|lib\/)/,
+  deps: {
+    neverBundle: /^(?![./]|lib\/)/,
+  },
 });
