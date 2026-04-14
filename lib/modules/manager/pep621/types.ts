@@ -7,4 +7,6 @@ export interface Pep508ParseResult {
 
 export interface Pep621ManagerData {
   depGroup?: string;
+  marker?: string;
+  pep508String?: string;
 }

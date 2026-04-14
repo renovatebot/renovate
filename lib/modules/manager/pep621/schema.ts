@@ -40,7 +40,7 @@ export function DependencyGroup(depType: string): DependencyGroup {
           if (dep.packageName) {
             dep.depName = dep.packageName;
           }
-          dep.managerData = { depGroup };
+          dep.managerData = { ...dep.managerData, depGroup };
           deps.push(dep);
         }
       }

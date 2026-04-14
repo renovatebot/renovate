@@ -456,6 +456,8 @@ export interface RenovateConfig
 
   constraintsFiltering?: ConstraintsFilter;
 
+  splitPythonMarkers?: boolean;
+
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
