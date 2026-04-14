@@ -7,24 +7,24 @@ import {
   ATTR_RENOVATE_REGISTRY_URL,
 } from '../../instrumentation/types.ts';
 import * as stats from '../../util/stats.ts';
-import { GetReleasesSpanProcessor } from './span-processor.ts';
+import { GetDatasourceReleasesSpanProcessor } from './span-processor.ts';
 
 vi.mock('../../util/stats.ts');
 
 describe('modules/datasource/span-processor', () => {
-  describe('GetReleasesSpanProcessor', () => {
+  describe('GetDatasourceReleasesSpanProcessor', () => {
     it('creates an instance', async () => {
-      const processor = new GetReleasesSpanProcessor();
-      expect(processor).toBeInstanceOf(GetReleasesSpanProcessor);
+      const processor = new GetDatasourceReleasesSpanProcessor();
+      expect(processor).toBeInstanceOf(GetDatasourceReleasesSpanProcessor);
       await expect(processor.forceFlush()).resolves.toBeUndefined();
       expect(processor.onStart(partial(), partial())).toBeUndefined();
       await expect(processor.shutdown()).resolves.toBeUndefined();
     });
 
-    it('writes span datapoints to GetReleasesStats', () => {
-      const writeMock = vi.mocked(stats.GetReleasesStats.write);
+    it('writes span datapoints to GetDatasourceReleasesStats', () => {
+      const writeMock = vi.mocked(stats.GetDatasourceReleasesStats.write);
 
-      const processor = new GetReleasesSpanProcessor();
+      const processor = new GetDatasourceReleasesSpanProcessor();
       processor.onEnd(
         partial<ReadableSpan>({
           ended: true,
@@ -48,9 +48,9 @@ describe('modules/datasource/span-processor', () => {
     });
 
     it('defaults registryUrl to an empty string if not provided', () => {
-      const writeMock = vi.mocked(stats.GetReleasesStats.write);
+      const writeMock = vi.mocked(stats.GetDatasourceReleasesStats.write);
 
-      const processor = new GetReleasesSpanProcessor();
+      const processor = new GetDatasourceReleasesSpanProcessor();
       processor.onEnd(
         partial<ReadableSpan>({
           ended: true,
@@ -126,10 +126,10 @@ describe('modules/datasource/span-processor', () => {
     ];
 
     test.each(noWriteTestCases)(
-      'does not write span datapoints to GetReleasesStats if $name',
+      'does not write span datapoints to GetDatasourceReleasesStats if $name',
       ({ span }) => {
-        const writeMock = vi.mocked(stats.GetReleasesStats.write);
-        const processor = new GetReleasesSpanProcessor();
+        const writeMock = vi.mocked(stats.GetDatasourceReleasesStats.write);
+        const processor = new GetDatasourceReleasesSpanProcessor();
         processor.onEnd(partial<ReadableSpan>(span));
         expect(writeMock).not.toHaveBeenCalled();
       },

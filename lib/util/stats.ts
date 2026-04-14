@@ -97,7 +97,7 @@ export type GetReleaseStatsReportShort = getReleaseStatsInternal<
   never
 >;
 
-export class GetReleasesStats {
+export class GetDatasourceReleasesStats {
   static write(
     datasource: string,
     registryUrl: string,

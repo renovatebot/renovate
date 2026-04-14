@@ -3,7 +3,7 @@ import * as memCache from './cache/memory/index.ts';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
-  GetReleasesStats,
+  GetDatasourceReleasesStats,
   GitOperationStats,
   HttpCacheStats,
   HttpStats,
@@ -140,7 +140,7 @@ describe('util/stats', () => {
     });
   });
 
-  describe('GetReleasesStats', () => {
+  describe('GetDatasourceReleasesStats', () => {
     beforeEach(() => {
       vi.useFakeTimers();
     });
@@ -150,7 +150,7 @@ describe('util/stats', () => {
     });
 
     it('returns empty report', () => {
-      const res = GetReleasesStats.getReport();
+      const res = GetDatasourceReleasesStats.getReport();
       expect(res).toEqual({
         stats: {
           avgMs: 0,
@@ -164,44 +164,44 @@ describe('util/stats', () => {
     });
 
     it('writes data points', () => {
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'npm',
         'https://registry.npmjs.org',
         'lodash',
         100,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'npm',
         'https://registry.npmjs.org',
         'lodash',
         200,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'npm',
         'https://jfrog.company.com/artifactory',
         'foo',
         400,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'docker',
         'https://registry.docker.com',
         'alpine',
         1000,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'docker',
         'https://registry.docker.com',
         'memcached',
         2000,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'docker',
         'https://registry.docker.com',
         'istio/pilot',
         3000,
       );
 
-      const res = GetReleasesStats.getReport();
+      const res = GetDatasourceReleasesStats.getReport();
       expect(res).toEqual({
         stats: {
           avgMs: 1117,
@@ -306,7 +306,7 @@ describe('util/stats', () => {
     });
 
     it('wraps a function', async () => {
-      const res = await GetReleasesStats.wrap(
+      const res = await GetDatasourceReleasesStats.wrap(
         'npm',
         'https://registry.npmjs.org',
         'lodash',
@@ -317,7 +317,7 @@ describe('util/stats', () => {
       );
 
       expect(res).toBe('foo');
-      expect(GetReleasesStats.getReport()).toEqual({
+      expect(GetDatasourceReleasesStats.getReport()).toEqual({
         stats: {
           avgMs: 100,
           count: 1,
@@ -360,44 +360,44 @@ describe('util/stats', () => {
     });
 
     it('logs report', () => {
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'npm',
         'https://registry.npmjs.org',
         'lodash',
         100,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'npm',
         'https://registry.npmjs.org',
         'lodash',
         200,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'npm',
         'https://jfrog.company.com/artifactory',
         'foo',
         400,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'docker',
         'https://registry.docker.com',
         'alpine',
         1000,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'docker',
         'https://registry.docker.com',
         'memcached',
         2000,
       );
-      GetReleasesStats.write(
+      GetDatasourceReleasesStats.write(
         'docker',
         'https://registry.docker.com',
         'istio/pilot',
         3000,
       );
 
-      GetReleasesStats.report();
+      GetDatasourceReleasesStats.report();
 
       expect(logger.logger.trace).toHaveBeenCalledTimes(1);
       const [traceData, traceMsg] = logger.logger.trace.mock.calls[0];

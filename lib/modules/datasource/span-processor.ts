@@ -10,9 +10,9 @@ import {
   ATTR_RENOVATE_PACKAGE_NAME,
   ATTR_RENOVATE_REGISTRY_URL,
 } from '../../instrumentation/types.ts';
-import { GetReleasesStats } from '../../util/stats.ts';
+import { GetDatasourceReleasesStats } from '../../util/stats.ts';
 
-export class GetReleasesSpanProcessor implements SpanProcessor {
+export class GetDatasourceReleasesSpanProcessor implements SpanProcessor {
   forceFlush(): Promise<void> {
     return Promise.resolve();
   }
@@ -42,7 +42,12 @@ export class GetReleasesSpanProcessor implements SpanProcessor {
     // duration[0] is seconds, duration[1] is nanoseconds.
     const durationMs = span.duration[0] * 1000 + span.duration[1] / 1_000_000;
 
-    GetReleasesStats.write(datasource, registryUrl, packageName, durationMs);
+    GetDatasourceReleasesStats.write(
+      datasource,
+      registryUrl,
+      packageName,
+      durationMs,
+    );
   }
 
   shutdown(): Promise<void> {
