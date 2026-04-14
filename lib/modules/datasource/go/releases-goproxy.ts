@@ -1,4 +1,5 @@
 import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
+import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -17,6 +18,8 @@ import { getSourceUrl } from './common.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import type { VersionInfo } from './types.ts';
+
+const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
@@ -81,7 +84,11 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const res = await this.getVersionsWithInfo(url, packageName);
+        const res = await this.getVersionsWithInfo(
+          url,
+          packageName,
+          config.constraintsFiltering,
+        );
         if (res.releases.length) {
           result = res;
           break;
@@ -187,6 +194,37 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
+  /**
+   * TODO docs
+   *
+   * NOTE that this means the `go` directive, not the `toolchain` directive.
+   */
+  async retrieveGoDirectiveForModule(
+    baseUrl: string,
+    packageName: string,
+    version: string,
+  ): Promise<string | undefined> {
+    const url = joinUrlParts(
+      baseUrl,
+      this.encodeCase(packageName),
+      '@v',
+      `${version}.mod`,
+    );
+    const res = await this.http.getText(url);
+
+    let goDirective: string | undefined = undefined;
+
+    for (const line of res.body.split('\n')) {
+      const goVersionMatches = goVersionRegex.exec(line)?.groups;
+      if (goVersionMatches) {
+        goDirective = goVersionMatches.version;
+        break;
+      }
+    }
+
+    return goDirective;
+  }
+
   async getLatestVersion(
     baseUrl: string,
     packageName: string,
@@ -208,6 +246,7 @@ export class GoProxyDatasource extends Datasource {
   async getVersionsWithInfo(
     baseUrl: string,
     packageName: string,
+    constraintsFiltering: ConstraintsFilter | undefined,
   ): Promise<ReleaseResult> {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
@@ -254,6 +293,31 @@ export class GoProxyDatasource extends Datasource {
             return { version };
           }
         });
+
+        if (constraintsFiltering === 'strict') {
+          releases = await p.map(releases, async (rel) => {
+            try {
+              const goDirective = await this.retrieveGoDirectiveForModule(
+                baseUrl,
+                packageName,
+                rel.version,
+              );
+              if (goDirective) {
+                rel.constraints ??= {};
+                rel.constraints.go ??= [];
+                rel.constraints.go.push(goDirective);
+              }
+            } catch (err) {
+              logger.trace(
+                { err },
+                `Can't obtain \`go\` directive from ${baseUrl}`,
+              );
+            }
+
+            return rel;
+          });
+        }
+
         result.releases.push(...releases);
       } catch (err) {
         const potentialHttpError =
