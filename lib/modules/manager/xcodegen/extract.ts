@@ -1,6 +1,6 @@
 import { logger } from '../../../logger/index.ts';
-import { regEx } from '../../../util/regex.ts';
-import { coerceString } from '../../../util/string.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -8,57 +8,37 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { XcodeGenSwiftPackage } from './schema.ts';
 import { XcodeGenProjectFile } from './schema.ts';
 
-function resolvePackageUrl(
-  pkg: XcodeGenSwiftPackage,
-): { url: string; isGitHubShorthand: boolean } | null {
+function resolvePackageUrl(pkg: XcodeGenSwiftPackage): string | null {
   if (pkg.url) {
-    return { url: pkg.url, isGitHubShorthand: false };
+    return pkg.url;
   }
 
   if (pkg.github) {
-    return {
-      url: `https://github.com/${pkg.github}`,
-      isGitHubShorthand: true,
-    };
+    return `https://github.com/${pkg.github}`;
   }
 
   return null;
 }
 
 function resolveGitDep(
-  depName: string,
   url: string,
-  isGitHubShorthand: boolean,
-): Pick<PackageDependency, 'datasource' | 'packageName' | 'sourceUrl'> {
-  if (isGitHubShorthand) {
-    return {
-      datasource: GithubTagsDatasource.id,
-      packageName: depName,
-    };
-  }
+): Pick<PackageDependency, 'datasource' | 'packageName'> {
+  const platform = detectPlatform(url);
 
-  const platformMatch = regEx(
-    /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/,
-  ).exec(coerceString(url))?.groups;
-
-  if (platformMatch) {
-    const { account, repo, platform } = platformMatch;
-    if (account && repo) {
-      const datasource =
-        platform === 'github'
-          ? GithubTagsDatasource.id
-          : GitlabTagsDatasource.id;
+  switch (platform) {
+    case 'github':
       return {
-        datasource,
-        packageName: `${account}/${repo.replace(regEx(/\.git$/), '')}`,
+        datasource: GithubTagsDatasource.id,
+        packageName: parseGitUrl(url).full_name,
       };
-    }
+    case 'gitlab':
+      return {
+        datasource: GitlabTagsDatasource.id,
+        packageName: parseGitUrl(url).full_name,
+      };
+    default:
+      return { datasource: GitTagsDatasource.id, packageName: url };
   }
-
-  return {
-    datasource: GitTagsDatasource.id,
-    packageName: url,
-  };
 }
 
 function resolveCurrentValue(
@@ -116,8 +96,8 @@ export function extractPackageFile(
       continue;
     }
 
-    const resolved = resolvePackageUrl(pkg);
-    if (!resolved) {
+    const resolvedUrl = resolvePackageUrl(pkg);
+    if (!resolvedUrl) {
       deps.push({
         depName,
         skipReason: 'invalid-url',
@@ -164,11 +144,7 @@ export function extractPackageFile(
       continue;
     }
 
-    const { datasource, packageName } = resolveGitDep(
-      depName,
-      resolved.url,
-      resolved.isGitHubShorthand,
-    );
+    const { datasource, packageName } = resolveGitDep(resolvedUrl);
 
     deps.push({
       depName,

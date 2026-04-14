@@ -98,7 +98,7 @@ describe('modules/manager/xcodegen/extract', () => {
         deps: [
           {
             depName: 'Ink',
-            packageName: 'Ink',
+            packageName: 'JohnSundell/Ink',
             datasource: 'github-tags',
             currentValue: '0.5.0',
             depType: 'from',
@@ -366,7 +366,7 @@ describe('modules/manager/xcodegen/extract', () => {
           },
           {
             depName: 'Ink',
-            packageName: 'Ink',
+            packageName: 'JohnSundell/Ink',
             datasource: 'github-tags',
             currentValue: '0.5.0',
             depType: 'from',
