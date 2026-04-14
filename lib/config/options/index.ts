@@ -141,7 +141,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'bumpType',
     description:
-      'The semver level to use when bumping versions. This is used by the `bumpVersions` feature. Use "sync" to use the same version as the dependency update.',
+      'The semver level to use when bumping versions. This is used by the `bumpVersions` feature. Use `sync` to use the same version as the dependency update.',
     type: 'string',
     parents: ['bumpVersions'],
     allowedValues: ['major', 'minor', 'patch', 'sync'],
