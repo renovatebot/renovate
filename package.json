@@ -346,7 +346,7 @@
     "tmp-promise": "3.0.3",
     "tsdown": "0.21.7",
     "type-fest": "5.5.0",
-    "typescript": "5.9.3",
+    "typescript": "6.0.2",
     "unified": "11.0.5",
     "vite": "8.0.5",
     "vitest": "4.1.3",
