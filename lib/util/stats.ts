@@ -69,8 +69,10 @@ interface getReleaseStatsInternalPackages<T> {
   packages: Record<string, T>;
 }
 
-// Internal structure that represents the hierarchical structure of the data. We use this
-// to handle the duration datapoints, and then convert to the final report structure.
+/**
+ * Internal structure that represents the hierarchical structure of the data. We use this
+ * to handle the duration datapoints, and then convert to the final report structure.
+ */
 interface getReleaseStatsInternal<T, P = T> {
   // Overall stats
   stats: T;
