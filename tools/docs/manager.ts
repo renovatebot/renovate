@@ -195,7 +195,7 @@ export async function generateManagers(
       md += '\n## Lock File Maintenance\n\n';
 
       md +=
-        'This manager supports [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) for the following file(s):\n';
+        'This manager supports [Lock File Maintanance (`lockFileMaintenance`)](../../../key-concepts/lock-file-maintenance.md) for the following file(s):\n';
       md += '\n';
       for (const lockFile of definition.lockFileNames) {
         md += `- \`${lockFile}\`\n`;
