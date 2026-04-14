@@ -1358,6 +1358,24 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ).trim();
       expect(branch).toBe('develop');
     });
+
+    it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+
+      // initialise the repo
+      await git.syncGit();
+      // then hit the RENOVATE_X_CLEAR_HOOKS code path
+      await git.syncGit();
+
+      expect(rawSpy).toHaveBeenCalledWith([
+        'config',
+        'core.hooksPath',
+        '/dev/null',
+      ]);
+
+      delete process.env.RENOVATE_X_CLEAR_HOOKS;
+    });
   });
 
   describe('pushCommit', () => {
