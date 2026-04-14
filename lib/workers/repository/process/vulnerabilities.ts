@@ -92,102 +92,6 @@ export class Vulnerabilities {
     }
   }
 
-  async flagMaliciousPackages(
-    config: RenovateConfig,
-    packageFiles: Record<string, PackageFile[]>,
-  ): Promise<void> {
-    const managers = Object.keys(packageFiles);
-    await Promise.all(
-      managers.map((manager) =>
-        this.flagManagerMaliciousPackages(config, packageFiles, manager),
-      ),
-    );
-  }
-
-  private async flagManagerMaliciousPackages(
-    config: RenovateConfig,
-    packageFiles: Record<string, PackageFile[]>,
-    manager: string,
-  ): Promise<void> {
-    const managerConfig = getManagerConfig(config, manager);
-    const queue = packageFiles[manager].map(
-      (pFile) => (): Promise<void> =>
-        this.flagPackageFileMaliciousPackages(managerConfig, pFile),
-    );
-    await p.all(queue);
-  }
-
-  private async flagPackageFileMaliciousPackages(
-    managerConfig: RenovateConfig,
-    pFile: PackageFile,
-  ): Promise<void> {
-    const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-    const queue = pFile.deps.map(
-      (dep) => (): Promise<void> =>
-        this.flagDependencyMaliciousPackage(packageFileConfig, dep),
-    );
-    await p.all(queue);
-  }
-
-  private async flagDependencyMaliciousPackage(
-    packageFileConfig: RenovateConfig & PackageFile,
-    dep: PackageDependency,
-  ): Promise<void> {
-    const ecosystem = Vulnerabilities.datasourceEcosystemMap[dep.datasource!];
-    if (!ecosystem) {
-      return;
-    }
-
-    let packageName = dep.packageName ?? dep.depName!;
-    if (ecosystem === 'PyPI') {
-      packageName = packageName.toLowerCase().replace(regEx(/[_.-]+/g), '-');
-    }
-
-    try {
-      const osvVulnerabilities = await this.osvOffline.getVulnerabilities(
-        ecosystem,
-        packageName,
-      );
-      if (
-        isNullOrUndefined(osvVulnerabilities) ||
-        isEmptyArray(osvVulnerabilities)
-      ) {
-        return;
-      }
-
-      const depVersion =
-        dep.lockedVersion ?? dep.currentVersion ?? dep.currentValue!;
-      const versioning = dep.versioning ?? getDefaultVersioning(dep.datasource);
-      const versioningApi = getVersioning(versioning);
-
-      if (!versioningApi.isVersion(depVersion)) {
-        return;
-      }
-
-      for (const osvVulnerability of osvVulnerabilities) {
-        if (osvVulnerability.withdrawn) {
-          continue;
-        }
-
-        this.skipMaliciousPackages(
-          ecosystem,
-          packageName,
-          depVersion,
-          versioningApi,
-          dep,
-          packageFileConfig.manager,
-          packageFileConfig.packageFile,
-          osvVulnerability,
-        );
-      }
-    } catch (err) {
-      logger.warn(
-        { err, packageName },
-        'Error flagging malicious package information for package',
-      );
-    }
-  }
-
   async fetchVulnerabilities(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
@@ -312,6 +216,17 @@ export class Vulnerabilities {
           );
           continue;
         }
+
+        this.skipMaliciousPackages(
+          ecosystem,
+          packageName,
+          depVersion,
+          versioningApi,
+          dep,
+          packageFileConfig.manager,
+          packageFileConfig.packageFile,
+          osvVulnerability,
+        );
 
         for (const affected of osvVulnerability.affected ?? []) {
           const isVulnerable = this.isPackageVulnerable(

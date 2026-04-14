@@ -6,7 +6,6 @@ import { fingerprint } from '../../../util/fingerprint.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import * as _branchify from '../updates/branchify.ts';
-import * as _fetch from './fetch.ts';
 import {
   EXTRACT_CACHE_REVISION,
   extract,
@@ -36,7 +35,6 @@ vi.mock('../../../util/cache/repository/index.ts');
 
 const branchify = vi.mocked(_branchify);
 const repositoryCache = vi.mocked(_repositoryCache);
-const fetch = vi.mocked(_fetch);
 
 describe('workers/repository/process/extract-update', () => {
   beforeEach(() => {
@@ -119,16 +117,14 @@ describe('workers/repository/process/extract-update', () => {
       expect(res).toEqual(packageFiles);
     });
 
-    it('fetches vulnerabilities and flags malicious packages', async () => {
+    it('fetches vulnerabilities', async () => {
       const config = {
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
       };
       const appendVulnerabilityPackageRulesMock = vi.fn();
-      const flagMaliciousPackagesMock = vi.fn();
-      createVulnerabilitiesMock.mockResolvedValue({
+      createVulnerabilitiesMock.mockResolvedValueOnce({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
-        flagMaliciousPackages: flagMaliciousPackagesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
@@ -136,17 +132,10 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledTimes(2);
+      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
       expect(
         appendVulnerabilityPackageRulesMock,
       ).toHaveBeenCalledExactlyOnceWith(
-        {
-          repoIsOnboarded: true,
-          osvVulnerabilityAlerts: true,
-        },
-        undefined,
-      );
-      expect(flagMaliciousPackagesMock).toHaveBeenCalledExactlyOnceWith(
         {
           repoIsOnboarded: true,
           osvVulnerabilityAlerts: true,
@@ -160,14 +149,14 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
       };
-      createVulnerabilitiesMock.mockRejectedValue(new Error());
+      createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledTimes(2);
+      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
     });
 
     describe('when skipReason=malicious-version-in-use', () => {
@@ -273,7 +262,7 @@ describe('workers/repository/process/extract-update', () => {
       });
     });
 
-    it('when skipReason=malicious-update-proposed, it logs a warning for each skipReason', async () => {
+    it('when skipReason=malicious-version-in-use, it logs a warning for each skipReason', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -343,65 +332,6 @@ describe('workers/repository/process/extract-update', () => {
         },
         'Dependency axios has update(s) proposed which would update you to a malicious version - skipping',
       );
-    });
-
-    it('flags malicious packages after updates have been fetched, so that proposed malicious updates can be detected', async () => {
-      const packageFiles: Record<string, PackageFile[]> = {
-        npm: [
-          {
-            deps: [
-              {
-                depType: 'devDependencies',
-                depName: 'axios',
-                currentValue: '1.14.0',
-                datasource: 'npm',
-                prettyDepType: 'devDependency',
-                lockedVersion: '1.14.0',
-                packageName: 'axios',
-              },
-            ],
-            packageFile: 'package.json',
-          },
-        ],
-      };
-
-      const config = {
-        repoIsOnboarded: true,
-        baseBranch: 'main',
-        osvVulnerabilityAlerts: true,
-      };
-
-      // Simulate fetchUpdates populating `updates` on each dep,
-      // the way the real implementation does.
-      fetch.fetchUpdates.mockImplementation(async (_config, pkgs) => {
-        for (const files of Object.values(pkgs!)) {
-          for (const file of files) {
-            for (const dep of file.deps) {
-              dep.updates = [{ newVersion: '1.14.1' }];
-            }
-          }
-        }
-      });
-
-      // Capture what the malicious-package flagging step sees when it runs.
-      let depsSeenByFlagMalicious: any;
-      const appendVulnerabilityPackageRulesMock = vi.fn();
-      const flagMaliciousPackagesMock = vi.fn(
-        async (_config: any, pkgs: any) => {
-          depsSeenByFlagMalicious = structuredClone(pkgs.npm[0].deps);
-        },
-      );
-      createVulnerabilitiesMock.mockResolvedValue({
-        appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
-        flagMaliciousPackages: flagMaliciousPackagesMock,
-      });
-
-      await lookup(config, packageFiles);
-
-      expect(flagMaliciousPackagesMock).toHaveBeenCalled();
-      expect(depsSeenByFlagMalicious[0].updates).toEqual([
-        { newVersion: '1.14.1' },
-      ]);
     });
   });
 
