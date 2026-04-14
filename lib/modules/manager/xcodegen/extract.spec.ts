@@ -24,6 +24,10 @@ describe('modules/manager/xcodegen/extract', () => {
             type: application
       `;
       expect(extractPackageFile(content, 'project.yml')).toBeNull();
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        expect.objectContaining({ packageFile: 'project.yml' }),
+        'XcodeGen project file has no packages',
+      );
     });
 
     it('returns null for empty packages', () => {

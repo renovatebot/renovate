@@ -100,6 +100,7 @@ export function extractPackageFile(
   }
 
   if (!parsed.packages) {
+    logger.trace({ packageFile }, 'XcodeGen project file has no packages');
     return null;
   }
 
