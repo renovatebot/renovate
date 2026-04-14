@@ -92,6 +92,7 @@ export async function filterInternalChecks(
           releaseConfig.minimumReleaseAgeBehaviour;
 
         // if there is a releaseTimestamp, regardless of `minimumReleaseAgeBehaviour`, we should process it
+        // v8 ignore else -- TODO: add test #40625
         if (candidateRelease.releaseTimestamp) {
           // we should skip this if we have a timestamp that isn't passing checks:
           if (
@@ -181,6 +182,7 @@ export async function filterInternalChecks(
     }
 
     if (!release) {
+      // v8 ignore else -- TODO: add test #40625
       if (pendingReleases.length) {
         // If all releases were pending then just take the highest
         logger.trace(

@@ -663,10 +663,11 @@ export class DockerDatasource extends Datasource {
       }
 
       // typescript issue :-/
-      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+      // oxlint-disable typescript/no-unnecessary-type-assertion
       const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
         url,
       )) as HttpResponse<QuayRestDockerTags>;
+      // oxlint-enable typescript/no-unnecessary-type-assertion
       const pageTags = res.body.tags.map((tag) => tag.name);
       tags = tags.concat(pageTags);
       page += 1;

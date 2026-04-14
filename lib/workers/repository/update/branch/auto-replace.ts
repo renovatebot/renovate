@@ -209,8 +209,8 @@ async function checkExistingBranch(
  * @returns 1 if `current !== newString` and 0 if they are equal or at least one is undefined.
  */
 function updatedToInt(
-  current: string | undefined,
-  newString: string | undefined,
+  current: string | undefined | null,
+  newString: string | undefined | null,
 ): number {
   if (current && newString && newString !== current) {
     return 1;

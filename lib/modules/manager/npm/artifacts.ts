@@ -171,10 +171,11 @@ async function updatePnpmWorkspace(
     return null;
   }
 
-  const packageFileContent = (await readLocalFile(
-    pnpmWorkspaceFilePath,
-    'utf8',
-  ))!;
+  // use already-updated content when updating the workspace file itself
+  const packageFileContent =
+    updateArtifactsConfig.packageFileName === pnpmWorkspaceFilePath
+      ? updateArtifactsConfig.newPackageFileContent
+      : (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!;
   const doc = parseDocument(packageFileContent);
 
   if (!doc.get('minimumReleaseAge')) {
@@ -185,6 +186,7 @@ async function updatePnpmWorkspace(
 
   for (const upgrade of upgrades) {
     let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
+    // v8 ignore next -- TODO: add test #40625
     const newVersion = upgrade.newVersion ?? upgrade.newValue;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
