@@ -1360,20 +1360,22 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
-      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
       process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+      await git.initRepo({
+        url: origin.path,
+      });
 
       // initialise the repo
       await git.syncGit();
       // then hit the RENOVATE_X_CLEAR_HOOKS code path
       await git.syncGit();
 
-      expect(rawSpy).toHaveBeenCalledWith([
-        'config',
-        'core.hooksPath',
-        '/dev/null',
-      ]);
-
+      const tmpGit = simpleGit(tmpDir.path);
+      const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
+      expect(hooksPath).toBe('/dev/null');
       delete process.env.RENOVATE_X_CLEAR_HOOKS;
     });
   });
