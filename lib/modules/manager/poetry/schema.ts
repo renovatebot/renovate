@@ -373,6 +373,11 @@ export const PoetryPyProject = Toml.pipe(
         deps,
         packageFileVersion,
       };
+      if (project?.['requires-python']) {
+        packageFileContent.extractedConstraints = {
+          python: project['requires-python'],
+        };
+      }
 
       const sourceUrls = tool?.poetry?.source;
       if (sourceUrls) {

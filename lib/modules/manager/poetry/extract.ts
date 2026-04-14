@@ -9,12 +9,14 @@ import {
 import { Result } from '../../../util/result.ts';
 import { massage as massageToml } from '../../../util/toml.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
-import type { PackageFileContent } from '../types.ts';
+import { applySplitPythonMarkers } from '../pep621/utils.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
   const { val: res, err } = Result.parse(
@@ -62,12 +64,19 @@ export async function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints: Record<string, any> = {};
+  const extractedConstraints = {
+    ...(res.extractedConstraints ?? {}),
+  };
 
   if (isNonEmptyString(pythonVersion)) {
     extractedConstraints.python = pythonVersion;
   }
   res.extractedConstraints = extractedConstraints;
+  res.deps = applySplitPythonMarkers(
+    res.deps,
+    config,
+    extractedConstraints.python,
+  );
 
   // Try poetry.lock first
   let lockFile = getSiblingFileName(packageFile, 'poetry.lock');
