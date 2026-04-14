@@ -1,7 +1,14 @@
+import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import {
+  ATTR_RENOVATE_DATASOURCE,
+  ATTR_RENOVATE_PACKAGE_NAME,
+  ATTR_RENOVATE_REGISTRY_URL,
+} from '../../instrumentation/types.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../util/array.ts';
@@ -11,7 +18,7 @@ import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
-import { DatasourceCacheStats, GetReleasesStats } from '../../util/stats.ts';
+import { DatasourceCacheStats } from '../../util/stats.ts';
 import { trimTrailingSlash } from '../../util/url.ts';
 import * as versioning from '../versioning/index.ts';
 import datasources from './api.ts';
@@ -86,10 +93,18 @@ async function getRegistryReleases(
     DatasourceCacheStats.miss(datasource.id, registryUrl, config.packageName);
   }
 
-  const res = await getReleasesInstrumented(datasource, {
-    ...config,
-    registryUrl,
-  });
+  const res = await instrument(
+    'getReleases',
+    () => datasource.getReleases({ ...config, registryUrl }),
+    {
+      attributes: {
+        [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+        [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+        [ATTR_RENOVATE_REGISTRY_URL]: registryUrl,
+        [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+      },
+    },
+  );
   if (res?.releases.length) {
     res.registryUrl ??= registryUrl;
   }
@@ -374,7 +389,18 @@ async function fetchReleases(
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
-      dep = await getReleasesInstrumented(datasource, config);
+      dep = await instrument(
+        'getReleases',
+        () => datasource.getReleases(config),
+        {
+          attributes: {
+            [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+            [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+            [ATTR_RENOVATE_REGISTRY_URL]: config.registryUrl ?? '',
+            [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+          },
+        },
+      );
     }
   } catch (err) {
     if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
@@ -391,18 +417,6 @@ async function fetchReleases(
   addMetaData(dep, datasourceName, config.packageName);
   dep = { ...dep, ...applyReplacements(config) };
   return dep;
-}
-
-function getReleasesInstrumented(
-  datasource: DatasourceApi,
-  config: GetReleasesConfig,
-): Promise<ReleaseResult | null> {
-  return GetReleasesStats.wrap(
-    datasource.id,
-    config.registryUrl ?? '',
-    config.packageName,
-    () => datasource.getReleases(config),
-  );
 }
 
 function fetchCachedReleases(
