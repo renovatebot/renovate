@@ -212,7 +212,7 @@ describe('workers/repository/process/extract-update', () => {
 
           // the first time, we're checking what updates are available, so don't modify anything
           appendVulnerabilityPackageRulesMock.mockImplementationOnce(
-            (
+            async (
               config: any,
               packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
@@ -221,7 +221,7 @@ describe('workers/repository/process/extract-update', () => {
           );
 
           fetch.fetchUpdates.mockImplementation(
-            (
+            async (
               config: any,
               packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
@@ -234,12 +234,12 @@ describe('workers/repository/process/extract-update', () => {
 
           // the next itme we
           appendVulnerabilityPackageRulesMock.mockImplementationOnce(
-            (
+            async (
               config: any,
               packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
               if (
-                packageFiles.npm[0].deps[0].updates[0].newVersion === '1.14.1'
+                packageFiles.npm[0].deps[0].updates[0]?.newVersion === '1.14.1'
               ) {
                 packageFiles.npm[0].deps[0].skipReason =
                   'malicious-update-proposed';
