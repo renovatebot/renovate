@@ -74,7 +74,7 @@ export interface DependencyStatus {
 export const ATTR_RENOVATE_SPLIT = 'renovate.split';
 
 /**
- * The name of a Renovate DataSource (ex: `github-tags`, `npm`, `docker`, etc).
+ * The name of a Renovate datasource (ex: `github-tags`, `npm`, `docker`, etc).
  */
 export const ATTR_RENOVATE_DATASOURCE = 'renovate.datasource';
 
