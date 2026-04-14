@@ -57,6 +57,168 @@ export class LookupStats {
   }
 }
 
+interface GetReleasesDataPoint {
+  datasource: string;
+  registryUrl: string;
+  packageName: string;
+  duration: number;
+}
+
+interface getReleaseStatsInternalPackages<T> {
+  stats: T;
+  packages: Record<string, T>;
+}
+
+/**
+ * Internal structure that represents the hierarchical structure of the data. We use this
+ * to handle the duration datapoints, and then convert to the final report structure.
+ */
+interface getReleaseStatsInternal<T, P = T> {
+  // Overall stats
+  stats: T;
+  datasources: Record<
+    string,
+    {
+      // Datasource stats.
+      stats: T;
+      registryUrls: Record<
+        string,
+        [P] extends [never]
+          ? Omit<getReleaseStatsInternalPackages<T>, 'packages'>
+          : getReleaseStatsInternalPackages<T>
+      >;
+    }
+  >;
+}
+
+export type GetReleaseStatsReport = getReleaseStatsInternal<TimingStatsReport>;
+
+// Short report does not include package stats.
+export type GetReleaseStatsReportShort = getReleaseStatsInternal<
+  TimingStatsReport,
+  never
+>;
+
+export class GetDatasourceReleasesStats {
+  static write(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+    duration: number,
+  ): void {
+    const data =
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats') ?? [];
+    data.push({ datasource, registryUrl, packageName, duration });
+    memCache.set('get-releases-stats', data);
+  }
+
+  static async wrap<T>(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+    callback: () => Promise<T>,
+  ): Promise<T> {
+    const start = Date.now();
+    const result = await callback();
+    const duration = Date.now() - start;
+    this.write(datasource, registryUrl, packageName, duration);
+    return result;
+  }
+
+  static getReport(): GetReleaseStatsReport {
+    const data =
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats') ?? [];
+
+    // Process all datapoints into a hierarchical structure of datasource, registry url, and package name.
+    const durationData: getReleaseStatsInternal<number[]> = {
+      stats: [],
+      datasources: {},
+    };
+    for (const { datasource, registryUrl, packageName, duration } of data) {
+      durationData.stats.push(duration);
+
+      durationData.datasources[datasource] ??= { stats: [], registryUrls: {} };
+      durationData.datasources[datasource].stats.push(duration);
+
+      durationData.datasources[datasource].registryUrls[registryUrl] ??= {
+        stats: [],
+        packages: {},
+      };
+      durationData.datasources[datasource].registryUrls[registryUrl].stats.push(
+        duration,
+      );
+
+      durationData.datasources[datasource].registryUrls[registryUrl].packages[
+        packageName
+      ] ??= [];
+      durationData.datasources[datasource].registryUrls[registryUrl].packages[
+        packageName
+      ].push(duration);
+    }
+
+    const report: GetReleaseStatsReport = {
+      stats: makeTimingReport(durationData.stats),
+      datasources: {},
+    };
+
+    for (const [datasource, datasourceData] of Object.entries(
+      durationData.datasources,
+    )) {
+      report.datasources[datasource] = {
+        stats: makeTimingReport(datasourceData.stats),
+        registryUrls: {},
+      };
+
+      for (const [registryUrl, registryUrlData] of Object.entries(
+        datasourceData.registryUrls,
+      )) {
+        report.datasources[datasource].registryUrls[registryUrl] = {
+          stats: makeTimingReport(registryUrlData.stats),
+          packages: {},
+        };
+
+        for (const [packageName, packageNameData] of Object.entries(
+          registryUrlData.packages,
+        )) {
+          report.datasources[datasource].registryUrls[registryUrl].packages[
+            packageName
+          ] = makeTimingReport(packageNameData);
+        }
+      }
+    }
+
+    return report;
+  }
+
+  static report(): void {
+    const report = this.getReport();
+
+    const shortReport: GetReleaseStatsReportShort = {
+      stats: report.stats,
+      datasources: {},
+    };
+
+    for (const [datasource, datasourceData] of Object.entries(
+      report.datasources,
+    )) {
+      shortReport.datasources[datasource] = {
+        stats: datasourceData.stats,
+        registryUrls: {},
+      };
+      for (const [registryUrl, registryUrlData] of Object.entries(
+        datasourceData.registryUrls,
+      )) {
+        shortReport.datasources[datasource].registryUrls[registryUrl] = {
+          stats: registryUrlData.stats,
+        };
+      }
+    }
+
+    logger.trace(report, 'getReleases statistics with packages');
+    logger.debug(shortReport, 'getReleases statistics summary');
+  }
+}
+
 type PackageCacheData = number[];
 
 export class PackageCacheStats {
