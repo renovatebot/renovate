@@ -72,6 +72,7 @@ describe('modules/manager/mise/extract', () => {
       lychee = "0.19.1"
       npm = "11.2.0"
       opentofu = "1.6.1"
+      openfga = "1.14.0"
       packer = "1.15.0"
       pipx = "1.7.1"
       pkl = "0.28.2"
@@ -238,6 +239,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'opentofu',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '1.14.0',
+            datasource: 'github-releases',
+            depName: 'openfga',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'openfga/openfga',
           },
           {
             currentValue: '1.15.0',
