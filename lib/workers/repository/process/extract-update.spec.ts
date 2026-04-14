@@ -238,8 +238,9 @@ describe('workers/repository/process/extract-update', () => {
               config: any,
               packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
-              if (
-                packageFiles.npm[0].deps[0].updates[0]?.newVersion === '1.14.1'
+              const updates = packageFiles?.npm[0]?.deps[0]?.updates
+
+              if (updates && updates[0]?.newVersion === '1.14.1'
               ) {
                 packageFiles.npm[0].deps[0].skipReason =
                   'malicious-update-proposed';
