@@ -1046,6 +1046,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
     });
+
+    it('should not pass extraCloneOpts to ls-remote when local repo exists', async () => {
+      const extraCloneOpts = {
+        '-c': 'extra.clone.config=test-extra-config-value',
+      };
+
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+      await git.syncGit();
+
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+
+      expect(rawSpy).toHaveBeenCalledWith([
+        'ls-remote',
+        '--heads',
+        origin.path,
+      ]);
+    });
   });
 
   describe('setGitAuthor()', () => {

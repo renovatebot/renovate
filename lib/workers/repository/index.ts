@@ -158,7 +158,6 @@ export async function renovateRepository(
       if (res === 'automerged') {
         if (canRetry) {
           logger.info('Restarting repository job after automerge result');
-          await cleanupLocalDir(localDir, repoConfig);
           const recursiveRes = await renovateRepository(repoConfig, false);
           return recursiveRes;
         }
@@ -190,7 +189,13 @@ export async function renovateRepository(
     }
     repoResult = processResult(config, errorRes);
   }
-  await cleanupLocalDir(localDir, repoConfig);
+  if (localDir && !repoConfig.persistRepoData) {
+    try {
+      await deleteLocalFile('.');
+    } catch (err) /* istanbul ignore if */ {
+      logger.warn({ err }, 'localDir deletion error');
+    }
+  }
   try {
     await fs.remove(privateCacheDir());
   } catch (err) /* istanbul ignore if */ {
@@ -252,18 +257,5 @@ export function printRepositoryProblems(repository: string | undefined): void {
       { repoProblems: Array.from(repoProblems) },
       'repository problems',
     );
-  }
-}
-
-async function cleanupLocalDir(
-  localDir: string,
-  repoConfig: RenovateConfig,
-): Promise<void> {
-  if (localDir && !repoConfig.persistRepoData) {
-    try {
-      await deleteLocalFile('.');
-    } catch (err) {
-      logger.warn({ err }, 'localDir deletion error');
-    }
   }
 }
