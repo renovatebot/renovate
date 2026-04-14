@@ -4,6 +4,7 @@ import {
   NodeTracerProvider,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
+import { GetReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import {
   disableInstrumentations,
@@ -57,13 +58,14 @@ describe('instrumentation/index', () => {
       _activeSpanProcessor: {
         _spanProcessors: [
           new GitOperationSpanProcessor(),
+          new GetReleasesSpanProcessor(),
           expect.any(SimpleSpanProcessor),
         ],
       },
     });
   });
 
-  it('registers GitOperationSpanProcessor regardless of tracing being enabled', () => {
+  it('registers GitOperationSpanProcessor, GetReleasesSpanProcessor regardless of tracing being enabled', () => {
     // intentionally don't set it
     delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
     delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
@@ -77,6 +79,7 @@ describe('instrumentation/index', () => {
       _activeSpanProcessor: {
         _spanProcessors: expect.arrayContaining([
           new GitOperationSpanProcessor(),
+          new GetReleasesSpanProcessor(),
         ]),
       },
     });
@@ -96,6 +99,7 @@ describe('instrumentation/index', () => {
       _activeSpanProcessor: {
         _spanProcessors: [
           new GitOperationSpanProcessor(),
+          new GetReleasesSpanProcessor(),
           {
             _exporter: {
               _delegate: {
@@ -129,6 +133,7 @@ describe('instrumentation/index', () => {
       _activeSpanProcessor: {
         _spanProcessors: [
           new GitOperationSpanProcessor(),
+          new GetReleasesSpanProcessor(),
           { _exporter: {} },
           {
             _exporter: {
