@@ -294,6 +294,49 @@ describe('modules/datasource/go/index', () => {
         expect(res?.releases[0].version).toEqual('v0.32.0');
         expect(res?.releases[1].version).toEqual('v0.33.0');
       });
+
+      it('todo', async () => {
+        const expected: ReleaseResult = {
+          releases: [
+            // Go 1.24
+            {
+              version: 'v0.32.0',
+              constraints: {
+                go: ['1.24.0'],
+              },
+            },
+            {
+              version: 'v0.33.0',
+              constraints: {
+                go: ['1.24.1'],
+              },
+            },
+            // Go 1.25
+            {
+              version: 'v0.34.0',
+              constraints: {
+                go: ['1.25.0'],
+              },
+            },
+          ],
+        };
+
+        getReleasesProxyMock.mockResolvedValue(expected);
+        getReleasesDirectMock.mockResolvedValue(null);
+
+        const res = await getPkgReleases({
+          datasource: GoDatasource.id,
+          packageName: 'golang.org/x/mod',
+          constraints: { go: '^1.24' },
+          constraintsFiltering: 'strict',
+        });
+
+        expect(res).toBeDefined();
+        console.log(res?.releases)
+        expect(res?.releases).toHaveLength(2);
+        expect(res?.releases[0].version).toEqual('v0.32.0');
+        expect(res?.releases[1].version).toEqual('v0.33.0');
+      });
     });
   });
 });
