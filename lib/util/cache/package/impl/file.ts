@@ -1,4 +1,5 @@
 import cacache from 'cacache';
+import { LRUCache } from 'lru-cache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -14,6 +15,12 @@ export class PackageCacheFile extends PackageCacheBase {
   }
 
   private readonly cacheFileName: string;
+
+  private readonly expiryMap = new LRUCache<string, DateTime>({
+    // Assuming 50 bytes per entry, this limits the memory footprint of this
+    // to around 5MB.
+    max: 100000,
+  });
 
   private constructor(cacheFileName: string) {
     super();
@@ -47,6 +54,7 @@ export class PackageCacheFile extends PackageCacheBase {
       }
 
       logger.trace({ namespace, key }, 'Returning cached value');
+      this.expiryMap.set(this.getKey(namespace, key), expiry);
 
       if (!cached.compress) {
         return cached.value;
@@ -76,6 +84,7 @@ export class PackageCacheFile extends PackageCacheBase {
       expiry,
     });
     await cacache.put(this.cacheFileName, this.getKey(namespace, key), payload);
+    this.expiryMap.set(this.getKey(namespace, key), expiry);
   }
 
   override async destroy(): Promise<void> {
@@ -88,6 +97,17 @@ export class PackageCacheFile extends PackageCacheBase {
       try {
         totalCount += 1;
         const cacheEntry = item as unknown as cacache.CacheObject;
+        const cachedExpiry = this.expiryMap.get(cacheEntry.key);
+        if (cachedExpiry !== undefined) {
+          if (DateTime.local() <= cachedExpiry) {
+            continue;
+          }
+          await cacache.rm.entry(this.cacheFileName, cacheEntry.key);
+          await cacache.rm.content(this.cacheFileName, cacheEntry.integrity);
+          this.expiryMap.delete(cacheEntry.key);
+          deletedCount += 1;
+          continue;
+        }
         const entry = await cacache.get(this.cacheFileName, cacheEntry.key);
         let cached: { expiry?: string } | undefined;
         try {

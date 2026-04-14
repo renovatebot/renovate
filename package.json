@@ -231,6 +231,7 @@
     "jsonata": "2.1.0",
     "jsonc-weaver": "0.2.4",
     "klona": "2.0.6",
+    "lru-cache": "11.3.5",
     "luxon": "3.7.2",
     "markdown-it": "14.1.1",
     "markdown-table": "3.0.4",
