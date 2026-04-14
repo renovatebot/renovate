@@ -39,10 +39,10 @@ function resolveGitDep(
 
   const platformMatch = regEx(
     /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/,
-  ).exec(coerceString(url));
+  ).exec(coerceString(url))?.groups;
 
-  if (platformMatch?.groups) {
-    const { account, repo, platform } = platformMatch.groups;
+  if (platformMatch) {
+    const { account, repo, platform } = platformMatch;
     if (account && repo) {
       const datasource =
         platform === 'github'
