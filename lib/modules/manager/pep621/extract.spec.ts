@@ -111,6 +111,10 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=1.1.0',
+          managerData: {
+            marker: 'python_version < "3.11"',
+            pep508String: 'tomli>=1.1.0; python_version < "3.11"',
+          },
         },
         {
           packageName: 'typing-extensions',
@@ -118,6 +122,10 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.dependencies',
           skipReason: 'unspecified-version',
+          managerData: {
+            marker: 'python_version < "3.8"',
+            pep508String: 'typing-extensions; python_version < "3.8"',
+          },
         },
         {
           packageName: 'importlib-metadata',
@@ -125,6 +133,10 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=3.6',
+          managerData: {
+            marker: 'python_version < "3.10"',
+            pep508String: 'importlib-metadata>=3.6; python_version < "3.10"',
+          },
         },
       ]);
 
@@ -709,6 +721,299 @@ describe('modules/manager/pep621/extract', () => {
           `;
       const res = await extractPackageFile(content, 'pyproject.toml');
       expect(res?.deps).toHaveLength(3);
+    });
+
+    it('should preserve marker in managerData alongside depGroup', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+
+        [project.optional-dependencies]
+        test = [
+          "pytest>=6.0,<7.0; python_version < \\"3.10\\"",
+        ]
+      `;
+      const result = await extractPackageFile(content, 'pyproject.toml');
+      const dep = result?.deps.find((d) => d.packageName === 'pytest');
+      expect(dep?.managerData).toEqual({
+        depGroup: 'test',
+        marker: 'python_version < "3.10"',
+        pep508String: 'pytest>=6.0,<7.0; python_version < "3.10"',
+      });
+      expect(dep?.replaceString).toBeUndefined();
+    });
+
+    it('should set constraints and additionalBranchPrefix when splitPythonMarkers is enabled', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+        requires-python = ">=3.9"
+        dependencies = [
+          "pytest>=6.0,<7.0; python_version < \\"3.10\\"",
+          "pytest>=7.0,<8.0; python_version >= \\"3.10\\"",
+          "requests>=2.0",
+        ]
+      `;
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+
+      const pytestLt = result?.deps.find(
+        (d) =>
+          d.packageName === 'pytest' && d.additionalBranchPrefix === 'pylt310-',
+      );
+      expect(pytestLt).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=6.0,<7.0',
+        constraints: { python: '>=3.9,<3.10' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'pylt310-',
+        commitMessageSuffix: '(python <3.10)',
+      });
+
+      const pytestGte = result?.deps.find(
+        (d) =>
+          d.packageName === 'pytest' &&
+          d.additionalBranchPrefix === 'py310plus-',
+      );
+      expect(pytestGte).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=7.0,<8.0',
+        constraints: { python: '>=3.10' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'py310plus-',
+        commitMessageSuffix: '(python >=3.10)',
+      });
+
+      const requests = result?.deps.find((d) => d.packageName === 'requests');
+      expect(requests?.constraints).toBeUndefined();
+      expect(requests?.constraintsFiltering).toBeUndefined();
+      expect(requests?.additionalBranchPrefix).toBeUndefined();
+      expect(requests?.commitMessageSuffix).toBeUndefined();
+    });
+
+    it('should intersect project requires-python with split marker constraints', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+        requires-python = ">=3.9"
+        dependencies = [
+          "pytest>=6.0,<7.0; python_version < \\"3.10\\"",
+        ]
+      `;
+
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+
+      expect(
+        result?.deps.find((d) => d.packageName === 'pytest'),
+      ).toMatchObject({
+        constraints: { python: '>=3.9,<3.10' },
+        constraintsFiltering: 'strict',
+      });
+    });
+
+    it('should not set constraints when splitPythonMarkers is disabled', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+        dependencies = [
+          "pytest>=6.0,<7.0; python_version < \\"3.10\\"",
+        ]
+      `;
+      const result = await extractPackageFile(content, 'pyproject.toml');
+
+      const dep = result?.deps.find((d) => d.packageName === 'pytest');
+      expect(dep?.constraints).toBeUndefined();
+      expect(dep?.constraintsFiltering).toBeUndefined();
+      expect(dep?.additionalBranchPrefix).toBeUndefined();
+      expect(dep?.commitMessageSuffix).toBeUndefined();
+    });
+
+    it('should override lockedVersion with pinned version for == deps when splitPythonMarkers is enabled', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.9"
+
+          [[package]]
+          name = "pytest"
+          version = "7.1.0"
+          source = { registry = "https://pypi.org/simple" }
+          sdist = { url = "https://files.pythonhosted.org/packages/pytest-7.1.0.tar.gz", hash = "sha256:abc123", size = 100000 }
+          wheels = [
+              { url = "https://files.pythonhosted.org/packages/pytest-7.1.0-py3-none-any.whl", hash = "sha256:def456", size = 50000 },
+          ]
+
+          [[package]]
+          name = "test-project"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "pytest" },
+          ]
+
+          [package.metadata]
+          requires-dist = [{ name = "pytest", specifier = "==6.0.0" }]
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const content = codeBlock`
+        [project]
+        name = "test-project"
+        version = "0.1.0"
+        requires-python = ">=3.9"
+        dependencies = [
+          "pytest==6.0.0; python_version == \\"3.9\\"",
+        ]
+      `;
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+
+      const dep = result?.deps.find((d) => d.packageName === 'pytest');
+      expect(dep).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '==6.0.0',
+        currentVersion: '6.0.0',
+        lockedVersion: '6.0.0',
+        constraints: { python: '3.9' },
+        constraintsFiltering: 'strict',
+      });
+    });
+
+    it('should set constraints on fixture deps with markers when splitPythonMarkers is enabled', async () => {
+      const result = await extractPackageFile(pdmPyProject, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+
+      const tomli = result?.deps.find(
+        (d) =>
+          d.packageName === 'tomli' && d.additionalBranchPrefix === 'pylt311-',
+      );
+      expect(tomli).toMatchObject({
+        packageName: 'tomli',
+        currentValue: '>=1.1.0',
+        constraints: { python: '>=3.7,<3.11' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'pylt311-',
+        commitMessageSuffix: '(python <3.11)',
+      });
+
+      const importlibMetadata = result?.deps.find(
+        (d) =>
+          d.packageName === 'importlib-metadata' &&
+          d.additionalBranchPrefix === 'pylt310-',
+      );
+      expect(importlibMetadata).toMatchObject({
+        packageName: 'importlib-metadata',
+        currentValue: '>=3.6',
+        constraints: { python: '>=3.7,<3.10' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'pylt310-',
+        commitMessageSuffix: '(python <3.10)',
+      });
+
+      // typing-extensions has no version but still gets constraints set
+      const typingExt = result?.deps.find(
+        (d) =>
+          d.packageName === 'typing-extensions' &&
+          d.additionalBranchPrefix === 'pylt38-',
+      );
+      expect(typingExt).toMatchObject({
+        skipReason: 'unspecified-version',
+        constraints: { python: '>=3.7,<3.8' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'pylt38-',
+        commitMessageSuffix: '(python <3.8)',
+      });
+
+      // deps without markers should be unaffected
+      const packaging = result?.deps.find((d) => d.packageName === 'packaging');
+      expect(packaging?.constraints).toBeUndefined();
+      expect(packaging?.additionalBranchPrefix).toBeUndefined();
+    });
+
+    it('should set constraints on optional deps with markers when splitPythonMarkers is enabled', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+
+        [project.optional-dependencies]
+        test = [
+          "pytest>=6.0,<7.0; python_version < \\"3.10\\"",
+        ]
+      `;
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+      const dep = result?.deps.find((d) => d.packageName === 'pytest');
+      expect(dep).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=6.0,<7.0',
+        constraints: { python: '<3.10' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'pylt310-',
+        commitMessageSuffix: '(python <3.10)',
+        managerData: {
+          depGroup: 'test',
+          marker: 'python_version < "3.10"',
+        },
+      });
+    });
+
+    it('should handle python_full_version markers with splitPythonMarkers', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+        dependencies = [
+          "tomli>=1.1.0; python_full_version >= \\"3.10.0\\"",
+        ]
+      `;
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+      const dep = result?.deps.find((d) => d.packageName === 'tomli');
+      expect(dep).toMatchObject({
+        packageName: 'tomli',
+        currentValue: '>=1.1.0',
+        constraints: { python: '>=3.10.0' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'py3100plus-',
+        commitMessageSuffix: '(python >=3.10.0)',
+      });
+    });
+
+    it('should ignore non-Python markers with splitPythonMarkers', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+        dependencies = [
+          "pywin32>=300; sys_platform == \\"win32\\"",
+        ]
+      `;
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+
+      const dep = result?.deps.find((d) => d.packageName === 'pywin32');
+      expect(dep?.managerData).toMatchObject({
+        marker: 'sys_platform == "win32"',
+      });
+      expect(dep?.constraints).toBeUndefined();
+      expect(dep?.constraintsFiltering).toBeUndefined();
     });
   });
 });

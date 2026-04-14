@@ -12,6 +12,7 @@ import type {
 } from '../types.ts';
 import { processors } from './processors/index.ts';
 import { PyProject } from './schema.ts';
+import { applySplitPythonMarkers } from './utils.ts';
 
 export function parsePyProject(
   content: string,
@@ -32,7 +33,7 @@ export function parsePyProject(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
@@ -91,6 +92,12 @@ export async function extractPackageFile(
     const processedLockFiles = await processor.getLockfiles(def, packageFile);
     lockFiles.push(...processedLockFiles);
   }
+
+  processedDeps = applySplitPythonMarkers(
+    processedDeps,
+    config,
+    extractedConstraints.python,
+  );
 
   const packageFileVersion = def.project?.version;
   return processedDeps.length || lockFiles.length
