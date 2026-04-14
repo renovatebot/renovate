@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
+import { coerceString } from '../../../util/string.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -130,7 +131,7 @@ export function extractPackageFile(
         depName,
         skipReason: 'unsupported-version',
         currentValue:
-          `${pkg.minVersion ?? ''} - ${pkg.maxVersion ?? ''}`.trim(),
+          `${coerceString(pkg.minVersion)} - ${coerceString(pkg.maxVersion)}`.trim(),
       });
       continue;
     }
