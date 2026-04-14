@@ -1,6 +1,5 @@
-import type { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
 import { regEx } from '../../../util/regex.ts';
-import { isXmlElement } from '../nuget/util.ts';
 import type { PackageDependency } from '../types.ts';
 import type { AntProp } from './types.ts';
 
@@ -70,55 +69,6 @@ export function parsePropertiesFile(
 
     offset += rawLine.length + 1;
   }
-}
-
-/**
- * Collect inline <property name="..." value="..."/> elements.
- * Implements first-definition-wins.
- */
-export function collectProperties(
-  node: XmlElement | XmlDocument,
-  content: string,
-  packageFile: string,
-  props: Record<string, AntProp>,
-): void {
-  for (const child of node.children) {
-    if (!isXmlElement(child)) {
-      continue;
-    }
-
-    if (child.name === 'property') {
-      const name = child.attr.name;
-      const value = child.attr.value;
-      if (name && value && !(name in props)) {
-        const pos = findAttrValuePosition(content, child, 'value');
-        props[name] = { val: value, fileReplacePosition: pos, packageFile };
-      }
-    }
-
-    collectProperties(child, content, packageFile, props);
-  }
-}
-
-/**
- * Collect <property file="..."/> references to external properties files.
- */
-export function collectPropertyFileRefs(
-  node: XmlElement | XmlDocument,
-): string[] {
-  const files: string[] = [];
-  for (const child of node.children) {
-    if (!isXmlElement(child)) {
-      continue;
-    }
-
-    if (child.name === 'property' && child.attr.file) {
-      files.push(child.attr.file);
-    }
-
-    files.push(...collectPropertyFileRefs(child));
-  }
-  return files;
 }
 
 /**
