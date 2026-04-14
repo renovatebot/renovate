@@ -259,6 +259,7 @@ export async function getUpdatedPackageFiles(
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = await updateDependency({
+        packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
@@ -576,8 +577,9 @@ async function checkForPendingVersions(
   }
 
   for (const dep of extracted.deps) {
+    const depName = dep.depName ?? dep.packageName;
     // shouldn't ever happen
-    if (!dep.depName) {
+    if (!depName) {
       logger.error(
         {
           packageFile: packageFileName,
@@ -590,7 +592,7 @@ async function checkForPendingVersions(
       throw new Error(WORKER_FILE_UPDATE_FAILED);
     }
 
-    const upgradeInfo = depNameToUpgradeInfo.get(dep.depName);
+    const upgradeInfo = depNameToUpgradeInfo.get(depName);
     if (!upgradeInfo) {
       continue;
     }
@@ -605,10 +607,10 @@ async function checkForPendingVersions(
           packageFile: packageFileName,
           manager,
           branchName: config.branchName,
-          depName: dep.depName,
+          depName,
           newVersion: resolvedVersion,
         },
-        `No new version found for '${dep.depName}' after updating '${packageFileName}'`,
+        `No new version found for '${depName}' after updating '${packageFileName}'`,
       );
       throw new Error(WORKER_FILE_UPDATE_FAILED);
     }
@@ -622,11 +624,11 @@ async function checkForPendingVersions(
             packageFile: packageFileName,
             manager,
             branchName: config.branchName,
-            depName: dep.depName,
+            depName,
             newVersion: resolvedVersion,
             expectedVersion,
           },
-          `No expectedVersion found for '${dep.depName}' after updating '${packageFileName}'`,
+          `No expectedVersion found for '${depName}' after updating '${packageFileName}'`,
         );
         continue;
       }
@@ -635,7 +637,7 @@ async function checkForPendingVersions(
         logger.once.warn(
           {
             packageFileName,
-            depName: dep.depName,
+            depName,
             expectedVersion,
             resolvedVersion,
           },
@@ -647,18 +649,18 @@ async function checkForPendingVersions(
       logger.debug(
         {
           packageFileName,
-          depName: dep.depName,
+          depName,
           expectedVersion,
           resolvedVersion,
         },
         'Artifact update introduced a pending version',
       );
-      let stderr = `Artifact update for ${dep.depName} resolved to version ${resolvedVersion}, which is a pending version that has not yet passed the Minimum Release Age threshold.`;
+      let stderr = `Artifact update for ${depName} resolved to version ${resolvedVersion}, which is a pending version that has not yet passed the Minimum Release Age threshold.`;
       stderr += `\nRenovate was attempting to update to ${expectedVersion}`;
       stderr += `\nThis is (likely) not a bug in Renovate, but due to the way your project pins dependencies, _and_ how Renovate calls your package manager to update them.\nUntil Renovate supports specifying an exact update to your package manager (https://github.com/renovatebot/renovate/issues/41624), it is recommended to directly pin your dependencies (with \`rangeStrategy=pin\` for apps, or \`rangeStrategy=widen\` for libraries)\nSee also: https://docs.renovatebot.com/dependency-pinning/`;
 
       artifactErrors.push({
-        lockFile: packageFileName,
+        fileName: packageFileName,
         stderr,
       });
     }

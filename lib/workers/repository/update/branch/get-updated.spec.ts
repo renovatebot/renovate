@@ -456,14 +456,14 @@ describe('workers/repository/update/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            lockFile: 'composer.lock',
+            fileName: 'composer.lock',
             stderr: 'some error',
           },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+        artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
 
@@ -478,14 +478,14 @@ describe('workers/repository/update/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            lockFile: 'composer.lock',
+            fileName: 'composer.lock',
             stderr: 'some error',
           },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+        artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
 
@@ -1269,7 +1269,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         const res = await getUpdatedPackageFiles(config);
         expect(res.artifactErrors).toHaveLength(1);
         expect(res.artifactErrors[0]).toMatchObject({
-          lockFile: 'composer.json',
+          fileName: 'composer.json',
           stderr: expect.stringContaining('1.3.0'),
         });
         expect(res.artifactErrors[0].stderr).toContain(
@@ -1336,7 +1336,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         const res = await getUpdatedPackageFiles(config);
         expect(res.artifactErrors).toHaveLength(1);
         expect(res.artifactErrors[0]).toMatchObject({
-          lockFile: 'composer.json',
+          fileName: 'composer.json',
           stderr: expect.stringContaining('1.3.0'),
         });
       });
@@ -1587,7 +1587,7 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     // should never happen, but our types allow this
-    it('rejects when an updated dependency has no depName', async () => {
+    it('rejects when an updated dependency has no depName or packageName', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
         manager: 'composer',
@@ -1610,6 +1610,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         deps: [
           {
             depName: undefined,
+            packageName: undefined,
             lockedVersion: '1.3.0',
           },
         ],
@@ -1628,6 +1629,42 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
         "No depName found after updating 'composer.json'",
       );
+    });
+
+    it('adds an artifact error when an updated dependency has no depName, but does have a packageName', async () => {
+      config.upgrades.push({
+        packageFile: 'composer.json',
+        manager: 'composer',
+        branchName: '',
+        depName: 'some-dep',
+        newVersion: '1.2.3',
+        pendingVersions: ['1.3.0'],
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
+      composer.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'composer.lock',
+            contents: 'some lock contents',
+          },
+        },
+      ]);
+      composer.extractPackageFile.mockResolvedValueOnce({
+        deps: [
+          {
+            depName: undefined,
+            packageName: 'some-dep',
+            lockedVersion: '1.3.0',
+          },
+        ],
+      });
+
+      const res = await getUpdatedPackageFiles(config);
+      expect(res.artifactErrors).toHaveLength(1);
+      expect(res.artifactErrors[0]).toMatchObject({
+        stderr: expect.stringContaining('some-dep'),
+      });
     });
 
     // should never happen, but our types allow this
@@ -1741,7 +1778,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res.artifactErrors).toHaveLength(1);
       expect(res.artifactErrors[0]).toMatchObject({
-        lockFile: 'composer.json',
+        fileName: 'composer.json',
         stderr: expect.stringContaining('1.3.0'),
       });
     });

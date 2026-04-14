@@ -107,7 +107,7 @@ export const api: VersioningApi = {
   getNewValue,
 };
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
+// oxlint-disable-next-line typescript/unbound-method
 export const { isVersion } = api;
 
 export default api;

@@ -8,7 +8,11 @@ import { addMeta, logger } from '../../../../logger/index.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { exec } from '../../../../util/exec/index.ts';
-import type { ExecOptions } from '../../../../util/exec/types.ts';
+import {
+  type ExecOptions,
+  isConstraintName,
+  isToolName,
+} from '../../../../util/exec/types.ts';
 import {
   ensureLocalDir,
   localPathIsFile,
@@ -150,6 +154,20 @@ export async function postUpgradeCommandsExecutor(
               for (const [tool] of Object.entries(
                 upgrade.postUpgradeTasks?.installTools,
               )) {
+                const validTool = isToolName(tool);
+                const validConstraint = isConstraintName(tool);
+                if (!validTool) {
+                  logger.warn(
+                    {
+                      tool,
+                      validTool,
+                      validConstraint,
+                    },
+                    `Skipping ${validConstraint ? 'valid' : 'invalid'} constraint that is not a tool that Containerbase knows`,
+                  );
+                  continue;
+                }
+
                 execOpts.toolConstraints.push({
                   toolName: tool,
                   constraint: upgrade.constraints?.[tool],
@@ -164,7 +182,7 @@ export async function postUpgradeCommandsExecutor(
             );
           } catch (error) {
             artifactErrors.push({
-              lockFile: upgrade.packageFile,
+              fileName: upgrade.packageFile,
               stderr: sanitize(error.message),
             });
           }
@@ -177,7 +195,7 @@ export async function postUpgradeCommandsExecutor(
             'Post-upgrade task did not match any on allowedCommands list',
           );
           artifactErrors.push({
-            lockFile: upgrade.packageFile,
+            fileName: upgrade.packageFile,
             stderr: sanitize(
               `Post-upgrade command '${compiledCmd}' has not been added to the allowed list in allowedCommands`,
             ),

@@ -4,6 +4,9 @@
     "enabled": true,
     "rules": {
       "recommended": false,
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
       "style": {
         "noParameterProperties": "error"
       }

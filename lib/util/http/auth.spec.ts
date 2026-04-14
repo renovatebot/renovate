@@ -98,6 +98,20 @@ describe('util/http/auth', () => {
       `);
     });
 
+    it('github app token with hostType not in GITHUB_API_USING_HOST_TYPES', () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: 'x-access-token:ghs_123test',
+        hostType: 'github-digest',
+      };
+
+      expect(applyAuthorization(opts)).toMatchObject({
+        headers: {
+          authorization: 'Bearer ghs_123test',
+        },
+      });
+    });
+
     it(`gitlab personal access token`, () => {
       const opts: GotOptions = {
         headers: {},

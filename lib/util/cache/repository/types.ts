@@ -26,7 +26,7 @@ export interface BranchUpgradeCache {
   fixedVersion?: string;
   currentVersion?: string;
   packageName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   sourceUrl?: string;
