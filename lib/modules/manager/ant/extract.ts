@@ -158,6 +158,11 @@ async function walkNodeInOrder(
           }
         }
       }
+    } else if (child.name === 'import' && child.attr.file) {
+      const importedFile = upath.normalize(
+        upath.join(baseDir, child.attr.file),
+      );
+      await walkXmlFile(importedFile, visitedFiles, allProps, allRawDeps);
     } else if (child.name === 'dependency') {
       const rawDep = collectDependency(child, packageFile, content);
       if (rawDep) {
@@ -182,6 +187,9 @@ async function walkXmlFile(
   allProps: Record<string, AntProp>,
   allRawDeps: RawDep[],
 ): Promise<void> {
+  if (visitedFiles.has(packageFile)) {
+    return;
+  }
   visitedFiles.add(packageFile);
 
   const content = await readLocalFile(packageFile, 'utf8');
