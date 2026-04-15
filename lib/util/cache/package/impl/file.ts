@@ -56,10 +56,6 @@ export class PackageCacheFile extends PackageCacheBase {
       logger.trace({ namespace, key }, 'Returning cached value');
       this.expiryMap.set(this.getKey(namespace, key), expiry);
 
-      if (!cached.compress) {
-        return cached.value;
-      }
-
       const json = await decompressFromBase64(cached.value);
       return JSON.parse(json);
     } catch {
@@ -79,7 +75,6 @@ export class PackageCacheFile extends PackageCacheBase {
     const compressedValue = await compressToBase64(serialized);
     const expiry = DateTime.local().plus({ minutes: hardTtlMinutes });
     const payload = JSON.stringify({
-      compress: true,
       value: compressedValue,
       expiry,
     });
