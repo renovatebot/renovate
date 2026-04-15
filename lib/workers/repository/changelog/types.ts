@@ -10,7 +10,7 @@ export type SupportedChangelogStages = Extends<
 >;
 
 export interface EmbedChangelogsOptions {
-  branches: BranchUpgradeConfig[];
+  upgrades: BranchUpgradeConfig[];
   stage: SupportedChangelogStages;
   fetchChangeLogs?: FetchChangeLogsOptions;
 }

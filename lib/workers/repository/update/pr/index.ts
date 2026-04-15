@@ -287,7 +287,7 @@ export async function ensurePr(
 
   // fetch changelogs for matching upgrades.
   await embedChangelogs({
-    branches: upgrades,
+    upgrades: upgrades,
     stage: 'pr',
     fetchChangeLogs: config.fetchChangeLogs,
   });

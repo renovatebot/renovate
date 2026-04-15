@@ -1239,7 +1239,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch({ ...config });
 
       expect(changelog.embedChangelogs).toHaveBeenCalledExactlyOnceWith({
-        branches: config.upgrades,
+        upgrades: config.upgrades,
         stage: 'branch',
         fetchChangeLogs: config.fetchChangeLogs,
       });

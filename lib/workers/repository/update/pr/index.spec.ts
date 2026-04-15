@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/index', () => {
         await ensurePr(config);
 
         expect(embedChangelogs).toHaveBeenCalledExactlyOnceWith({
-          branches: config.upgrades,
+          upgrades: config.upgrades,
           stage: 'pr',
           fetchChangeLogs: config.fetchChangeLogs,
         });

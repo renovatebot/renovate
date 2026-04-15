@@ -60,15 +60,15 @@ function resolveFetchChangeLogs(
 }
 
 export async function embedChangelogs({
-  branches,
+  upgrades,
   stage,
   fetchChangeLogs,
 }: EmbedChangelogsOptions): Promise<void> {
   // Filter down to branch upgrades that match the stage and fetchChangeLogs configuration.
-  const upgrades = branches.filter(
+  const filteredUpgrades = upgrades.filter(
     (upgrade) =>
       resolveFetchChangeLogs(fetchChangeLogs, upgrade.fetchChangeLogs) ===
       stage,
   );
-  await p.map(upgrades, embedChangelog, { concurrency: 10 });
+  await p.map(filteredUpgrades, embedChangelog, { concurrency: 10 });
 }

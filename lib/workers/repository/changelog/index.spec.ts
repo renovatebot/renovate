@@ -24,7 +24,11 @@ describe('workers/repository/changelog/index', () => {
       partial<BranchUpgradeConfig>({ changelogContent: 'testContent' }),
     ];
     await expect(
-      embedChangelogs({ branches, stage: 'pr', fetchChangeLogs: 'pr' }),
+      embedChangelogs({
+        upgrades: branches,
+        stage: 'pr',
+        fetchChangeLogs: 'pr',
+      }),
     ).toResolve();
     expect(branches).toEqual([
       { logJSON: null },
@@ -176,7 +180,7 @@ describe('workers/repository/changelog/index', () => {
       ];
       await expect(
         embedChangelogs({
-          branches,
+          upgrades: branches,
           stage,
           fetchChangeLogs,
         }),

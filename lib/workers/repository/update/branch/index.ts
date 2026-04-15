@@ -650,7 +650,7 @@ export async function processBranch(
       }
 
       await embedChangelogs({
-        branches: config.upgrades,
+        upgrades: config.upgrades,
         stage: 'branch',
         fetchChangeLogs: config.fetchChangeLogs,
       });
