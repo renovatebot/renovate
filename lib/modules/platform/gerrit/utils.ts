@@ -6,12 +6,13 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
-import type { Pr } from '../types.ts';
+import type { GitUrlOption, Pr } from '../types.ts';
 import type {
   GerritChange,
   GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRequestDetail,
+  GerritServerInfo,
 } from './types.ts';
 
 export const MIN_GERRIT_VERSION = '3.0.0';
@@ -32,7 +33,12 @@ export const REQUEST_DETAILS_FOR_PRS: GerritRequestDetail[] = [
   'COMMIT_FOOTERS', // to get the commit message
 ] as const;
 
-export function getGerritRepoUrl(repository: string, endpoint: string): string {
+export function getGerritRepoUrl(
+  repository: string,
+  endpoint: string,
+  gitUrl: GitUrlOption | undefined,
+  downloadSchemes: GerritServerInfo['download']['schemes'],
+): string {
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
     hostType: 'gerrit',
@@ -59,7 +65,20 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
     { url: url.toString() },
     'using URL based on configured endpoint',
   );
-  return url.toString();
+
+  logger.trace(downloadSchemes, 'Available Download Schemes');
+  switch (gitUrl) {
+    case 'ssh':
+      if (downloadSchemes.ssh) {
+        // eslint-disable-next-line no-template-curly-in-string
+        return downloadSchemes.ssh.url.replace('${project}', repository);
+      }
+      throw new Error('Gerrit server does not advertise SSH support');
+    case 'endpoint':
+      return url.toString();
+    default:
+      return url.toString();
+  }
 }
 
 export function mapPrStateToGerritFilter(state?: PrState): string | null {

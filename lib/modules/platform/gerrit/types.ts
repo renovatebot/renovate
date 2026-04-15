@@ -144,3 +144,16 @@ export interface GerritMergeableInfo {
     | 'CHERRY_PICK';
   mergeable: boolean;
 }
+
+export interface GerritServerInfo {
+  download: {
+    schemes: Partial<
+      Record<'anonymous http' | 'http' | 'ssh', GerritDownloadSchemeInfo>
+    >;
+  };
+}
+
+export interface GerritDownloadSchemeInfo {
+  /** The URL of the download scheme, where '${project}' is used as placeholder for the project name. */
+  url: string;
+}

@@ -14,6 +14,7 @@ import type {
   GerritMergeableInfo,
   GerritProjectInfo,
   GerritRequestDetail,
+  GerritServerInfo,
 } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
@@ -39,6 +40,21 @@ class GerritClient {
       z.string(),
     );
     return res.body;
+  }
+
+  async getDownloadSchemes(): Promise<GerritServerInfo['download']['schemes']> {
+    const res = await this.gerritHttp.getJson(
+      'a/config/server/info',
+      z.object({
+        download: z.object({
+          schemes: z.record(
+            z.enum(['anonymous http', 'http', 'ssh']),
+            z.object({ url: z.string() }),
+          ),
+        }),
+      }),
+    );
+    return res.body.download.schemes;
   }
 
   async getRepos(): Promise<string[]> {
