@@ -1058,6 +1058,73 @@ describe('modules/manager/ant/extract', () => {
       ]);
     });
 
+    it('handles absolute settingsFile path', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        const files: Record<string, string> = {
+          'build.xml': codeBlock`
+            <project>
+              <artifact:dependencies settingsFile="/etc/maven/settings.xml">
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `,
+          '/etc/maven/settings.xml': codeBlock`
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+              <mirrors>
+                <mirror>
+                  <url>https://internal.example.com/maven</url>
+                </mirror>
+              </mirrors>
+            </settings>
+          `,
+        };
+        return Promise.resolve(files[fileName] ?? null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              registryUrls: ['https://internal.example.com/maven'],
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('logs debug when settingsFile cannot be read', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        const files: Record<string, string> = {
+          'build.xml': codeBlock`
+            <project>
+              <artifact:dependencies settingsFile="missing/settings.xml">
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `,
+        };
+        return Promise.resolve(files[fileName] ?? null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              registryUrls: [],
+            }),
+          ],
+        },
+      ]);
+    });
+
     it('does not pass registries to dependencies outside the block', async () => {
       fs.readLocalFile.mockImplementation((fileName: string) => {
         const files: Record<string, string> = {
