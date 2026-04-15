@@ -121,11 +121,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       providerUrl,
       TerraformProviderV2Response,
     );
-    return {
-      releases: res.included,
-      sourceUrl: res.data.attributes.source,
-      homepage: `${registryUrl}/providers/${repository}`,
-    };
+    res.homepage = `${registryUrl}/providers/${repository}`;
+    return res;
   }
 
   /**
@@ -151,10 +148,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       docsUrl,
       OpenTofuProviderDocsResponse,
     );
-    return {
-      releases: res.versions,
-      homepage: `https://search.opentofu.org/provider/${repository}`,
-    };
+    res.homepage = `https://search.opentofu.org/provider/${repository}`;
+    return res;
   }
 
   /**

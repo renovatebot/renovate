@@ -11,6 +11,8 @@ description: Requires Renovate to wait for a specified amount of time before sug
 
 The use of `minimumReleaseAge` is not to slow down fast releasing project updates, but to provide a means to reduce risk supply chain security risks.
 
+In other ecosystems and package managers, this may be referred to as a "dependency cooldown".
+
 For example, `minimumReleaseAge=14 days` would ensure that a package update is not suggested by Renovate until 14 days after its release, which allows plenty of time to allow security researchers and automated security tools to catch malicious intent in packages.
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.

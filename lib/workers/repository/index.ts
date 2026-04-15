@@ -24,6 +24,7 @@ import { addSplit, getSplits, splitInit } from '../../util/split.ts';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
+  GetDatasourceReleasesStats,
   GitOperationStats,
   HttpCacheStats,
   HttpStats,
@@ -207,6 +208,7 @@ export async function renovateRepository(
   HttpStats.report();
   HttpCacheStats.report();
   LookupStats.report();
+  GetDatasourceReleasesStats.report();
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   GitOperationStats.report();
