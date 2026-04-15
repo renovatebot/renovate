@@ -36,9 +36,71 @@ function getDependencyType(scope: string | undefined): string {
   return 'compile';
 }
 
+function parseCoords(coordsStr: string): {
+  groupId: string;
+  artifactId: string;
+  rawVersion: string;
+  scope: string | undefined;
+} | null {
+  const parts = coordsStr.split(':');
+  if (parts.length < 3) {
+    logger.trace({ coordsStr }, 'ant manager: coords has fewer than 3 parts');
+    return null;
+  }
+
+  const [groupId, artifactId] = parts;
+  if (!groupId || !artifactId) {
+    logger.trace(
+      { coordsStr },
+      'ant manager: coords has empty groupId or artifactId',
+    );
+    return null;
+  }
+
+  let scope: string | undefined;
+  let rawVersion: string;
+
+  if (parts.length >= 4 && scopeNames.has(parts.at(-1)!)) {
+    scope = parts.at(-1);
+    rawVersion = parts.at(-2)!;
+  } else {
+    rawVersion = parts.at(-1)!;
+  }
+
+  return { groupId, artifactId, rawVersion, scope };
+}
+
 interface RawDep {
   dep: PackageDependency;
   depPackageFile: string;
+}
+
+function collectCoordsDependency(
+  node: XmlElement,
+  packageFile: string,
+  content: string,
+): RawDep | null {
+  const coordsStr = node.attr.coords;
+
+  const parsed = parseCoords(coordsStr);
+  if (!parsed) {
+    return null;
+  }
+
+  const dep: PackageDependency = {
+    datasource: MavenDatasource.id,
+    depName: `${parsed.groupId}:${parsed.artifactId}`,
+    currentValue: parsed.rawVersion,
+    depType: getDependencyType(parsed.scope ?? node.attr.scope),
+    registryUrls: [],
+  };
+
+  // Position at the version substring within the coords attribute value
+  const coordsValuePos = findAttrValuePosition(content, node, 'coords');
+  const versionOffset = coordsStr.lastIndexOf(parsed.rawVersion);
+  dep.fileReplacePosition = coordsValuePos + versionOffset;
+
+  return { dep, depPackageFile: packageFile };
 }
 
 function collectDependency(
@@ -46,6 +108,10 @@ function collectDependency(
   packageFile: string,
   content: string,
 ): RawDep | null {
+  if (node.attr.coords) {
+    return collectCoordsDependency(node, packageFile, content);
+  }
+
   const { groupId, artifactId, version, scope } = node.attr;
 
   if (!version || !groupId || !artifactId) {
