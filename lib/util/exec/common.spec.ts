@@ -16,7 +16,7 @@ import type { DataListener, RawExecOptions } from './types.ts';
 vi.mock('../../instrumentation/index.ts');
 vi.mock('node:child_process');
 vi.mock('execa');
-vi.unmock('./common');
+vi.unmock('./common.ts');
 
 const instrument = vi.spyOn(_instrumentation, 'instrument');
 const execa = vi.mocked(_execa);

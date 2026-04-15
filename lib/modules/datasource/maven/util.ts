@@ -16,6 +16,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { MAVEN_REPO } from './common.ts';
+import { CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
   MavenDependency,
@@ -70,6 +71,7 @@ const cacheProvider = new PackageHttpCacheProvider({
   softTtlMinutes: 15,
   checkAuthorizationHeader: true,
   checkCacheControlHeader: false, // Maven doesn't respond with `cache-control` headers
+  writeSchema: CachedMavenXml,
 });
 
 export async function downloadHttpProtocol(

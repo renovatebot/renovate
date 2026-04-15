@@ -14,6 +14,7 @@ import type {
   SkipReason,
   StageName,
 } from '../../types/index.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
@@ -31,12 +32,12 @@ export interface ExtractConfig extends CustomExtractConfig {
   skipInstalls?: boolean | null;
   repository?: string;
   currentDigest?: string;
-  newDigest?: string;
+  newDigest?: string | null;
 }
 
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
@@ -100,7 +101,7 @@ export interface LookupUpdate {
   isReplacement?: boolean;
   isSingleVersion?: boolean;
   isVulnerabilityAlert?: boolean;
-  newDigest?: string;
+  newDigest?: string | null;
   newMajor?: number;
   newMinor?: number;
   newPatch?: number;
@@ -219,7 +220,7 @@ export interface Upgrade<
   lockFiles?: string[];
   manager?: string;
   name?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newFrom?: string;
   newMajor?: number;
   newName?: string;
@@ -376,7 +377,7 @@ export type ManagerApi = ManagerApiBase &
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>, ManagerData<T> {
   // TODO: remove null
-  constraints?: Record<string, string> | null;
+  constraints?: Partial<Record<ConstraintName, string>> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipArtifactsUpdate?: boolean;

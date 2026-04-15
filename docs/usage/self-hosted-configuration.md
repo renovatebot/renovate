@@ -156,6 +156,7 @@ Allowed options:
 
 | Option          | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.  |
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 

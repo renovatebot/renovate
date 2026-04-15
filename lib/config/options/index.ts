@@ -144,6 +144,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
     parents: ['bumpVersions'],
+    allowedValues: ['major', 'minor', 'patch', 'sync'],
   },
   {
     name: 'filePatterns',
@@ -659,7 +660,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.33.3',
+    default: 'ghcr.io/renovatebot/base-image:13.33.30',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -3215,7 +3216,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    allowedValues: ['goGenerate', 'gradleWrapper'],
+    allowedValues: ['bazelModDeps', 'goGenerate', 'gradleWrapper'],
     stage: 'repository',
     globalOnly: true,
   },
