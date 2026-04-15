@@ -25,7 +25,7 @@ import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-import { parseJson } from '../../../util/common.ts';
+import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
 import { setUserEnv } from '../../../util/env.ts';
 import { readLocalFile, readSystemFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -192,7 +192,7 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig: RepositoryWorkerConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
-  if (config.requireConfig !== 'ignored') {
+  if (getInheritedOrGlobal('requireConfig') !== 'ignored') {
     repoConfig = await detectRepoFileConfig(branchName);
   }
   if (!repoConfig.configFileParsed && config.mode === 'silent') {

@@ -1046,6 +1046,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
     });
+
+    it('should not pass extraCloneOpts to ls-remote when local repo exists', async () => {
+      const extraCloneOpts = {
+        '-c': 'extra.clone.config=test-extra-config-value',
+      };
+
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+      await git.syncGit();
+
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+
+      expect(rawSpy).toHaveBeenCalledWith([
+        'ls-remote',
+        '--heads',
+        origin.path,
+      ]);
+    });
   });
 
   describe('setGitAuthor()', () => {
@@ -1357,6 +1377,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
       expect(branch).toBe('develop');
+    });
+
+    it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
+      // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+      process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+      await git.initRepo({
+        url: origin.path,
+      });
+
+      // initialise the repo
+      await git.syncGit();
+      // then hit the RENOVATE_X_CLEAR_HOOKS code path
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
+      expect(hooksPath).toBe('/dev/null');
+      delete process.env.RENOVATE_X_CLEAR_HOOKS;
     });
   });
 

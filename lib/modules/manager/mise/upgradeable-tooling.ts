@@ -369,6 +369,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  openfga: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'openfga/openfga',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   packer: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
