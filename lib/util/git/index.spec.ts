@@ -1719,5 +1719,31 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
       expect(git.getBranchCommit('renovate/virtual-test')).toBe(commit);
     });
+
+    it('marks branch as not modified after update', async () => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+      const originRepo = simpleGit(origin.path);
+      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      await originRepo.raw(['update-ref', 'refs/changes/60/12360/1', commit]);
+
+      await git.initRepo({
+        url: origin.path,
+        virtualBranches: [
+          {
+            name: 'renovate/virtual-test',
+            ref: 'refs/changes/60/12360/1',
+            sha: commit,
+          },
+        ],
+      });
+      await git.syncGit();
+      await git.checkoutBranch('renovate/virtual-test');
+
+      await git.updateVirtualBranch('renovate/virtual-test');
+
+      expect(
+        await git.isBranchModified('renovate/virtual-test', defaultBranch),
+      ).toBeFalse();
+    });
   });
 });
