@@ -81,9 +81,6 @@ function collectCoordsDependency(
   content: string,
 ): RawDep | null {
   const coordsStr = node.attr.coords;
-  if (!coordsStr) {
-    return null;
-  }
 
   const parsed = parseCoords(coordsStr);
   if (!parsed) {
