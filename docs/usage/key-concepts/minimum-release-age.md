@@ -207,7 +207,7 @@ The below is a non-exhaustive list of public registries which support release ti
 | `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
 | `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
-| `terraform-provider` | `https://registry.terraform.io`                    | ✅        | Not always returned                                              |
+| `terraform-provider` | `https://registry.terraform.io`                    | ✅        |                                                                  |
 | `github-tags`        | `https://github.com`                               | ✅        |                                                                  |
 | `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                                  |
 | `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                                  |
