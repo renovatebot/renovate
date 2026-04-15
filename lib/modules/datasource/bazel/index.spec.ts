@@ -10,8 +10,10 @@ vi.mock('../../../util/fs/index.ts');
 
 const datasource = BazelDatasource.id;
 const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
+const bcrUiBaseUrl = BazelDatasource.bcrUiBaseUrl;
 const packageName = 'rules_foo';
 const path = BazelDatasource.packageMetadataPath(packageName);
+const bcrUiPath = `/modules/${packageName}`;
 
 const mockMetadata = {
   versions: ['0.14.8', '0.14.9', '0.15.0', '0.16.0'],
@@ -20,6 +22,13 @@ const mockMetadata = {
   },
   homepage: 'https://github.com/foo/bar',
 };
+
+function bcrPageHtml(json: string): string {
+  return `<!DOCTYPE html><html><head></head><body><script id="__NEXT_DATA__" type="application/json">${json}</script></body></html>`;
+}
+
+const bcrPageData = Fixtures.get('bcr-page-data.json');
+const mockBcrPage = bcrPageHtml(bcrPageData);
 
 describe('modules/datasource/bazel/index', () => {
   describe('getReleases', () => {
@@ -60,6 +69,71 @@ describe('modules/datasource/bazel/index', () => {
         .scope(defaultRegistryUrl)
         .get(path)
         .reply(200, Fixtures.get('metadata-no-yanked-versions.json'));
+      httpMock.scope(bcrUiBaseUrl).get(bcrUiPath).reply(200, mockBcrPage);
+      const res = await getPkgReleases({ datasource, packageName });
+      expect(res).toEqual({
+        registryUrl:
+          'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main',
+        releases: [
+          {
+            version: '0.14.8',
+            releaseTimestamp: '2024-01-10T12:00:00.000Z',
+          },
+          {
+            version: '0.14.9',
+            releaseTimestamp: '2024-03-15T14:30:00.000Z',
+          },
+          {
+            version: '0.15.0',
+            releaseTimestamp: '2024-06-20T09:00:00.000Z',
+          },
+          {
+            version: '0.16.0',
+            releaseTimestamp: '2024-09-01T16:45:00.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/foo/bar',
+      });
+    });
+
+    it('metadata with yanked versions', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(path)
+        .reply(200, Fixtures.get('metadata-with-yanked-versions.json'));
+      httpMock.scope(bcrUiBaseUrl).get(bcrUiPath).reply(200, mockBcrPage);
+      const res = await getPkgReleases({ datasource, packageName });
+      expect(res).toEqual({
+        registryUrl:
+          'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main',
+        releases: [
+          {
+            version: '0.14.8',
+            releaseTimestamp: '2024-01-10T12:00:00.000Z',
+          },
+          {
+            version: '0.14.9',
+            releaseTimestamp: '2024-03-15T14:30:00.000Z',
+          },
+          {
+            version: '0.15.0',
+            isDeprecated: true,
+            releaseTimestamp: '2024-06-20T09:00:00.000Z',
+          },
+          {
+            version: '0.16.0',
+            releaseTimestamp: '2024-09-01T16:45:00.000Z',
+          },
+        ],
+      });
+    });
+
+    it('returns releases without timestamps when BCR UI page fetch fails', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(path)
+        .reply(200, Fixtures.get('metadata-no-yanked-versions.json'));
+      httpMock.scope(bcrUiBaseUrl).get(bcrUiPath).reply(500);
       const res = await getPkgReleases({ datasource, packageName });
       expect(res).toEqual({
         registryUrl:
@@ -74,11 +148,15 @@ describe('modules/datasource/bazel/index', () => {
       });
     });
 
-    it('metadata with yanked versions', async () => {
+    it('returns releases without timestamps when BCR UI page has no __NEXT_DATA__', async () => {
       httpMock
         .scope(defaultRegistryUrl)
         .get(path)
-        .reply(200, Fixtures.get('metadata-with-yanked-versions.json'));
+        .reply(200, Fixtures.get('metadata-no-yanked-versions.json'));
+      httpMock
+        .scope(bcrUiBaseUrl)
+        .get(bcrUiPath)
+        .reply(200, '<html><body>no data</body></html>');
       const res = await getPkgReleases({ datasource, packageName });
       expect(res).toEqual({
         registryUrl:
@@ -86,9 +164,33 @@ describe('modules/datasource/bazel/index', () => {
         releases: [
           { version: '0.14.8' },
           { version: '0.14.9' },
-          { version: '0.15.0', isDeprecated: true },
+          { version: '0.15.0' },
           { version: '0.16.0' },
         ],
+        sourceUrl: 'https://github.com/foo/bar',
+      });
+    });
+
+    it('does not fetch BCR UI page for custom registry URLs', async () => {
+      const customRegistryUrl = 'https://custom-registry.example.com';
+      httpMock
+        .scope(customRegistryUrl)
+        .get(path)
+        .reply(200, Fixtures.get('metadata-no-yanked-versions.json'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls: [customRegistryUrl],
+      });
+      expect(res).toEqual({
+        registryUrl: customRegistryUrl,
+        releases: [
+          { version: '0.14.8' },
+          { version: '0.14.9' },
+          { version: '0.15.0' },
+          { version: '0.16.0' },
+        ],
+        sourceUrl: 'https://github.com/foo/bar',
       });
     });
   });
