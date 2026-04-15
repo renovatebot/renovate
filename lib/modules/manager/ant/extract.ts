@@ -44,11 +44,16 @@ function parseCoords(coordsStr: string): {
 } | null {
   const parts = coordsStr.split(':');
   if (parts.length < 3) {
+    logger.trace({ coordsStr }, 'ant manager: coords has fewer than 3 parts');
     return null;
   }
 
   const [groupId, artifactId] = parts;
   if (!groupId || !artifactId) {
+    logger.trace(
+      { coordsStr },
+      'ant manager: coords has empty groupId or artifactId',
+    );
     return null;
   }
 
