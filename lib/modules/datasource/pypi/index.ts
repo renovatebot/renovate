@@ -82,9 +82,8 @@ export class PypiDatasource extends Datasource {
     return dependency;
   }
 
-  private sanitizeLookupUrl(lookupUrl: string): string {
-    const parsedUrl = parseUrl(lookupUrl);
-    if (!parsedUrl || (!parsedUrl.username && !parsedUrl.password)) {
+  private sanitizeLookupUrl(lookupUrl: string, parsedUrl: URL): string {
+    if (!parsedUrl.username && !parsedUrl.password) {
       return lookupUrl;
     }
 
@@ -104,7 +103,7 @@ export class PypiDatasource extends Datasource {
     if (parsedUrl.hostname.endsWith('.pkg.dev')) {
       const auth = await getGoogleAuthToken();
       if (auth) {
-        const sanitizedLookupUrl = this.sanitizeLookupUrl(lookupUrl);
+        const sanitizedLookupUrl = this.sanitizeLookupUrl(lookupUrl, parsedUrl);
         return {
           headers: { authorization: `Basic ${auth}` },
           lookupUrl: sanitizedLookupUrl,
