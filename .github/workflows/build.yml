@@ -446,7 +446,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: success() && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -612,7 +612,7 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: renovate-dist
           path: dist/
@@ -706,7 +706,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docs
           path: tmp/docs/
@@ -812,7 +812,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@6f958b07613524a169bb0de81783a5129daa6bc8 # v4.5.13
+        uses: containerbase/internal-tools@de382073d6a0594c3edaf033688540da4d21384e # v4.5.14
         with:
           command: docker-config
 
@@ -872,7 +872,7 @@ jobs:
 
       - name: Upload docs artifact for deployment
         if: github.ref_name == 'main'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: mkdocs-site
           path: tmp/mkdocs-site.tgz
