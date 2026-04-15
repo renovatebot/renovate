@@ -948,6 +948,153 @@ describe('modules/manager/ant/extract', () => {
       ]);
     });
 
+    it('collects registry URLs from remoteRepository elements', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        const files: Record<string, string> = {
+          'build.xml': codeBlock`
+            <project>
+              <artifact:dependencies>
+                <remoteRepository url="https://repo.example.com/maven2" />
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `,
+        };
+        return Promise.resolve(files[fileName] ?? null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              registryUrls: ['https://repo.example.com/maven2'],
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('collects registry URLs from settingsFile attribute', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        const files: Record<string, string> = {
+          'build.xml': codeBlock`
+            <project>
+              <artifact:dependencies settingsFile="build/settings.xml">
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `,
+          'build/settings.xml': codeBlock`
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+              <mirrors>
+                <mirror>
+                  <url>https://artifactory.example.com/maven</url>
+                </mirror>
+              </mirrors>
+            </settings>
+          `,
+        };
+        return Promise.resolve(files[fileName] ?? null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              registryUrls: ['https://artifactory.example.com/maven'],
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('merges registries from settingsFile and remoteRepository', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        const files: Record<string, string> = {
+          'build.xml': codeBlock`
+            <project>
+              <artifact:dependencies settingsFile="build/settings.xml">
+                <remoteRepository url="https://repo.example.com/maven2" />
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `,
+          'build/settings.xml': codeBlock`
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+              <mirrors>
+                <mirror>
+                  <url>https://artifactory.example.com/maven</url>
+                </mirror>
+              </mirrors>
+            </settings>
+          `,
+        };
+        return Promise.resolve(files[fileName] ?? null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              registryUrls: [
+                'https://artifactory.example.com/maven',
+                'https://repo.example.com/maven2',
+              ],
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('does not pass registries to dependencies outside the block', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        const files: Record<string, string> = {
+          'build.xml': codeBlock`
+            <project>
+              <artifact:dependencies>
+                <remoteRepository url="https://repo.example.com/maven2" />
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+              <artifact:dependencies>
+                <dependency groupId="org.slf4j" artifactId="slf4j-api" version="1.7.36" />
+              </artifact:dependencies>
+            </project>
+          `,
+        };
+        return Promise.resolve(files[fileName] ?? null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              registryUrls: ['https://repo.example.com/maven2'],
+            }),
+            expect.objectContaining({
+              depName: 'org.slf4j:slf4j-api',
+              registryUrls: [],
+            }),
+          ],
+        },
+      ]);
+    });
+
     it('handles chain referencing undefined property', async () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`
         <project>
