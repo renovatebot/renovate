@@ -102,7 +102,14 @@ For a local check that mirrors CI:
 pnpm check
 ```
 
-This runs all checks in parallel: auto-fixes, lint, type-check, and only the test shards affected by your changes.
+You can scope checks to specific files or directories for faster iteration:
+
+```bash
+pnpm check lib/util/http
+pnpm check lib/util/hash.ts
+```
+
+Use `--fix` to auto-fix (oxlint, biome, prettier) and `--no-test` to skip tests.
 
 ## Do not force push to your pull request branch
 
