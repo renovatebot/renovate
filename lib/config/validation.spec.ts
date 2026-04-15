@@ -1197,6 +1197,23 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('errors on invalid preset syntax', async () => {
+      const config = {
+        extends: [
+          'github>owner/repo//path@commitHash',
+          'github>owner/repo//path#commitHash',
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].message).toContain('github>owner/repo//path@commitHash');
+    });
+
     it('warns if only selectors in packageRules', async () => {
       const config = {
         packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],

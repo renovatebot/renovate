@@ -158,6 +158,181 @@ describe('workers/repository/process/extract-update', () => {
 
       expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
     });
+
+    describe('when skipReason=malicious-version-in-use', () => {
+      it('logs a warning', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+
+                  // most importantly
+                  skipReason: 'malicious-version-in-use',
+                },
+                // not malicious
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.0',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.0',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+
+        const config = {
+          repoIsOnboarded: true,
+          baseBranch: 'main',
+        };
+
+        await lookup(config, packageFiles);
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            packageFile: 'package.json',
+            depName: 'axios',
+            packageName: 'axios',
+            manager: 'npm',
+            datasource: 'npm',
+          },
+          'Dependency axios is currently using a malicious version',
+        );
+      });
+
+      it('deletes the skipReason and skipStage, to allow the update phase to continue updating', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+
+                  // most importantly
+                  skipReason: 'malicious-version-in-use',
+                  skipStage: 'lookup',
+                },
+                // not malicious
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.0',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.0',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+
+        const config = {
+          repoIsOnboarded: true,
+          baseBranch: 'main',
+        };
+
+        await lookup(config, packageFiles);
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
+        expect(packageFiles.npm[0].deps[0].skipStage).toBeUndefined();
+      });
+    });
+
+    it('when skipReason=malicious-version-in-use, it logs a warning for each skipReason', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depType: 'devDependencies',
+                depName: 'axios',
+                currentValue: '1.14.0',
+                datasource: 'npm',
+                prettyDepType: 'devDependency',
+                lockedVersion: '1.14.0',
+                updates: [
+                  {
+                    newVersion: '1.14.1',
+                  },
+                  {
+                    // unrelated, using newValue
+                    newValue: '1.14.2',
+                  },
+                  {
+                    // unrelated
+                    newVersion: '2.0.0',
+                  },
+                  {
+                    // doesn't have a newVersion or newValue
+                    updateType: 'digest',
+                    newDigest: '1234',
+                  },
+                ],
+                packageName: 'axios',
+
+                // most importantly
+                skipReason: 'malicious-update-proposed',
+              },
+              // not malicious
+              {
+                depType: 'devDependencies',
+                depName: 'axios',
+                currentValue: '1.14.0',
+                datasource: 'npm',
+                prettyDepType: 'devDependency',
+                lockedVersion: '1.14.0',
+                updates: [],
+                packageName: 'axios',
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+
+      const config = {
+        repoIsOnboarded: true,
+        baseBranch: 'main',
+      };
+
+      await lookup(config, packageFiles);
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          packageFile: 'package.json',
+          depName: 'axios',
+          packageName: 'axios',
+          manager: 'npm',
+          datasource: 'npm',
+          newVersions: ['1.14.1', '1.14.2', '2.0.0'],
+        },
+        'Dependency axios has update(s) proposed which would update you to a malicious version - skipping',
+      );
+    });
   });
 
   describe('isCacheExtractValid()', () => {

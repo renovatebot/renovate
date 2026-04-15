@@ -724,16 +724,16 @@ export async function setVirtualBranch(
 ): Promise<void> {
   await git.raw(['update-ref', `refs/remotes/origin/${branchName}`, commitSha]);
   config.branchCommits[branchName] = commitSha;
-  config.branchIsModified[branchName] = false;
 }
 
 /**
  * Update a virtual branch's tracking to match the current local branch.
- * Resolves the SHA from the local branch and delegates to setVirtualBranch.
+ * To be called after a commit is pushed.
  */
 export async function updateVirtualBranch(branchName: string): Promise<void> {
   const commitSha = (await git.revparse([branchName])).trim() as LongCommitSha;
   await setVirtualBranch(branchName, commitSha);
+  config.branchIsModified[branchName] = false;
 }
 
 export async function resetHardFromRemote(
@@ -1428,7 +1428,9 @@ export async function commitFiles(
     if (commitResult) {
       const pushResult = await pushCommit({
         sourceRef: commitConfig.branchName,
+        targetRef: commitConfig.targetRef,
         files: commitConfig.files,
+        pushOptions: commitConfig.pushOptions,
       });
       // v8 ignore else -- TODO: add test #40625
       if (pushResult) {
