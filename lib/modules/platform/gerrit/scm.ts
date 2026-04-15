@@ -1,3 +1,4 @@
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { randomUUID } from 'crypto';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
@@ -34,7 +35,7 @@ export async function pushForReview(options: {
   if (options.autoApprove) {
     pushOptions.push('label=Code-Review+2');
   }
-  if (options.labels) {
+  if (isNonEmptyArray(options.labels)) {
     for (const label of options.labels) {
       pushOptions.push(`hashtag=${label}`);
     }

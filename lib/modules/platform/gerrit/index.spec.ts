@@ -891,7 +891,6 @@ describe('modules/platform/gerrit/index', () => {
     it('deleteLabel() - deletes a label', async () => {
       const pro = gerrit.deleteLabel(123456, 'hashtag1');
       await expect(pro).resolves.toBeUndefined();
-      expect(clientMock.setHashtags).toHaveBeenCalledTimes(1);
       expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
         remove: ['hashtag1'],
       });
