@@ -11,7 +11,10 @@ describe('modules/manager/xcodegen/extract', () => {
     it('returns null for invalid YAML', () => {
       expect(extractPackageFile('nothing here: [', 'project.yml')).toBeNull();
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        expect.objectContaining({ packageFile: 'project.yml' }),
+        expect.objectContaining({
+          packageFile: 'project.yml',
+          err: expect.any(Error),
+        }),
         'Parsing XcodeGen project YAML failed',
       );
     });
@@ -280,6 +283,48 @@ describe('modules/manager/xcodegen/extract', () => {
             depName: 'GitLabPkg',
             packageName: 'some-group/some-project',
             datasource: 'gitlab-tags',
+            currentValue: '1.0.0',
+            depType: 'from',
+          },
+        ],
+      });
+    });
+
+    it('uses github-tags datasource with registryUrls for self-hosted GHES', () => {
+      const content = codeBlock`
+        packages:
+          Yams:
+            url: https://github.example.com/jpsim/Yams
+            from: 2.0.0
+      `;
+      expect(extractPackageFile(content, 'project.yml')).toEqual({
+        deps: [
+          {
+            depName: 'Yams',
+            packageName: 'jpsim/Yams',
+            datasource: 'github-tags',
+            registryUrls: ['https://github.example.com'],
+            currentValue: '2.0.0',
+            depType: 'from',
+          },
+        ],
+      });
+    });
+
+    it('uses gitlab-tags datasource with registryUrls for self-hosted GitLab', () => {
+      const content = codeBlock`
+        packages:
+          GitLabPkg:
+            url: https://gitlab.example.com/some-group/some-project
+            from: 1.0.0
+      `;
+      expect(extractPackageFile(content, 'project.yml')).toEqual({
+        deps: [
+          {
+            depName: 'GitLabPkg',
+            packageName: 'some-group/some-project',
+            datasource: 'gitlab-tags',
+            registryUrls: ['https://gitlab.example.com'],
             currentValue: '1.0.0',
             depType: 'from',
           },

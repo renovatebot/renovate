@@ -23,20 +23,30 @@ function resolvePackageUrl(pkg: XcodeGenSwiftPackage): string | null {
 
 function resolveGitDep(
   url: string,
-): Pick<PackageDependency, 'datasource' | 'packageName'> {
+): Pick<PackageDependency, 'datasource' | 'packageName' | 'registryUrls'> {
   const platform = detectPlatform(url);
 
   switch (platform) {
-    case 'github':
+    case 'github': {
+      const { full_name, host, protocol } = parseGitUrl(url);
       return {
         datasource: GithubTagsDatasource.id,
-        packageName: parseGitUrl(url).full_name,
+        packageName: full_name,
+        ...(host !== 'github.com' && {
+          registryUrls: [`${protocol}://${host}`],
+        }),
       };
-    case 'gitlab':
+    }
+    case 'gitlab': {
+      const { full_name, host, protocol } = parseGitUrl(url);
       return {
         datasource: GitlabTagsDatasource.id,
-        packageName: parseGitUrl(url).full_name,
+        packageName: full_name,
+        ...(host !== 'gitlab.com' && {
+          registryUrls: [`${protocol}://${host}`],
+        }),
       };
+    }
     default:
       return { datasource: GitTagsDatasource.id, packageName: url };
   }
@@ -145,12 +155,14 @@ export function extractPackageFile(
       continue;
     }
 
-    const { datasource, packageName } = resolveGitDep(resolvedUrl);
+    const { datasource, packageName, registryUrls } =
+      resolveGitDep(resolvedUrl);
 
     deps.push({
       depName,
       packageName,
       datasource,
+      ...(registryUrls && { registryUrls }),
       currentValue: versionInfo.currentValue,
       depType: versionInfo.depType,
     });
