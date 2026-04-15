@@ -208,7 +208,9 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
   logger.debug(`fetchBranchCommits(): url=${url}`);
   const opts = ['ls-remote', '--heads', url];
-  if (config.extraCloneOpts) {
+  const localDir = GlobalConfig.get('localDir')!;
+  const repoExists = await fs.pathExists(upath.join(localDir, '.git/HEAD'));
+  if (config.extraCloneOpts && !repoExists) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       // TODO: types (#22198)
       opts.unshift(e[0], `${e[1]!}`),
@@ -402,7 +404,6 @@ export const syncGit = withInstrumenting(
   { name: 'syncGit' },
   async function (): Promise<void> {
     if (gitInitialized) {
-      /* v8 ignore if -- TODO: add test #40625 */
       if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
         await git.raw(['config', 'core.hooksPath', '/dev/null']);
       }

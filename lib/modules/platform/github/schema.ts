@@ -26,13 +26,21 @@ const Package = z.object({
   name: z.string(),
 });
 
+const Severity = z.enum(['low', 'medium', 'high', 'critical']);
+
 const SecurityVulnerability = z
   .object({
     first_patched_version: z.object({ identifier: z.string() }).nullish(),
     package: Package,
+    severity: Severity,
     vulnerable_version_range: z.string(),
   })
   .nullable();
+
+const CvssSeverity = z.object({
+  vector_string: z.string().nullable(),
+  score: z.number().nullable(),
+});
 
 const SecurityAdvisory = z.object({
   description: z.string(),
@@ -43,6 +51,13 @@ const SecurityAdvisory = z.object({
     }),
   ),
   references: z.array(z.object({ url: z.string() })).optional(),
+  severity: Severity,
+  cvss_severities: z
+    .object({
+      cvss_v3: CvssSeverity.nullish(),
+      cvss_v4: CvssSeverity.nullish(),
+    })
+    .nullish(),
 });
 export type SecurityAdvisory = z.infer<typeof SecurityAdvisory>;
 

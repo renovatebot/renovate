@@ -364,7 +364,7 @@ jobs:
       - name: Run zizmor
         uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
         with:
-          version: v1.23.1
+          version: 1.24.1
 
   test:
     needs: [setup, prefetch]
@@ -812,7 +812,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@28049d82242d1a335810c9abcdedf55a5d0ed4ee # v4.5.20
+        uses: containerbase/internal-tools@2c1de3d6da2b11f8db1569520266e557e281bb98 # v4.5.22
         with:
           command: docker-config
 

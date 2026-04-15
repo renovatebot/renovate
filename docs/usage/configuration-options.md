@@ -2946,7 +2946,23 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`pypi`](./modules/datasource/pypi/index.md)
 - [`rubygems`](./modules/datasource/rubygems/index.md)
 
-The entire database is downloaded locally by [renovate-offline](https://github.com/renovatebot/osv-offline) and queried offline.
+The entire database is downloaded locally by [osv-offline](https://github.com/renovatebot/osv-offline) and queried offline.
+
+<!-- markdownlint-disable MD001 -->
+
+#### Malicious package detection and protection
+
+<!-- prettier-ignore -->
+!!! note
+    This functionality is currently experimental, being actively worked on, and will soon be available for usage outside of `osvVulnerabilityAlerts`.
+
+If Renovate detects a malicious dependency using data from OSV, it will surface this in log warnings, and prevent PRs from being created.
+
+If you currently have a dependency that is using a malicious version, Renovate will report this via a warning log.
+
+If Renovate finds a dependency update available, and that dependency update is found to be malicious, Renovate will skip **any updates to the dependency**, marking it with `skipReason: malicious-update-proposed`, and report this via a warning log.
+
+<!-- markdownlint-enable MD001 -->
 
 ## packageRules
 
@@ -3474,7 +3490,7 @@ $exists(deprecationMessage)
 $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
-$detectPlatform(sourceUrl) = "github"
+$detectPlatform(sourceUrl) = 'github'
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
