@@ -4,16 +4,14 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts } from '../../../util/url.ts';
+import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
-import type { ServiceDiscoveryResponse } from '../terraform-module/schema.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { TerraformProviderV2Response } from './schema.ts';
 import type {
   TerraformBuild,
-  TerraformProvider,
   TerraformProviderReleaseBackend,
   TerraformProviderVersions,
   TerraformRegistryBuildResponse,
@@ -46,7 +44,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results and only for `https://registry.terraform.io`';
+    'The release timestamp is determined from the `published-at` field in the Terraform Registry v2 API response and is only available for `https://registry.terraform.io`.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the the `source` field in the results.';
@@ -64,16 +62,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     );
 
     if (registryUrl === TerraformProviderDatasource.terraformRegistryUrl) {
-      const repository = TerraformProviderDatasource.getRepository({
-        packageName,
-      });
-      const serviceDiscovery =
-        await this.getTerraformServiceDiscoveryResult(registryUrl);
-      return await this.queryTerraformRegistry(
-        serviceDiscovery,
-        registryUrl,
-        repository,
-      );
+      return await this.queryTerraformRegistryV2(registryUrl, packageName);
     }
     if (registryUrl === TerraformProviderDatasource.hashicorpReleaseUrl) {
       return await this.queryReleaseBackend(packageName, registryUrl);
@@ -101,41 +90,29 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   /**
-   * Query the Terraform Registry using the undocumented extended provider API.
-   * This provides more information than the base Provider Registry Protocol,
-   * such as the release date for the latest version and the source URL.
+   * Query the Terraform Registry using the undocumented v2 JSON:API.
+   *
+   * Returns release timestamps for all versions, unlike the v1 API
+   * which only exposed the timestamp for the latest version.
    */
-  private async queryTerraformRegistry(
-    serviceDiscovery: ServiceDiscoveryResponse,
+  private async queryTerraformRegistryV2(
     registryUrl: string,
-    repository: string,
+    packageName: string,
   ): Promise<ReleaseResult> {
-    const backendURL = createSDBackendURL(
+    const repository = TerraformProviderDatasource.getRepository({
+      packageName,
+    });
+    const providerUrl = `${joinUrlParts(
       registryUrl,
-      'providers.v1',
-      serviceDiscovery,
+      'v2/providers',
       repository,
+    )}?${getQueryString({ include: 'provider-versions' })}`;
+    const { body: res } = await this.http.getJson(
+      providerUrl,
+      TerraformProviderV2Response,
     );
-    const res = (
-      await this.http.getJsonUnchecked<TerraformProvider>(backendURL)
-    ).body;
-    const dep: ReleaseResult = {
-      releases: res.versions.map((version) => ({
-        version,
-      })),
-    };
-    if (res.source) {
-      dep.sourceUrl = res.source;
-    }
-    // set published date for latest release
-    const latestVersion = dep.releases.find(
-      (release) => res.version === release.version,
-    );
-    if (latestVersion) {
-      latestVersion.releaseTimestamp = asTimestamp(res.published_at);
-    }
-    dep.homepage = `${registryUrl}/providers/${repository}`;
-    return dep;
+    res.homepage = `${registryUrl}/providers/${repository}`;
+    return res;
   }
 
   /**

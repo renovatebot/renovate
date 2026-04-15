@@ -165,6 +165,7 @@ export const presets: Record<string, Preset> = {
           'adoptopenjdk',
           'openjdk',
           'java',
+          'java-jdk',
           'java-jre',
           'sapmachine',
           '/^azul/zulu-openjdk/',
