@@ -146,6 +146,7 @@
       "https://github.com/microsoft/ClearScript",
       "https://github.com/Microsoft/ClearScript"
     ],
+    "cloudflare-workers-sdk": "https://github.com/cloudflare/workers-sdk",
     "commitlint": "https://github.com/conventional-changelog/commitlint",
     "contentful-rich-text": "https://github.com/contentful/rich-text",
     "cspell": "https://github.com/streetsidesoftware/cspell",
