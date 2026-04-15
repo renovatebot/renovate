@@ -1,3 +1,4 @@
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { randomUUID } from 'crypto';
 import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
@@ -37,7 +38,7 @@ function buildGerritPushOptions(options?: {
   if (options?.autoApprove) {
     pushOptions.push('label=Code-Review+2');
   }
-  if (options?.labels) {
+  if (isNonEmptyArray(options?.labels)) {
     for (const label of options.labels) {
       pushOptions.push(`hashtag=${label}`);
     }

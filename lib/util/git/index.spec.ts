@@ -576,8 +576,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
 
       expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
-      expect(fetchSpy).toHaveBeenCalledTimes(0);
-      expect(pushSpy).toHaveBeenCalledTimes(0);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(pushSpy).not.toHaveBeenCalled();
     });
 
     it('should throw', async () => {
