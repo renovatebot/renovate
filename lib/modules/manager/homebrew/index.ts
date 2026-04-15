@@ -9,7 +9,7 @@ export const url = 'https://brew.sh';
 
 export const defaultConfig = {
   commitMessageTopic: 'Homebrew Formula {{depName}}',
-  managerFilePatterns: ['/^Formula/\w*/?[^/]+[.]rb$/'],
+  managerFilePatterns: ['/^Formula/\\w*/?[^/]+[.]rb$/'],
 };
 
 export const supportedDatasources = [
