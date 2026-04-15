@@ -115,10 +115,12 @@ describe('modules/platform/github/schema', () => {
         security_advisory: {
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
+          severity: 'high',
         },
         security_vulnerability: {
           first_patched_version: { identifier: '1.0.0' },
           package: { ecosystem: 'dotnet', name: 'test-package' },
+          severity: 'high',
           vulnerable_version_range: '< 1.0.0',
         },
         dependency: { manifest_path: 'package.json' },
@@ -128,10 +130,12 @@ describe('modules/platform/github/schema', () => {
         security_advisory: {
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-5678' }],
+          severity: 'medium',
         },
         security_vulnerability: {
           first_patched_version: { identifier: '2.0.0' },
           package: { ecosystem: 'npm', name: 'valid-package' },
+          severity: 'medium',
           vulnerable_version_range: '< 2.0.0',
         },
         dependency: { manifest_path: 'package.json' },
@@ -148,10 +152,12 @@ describe('modules/platform/github/schema', () => {
         security_advisory: {
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
+          severity: 'high',
         },
         security_vulnerability: {
           first_patched_version: { identifier: '1.0.0' },
           package: { ecosystem: 'dotnet', name: 'test-package' },
+          severity: 'high',
           vulnerable_version_range: '< 1.0.0',
         },
       },
@@ -173,6 +179,7 @@ describe('modules/platform/github/schema', () => {
         security_advisory: {
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-5678' }],
+          severity: 'high',
         },
         security_vulnerability: null,
         dependency: { manifest_path: 'package.json' },
@@ -186,5 +193,41 @@ describe('modules/platform/github/schema', () => {
       }),
       'Vulnerability Alert: Failed to parse some alerts',
     );
+  });
+
+  it('should parse severity and cvss_severities fields', () => {
+    const result = GithubVulnerabilityAlerts.parse([
+      {
+        dismissed_reason: null,
+        security_advisory: {
+          description: 'Test advisory',
+          identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
+          severity: 'high',
+          cvss_severities: {
+            cvss_v3: {
+              vector_string: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
+              score: 9.8,
+            },
+            cvss_v4: null,
+          },
+        },
+        security_vulnerability: {
+          first_patched_version: { identifier: '2.0.0' },
+          package: { ecosystem: 'npm', name: 'test-package' },
+          severity: 'critical',
+          vulnerable_version_range: '< 2.0.0',
+        },
+        dependency: { manifest_path: 'package.json' },
+      },
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].security_advisory.severity).toBe('high');
+    expect(result[0].security_vulnerability?.severity).toBe('critical');
+    expect(result[0].security_advisory.cvss_severities?.cvss_v3).toEqual({
+      vector_string: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
+      score: 9.8,
+    });
+    expect(result[0].security_advisory.cvss_severities?.cvss_v4).toBeNull();
   });
 });

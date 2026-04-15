@@ -28,9 +28,7 @@ export function createDefaultStreams(
 
   // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
-    // TODO: typings (#9615)
-    const prettyStdOut = new RenovateStream() as any;
-    prettyStdOut.pipe(process.stdout);
+    const prettyStdOut = new RenovateStream(process.stdout);
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
@@ -68,7 +66,14 @@ function createLogFileStream(logFile: string): BunyanStream {
     isNonEmptyStringAndNotWhitespace(logFileFormat) &&
     logFileFormat === 'pretty'
   ) {
+    const fileStream = fs.createWriteStream(logFile, {
+      flags: 'a',
+      encoding: 'utf8',
+    });
+    const prettyFile = new RenovateStream(fileStream, false);
+    file.stream = prettyFile;
     file.type = 'raw';
+    delete file.path;
   }
 
   return file;

@@ -162,6 +162,7 @@ describe('util/cache/package/impl/file', () => {
 
     it('continues on cleanup errors', async () => {
       await cache.set('_test-namespace', 'valid', 1234, 5);
+      await cacache.put(cacheFileName, 'cold-entry', 'some data');
       const cacacheGet = vi
         .spyOn(cacache, 'get')
         .mockRejectedValue(new Error('error'));
@@ -169,6 +170,36 @@ describe('util/cache/package/impl/file', () => {
       await cache.destroy();
 
       expect(cacacheGet).toHaveBeenCalled();
+    });
+
+    it('skips disk read for entry written this run', async () => {
+      await cache.set('_test-namespace', 'in-memory', 'value', 5);
+      const cacacheGet = vi.spyOn(cacache, 'get');
+
+      await cache.destroy();
+
+      const calledForKey = cacacheGet.mock.calls.some(
+        (args) => args[1] === '_test-namespace-in-memory',
+      );
+      expect(calledForKey).toBe(false);
+      const entries = await cacache.ls(cacheFileName);
+      expect(Object.keys(entries)).toContain('_test-namespace-in-memory');
+    });
+
+    it('skips disk read for expired entry written this run', async () => {
+      await cache.set('_test-namespace', 'expired-in-memory', 'value', -5);
+      const cacacheGet = vi.spyOn(cacache, 'get');
+
+      await cache.destroy();
+
+      const calledForKey = cacacheGet.mock.calls.some(
+        (args) => args[1] === '_test-namespace-expired-in-memory',
+      );
+      expect(calledForKey).toBe(false);
+      const entries = await cacache.ls(cacheFileName);
+      expect(Object.keys(entries)).not.toContain(
+        '_test-namespace-expired-in-memory',
+      );
     });
   });
 });

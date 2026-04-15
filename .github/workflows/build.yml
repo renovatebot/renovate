@@ -238,7 +238,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/prettier
           # we need to add the hash because prettier cache doesn't detect plugin changes
@@ -256,7 +256,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/prettier
           key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -313,7 +313,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore tsbuildinfo cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
@@ -324,7 +324,7 @@ jobs:
 
       - name: Save tsbuildinfo cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -362,7 +362,7 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
+        uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
         with:
           version: v1.23.1
 
@@ -398,7 +398,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/vitest
           key: |
@@ -812,7 +812,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@4d98d9378f65b15fccde007c0e85bda4e72d1e48 # v4.5.17
+        uses: containerbase/internal-tools@28049d82242d1a335810c9abcdedf55a5d0ed4ee # v4.5.20
         with:
           command: docker-config
 
@@ -914,7 +914,7 @@ jobs:
           curl --retry 5 --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
 
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: tools/mkdocs/site
 
@@ -930,7 +930,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
@@ -950,7 +950,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook

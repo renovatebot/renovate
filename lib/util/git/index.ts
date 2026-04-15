@@ -402,7 +402,6 @@ export const syncGit = withInstrumenting(
   { name: 'syncGit' },
   async function (): Promise<void> {
     if (gitInitialized) {
-      /* v8 ignore if -- TODO: add test #40625 */
       if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
         await git.raw(['config', 'core.hooksPath', '/dev/null']);
       }

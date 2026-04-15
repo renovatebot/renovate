@@ -2,6 +2,7 @@ import { z } from 'zod/v3';
 
 import type { SkipReason, StageName } from '../../../types/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
@@ -280,9 +281,9 @@ const ZizmorcoreZizmorAction = z
     }
 
     return {
-      datasource: PypiDatasource.id,
-      depName: 'zizmor',
-      packageName: 'zizmor',
+      datasource: DockerDatasource.id,
+      depName: 'ghcr.io/zizmorcore/zizmor',
+      packageName: 'ghcr.io/zizmorcore/zizmor',
       ...(skipStage && { skipStage }),
       ...(skipReason && { skipReason }),
       currentValue: val.version,

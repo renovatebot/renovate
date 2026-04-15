@@ -204,8 +204,20 @@ describe('modules/datasource/common', () => {
       };
       const releaseResult: ReleaseResult = {
         releases: [
-          { version: '1.0.0', constraints: { foo: ['^1.0.0'] } },
-          { version: '2.0.0', constraints: { foo: ['^2.0.0'] } },
+          {
+            version: '1.0.0',
+            constraints: {
+              // @ts-expect-error -- intentionally using invalid constraint names
+              foo: ['^1.0.0'],
+            },
+          },
+          {
+            version: '2.0.0',
+            constraints: {
+              // @ts-expect-error -- intentionally using invalid constraint names
+              foo: ['^2.0.0'],
+            },
+          },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
@@ -218,7 +230,7 @@ describe('modules/datasource/common', () => {
         datasource: 'foo',
         packageName: 'bar',
         constraintsFiltering: 'strict' as const,
-        constraints: { baz: '^1.0.0', qux: 'invalid' },
+        constraints: { baz: '^1.0.0', qux: 'invalid' } as never,
       };
       const releaseResult = {
         releases: [
@@ -227,6 +239,7 @@ describe('modules/datasource/common', () => {
           { version: '3.0.0', constraints: { baz: ['^0.9.0', 'invalid'] } },
         ],
       };
+      // @ts-expect-error -- intentionally using invalid constraint names
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
