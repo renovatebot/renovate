@@ -205,10 +205,3 @@ To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON servic
      ]
    }
    ```
-
-## Ant
-
-Renovate can extract dependencies from Apache Ant `build.xml` files that use the `maven-resolver-ant-tasks` or `maven-ant-tasks` library.
-Dependencies are looked up using the Maven datasource.
-
-Refer to the [Ant manager documentation](../modules/manager/ant/index.md) for supported syntax, property resolution, file traversal, and registry URL discovery.

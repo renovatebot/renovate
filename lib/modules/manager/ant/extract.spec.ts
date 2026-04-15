@@ -976,6 +976,36 @@ describe('modules/manager/ant/extract', () => {
       ]);
     });
 
+    it('passes registry URLs to coords-style dependencies', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        const files: Record<string, string> = {
+          'build.xml': codeBlock`
+            <project>
+              <artifact:dependencies>
+                <remoteRepository url="https://repo.example.com/maven2" />
+                <dependency coords="junit:junit:4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `,
+        };
+        return Promise.resolve(files[fileName] ?? null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              registryUrls: ['https://repo.example.com/maven2'],
+            }),
+          ],
+        },
+      ]);
+    });
+
     it('collects registry URLs from settingsFile attribute', async () => {
       fs.readLocalFile.mockImplementation((fileName: string) => {
         const files: Record<string, string> = {
