@@ -1428,7 +1428,9 @@ export async function commitFiles(
     if (commitResult) {
       const pushResult = await pushCommit({
         sourceRef: commitConfig.branchName,
+        targetRef: commitConfig.targetRef,
         files: commitConfig.files,
+        pushOptions: commitConfig.pushOptions,
       });
       // v8 ignore else -- TODO: add test #40625
       if (pushResult) {
