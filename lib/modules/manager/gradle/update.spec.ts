@@ -1,10 +1,11 @@
-import { updateDependency } from '.';
+import { updateDependency } from './index.ts';
 
 describe('modules/manager/gradle/update', () => {
   it('replaces', () => {
     expect(
       updateDependency({
         fileContent: '###1.2.3###',
+        packageFile: 'build.gradle',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
@@ -20,6 +21,7 @@ describe('modules/manager/gradle/update', () => {
     expect(
       updateDependency({
         fileContent: '###1.2.4###',
+        packageFile: 'build.gradle',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.5',
@@ -37,6 +39,7 @@ describe('modules/manager/gradle/update', () => {
     expect(
       updateDependency({
         fileContent,
+        packageFile: 'build.gradle',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
@@ -52,6 +55,7 @@ describe('modules/manager/gradle/update', () => {
     expect(
       updateDependency({
         fileContent: '###1.3.0###',
+        packageFile: 'build.gradle',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
@@ -65,6 +69,7 @@ describe('modules/manager/gradle/update', () => {
     expect(
       updateDependency({
         fileContent: '',
+        packageFile: 'build.gradle',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
@@ -79,6 +84,7 @@ describe('modules/manager/gradle/update', () => {
   it('should return null for replacement', () => {
     const res = updateDependency({
       fileContent: '',
+      packageFile: 'build.gradle',
       upgrade: { updateType: 'replacement' },
     });
     expect(res).toBeNull();

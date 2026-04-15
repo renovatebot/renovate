@@ -57,6 +57,10 @@ We recommend this default image for most users.
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
+<!-- prettier-ignore -->
+!!! warning
+    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
 Read the [`binarySource` config option docs](../self-hosted-configuration.md#binarysource) for more information.
@@ -213,6 +217,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Gitea](../modules/platform/gitea/index.md)
 - [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
 - [GitLab](../modules/platform/gitlab/index.md)
+- [SCM-Manager](../modules/platform/scm-manager/index.md)
 
 ### GitHub.com token for changelogs (and tools)
 
@@ -229,3 +234,7 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 ### Self-hosting examples
 
 For more examples on running Renovate self-hosted, read our [Self-hosted examples](../examples/self-hosting.md) page.
+
+### Community tools
+
+There are also some [community-maintained tools](../community-tools.md) which may help running Renovate.

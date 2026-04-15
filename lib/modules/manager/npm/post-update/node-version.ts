@@ -1,11 +1,11 @@
 import semver from 'semver';
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import type { ToolConstraint } from '../../../../util/exec/types';
-import { readLocalFile } from '../../../../util/fs';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import type { LazyPackageJson } from './utils';
+import { logger } from '../../../../logger/index.ts';
+import type { ToolConstraint } from '../../../../util/exec/types.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import type { LazyPackageJson } from './utils.ts';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
@@ -29,6 +29,7 @@ async function getPackageJsonConstraint(
   const pkgJson = await pkg.getValue();
   if (pkgJson.volta?.node) {
     const constraint = pkgJson.volta.node;
+    // v8 ignore else -- TODO: add test #40625
     if (semver.validRange(constraint)) {
       logger.debug(
         `Using node constraint "${constraint}" from package.json volta`,
@@ -38,6 +39,7 @@ async function getPackageJsonConstraint(
   }
   if (pkgJson.engines?.node) {
     const constraint = pkgJson.engines.node;
+    // v8 ignore else -- TODO: add test #40625
     if (semver.validRange(constraint)) {
       logger.debug(
         `Using node constraint "${constraint}" from package.json engines`,

@@ -1,15 +1,15 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import type { RenovateConfig } from '../../../config/types';
-import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { ensureComment } from '../../../modules/platform/comment';
-import { scm } from '../../../modules/platform/scm';
-import { getBranchList, setUserRepoConfig } from '../../../util/git';
-import { escapeRegExp, regEx } from '../../../util/regex';
-import { uniqueStrings } from '../../../util/string';
-import { getReconfigureBranchName } from '../reconfigure/utils';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { REPOSITORY_CHANGED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ensureComment } from '../../../modules/platform/comment.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { getBranchList, setUserRepoConfig } from '../../../util/git/index.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { uniqueStrings } from '../../../util/string.ts';
+import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
 async function cleanUpBranches(
   config: RenovateConfig,
@@ -29,7 +29,7 @@ async function cleanUpBranches(
     try {
       // get base branch from branch name if base branches are configured
       // use default branch if no base branches are configured
-      // use defaul branch name if no match (can happen when base branches are configured later)
+      // use default branch name if no match (can happen when base branches are configured later)
       const baseBranch =
         baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
       const pr = await platform.findPr({
@@ -120,7 +120,7 @@ async function cleanUpBranches(
  * @param config Renovate configuration
  */
 function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
-  if (!config.baseBranchPatterns?.length) {
+  if (!config.baseBranchPatterns?.length || !config.baseBranches?.length) {
     return null;
   }
 
@@ -130,9 +130,7 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
     .filter(uniqueStrings)
     .map(escapeRegExp);
 
-  // calculate possible base branches and escape for regex
-  // if baseBranchPatterns is configured, baseBranches will be defined too
-  const baseBranches = config.baseBranches!.map(escapeRegExp);
+  const baseBranches = config.baseBranches.map(escapeRegExp);
 
   // create regex to extract base branche from branch name
   const baseBranchRe = regEx(
@@ -152,6 +150,10 @@ export async function pruneStaleBranches(
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
+    return;
+  }
+  if (!config.defaultBranch) {
+    logger.debug('No defaultBranch set - skipping branch pruning');
     return;
   }
   // TODO: types (#22198)

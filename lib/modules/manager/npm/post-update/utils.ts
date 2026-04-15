@@ -1,9 +1,9 @@
 import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
-import { logger } from '../../../../logger';
-import { Lazy } from '../../../../util/lazy';
-import type { PackageJson } from '../schema';
-import { loadPackageJson } from '../utils';
+import { logger } from '../../../../logger/index.ts';
+import { Lazy } from '../../../../util/lazy.ts';
+import type { PackageJson } from '../schema.ts';
+import { loadPackageJson } from '../utils.ts';
 
 export function lazyLoadPackageJson(
   lockFileDir: string,
@@ -28,6 +28,7 @@ export function getPackageManagerVersion(
       : [pkg.devEngines.packageManager];
     const packageMgr = packageManagers.find((pm) => pm.name === name);
     const version = packageMgr?.version;
+    // v8 ignore else -- TODO: add test #40625
     if (version) {
       logger.debug(
         `Found ${name} constraint in package.json devEngines: ${version}`,
@@ -53,4 +54,8 @@ export function getPackageManagerVersion(
     return version;
   }
   return null;
+}
+
+export function getNodeOptions(nodeMaxMemory: number): string {
+  return `--max-old-space-size=${nodeMaxMemory}`;
 }

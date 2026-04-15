@@ -1,13 +1,17 @@
-import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { GitOperationSpanProcessor } from '../util/git/span-processor';
+import { ProxyTracerProvider } from '@opentelemetry/api';
+import {
+  NodeTracerProvider,
+  SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-node';
+import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
+import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import {
   disableInstrumentations,
   getTracerProvider,
   init,
   instrument,
-} from '.';
+} from './index.ts';
 
 afterAll(disableInstrumentations);
 
@@ -17,6 +21,15 @@ describe('instrumentation/index', () => {
   beforeEach(() => {
     api.trace.disable(); // clear global components
     process.env = { ...oldEnv };
+
+    // remove any otel env
+    for (const key in process.env) {
+      if (key.startsWith('OTEL_')) {
+        delete process.env[key];
+      }
+    }
+    delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
+    delete process.env.RENOVATE_USE_CLOUD_METADATA_SERVICES;
   });
 
   afterAll(() => {
@@ -43,7 +56,31 @@ describe('instrumentation/index', () => {
     const nodeProvider = delegateProvider as NodeTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
-        _spanProcessors: [{ _exporter: {} }],
+        _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
+          expect.any(SimpleSpanProcessor),
+        ],
+      },
+    });
+  });
+
+  it('registers GitOperationSpanProcessor, GetDatasourceReleasesSpanProcessor regardless of tracing being enabled', () => {
+    // intentionally don't set it
+    delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
+    delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(nodeProvider).toMatchObject({
+      _activeSpanProcessor: {
+        _spanProcessors: expect.arrayContaining([
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
+        ]),
       },
     });
   });
@@ -61,6 +98,8 @@ describe('instrumentation/index', () => {
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
           {
             _exporter: {
               _delegate: {
@@ -74,7 +113,6 @@ describe('instrumentation/index', () => {
               },
             },
           },
-          new GitOperationSpanProcessor(),
         ],
       },
     });
@@ -94,6 +132,8 @@ describe('instrumentation/index', () => {
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
           { _exporter: {} },
           {
             _exporter: {
@@ -108,7 +148,6 @@ describe('instrumentation/index', () => {
               },
             },
           },
-          new GitOperationSpanProcessor(),
         ],
       },
     });

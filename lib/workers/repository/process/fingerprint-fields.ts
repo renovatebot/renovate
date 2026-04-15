@@ -1,8 +1,8 @@
-import type { UpgradeFingerprintConfig } from '../../types';
+import type { UpgradeFingerprintConfig } from '../../types.ts';
 
 type CommitFingerprintFields = keyof UpgradeFingerprintConfig;
 
-export const upgradeFingerprintFields: CommitFingerprintFields[] = [
+export const upgradeFingerprintFields = [
   'autoReplaceStringTemplate',
   'currentDigest',
   'currentValue',
@@ -18,4 +18,4 @@ export const upgradeFingerprintFields: CommitFingerprintFields[] = [
   'newVersion',
   'packageFile',
   'replaceString',
-];
+] as const satisfies CommitFingerprintFields[];

@@ -1,16 +1,17 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
-import type { SkipReason, StageName } from '../../../types';
-import { escapeRegExp, regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { NpmDatasource } from '../../datasource/npm';
-import { PypiDatasource } from '../../datasource/pypi';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as condaVersioning from '../../versioning/conda';
-import * as npmVersioning from '../../versioning/npm';
-import * as pep440versioning from '../../versioning/pep440';
-import * as rubyVersioning from '../../versioning/ruby';
-import type { PackageDependency } from '../types';
+import type { SkipReason, StageName } from '../../../types/index.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import * as condaVersioning from '../../versioning/conda/index.ts';
+import * as npmVersioning from '../../versioning/npm/index.ts';
+import * as pep440versioning from '../../versioning/pep440/index.ts';
+import * as rubyVersioning from '../../versioning/ruby/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 function matchAction(action: string): z.Schema {
   return z
@@ -240,6 +241,56 @@ const SetupHatch = z
     };
   });
 
+const SetupGolangciLint = z
+  .object({
+    uses: matchAction('golangci/golangci-lint-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: GithubReleasesDatasource.id,
+      depName: 'golangci/golangci-lint',
+      packageName: 'golangci/golangci-lint',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
+const ZizmorcoreZizmorAction = z
+  .object({
+    uses: matchAction('zizmorcore/zizmor-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: DockerDatasource.id,
+      depName: 'ghcr.io/zizmorcore/zizmor',
+      packageName: 'ghcr.io/zizmorcore/zizmor',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -256,4 +307,6 @@ export const CommunityActions = z.union([
   SetupDeno,
   SetupRuby,
   SetupHatch,
+  SetupGolangciLint,
+  ZizmorcoreZizmorAction,
 ]);

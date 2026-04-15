@@ -1,9 +1,10 @@
 import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
-} from '../../config/types';
-import type { ModuleApi } from '../../types';
-import type { Timestamp } from '../../util/timestamp';
+} from '../../config/types.ts';
+import type { ModuleApi } from '../../types/index.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
+import type { Timestamp } from '../../util/timestamp.ts';
 
 export interface GetDigestInputConfig {
   datasource: string;
@@ -32,6 +33,8 @@ export interface GetReleasesConfig {
   packageName: string;
   registryUrl?: string;
   currentValue?: string;
+  constraints?: Partial<Record<ConstraintName, string>>;
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface GetPkgReleasesConfig {
@@ -47,7 +50,7 @@ export interface GetPkgReleasesConfig {
   extractVersion?: string;
   versionCompatibility?: string;
   currentCompatibility?: string;
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
@@ -66,8 +69,8 @@ export interface Release {
   version: string;
   /** The original value to which `extractVersion` was applied */
   versionOrig?: string;
-  newDigest?: string | undefined;
-  constraints?: Record<string, string[]>;
+  newDigest?: string | null;
+  constraints?: Partial<Record<ConstraintName, string[]>>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;

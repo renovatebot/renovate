@@ -1,21 +1,21 @@
 import { codeBlock } from 'common-tags';
-import type { RenovateConfig } from '../../lib/config/types';
-import type { Category } from '../../lib/constants';
-import { getManagers } from '../../lib/modules/manager';
+import type { RenovateConfig } from '../../lib/config/types.ts';
+import type { Category } from '../../lib/constants/index.ts';
 import {
   getCustomManagers,
   isCustomManager,
-} from '../../lib/modules/manager/custom';
-import { readFile, updateFile } from '../utils';
-import type { OpenItems } from './github-query-items';
-import { generateFeatureAndBugMarkdown } from './github-query-items';
+} from '../../lib/modules/manager/custom/index.ts';
+import { getManagers } from '../../lib/modules/manager/index.ts';
+import { readFile, updateFile } from '../utils/index.ts';
+import type { OpenItems } from './github-query-items.ts';
+import { generateFeatureAndBugMarkdown } from './github-query-items.ts';
 import {
   formatUrls,
   getDisplayName,
   getModuleLink,
   getNameWithUrl,
   replaceContent,
-} from './utils';
+} from './utils.ts';
 
 const noCategoryID = 'no-category';
 const noCategoryDisplayName = 'No Category';
@@ -146,6 +146,40 @@ export async function generateManagers(
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
       md += formatUrls(urls);
+      md += '## Dependency types\n\n';
+      if (definition.knownDepTypes?.length) {
+        const hasPrettyDepType = definition.knownDepTypes.some(
+          (m) => m.prettyDepType,
+        );
+        md += 'This manager extracts the following `depType` values:\n\n';
+        if (hasPrettyDepType) {
+          md += '| `depType` | `prettyDepType` | Description |\n';
+          md += '|-----------|-----------------|-------------|\n';
+          for (const {
+            depType,
+            prettyDepType,
+            description,
+          } of definition.knownDepTypes) {
+            md += `| \`${depType}\` | ${prettyDepType ? `\`${prettyDepType}\`` : ''} | ${description} |\n`;
+          }
+        } else {
+          md += '| `depType` | Description |\n';
+          md += '|-----------|-------------|\n';
+          for (const { depType, description } of definition.knownDepTypes) {
+            md += `| \`${depType}\` | ${description} |\n`;
+          }
+        }
+        md += '\n';
+      }
+      if (definition.supportsDynamicDepTypesNote) {
+        md += definition.supportsDynamicDepTypesNote + '\n\n';
+      }
+      if (
+        (!definition.knownDepTypes || definition.knownDepTypes.length === 0) &&
+        definition.supportsDynamicDepTypesNote === undefined
+      ) {
+        md += 'This manager has no documented `depType` values.\n';
+      }
       md += '## Default config\n\n';
       md += '```json\n';
       md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';
@@ -156,6 +190,19 @@ export async function generateManagers(
         isCustomMgr ? `custom/${manager}` : manager
       }/readme.md`,
     );
+
+    if (!isCustomMgr && definition.supportsLockFileMaintenance) {
+      md += '\n## Lock File Maintenance\n\n';
+
+      md +=
+        'This manager supports [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) for the following file(s):\n';
+      md += '\n';
+      for (const lockFile of definition.lockFileNames) {
+        md += `- \`${lockFile}\`\n`;
+      }
+      md += '\n';
+    }
+
     if (!isCustomMgr) {
       md += '\n## Additional Information\n\n';
     }

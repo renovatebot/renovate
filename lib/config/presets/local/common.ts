@@ -1,9 +1,9 @@
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import type { Nullish } from '../../../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { Preset } from '../types';
-import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { Nullish } from '../../../types/index.ts';
+import type { Preset } from '../types.ts';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
 
 export async function fetchJSONFile(
   repo: string,

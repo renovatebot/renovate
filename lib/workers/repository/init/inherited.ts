@@ -1,24 +1,23 @@
 import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { mergeChildConfig, removeGlobalConfig } from '../../../config';
-import { setUserConfigFileNames } from '../../../config/app-strings';
-import { decryptConfig } from '../../../config/decrypt';
-import { parseFileConfig } from '../../../config/parse';
-import { resolveConfigPresets } from '../../../config/presets';
-import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
-import type { RenovateConfig } from '../../../config/types';
-import { validateConfig } from '../../../config/validation';
+import { setUserConfigFileNames } from '../../../config/app-strings.ts';
+import { decryptConfig } from '../../../config/decrypt.ts';
+import { mergeChildConfig, removeGlobalConfig } from '../../../config/index.ts';
+import { InheritConfig } from '../../../config/inherit.ts';
+import { parseFileConfig } from '../../../config/parse.ts';
+import { resolveConfigPresets } from '../../../config/presets/index.ts';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { validateConfig } from '../../../config/validation.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
   CONFIG_VALIDATION,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import * as hostRules from '../../../util/host-rules';
-import * as queue from '../../../util/http/queue';
-import * as throttle from '../../../util/http/throttle';
-import * as template from '../../../util/template';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import * as template from '../../../util/template/index.ts';
+import { applyHostRules } from './merge.ts';
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
@@ -126,12 +125,13 @@ export async function mergeInheritedConfig(
       secrets: config.secrets ?? {},
       variables: config.variables ?? {},
     });
-    setInheritedHostRules(filteredConfig);
+    applyHostRules(filteredConfig);
+    filteredConfig = InheritConfig.set(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
 
   logger.debug('Resolving presets found in inherited config');
-  const resolvedConfig = await resolveConfigPresets(
+  const { config: resolvedConfig } = await resolveConfigPresets(
     filteredConfig,
     config,
     config.ignorePresets,
@@ -170,27 +170,7 @@ export async function mergeInheritedConfig(
     secrets: config.secrets ?? {},
     variables: config.variables ?? {},
   });
-  setInheritedHostRules(filteredConfig);
+  applyHostRules(filteredConfig);
+  filteredConfig = InheritConfig.set(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
-}
-
-function setInheritedHostRules(config: RenovateConfig): void {
-  if (config.hostRules) {
-    logger.debug('Setting hostRules from config');
-    for (const rule of config.hostRules) {
-      try {
-        hostRules.add(rule);
-      } catch (err) {
-        // istanbul ignore next
-        logger.warn(
-          { err, config: rule },
-          'Error setting hostRule from config',
-        );
-      }
-    }
-    // host rules can change concurrency
-    queue.clear();
-    throttle.clear();
-    delete config.hostRules;
-  }
 }

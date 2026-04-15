@@ -1,7 +1,7 @@
-import { getLockedDependencies } from './get-locked';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { getLockedDependencies } from './get-locked.ts';
 
-vi.mock('../../../../../../util/fs');
+vi.mock('../../../../../../util/fs/index.ts');
 
 const packageLockJson = Fixtures.getJson('package-lock-v1.json');
 const bundledPackageLockJson = Fixtures.getJson('bundled.package-lock.json');

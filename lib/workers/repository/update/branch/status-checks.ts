@@ -1,12 +1,13 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import type { BranchStatus } from '../../../../types';
-import { isActiveConfidenceLevel } from '../../../../util/merge-confidence';
-import type { MergeConfidence } from '../../../../util/merge-confidence/types';
-import { coerceString } from '../../../../util/string';
-import { joinUrlParts } from '../../../../util/url';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import type { BranchStatusConfig } from '../../../../modules/platform/types.ts';
+import type { BranchStatus } from '../../../../types/index.ts';
+import { isActiveConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
+import { coerceString } from '../../../../util/string.ts';
+import { joinUrlParts } from '../../../../util/url.ts';
 
 export async function resolveBranchStatus(
   branchName: string,
@@ -31,13 +32,13 @@ export async function resolveBranchStatus(
   return status;
 }
 
-async function setStatusCheck(
-  branchName: string,
-  context: string,
-  description: string,
-  state: BranchStatus,
-  url?: string,
-): Promise<void> {
+async function setStatusCheck({
+  branchName,
+  context,
+  description,
+  state,
+  url,
+}: BranchStatusConfig): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
     context,
@@ -87,16 +88,16 @@ export async function setStability(config: StabilityConfig): Promise<void> {
 
   const docsLink = joinUrlParts(
     coerceString(config.productLinks?.documentation),
-    'configuration-options/#minimumreleaseage',
+    'key-concepts/minimum-release-age/',
   );
 
-  await setStatusCheck(
-    config.branchName,
+  await setStatusCheck({
+    branchName: config.branchName,
     context,
     description,
-    config.stabilityStatus,
-    docsLink,
-  );
+    state: config.stabilityStatus,
+    url: docsLink,
+  });
 }
 
 export interface ConfidenceConfig extends RenovateConfig {
@@ -131,11 +132,11 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     'merge-confidence',
   );
 
-  await setStatusCheck(
-    config.branchName,
+  await setStatusCheck({
+    branchName: config.branchName,
     context,
     description,
-    config.confidenceStatus,
-    docsLink,
-  );
+    state: config.confidenceStatus,
+    url: docsLink,
+  });
 }

@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { extractAllPackageFiles } from '..';
-import { logger } from '../../../../logger';
-import type { ExtractConfig } from '../../types';
-import { postExtract } from './post';
-import * as npmExtract from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { ExtractConfig } from '../../types.ts';
+import { extractAllPackageFiles } from '../index.ts';
+import * as npmExtract from './index.ts';
+import { postExtract } from './post/index.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -27,7 +27,9 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
@@ -394,7 +396,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds complex yarn workspaces', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+      fs.readLocalFile.mockImplementation((): Promise<any> => {
         return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
@@ -1243,6 +1245,32 @@ describe('modules/manager/npm/extract/index', () => {
           skipInstalls: true,
         },
       ]);
+    });
+
+    it('warns for invalid pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        **:
+      `);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        {
+          packageFile: 'pnpm-workspace.yaml',
+          err: expect.any(Error),
+        },
+        'Failed to parse pnpm-workspace.yaml file',
+      );
+    });
+
+    it('parses empty pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('extracts pnpm workspace yaml files', async () => {

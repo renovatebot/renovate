@@ -1,5 +1,5 @@
-import * as hostRules from '../host-rules';
-import { clear, getQueue } from './queue';
+import * as hostRules from '../host-rules.ts';
+import { clear, getQueue } from './queue.ts';
 
 describe('util/http/queue', () => {
   beforeEach(() => {

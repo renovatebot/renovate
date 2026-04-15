@@ -1,6 +1,6 @@
-import * as versionings from '../../../modules/versioning';
-import { matchRegexOrGlob } from '../../../util/string-match';
-import { presets } from './workarounds';
+import * as versionings from '../../../modules/versioning/index.ts';
+import { matchRegexOrGlob } from '../../../util/string-match.ts';
+import { presets } from './workarounds.preset.ts';
 
 describe('config/presets/internal/workarounds', () => {
   describe('bitnamiDockerImageVersioning', () => {
@@ -38,6 +38,32 @@ describe('config/presets/internal/workarounds', () => {
       ${'1.24.0-debian-12-r24'} | ${true}
     `('matchCurrentValue("$input") == "$expected"', ({ input, expected }) => {
       expect(matchRegexOrGlob(input, matchCurrentValue)).toEqual(expected);
+    });
+  });
+
+  describe('clamavDockerImageVersioning', () => {
+    const preset = presets.clamavDockerImageVersioning;
+    const packageRule = preset.packageRules![0];
+    const versioning = versionings.get(packageRule.versioning);
+
+    it.each`
+      input              | expected
+      ${'latest'}        | ${false}
+      ${'latest_base'}   | ${false}
+      ${'stable'}        | ${false}
+      ${'stable_base'}   | ${false}
+      ${'unstable'}      | ${false}
+      ${'unstable_base'} | ${false}
+      ${'20'}            | ${false}
+      ${'20_base'}       | ${false}
+      ${'1.24'}          | ${true}
+      ${'1.24_base'}     | ${true}
+      ${'1.24.0'}        | ${true}
+      ${'1.24.0_base'}   | ${true}
+      ${'1.5.1-17'}      | ${true}
+      ${'1.5.1-17_base'} | ${true}
+    `('versioning("$input") == "$expected"', ({ input, expected }) => {
+      expect(versioning.isValid(input)).toEqual(expected);
     });
   });
 

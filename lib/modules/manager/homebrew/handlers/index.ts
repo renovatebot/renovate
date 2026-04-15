@@ -1,0 +1,28 @@
+import type { UrlParsedResult } from '../types.ts';
+import type { HomebrewUrlHandler } from './base.ts';
+import { GitHubUrlHandler } from './github.ts';
+import { NpmUrlHandler } from './npm.ts';
+
+const handlers: HomebrewUrlHandler[] = [
+  new GitHubUrlHandler(),
+  new NpmUrlHandler(),
+];
+
+export function findHandler(
+  url: string | null,
+): { handler: HomebrewUrlHandler; parsed: UrlParsedResult } | null {
+  if (!url) {
+    return null;
+  }
+  for (const handler of handlers) {
+    const parsed = handler.parseUrl(url);
+    if (parsed) {
+      return { handler, parsed };
+    }
+  }
+  return null;
+}
+
+export function findHandlerByType(type: string): HomebrewUrlHandler | null {
+  return handlers.find((h) => h.type === type) ?? null;
+}

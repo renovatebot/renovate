@@ -1,19 +1,18 @@
-import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { parseYaml } from '../../../util/yaml';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { withDebugMessage } from '../../../util/schema-utils/index.ts';
 import {
   KubernetesApiDatasource,
   supportedApis,
-} from '../../datasource/kubernetes-api';
-import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
-import { getDep } from '../dockerfile/extract';
+} from '../../datasource/kubernetes-api/index.ts';
+import * as kubernetesApiVersioning from '../../versioning/kubernetes-api/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { KubernetesConfiguration } from './types';
+} from '../types.ts';
+import { type KubernetesManifest, KubernetesManifests } from './schema.ts';
 
 export function extractPackageFile(
   content: string,
@@ -29,9 +28,14 @@ export function extractPackageFile(
     return null;
   }
 
+  const manifests = KubernetesManifests.catch(
+    withDebugMessage([], `${packageFile} does not match Kubernetes schema`),
+  ).parse(content);
+
   const deps: PackageDependency[] = [
     ...extractImages(content, config),
-    ...extractApis(content, packageFile),
+    ...extractImageVolumes(manifests, config),
+    ...extractApis(manifests),
   ];
 
   return deps.length ? { deps } : null;
@@ -71,29 +75,32 @@ function extractImages(
   return deps;
 }
 
-function extractApis(
-  content: string,
-  packageFile: string,
+function extractImageVolumes(
+  manifests: KubernetesManifest[],
+  config: ExtractConfig,
 ): PackageDependency[] {
-  let doc: KubernetesConfiguration[];
+  const deps: PackageDependency[] = [];
 
-  try {
-    // TODO: use schema (#9610)
-    doc = parseYaml(content, {
-      removeTemplates: true,
-    });
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse Kubernetes manifest.');
-    return [];
+  for (const manifest of manifests) {
+    for (const currentFrom of manifest.imageVolumeReferences) {
+      const dep = getDep(currentFrom, true, config.registryAliases);
+      logger.debug(
+        {
+          depName: dep.depName,
+          currentValue: dep.currentValue,
+          currentDigest: dep.currentDigest,
+        },
+        'Kubernetes image volume',
+      );
+      deps.push(dep);
+    }
   }
 
-  return doc
-    .filter(isTruthy)
-    .filter(
-      (m) =>
-        isNonEmptyStringAndNotWhitespace(m.kind) &&
-        isNonEmptyStringAndNotWhitespace(m.apiVersion),
-    )
+  return deps;
+}
+
+function extractApis(manifests: KubernetesManifest[]): PackageDependency[] {
+  return manifests
     .filter((m) => supportedApis.has(m.kind))
     .map((configuration) => ({
       depName: configuration.kind,

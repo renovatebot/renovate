@@ -1,17 +1,18 @@
 import type { WriteStream } from 'node:fs';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { add } from '../util/host-rules';
-import { addSecretForSanitizing as addSecret } from '../util/sanitize';
-import type { RenovateLogger } from './renovate-logger';
-import { ProblemStream } from './utils';
+import { DateTime } from 'luxon';
+import { partial } from '~test/util.ts';
+import { add } from '../util/host-rules.ts';
+import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
+import { createDefaultStreams } from './bunyan.ts';
 import {
   addMeta,
   addStream,
   clearProblems,
-  createDefaultStreams,
   getContext,
   getProblems,
+  init,
   levels,
   logLevel,
   logger,
@@ -19,17 +20,21 @@ import {
   setContext,
   setMeta,
   withMeta,
-} from '.';
-import { partial } from '~test/util';
+} from './index.ts';
+import { ProblemStream } from './problem-stream.ts';
+import type { RenovateLogger } from './renovate-logger.ts';
 
 const logContext = 'initial_context';
 
-vi.unmock('.');
-vi.mock('nanoid', () => ({
-  nanoid: () => 'initial_context',
+vi.unmock('./index.ts');
+vi.mock('node:crypto', () => ({
+  randomUUID: vi.fn(() => 'initial_context'),
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
+
+// init logger
+await init();
 
 describe('logger/index', () => {
   beforeEach(() => {
@@ -370,7 +375,12 @@ describe('logger/index', () => {
     expect(logged.msg).toBe('foo');
     expect(logged.foo.foo).toBe('[Circular]');
     expect(logged.foo.bar).toEqual(['[Circular]']);
-    expect(logged.bar).toBe('[Circular]');
+    expect(logged.bar).toEqual([
+      {
+        bar: '[Circular]',
+        foo: '[Circular]',
+      },
+    ]);
   });
 
   it('sanitizes secrets', () => {
@@ -393,7 +403,10 @@ describe('logger/index', () => {
     add({ password: 'secret"password' });
 
     class SomeClass {
-      constructor(public field: string) {}
+      public field: string;
+      constructor(field: string) {
+        this.field = field;
+      }
     }
 
     const prBody = 'test';
@@ -444,7 +457,10 @@ describe('logger/index', () => {
     add({ password: 'secret"password' });
 
     class SomeClass {
-      constructor(public field: string) {}
+      public field: string;
+      constructor(field: string) {
+        this.field = field;
+      }
     }
 
     const childLogger = (logger as RenovateLogger).childLogger();
@@ -466,7 +482,10 @@ describe('logger/index', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someDate: new Date('2021-04-05T06:07Z'),
       someFn: () => 'secret"password',
+      someLuxonDate: DateTime.fromISO('2020-02-29'),
+      someLuxonDateTime: DateTime.fromISO('2020-02-29T01:40:21.345+00:00'),
       someObject: new SomeClass('secret"password'),
     });
 
@@ -481,7 +500,10 @@ describe('logger/index', () => {
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe(prBody);
     expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someDate).toBe('2021-04-05T06:07:00.000Z');
     expect(logged.someFn).toBe('[function]');
+    expect(logged.someLuxonDate).toBe('2020-02-29T00:00:00.000+00:00');
+    expect(logged.someLuxonDateTime).toBe('2020-02-29T01:40:21.345+00:00');
     expect(logged.someObject.field).toBe('**redacted**');
   });
 

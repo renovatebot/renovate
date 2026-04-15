@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { updateDependency } from '.';
+import { updateDependency } from './index.ts';
 
 describe('modules/manager/copier/update', () => {
   describe('updateDependency', () => {
@@ -8,7 +8,11 @@ describe('modules/manager/copier/update', () => {
         _src_path: https://foo.bar/baz/quux
         _commit: 1.0.0
       `;
-      const ret = updateDependency({ fileContent, upgrade: {} });
+      const ret = updateDependency({
+        fileContent,
+        packageFile: '.copier-answers.yml',
+        upgrade: {},
+      });
       expect(ret).toBe(`${fileContent}\n#copier updated`);
     });
 
@@ -18,7 +22,11 @@ describe('modules/manager/copier/update', () => {
         _commit: 1.0.0
         #copier updated
       `;
-      const ret = updateDependency({ fileContent, upgrade: {} });
+      const ret = updateDependency({
+        fileContent,
+        packageFile: '.copier-answers.yml',
+        upgrade: {},
+      });
       expect(ret).toBe(fileContent);
     });
   });

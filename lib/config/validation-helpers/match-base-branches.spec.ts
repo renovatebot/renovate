@@ -1,4 +1,4 @@
-import { check } from './match-base-branches';
+import { check } from './match-base-branches.ts';
 
 describe('config/validation-helpers/match-base-branches', () => {
   it('returns error when baseBranchPatterns is not defined', () => {

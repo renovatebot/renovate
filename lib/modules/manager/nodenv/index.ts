@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import * as nodeVersioning from '../../versioning/node';
+import type { Category } from '../../../constants/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import * as nodeVersioning from '../../versioning/node/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'nodenv';
 export const url = 'https://github.com/nodenv/nodenv#readme';

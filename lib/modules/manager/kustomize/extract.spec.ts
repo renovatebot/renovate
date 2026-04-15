@@ -1,16 +1,16 @@
 import { codeBlock } from 'common-tags';
-import { regEx } from '../../../util/regex';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HelmDatasource } from '../../datasource/helm';
+import { regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
 import {
   extractHelmChart,
   extractImage,
   extractResource,
   parseKustomize,
-} from './extract';
-import { extractPackageFile } from '.';
+} from './extract.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {

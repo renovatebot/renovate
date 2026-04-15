@@ -1,4 +1,4 @@
-import pep440 from '.';
+import pep440 from './index.ts';
 
 describe('modules/versioning/pep440/index', () => {
   it.each`
@@ -101,6 +101,8 @@ describe('modules/versioning/pep440/index', () => {
     currentValue            | rangeStrategy    | currentVersion | newVersion   | expected
     ${'1.0.0'}              | ${'bump'}        | ${'1.0.0'}     | ${'1.2.3'}   | ${'1.2.3'}
     ${'1.0.0'}              | ${'replace'}     | ${'1.0.0'}     | ${'1.2.3'}   | ${'1.2.3'}
+    ${'v1.0.0'}             | ${'bump'}        | ${'1.0.0'}     | ${'1.2.3'}   | ${'v1.2.3'}
+    ${'v1.0.0'}             | ${'replace'}     | ${'1.0.0'}     | ${'1.2.3'}   | ${'v1.2.3'}
     ${'==1.0.3'}            | ${'bump'}        | ${'1.0.0'}     | ${'1.2.3'}   | ${'==1.2.3'}
     ${'==1.0.3'}            | ${'replace'}     | ${'1.0.0'}     | ${'1.2.3'}   | ${'==1.2.3'}
     ${'>=1.2.0'}            | ${'bump'}        | ${'1.0.0'}     | ${'1.2.3'}   | ${'>=1.2.3'}

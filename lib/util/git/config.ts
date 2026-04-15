@@ -1,7 +1,8 @@
 import { isArray, isNumber, isString } from '@sindresorhus/is';
 import type { SimpleGitOptions } from 'simple-git';
-import { GlobalConfig } from '../../config/global';
-import type { GitNoVerifyOption } from './types';
+import { GlobalConfig } from '../../config/global.ts';
+import { getEnv } from '../env.ts';
+import type { GitNoVerifyOption } from './types.ts';
 
 let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
 
@@ -24,6 +25,11 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
     },
     config: ['core.quotePath=false'],
   };
+  if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
+    config.unsafe = {
+      allowUnsafeHooksPath: true,
+    };
+  }
   // https://github.com/steveukx/git-js/pull/591
   const gitTimeout = GlobalConfig.get('gitTimeout');
   if (isNumber(gitTimeout) && gitTimeout > 0) {

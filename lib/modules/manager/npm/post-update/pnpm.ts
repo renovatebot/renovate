@@ -1,30 +1,34 @@
 import { isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { exec } from '../../../../util/exec';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ExtraEnv,
   ToolConstraint,
-} from '../../../../util/exec/types';
+} from '../../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import { uniqueStrings } from '../../../../util/string';
-import { parseSingleYaml } from '../../../../util/yaml';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants';
-import type { PnpmWorkspaceFile } from '../extract/types';
-import { getNodeToolConstraint } from './node-version';
-import type { GenerateLockFileResult, PnpmLockFile } from './types';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
+} from '../../../../util/fs/index.ts';
+import { uniqueStrings } from '../../../../util/string.ts';
+import { parseSingleYaml } from '../../../../util/yaml.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
+import type { PnpmWorkspaceFile } from '../extract/types.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
+import {
+  getNodeOptions,
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from './utils.ts';
 
 function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
   for (const upgrade of upgrades) {
@@ -44,8 +48,6 @@ export async function generateLockFile(
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile: string | null = null;
-  let stdout: string | undefined;
-  let stderr: string | undefined;
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
@@ -71,6 +73,12 @@ export async function generateLockFile(
       pnpm_config_cache_dir: pnpmConfigCacheDir,
       pnpm_config_store_dir: pnpmConfigStoreDir,
     };
+
+    const { nodeMaxMemory } = getToolSettingsOptions(config.toolSettings);
+    if (nodeMaxMemory) {
+      extraEnv.NODE_OPTIONS = getNodeOptions(nodeMaxMemory);
+    }
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
@@ -150,8 +158,7 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.debug(
           { err, lockFileName },
           'Error removing `pnpm-lock.yaml` for lock file maintenance',
@@ -161,8 +168,8 @@ export async function generateLockFile(
 
     await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore next -- needs test */
   } catch (err) {
+    // v8 ignore if -- TODO: add test #40625
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -170,8 +177,8 @@ export async function generateLockFile(
       {
         commands,
         err,
-        stdout,
-        stderr,
+        stdout: err.stdout,
+        stderr: err.stderr,
         type: 'pnpm',
       },
       'lock file error',

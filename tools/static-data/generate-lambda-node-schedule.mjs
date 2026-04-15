@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { updateJsonFile } from './utils.mjs';
 
 const Runtimes = z.object({
@@ -27,7 +27,7 @@ await (async () => {
 
   /** @type {Record<string, z.infer<Runtimes>>} */
   const nodeRuntimes = {};
-  for (let lambda of lambdas) {
+  for (const lambda of lambdas) {
     if (!lambda.cycle.startsWith('nodejs')) {
       continue;
     }

@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { updateDependency } from '.';
+import { updateDependency } from './index.ts';
 
 describe('modules/manager/hermit/update', () => {
   describe('updateDependency', () => {
@@ -8,7 +8,11 @@ describe('modules/manager/hermit/update', () => {
         #!/bin/bash
         #some hermit content
       `;
-      const ret = updateDependency({ fileContent, upgrade: {} });
+      const ret = updateDependency({
+        fileContent,
+        packageFile: 'bin/hermit',
+        upgrade: {},
+      });
       expect(ret).toBe(`${fileContent}\n#hermit updated`);
     });
 
@@ -18,7 +22,11 @@ describe('modules/manager/hermit/update', () => {
         #some hermit content
         #hermit updated
       `;
-      const ret = updateDependency({ fileContent, upgrade: {} });
+      const ret = updateDependency({
+        fileContent,
+        packageFile: 'bin/hermit',
+        upgrade: {},
+      });
       expect(ret).toBe(`${fileContent}`);
     });
   });

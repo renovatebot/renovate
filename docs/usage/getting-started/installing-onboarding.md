@@ -5,7 +5,7 @@
 Read the [Security and Permissions](../security-and-permissions.md) page to learn more about:
 
 - Renovate's security stance
-- What do if you need to use certified software
+- What to do if you need to use certified software
 - The security/disclosure process
 - Permissions
 - Privacy
@@ -77,6 +77,9 @@ Conveniently, Renovate will not make any changes to your repository or raise any
 If there is anything about the Pull Request that you don't like or understand, take your time to read the [documentation](../index.md) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you're satisfied with the result.
 
 You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can work on the config until you're satisfied with the results.
+
+If you wish to out-out of having Renovate run for your repo, simply close the onboarding Pull Request without merging it.
+This is action reversible - you can re-request an onboarding PR by renaming the (closed) onboarding PR, or you can commit a Renovate configuration file to your default branch to manually onboard.
 
 ### Check for warnings
 

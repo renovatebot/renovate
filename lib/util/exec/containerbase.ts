@@ -1,24 +1,29 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import type { ReleaseResult } from '../../modules/datasource';
-import * as allVersioning from '../../modules/versioning';
-import { id as composerVersioningId } from '../../modules/versioning/composer';
-import { id as condaVersioningId } from '../../modules/versioning/conda';
-import { id as gradleVersioningId } from '../../modules/versioning/gradle';
-import { id as mavenVersioningId } from '../../modules/versioning/maven';
-import { id as nodeVersioningId } from '../../modules/versioning/node';
-import { id as npmVersioningId } from '../../modules/versioning/npm';
-import { id as pep440VersioningId } from '../../modules/versioning/pep440';
-import { id as pythonVersioningId } from '../../modules/versioning/python';
-import { id as rubyVersioningId } from '../../modules/versioning/ruby';
-import { id as semverVersioningId } from '../../modules/versioning/semver';
-import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced';
-import { getEnv } from '../env';
-import type { Opt, ToolConfig, ToolConstraint } from './types';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import type { ReleaseResult } from '../../modules/datasource/index.ts';
+import { id as composerVersioningId } from '../../modules/versioning/composer/index.ts';
+import { id as condaVersioningId } from '../../modules/versioning/conda/index.ts';
+import { id as gradleVersioningId } from '../../modules/versioning/gradle/index.ts';
+import * as allVersioning from '../../modules/versioning/index.ts';
+import { id as mavenVersioningId } from '../../modules/versioning/maven/index.ts';
+import { id as nodeVersioningId } from '../../modules/versioning/node/index.ts';
+import { id as npmVersioningId } from '../../modules/versioning/npm/index.ts';
+import { id as pep440VersioningId } from '../../modules/versioning/pep440/index.ts';
+import { id as pythonVersioningId } from '../../modules/versioning/python/index.ts';
+import { id as rubyVersioningId } from '../../modules/versioning/ruby/index.ts';
+import { id as semverVersioningId } from '../../modules/versioning/semver/index.ts';
+import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced/index.ts';
+import { getEnv } from '../env.ts';
+import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
-const allToolConfig: Record<string, ToolConfig> = {
+const allToolConfig: Record<ToolName, ToolConfig> = {
+  bazelisk: {
+    datasource: 'github-releases',
+    packageName: 'bazelbuild/bazelisk',
+    versioning: semverVersioningId,
+  },
   bun: {
     datasource: 'github-releases',
     packageName: 'oven-sh/bun',
@@ -150,7 +155,6 @@ const allToolConfig: Record<string, ToolConfig> = {
   npm: {
     datasource: 'npm',
     packageName: 'npm',
-    hash: true,
     versioning: npmVersioningId,
   },
   pdm: {
@@ -236,18 +240,19 @@ const allToolConfig: Record<string, ToolConfig> = {
   },
 };
 
-let _getPkgReleases: Promise<typeof import('../../modules/datasource')> | null =
-  null;
+let _getPkgReleases: Promise<
+  typeof import('../../modules/datasource/index.ts')
+> | null = null;
 
 async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
-  _getPkgReleases ??= import('../../modules/datasource/index.js');
+  _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);
 }
 
-export function supportsDynamicInstall(toolName: string): boolean {
+export function supportsDynamicInstall(toolName: ToolName): boolean {
   return !!allToolConfig[toolName];
 }
 
@@ -374,9 +379,6 @@ export async function generateInstallCommands(
       const { toolName } = toolConstraint;
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
-      if (allToolConfig[toolName].hash) {
-        installCommands.push(`hash -d ${toolName} 2>/dev/null || true`);
-      }
     }
   }
   return installCommands;

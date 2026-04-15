@@ -1,11 +1,11 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import { logger } from '../../../logger';
-import type { MaybePromise } from '../../../types';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { MaybePromise } from '../../../types/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 function getSectionName(str: string): string {
   const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) ?? [];

@@ -3,9 +3,9 @@ import {
   isNonEmptyArray,
   isNonEmptyStringAndNotWhitespace,
 } from '@sindresorhus/is';
-import type { RegExpVersion } from '../regex';
-import { RegExpVersioningApi } from '../regex';
-import type { VersioningApiConstructor } from '../types';
+import type { RegExpVersion } from '../regex/index.ts';
+import { RegExpVersioningApi } from '../regex/index.ts';
+import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'nixpkgs';
 export const displayName = 'Nixpkgs';
@@ -31,11 +31,11 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
     const release = [];
 
     if (major) {
-      release.push(Number.parseInt(major));
+      release.push(Number.parseInt(major, 10));
     }
 
     if (minor) {
-      release.push(Number.parseInt(minor));
+      release.push(Number.parseInt(minor, 10));
     }
 
     const compatibility = isNonEmptyStringAndNotWhitespace(suffix)

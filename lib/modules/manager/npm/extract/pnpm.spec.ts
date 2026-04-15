@@ -1,19 +1,19 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../../config/global';
-import * as yaml from '../../../../util/yaml';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, getFixturePath, logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as yaml from '../../../../util/yaml.ts';
+import type { PackageFile } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
   extractPnpmWorkspaceFile,
   findPnpmWorkspace,
   getPnpmLock,
-} from './pnpm';
-import { Fixtures } from '~test/fixtures';
-import { fs, getFixturePath, logger, partial } from '~test/util';
+} from './pnpm.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/pnpm', () => {
   beforeAll(() => {
@@ -95,7 +95,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
   describe('.detectPnpmWorkspaces()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
 
       // The real implementations of these functions are used for this block;
       // they do static path manipulation.
@@ -385,6 +387,77 @@ describe('modules/manager/npm/extract/pnpm', () => {
             depName: 'react',
             depType: 'pnpm.catalog.react17',
             prettyDepType: 'pnpm.catalog.react17',
+          },
+        ],
+      });
+    });
+
+    it('parses overrides in pnpm-workspace.yaml file', async () => {
+      expect(
+        await extractPnpmWorkspaceFile(
+          {
+            overrides: {
+              'foo>bar': '2.0.0',
+              'foo@1.0.0': '2.0.0',
+              'foo@>1.0.0': '2.0.0',
+              'foo@>=1.0.0': '2.0.0',
+              'foo@1.0.0>bar': '2.0.0',
+              'foo@>1.0.0>bar': '2.0.0',
+              'foo@>=1.0.0 <2.0.0': '>=2.0.0',
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '>=2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0 <2.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
           },
         ],
       });

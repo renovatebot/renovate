@@ -6,26 +6,27 @@ import {
   isObject,
   isString,
 } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { BackendToolingConfig } from './backends';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { BackendToolingConfig } from './backends.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
-} from './backends';
-import type { MiseTool, MiseToolOptions } from './schema';
-import type { ToolingDefinition } from './upgradeable-tooling';
-import { asdfTooling, miseTooling } from './upgradeable-tooling';
-import { parseTomlFile } from './utils';
+} from './backends.ts';
+import type { MiseTool, MiseToolOptions } from './schema.ts';
+import type { ToolingDefinition } from './upgradeable-tooling.ts';
+import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
+import { parseTomlFile } from './utils.ts';
 
 // Tool names can have options in the tool name
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
@@ -110,7 +111,7 @@ function getToolConfig(
   toolName: string,
   version: string,
   toolOptions: MiseToolOptions,
-): ToolingConfig | BackendToolingConfig | null {
+): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
     case '':
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
@@ -134,6 +135,8 @@ function getToolConfig(
       return createDotnetToolConfig(toolName);
     case 'gem':
       return createGemToolConfig(toolName);
+    case 'github':
+      return createGithubToolConfig(toolName, version, toolOptions);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':
@@ -157,7 +160,7 @@ function getToolConfig(
 function getRegistryToolConfig(
   short: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   // Try to get the config from miseTooling first, then asdfTooling
   return (
     getConfigFromTooling(miseTooling, short, version) ??
@@ -169,7 +172,7 @@ function getConfigFromTooling(
   toolingSource: Record<string, ToolingDefinition>,
   name: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   const toolDefinition = toolingSource[name];
   if (!toolDefinition) {
     return null;
@@ -185,7 +188,7 @@ function getConfigFromTooling(
 function createDependency(
   name: string,
   version: string | null,
-  config: ToolingConfig | BackendToolingConfig | null,
+  config: StaticTooling | BackendToolingConfig | null,
 ): PackageDependency {
   if (version === null) {
     return {

@@ -1,4 +1,4 @@
-import { AutomergeTypeMigration } from './automerge-type-migration';
+import { AutomergeTypeMigration } from './automerge-type-migration.ts';
 
 describe('config/migrations/custom/automerge-type-migration', () => {
   it('should migrate string like "branch-" to "branch"', async () => {

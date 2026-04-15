@@ -7,8 +7,8 @@ import type {
   ResultFragment,
   RuleFragment,
   UseRepoRuleFragment,
-} from './fragments';
-import * as fragments from './fragments';
+} from './fragments.ts';
+import * as fragments from './fragments.ts';
 
 // Represents the fields that the context must have.
 export interface CtxCompatible {
@@ -34,6 +34,10 @@ export class Ctx implements CtxCompatible {
   readonly source: string;
   results: ResultFragment[];
   stack: AllFragments[];
+
+  // Temporary state for use_repo_rule parsing
+  _tempVariableName?: string;
+  _tempStrings?: string[];
 
   constructor(source: string) {
     this.source = source;
@@ -127,6 +131,7 @@ export class Ctx implements CtxCompatible {
         parent.items.push(current);
         return true;
       }
+      // v8 ignore else -- TODO: add test #40625
       if (
         (parent.type === 'rule' ||
           parent.type === 'extensionTag' ||

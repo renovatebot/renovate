@@ -1,9 +1,9 @@
 import { isString } from '@sindresorhus/is';
 import moo from 'moo';
-import * as memCache from '../../../util/cache/memory';
-import { getEnv } from '../../../util/env';
-import { regEx } from '../../../util/regex';
-import type { GoproxyItem } from './types';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { GoproxyItem } from './types.ts';
 
 /**
  * Parse `GOPROXY` to the sequence of url + fallback strategy tags.

@@ -1,11 +1,12 @@
 import { Readable } from 'node:stream';
 import { codeBlock } from 'common-tags';
-import { updateDependency } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import * as handlers from './handlers/index.ts';
+import { updateDependency } from './index.ts';
 
-const aide = Fixtures.get('aide.rb');
-const ibazel = Fixtures.get('ibazel.rb');
+const aide = Fixtures.get('aide.rb.sample');
+const ibazel = Fixtures.get('ibazel.rb.sample');
 
 const baseUrl = 'https://github.com';
 
@@ -15,11 +16,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.16.1',
       depName: 'Aide',
       managerData: {
+        type: 'github' as const,
         ownerName: 'aide',
         repoName: 'aide',
         sha256:
           '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
         url: 'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+        urlType: 'releases' as const,
       },
       newValue: 'v0.17.7',
     };
@@ -30,6 +33,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: aide,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -47,11 +51,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -64,6 +70,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -90,11 +97,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -107,6 +116,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: oldArchiveFormat,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -124,11 +134,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -143,6 +155,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -154,17 +167,20 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'invalid_url',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -176,25 +192,20 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'invalid/repo/name',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/invalid/repo/name/releases/download/v0.9.3/invalid/repo/name-0.9.3.tar.gz',
-      )
-      .replyWithError('')
-      .get('/bazelbuild/invalid/repo/name/archive/refs/tags/v0.9.3.tar.gz')
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -206,27 +217,20 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'wrong-version/archive/refs/tags/v10.2.3.tar.gz',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/wrong-version/archive/refs/tags/v10.2.3.tar.gz/releases/download/v0.9.3/wrong-version/archive/refs/tags/v10.2.3.tar.gz-0.9.3.tar.gz',
-      )
-      .replyWithError('')
-      .get(
-        '/bazelbuild/wrong-version/archive/refs/tags/v10.2.3.tar.gz/archive/refs/tags/v0.9.3.tar.gz',
-      )
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -247,11 +251,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -264,6 +270,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: invalidUrlFormula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -283,11 +290,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -300,6 +309,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: missingUrlFormula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -320,11 +330,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -337,6 +349,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: invalidSha256Formula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -356,11 +369,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -373,6 +388,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: missingSha256Formula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -384,11 +400,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.16.1',
       depName: 'Aide',
       managerData: {
+        type: 'github' as const,
         ownerName: 'aide',
         repoName: 'aide',
         sha256:
           '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
         url: 'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+        urlType: 'releases' as const,
       },
       newValue: 'v0.17.7',
     };
@@ -401,9 +419,249 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: aide,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
     expect(newContent).toBe(aide);
+  });
+
+  it('returns unchanged content if managerData is missing required fields', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256: null,
+        url: null,
+      },
+      newValue: 'v0.9.3',
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+  });
+
+  it('returns unchanged content for unknown handler type', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'unknown' as never,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+        url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+      },
+      newValue: 'v0.9.3',
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+  });
+
+  it('returns unchanged content if newValue is missing', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+        url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+      },
+      newValue: undefined as never,
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+  });
+
+  it('returns unchanged content if handler buildArchiveUrls returns null', async () => {
+    const mockHandler = {
+      type: 'github',
+      parseUrl: vi.fn().mockReturnValue({
+        type: 'github',
+        currentValue: 'v0.8.2',
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        urlType: 'archive',
+      }),
+      buildArchiveUrls: vi.fn().mockReturnValue(null),
+      createDependency: vi.fn(),
+    };
+
+    vi.spyOn(handlers, 'findHandlerByType').mockReturnValue(
+      mockHandler as never,
+    );
+
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+        url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+      },
+      newValue: 'v0.9.3',
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+    expect(mockHandler.buildArchiveUrls).toHaveBeenCalled();
+  });
+
+  it('updates npm scoped package dependency', async () => {
+    const content = codeBlock`
+      class ClaudeCode < Formula
+      desc "Anthropic's official CLI for Claude"
+      homepage "https://www.anthropic.com/claude-code"
+      url "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz"
+      sha256 "345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601"
+      license "Proprietary"
+      end
+    `;
+
+    const upgrade = {
+      currentValue: '0.1.0',
+      depName: '@anthropic-ai/claude-code',
+      managerData: {
+        type: 'npm' as const,
+        packageName: '@anthropic-ai/claude-code',
+        sha256:
+          '345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601',
+        url: 'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz',
+      },
+      newValue: '0.2.0',
+    };
+
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/@anthropic-ai/claude-code/-/claude-code-0.2.0.tgz')
+      .reply(200, Readable.from(['foo']));
+
+    const newContent = await updateDependency({
+      fileContent: content,
+      packageFile: 'Formula/some.rb',
+      upgrade,
+    });
+
+    expect(newContent).not.toBe(content);
+    expect(newContent).toContain(
+      'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.2.0.tgz',
+    );
+    expect(newContent).toContain(
+      '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae',
+    );
+  });
+
+  it('updates npm unscoped package dependency', async () => {
+    const content = codeBlock`
+      class Express < Formula
+      desc "Fast, unopinionated, minimalist web framework"
+      homepage "https://expressjs.com/"
+      url "https://registry.npmjs.org/express/-/express-4.18.2.tgz"
+      sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      license "MIT"
+      end
+    `;
+
+    const upgrade = {
+      currentValue: '4.18.2',
+      depName: 'express',
+      managerData: {
+        type: 'npm' as const,
+        packageName: 'express',
+        sha256:
+          'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
+        url: 'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
+      },
+      newValue: '4.18.3',
+    };
+
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/express/-/express-4.18.3.tgz')
+      .reply(200, Readable.from(['bar']));
+
+    const newContent = await updateDependency({
+      fileContent: content,
+      packageFile: 'Formula/some.rb',
+      upgrade,
+    });
+
+    expect(newContent).not.toBe(content);
+    expect(newContent).toContain(
+      'https://registry.npmjs.org/express/-/express-4.18.3.tgz',
+    );
+    expect(newContent).toContain(
+      'fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9',
+    );
+  });
+
+  it('returns unchanged content if npm tarball download fails', async () => {
+    const content = codeBlock`
+      class Express < Formula
+      desc "Fast, unopinionated, minimalist web framework"
+      homepage "https://expressjs.com/"
+      url "https://registry.npmjs.org/express/-/express-4.18.2.tgz"
+      sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      license "MIT"
+      end
+    `;
+
+    const upgrade = {
+      currentValue: '4.18.2',
+      depName: 'express',
+      managerData: {
+        type: 'npm' as const,
+        packageName: 'express',
+        sha256:
+          'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
+        url: 'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
+      },
+      newValue: '4.18.3',
+    };
+
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/express/-/express-4.18.3.tgz')
+      .replyWithError('Not found');
+
+    const newContent = await updateDependency({
+      fileContent: content,
+      packageFile: 'Formula/some.rb',
+      upgrade,
+    });
+
+    expect(newContent).toBe(content);
   });
 });

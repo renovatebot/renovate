@@ -1,12 +1,12 @@
 // Code originally derived from https://github.com/hadfieldn/node-bunyan-prettystream but since heavily edited
 // Neither fork nor original repo appear to be maintained
 
-import { Stream } from 'node:stream';
+import { Writable } from 'node:stream';
 import * as util from 'node:util';
-import chalk from 'chalk';
+import { isNonEmptyObject, isPlainObject, isString } from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
-import { regEx } from '../util/regex';
-import type { BunyanRecord } from './types';
+import { regEx } from '../util/regex.ts';
+import type { BunyanRecord } from './types.ts';
 
 const bunyanFields = [
   'name',
@@ -29,12 +29,21 @@ const metaFields = [
 ];
 
 const levels: Record<number, string> = {
-  10: chalk.gray('TRACE'),
-  20: chalk.blue('DEBUG'),
-  30: chalk.green(' INFO'),
-  40: chalk.magenta(' WARN'),
-  50: chalk.red('ERROR'),
-  60: chalk.bgRed('FATAL'),
+  10: 'TRACE',
+  20: 'DEBUG',
+  30: ' INFO',
+  40: ' WARN',
+  50: 'ERROR',
+  60: 'FATAL',
+};
+
+const colorizedLevels: Record<number, string> = {
+  10: util.styleText('gray', 'TRACE'),
+  20: util.styleText('blue', 'DEBUG'),
+  30: util.styleText('green', ' INFO'),
+  40: util.styleText('magenta', ' WARN'),
+  50: util.styleText('red', 'ERROR'),
+  60: util.styleText('bgRed', 'FATAL'),
 };
 
 export function indent(str: string, leading = false): string {
@@ -42,7 +51,7 @@ export function indent(str: string, leading = false): string {
   return prefix + str.split(regEx(/\r?\n/)).join('\n       ');
 }
 
-export function getMeta(rec: BunyanRecord): string {
+export function getMeta(rec: BunyanRecord, colorize = true): string {
   if (!rec) {
     return '';
   }
@@ -55,7 +64,7 @@ export function getMeta(rec: BunyanRecord): string {
     .map((field) => `${field}=${String(rec[field])}`)
     .join(', ');
   res = ` (${metaStr})${res}`;
-  return chalk.gray(res);
+  return colorize ? util.styleText('gray', res) : res;
 }
 
 export function getDetails(rec: BunyanRecord): string {
@@ -77,32 +86,52 @@ export function getDetails(rec: BunyanRecord): string {
   if (remainingKeys.length === 0) {
     return '';
   }
+
+  // Handle err.stack specially for readable multi-line output
+  const err = recFiltered.err;
+  if (isPlainObject(err) && isString(err.stack)) {
+    const { stack, ...errRest } = err;
+    recFiltered.err = isNonEmptyObject(errRest) ? errRest : undefined;
+    const parts: string[] = [];
+    for (const key of remainingKeys) {
+      if (key === 'err' && recFiltered.err === undefined) {
+        continue;
+      }
+      parts.push(indent(`"${key}": ${stringify(recFiltered[key])}`, true));
+    }
+    const jsonPart = parts.join(',\n');
+    const stackPart = indent(stack, true);
+    return jsonPart ? `${jsonPart}\n${stackPart}\n` : `${stackPart}\n`;
+  }
+
   return `${remainingKeys
     .map((key) => `${indent(`"${key}": ${stringify(recFiltered[key])}`, true)}`)
     .join(',\n')}\n`;
 }
 
-export function formatRecord(rec: BunyanRecord): string {
-  const level = levels[rec.level];
+export function formatRecord(rec: BunyanRecord, colorize = true): string {
+  const level = colorize ? colorizedLevels[rec.level] : levels[rec.level];
   const msg = `${indent(rec.msg)}`;
-  const meta = getMeta(rec);
+  const meta = getMeta(rec, colorize);
   const details = getDetails(rec);
   return util.format('%s: %s%s\n%s', level, msg, meta, details);
 }
 
-export class RenovateStream extends Stream {
-  readable: boolean;
+export class RenovateStream extends Writable {
+  private colorize: boolean;
+  private destination: NodeJS.WritableStream;
 
-  writable: boolean;
-
-  constructor() {
-    super();
-    this.readable = true;
-    this.writable = true;
+  constructor(destination: NodeJS.WritableStream, colorize = true) {
+    super({ objectMode: true });
+    this.colorize = colorize;
+    this.destination = destination;
   }
 
-  write(data: BunyanRecord): boolean {
-    this.emit('data', formatRecord(data));
-    return true;
+  override _write(
+    data: BunyanRecord,
+    _encoding: string,
+    callback: (error?: Error | null) => void,
+  ): void {
+    this.destination.write(formatRecord(data, this.colorize), callback);
   }
 }

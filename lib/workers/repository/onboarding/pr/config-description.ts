@@ -1,9 +1,7 @@
 import { isArray, isString } from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import { emojify } from '../../../../util/emoji';
-import { getDefaultConfigFileName } from '../common';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
 
 export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
@@ -29,10 +27,9 @@ function getDescriptionArray(config: RenovateConfig): string[] {
 
 export function getConfigDesc(
   config: RenovateConfig,
-  packageFiles?: Record<string, PackageFile[]>,
+  // TODO: remove unused parameter
+  _packageFiles?: Record<string, PackageFile[]>,
 ): string {
-  // TODO: type (#22198)
-  const configFile = getDefaultConfigFileName(config);
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   const descriptionArr = getDescriptionArray(config);
@@ -46,15 +43,6 @@ export function getConfigDesc(
   descriptionArr.forEach((d) => {
     desc += `  - ${d}\n`;
   });
-  desc += '\n';
-  desc += emojify(
-    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
-  );
-  desc += ` Add your custom config to \`${configFile}\` in this branch${
-    config.onboardingRebaseCheckbox
-      ? ' and select the Retry/Rebase checkbox below'
-      : ''
-  }. Renovate will update the Pull Request description the next time it runs.`;
-  desc += '\n\n---\n';
+  desc += '\n---\n';
   return desc;
 }

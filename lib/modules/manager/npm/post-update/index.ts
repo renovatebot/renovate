@@ -2,50 +2,54 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getEnv } from '../../../../util/env';
+import { logger } from '../../../../logger/index.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { getEnv } from '../../../../util/env.ts';
 import {
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../../util/fs';
-import { getFile, getRepoStatus } from '../../../../util/git';
-import type { FileChange } from '../../../../util/git/types';
-import * as hostRules from '../../../../util/host-rules';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import { ensureTrailingSlash } from '../../../../util/url';
-import { dump, parseSingleYaml } from '../../../../util/yaml';
-import { NpmDatasource } from '../../../datasource/npm';
-import { scm } from '../../../platform/scm';
-import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
+} from '../../../../util/fs/index.ts';
+import { getFile, getRepoStatus } from '../../../../util/git/index.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import * as hostRules from '../../../../util/host-rules.ts';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../../util/url.ts';
+import { dump, parseSingleYaml } from '../../../../util/yaml.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
+import { scm } from '../../../platform/scm.ts';
+import type {
+  ArtifactError,
+  PackageFile,
+  PostUpdateConfig,
+  Upgrade,
+} from '../../types.ts';
 import {
   NPM_CACHE_DIR,
   PNPM_CACHE_BASE_DIR,
   YARN_CACHE_DIR,
   YARN_GLOBAL_DIR,
-} from '../constants';
-import { getZeroInstallPaths } from '../extract/yarn';
-import type { NpmManagerData } from '../types';
+} from '../constants.ts';
+import { getZeroInstallPaths } from '../extract/yarn.ts';
+import type { NpmManagerData } from '../types.ts';
 import {
   composeLockFile,
   getNpmrcContent,
   parseLockFile,
   resetNpmrcContent,
   updateNpmrcContent,
-} from '../utils';
-import * as npm from './npm';
-import * as pnpm from './pnpm';
-import { processHostRules } from './rules';
+} from '../utils.ts';
+import * as npm from './npm.ts';
+import * as pnpm from './pnpm.ts';
+import { processHostRules } from './rules.ts';
 import type {
   AdditionalPackageFiles,
-  ArtifactError,
   DetermineLockFileDirsResult,
   WriteExistingFilesResult,
   YarnRcYmlFile,
-} from './types';
-import * as yarn from './yarn';
+} from './types.ts';
+import * as yarn from './yarn.ts';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 const getDirs = (arr: (string | null | undefined)[]): string[] =>
@@ -60,6 +64,7 @@ export function determineLockFileDirs(
   const pnpmShrinkwrapDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
+    // v8 ignore else -- TODO: add test #40625
     if (
       upgrade.updateType === 'lockFileMaintenance' ||
       upgrade.isRemediation === true ||
@@ -134,7 +139,7 @@ export async function writeExistingFiles(
     'Writing package.json files',
   );
   for (const packageFile of npmFiles) {
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (!packageFile.managerData) {
       continue;
     }
@@ -151,8 +156,7 @@ export async function writeExistingFiles(
     ) {
       try {
         await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
@@ -163,8 +167,7 @@ export async function writeExistingFiles(
       let existingNpmLock: string;
       try {
         existingNpmLock = (await getFile(npmLock)) ?? '';
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ err }, 'Error reading npm lock file');
         existingNpmLock = '';
       }
@@ -204,6 +207,7 @@ export async function writeExistingFiles(
             }
           }
         }
+        // v8 ignore else -- TODO: add test #40625
         if (widens.length) {
           logger.debug(
             `Removing ${String(widens)} from ${npmLock} to force an update`,
@@ -216,14 +220,14 @@ export async function writeExistingFiles(
                 delete npmLockParsed.dependencies![depName];
               });
             }
-            /* v8 ignore next -- needs test */
-          } catch {
+          } catch /* v8 ignore next -- TODO: add test #40625 */ {
             logger.warn(
               { npmLock },
               'Error massaging package-lock.json for widen',
             );
           }
         }
+        // v8 ignore else -- TODO: add test #40625
         if (lockFileChanged) {
           logger.debug('Massaging npm lock file before writing to disk');
           existingNpmLock = composeLockFile(npmLockParsed, detectedIndent);
@@ -242,6 +246,15 @@ export async function writeUpdatedPackageFiles(
   if (!config.updatedPackageFiles) {
     logger.debug('No files found');
     return;
+  }
+  // prefer artifact content when it updates the same file (e.g. pnpm-workspace.yaml)
+  const artifactContents = new Map<string, string>();
+  if (config.updatedArtifacts) {
+    for (const artifact of config.updatedArtifacts) {
+      if (artifact.type === 'addition' && artifact.contents) {
+        artifactContents.set(artifact.path, artifact.contents.toString());
+      }
+    }
   }
   const supportedLockFiles = ['package-lock.json', 'yarn.lock'];
   for (const packageFile of config.updatedPackageFiles) {
@@ -266,8 +279,10 @@ export async function writeUpdatedPackageFiles(
     ) {
       continue;
     }
+    const contents =
+      artifactContents.get(packageFile.path) ?? packageFile.contents!;
     logger.debug(`Writing ${packageFile.path}`);
-    await writeLocalFile(packageFile.path, packageFile.contents!);
+    await writeLocalFile(packageFile.path, contents);
   }
 }
 
@@ -371,8 +386,7 @@ export async function updateYarnBinary(
         isExecutable: true,
       },
     );
-    /* v8 ignore next -- needs test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.error({ err }, 'Error updating Yarn binary');
   }
   return existingYarnrcYmlContent && yarnrcYml;
@@ -425,9 +439,9 @@ export async function getAdditionalFiles(
       hostType: 'github',
       url: 'https://api.github.com/',
     }));
-    token = token ? /* v8 ignore next */ `${token}@` : token;
-    /* v8 ignore next -- needs test */
-  } catch (err) {
+    // v8 ignore next -- TODO: add test #40625
+    token = token ? `${token}@` : token;
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
   const tokenRe = regEx(`${token ?? ''}`, 'g', false);
@@ -469,7 +483,7 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: npmLock,
+        fileName: npmLock,
         stderr: res.stderr,
       });
     } else if (res.lockFile) {
@@ -502,6 +516,7 @@ export async function getAdditionalFiles(
     if (additionalYarnRcYml) {
       yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
       existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
+      // v8 ignore else -- TODO: add test #40625
       if (existingYarnrcYmlContent) {
         try {
           // TODO: use schema (#9610)
@@ -534,10 +549,9 @@ export async function getAdditionalFiles(
       /* v8 ignore next -- needs test */
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
         for (const upgrade of config.upgrades) {
-          /* eslint-disable no-useless-escape */
           if (
             res.stderr.includes(
-              `Couldn't find any versions for \\\"${upgrade.depName}\\\"`,
+              `Couldn't find any versions for \\"${upgrade.depName}\\"`,
             )
           ) {
             logger.debug(
@@ -551,13 +565,12 @@ export async function getAdditionalFiles(
               NpmDatasource.id,
             );
           }
-          /* eslint-enable no-useless-escape */
         }
       }
 
       artifactErrors.push({
-        lockFile: yarnLock,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        fileName: yarnLock,
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
     } else {
@@ -628,8 +641,8 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        lockFile: pnpmShrinkwrap,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        fileName: pnpmShrinkwrap,
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         stderr: res.stderr || res.stdout,
       });
     } else {

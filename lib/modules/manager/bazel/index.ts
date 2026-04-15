@@ -1,12 +1,13 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GoDatasource } from '../../datasource/go';
-import { updateArtifacts } from './artifacts';
-import { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GoDatasource } from '../../datasource/go/index.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile, updateArtifacts };
+export { knownDepTypes } from './dep-types.ts';
 
 export const url = 'https://bazel.build/docs';
 export const categories: Category[] = ['bazel'];

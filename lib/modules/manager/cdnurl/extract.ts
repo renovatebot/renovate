@@ -1,6 +1,6 @@
-import { regEx } from '../../../util/regex';
-import { CdnjsDatasource } from '../../datasource/cdnjs';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { CdnjsDatasource } from '../../datasource/cdnjs/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export const cloudflareUrlRegex = regEx(
   /\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/(?<depName>[^/]+?)\/(?<currentValue>[^/]+?)\/(?<asset>[-/_.a-zA-Z0-9]+)/,

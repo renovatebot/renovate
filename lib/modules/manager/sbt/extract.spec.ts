@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import {
   extractPackageFile as extract,
   extractAllPackageFiles,
-} from './extract';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+} from './extract.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 
@@ -93,6 +93,66 @@ describe('modules/manager/sbt/extract', () => {
           },
         ],
         packageFileVersion: '3.2.1',
+      });
+    });
+
+    it('extracts deps when scala version is defined in an object', () => {
+      const content = codeBlock`
+        val versions = new {
+          scala = "2.12.10"
+          example = "0.0.8"
+        }
+        scalaVersion := versions.scala
+        version := "3.2.1"
+        libraryDependencies += "org.example" % "foo" % versions.example
+      `;
+      expect(extractPackageFile(content)).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+            registryUrls: [],
+            separateMinorPatch: true,
+          },
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: '0.0.8',
+            registryUrls: [],
+            sharedVariableName: 'versions.example',
+            variableName: 'versions.example',
+          },
+        ],
+        packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: '2.12',
+        },
+      });
+    });
+
+    it('skips deps when dotted symbolds do not resolve to anything', () => {
+      const content = codeBlock`
+        scalaVersion := versions.scala
+        version := "3.2.1"
+        libraryDependencies += "org.example" % "foo" % versions.example
+      `;
+      expect(extractPackageFile(content)).toEqual({
+        deps: [
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: undefined,
+            registryUrls: [],
+          },
+        ],
+        packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: undefined,
+        },
       });
     });
 

@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { BitriseDatasource } from '../../datasource/bitrise';
-import { extractPackageFile } from '.';
+import { BitriseDatasource } from '../../datasource/bitrise/index.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/bitrise/extract', () => {
   describe('extractPackageFile()', () => {
@@ -106,6 +106,34 @@ describe('modules/manager/bitrise/extract', () => {
             packageName: 'script',
             registryUrls: ['https://github.com/foo/bar.git'],
             replaceString: 'https://github.com/foo/bar.git::script@1',
+          },
+        ],
+      });
+    });
+
+    it('handles workflows without steps', () => {
+      expect(
+        extractPackageFile(
+          codeBlock`
+      workflows:
+        deploy:
+          steps:
+          - activate-ssh-key@1.0.0: {}
+        deploy_staging:
+          envs:
+          - DEPLOY_BUILD_SCHEME: Staging
+          after_run:
+          - deploy
+      `,
+          'bitrise.yml',
+        ),
+      ).toEqual({
+        deps: [
+          {
+            datasource: BitriseDatasource.id,
+            packageName: 'activate-ssh-key',
+            currentValue: '1.0.0',
+            replaceString: 'activate-ssh-key@1.0.0',
           },
         ],
       });

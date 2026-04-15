@@ -1,4 +1,4 @@
-import { createSDBackendURL } from './utils';
+import { createSDBackendURL, getRegistryRepository } from './utils.ts';
 
 describe('modules/datasource/terraform-module/utils', () => {
   describe('createSDBackendURL', () => {
@@ -80,6 +80,41 @@ describe('modules/datasource/terraform-module/utils', () => {
         'hashicorp/azure',
       );
       expect(result).toBe('https://registry.example.com/hashicorp/azure');
+    });
+  });
+
+  describe('getRegistryRepository', () => {
+    it('uses the configured registry URL for standard package names', () => {
+      expect(
+        getRegistryRepository(
+          'hashicorp/consul/aws',
+          'https://registry.terraform.io',
+        ),
+      ).toEqual({
+        registry: 'https://registry.terraform.io',
+        repository: 'hashicorp/consul/aws',
+      });
+    });
+
+    it('extracts the registry from packageName when it is embedded', () => {
+      expect(
+        getRegistryRepository(
+          'registry.terraform.io/hashicorp/consul/aws',
+          undefined,
+        ),
+      ).toEqual({
+        registry: 'https://registry.terraform.io',
+        repository: 'hashicorp/consul/aws',
+      });
+    });
+
+    it('normalizes an embedded registry without a scheme', () => {
+      expect(
+        getRegistryRepository('terraform.company.com/hashicorp/consul/aws', ''),
+      ).toEqual({
+        registry: 'https://terraform.company.com',
+        repository: 'hashicorp/consul/aws',
+      });
     });
   });
 });

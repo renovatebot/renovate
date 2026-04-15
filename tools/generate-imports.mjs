@@ -4,16 +4,13 @@ import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { hashFile, hashFromArray } from './utils/hash.mjs';
 
-console.log('generating imports');
 const newFiles = new Set();
 
 if (!fs.existsSync('lib')) {
-  console.log('> missing sources');
   process.exit(0);
 }
 
 if (!fs.existsSync('data')) {
-  console.log('> missing data folder');
   process.exit(0);
 }
 
@@ -86,7 +83,7 @@ async function getFileHash(filePath) {
  */
 export async function getManagerHash(managerName, isCustomManager) {
   /** @type {string[]} */
-  let hashes = [];
+  const hashes = [];
   let folderPattern = `lib/modules/manager/${managerName}/**`;
   if (isCustomManager) {
     folderPattern = `lib/modules/manager/custom/${managerName}/**`;
@@ -126,7 +123,6 @@ async function generateData() {
     const rawFileContent = await fs.readFile(file, 'utf8');
     const value = JSON.stringify(rawFileContent);
 
-    console.log(`> ${key}`);
     contentMapAssignments.push(`data.set('${key}', ${value});`);
   }
 
@@ -161,11 +157,10 @@ export type ManagerName = typeof AllManagersListLiteral[number];
 }
 
 async function generateHash() {
-  console.log('generating hashes');
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
     /** @type {Record<string, string>[]} */
-    let hashes = [];
+    const hashes = [];
     // get managers list
     const managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })
@@ -201,7 +196,7 @@ async function generateHash() {
       [hashMap, hashStrings.join('\n')].join('\n\n'),
     );
   } catch (err) {
-    console.log('ERROR:', err.message);
+    console.error(err);
     process.exit(1);
   }
 }
@@ -220,8 +215,8 @@ await (async () => {
           await fs.remove(file);
         }),
     );
-  } catch (e) {
-    console.log(e.toString());
+  } catch (err) {
+    console.error(err);
     process.exit(1);
   }
 })();

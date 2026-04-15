@@ -1,4 +1,4 @@
-import { api as versioning } from '.';
+import { api as versioning } from './index.ts';
 
 describe('modules/versioning/poetry/index', () => {
   describe('equals', () => {

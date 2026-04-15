@@ -1,7 +1,7 @@
-import { logger } from '../logger';
-import * as memCache from './cache/memory';
-import type { GitOperationType } from './git/types';
-import { parseUrl } from './url';
+import { logger } from '../logger/index.ts';
+import * as memCache from './cache/memory/index.ts';
+import type { GitOperationType } from './git/types.ts';
+import { parseUrl } from './url.ts';
 
 type LookupStatsData = Record<string, number[]>;
 
@@ -54,6 +54,168 @@ export class LookupStats {
   static report(): void {
     const report = LookupStats.getReport();
     logger.debug(report, 'Lookup statistics');
+  }
+}
+
+interface GetReleasesDataPoint {
+  datasource: string;
+  registryUrl: string;
+  packageName: string;
+  duration: number;
+}
+
+interface getReleaseStatsInternalPackages<T> {
+  stats: T;
+  packages: Record<string, T>;
+}
+
+/**
+ * Internal structure that represents the hierarchical structure of the data. We use this
+ * to handle the duration datapoints, and then convert to the final report structure.
+ */
+interface getReleaseStatsInternal<T, P = T> {
+  // Overall stats
+  stats: T;
+  datasources: Record<
+    string,
+    {
+      // Datasource stats.
+      stats: T;
+      registryUrls: Record<
+        string,
+        [P] extends [never]
+          ? Omit<getReleaseStatsInternalPackages<T>, 'packages'>
+          : getReleaseStatsInternalPackages<T>
+      >;
+    }
+  >;
+}
+
+export type GetReleaseStatsReport = getReleaseStatsInternal<TimingStatsReport>;
+
+// Short report does not include package stats.
+export type GetReleaseStatsReportShort = getReleaseStatsInternal<
+  TimingStatsReport,
+  never
+>;
+
+export class GetDatasourceReleasesStats {
+  static write(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+    duration: number,
+  ): void {
+    const data =
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats') ?? [];
+    data.push({ datasource, registryUrl, packageName, duration });
+    memCache.set('get-releases-stats', data);
+  }
+
+  static async wrap<T>(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+    callback: () => Promise<T>,
+  ): Promise<T> {
+    const start = Date.now();
+    const result = await callback();
+    const duration = Date.now() - start;
+    this.write(datasource, registryUrl, packageName, duration);
+    return result;
+  }
+
+  static getReport(): GetReleaseStatsReport {
+    const data =
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats') ?? [];
+
+    // Process all datapoints into a hierarchical structure of datasource, registry url, and package name.
+    const durationData: getReleaseStatsInternal<number[]> = {
+      stats: [],
+      datasources: {},
+    };
+    for (const { datasource, registryUrl, packageName, duration } of data) {
+      durationData.stats.push(duration);
+
+      durationData.datasources[datasource] ??= { stats: [], registryUrls: {} };
+      durationData.datasources[datasource].stats.push(duration);
+
+      durationData.datasources[datasource].registryUrls[registryUrl] ??= {
+        stats: [],
+        packages: {},
+      };
+      durationData.datasources[datasource].registryUrls[registryUrl].stats.push(
+        duration,
+      );
+
+      durationData.datasources[datasource].registryUrls[registryUrl].packages[
+        packageName
+      ] ??= [];
+      durationData.datasources[datasource].registryUrls[registryUrl].packages[
+        packageName
+      ].push(duration);
+    }
+
+    const report: GetReleaseStatsReport = {
+      stats: makeTimingReport(durationData.stats),
+      datasources: {},
+    };
+
+    for (const [datasource, datasourceData] of Object.entries(
+      durationData.datasources,
+    )) {
+      report.datasources[datasource] = {
+        stats: makeTimingReport(datasourceData.stats),
+        registryUrls: {},
+      };
+
+      for (const [registryUrl, registryUrlData] of Object.entries(
+        datasourceData.registryUrls,
+      )) {
+        report.datasources[datasource].registryUrls[registryUrl] = {
+          stats: makeTimingReport(registryUrlData.stats),
+          packages: {},
+        };
+
+        for (const [packageName, packageNameData] of Object.entries(
+          registryUrlData.packages,
+        )) {
+          report.datasources[datasource].registryUrls[registryUrl].packages[
+            packageName
+          ] = makeTimingReport(packageNameData);
+        }
+      }
+    }
+
+    return report;
+  }
+
+  static report(): void {
+    const report = this.getReport();
+
+    const shortReport: GetReleaseStatsReportShort = {
+      stats: report.stats,
+      datasources: {},
+    };
+
+    for (const [datasource, datasourceData] of Object.entries(
+      report.datasources,
+    )) {
+      shortReport.datasources[datasource] = {
+        stats: datasourceData.stats,
+        registryUrls: {},
+      };
+      for (const [registryUrl, registryUrlData] of Object.entries(
+        datasourceData.registryUrls,
+      )) {
+        shortReport.datasources[datasource].registryUrls[registryUrl] = {
+          stats: registryUrlData.stats,
+        };
+      }
+    }
+
+    logger.trace(report, 'getReleases statistics with packages');
+    logger.debug(shortReport, 'getReleases statistics summary');
   }
 }
 
@@ -113,30 +275,32 @@ interface DatasourceCacheDataPoint {
   action: 'hit' | 'miss' | 'set' | 'skip';
 }
 
-/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
-export interface DatasourceCacheReport {
-  long: {
-    [datasource in string]: {
-      [registryUrl in string]: {
-        [packageName in string]: {
-          read?: 'hit' | 'miss';
-          write?: 'set' | 'skip';
-        };
-      };
-    };
-  };
-  short: {
-    [datasource in string]: {
-      [registryUrl in string]: {
-        hit: number;
-        miss: number;
-        set: number;
-        skip: number;
-      };
-    };
-  };
+interface DatasourceCacheLongEntry {
+  read?: 'hit' | 'miss';
+  write?: 'set' | 'skip';
 }
-/* eslint-enable @typescript-eslint/consistent-indexed-object-style */
+
+interface DatasourceCacheShortEntry {
+  hit: number;
+  miss: number;
+  set: number;
+  skip: number;
+}
+
+type DatasourceCacheLong = Record<
+  string,
+  Record<string, Record<string, DatasourceCacheLongEntry>>
+>;
+
+type DatasourceCacheShort = Record<
+  string,
+  Record<string, DatasourceCacheShortEntry>
+>;
+
+export interface DatasourceCacheReport {
+  long: DatasourceCacheLong;
+  short: DatasourceCacheShort;
+}
 
 export class DatasourceCacheStats {
   private static getData(): DatasourceCacheDataPoint[] {
@@ -224,6 +388,7 @@ export class DatasourceCacheStats {
         continue;
       }
 
+      /* v8 ignore else -- TODO: add tests #40625 */
       if (action === 'skip') {
         result.long[datasource][registryUrl][packageName].write = 'skip';
         result.short[datasource][registryUrl].skip += 1;
@@ -429,6 +594,7 @@ export class HttpCacheStats {
 
   static incLocalHits(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -440,6 +606,7 @@ export class HttpCacheStats {
 
   static incLocalMisses(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -451,6 +618,7 @@ export class HttpCacheStats {
 
   static incRemoteHits(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -461,6 +629,7 @@ export class HttpCacheStats {
 
   static incRemoteMisses(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -474,6 +643,7 @@ export class HttpCacheStats {
     let report: Record<string, Record<string, HttpCacheHostStatsData>> = {};
     for (const [url, stats] of Object.entries(data)) {
       const parsedUrl = parseUrl(url);
+      /* v8 ignore else -- TODO: add tests #40625 */
       if (parsedUrl) {
         const { origin, pathname } = parsedUrl;
         report[origin] ??= {};

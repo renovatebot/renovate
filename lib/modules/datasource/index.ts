@@ -1,20 +1,27 @@
+import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { GlobalConfig } from '../../config/global';
-import { HOST_DISABLED } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { coerceArray } from '../../util/array';
-import * as memCache from '../../util/cache/memory';
-import * as packageCache from '../../util/cache/package';
-import type { PackageCacheNamespace } from '../../util/cache/package/types';
-import { clone } from '../../util/clone';
-import { filterMap } from '../../util/filter-map';
-import { AsyncResult, Result } from '../../util/result';
-import { DatasourceCacheStats } from '../../util/stats';
-import { trimTrailingSlash } from '../../util/url';
-import * as versioning from '../versioning';
-import datasources from './api';
+import { GlobalConfig } from '../../config/global.ts';
+import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import {
+  ATTR_RENOVATE_DATASOURCE,
+  ATTR_RENOVATE_PACKAGE_NAME,
+  ATTR_RENOVATE_REGISTRY_URL,
+} from '../../instrumentation/types.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../util/array.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
+import * as packageCache from '../../util/cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
+import { clone } from '../../util/clone.ts';
+import { filterMap } from '../../util/filter-map.ts';
+import { AsyncResult, Result } from '../../util/result.ts';
+import { DatasourceCacheStats } from '../../util/stats.ts';
+import { trimTrailingSlash } from '../../util/url.ts';
+import * as versioning from '../versioning/index.ts';
+import datasources from './api.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
@@ -22,10 +29,10 @@ import {
   filterValidVersions,
   getDatasourceFor,
   sortAndRemoveDuplicates,
-} from './common';
-import { addMetaData } from './metadata';
-import { setNpmrc } from './npm';
-import { resolveRegistryUrl } from './npm/npmrc';
+} from './common.ts';
+import { addMetaData } from './metadata.ts';
+import { setNpmrc } from './npm/index.ts';
+import { resolveRegistryUrl } from './npm/npmrc.ts';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -33,10 +40,10 @@ import type {
   GetPkgReleasesConfig,
   GetReleasesConfig,
   ReleaseResult,
-} from './types';
+} from './types.ts';
 
-export * from './types';
-export { isGetPkgReleasesConfig } from './common';
+export { isGetPkgReleasesConfig } from './common.ts';
+export * from './types.ts';
 
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
@@ -86,7 +93,18 @@ async function getRegistryReleases(
     DatasourceCacheStats.miss(datasource.id, registryUrl, config.packageName);
   }
 
-  const res = await datasource.getReleases({ ...config, registryUrl });
+  const res = await instrument(
+    'getReleases',
+    () => datasource.getReleases({ ...config, registryUrl }),
+    {
+      attributes: {
+        [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+        [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+        [ATTR_RENOVATE_REGISTRY_URL]: registryUrl,
+        [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+      },
+    },
+  );
   if (res?.releases.length) {
     res.registryUrl ??= registryUrl;
   }
@@ -371,7 +389,18 @@ async function fetchReleases(
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
-      dep = await datasource.getReleases(config);
+      dep = await instrument(
+        'getReleases',
+        () => datasource.getReleases(config),
+        {
+          attributes: {
+            [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+            [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+            [ATTR_RENOVATE_REGISTRY_URL]: config.registryUrl ?? '',
+            [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+          },
+        },
+      );
     }
   } catch (err) {
     if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {

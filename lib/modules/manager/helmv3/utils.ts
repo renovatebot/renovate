@@ -1,9 +1,9 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { DockerDatasource } from '../../datasource/docker';
-import type { PackageDependency } from '../types';
-import { removeOCIPrefix } from './oci';
-import type { ChartDefinition, Repository } from './types';
+import { logger } from '../../../logger/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { removeOCIPrefix } from './oci.ts';
+import type { ChartDefinition, Repository } from './types.ts';
 
 export function parseRepository(
   depName: string,

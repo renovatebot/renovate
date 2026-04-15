@@ -1,14 +1,16 @@
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
-import { JavaVersionDatasource } from '../../datasource/java-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as regexVersioning from '../../versioning/regex';
-import * as semverVersioning from '../../versioning/semver';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling';
-import { upgradeableTooling } from '../asdf/upgradeable-tooling';
+import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import * as regexVersioning from '../../versioning/regex/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
+import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
+import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
+import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
 
 export interface ToolingDefinition {
   config: ToolingConfig;
@@ -16,6 +18,13 @@ export interface ToolingDefinition {
 }
 
 export const asdfTooling = upgradeableTooling;
+
+function shortJavaVersioning(version: string): { versioning?: string } {
+  if (regEx(/^\d+(\.\d+)?$/).test(version)) {
+    return { versioning: semverPartialVersioning.id };
+  }
+  return {};
+}
 
 const miseCoreTooling: Record<string, ToolingDefinition> = {
   bun: {
@@ -67,6 +76,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: versionMatch,
+          ...shortJavaVersioning(versionMatch),
         };
       }
       const openJdkMatches = regEx(/^openjdk-(?<version>\d\S+)/).exec(
@@ -77,6 +87,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: openJdkMatches.version,
+          ...shortJavaVersioning(openJdkMatches.version),
         };
       }
       const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
@@ -87,6 +98,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: adoptOpenJdkMatches.version,
+          ...shortJavaVersioning(adoptOpenJdkMatches.version),
         };
       }
       const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
@@ -97,6 +109,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: temurinJdkMatches.version,
+          ...shortJavaVersioning(temurinJdkMatches.version),
         };
       }
       const correttoJdkMatches = regEx(/^corretto-(?<version>\d\S+)/).exec(
@@ -107,6 +120,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: correttoJdkMatches.version,
+          ...shortJavaVersioning(correttoJdkMatches.version),
         };
       }
       const zuluJdkMatches = regEx(/^zulu-(?<version>\d\S+)/).exec(
@@ -117,6 +131,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: zuluJdkMatches.version,
+          ...shortJavaVersioning(zuluJdkMatches.version),
         };
       }
       const oracleGraalvmJdkMatches = regEx(
@@ -127,6 +142,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: oracleGraalvmJdkMatches.version,
+          ...shortJavaVersioning(oracleGraalvmJdkMatches.version),
         };
       }
 
@@ -136,7 +152,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
   node: {
     misePluginUrl: 'https://mise.jdx.dev/lang/node.html',
     config: {
-      packageName: 'nodejs',
+      packageName: 'node',
       datasource: NodeVersionDatasource.id,
     },
   },
@@ -220,6 +236,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  caddy: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'caddyserver/caddy',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   ccache: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -236,10 +260,25 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  conan: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'conan-io/conan',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   consul: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'hashicorp/consul',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  gh: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'cli/cli',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
     },
@@ -315,10 +354,33 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^lychee-v(?<version>\\S+)',
     },
   },
+  npm: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'npm',
+      datasource: NpmDatasource.id,
+    },
+  },
   opentofu: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'opentofu/opentofu',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  openfga: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'openfga/openfga',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  packer: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'hashicorp/packer',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
     },
@@ -334,6 +396,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'apple/pkl',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  prettier: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'prettier/prettier',
       datasource: GithubReleasesDatasource.id,
     },
   },
@@ -356,6 +425,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'astral-sh/ruff',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  rumdl: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'rvben/rumdl',
       datasource: GithubReleasesDatasource.id,
     },
   },
@@ -399,10 +475,31 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  swiftformat: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'nicklockwood/SwiftFormat',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  swiftlint: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'realm/SwiftLint',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   taplo: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'tamasfe/taplo',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  tart: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'cirruslabs/tart',
       datasource: GithubReleasesDatasource.id,
     },
   },

@@ -1,4 +1,4 @@
-import { regEx } from '../util/regex';
+import { regEx } from '../util/regex.ts';
 
 export default function cmdSerializer(
   cmd: string | string[],

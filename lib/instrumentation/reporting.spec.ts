@@ -1,8 +1,10 @@
 import type { S3Client } from '@aws-sdk/client-s3';
 import { mock, mockDeep } from 'vitest-mock-extended';
-import type { RenovateConfig } from '../config/types';
-import type { PackageFile } from '../modules/manager/types';
-import type { BranchCache } from '../util/cache/repository/types';
+import { s3 } from '~test/s3.ts';
+import { fs, logger } from '~test/util.ts';
+import type { RenovateConfig } from '../config/types.ts';
+import type { PackageFile } from '../modules/manager/types.ts';
+import type { BranchCache } from '../util/cache/repository/types.ts';
 import {
   addBranchStats,
   addExtractionStats,
@@ -11,14 +13,12 @@ import {
   finalizeReport,
   getReport,
   resetReport,
-} from './reporting';
-import type { Report } from './types';
-import { s3 } from '~test/s3';
-import { fs, logger } from '~test/util';
+} from './reporting.ts';
+import type { Report } from './types.ts';
 
-vi.mock('../util/fs', () => mockDeep());
-vi.mock('../util/s3', () => mockDeep());
-vi.mock('../logger', () => mockDeep());
+vi.mock('../util/fs/index.ts', () => mockDeep());
+vi.mock('../util/s3.ts', () => mockDeep());
+vi.mock('../logger/index.ts', () => mockDeep());
 
 describe('instrumentation/reporting', () => {
   beforeEach(() => {
@@ -136,6 +136,24 @@ describe('instrumentation/reporting', () => {
     );
   });
 
+  it('write formatted report if reportFormatting is enabled', async () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'file',
+      reportPath: './report.json',
+      reportFormatting: true,
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+
+    await exportStats(config);
+
+    const [[, writtenContent]] = fs.writeSystemFile.mock.calls;
+    expect(JSON.parse(writtenContent as string)).toEqual(expectedReport);
+    expect(writtenContent).not.toBe(JSON.stringify(expectedReport));
+  });
+
   it('send report to an S3 bucket if reportType is s3', async () => {
     const mockClient = mock<S3Client>();
     s3.parseS3Url.mockReturnValue({ Bucket: 'bucket-name', Key: 'key-name' });
@@ -190,6 +208,19 @@ describe('instrumentation/reporting', () => {
 
     fs.writeSystemFile.mockRejectedValue(null);
     await expect(exportStats(config)).toResolve();
+  });
+
+  it('reports nothing when reportType=null', async () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: null,
+    };
+
+    await exportStats(config);
+
+    expect(logger.logger.debug).not.toHaveBeenCalled();
+    expect(logger.logger.info).not.toHaveBeenCalled();
+    expect(logger.logger.warn).not.toHaveBeenCalled();
   });
 
   it('should add problems to report', () => {

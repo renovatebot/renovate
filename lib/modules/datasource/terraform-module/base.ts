@@ -1,9 +1,9 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import type { HttpError } from '../../../util/http';
-import { ensureTrailingSlash } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { ServiceDiscoveryResult } from './types';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import { ServiceDiscoveryResponse } from './schema.ts';
 
 const terraformId = 'terraform';
 
@@ -11,20 +11,30 @@ const terraformId = 'terraform';
 export abstract class TerraformDatasource extends Datasource {
   static id = terraformId;
 
-  @cache({
-    namespace: `datasource-${terraformId}`,
-    key: (registryUrl: string) =>
-      TerraformDatasource.getDiscoveryUrl(registryUrl),
-    ttlMinutes: 1440,
-  })
-  async getTerraformServiceDiscoveryResult(
+  static readonly terraformRegistryUrl = 'https://registry.terraform.io';
+
+  private async _getTerraformServiceDiscoveryResult(
     registryUrl: string,
-  ): Promise<ServiceDiscoveryResult> {
+  ): Promise<ServiceDiscoveryResponse> {
     const discoveryURL = TerraformDatasource.getDiscoveryUrl(registryUrl);
-    const serviceDiscovery = (
-      await this.http.getJsonUnchecked<ServiceDiscoveryResult>(discoveryURL)
-    ).body;
-    return serviceDiscovery;
+    const { body: res } = await this.http.getJson(
+      discoveryURL,
+      ServiceDiscoveryResponse,
+    );
+    return res;
+  }
+
+  getTerraformServiceDiscoveryResult(
+    registryUrl: string,
+  ): Promise<ServiceDiscoveryResponse> {
+    return withCache(
+      {
+        namespace: `datasource-${terraformId}`,
+        key: TerraformDatasource.getDiscoveryUrl(registryUrl),
+        ttlMinutes: 1440,
+      },
+      () => this._getTerraformServiceDiscoveryResult(registryUrl),
+    );
   }
 
   private static getDiscoveryUrl(registryUrl: string): string {
@@ -33,11 +43,9 @@ export abstract class TerraformDatasource extends Datasource {
 
   override handleHttpErrors(err: HttpError): void {
     const failureCodes = ['EAI_AGAIN'];
-    // istanbul ignore if
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }
-    // istanbul ignore if
     if (err.response?.statusCode === 503) {
       throw new ExternalHostError(err);
     }

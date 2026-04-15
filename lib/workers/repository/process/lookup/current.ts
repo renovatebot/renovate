@@ -1,6 +1,6 @@
 import { isString } from '@sindresorhus/is';
-import type { VersioningApi } from '../../../../modules/versioning/types';
-import { regEx } from '../../../../util/regex';
+import type { VersioningApi } from '../../../../modules/versioning/types.ts';
+import { regEx } from '../../../../util/regex.ts';
 
 export function getCurrentVersion(
   currentValue: string,

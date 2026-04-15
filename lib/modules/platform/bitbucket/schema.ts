@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import { LooseArray } from '../../../util/schema-utils';
+import { z } from 'zod/v3';
+import { logger } from '../../../logger/index.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 const BitbucketSourceType = z.enum(['commit_directory', 'commit_file']);
 
@@ -93,3 +93,15 @@ export const UnresolvedPrTasks = z
   .transform((data) =>
     data.values.filter((task) => task.state === 'UNRESOLVED'),
   );
+
+const WorkspaceAccess = z.object({
+  workspace: z.object({
+    slug: z.string(),
+  }),
+});
+
+export const WorkspaceAccesses = z
+  .object({
+    values: z.array(WorkspaceAccess),
+  })
+  .transform((body) => body.values.map(({ workspace }) => workspace.slug));

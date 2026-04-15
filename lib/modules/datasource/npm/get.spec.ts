@@ -1,13 +1,13 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as _packageCache from '../../../util/cache/package';
-import * as hostRules from '../../../util/host-rules';
-import { Http } from '../../../util/http';
-import type { HttpResponse } from '../../../util/http/types';
-import { getDependency } from './get';
-import { resolveRegistryUrl, setNpmrc } from './npmrc';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { getDependency } from './get.ts';
+import { resolveRegistryUrl, setNpmrc } from './npmrc.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 
 const packageCache = vi.mocked(_packageCache);
 
@@ -21,6 +21,8 @@ const http = new Http('npm');
 
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
+    packageCache.get.mockReset();
+    packageCache.setWithRawTtl.mockReset();
     hostRules.clear();
     setNpmrc();
   });
@@ -360,7 +362,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
@@ -508,7 +510,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
@@ -520,6 +522,32 @@ describe('modules/datasource/npm/get', () => {
         },
       ]
     `);
+  });
+
+  it('handles full repository urls with release source directories', async () => {
+    httpMock
+      .scope('https://test.org')
+      .get('/some-package')
+      .reply(200, {
+        name: 'some-package',
+        repository: 'https://example.com/octocat/Hello-World',
+        versions: {
+          '1.0.0': {
+            repository: {
+              url: 'https://example.com/octocat/Hello-World',
+              directory: 'packages/foo',
+            },
+          },
+        },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency(http, 'https://test.org', 'some-package');
+
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://example.com/octocat/Hello-World',
+      releases: [{ sourceDirectory: 'packages/foo' }],
+    });
   });
 
   it('does not massage non-github non-compliant repository urls', async () => {
@@ -550,7 +578,7 @@ describe('modules/datasource/npm/get', () => {
         {
           "headers": {
             "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br, zstd",
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
@@ -568,9 +596,7 @@ describe('modules/datasource/npm/get', () => {
     const httpResponse: HttpResponse<unknown> = {
       statusCode: 200,
       body: {
-        name: 'test',
         repository: {
-          type: 'git',
           url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
           directory: 'packages/foo',
         },
@@ -579,6 +605,103 @@ describe('modules/datasource/npm/get', () => {
       },
       headers: { 'cache-control': 'max-age=180, public' },
     };
+
+    it('stores a trimmed packument body in cache', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/some-package')
+        .reply(200, {
+          _id: 'some-package',
+          name: 'some-package',
+          repository: {
+            type: 'git',
+            url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+            directory: 'packages/foo',
+          },
+          homepage: 'https://example.com/package',
+          time: {
+            created: '2024-06-01T00:00:00.000Z',
+            '1.0.0': '2024-06-02T00:00:00.000Z',
+          },
+          'dist-tags': { latest: '1.0.0' },
+          versions: {
+            '1.0.0': {
+              repository: {
+                type: 'git',
+                url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+              },
+              homepage: 'https://example.com/package/v1',
+              deprecated: 'use 2.0.0',
+              gitHead: 'abc123',
+              dependencies: { foo: '^1.0.0' },
+              devDependencies: { bar: '^2.0.0' },
+              engines: { node: '>=18', bun: '>=1.0.0' },
+              dist: {
+                attestations: {
+                  url: 'https://example.com/attestations',
+                  issuer: 'ignore me',
+                },
+                tarball: 'https://example.com/some-package.tgz',
+              },
+              scripts: { test: 'vitest' },
+            },
+          },
+          readme: 'huge',
+        });
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep).toMatchObject({
+        homepage: 'https://example.com/package',
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
+      expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
+        'datasource-npm:cache-provider',
+        'https://example.com/some-package',
+        expect.objectContaining({
+          httpResponse: expect.objectContaining({
+            body: {
+              repository: {
+                url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+                directory: 'packages/foo',
+              },
+              homepage: 'https://example.com/package',
+              time: {
+                created: '2024-06-01T00:00:00.000Z',
+                '1.0.0': '2024-06-02T00:00:00.000Z',
+              },
+              'dist-tags': { latest: '1.0.0' },
+              versions: {
+                '1.0.0': {
+                  repository: {
+                    url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+                  },
+                  homepage: 'https://example.com/package/v1',
+                  deprecated: 'use 2.0.0',
+                  gitHead: 'abc123',
+                  dependencies: { foo: '^1.0.0' },
+                  devDependencies: { bar: '^2.0.0' },
+                  engines: { node: '>=18' },
+                  dist: {
+                    attestations: {
+                      url: 'https://example.com/attestations',
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        }),
+        expect.any(Number),
+      );
+    });
 
     it('returns unexpired cache', async () => {
       vi.setSystemTime('2024-06-15T00:14:59.999Z');

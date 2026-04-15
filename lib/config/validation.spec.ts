@@ -1,21 +1,47 @@
-import { getConfigFileNames } from './app-strings';
-import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
-import * as configValidation from './validation';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
+import type { HostRule } from '../types/index.ts';
+import { getConfigFileNames } from './app-strings.ts';
+import { GlobalConfig } from './global.ts';
+import type { RenovateConfig } from './types.ts';
+import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
-    it('returns deprecation warnings', async () => {
-      const config = {
-        prTitle: 'something',
+    it.each(['branchName', 'commitMessage', 'prTitle'])(
+      `returns custom deprecation warnings for %s`,
+      async (option: string) => {
+        const config = {
+          [option]: 'something',
+        };
+        const { warnings } = await configValidation.validateConfig(
+          'repo',
+          config,
+        );
+        expect(warnings).toHaveLength(1);
+        expect(warnings).toMatchSnapshot();
+      },
+    );
+
+    // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
+    it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
+      const config: RenovateConfig = {
+        hostRules: [
+          {
+            dnsCache: true,
+          } as HostRule,
+        ],
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { errors, warnings } = await configValidation.validateConfig(
         'repo',
         config,
       );
-      expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchSnapshot();
+      expect(errors).toHaveLength(0);
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Deprecation Warning',
+          message: `The 'dnsCache' option is deprecated: This option is deprecated and will be removed in a future release.`,
+        },
+      ]);
     });
 
     it('allow enabled field in vulnerabilityAlerts', async () => {
@@ -1171,6 +1197,23 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('errors on invalid preset syntax', async () => {
+      const config = {
+        extends: [
+          'github>owner/repo//path@commitHash',
+          'github>owner/repo//path#commitHash',
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].message).toContain('github>owner/repo//path@commitHash');
+    });
+
     it('warns if only selectors in packageRules', async () => {
       const config = {
         packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],
@@ -1202,6 +1245,36 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
+    });
+
+    it('warns when registryUrls is set at the top level of repo config', async () => {
+      const config = {
+        registryUrls: ['https://registry.npmjs.org'],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].message).toContain(
+        'Setting `registryUrls` at the top level of your config will apply it to all managers',
+      );
+    });
+
+    it('warns when defaultRegistryUrls is set at the top level of repo config', async () => {
+      const config = {
+        defaultRegistryUrls: ['https://registry.npmjs.org'],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].message).toContain(
+        'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers',
+      );
     });
 
     it('warns on nested group packageRules', async () => {
@@ -1722,6 +1795,33 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
+    it('handles prefixed onboardingConfigFileName', async () => {
+      const config = {
+        platform: 'forgejo',
+        onboardingConfigFileName: '.forgejo/renovate.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: not sure why
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('allows unique onboardingConfigFileName if it is set in configFileNames', async () => {
+      const config = {
+        onboardingConfigFileName: '.forgejo/renovate.json',
+        configFileNames: ['.forgejo/renovate.json'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('errors if env object is defined but allowedEnv is empty or undefined', async () => {
       const config = {
         env: {
@@ -1791,6 +1891,24 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
+    // TODO #40742 #40747
+    it('binarySource=docker is deprecated', async () => {
+      const config: GlobalConfig = {
+        binarySource: 'docker',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Deprecation Warning',
+          message:
+            'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
+        },
+      ]);
+    });
+
     it('binarySource', async () => {
       const config = {
         binarySource: 'invalid' as never,
@@ -2202,6 +2320,36 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
+    });
+
+    it('warns when registryUrls is set at the top level of global config', async () => {
+      const config = {
+        registryUrls: ['https://registry.npmjs.org'],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].message).toContain(
+        'Setting `registryUrls` at the top level of your config will apply it to all managers',
+      );
+    });
+
+    it('warns when defaultRegistryUrls is set at the top level of global config', async () => {
+      const config = {
+        defaultRegistryUrls: ['https://registry.npmjs.org'],
+      } as any;
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].message).toContain(
+        'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers',
+      );
     });
 
     it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {

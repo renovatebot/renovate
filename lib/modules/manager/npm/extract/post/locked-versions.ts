@@ -1,13 +1,13 @@
 import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
-import { logger } from '../../../../../logger';
-import type { PackageFile } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import { getNpmLock } from '../npm';
-import { getPnpmLock } from '../pnpm';
-import type { LockFile } from '../types';
-import { getYarnLock, getYarnVersionFromLock } from '../yarn';
+import { logger } from '../../../../../logger/index.ts';
+import type { PackageFile } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { getNpmLock } from '../npm.ts';
+import { getPnpmLock } from '../pnpm.ts';
+import type { LockFile } from '../types.ts';
+import { getYarnLock, getYarnVersionFromLock } from '../yarn.ts';
 
 const pnpmCatalogDepTypeRe = /pnpm\.catalog\.(?<version>.*)/;
 
@@ -23,6 +23,7 @@ export async function getLockedVersions(
     if (yarnLock) {
       logger.trace('Found yarnLock');
       lockFiles.push(yarnLock);
+      // v8 ignore else -- TODO: add test #40625
       if (!lockFileCache[yarnLock]) {
         logger.trace(`Retrieving/parsing ${yarnLock}`);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
@@ -153,6 +154,7 @@ export async function getLockedVersions(
             ]?.[depName!],
           );
 
+          // v8 ignore else -- TODO: add test #40625
           if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }
@@ -164,6 +166,7 @@ export async function getLockedVersions(
             ]?.[depType!]?.[depName!],
           );
 
+          // v8 ignore else -- TODO: add test #40625
           if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }

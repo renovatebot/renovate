@@ -1,18 +1,22 @@
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { hashStream } from '../../../util/hash';
-import { Http } from '../../../util/http';
-import { map as pMap } from '../../../util/promises';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { Http } from '../../../util/http/index.ts';
+import { map as pMap } from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   ArtifactError,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../types';
-import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
-import type { RecordFragment, StringFragment } from './types';
+} from '../types.ts';
+import {
+  findCodeFragment,
+  patchCodeAtFragments,
+  updateCode,
+} from './common.ts';
+import type { RecordFragment, StringFragment } from './types.ts';
 
 const http = new Http('bazel');
 

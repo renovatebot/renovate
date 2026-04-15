@@ -1,4 +1,4 @@
-import { matchesAnyPattern } from './utils';
+import { matchesAnyPattern } from './utils.ts';
 
 describe('modules/manager/npm/extract/utils', () => {
   describe('.matchesAnyPattern()', () => {

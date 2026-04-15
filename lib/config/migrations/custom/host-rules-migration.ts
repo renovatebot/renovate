@@ -1,11 +1,11 @@
 import { isString } from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import type { LegacyHostRule } from '../../../util/host-rules';
-import { massageHostUrl } from '../../../util/url';
-import { AbstractMigration } from '../base/abstract-migration';
-import { migrateDatasource } from './datasource-migration';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import type { LegacyHostRule } from '../../../util/host-rules.ts';
+import { massageHostUrl } from '../../../util/url.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+import { migrateDatasource } from './datasource-migration.ts';
 
 export class HostRulesMigration extends AbstractMigration {
   override readonly propertyName = 'hostRules';
@@ -18,6 +18,7 @@ export class HostRulesMigration extends AbstractMigration {
 
       for (const [key, value] of Object.entries(hostRule)) {
         if (key === 'platform') {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.hostType ??= value;
           }
@@ -25,6 +26,7 @@ export class HostRulesMigration extends AbstractMigration {
         }
 
         if (key === 'matchHost') {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }
@@ -32,6 +34,7 @@ export class HostRulesMigration extends AbstractMigration {
         }
 
         if (key === 'hostType') {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.hostType ??= migrateDatasource(value);
           }
@@ -45,6 +48,7 @@ export class HostRulesMigration extends AbstractMigration {
           key === 'hostName' ||
           key === 'domainName'
         ) {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }

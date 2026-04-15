@@ -1,9 +1,9 @@
 import os from 'node:os';
 import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { readSystemFile } from '../../../util/fs';
-import type { GlobalManagerConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { readSystemFile } from '../../../util/fs/index.ts';
+import type { GlobalManagerConfig } from '../types.ts';
 
 export async function detectGlobalConfig(): Promise<GlobalManagerConfig> {
   const res: GlobalManagerConfig = {};
@@ -11,6 +11,7 @@ export async function detectGlobalConfig(): Promise<GlobalManagerConfig> {
   const npmrcFileName = upath.join(homedir, '.npmrc');
   try {
     const npmrc = await readSystemFile(npmrcFileName, 'utf8');
+    // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyString(npmrc)) {
       res.npmrc = npmrc;
       res.npmrcMerge = true;

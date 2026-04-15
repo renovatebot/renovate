@@ -1,13 +1,13 @@
-import type { AllConfig } from '../../config/types';
-import * as platform from '../../modules/platform';
-import * as _ghApi from '../../modules/platform/github';
-import * as _hostRules from '../../util/host-rules';
-import { autodiscoverRepositories } from './autodiscover';
+import type { AllConfig } from '../../config/types.ts';
+import * as _ghApi from '../../modules/platform/github/index.ts';
+import * as platform from '../../modules/platform/index.ts';
+import * as _hostRules from '../../util/host-rules.ts';
+import { autodiscoverRepositories } from './autodiscover.ts';
 
-vi.mock('../../modules/platform/github');
-vi.mock('../../util/host-rules');
-vi.unmock('../../modules/platform');
-vi.unmock('../../modules/platform/scm');
+vi.mock('../../modules/platform/github/index.ts');
+vi.mock('../../util/host-rules.ts');
+vi.unmock('../../modules/platform/index.ts');
+vi.unmock('../../modules/platform/scm.ts');
 
 // imports are readonly
 const hostRules = vi.mocked(_hostRules);

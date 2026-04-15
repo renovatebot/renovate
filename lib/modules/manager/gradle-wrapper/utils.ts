@@ -1,17 +1,17 @@
 import os from 'node:os';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
 import {
   chmodLocalFile,
   localPathExists,
   readLocalFile,
   statLocalFile,
-} from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import gradleVersioning from '../../versioning/gradle';
-import { parseJavaToolchainVersion } from '../gradle/parser';
-import type { GradleVersionExtract } from './types';
+} from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import gradleVersioning from '../../versioning/gradle/index.ts';
+import { parseJavaToolchainVersion } from '../gradle/parser.ts';
+import type { GradleVersionExtract } from './types.ts';
 
 export const extraEnv = {
   GRADLE_OPTS:
@@ -72,6 +72,9 @@ export async function getJavaConstraint(
       if (languageVersion) {
         return `^${languageVersion}.0.0`;
       }
+    }
+    if (major > 9 || (major === 9 && minor && minor >= 1)) {
+      return '^25.0.0';
     }
     if (major > 8 || (major === 8 && minor && minor >= 5)) {
       return '^21.0.0';

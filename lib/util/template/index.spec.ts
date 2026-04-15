@@ -1,8 +1,8 @@
-import { getOptions } from '../../config/options';
-import * as _execUtils from '../exec/utils';
-import * as template from '.';
+import { getOptions } from '../../config/options/index.ts';
+import * as _execUtils from '../exec/utils.ts';
+import * as template from './index.ts';
 
-vi.mock('../exec/utils');
+vi.mock('../exec/utils.ts');
 
 const execUtils = vi.mocked(_execUtils);
 
@@ -171,6 +171,23 @@ describe('util/template/index', () => {
     });
   });
 
+  it.each`
+    input                      | expected
+    ${'foo'}                   | ${'foo'}
+    ${'>='}                    | ${'>='}
+    ${'<~'}                    | ${'<~'}
+    ${'<= {{ newVersion }}'}   | ${'<= 1.6.0'}
+    ${'<= {{{ newVersion }}}'} | ${'<= 1.6.0'}
+    ${'& {{ newValue}}'}       | ${'& >= 1.6.0'}
+  `(
+    'do not escape common range symbols: $input -> $output',
+    ({ input, expected }) => {
+      expect(
+        template.compile(input, { newVersion: '1.6.0', newValue: '>= 1.6.0' }),
+      ).toBe(expected);
+    },
+  );
+
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
     const output = template.compile(userTemplate, {});
@@ -212,6 +229,17 @@ describe('util/template/index', () => {
       depName: 'some.github.com/dep',
     });
     expect(output).toBe('ghc/dep');
+  });
+
+  it('add', () => {
+    const userTemplate = '{{add 1 2}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('3');
+  });
+
+  it('add - throws if inputs are invalid', () => {
+    const userTemplate = '{{add undefined null}}';
+    expect(() => template.compile(userTemplate, {})).toThrow();
   });
 
   describe('proxyCompileInput', () => {

@@ -1,47 +1,47 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
+import { git, logger, partial, platform, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
-import * as _comment from '../../../../modules/platform/comment';
-import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
-import type { Pr } from '../../../../modules/platform/types';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import type { PrCache } from '../../../../util/cache/repository/types';
-import { fingerprint } from '../../../../util/fingerprint';
-import { toBase64 } from '../../../../util/string';
-import * as _limits from '../../../global/limits';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import * as _statusChecks from '../branch/status-checks';
-import * as _prBody from './body';
-import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
-import * as _participants from './participants';
-import * as _prCache from './pr-cache';
-import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
-import { ensurePr } from '.';
-import { git, logger, partial, platform, scm } from '~test/util';
+} from '../../../../constants/error-messages.ts';
+import * as _comment from '../../../../modules/platform/comment.ts';
+import { getPrBodyStruct } from '../../../../modules/platform/pr-body.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import type { PrCache } from '../../../../util/cache/repository/types.ts';
+import { fingerprint } from '../../../../util/fingerprint.ts';
+import { toBase64 } from '../../../../util/string.ts';
+import * as _limits from '../../../global/limits.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { embedChangelogs } from '../../changelog/index.ts';
+import * as _statusChecks from '../branch/status-checks.ts';
+import * as _prBody from './body/index.ts';
+import type { ChangeLogChange, ChangeLogRelease } from './changelog/types.ts';
+import { ensurePr } from './index.ts';
+import * as _participants from './participants.ts';
+import * as _prCache from './pr-cache.ts';
+import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
 
-vi.mock('../../changelog');
+vi.mock('../../changelog/index.ts');
 
-vi.mock('../../../global/limits');
+vi.mock('../../../global/limits.ts');
 const limits = vi.mocked(_limits);
 
-vi.mock('../branch/status-checks');
+vi.mock('../branch/status-checks.ts');
 const checks = vi.mocked(_statusChecks);
 
-vi.mock('./body');
+vi.mock('./body/index.ts');
 const prBody = vi.mocked(_prBody);
 
-vi.mock('./participants');
+vi.mock('./participants.ts');
 const participants = vi.mocked(_participants);
 
-vi.mock('../../../../modules/platform/comment');
+vi.mock('../../../../modules/platform/comment.ts');
 const comment = vi.mocked(_comment);
 
-vi.mock('./pr-cache');
+vi.mock('./pr-cache.ts');
 const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
@@ -511,6 +511,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
 
         expect(logger.logger.info).toHaveBeenCalledWith(
+          { labels: ['new_label'] },
           `DRY-RUN: Would create PR: ${prTitle}`,
         );
       });
@@ -629,7 +630,7 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           automerge: true,
           automergeType: 'branch',
-          artifactErrors: [{ lockFile: 'foo', stderr: 'bar' }],
+          artifactErrors: [{ fileName: 'foo', stderr: 'bar' }],
         });
 
         expect(res).toEqual({ type: 'with-pr', pr });
@@ -686,7 +687,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
         vi.spyOn(platform, 'massageMarkdown').mockImplementation(
-          (prBody) => 'markdown content',
+          () => 'markdown content',
         );
         await ensurePr({
           ...config,
@@ -997,6 +998,7 @@ describe('workers/repository/update/pr/index', () => {
             [true, true],
             [false, true],
             [false, false],
+            [undefined, undefined],
           ])(
             'current attestation %s, new attestation %s',
             (currentAttestation, newAttestation) => {
@@ -1007,10 +1009,7 @@ describe('workers/repository/update/pr/index', () => {
                 manager: 'npm',
                 currentVersion: '1.2.3',
                 newVersion: '2.3.4',
-                releases: [
-                  { version: '1.2.3', attestation: currentAttestation },
-                  { version: '2.3.4', attestation: newAttestation },
-                ],
+                releases: [{ version: '2.3.4', attestation: newAttestation }],
               });
 
               it('does not warn the user', async () => {
@@ -1018,6 +1017,7 @@ describe('workers/repository/update/pr/index', () => {
 
                 const res = await ensurePr({
                   ...config,
+                  hasAttestation: currentAttestation,
                   upgrades: [dummyUpgrade],
                 });
 
@@ -1037,7 +1037,7 @@ describe('workers/repository/update/pr/index', () => {
             currentVersion: '1.2.3',
             newVersion: '2.3.4',
             releases: [
-              { version: '1.2.3', attestation: true },
+              // but the update we're updating to does not
               { version: '2.3.4', attestation: false },
             ],
           });
@@ -1047,6 +1047,8 @@ describe('workers/repository/update/pr/index', () => {
 
             const res = await ensurePr({
               ...config,
+              // the current release has an attestation
+              hasAttestation: true,
               upgrades: [dummyUpgrade],
             });
 
@@ -1056,7 +1058,7 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [
                 {
                   prBodyNotes: [
-                    `> :exclamation: **Warning**
+                    `> :stop_sign: **Caution**
 >
 > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
 > Verify that release 2.3.4 was published by the expected author.
@@ -1066,6 +1068,41 @@ describe('workers/repository/update/pr/index', () => {
                 },
               ],
             });
+          });
+        });
+        // TODO #42312
+        describe('when attestation is removed in an intermediate version', () => {
+          const dummyUpgrade = partial<BranchUpgradeConfig>({
+            branchName: sourceBranch,
+            depType: 'foo',
+            depName: 'bar',
+            manager: 'npm',
+            currentVersion: '1.2.3',
+            newVersion: '2.3.4',
+            releases: [
+              // previous versions between our currentVersion and newVersion have gaps in attestations
+              { version: '1.2.4', attestation: false },
+              { version: '1.3.0', attestation: false },
+              { version: '2.0.0', attestation: false },
+
+              // but the update we're updating to has attestation information
+              { version: '2.3.4', attestation: true },
+            ],
+          });
+
+          it('does not warn the user', async () => {
+            platform.createPr.mockResolvedValueOnce(pr);
+
+            const res = await ensurePr({
+              ...config,
+              // the current release has an attestation
+              hasAttestation: true,
+              upgrades: [dummyUpgrade],
+            });
+
+            expect(res).toEqual({ type: 'with-pr', pr });
+            const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+            expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
           });
         });
       });
@@ -1225,6 +1262,41 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).not.toHaveBeenCalledExactlyOnceWith(
           'PR cache not found',
         );
+      });
+
+      it('skips cache early return when autoApprove is set', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          bodyFingerprint: fingerprint(generatePrBodyFingerprintConfig(config)),
+          lastEdited: '2020-01-20T00:00:00Z',
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        const res = await ensurePr({ ...config, autoApprove: true });
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: existingPr,
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
+        );
+        // updatePr should be called to re-trigger approval
+        expect(platform.updatePr).toHaveBeenCalled();
+      });
+    });
+
+    describe('autoApprove', () => {
+      it('updates PR when autoApprove is set even if PR does not need updating', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, autoApprove: true });
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, bodyStruct },
+        });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
       });
     });
   });

@@ -1,9 +1,9 @@
-import { GlobalConfig } from '../../config/global';
-import { bootstrap } from '../../proxy';
-import type { HostRule } from '../../types';
-import * as hostRules from '../host-rules';
-import { applyHostRule, findMatchingRule } from './host-rules';
-import type { GotOptions } from './types';
+import { GlobalConfig } from '../../config/global.ts';
+import { bootstrap } from '../../proxy.ts';
+import type { HostRule } from '../../types/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { applyHostRule, findMatchingRule } from './host-rules.ts';
+import type { GotOptions } from './types.ts';
 
 const url = 'https://github.com';
 
@@ -567,6 +567,53 @@ describe('util/http/host-rules', () => {
       },
       hostType: 'pod',
       token: 'dotcom-token',
+    });
+  });
+
+  describe('GHE platform endpoint fallback', () => {
+    beforeEach(() => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://ghe.example.com/',
+      });
+      hostRules.clear();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'ghe.example.com',
+        token: 'ghe-token',
+      });
+    });
+
+    it('fallback to github for non-listed hostType targeting GHE endpoint', () => {
+      // github-digest is NOT in GITHUB_API_USING_HOST_TYPES,
+      // but should still get credentials when targeting the GHE endpoint
+      const opts = { hostType: 'github-digest' };
+      const hostRule = findMatchingRule(
+        'https://ghe.example.com/api/v3/',
+        opts,
+      );
+      expect(hostRule).toEqual({
+        token: 'ghe-token',
+      });
+      expect(
+        applyHostRule('https://ghe.example.com/api/v3/', opts, hostRule),
+      ).toEqual({
+        context: {
+          authType: undefined,
+        },
+        hostType: 'github-digest',
+        token: 'ghe-token',
+      });
+    });
+
+    it('no fallback when request targets a different host', () => {
+      // Request targets a different host than the platform endpoint — no fallback
+      const opts = { hostType: 'github-digest' };
+      const hostRule = findMatchingRule(
+        'https://other-ghe.example.com/api/v3/',
+        opts,
+      );
+      expect(hostRule).toEqual({});
     });
   });
 

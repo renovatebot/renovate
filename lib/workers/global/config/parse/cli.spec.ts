@@ -1,7 +1,8 @@
-import { DockerDatasource } from '../../../../modules/datasource/docker';
-import getArgv from './__fixtures__/argv';
-import * as cli from './cli';
-import type { ParseConfigOptions } from './types';
+import { pkg } from '../../../../expose.ts';
+import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
+import getArgv from './__fixtures__/argv.ts';
+import * as cli from './cli.ts';
+import type { ParseConfigOptions } from './types.ts';
 
 describe('workers/global/config/parse/cli', () => {
   let argv: string[];
@@ -204,6 +205,31 @@ describe('workers/global/config/parse/cli', () => {
     it('requireConfig boolean false', () => {
       argv.push('--require-config=false');
       expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
+    });
+  });
+
+  describe('.parseEarlyFlags(argv)', () => {
+    it('prints version and exits when --version is passed', () => {
+      const exitSpy = vi
+        .spyOn(process, 'exit')
+        .mockImplementation((() => undefined) as never);
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
+
+      cli.parseEarlyFlags([...argv, '--version']);
+
+      expect(stdoutSpy).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining(pkg.version),
+      );
+      expect(exitSpy).toHaveBeenCalledExactlyOnceWith(0);
+
+      stdoutSpy.mockRestore();
+      exitSpy.mockRestore();
+    });
+
+    it('does not error when --dry-run is the last argument', () => {
+      expect(() =>
+        cli.parseEarlyFlags([...argv, 'myrepo', '--dry-run']),
+      ).not.toThrow();
     });
   });
 });

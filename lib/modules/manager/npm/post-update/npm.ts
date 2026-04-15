@@ -3,33 +3,37 @@ import { isNonEmptyString, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { exec } from '../../../../util/exec';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ExtraEnv,
   ToolConstraint,
-} from '../../../../util/exec/types';
+} from '../../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   localPathExists,
   readLocalFile,
   renameLocalFile,
-} from '../../../../util/fs';
-import { minimatch } from '../../../../util/minimatch';
-import { Result } from '../../../../util/result';
-import { trimSlashes } from '../../../../util/url';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import { PackageLock } from '../schema';
-import { composeLockFile, parseLockFile } from '../utils';
-import { getNodeToolConstraint } from './node-version';
-import type { GenerateLockFileResult } from './types';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
+} from '../../../../util/fs/index.ts';
+import { minimatch } from '../../../../util/minimatch.ts';
+import { Result } from '../../../../util/result.ts';
+import { trimSlashes } from '../../../../util/url.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { PackageLock } from '../schema.ts';
+import { composeLockFile, parseLockFile } from '../utils.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import type { GenerateLockFileResult } from './types.ts';
+import {
+  getNodeOptions,
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from './utils.ts';
 
 async function getNpmConstraintFromPackageLock(
   lockFileDir: string,
@@ -111,6 +115,12 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
     };
+
+    const { nodeMaxMemory } = getToolSettingsOptions(config.toolSettings);
+    if (nodeMaxMemory) {
+      extraEnv.NODE_OPTIONS = getNodeOptions(nodeMaxMemory);
+    }
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
@@ -148,6 +158,7 @@ export async function generateLockFile(
           .map((update) => update.managerData?.packageKey)
           .filter((packageKey) => !rootDeps.has(packageKey));
 
+        // v8 ignore else -- TODO: add test #40625
         if (currentWorkspaceUpdates.length) {
           const updateCmd = `npm install ${cmdOptions} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
             .map(quote)
@@ -186,8 +197,7 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.debug(
           { err, lockFileName },
           'Error removing `package-lock.json` for lock file maintenance',
@@ -203,6 +213,7 @@ export async function generateLockFile(
       commands = [];
       for (const command of existingCommands) {
         commands.push(command);
+        // v8 ignore else -- TODO: add test #40625
         if (command.startsWith('npm install')) {
           commands.push(command);
         }
@@ -244,6 +255,7 @@ export async function generateLockFile(
             | 'optionalDependencies';
 
           // TODO #22198
+          // v8 ignore else -- TODO: add test #40625
           if (
             lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
           ) {
@@ -254,8 +266,8 @@ export async function generateLockFile(
         lockFile = composeLockFile(lockFileParsed, detectedIndent);
       }
     }
-    /* v8 ignore next -- needs test */
   } catch (err) {
+    // v8 ignore if -- TODO: add test #40625
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -266,6 +278,7 @@ export async function generateLockFile(
       },
       'lock file error',
     );
+    // v8 ignore if -- TODO: add test #40625
     if (err.stderr?.includes('ENOSPC: no space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
@@ -327,6 +340,7 @@ export function divideWorkspaceAndRootDeps(
           }
         }
         if (workspaceName) {
+          // v8 ignore else -- TODO: add test #40625
           if (
             !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
           ) {

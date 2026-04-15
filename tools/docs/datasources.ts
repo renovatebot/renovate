@@ -1,15 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { getDatasources } from '../../lib/modules/datasource';
-import { readFile, updateFile } from '../utils';
-import type { OpenItems } from './github-query-items';
-import { generateFeatureAndBugMarkdown } from './github-query-items';
+import { getDatasources } from '../../lib/modules/datasource/index.ts';
+import { readFile, updateFile } from '../utils/index.ts';
+import type { OpenItems } from './github-query-items.ts';
+import { generateFeatureAndBugMarkdown } from './github-query-items.ts';
 import {
   formatDescription,
   formatUrls,
   getDisplayName,
   getModuleLink,
   replaceContent,
-} from './utils';
+} from './utils.ts';
 
 export async function generateDatasources(
   dist: string,

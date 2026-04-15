@@ -1,5 +1,5 @@
-import type { lexer as l, parser as p } from 'good-enough-parser';
-import { lang } from 'good-enough-parser';
+import type { lexer as l, parser as p } from '@renovatebot/good-enough-parser';
+import { lang } from '@renovatebot/good-enough-parser';
 
 /**
  * @see https://perldoc.perl.org/perldata#Scalar-value-constructors

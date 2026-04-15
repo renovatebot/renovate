@@ -1,23 +1,24 @@
 import { isString } from '@sindresorhus/is';
 import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
-import { logger } from '../../../../../logger';
-import type { UpdateDependencyConfig } from '../../../types';
-import { PnpmCatalogs } from '../../schema';
-import { getNewGitValue, getNewNpmAliasValue } from './common';
+import { logger } from '../../../../../logger/index.ts';
+import type { UpdateDependencyConfig } from '../../../types.ts';
+import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
+import { PnpmWorkspaceFile } from '../../schema.ts';
+import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
 
-export function updatePnpmCatalogDependency({
+export function updatePnpmWorkspaceDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  const { depType, managerData, depName } = upgrade;
+  const { depType, depName } = upgrade;
 
   const catalogName = depType?.split('.').at(-1);
 
-  /* v8 ignore next -- needs test */
-  if (!isString(catalogName)) {
+  // should never happen
+  if (!isString(catalogName) && depType !== pnpmWorkspaceOverrides) {
     logger.error(
-      'No catalogName was found; this is likely an extraction error.',
+      'No catalogName or override was found; this is likely an extraction error.',
     );
     return null;
   }
@@ -28,11 +29,11 @@ export function updatePnpmCatalogDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
-    `npm.updatePnpmCatalogDependency(): ${depType}:${/* v8 ignore next -- needs test */ managerData?.catalogName}.${depName} = ${newValue}`,
+    `npm.updatePnpmWorkspaceDependency(): ${depType}:${depName} = ${newValue}`,
   );
 
-  let document;
-  let parsedContents;
+  let document: Document;
+  let parsedContents: PnpmWorkspaceFile;
 
   try {
     // In order to preserve the original formatting as much as possible, we want
@@ -42,7 +43,7 @@ export function updatePnpmCatalogDependency({
     // values. Thus, we use both an annotated AST and a JS representation; the
     // former for manipulation, and the latter for querying/validation.
     document = parseDocument(fileContent, { keepSourceTokens: true });
-    parsedContents = PnpmCatalogs.parse(document.toJS());
+    parsedContents = PnpmWorkspaceFile.parse(fileContent);
   } catch (err) {
     logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
     return null;
@@ -53,11 +54,13 @@ export function updatePnpmCatalogDependency({
   // Thus, we must check which entry is being used, to reference it from / set
   // it in the right place.
   const usesImplicitDefaultCatalog = parsedContents.catalog !== undefined;
+  const isCatalogUpdate = catalogName && depType !== pnpmWorkspaceOverrides;
 
-  const oldVersion =
-    catalogName === 'default' && usesImplicitDefaultCatalog
+  const oldVersion = isCatalogUpdate
+    ? catalogName === 'default' && usesImplicitDefaultCatalog
       ? parsedContents.catalog?.[depName!]
-      : parsedContents.catalogs?.[catalogName]?.[depName!];
+      : parsedContents.catalogs?.[catalogName]?.[depName!]
+    : parsedContents.overrides?.[depName!];
 
   if (oldVersion === newValue) {
     logger.trace('Version is already updated');
@@ -65,11 +68,13 @@ export function updatePnpmCatalogDependency({
   }
 
   // Update the value
-  const path = getDepPath({
-    depName: depName!,
-    catalogName,
-    usesImplicitDefaultCatalog,
-  });
+  const path = isCatalogUpdate
+    ? getDepPath({
+        depName: depName!,
+        catalogName,
+        usesImplicitDefaultCatalog,
+      })
+    : ['overrides', depName!];
 
   const modifiedDocument = changeDependencyIn(document, path, {
     newValue,
@@ -82,7 +87,7 @@ export function updatePnpmCatalogDependency({
     return null;
   }
 
-  /* v8 ignore next 3 -- this should not happen in practice, but we must satisfy the types */
+  /* v8 ignore if -- this should not happen in practice, but we must satisfy the types */
   if (!modifiedDocument.contents?.srcToken) {
     return null;
   }
@@ -118,13 +123,14 @@ function changeDependencyIn(
   }
 
   if (newName) {
-    /* v8 ignore next 3 -- the try..catch block above already throws if a key is an alias */
+    /* v8 ignore if -- the try..catch block above already throws if a key is an alias */
     if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }
     CST.setScalarValue(relevantNode.srcToken.key, newName);
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (newValue) {
     // We only support scalar values when substituting. This explicitly avoids
     // substituting aliases, since those can be resolved from a shared location,

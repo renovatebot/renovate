@@ -1,5 +1,5 @@
-import { logger } from '../../../../../../logger';
-import type { YarnLock, YarnLockEntrySummary } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import type { YarnLock, YarnLockEntrySummary } from './types.ts';
 
 export function parseEntry(depNameConstraint: string): {
   entryName: string;
@@ -37,8 +37,8 @@ export function getYarn1LockedDependencies(
       if (entryName === depName && entry?.version === currentVersion) {
         res.push({ entry, depNameConstraint, depName, constraint });
       }
-    } /* v8 ignore next -- needs test */
-  } catch (err) {
+    }
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'getLockedDependencies() error');
   }
   return res;
@@ -68,8 +68,8 @@ export function getYarn2LockedDependencies(
           res.push({ entry, depNameConstraint, depName, constraint });
         }
       }
-    } /* v8 ignore next -- needs test */
-  } catch (err) {
+    }
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'getLockedDependencies() error');
   }
   return res;

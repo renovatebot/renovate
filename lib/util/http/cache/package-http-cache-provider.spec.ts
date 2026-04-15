@@ -1,19 +1,41 @@
 import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { Http, type HttpResponse } from '..';
-import { GlobalConfig } from '../../../config/global';
-import * as _packageCache from '../../cache/package';
-import { PackageHttpCacheProvider } from './package-http-cache-provider';
-import type { HttpCache } from './schema';
-import * as httpMock from '~test/http-mock';
+import { z } from 'zod/v3';
+import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _packageCache from '../../cache/package/index.ts';
+import { Http, type HttpResponse } from '../index.ts';
+import {
+  PackageHttpCacheProvider,
+  type PackageHttpCacheProviderOptions,
+} from './package-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
-vi.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/cache/package/index.ts', () => mockDeep());
 const packageCache = vi.mocked(_packageCache);
 
 const http = new Http('test');
 
+const TrimmedBody = z.object({
+  message: z.string(),
+});
+
+const InvalidBody = z.object({
+  required: z.string(),
+});
+
 describe('util/http/cache/package-http-cache-provider', () => {
+  const namespace = '_test-namespace';
   const url = 'http://example.com/foo/bar';
+  const headUrl = `head:${url}`;
+  const publicCacheHeaders = {
+    etag: 'foobar',
+    'cache-control': 'max-age=180, public',
+  };
+  const privateCacheHeaders = {
+    etag: 'foobar',
+    'cache-control': 'max-age=180, private',
+  };
 
   let cache: Record<string, HttpCache> = {};
 
@@ -39,6 +61,25 @@ describe('util/http/cache/package-http-cache-provider', () => {
     Settings.now = () => value;
   };
 
+  const createCacheProvider = (
+    options: Partial<PackageHttpCacheProviderOptions> = {},
+  ) =>
+    new PackageHttpCacheProvider({
+      namespace,
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
+      ...options,
+    });
+
+  it('skips persisting null cache values', async () => {
+    const cacheProvider = createCacheProvider();
+
+    await cacheProvider.persist('get', url, null);
+
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+    expect(cache).toEqual({});
+  });
+
   it('loads cache correctly', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
@@ -48,12 +89,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       httpResponse: { statusCode: 200, body: 'old response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
-      softTtlMinutes: 0,
-      checkAuthorizationHeader: false,
-      checkCacheControlHeader: false,
-    });
+    const cacheProvider = createCacheProvider({ softTtlMinutes: 0 });
     httpMock.scope(url).get('').reply(200, 'new response');
 
     const res = await http.getText(url, { cacheProvider });
@@ -69,11 +105,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       httpResponse: { statusCode: 200, body: 'cached response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
-      checkAuthorizationHeader: false,
-      checkCacheControlHeader: false,
-    });
+    const cacheProvider = createCacheProvider();
 
     const res = await http.getText(url, { cacheProvider });
 
@@ -81,10 +113,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
 
     mockTime('2024-06-15T00:15:00.000Z');
-    httpMock.scope(url).get('').reply(200, 'new response', {
-      etag: 'foobar',
-      'cache-control': 'max-age=180, public',
-    });
+    httpMock.scope(url).get('').reply(200, 'new response', publicCacheHeaders);
 
     const res2 = await http.getText(url, { cacheProvider });
     expect(res2.body).toBe('new response');
@@ -92,15 +121,11 @@ describe('util/http/cache/package-http-cache-provider', () => {
   });
 
   it('handles cache miss', async () => {
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
-      checkAuthorizationHeader: false,
-      checkCacheControlHeader: false,
-    });
-    httpMock.scope(url).get('').reply(200, 'fetched response', {
-      etag: 'foobar',
-      'cache-control': 'max-age=180, public',
-    });
+    const cacheProvider = createCacheProvider();
+    httpMock
+      .scope(url)
+      .get('')
+      .reply(200, 'fetched response', publicCacheHeaders);
 
     const res = await http.getText(url, { cacheProvider });
 
@@ -119,12 +144,52 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
   });
 
+  it('applies writeSchema before persisting cache', async () => {
+    const cacheProvider = createCacheProvider({ writeSchema: TrimmedBody });
+    httpMock
+      .scope(url)
+      .get('')
+      .reply(
+        200,
+        { message: 'fetched response', extra: 'drop me' },
+        publicCacheHeaders,
+      );
+
+    const res = await http.getJsonUnchecked(url, { cacheProvider });
+
+    expect(res.body).toEqual({ message: 'fetched response', extra: 'drop me' });
+    expect(cache).toEqual({
+      'http://example.com/foo/bar': {
+        etag: 'foobar',
+        httpResponse: {
+          statusCode: 200,
+          headers: expect.any(Object),
+          body: { message: 'fetched response' },
+        },
+        lastModified: undefined,
+        timestamp: expect.any(String),
+      },
+    });
+  });
+
+  it('skips cache write when writeSchema validation fails', async () => {
+    const cacheProvider = createCacheProvider({ writeSchema: InvalidBody });
+    httpMock
+      .scope(url)
+      .get('')
+      .reply(200, { message: 'fetched response' }, publicCacheHeaders);
+
+    const res = await http.getJsonUnchecked(url, { cacheProvider });
+
+    expect(res.body).toEqual({ message: 'fetched response' });
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+    expect(cache).toEqual({});
+  });
+
   it('prevents caching when cache-control is private', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
-      checkAuthorizationHeader: false,
+    const cacheProvider = createCacheProvider({
       checkCacheControlHeader: true,
     });
 
@@ -141,10 +206,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
   it('prevents caching when the request contains authorization header', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
+    const cacheProvider = createCacheProvider({
       checkAuthorizationHeader: true,
-      checkCacheControlHeader: false,
     });
 
     httpMock.scope(url).get('').reply(200, 'private response');
@@ -163,16 +226,12 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     mockTime('2024-06-15T00:00:00.000Z');
 
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
-      checkAuthorizationHeader: false,
-      checkCacheControlHeader: false,
-    });
+    const cacheProvider = createCacheProvider();
 
-    httpMock.scope(url).get('').reply(200, 'private response', {
-      etag: 'foobar',
-      'cache-control': 'max-age=180, private',
-    });
+    httpMock
+      .scope(url)
+      .get('')
+      .reply(200, 'private response', privateCacheHeaders);
 
     const res = await http.get(url, { cacheProvider });
 
@@ -183,16 +242,12 @@ describe('util/http/cache/package-http-cache-provider', () => {
   it('allows caching when cache-control is private but checkCacheControlHeader=false', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
-      checkAuthorizationHeader: false,
-      checkCacheControlHeader: false,
-    });
+    const cacheProvider = createCacheProvider();
 
-    httpMock.scope(url).get('').reply(200, 'private response', {
-      etag: 'foobar',
-      'cache-control': 'max-age=180, private',
-    });
+    httpMock
+      .scope(url)
+      .get('')
+      .reply(200, 'private response', privateCacheHeaders);
 
     const res = await http.get(url, { cacheProvider });
 
@@ -208,11 +263,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       httpResponse: { statusCode: 200, body: 'cached response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: '_test-namespace',
-      checkAuthorizationHeader: false,
-      checkCacheControlHeader: false,
-    });
+    const cacheProvider = createCacheProvider();
     httpMock.scope(url).get('').reply(500);
 
     const res = await http.getText(url, { cacheProvider });
@@ -220,17 +271,44 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(res.body).toBe('cached response');
   });
 
+  it('stores a trimmed body when refreshing cache after 304', async () => {
+    mockTime('2024-06-15T00:15:00.000Z');
+    cache[url] = {
+      etag: 'etag-value',
+      lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+      httpResponse: {
+        statusCode: 200,
+        headers: { etag: 'etag-value' },
+        body: { message: 'cached response', extra: 'drop me' },
+      },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+    const cacheProvider = createCacheProvider({ writeSchema: TrimmedBody });
+    httpMock.scope(url).get('').reply(304);
+
+    const res = await http.getJsonUnchecked(url, { cacheProvider });
+
+    expect(res.body).toEqual({ message: 'cached response', extra: 'drop me' });
+    expect(packageCache.setWithRawTtl).toHaveBeenCalledTimes(1);
+    expect(cache).toEqual({
+      'http://example.com/foo/bar': {
+        etag: 'etag-value',
+        lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+        httpResponse: {
+          statusCode: 200,
+          cached: true,
+          headers: { etag: 'etag-value' },
+          body: { message: 'cached response' },
+        },
+        timestamp: expect.any(String),
+      },
+    });
+  });
+
   describe('HEAD requests', () => {
     it('handles cache miss for HEAD request', async () => {
-      const cacheProvider = new PackageHttpCacheProvider({
-        namespace: '_test-namespace',
-        checkAuthorizationHeader: false,
-        checkCacheControlHeader: false,
-      });
-      httpMock.scope(url).head('').reply(200, '', {
-        etag: 'foobar',
-        'cache-control': 'max-age=180, public',
-      });
+      const cacheProvider = createCacheProvider();
+      httpMock.scope(url).head('').reply(200, '', publicCacheHeaders);
 
       const res = await http.head(url, { cacheProvider });
 
@@ -252,18 +330,13 @@ describe('util/http/cache/package-http-cache-provider', () => {
     it('loads cache correctly for HEAD request', async () => {
       mockTime('2024-06-15T00:00:00.000Z');
 
-      cache['head:' + url] = {
+      cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
         httpResponse: { statusCode: 200, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
-      const cacheProvider = new PackageHttpCacheProvider({
-        namespace: '_test-namespace',
-        softTtlMinutes: 0,
-        checkAuthorizationHeader: false,
-        checkCacheControlHeader: false,
-      });
+      const cacheProvider = createCacheProvider({ softTtlMinutes: 0 });
       httpMock.scope(url).head('').reply(200, '');
 
       const res = await http.head(url, { cacheProvider });
@@ -273,17 +346,13 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     it('loads cache bypassing server for HEAD request', async () => {
       mockTime('2024-06-15T00:14:59.999Z');
-      cache['head:' + url] = {
+      cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
         httpResponse: { statusCode: 200, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
-      const cacheProvider = new PackageHttpCacheProvider({
-        namespace: '_test-namespace',
-        checkAuthorizationHeader: false,
-        checkCacheControlHeader: false,
-      });
+      const cacheProvider = createCacheProvider();
 
       const res = await http.head(url, { cacheProvider });
 
@@ -293,17 +362,13 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     it('serves stale HEAD response during revalidation error', async () => {
       mockTime('2024-06-15T00:15:00.000Z');
-      cache['head:' + url] = {
+      cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
         httpResponse: { statusCode: 200, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
-      const cacheProvider = new PackageHttpCacheProvider({
-        namespace: '_test-namespace',
-        checkAuthorizationHeader: false,
-        checkCacheControlHeader: false,
-      });
+      const cacheProvider = createCacheProvider();
       httpMock.scope(url).head('').reply(500);
 
       const res = await http.head(url, { cacheProvider });
@@ -314,9 +379,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     it('prevents caching HEAD request when cache-control is private', async () => {
       mockTime('2024-06-15T00:00:00.000Z');
 
-      const cacheProvider = new PackageHttpCacheProvider({
-        namespace: '_test-namespace',
-        checkAuthorizationHeader: false,
+      const cacheProvider = createCacheProvider({
         checkCacheControlHeader: true,
       });
 
@@ -331,11 +394,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
 
     it('caches HEAD and GET requests separately', async () => {
-      const cacheProvider = new PackageHttpCacheProvider({
-        namespace: '_test-namespace',
-        checkAuthorizationHeader: false,
-        checkCacheControlHeader: false,
-      });
+      const cacheProvider = createCacheProvider();
 
       httpMock.scope(url).get('').reply(200, 'get response', {
         etag: 'get-etag',
@@ -438,20 +497,17 @@ describe('util/http/cache/package-http-cache-provider', () => {
       }) => {
         GlobalConfig.set({ cachePrivatePackages });
 
-        const cacheProvider = new PackageHttpCacheProvider({
-          namespace: '_test-namespace',
+        const cacheProvider = createCacheProvider({
           checkCacheControlHeader,
           checkAuthorizationHeader,
         });
 
         const response = { headers: {} } as HttpResponse;
 
-        // Set cache-control header if defined
         if (cacheControl !== undefined) {
           response.headers['cache-control'] = cacheControl;
         }
 
-        // Only set authorization property if not undefined
         if (authorization !== undefined) {
           response.authorization = authorization;
         }
@@ -463,9 +519,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     test('handles case-insensitive cache-control values', () => {
       GlobalConfig.set({ cachePrivatePackages: false });
 
-      const cacheProvider = new PackageHttpCacheProvider({
-        namespace: '_test-namespace',
-        checkAuthorizationHeader: false,
+      const cacheProvider = createCacheProvider({
         checkCacheControlHeader: true,
       });
 

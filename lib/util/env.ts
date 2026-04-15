@@ -1,4 +1,4 @@
-import * as memCache from './cache/memory';
+import * as memCache from './cache/memory/index.ts';
 
 let customEnv: Record<string, string> = {};
 

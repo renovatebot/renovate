@@ -18,12 +18,17 @@ You need the following dependencies for local development:
 We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
 Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
 
+For building the documentation, you also need:
+
+- Python `>=3.11`
+- PDM `>=2.26.0`
+
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
 npm install -g pnpm
@@ -144,9 +149,20 @@ If this is working then in future you can create other test repos to verify your
 
 You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `vitest`.
+`pnpm test` runs lint checks (`oxlint`, `biome`, `prettier`, etc.), a type check, and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
+
+### Quick Local CI
+
+For fast iteration during development, use `pnpm check`, which runs lint and tests in parallel:
+
+```bash
+pnpm check
+pnpm check lib/util/http        # scope to a directory
+pnpm check lib/util/hash.ts     # scope to a file
+pnpm check --fix lib/util/http  # auto-fix only
+```
 
 ### Vitest
 
@@ -169,10 +185,24 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 ## Linting and formatting
 
 We use [Prettier](https://github.com/prettier/prettier) to format our code.
-If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most `eslint` errors automatically before running `pnpm test` again.
+If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
 You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
+
+### IDE extensions
+
+We recommend installing the extensions listed in `.vscode/extensions.json`.
+VS Code will prompt you to install them when you open the project.
+
+For linting, we use [oxlint](https://oxc.rs) with type-aware analysis.
+
+To get real-time oxlint diagnostics, install the extension for your editor:
+
+- **VS Code**: [oxc](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode)
+- **Zed**: [oxc](https://github.com/zed-extensions/oxc)
+- **IntelliJ/WebStorm**: [Oxlint](https://plugins.jetbrains.com/plugin/25948-oxlint)
+- **Neovim**: [nvim-oxlint](https://github.com/soulsam480/nvim-oxlint) or via native LSP
 
 ## Documentation
 

@@ -1,9 +1,10 @@
 import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
-import type { RenovateSplit } from '../config/types';
-import type { BunyanRecord } from '../logger/types';
-import type { PackageFile } from '../modules/manager/types';
-import type { BranchCache } from '../util/cache/repository/types';
-import type { GitOperationType } from '../util/git/types';
+import type { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
+import type { RenovateSplit } from '../config/types.ts';
+import type { BunyanRecord } from '../logger/types.ts';
+import type { PackageFile } from '../modules/manager/types.ts';
+import type { BranchCache } from '../util/cache/repository/types.ts';
+import type { GitOperationType } from '../util/git/types.ts';
 
 export type RenovateSpanOptions = {
   attributes?: RenovateSpanAttributes;
@@ -12,10 +13,14 @@ export type RenovateSpanOptions = {
 export type RenovateSpanAttributes = {
   [ATTR_RENOVATE_SPLIT]?: RenovateSplit;
   [ATTR_VCS_GIT_OPERATION_TYPE]?: GitOperationType;
+  [ATTR_CODE_FUNCTION_NAME]?: string;
+  [ATTR_RENOVATE_DATASOURCE]?: string;
+  [ATTR_RENOVATE_REGISTRY_URL]?: string;
+  [ATTR_RENOVATE_PACKAGE_NAME]?: string;
 } & Attributes;
 
 /**
- * The instrumentation decorator parameters.
+ * The instrumentation parameters.
  */
 export interface SpanParameters {
   /**
@@ -26,7 +31,7 @@ export interface SpanParameters {
   /**
    * Attributes which should be added to the span
    */
-  attributes?: Attributes | undefined;
+  attributes?: RenovateSpanAttributes | undefined;
 
   /**
    * Should this span be added to the root span or to the current active span
@@ -67,6 +72,21 @@ export interface DependencyStatus {
 }
 
 export const ATTR_RENOVATE_SPLIT = 'renovate.split';
+
+/**
+ * The name of a Renovate datasource (ex: `github-tags`, `npm`, `docker`, etc).
+ */
+export const ATTR_RENOVATE_DATASOURCE = 'renovate.datasource';
+
+/**
+ * The registry URL of a registry URL as might be used with a datasource and package name.
+ */
+export const ATTR_RENOVATE_REGISTRY_URL = 'renovate.registryUrl';
+
+/**
+ * The package name of a package.
+ */
+export const ATTR_RENOVATE_PACKAGE_NAME = 'renovate.packageName';
 
 /**
  * the Git Version Control System (VCS)'s Operation Type

@@ -2,12 +2,12 @@ import os from 'node:os';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { exec } from '../exec';
-import { newlineRegex, regEx } from '../regex';
-import { addSecretForSanitizing } from '../sanitize';
-import { fromBase64, toBase64 } from '../string';
+import { PLATFORM_GPG_FAILED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { exec } from '../exec/index.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import { addSecretForSanitizing } from '../sanitize.ts';
+import { fromBase64, toBase64 } from '../string.ts';
 
 type PrivateKeyFormat = 'gpg' | 'ssh';
 

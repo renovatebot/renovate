@@ -4,13 +4,13 @@ import {
   isNonEmptyString,
   isNullOrUndefined,
 } from '@sindresorhus/is';
-import { getDep } from '../../../dockerfile/extract';
-import type { ExtractConfig, PackageDependency } from '../../../types';
-import { DependencyExtractor } from '../../base';
-import type { TerraformDefinitionFile } from '../../hcl/types';
-import type { ProviderLock } from '../../lockfile/types';
-import type { GenericImageResourceDef } from '../../types';
-import { generic_image_datasource, generic_image_resource } from './utils';
+import { getDep } from '../../../dockerfile/extract.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
+import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
+import type { GenericImageResourceDef } from '../../types.ts';
+import { generic_image_datasource, generic_image_resource } from './utils.ts';
 
 export class GenericDockerImageRefExtractor extends DependencyExtractor {
   getCheckList(): string[] {

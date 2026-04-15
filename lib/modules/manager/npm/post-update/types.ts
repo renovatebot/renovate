@@ -1,6 +1,6 @@
-import type { FileChange } from '../../../../util/git/types';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import type { FileChange } from '../../../../util/git/types.ts';
+import type { ArtifactError, PackageFile } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
@@ -10,11 +10,6 @@ export interface DetermineLockFileDirsResult {
 
 export interface AdditionalPackageFiles {
   npm?: Partial<PackageFile<NpmManagerData>>[];
-}
-
-export interface ArtifactError {
-  lockFile: string;
-  stderr?: string;
 }
 
 export interface WriteExistingFilesResult {

@@ -1,48 +1,48 @@
 import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../../config';
-import type { ValidationMessage } from '../../../../config/types';
-import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
+import { mergeChildConfig } from '../../../../config/index.ts';
+import type { ValidationMessage } from '../../../../config/types.ts';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import {
+  getDatasourceFor,
+  getDefaultVersioning,
+} from '../../../../modules/datasource/common.ts';
 import type {
   GetDigestInputConfig,
   Release,
   ReleaseResult,
-} from '../../../../modules/datasource';
+} from '../../../../modules/datasource/index.ts';
 import {
   applyDatasourceFilters,
   getDigest,
   getRawPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
-} from '../../../../modules/datasource';
-import {
-  getDatasourceFor,
-  getDefaultVersioning,
-} from '../../../../modules/datasource/common';
-import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
-import { getRangeStrategy } from '../../../../modules/manager';
-import * as allVersioning from '../../../../modules/versioning';
-import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { assignKeys } from '../../../../util/assign-keys';
-import { getElapsedDays } from '../../../../util/date';
-import { applyPackageRules } from '../../../../util/package-rules';
-import { regEx } from '../../../../util/regex';
-import { Result } from '../../../../util/result';
-import type { Timestamp } from '../../../../util/timestamp';
-import { calculateAbandonment } from './abandonment';
-import { getBucket } from './bucket';
-import { getCurrentVersion } from './current';
-import { filterVersions } from './filter';
-import { filterInternalChecks } from './filter-checks';
-import { generateUpdate } from './generate';
-import { getRollbackUpdate } from './rollback';
-import { calculateMostRecentTimestamp } from './timestamps';
-import type { LookupUpdateConfig, UpdateResult } from './types';
+} from '../../../../modules/datasource/index.ts';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
+import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
+import * as allVersioning from '../../../../modules/versioning/index.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { assignKeys } from '../../../../util/assign-keys.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { applyPackageRules } from '../../../../util/package-rules/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { Result } from '../../../../util/result.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import { calculateAbandonment } from './abandonment.ts';
+import { getBucket } from './bucket.ts';
+import { getCurrentVersion } from './current.ts';
+import { filterVersions } from './filter.ts';
+import { filterInternalChecks } from './filter-checks.ts';
+import { generateUpdate } from './generate.ts';
+import { getRollbackUpdate } from './rollback.ts';
+import { calculateMostRecentTimestamp } from './timestamps.ts';
+import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
-} from './utils';
+} from './utils.ts';
 
 async function getTimestamp(
   config: LookupUpdateConfig,
@@ -93,6 +93,7 @@ export async function lookupUpdates(
     );
     if (config.currentValue && !isString(config.currentValue)) {
       // If currentValue is not a string, then it's invalid
+      // v8 ignore else -- TODO: add test #40625
       if (config.currentValue) {
         logger.debug(
           `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
@@ -171,7 +172,7 @@ export async function lookupUpdates(
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: config.packageName,
-          message: `Failed to look up ${config.datasource} package ${config.packageName}`,
+          message: `Failed to look up ${config.datasource} package ${config.packageName}: ${lookupError}`,
         };
         logger.debug(
           {
@@ -326,6 +327,7 @@ export async function lookupUpdates(
         )!;
 
       if (!currentVersion) {
+        // v8 ignore else -- TODO: add test #40625
         if (!config.lockedVersion) {
           logger.debug(
             `No currentVersion or lockedVersion found for ${config.packageName}`,
@@ -470,6 +472,7 @@ export async function lookupUpdates(
           release.version,
           versioningApi,
         );
+        // v8 ignore else -- TODO: add test #40625
         if (isString(bucket)) {
           if (buckets[bucket]) {
             buckets[bucket].push(release);
@@ -616,6 +619,7 @@ export async function lookupUpdates(
     ) {
       for (const update of res.updates) {
         logger.debug({ update });
+        // v8 ignore else -- TODO: add test #40625
         if (isString(config.currentValue) && isString(update.newValue)) {
           update.newValue = config.currentValue.replace(
             compareValue,
@@ -637,6 +641,7 @@ export async function lookupUpdates(
         }
       } else if (config.pinDigests) {
         // Create a pin only if one doesn't already exists
+        // v8 ignore else -- TODO: add test #40625
         if (!res.updates.some((update) => update.updateType === 'pin')) {
           // pin digest
           res.updates.push({
@@ -649,7 +654,7 @@ export async function lookupUpdates(
       if (versioningApi.valueToVersion) {
         // TODO #22198
         res.currentVersion = versioningApi.valueToVersion(res.currentVersion!);
-        for (const update of res.updates || /* istanbul ignore next*/ []) {
+        for (const update of res.updates) {
           // TODO #22198
           update.newVersion = versioningApi.valueToVersion(update.newVersion!);
         }
@@ -679,13 +684,25 @@ export async function lookupUpdates(
           ) {
             delete getDigestConfig.lookupName;
             delete getDigestConfig.currentDigest;
+            getDigestConfig.replacementName = update.newName;
           }
 
-          // TODO #22198
-          update.newDigest ??=
-            dependency?.releases.find((r) => r.version === update.newValue)
-              ?.newDigest ??
-            (await getDigest(getDigestConfig, update.newValue))!;
+          // Don't use current releases if replacement changes name, otherwise we use the wrong new digest.
+          // This happens on datasources which return the digest in release info like `github-tags`.
+          // We can still use it when only version is changing.
+          if (
+            update.updateType !== 'replacement' ||
+            update.newName === config.packageName
+          ) {
+            update.newDigest ??= dependency?.releases.find(
+              (r) => r.version === update.newValue,
+            )?.newDigest;
+          }
+
+          update.newDigest ??= await getDigest(
+            getDigestConfig,
+            update.newValue,
+          );
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.
@@ -753,8 +770,7 @@ export async function lookupUpdates(
     if (config.rollbackPrs && config.followTag) {
       res.updates = res.updates.filter(
         (update) =>
-          res.updates.length === 1 ||
-          /* istanbul ignore next */ update.updateType !== 'rollback',
+          update.updateType !== 'rollback' || res.updates.length === 1,
       );
     }
 

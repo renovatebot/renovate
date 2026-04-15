@@ -1,28 +1,32 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import { asTimestamp } from '../../../util/timestamp';
-import { isHttpUrl } from '../../../util/url';
-import * as hashicorpVersioning from '../../versioning/hashicorp';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { TerraformDatasource } from './base';
-import type {
-  RegistryRepository,
-  ServiceDiscoveryResult,
-  TerraformModuleVersions,
-  TerraformRelease,
-} from './types';
-import { createSDBackendURL } from './utils';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { isHttpUrl } from '../../../util/url.ts';
+import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { TerraformDatasource } from './base.ts';
+import { ProtocolModuleResponse, TerraformModuleResponse } from './schema.ts';
+import { createSDBackendURL, getRegistryRepository } from './utils.ts';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-module';
+
+  static readonly terraformCloudUrl = 'https://app.terraform.io';
+
+  static readonly defaultRegistryUrls = [
+    TerraformModuleDatasource.terraformRegistryUrl,
+  ];
+
+  static readonly extendedApiRegistryUrls = [
+    TerraformModuleDatasource.terraformRegistryUrl,
+    TerraformModuleDatasource.terraformCloudUrl,
+  ];
 
   constructor() {
     super(TerraformModuleDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://registry.terraform.io'];
+  override readonly defaultRegistryUrls =
+    TerraformModuleDatasource.defaultRegistryUrls;
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 
@@ -33,22 +37,14 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the the `source` field in the results.';
 
-  readonly extendedApiRegistryUrls = [
-    'https://registry.terraform.io',
-    'https://app.terraform.io',
-  ];
-
   /**
-   * This function will fetch a package from the specified Terraform registry and return all semver versions.
-   *  - `sourceUrl` is supported if "source" field is set
-   *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
+   * Resolves a module release list for the configured registry.
+   *
+   * Requests against the public Terraform registry and Terraform Cloud use the
+   * registry-specific module endpoint, while other registries use the generic
+   * Module Registry Protocol versions endpoint.
    */
-  @cache({
-    namespace: `datasource-${TerraformModuleDatasource.id}`,
-    key: (getReleasesConfig: GetReleasesConfig) =>
-      TerraformModuleDatasource.getCacheKey(getReleasesConfig),
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -57,146 +53,99 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       return null;
     }
 
-    const { registry: registryUrlNormalized, repository } =
-      TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
+    const { registry, repository } = getRegistryRepository(
+      packageName,
+      registryUrl,
+    );
     logger.trace(
-      { registryUrlNormalized, terraformRepository: repository },
+      { registryUrlNormalized: registry, terraformRepository: repository },
       'terraform-module.getReleases()',
     );
 
-    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryUrlNormalized,
-    );
-    if (this.extendedApiRegistryUrls.includes(registryUrlNormalized)) {
-      return await this.queryRegistryExtendedApi(
-        serviceDiscovery,
-        registryUrlNormalized,
-        repository,
-      );
-    }
+    try {
+      if (
+        TerraformModuleDatasource.extendedApiRegistryUrls.includes(registry)
+      ) {
+        return await this.queryTerraformRegistry(registry, repository);
+      }
 
-    return await this.queryRegistryVersions(
+      // Use the standard Module Registry Protocol for other conformant registries.
+      return await this.queryModuleRegistry(registry, repository);
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformModuleDatasource.id}`,
+        key: TerraformModuleDatasource.getCacheKey(config),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  /**
+   * Queries the Terraform Registry module endpoint.
+   *
+   * The response includes the latest published version separately, so only that
+   * release can be annotated with `releaseTimestamp`.
+   *
+   * https://developer.hashicorp.com/terraform/registry/api-docs#get-a-specific-module
+   */
+  private async queryTerraformRegistry(
+    registryUrl: string,
+    repository: string,
+  ): Promise<ReleaseResult> {
+    const serviceDiscovery =
+      await this.getTerraformServiceDiscoveryResult(registryUrl);
+    const pkgUrl = createSDBackendURL(
+      registryUrl,
+      'modules.v1',
       serviceDiscovery,
-      registryUrlNormalized,
       repository,
     );
-  }
-
-  /**
-   * this uses the api that terraform registry has in addition to the base api
-   * this endpoint provides more information, such as release date
-   * https://www.terraform.io/registry/api-docs#latest-version-for-a-specific-module-provider
-   */
-  private async queryRegistryExtendedApi(
-    serviceDiscovery: ServiceDiscoveryResult,
-    registryUrl: string,
-    repository: string,
-  ): Promise<ReleaseResult | null> {
-    let res: TerraformRelease;
-    let pkgUrl: string;
-
-    try {
-      // TODO: types (#22198)
-
-      pkgUrl = createSDBackendURL(
-        registryUrl,
-        'modules.v1',
-        serviceDiscovery,
-        repository,
-      );
-      res = (await this.http.getJsonUnchecked<TerraformRelease>(pkgUrl)).body;
-      const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
-      if (returnedName !== repository) {
-        logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
-        return null;
-      }
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
-
-    // Simplify response before caching and returning
-    const dep: ReleaseResult = {
-      releases: res.versions.map((version) => ({
-        version,
-      })),
-    };
-    if (res.source) {
-      dep.sourceUrl = res.source;
-    }
-    dep.homepage = `${registryUrl}/modules/${repository}`;
-    // set published date for latest release
-    const latestVersion = dep.releases.find(
-      (release) => res.version === release.version,
+    const { body: res } = await this.http.getJson(
+      pkgUrl,
+      TerraformModuleResponse,
     );
-    if (latestVersion) {
-      latestVersion.releaseTimestamp = asTimestamp(res.published_at);
-    }
-    return dep;
-  }
-
-  /**
-   * this version uses the Module Registry Protocol that all registries are required to implement
-   * https://www.terraform.io/internals/module-registry-protocol
-   */
-  private async queryRegistryVersions(
-    serviceDiscovery: ServiceDiscoveryResult,
-    registryUrl: string,
-    repository: string,
-  ): Promise<ReleaseResult | null> {
-    let res: TerraformModuleVersions;
-    let pkgUrl: string;
-    try {
-      // TODO: types (#22198)
-      pkgUrl = createSDBackendURL(
-        registryUrl,
-        'modules.v1',
-        serviceDiscovery,
-        `${repository}/versions`,
-      );
-      res = (await this.http.getJsonUnchecked<TerraformModuleVersions>(pkgUrl))
-        .body;
-      if (res.modules.length < 1) {
-        logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
-        return null;
-      }
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
-
-    // Simplify response before caching and returning
-    const dep: ReleaseResult = {
-      releases: res.modules[0].versions.map(({ version }) => ({
-        version,
-      })),
-    };
-
-    // Add the source URL if given
-    if (isHttpUrl(res.modules[0].source)) {
-      dep.sourceUrl = res.modules[0].source;
-    }
-
-    return dep;
-  }
-
-  private static getRegistryRepository(
-    packageName: string,
-    registryUrl: string | undefined,
-  ): RegistryRepository {
-    let registry: string;
-    const split = packageName.split('/');
-    if (split.length > 3 && split[0].includes('.')) {
-      [registry] = split;
-      split.shift();
-    } else {
-      registry = coerceString(registryUrl);
-    }
-    if (!regEx(/^https?:\/\//).test(registry)) {
-      registry = `https://${registry}`;
-    }
-    const repository = split.join('/');
     return {
-      registry,
-      repository,
+      releases: res.versions,
+      sourceUrl: res.source,
+      homepage: `${registryUrl}/modules/${repository}`,
+    };
+  }
+
+  /**
+   * Queries a registry through the Terraform Module Registry Protocol.
+   *
+   * This is the default path for registries implementing the standard module
+   * registry protocol. It returns release versions and, when present and valid,
+   * the upstream source URL.
+   *
+   * https://developer.hashicorp.com/terraform/internals/module-registry-protocol
+   */
+  private async queryModuleRegistry(
+    registryUrl: string,
+    repository: string,
+  ): Promise<ReleaseResult | null> {
+    const serviceDiscovery =
+      await this.getTerraformServiceDiscoveryResult(registryUrl);
+    const pkgUrl = createSDBackendURL(
+      registryUrl,
+      'modules.v1',
+      serviceDiscovery,
+      `${repository}/versions`,
+    );
+    const { body: res } = await this.http.getJson(
+      pkgUrl,
+      ProtocolModuleResponse,
+    );
+    return {
+      releases: res.versions,
+      sourceUrl: isHttpUrl(res.source) ? res.source : undefined,
     };
   }
 
@@ -204,8 +153,10 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): string {
-    const { registry, repository } =
-      TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
+    const { registry, repository } = getRegistryRepository(
+      packageName,
+      registryUrl,
+    );
     return `${registry}/${repository}`;
   }
 }

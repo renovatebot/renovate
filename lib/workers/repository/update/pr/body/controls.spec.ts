@@ -1,4 +1,4 @@
-import { getControls } from './controls';
+import { getControls } from './controls.ts';
 
 describe('workers/repository/update/pr/body/controls', () => {
   it('calls getControls', () => {

@@ -9,7 +9,7 @@
   "ignorePresets": [":ignoreModulesAndTests"],
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "rebaseWhen": "conflicted",
-  "baseBranchPatterns": ["$default", "next"],
+  "baseBranchPatterns": ["$default", "/^disable-next$/"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -97,6 +97,11 @@
       "matchDatasources": ["npm"],
       "matchDepNames": ["got"],
       "separateMultipleMajor": true
+    },
+    {
+      "description": "Don't upgrade Vite automagically, due to a possible issue with flakey tests due to the upgrade: https://github.com/renovatebot/renovate/discussions/39921",
+      "matchDepNames": ["vite"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [
@@ -104,7 +109,7 @@
       "customType": "regex",
       "managerFilePatterns": ["lib/config/options/index.ts"],
       "matchStrings": [
-        "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
+        "default: '(?<depName>ghcr.io/renovatebot/base-image):(?<currentValue>.*)'"
       ],
       "datasourceTemplate": "docker"
     }

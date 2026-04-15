@@ -1,8 +1,9 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import { OrbDatasource } from '../../datasource/orb';
-import { extractPackageFile } from './extract';
-export { getRangeStrategy } from './range';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { OrbDatasource } from '../../datasource/orb/index.ts';
+import { extractPackageFile } from './extract.ts';
+
+export { getRangeStrategy } from './range.ts';
 
 export { extractPackageFile };
 
@@ -15,3 +16,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [DockerDatasource.id, OrbDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

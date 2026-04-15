@@ -1,17 +1,17 @@
 import { isString } from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
-import { logger } from '../../../../logger';
+import { logger } from '../../../../logger/index.ts';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import type { PackageFileContent } from '../../types';
-import type { YarnCatalogs } from '../schema';
-import type { NpmManagerData } from '../types';
-import { extractCatalogDeps } from './common/catalogs';
-import type { Catalog, LockFile } from './types';
+} from '../../../../util/fs/index.ts';
+import type { PackageFileContent } from '../../types.ts';
+import type { YarnCatalogs } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
+import { extractCatalogDeps } from './common/catalogs.ts';
+import type { Catalog, LockFile } from './types.ts';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -24,7 +24,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
         // yarn 2
-        lockfileVersion = parseInt(val.cacheKey);
+        lockfileVersion = parseInt(val.cacheKey, 10);
         logger.once.debug(
           `yarn.lock ${filePath} has __metadata.cacheKey=${lockfileVersion}`,
         );
@@ -68,10 +68,11 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
+  // TODO: fix type #22198
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml); /* v8 ignore next -- needs test */
-  } catch (err) {
+    conf = parseSyml(yarnrcYml);
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
   }
   const paths = [
@@ -91,6 +92,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
+  // v8 ignore else -- TODO: add test #40625
   if (isString(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {

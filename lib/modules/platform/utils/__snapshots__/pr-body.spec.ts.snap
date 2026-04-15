@@ -1,7 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`modules/platform/utils/pr-body > .smartTruncate > truncates to 300 not smart 1`] = `
-"> **Note:** This PR body was truncated due to platform limits.
+"> ℹ️ **Note**
+> 
+> This PR body was truncated due to platform limits.
 
 This PR contains the following updates:
 
@@ -11,11 +13,13 @@ This PR contains the following updates:
 
 ---
 
-### Release Note"
+### Relea"
 `;
 
 exports[`modules/platform/utils/pr-body > .smartTruncate > truncates to 1000 1`] = `
-"> **Note:** This PR body was truncated due to platform limits.
+"> ℹ️ **Note**
+> 
+> This PR body was truncated due to platform limits.
 
 This PR contains the following updates:
 
@@ -30,7 +34,7 @@ This PR contains the following updates:
 <details>
 <summary>renovatebot/renovate</summary>
 
-### [\`v19.47.0\`](https:/
+### [\`v19.47.0\`](
 
 </details>
 

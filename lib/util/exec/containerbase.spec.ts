@@ -1,13 +1,13 @@
-import { GlobalConfig } from '../../config/global';
-import * as _datasource from '../../modules/datasource';
+import { GlobalConfig } from '../../config/global.ts';
+import * as _datasource from '../../modules/datasource/index.ts';
 import {
   generateInstallCommands,
   isDynamicInstall,
   resolveConstraint,
-} from './containerbase';
-import type { ToolConstraint } from './types';
+} from './containerbase.ts';
+import type { ToolConstraint, ToolName } from './types.ts';
 
-vi.mock('../../modules/datasource');
+vi.mock('../../modules/datasource/index.ts');
 
 const datasource = vi.mocked(_datasource);
 
@@ -32,6 +32,7 @@ describe('util/exec/containerbase', () => {
       process.env.CONTAINERBASE = 'true';
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
+        // @ts-expect-error -- intentionally using invalid constraint names
         { toolName: 'invalid' },
       ];
       expect(isDynamicInstall(toolConstraints)).toBeFalse();
@@ -107,9 +108,9 @@ describe('util/exec/containerbase', () => {
     });
 
     it('throws for unknown tools', async () => {
-      await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
-        'Invalid tool to install: whoops',
-      );
+      await expect(
+        resolveConstraint({ toolName: 'whoops' as ToolName }),
+      ).rejects.toThrow('Invalid tool to install: whoops');
     });
 
     it('throws no releases', async () => {
@@ -256,15 +257,6 @@ describe('util/exec/containerbase', () => {
       ];
       expect(await generateInstallCommands(toolConstraints)).toEqual([
         'install-tool composer 2.1.0',
-      ]);
-    });
-
-    it('hashes npm', async () => {
-      const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
-      const res = await generateInstallCommands(toolConstraints);
-      expect(res).toEqual([
-        'install-tool npm 2.1.0',
-        'hash -d npm 2>/dev/null || true',
       ]);
     });
   });
