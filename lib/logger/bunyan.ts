@@ -1,9 +1,16 @@
+import { createRequire } from 'node:module';
 import {
   isNonEmptyStringAndNotWhitespace,
   isString,
   isUndefined,
 } from '@sindresorhus/is';
-import * as bunyan from 'bunyan';
+
+// Use createRequire so that @opentelemetry/instrumentation-bunyan can patch
+// bunyan via require-in-the-middle. A plain ESM `import` bypasses the hook.
+const bunyan = createRequire(import.meta.url)(
+  'bunyan',
+) as typeof import('bunyan');
+
 import fs from 'fs-extra';
 import upath from 'upath';
 import cmdSerializer from './cmd-serializer.ts';
@@ -28,9 +35,7 @@ export function createDefaultStreams(
 
   // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
-    // TODO: typings (#9615)
-    const prettyStdOut = new RenovateStream() as any;
-    prettyStdOut.pipe(process.stdout);
+    const prettyStdOut = new RenovateStream(process.stdout);
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
@@ -68,7 +73,14 @@ function createLogFileStream(logFile: string): BunyanStream {
     isNonEmptyStringAndNotWhitespace(logFileFormat) &&
     logFileFormat === 'pretty'
   ) {
+    const fileStream = fs.createWriteStream(logFile, {
+      flags: 'a',
+      encoding: 'utf8',
+    });
+    const prettyFile = new RenovateStream(fileStream, false);
+    file.stream = prettyFile;
     file.type = 'raw';
+    delete file.path;
   }
 
   return file;

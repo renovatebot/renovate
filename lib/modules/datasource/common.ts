@@ -3,6 +3,7 @@ import {
   isNonEmptyStringAndNotWhitespace,
 } from '@sindresorhus/is';
 import { logger } from '../../logger/index.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { regEx } from '../../util/regex.ts';
 import * as allVersioning from '../versioning/index.ts';
@@ -193,7 +194,9 @@ export function applyConstraintsFiltering<
       return release;
     }
 
-    for (const [name, configConstraint] of Object.entries(configConstraints)) {
+    for (const [name, configConstraint] of Object.entries(
+      configConstraints,
+    ) as [ConstraintName, string][]) {
       if (!versioning.isValid(configConstraint)) {
         logger.once.warn(
           {
