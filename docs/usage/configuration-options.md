@@ -3490,7 +3490,7 @@ $exists(deprecationMessage)
 $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
-$detectPlatform(sourceUrl) = "github"
+$detectPlatform(sourceUrl) = 'github'
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
