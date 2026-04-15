@@ -50,9 +50,7 @@ describe('docs/documentation', () => {
           .map((match) => match.substring(4, match.length - 1))
           .filter(
             (header) =>
-              header !== 'managerFilePatterns' &&
-              header !== 'enabled' &&
-              header !== 'fetchChangeLogs',
+              header !== 'managerFilePatterns' && header !== 'enabled',
           );
       }
 

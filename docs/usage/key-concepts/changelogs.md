@@ -32,7 +32,7 @@ For more details, see [Private packages, looking up changelogs](../getting-start
 
 Top-level configuration that controls when to fetch changelogs for addition to pull-request and branch commit-messages.
 If you want more finely-grained control over changelog fetching (disabling for specific packages, source repositories, etc),
-use a package rule with the [`packageRules.fetchChangeLogs`](../configuration-options.md#packagerulesfetchchangelogs) setting.
+use [packageRules](../configuration-options.md#packagerules) to override the `fetchChangeLogs` value for matching packages.
 
 Set to `off` if changelog fetching is causing a problem.
 
