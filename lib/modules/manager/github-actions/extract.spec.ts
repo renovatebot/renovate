@@ -1420,10 +1420,10 @@ describe('modules/manager/github-actions/extract', () => {
         {
           skipStage: 'extract',
           skipReason: 'unspecified-version',
-          datasource: 'pypi',
-          depName: 'zizmor',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
           depType: 'uses-with',
-          packageName: 'zizmor',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
         },
       ],
     },
@@ -1437,10 +1437,10 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: 'v1.23.1',
-          datasource: 'pypi',
-          depName: 'zizmor',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
           depType: 'uses-with',
-          packageName: 'zizmor',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
         },
       ],
     },
@@ -1454,10 +1454,10 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '1.23.1',
-          datasource: 'pypi',
-          depName: 'zizmor',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
           depType: 'uses-with',
-          packageName: 'zizmor',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
         },
       ],
     },

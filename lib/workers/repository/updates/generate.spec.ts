@@ -190,6 +190,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           automerge: true,
           constraints: {
+            // @ts-expect-error -- intentionally using invalid constraint names
             foo: '1.0.0',
           },
         },
@@ -209,6 +210,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-06T20:01:41+00:00' as Timestamp,
           automerge: false,
           constraints: {
+            // @ts-expect-error -- intentionally using invalid constraint names
             foo: '1.0.0',
             bar: '2.0.0',
           },

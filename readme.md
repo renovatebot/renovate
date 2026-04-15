@@ -80,6 +80,8 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 
 **Supports: all platforms**
 
+For additional community-maintained options, see the [Community Tools](https://docs.renovatebot.com/community-tools/) page.
+
 ## Docs
 
 ### More about Renovate

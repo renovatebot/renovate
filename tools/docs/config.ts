@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
   allManagersList,
   getManagers,
 } from '../../lib/modules/manager/index.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
-import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { formatCell, replaceContent } from './utils.ts';
 
