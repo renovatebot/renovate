@@ -31,7 +31,7 @@ export const presets: Record<string, Preset> = {
       {
         changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
         matchDatasources: ['git-refs', 'git-tags'],
-        matchJsonata: ["$detectPlatform({{ sourceUrl }}) = 'forgejo'"],
+        matchJsonata: ["$detectPlatform(sourceUrl) = 'forgejo'"],
         matchUpdateTypes: ['digest'],
       },
     ],
@@ -48,7 +48,7 @@ export const presets: Record<string, Preset> = {
       {
         changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
         matchDatasources: ['git-refs', 'git-tags'],
-        matchJsonata: ["$detectPlatform({{ sourceUrl }}) = 'gitea'"],
+        matchJsonata: ["$detectPlatform(sourceUrl) = 'gitea'"],
         matchUpdateTypes: ['digest'],
       },
     ],
@@ -65,7 +65,7 @@ export const presets: Record<string, Preset> = {
       {
         changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
         matchDatasources: ['git-refs', 'git-tags'],
-        matchJsonata: ["$detectPlatform({{ sourceUrl }}) = 'github'"],
+        matchJsonata: ["$detectPlatform(sourceUrl) = 'github'"],
         matchUpdateTypes: ['digest'],
       },
     ],
