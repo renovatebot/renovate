@@ -30,7 +30,7 @@ export class BazelDatasource extends Datasource {
   override readonly defaultVersioning = bazelVersioningId;
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the BCR UI commit dates at registry.bazel.build, and is only available for the default Bazel Central Registry.';
+    'The release timestamp is determined from the BCR UI commit dates at registry.bazel.build. Timestamps are fetched for any remote registry (including BCR mirrors/proxies) but not for file-based registries.';
 
   static packageMetadataPath(packageName: string): string {
     return `/modules/${packageName}/metadata.json`;
@@ -100,10 +100,9 @@ export class BazelDatasource extends Datasource {
         return null;
       }
 
-      const timestamps =
-        registryUrl === BazelDatasource.bazelCentralRepoUrl
-          ? await this.getVersionTimestamps(packageName)
-          : new Map<string, Timestamp>();
+      const timestamps = url.startsWith('file://')
+        ? new Map<string, Timestamp>()
+        : await this.getVersionTimestamps(packageName);
 
       result.releases = metadata.versions
         .map((v) => new BzlmodVersion(v))

@@ -171,12 +171,49 @@ describe('modules/datasource/bazel/index', () => {
       });
     });
 
-    it('does not fetch BCR UI page for custom registry URLs', async () => {
+    it('fetches BCR UI timestamps for custom registry URLs (BCR mirrors)', async () => {
       const customRegistryUrl = 'https://custom-registry.example.com';
       httpMock
         .scope(customRegistryUrl)
         .get(path)
         .reply(200, Fixtures.get('metadata-no-yanked-versions.json'));
+      httpMock.scope(bcrUiBaseUrl).get(bcrUiPath).reply(200, mockBcrPage);
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls: [customRegistryUrl],
+      });
+      expect(res).toEqual({
+        registryUrl: customRegistryUrl,
+        releases: [
+          {
+            version: '0.14.8',
+            releaseTimestamp: '2024-01-10T12:00:00.000Z',
+          },
+          {
+            version: '0.14.9',
+            releaseTimestamp: '2024-03-15T14:30:00.000Z',
+          },
+          {
+            version: '0.15.0',
+            releaseTimestamp: '2024-06-20T09:00:00.000Z',
+          },
+          {
+            version: '0.16.0',
+            releaseTimestamp: '2024-09-01T16:45:00.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/foo/bar',
+      });
+    });
+
+    it('gracefully handles BCR UI failure for custom registry URLs', async () => {
+      const customRegistryUrl = 'https://custom-registry.example.com';
+      httpMock
+        .scope(customRegistryUrl)
+        .get(path)
+        .reply(200, Fixtures.get('metadata-no-yanked-versions.json'));
+      httpMock.scope(bcrUiBaseUrl).get(bcrUiPath).reply(404);
       const res = await getPkgReleases({
         datasource,
         packageName,
