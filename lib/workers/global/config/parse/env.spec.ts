@@ -1,4 +1,5 @@
 import type { MockInstance } from 'vitest';
+import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { RequiredConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -397,7 +398,7 @@ describe('workers/global/config/parse/env', () => {
     const envNameToOptions = new Map<string, string[]>();
 
     for (const option of options) {
-      const envName = env.getEnvName(option);
+      const envName = getEnvName(option);
       if (envName === '') {
         continue;
       }
@@ -419,7 +420,7 @@ describe('workers/global/config/parse/env', () => {
         name: 'foo',
         env: false,
       };
-      expect(env.getEnvName(option)).toBe('');
+      expect(getEnvName(option)).toBe('');
     });
 
     it('returns existing env', () => {
@@ -427,14 +428,14 @@ describe('workers/global/config/parse/env', () => {
         name: 'foo',
         env: 'FOO',
       };
-      expect(env.getEnvName(option)).toBe('FOO');
+      expect(getEnvName(option)).toBe('FOO');
     });
 
     it('generates RENOVATE_ env', () => {
       const option: ParseConfigOptions = {
         name: 'oneTwoThree',
       };
-      expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
+      expect(getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
     });
 
     it('dryRun boolean true', async () => {

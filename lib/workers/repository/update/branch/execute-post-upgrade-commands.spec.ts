@@ -4,6 +4,7 @@ import upath from 'upath';
 import { fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as _exec from '../../../../util/exec/index.ts';
+import type { ConstraintName, ToolName } from '../../../../util/exec/types.ts';
 import * as _gitAuth from '../../../../util/git/auth.ts';
 import type { StatusResult } from '../../../../util/git/types.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
@@ -910,8 +911,8 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
     describe('when using installTools', () => {
       interface TestCase {
         description: string;
-        constraints?: Record<string, string>;
-        installTools: Record<string, Record<never, never>>;
+        constraints?: Partial<Record<ConstraintName, string>>;
+        installTools: Partial<Record<ToolName, Record<never, never>>>;
         expected: { toolName: string; constraint: string | undefined }[];
       }
 
@@ -945,6 +946,26 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           constraints: undefined,
           installTools: { node: {} },
           expected: [{ toolName: 'node', constraint: undefined }],
+        },
+        {
+          description: `a constraint that isn't a valid tool is ignored (without being referenced by \`installTools\`)`,
+          constraints: {
+            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            jenkins: '1.566.0',
+          },
+          installTools: {},
+          expected: [],
+        },
+        {
+          description: `a constraint that isn't a valid tool is ignored (when referenced by \`installTools\`)`,
+          constraints: {
+            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            jenkins: '2.541.3',
+          },
+          installTools: {
+            jenkins: {},
+          } as never, // TODO can't tighten the type constraints, as the arguments to the test function don't match
+          expected: [],
         },
       ])('$description', async ({ constraints, installTools, expected }) => {
         const commands = partial<BranchUpgradeConfig>([
@@ -1010,6 +1031,152 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           }),
         );
         expect(res.artifactErrors).toHaveLength(0);
+      });
+
+      it(`logs when skipping a constraint that isn't a known tool`, async () => {
+        // @ts-expect-error -- installTools.jenkins is not valid
+        const commands = partial<BranchUpgradeConfig>([
+          {
+            constraints: {
+              jenkins: '2.541.3',
+            },
+            manager: 'some-manager',
+            branchName: 'main',
+            postUpgradeTasks: {
+              commands: ['some-command'],
+              executionMode: 'update',
+              installTools: {
+                jenkins: {},
+              },
+            },
+          },
+        ]);
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+            { type: 'addition', path: 'artifact', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep2',
+            },
+          ],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({
+          stdout: 'success',
+          stderr: '',
+        });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: [],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const localDir = upath.join(tmpDir.path, 'local');
+        GlobalConfig.set({
+          localDir,
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        await postUpgradeCommands.postUpgradeCommandsExecutor(
+          // @ts-expect-error -- installTools.jenkins is not valid
+          commands,
+          config,
+        );
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            tool: 'jenkins',
+            validTool: false,
+            validConstraint: true,
+          },
+          'Skipping valid constraint that is not a tool that Containerbase knows',
+        );
+      });
+
+      it(`logs when skipping a value that isn't a known constraint`, async () => {
+        // @ts-expect-error -- not using a valid constraints or installTools value
+        const commands = partial<BranchUpgradeConfig>([
+          {
+            constraints: {
+              'not-valid': '1.2.3',
+            },
+            manager: 'some-manager',
+            branchName: 'main',
+            postUpgradeTasks: {
+              commands: ['some-command'],
+              executionMode: 'update',
+              installTools: {
+                'not-valid': {},
+              },
+            },
+          },
+        ]);
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+            { type: 'addition', path: 'artifact', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep2',
+            },
+          ],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({
+          stdout: 'success',
+          stderr: '',
+        });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: [],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const localDir = upath.join(tmpDir.path, 'local');
+        GlobalConfig.set({
+          localDir,
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        await postUpgradeCommands.postUpgradeCommandsExecutor(
+          // @ts-expect-error -- installTools.jenkins is not valid
+          commands,
+          config,
+        );
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            tool: 'not-valid',
+            validTool: false,
+            validConstraint: false,
+          },
+          'Skipping invalid constraint that is not a tool that Containerbase knows',
+        );
       });
     });
   });

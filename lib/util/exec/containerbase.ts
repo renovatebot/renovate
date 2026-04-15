@@ -16,9 +16,9 @@ import { id as rubyVersioningId } from '../../modules/versioning/ruby/index.ts';
 import { id as semverVersioningId } from '../../modules/versioning/semver/index.ts';
 import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced/index.ts';
 import { getEnv } from '../env.ts';
-import type { Opt, ToolConfig, ToolConstraint } from './types.ts';
+import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
-const allToolConfig: Record<string, ToolConfig> = {
+const allToolConfig: Record<ToolName, ToolConfig> = {
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
@@ -252,7 +252,7 @@ async function getPkgReleases(
   return getPkgReleases(toolConfig);
 }
 
-export function supportsDynamicInstall(toolName: string): boolean {
+export function supportsDynamicInstall(toolName: ToolName): boolean {
   return !!allToolConfig[toolName];
 }
 
