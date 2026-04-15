@@ -25,7 +25,6 @@ describe('modules/manager/ant/extract', () => {
             depName: 'junit:junit',
             currentValue: '4.13.2',
             depType: 'test',
-            registryUrls: [],
           }),
         ],
       });
@@ -783,7 +782,6 @@ describe('modules/manager/ant/extract', () => {
               depName: 'junit:junit',
               currentValue: '4.13.2',
               depType: 'compile',
-              registryUrls: [],
             }),
           ],
         },
@@ -1118,7 +1116,6 @@ describe('modules/manager/ant/extract', () => {
           deps: [
             expect.objectContaining({
               depName: 'junit:junit',
-              registryUrls: [],
             }),
           ],
         },
@@ -1155,7 +1152,6 @@ describe('modules/manager/ant/extract', () => {
             }),
             expect.objectContaining({
               depName: 'org.slf4j:slf4j-api',
-              registryUrls: [],
             }),
           ],
         },

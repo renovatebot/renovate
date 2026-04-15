@@ -128,7 +128,7 @@ function collectCoordsDependency(
     depName: `${parsed.groupId}:${parsed.artifactId}`,
     currentValue: parsed.rawVersion,
     depType: getDependencyType(parsed.scope ?? node.attr.scope),
-    registryUrls,
+    ...(registryUrls?.length && { registryUrls }),
   };
 
   // Position at the version substring within the coords attribute value
@@ -160,7 +160,7 @@ function collectDependency(
     depName: `${groupId}:${artifactId}`,
     currentValue: version,
     depType: getDependencyType(scope),
-    registryUrls,
+    ...(registryUrls?.length && { registryUrls }),
   };
 
   dep.fileReplacePosition = findAttrValuePosition(content, node, 'version');
