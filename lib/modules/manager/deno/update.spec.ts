@@ -23,10 +23,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '0.223.0',
           newValue: '0.224.0',
           datasource: 'deno',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.imports.fs).toBe(
           'https://deno.land/std@0.224.0/fs/mod.ts',
@@ -51,10 +54,11 @@ describe('modules/manager/deno/update', () => {
           currentValue: '0.223.0',
           newValue: '0.224.0',
           datasource: 'deno',
-          packageFile: 'deno.json',
         };
 
-        expect(() => updateDependency({ fileContent, upgrade })).toThrow();
+        expect(() =>
+          updateDependency({ fileContent, packageFile: 'deno.json', upgrade }),
+        ).toThrow();
       });
 
       it('updates dependency in scopes', () => {
@@ -76,10 +80,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: 'latest',
           newValue: '2.0.0',
           datasource: 'jsr',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
 
         expect(result).not.toBeNull();
         const parsed = JSON.parse(result!);
@@ -107,10 +114,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: 'latest',
           newValue: '2.0.0',
           datasource: 'jsr',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -134,10 +144,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '4.0.0',
           newValue: '4.1.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.tasks.build).toBe('deno run -A npm:dep1@4.1.0');
       });
@@ -162,10 +175,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '14.0.1',
           newValue: '16.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const resul = updateDependency({ fileContent, upgrade });
+        const resul = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(resul!);
         expect(parsed.tasks.dev.command).toBe(
           'deno run --allow-net npm:dep2@16.0.0',
@@ -192,10 +208,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '4.0.0',
           newValue: '4.1.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -219,10 +238,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '14.0.1',
           newValue: '16.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -245,10 +267,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.compilerOptions.types[0]).toBe('npm:@types/dep2@19.0.0');
       });
@@ -270,10 +295,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -294,10 +322,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -320,10 +351,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'deno',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.compilerOptions.jsxImportSource).toBe(
           'https://deno.land/x/dep2@19.0.0',
@@ -347,10 +381,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'deno',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -371,10 +408,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -397,11 +437,11 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
         const result = updateDependency({
           fileContent,
+          packageFile: 'deno.json',
           upgrade,
         });
         const parsed = JSON.parse(result!);
@@ -427,10 +467,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '5.0.0',
           newValue: '6.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.lint.plugins).toContain('npm:dep1@6.0.0');
       });
@@ -452,10 +495,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '5.0.0',
           newValue: '6.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -476,10 +522,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '5.0.0',
           newValue: '6.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -500,10 +549,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: undefined,
           newValue: '1.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.imports.dep1).toBe('npm:dep1@1.0.0');
       });
@@ -512,7 +564,11 @@ describe('modules/manager/deno/update', () => {
         const fileContent = JSON.stringify({}, null, 2);
         const upgrade: UpdateDependencyConfig['upgrade'] = {};
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: '',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -533,10 +589,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'unknown',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -556,10 +615,13 @@ describe('modules/manager/deno/update', () => {
           depType: 'imports',
           newValue: '2.0.0',
           datasource: 'deno',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.imports.fs).toBe('https://deno.land/std/fs@2.0.0');
       });
@@ -573,10 +635,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -610,10 +675,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '1.1.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result1 = updateDependency({ fileContent, upgrade });
+        const result1 = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result1!);
         expect(parsed.imports.dep1).toBe('npm:dep1@1.1.0');
       });
@@ -631,10 +699,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '1.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toEqual(fileContent);
       });
 
@@ -647,10 +718,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -663,10 +737,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -683,10 +760,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'invalid',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -699,10 +779,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'npm',
-          packageFile: 'unknown.yaml',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'unknown.yaml',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -723,7 +806,11 @@ describe('modules/manager/deno/update', () => {
           packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.imports.dep1).toContain('npm:dep1@2.0.0');
       });
@@ -741,10 +828,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -761,10 +851,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -781,10 +874,13 @@ describe('modules/manager/deno/update', () => {
           currentValue: '5.0.0',
           newValue: '6.0.0',
           datasource: 'npm',
-          packageFile: 'deno.json',
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'deno.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
     });
@@ -803,13 +899,16 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'jsr',
-          packageFile: 'import_map.json',
           managerData: {
             importMapReferrer: 'deno.json',
           },
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'import_map.json',
+          upgrade,
+        });
         const parsed = JSON.parse(result!);
         expect(parsed.imports.dep1).toContain('jsr:@scope/dep1@2.0.0');
       });
@@ -823,13 +922,16 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'npm',
-          packageFile: 'import_map.json',
           managerData: {
             importMapReferrer: 'deno.json',
           },
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'import_map.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -850,13 +952,16 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'unknown',
-          packageFile: 'import_map.json',
           managerData: {
             importMapReferrer: 'deno.json',
           },
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'import_map.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
 
@@ -873,13 +978,16 @@ describe('modules/manager/deno/update', () => {
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'invalid',
-          packageFile: 'import_map.json',
           managerData: {
             importMapReferrer: 'deno.json',
           },
         };
 
-        const result = updateDependency({ fileContent, upgrade });
+        const result = updateDependency({
+          fileContent,
+          packageFile: 'import_map.json',
+          upgrade,
+        });
         expect(result).toBeNull();
       });
     });
@@ -894,11 +1002,11 @@ describe('modules/manager/deno/update', () => {
           depType: 'dependencies',
           depName: 'cheerio',
           newValue: '0.22.1',
-          packageFile: 'package.json',
         };
         const outputContent = readFixture('outputs/011.json');
         const testContent = updateDependency({
           fileContent: input01Content,
+          packageFile: 'package.json',
           upgrade,
         });
         expect(testContent).toEqual(outputContent);

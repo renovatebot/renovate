@@ -112,15 +112,8 @@ function updateImportMapLikeDepTypes(
 export function updateDependency(
   config: UpdateDependencyConfig<DenoManagerData>,
 ): string | null {
-  const { fileContent, upgrade } = config;
-  const {
-    depName,
-    currentValue,
-    newValue,
-    datasource,
-    packageFile,
-    managerData,
-  } = upgrade;
+  const { fileContent, packageFile, upgrade } = config;
+  const { depName, currentValue, newValue, datasource, managerData } = upgrade;
   if (!packageFile) {
     logger.debug('deno.updateDependency(): No package file found');
     return null;
