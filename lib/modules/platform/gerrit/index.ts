@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
@@ -239,7 +239,7 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
       return false;
     }
     if (
-      findPRConfig.state !== undefined &&
+      !isUndefined(findPRConfig.state) &&
       findPRConfig.state !== 'all' &&
       pr.state !== findPRConfig.state &&
       !(findPRConfig.state === '!open' && pr.state !== 'open')
@@ -346,7 +346,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
-  if (change === undefined) {
+  if (isUndefined(change)) {
     throw new Error(
       `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
