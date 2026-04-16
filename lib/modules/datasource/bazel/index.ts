@@ -4,6 +4,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
@@ -12,8 +13,9 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BazelModuleMetadata, BcrPageData } from './schema.ts';
 
-const nextDataRegex =
-  /<script id="__NEXT_DATA__" type="application\/json">(?<json>.+?)<\/script>/s;
+const nextDataRegex = regEx(
+  /<script id="__NEXT_DATA__" type="application\/json">(?<json>.+?)<\/script>/s,
+);
 
 export class BazelDatasource extends Datasource {
   static readonly id = 'bazel';

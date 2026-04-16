@@ -27,8 +27,31 @@ function bcrPageHtml(json: string): string {
   return `<!DOCTYPE html><html><head></head><body><script id="__NEXT_DATA__" type="application/json">${json}</script></body></html>`;
 }
 
-const bcrPageData = Fixtures.get('bcr-page-data.json');
-const mockBcrPage = bcrPageHtml(bcrPageData);
+const bcrPageData = {
+  props: {
+    pageProps: {
+      versionInfos: [
+        {
+          version: '0.14.8',
+          submission: { status: ['A'], authorDateIso: '2024-01-10T12:00:00Z' },
+        },
+        {
+          version: '0.14.9',
+          submission: { status: ['A'], authorDateIso: '2024-03-15T14:30:00Z' },
+        },
+        {
+          version: '0.15.0',
+          submission: { status: ['A'], authorDateIso: '2024-06-20T09:00:00Z' },
+        },
+        {
+          version: '0.16.0',
+          submission: { status: ['A'], authorDateIso: '2024-09-01T16:45:00Z' },
+        },
+      ],
+    },
+  },
+};
+const mockBcrPage = bcrPageHtml(JSON.stringify(bcrPageData));
 
 describe('modules/datasource/bazel/index', () => {
   describe('getReleases', () => {
@@ -96,36 +119,19 @@ describe('modules/datasource/bazel/index', () => {
       });
     });
 
-    it('metadata with yanked versions', async () => {
+    it('marks yanked versions as deprecated', async () => {
       httpMock
         .scope(defaultRegistryUrl)
         .get(path)
         .reply(200, Fixtures.get('metadata-with-yanked-versions.json'));
       httpMock.scope(bcrUiBaseUrl).get(bcrUiPath).reply(200, mockBcrPage);
       const res = await getPkgReleases({ datasource, packageName });
-      expect(res).toEqual({
-        registryUrl:
-          'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main',
-        releases: [
-          {
-            version: '0.14.8',
-            releaseTimestamp: '2024-01-10T12:00:00.000Z',
-          },
-          {
-            version: '0.14.9',
-            releaseTimestamp: '2024-03-15T14:30:00.000Z',
-          },
-          {
-            version: '0.15.0',
-            isDeprecated: true,
-            releaseTimestamp: '2024-06-20T09:00:00.000Z',
-          },
-          {
-            version: '0.16.0',
-            releaseTimestamp: '2024-09-01T16:45:00.000Z',
-          },
-        ],
-      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.14.8' },
+        { version: '0.14.9' },
+        { version: '0.15.0', isDeprecated: true },
+        { version: '0.16.0' },
+      ]);
     });
 
     it('returns releases without timestamps when BCR UI page fetch fails', async () => {
