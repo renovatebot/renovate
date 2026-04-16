@@ -139,6 +139,10 @@ export async function getCachedGunzippedFile(
       cacheDir,
       `${randomUUID()}_${urlHash}.gz`,
     );
+    const extractedTempFile = upath.join(
+      cacheDir,
+      `${randomUUID()}_${urlHash}.${extension}`,
+    );
 
     try {
       const wasUpdated = await downloadGzipFile(
@@ -150,7 +154,9 @@ export async function getCachedGunzippedFile(
 
       if (wasUpdated || !lastTimestamp) {
         try {
-          await extractGzipFile(compressedFile, extractedFile);
+          // Only replace the shared cache file after a successful extract.
+          await extractGzipFile(compressedFile, extractedTempFile);
+          await fs.renameCacheFile(extractedTempFile, extractedFile);
           lastTimestamp = await getFileCreationTime(extractedFile);
         } catch (err) {
           logger.warn(
@@ -174,6 +180,9 @@ export async function getCachedGunzippedFile(
     } finally {
       if (await fs.cachePathExists(compressedFile)) {
         await fs.rmCache(compressedFile);
+      }
+      if (await fs.cachePathExists(extractedTempFile)) {
+        await fs.rmCache(extractedTempFile);
       }
     }
   } finally {

@@ -8,6 +8,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import * as cacheFs from '../../../util/fs/index.ts';
+import { toSha256 } from '../../../util/hash.ts';
 import { RpmDatasource } from './index.ts';
 
 const registryUrl = 'https://example.com/repo/repodata/';
@@ -187,6 +188,7 @@ describe('modules/datasource/rpm/index', () => {
 
   describe('getReleasesByPackageName', () => {
     const packageName = 'example-package';
+    const extractedPrimaryXmlPath = `others/rpm/${toSha256(primaryXmlUrl)}.xml`;
 
     function buildPrimaryXml(packageEntries: string): string {
       return codeBlock`
@@ -407,6 +409,111 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrow('Missing metadata in extracted RPM metadata file!');
+    });
+
+    it('keeps the previous extracted primary.xml if a refresh extract fails', async () => {
+      const originalPipeline = cacheFs.pipeline;
+
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+        `),
+      );
+
+      expect(
+        await rpmDatasource.getReleasesByPackageName(
+          primaryXmlUrl,
+          packageName,
+        ),
+      ).toEqual({
+        releases: [{ version: '1.0-2.azl3' }],
+      });
+
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .head('/somesha256-primary.xml.gz')
+        .once()
+        .reply(200);
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="2.0" rel="1.azl3"/>
+          </package>
+        `),
+      );
+
+      vi.spyOn(cacheFs, 'pipeline')
+        .mockImplementationOnce(
+          (...args: Parameters<typeof cacheFs.pipeline>) =>
+            originalPipeline(...args),
+        )
+        .mockRejectedValueOnce(new Error('extract failed'));
+
+      expect(
+        await rpmDatasource.getReleasesByPackageName(
+          primaryXmlUrl,
+          packageName,
+        ),
+      ).toEqual({
+        releases: [{ version: '1.0-2.azl3' }],
+      });
+      await expect(
+        cacheFs.readCacheFile(extractedPrimaryXmlPath, 'utf8'),
+      ).resolves.toContain('ver="1.0"');
+    });
+
+    it('replaces the extracted primary.xml after a successful refresh', async () => {
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+        `),
+      );
+
+      expect(
+        await rpmDatasource.getReleasesByPackageName(
+          primaryXmlUrl,
+          packageName,
+        ),
+      ).toEqual({
+        releases: [{ version: '1.0-2.azl3' }],
+      });
+
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .head('/somesha256-primary.xml.gz')
+        .once()
+        .reply(200);
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="2.0" rel="1.azl3"/>
+          </package>
+        `),
+      );
+
+      expect(
+        await rpmDatasource.getReleasesByPackageName(
+          primaryXmlUrl,
+          packageName,
+        ),
+      ).toEqual({
+        releases: [{ version: '2.0-1.azl3' }],
+      });
+      await expect(
+        cacheFs.readCacheFile(extractedPrimaryXmlPath, 'utf8'),
+      ).resolves.toContain('ver="2.0"');
     });
 
     it('returns null if no element package is found in primary.xml', async () => {
