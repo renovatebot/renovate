@@ -143,6 +143,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     // override some local git settings for better testing
     const local = simpleGit(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
+    await local.addConfig('user.name', 'Jest');
+    await local.addConfig('user.email', 'Jest@example.com');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 

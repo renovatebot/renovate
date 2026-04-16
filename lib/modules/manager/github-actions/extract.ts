@@ -13,6 +13,7 @@ import * as dockerVersioning from '../../versioning/docker/index.ts';
 import * as exactVersioning from '../../versioning/exact/index.ts';
 import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
+import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
@@ -86,7 +87,7 @@ function extractRepositoryAction(
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
-    versioning: dockerVersioning.id,
+    versioning: semverPartialVersioning.id,
     depType: 'action',
     replaceString: valueString,
     autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
