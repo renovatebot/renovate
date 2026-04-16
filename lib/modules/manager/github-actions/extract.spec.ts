@@ -163,7 +163,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pascalgn/automerge-action',
           depType: 'action',
           replaceString: '"pascalgn/automerge-action@v0.13.1"',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           currentValue: 'v2.3.5',
@@ -172,7 +172,7 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString:
             'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           currentValue: 'v1',
@@ -180,7 +180,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           depType: 'action',
           replaceString: 'actions/checkout@v1',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           currentValue: 'v1.1.2',
@@ -188,7 +188,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           currentValue: '1.37.0-glibc',
@@ -236,7 +236,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'semver-partial',
           depType: 'action',
           replaceString:
             'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
@@ -249,7 +249,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'semver-partial',
           depType: 'action',
           replaceString:
             "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1",
@@ -262,7 +262,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'semver-partial',
           depType: 'action',
           replaceString:
             '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1',
@@ -275,7 +275,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'semver-partial',
           depType: 'action',
           replaceString: '"actions/checkout@v2"',
           autoReplaceStringTemplate:
@@ -286,7 +286,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-java',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'semver-partial',
           depType: 'action',
           replaceString: '"actions/setup-java@v2"',
           autoReplaceStringTemplate:
@@ -575,7 +575,7 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0]).toEqual({
         depName: 'actions/checkout',
         commitMessageTopic: '{{{depName}}} action',
-        versioning: 'docker',
+        versioning: 'semver-partial',
         depType: 'action',
         replaceString:
           'actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4',
@@ -600,7 +600,7 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0]).toEqual({
         depName: 'actions/checkout',
         commitMessageTopic: '{{{depName}}} action',
-        versioning: 'docker',
+        versioning: 'semver-partial',
         depType: 'action',
         replaceString: 'actions/checkout@c85c95e # v4',
         autoReplaceStringTemplate:
@@ -776,7 +776,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -787,7 +787,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -798,7 +798,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-go',
           depType: 'action',
           replaceString: 'actions/setup-go@v5',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -809,7 +809,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-python',
           depType: 'action',
           replaceString: 'actions/setup-python@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -820,7 +820,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           depName: 'node',
@@ -926,7 +926,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -937,7 +937,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -948,7 +948,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-go',
           depType: 'action',
           replaceString: 'actions/setup-go@v5',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -959,7 +959,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-python',
           depType: 'action',
           replaceString: 'actions/setup-python@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           autoReplaceStringTemplate:
@@ -970,7 +970,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'semver-partial',
         },
         {
           depName: 'node',
