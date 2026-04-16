@@ -35,30 +35,6 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('getDownloadSchemes()', () => {
-    it('returns download schemes', async () => {
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get('/a/config/server/info')
-        .reply(
-          200,
-          gerritRestResponse({
-            download: {
-              schemes: {
-                ssh: { url: 'ssh://some-server' },
-                http: { url: 'https://some-server' },
-              },
-            },
-          }),
-          jsonResultHeader,
-        );
-      expect(await client.getDownloadSchemes()).toEqual({
-        ssh: { url: 'ssh://some-server' },
-        http: { url: 'https://some-server' },
-      });
-    });
-  });
-
   describe('getRepos()', () => {
     it('returns repos', async () => {
       httpMock

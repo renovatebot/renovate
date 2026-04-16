@@ -12,7 +12,6 @@ import type {
   GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRequestDetail,
-  GerritServerInfo,
 } from './types.ts';
 
 export const MIN_GERRIT_VERSION = '3.0.0';
@@ -37,7 +36,6 @@ export function getGerritRepoUrl(
   repository: string,
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
-  downloadSchemes: GerritServerInfo['download']['schemes'],
 ): string {
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
@@ -45,8 +43,8 @@ export function getGerritRepoUrl(
     url: endpoint,
   });
 
-  const url = parseUrl(endpoint);
-  if (!url) {
+  const endpointUrl = parseUrl(endpoint);
+  if (!endpointUrl) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
   if (!(opts.username && opts.password)) {
@@ -54,30 +52,40 @@ export function getGerritRepoUrl(
       'Init: You must configure a Gerrit Server username/password',
     );
   }
-  url.username = opts.username;
-  url.password = opts.password;
-  url.pathname = joinUrlParts(
-    url.pathname,
+  const httpUrl = new URL(endpointUrl.toString());
+  httpUrl.username = opts.username;
+  httpUrl.password = opts.password;
+  httpUrl.pathname = joinUrlParts(
+    httpUrl.pathname,
     'a',
     encodeURIComponent(repository),
   );
+
+  const sshUrl = new URL(
+    `ssh://${endpointUrl.host}:29418${joinUrlParts(endpointUrl.pathname, repository)}`,
+  );
+
+  const url = pickUrlFromGitUrl(gitUrl, sshUrl, httpUrl);
   logger.trace(
-    { url: url.toString() },
+    { url: httpUrl.toString() },
     'using URL based on configured endpoint',
   );
 
-  logger.trace(downloadSchemes, 'Available Download Schemes');
+  return url;
+}
+
+function pickUrlFromGitUrl(
+  gitUrl: GitUrlOption | undefined,
+  sshUrl: URL,
+  httpUrl: URL,
+): string {
   switch (gitUrl) {
     case 'ssh':
-      if (downloadSchemes.ssh) {
-        // eslint-disable-next-line no-template-curly-in-string
-        return downloadSchemes.ssh.url.replace('${project}', repository);
-      }
-      throw new Error('Gerrit server does not advertise SSH support');
+      return sshUrl.toString();
     case 'endpoint':
-      return url.toString();
+      return httpUrl.toString();
     default:
-      return url.toString();
+      return httpUrl.toString();
   }
 }
 

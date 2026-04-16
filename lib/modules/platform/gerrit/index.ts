@@ -136,7 +136,6 @@ export async function initRepo({
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo(${repository}, ${gitUrl})`);
-  const downloadSchemes = await client.getDownloadSchemes();
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 
@@ -148,7 +147,7 @@ export async function initRepo({
     labels: projectInfo.labels ?? {},
   };
   const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl, gitUrl, downloadSchemes);
+  const url = getGerritRepoUrl(repository, baseUrl, gitUrl);
   configureScm(repository, config.gerritUsername!);
   await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
