@@ -5011,7 +5011,7 @@ When using this strategy, make sure that the package you're referencing does sup
 ## vulnerabilityAlerts
 
 Renovate can read GitHub's Vulnerability Alerts to customize its Pull Requests.
-For this to work, you must enable the [Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph#enabling-the-dependency-graph), and [Dependabot alerts](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
+For this to work, you must enable the [Dependency graph](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/enabling-the-dependency-graph), and [Dependabot alerts](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
