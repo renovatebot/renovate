@@ -11,6 +11,7 @@ import type {
   SkipReason,
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
+import type { ConstraintName, ToolName } from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -173,6 +174,7 @@ export interface GlobalInheritableConfig {
   onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
+  requireConfig?: RequiredConfig;
 }
 
 // Config options used only within the global worker
@@ -305,7 +307,7 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
-  installTools?: Record<string, Record<never, never>>;
+  installTools?: Partial<Record<ToolName, Record<never, never>>>;
 }
 
 export type UpdateConfig<
@@ -367,6 +369,7 @@ export interface RenovateConfig
     RenovateInternalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
+  reportFormatting?: boolean;
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
@@ -450,7 +453,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
   variables?: Record<string, string>;
 
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
@@ -554,7 +557,10 @@ export type MergeStrategy =
   | 'squash';
 
 // This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution = 'goGenerate' | 'gradleWrapper';
+export type AllowedUnsafeExecution =
+  | 'bazelModDeps'
+  | 'goGenerate'
+  | 'gradleWrapper';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -576,6 +582,7 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchRepositories?: string[];
   matchSourceUrls?: string[];
+  matchRegistryUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   matchJsonata?: string[];
   overrideDatasource?: string;

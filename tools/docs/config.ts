@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
   allManagersList,
   getManagers,
 } from '../../lib/modules/manager/index.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
-import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { formatCell, replaceContent } from './utils.ts';
 
@@ -294,32 +294,48 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
 
-      if (!indexed[option.name]) {
-        throw new Error(
-          `Config option "${option.name}" is missing an entry in ${configFile}`,
-        );
+      // Child options are indexed as "parent.optionName"; collect all matching keys
+      let lookupKeys: string[] = [];
+      for (const parent of option.parents ?? []) {
+        if (parent !== '.') {
+          const key = `${parent}.${option.name}`;
+          if (indexed[key]) {
+            lookupKeys.push(key);
+          }
+        }
       }
-
-      const [headerIndex, footerIndex] = indexed[option.name];
+      // Fall back to plain name for top-level ## options (e.g. enabled, managerFilePatterns)
+      if (lookupKeys.length === 0) {
+        if (!indexed[option.name]) {
+          throw new Error(
+            `Config option "${option.name}" is missing an entry in ${configFile}`,
+          );
+        }
+        lookupKeys = [option.name];
+      }
 
       el.cli = getCliName(option);
       el.env = getEnvName(option);
       stringifyArrays(el);
 
-      configOptionsRaw[headerIndex] +=
-        `\n${option.description}\n\n` +
-        genTable(Object.entries(el), option.type, option.default);
+      for (const key of lookupKeys) {
+        const [headerIndex, footerIndex] = indexed[key];
 
-      if (el.advancedUse) {
-        configOptionsRaw[headerIndex] += generateAdvancedUse();
-      }
+        configOptionsRaw[headerIndex] +=
+          `\n${option.description}\n\n` +
+          genTable(Object.entries(el), option.type, option.default);
 
-      if (el.experimental) {
-        configOptionsRaw[footerIndex] += genExperimentalMsg(el);
-      }
+        if (el.advancedUse) {
+          configOptionsRaw[headerIndex] += generateAdvancedUse();
+        }
 
-      if (is.nonEmptyString(el.deprecationMsg)) {
-        configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+        if (el.experimental) {
+          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+        }
+
+        if (is.nonEmptyString(el.deprecationMsg)) {
+          configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+        }
       }
     });
 

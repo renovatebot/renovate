@@ -8,7 +8,7 @@ import {
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
+import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { BackendToolingConfig } from './backends.ts';
 import {
@@ -111,7 +111,7 @@ function getToolConfig(
   toolName: string,
   version: string,
   toolOptions: MiseToolOptions,
-): ToolingConfig | BackendToolingConfig | null {
+): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
     case '':
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
@@ -160,7 +160,7 @@ function getToolConfig(
 function getRegistryToolConfig(
   short: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   // Try to get the config from miseTooling first, then asdfTooling
   return (
     getConfigFromTooling(miseTooling, short, version) ??
@@ -172,7 +172,7 @@ function getConfigFromTooling(
   toolingSource: Record<string, ToolingDefinition>,
   name: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   const toolDefinition = toolingSource[name];
   if (!toolDefinition) {
     return null;
@@ -188,7 +188,7 @@ function getConfigFromTooling(
 function createDependency(
   name: string,
   version: string | null,
-  config: ToolingConfig | BackendToolingConfig | null,
+  config: StaticTooling | BackendToolingConfig | null,
 ): PackageDependency {
   if (version === null) {
     return {

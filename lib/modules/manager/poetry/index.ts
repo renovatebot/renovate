@@ -30,3 +30,5 @@ export const supportedDatasources = [
   GitRefsDatasource.id,
   GitTagsDatasource.id,
 ];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

@@ -4,16 +4,14 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts } from '../../../util/url.ts';
+import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
-import type { ServiceDiscoveryResult } from '../terraform-module/types.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { TerraformProviderV2Response } from './schema.ts';
 import type {
   TerraformBuild,
-  TerraformProvider,
   TerraformProviderReleaseBackend,
   TerraformProviderVersions,
   TerraformRegistryBuildResponse,
@@ -24,9 +22,11 @@ import type {
 export class TerraformProviderDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-provider';
 
+  static readonly hashicorpReleaseUrl = 'https://releases.hashicorp.com';
+
   static readonly defaultRegistryUrls = [
-    'https://registry.terraform.io',
-    'https://releases.hashicorp.com',
+    TerraformProviderDatasource.terraformRegistryUrl,
+    TerraformProviderDatasource.hashicorpReleaseUrl,
   ];
 
   static repositoryRegex = regEx(/^hashicorp\/(?<packageName>\S+)$/);
@@ -44,7 +44,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results and only for `https://registry.terraform.io`';
+    'The release timestamp is determined from the `published-at` field in the Terraform Registry v2 API response and is only available for `https://registry.terraform.io`.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the the `source` field in the results.';
@@ -61,28 +61,15 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       `terraform-provider.getDependencies() packageName: ${packageName}`,
     );
 
-    if (registryUrl === this.defaultRegistryUrls[1]) {
+    if (registryUrl === TerraformProviderDatasource.terraformRegistryUrl) {
+      return await this.queryTerraformRegistryV2(registryUrl, packageName);
+    }
+    if (registryUrl === TerraformProviderDatasource.hashicorpReleaseUrl) {
       return await this.queryReleaseBackend(packageName, registryUrl);
     }
-    const repository = TerraformProviderDatasource.getRepository({
-      packageName,
-    });
-    const serviceDiscovery =
-      await this.getTerraformServiceDiscoveryResult(registryUrl);
 
-    if (registryUrl === this.defaultRegistryUrls[0]) {
-      return await this.queryRegistryExtendedApi(
-        serviceDiscovery,
-        registryUrl,
-        repository,
-      );
-    }
-
-    return await this.queryRegistryVersions(
-      serviceDiscovery,
-      registryUrl,
-      repository,
-    );
+    // Fall back to the standard Provider Registry Protocol for other registries.
+    return await this.queryProviderRegistry(registryUrl, packageName);
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -103,52 +90,45 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   /**
-   * this uses the api that terraform registry has in addition to the base api
-   * this endpoint provides more information, such as release date
-   * this api is undocumented.
+   * Query the Terraform Registry using the undocumented v2 JSON:API.
+   *
+   * Returns release timestamps for all versions, unlike the v1 API
+   * which only exposed the timestamp for the latest version.
    */
-  private async queryRegistryExtendedApi(
-    serviceDiscovery: ServiceDiscoveryResult,
+  private async queryTerraformRegistryV2(
     registryUrl: string,
-    repository: string,
+    packageName: string,
   ): Promise<ReleaseResult> {
-    const backendURL = createSDBackendURL(
+    const repository = TerraformProviderDatasource.getRepository({
+      packageName,
+    });
+    const providerUrl = `${joinUrlParts(
       registryUrl,
-      'providers.v1',
-      serviceDiscovery,
+      'v2/providers',
       repository,
+    )}?${getQueryString({ include: 'provider-versions' })}`;
+    const { body: res } = await this.http.getJson(
+      providerUrl,
+      TerraformProviderV2Response,
     );
-    const res = (
-      await this.http.getJsonUnchecked<TerraformProvider>(backendURL)
-    ).body;
-    const dep: ReleaseResult = {
-      releases: res.versions.map((version) => ({
-        version,
-      })),
-    };
-    if (res.source) {
-      dep.sourceUrl = res.source;
-    }
-    // set published date for latest release
-    const latestVersion = dep.releases.find(
-      (release) => res.version === release.version,
-    );
-    if (latestVersion) {
-      latestVersion.releaseTimestamp = asTimestamp(res.published_at);
-    }
-    dep.homepage = `${registryUrl}/providers/${repository}`;
-    return dep;
+    res.homepage = `${registryUrl}/providers/${repository}`;
+    return res;
   }
 
   /**
-   * this version uses the Provider Registry Protocol that all registries are required to implement
+   * Query a registry using the Provider Registry Protocol that all registries
+   * are required to implement.
    * https://www.terraform.io/internals/provider-registry-protocol
    */
-  private async queryRegistryVersions(
-    serviceDiscovery: ServiceDiscoveryResult,
+  private async queryProviderRegistry(
     registryUrl: string,
-    repository: string,
+    packageName: string,
   ): Promise<ReleaseResult> {
+    const repository = TerraformProviderDatasource.getRepository({
+      packageName,
+    });
+    const serviceDiscovery =
+      await this.getTerraformServiceDiscoveryResult(registryUrl);
     const backendURL = createSDBackendURL(
       registryUrl,
       'providers.v1',
@@ -200,7 +180,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     repository: string,
     version: string,
   ): Promise<TerraformBuild[] | null> {
-    if (registryURL === TerraformProviderDatasource.defaultRegistryUrls[1]) {
+    if (registryURL === TerraformProviderDatasource.hashicorpReleaseUrl) {
       // check if registryURL === secondary backend
       const repositoryRegexResult =
         TerraformProviderDatasource.repositoryRegex.exec(repository)?.groups;
@@ -356,7 +336,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<VersionDetailResponse> {
     return (
       await this.http.getJsonUnchecked<VersionDetailResponse>(
-        `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`,
+        `${TerraformProviderDatasource.hashicorpReleaseUrl}/${backendLookUpName}/${version}/index.json`,
       )
     ).body;
   }
