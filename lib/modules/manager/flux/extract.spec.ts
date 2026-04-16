@@ -1310,6 +1310,13 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('ignores system manifest files without valid Flux version header', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/flux-system-invalid/gotk-components.yaml',
+      ]);
+      expect(result).toBeNull();
+    });
+
     it('should pick correct package file when using HelmRepository with chartRef', async () => {
       const result = await extractAllPackageFiles(config, [
         'lib/modules/manager/flux/__fixtures__/helmChartRefRelease.yaml',
