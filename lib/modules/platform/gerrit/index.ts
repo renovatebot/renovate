@@ -1,4 +1,4 @@
-import { isTruthy } from '@sindresorhus/is';
+import { isNonEmptyArray, isTruthy } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
@@ -186,7 +186,7 @@ export async function initRepo({
     });
   }
 
-  if (virtualBranches.length > 0) {
+  if (isNonEmptyArray(virtualBranches)) {
     logger.debug(
       `Will fetch ${virtualBranches.length} Gerrit changes as virtual branches`,
     );
