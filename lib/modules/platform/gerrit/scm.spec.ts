@@ -199,7 +199,12 @@ describe('modules/platform/gerrit/scm', () => {
         branch: 'main',
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
-      git.commitFiles.mockResolvedValueOnce('commitSha' as LongCommitSha);
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
+        files: [],
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
 
       expect(
         await gerritScm.commitAndPush({
@@ -210,7 +215,7 @@ describe('modules/platform/gerrit/scm', () => {
           prTitle: 'pr title',
         }),
       ).toBe('commitSha');
-      expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'new-main',
         branchName: 'renovate/dependency-1.x',
         files: [],
@@ -219,12 +224,15 @@ describe('modules/platform/gerrit/scm', () => {
           'Renovate-Branch: renovate/dependency-1.x\nChange-Id: Ifcd936eef0ced620040a07a337c586d0a882725b',
         ],
         prTitle: 'pr title',
+      });
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        files: [],
+        sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main', // not new-main
         pushOptions: ['notify=NONE', 'ready'],
       });
-      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
-        'commitSha',
       );
     });
 
@@ -234,7 +242,7 @@ describe('modules/platform/gerrit/scm', () => {
         branch: 'main',
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
-      git.commitFiles.mockResolvedValueOnce(null); //no changes
+      git.prepareCommit.mockResolvedValueOnce(null); //no changes
 
       expect(
         await gerritScm.commitAndPush({
@@ -245,7 +253,7 @@ describe('modules/platform/gerrit/scm', () => {
           prTitle: 'pr title',
         }),
       ).toBeNull();
-      expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
@@ -254,10 +262,8 @@ describe('modules/platform/gerrit/scm', () => {
           'Renovate-Branch: renovate/dependency-1.x\nChange-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
         ],
         prTitle: 'pr title',
-        targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'ready'],
       });
-      expect(git.setVirtualBranch).not.toHaveBeenCalled();
+      expect(git.pushCommit).toHaveBeenCalledTimes(0);
     });
 
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
@@ -267,7 +273,12 @@ describe('modules/platform/gerrit/scm', () => {
         branch: 'main',
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
-      git.commitFiles.mockResolvedValueOnce('commitSha' as LongCommitSha);
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
+        files: [],
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
       expect(
         await gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
@@ -278,7 +289,7 @@ describe('modules/platform/gerrit/scm', () => {
           autoApprove: true,
         }),
       ).toBe('commitSha');
-      expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
@@ -288,12 +299,15 @@ describe('modules/platform/gerrit/scm', () => {
         ],
         prTitle: 'pr title',
         autoApprove: true,
+      });
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        files: [],
+        sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
-      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
-        'commitSha',
       );
     });
   });

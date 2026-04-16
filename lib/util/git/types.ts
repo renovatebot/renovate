@@ -109,16 +109,6 @@ export interface CommitFilesConfig {
   prTitle?: string;
   /** Only needed by Gerrit platform */
   autoApprove?: boolean;
-  /**
-   * Custom push target ref (e.g. `refs/for/main` for Gerrit).
-   * When set, the remote-tracking ref for the branch is updated manually
-   * after push since git won't auto-update it.
-   */
-  targetRef?: string;
-  /**
-   * Push options to pass to `git push --push-option`.
-   */
-  pushOptions?: string[];
 }
 
 export interface PushFilesConfig {
