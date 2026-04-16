@@ -15,6 +15,7 @@ const toolNames = [
   'conan',
   'copier',
   'corepack',
+  'deno',
   'devbox',
   'dotnet',
   'erlang',
