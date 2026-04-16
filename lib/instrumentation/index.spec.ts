@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import {
@@ -150,6 +151,25 @@ describe('instrumentation/index', () => {
           },
         ],
       },
+    });
+  });
+
+  describe('BunyanInstrumentation', () => {
+    // OpenTelemetry's context propagation currently uses `AsyncLocalStorage`, which does not behave the same way in vitest worker threads as in a real Node.js process, so we cannot write a full end-to-end here to validate the `span_id`, `trace_id` and `trace_flags` are set
+    //
+    // Claude Sonnet 4.6 suggests that we instead create an (admittedly brittle) test to validate that this is marked as `__wrapped`.
+    it('patches bunyan Logger._emit when tracing is enabled', () => {
+      process.env.RENOVATE_TRACING_CONSOLE_EXPORTER = 'true';
+      init();
+
+      const bunyan = createRequire(import.meta.url)(
+        'bunyan',
+      ) as typeof import('bunyan');
+
+      // shimmer marks wrapped functions with __wrapped = true
+      expect(
+        (bunyan.prototype as unknown as Record<string, unknown>)._emit,
+      ).toHaveProperty('__wrapped', true);
     });
   });
 

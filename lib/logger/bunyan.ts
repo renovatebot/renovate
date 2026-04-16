@@ -1,9 +1,16 @@
+import { createRequire } from 'node:module';
 import {
   isNonEmptyStringAndNotWhitespace,
   isString,
   isUndefined,
 } from '@sindresorhus/is';
-import * as bunyan from 'bunyan';
+
+// Use createRequire so that @opentelemetry/instrumentation-bunyan can patch
+// bunyan via require-in-the-middle. A plain ESM `import` bypasses the hook.
+const bunyan = createRequire(import.meta.url)(
+  'bunyan',
+) as typeof import('bunyan');
+
 import fs from 'fs-extra';
 import upath from 'upath';
 import cmdSerializer from './cmd-serializer.ts';

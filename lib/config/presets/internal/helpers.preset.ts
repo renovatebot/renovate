@@ -19,19 +19,53 @@ export const presets: Record<string, Preset> = {
     description: 'Keep `typescript` version in sync with the `rc` tag.',
     extends: [':followTag(typescript, rc)'],
   },
-  githubDigestChangelogs: {
+  forgejoDigestChangelogs: {
     description:
-      'Ensure that every dependency pinned by digest and sourced from GitHub.com contains a link to the commit-to-commit diff',
+      'Ensure that every dependency pinned by digest and sourced from Forgejo contains a link to the commit-to-commit diff',
     packageRules: [
       {
         changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
-        matchDatasources: [
-          'git-refs',
-          'git-tags',
-          'github-releases',
-          'github-tags',
-        ],
-        matchSourceUrls: ['https://github.com/**'],
+        matchDatasources: ['forgejo-releases', 'forgejo-tags'],
+        matchUpdateTypes: ['digest'],
+      },
+      {
+        changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchDatasources: ['git-refs', 'git-tags'],
+        matchJsonata: ["$detectPlatform(sourceUrl) = 'forgejo'"],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
+  giteaDigestChangelogs: {
+    description:
+      'Ensure that every dependency pinned by digest and sourced from Gitea contains a link to the commit-to-commit diff',
+    packageRules: [
+      {
+        changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchDatasources: ['gitea-releases', 'gitea-tags'],
+        matchUpdateTypes: ['digest'],
+      },
+      {
+        changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchDatasources: ['git-refs', 'git-tags'],
+        matchJsonata: ["$detectPlatform(sourceUrl) = 'gitea'"],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
+  githubDigestChangelogs: {
+    description:
+      'Ensure that every dependency pinned by digest and sourced from GitHub.com and Github enterprise contains a link to the commit-to-commit diff',
+    packageRules: [
+      {
+        changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchDatasources: ['github-digest', 'github-releases', 'github-tags'],
+        matchUpdateTypes: ['digest'],
+      },
+      {
+        changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchDatasources: ['git-refs', 'git-tags'],
+        matchJsonata: ["$detectPlatform(sourceUrl) = 'github'"],
         matchUpdateTypes: ['digest'],
       },
     ],
@@ -77,8 +111,6 @@ export const presets: Record<string, Preset> = {
       {
         extends: ['helpers:pinGitHubActionDigests'],
         extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
-        versioning:
-          'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
       },
     ],
   },

@@ -7,7 +7,6 @@ import { regEx } from '../../../util/regex.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
-import type { ServiceDiscoveryResult } from '../terraform-module/types.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
@@ -27,7 +26,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-provider';
 
   static readonly hashicorpReleaseUrl = 'https://releases.hashicorp.com';
-  static readonly terraformRegistryUrl = 'https://registry.terraform.io';
   static readonly openTofuApiUrl = 'https://api.opentofu.org';
   static readonly openTofuRegistryUrl = 'https://registry.opentofu.org';
 
@@ -167,7 +165,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const repository = TerraformProviderDatasource.getRepository({
       packageName,
     });
-    const serviceDiscovery: ServiceDiscoveryResult =
+    const serviceDiscovery =
       await this.getTerraformServiceDiscoveryResult(registryUrl);
     const backendURL = createSDBackendURL(
       registryUrl,
