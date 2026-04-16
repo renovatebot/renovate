@@ -67,9 +67,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         }
       }
 
-      const currentlyEnabled = config.force?.enabled ?? config.enabled;
-      const applyWillEnable = toApply.force?.enabled ?? toApply.enabled;
-      if (applyWillEnable && currentlyEnabled === false) {
+      if (toApply.force?.enabled || toApply.enabled) {
         delete config.skipReason;
         delete config.skipStage;
       }
