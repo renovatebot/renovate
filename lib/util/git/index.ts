@@ -1,5 +1,10 @@
 import URL from 'node:url';
-import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
+import {
+  isBoolean,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isString,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -228,7 +233,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
           sha as LongCommitSha;
       });
 
-    if (config.virtualBranches?.length) {
+    if (isNonEmptyArray(config.virtualBranches)) {
       for (const branch of config.virtualBranches) {
         config.branchCommits[branch.name] = branch.sha;
       }
@@ -547,7 +552,7 @@ export const syncGit = withInstrumenting(
       });
     }
 
-    if (config.virtualBranches?.length) {
+    if (isNonEmptyArray(config.virtualBranches)) {
       const refs = config.virtualBranches.map((branch) => branch.ref);
       await fetchRevSpec(...refs);
       for (const branch of config.virtualBranches) {

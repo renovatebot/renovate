@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { randomUUID } from 'crypto';
 import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
@@ -69,8 +69,9 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: commit.baseBranch,
     });
 
-    const message =
-      typeof commit.message === 'string' ? [commit.message] : commit.message;
+    const message = isString(commit.message)
+      ? [commit.message]
+      : commit.message;
 
     // In Gerrit, the change subject/title is the first line of the commit message
     // v8 ignore else -- TODO: add test #40625
