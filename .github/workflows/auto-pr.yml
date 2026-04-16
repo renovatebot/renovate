@@ -4,10 +4,16 @@ on:
   pull_request_target:
     types:
       - opened
+      - ready_for_review
 
 jobs:
   review:
-    if: github.event.action == 'opened' && !endsWith(github.event.pull_request.user.login, '[bot]')
+    if: >-
+      !endsWith(github.event.pull_request.user.login, '[bot]') &&
+      (
+        (github.event.action == 'opened' && !github.event.pull_request.draft) ||
+        github.event.action == 'ready_for_review'
+      )
     runs-on: ubuntu-24.04
     permissions:
       pull-requests: write
