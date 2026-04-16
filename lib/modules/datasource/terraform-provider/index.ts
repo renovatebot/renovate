@@ -71,7 +71,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (registryUrl === TerraformProviderDatasource.terraformRegistryUrl) {
       return await this.queryTerraformRegistryV2(registryUrl, packageName);
     }
-    if (registryUrl === TerraformProviderDatasource.openTofuRegistryUrl) {
+    if (
+      registryUrl === TerraformProviderDatasource.openTofuRegistryUrl ||
+      registryUrl === TerraformProviderDatasource.openTofuApiUrl
+    ) {
       return await this.queryOpenTofuRegistry(packageName);
     }
     if (registryUrl === TerraformProviderDatasource.hashicorpReleaseUrl) {
