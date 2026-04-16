@@ -12,7 +12,7 @@ import {
 } from './post.ts';
 import type { DenoManagerData } from './types.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 // used in detectNodeCompatWorkspaces()
 vi.mock('find-packages', () => ({
   findPackages: vi.fn(),

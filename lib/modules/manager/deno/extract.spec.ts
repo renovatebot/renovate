@@ -10,7 +10,7 @@ import {
   processImportMap,
 } from './extract.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 vi.mock('./compat.ts');
 // used in detectNodeCompatWorkspaces()
 vi.mock('find-packages', () => ({

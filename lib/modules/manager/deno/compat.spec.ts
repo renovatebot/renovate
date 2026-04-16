@@ -6,7 +6,7 @@ import {
   extractDenoCompatiblePackageJson,
 } from './compat.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 // used in detectNodeCompatWorkspaces()
 vi.mock('find-packages', () => ({
   findPackages: vi.fn(),
