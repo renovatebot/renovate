@@ -569,7 +569,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
         'refs/changes/1/2',
       );
-      expect(git.pushCommit).toHaveBeenCalledTimes(0);
+      expect(git.pushCommit).not.toHaveBeenCalled();
     });
 
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
