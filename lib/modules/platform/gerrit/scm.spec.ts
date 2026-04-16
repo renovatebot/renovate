@@ -263,7 +263,7 @@ describe('modules/platform/gerrit/scm', () => {
         ],
         prTitle: 'pr title',
       });
-      expect(git.pushCommit).toHaveBeenCalledTimes(0);
+      expect(git.pushCommit).not.toHaveBeenCalled();
     });
 
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
