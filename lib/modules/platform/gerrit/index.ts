@@ -298,7 +298,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
     updated = true;
   }
   // TODO: support restoring change if prConfig.state === 'open'
-  if (prConfig.state && prConfig.state === 'closed') {
+  if (prConfig.state === 'closed') {
     const change = await client.abandonChange(prConfig.number);
     pr.state = 'closed';
     pr.updatedAt = convertGerritDateToISO(change.updated);
