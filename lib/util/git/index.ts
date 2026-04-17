@@ -1511,6 +1511,7 @@ export async function getCommitTreeSha(
   const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
   if (!treeSha) {
     const snippet = commitOutput.split(newlineRegex)[0];
+    /* v8 ignore next 3 -- tested, but v8 reports template literal as partial */
     throw new Error(
       `Could not extract tree SHA from commit ${commitSha}: ${snippet}`,
     );
