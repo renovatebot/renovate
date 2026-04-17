@@ -190,6 +190,14 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
     expect(packageCache.set).toHaveBeenCalled();
   });
 
+  it('returns cached digest for a known tag', async () => {
+    packageCache.get.mockResolvedValue(oldCacheData());
+    const cache = await DockerHubCache.init(dockerRepository);
+
+    expect(cache.getDigestForTag('2')).toBe('sha256:222');
+    expect(cache.getDigestForTag('nope')).toBeNull();
+  });
+
   it('reconciles from empty cache', async () => {
     const item = newItem();
     const expectedCache = {

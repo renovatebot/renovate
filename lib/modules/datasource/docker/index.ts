@@ -901,6 +901,15 @@ export class DockerDatasource extends Datasource {
 
       let manifestResponse: HttpResponse | null = null;
       if (!architecture) {
+        // Reuse the digest cached from the Docker Hub tag API to skip a HEAD request
+        if (registryHost === 'https://index.docker.io') {
+          const cache = await DockerHubCache.init(dockerRepository);
+          const cachedDigest = cache.getDigestForTag(newTag);
+          if (cachedDigest) {
+            return cachedDigest;
+          }
+        }
+
         manifestResponse = await this.getManifestResponse(
           registryHost,
           dockerRepository,
@@ -1086,7 +1095,8 @@ export class DockerDatasource extends Datasource {
 
       // Digest is intentionally not propagated — the Docker Hub tag API
       // returns the manifest-list digest, which would bypass arch-aware
-      // resolution in `getDigest()`.
+      // resolution in `getDigest()`. `getDigest()` consults the same cache
+      // as a shortcut when no arch resolution is needed.
       return release;
     });
   }
