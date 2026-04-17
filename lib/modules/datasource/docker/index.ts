@@ -901,7 +901,7 @@ export class DockerDatasource extends Datasource {
 
       let manifestResponse: HttpResponse | null = null;
       if (!architecture) {
-        // Reuse the digest cached from the Docker Hub tag API to skip a HEAD request
+        // Reuse the digest cached from the Docker Hub tag API
         if (registryHost === 'https://index.docker.io') {
           const cache = await DockerHubCache.init(dockerRepository);
           const cachedDigest = cache.getDigestForTag(newTag);
@@ -932,6 +932,18 @@ export class DockerDatasource extends Datasource {
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
+        // Reuse the per-arch digest cached from the Docker Hub tag API
+        if (
+          isNonEmptyString(architecture) &&
+          registryHost === 'https://index.docker.io'
+        ) {
+          const cache = await DockerHubCache.init(dockerRepository);
+          const cachedDigest = cache.getArchDigestForTag(newTag, architecture);
+          if (cachedDigest) {
+            return cachedDigest;
+          }
+        }
+
         logger.debug(
           { registryHost, dockerRepository },
           'Architecture-specific digest or missing docker-content-digest header - pulling full manifest',

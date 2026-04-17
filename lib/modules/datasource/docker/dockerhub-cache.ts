@@ -117,4 +117,12 @@ export class DockerHubCache {
       this.getItems().find((item) => item.name === tagName)?.digest ?? null
     );
   }
+
+  getArchDigestForTag(tagName: string, architecture: string): string | null {
+    const tag = this.getItems().find((item) => item.name === tagName);
+    return (
+      tag?.images.find((img) => img.architecture === architecture)?.digest ??
+      null
+    );
+  }
 }
