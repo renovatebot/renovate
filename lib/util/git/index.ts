@@ -1552,6 +1552,12 @@ export async function getCommitTreeSha(
 ): Promise<LongCommitSha> {
   const commitOutput = await git.catFile(['-p', commitSha]);
   const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  if (!treeSha) {
+    const snippet = commitOutput.split(newlineRegex)[0] ?? '';
+    throw new Error(
+      `Could not extract tree SHA from commit ${commitSha}: ${snippet}`,
+    );
+  }
   return treeSha as LongCommitSha;
 }
 

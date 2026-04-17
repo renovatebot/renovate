@@ -1307,6 +1307,17 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(treeSha).toHaveLength(40);
       expect(treeSha).toMatch(/^[0-9a-f]{40}$/);
     });
+
+    it('throws if commit output does not contain a tree SHA', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      vi.spyOn(SimpleGit.prototype, 'catFile').mockResolvedValueOnce(
+        'parent deadbeef',
+      );
+
+      await expect(git.getCommitTreeSha(commit)).rejects.toThrow(
+        `Could not extract tree SHA from commit ${commit}: parent deadbeef`,
+      );
+    });
   });
 
   describe('diffCommitTree', () => {
@@ -1351,28 +1362,24 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await repo.raw(['mv', 'master_file', 'renamed_master_file']);
       await repo.commit('rename master file');
 
-      const commit = (await repo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = (await repo.revparse(['HEAD'])).trim() as LongCommitSha;
       const diff = await git.diffCommitTree(parentCommit, commit);
 
       expect(diff).toHaveLength(2);
-
-      const deletedPath = diff.find((item) => item.path === 'master_file');
-      expect(deletedPath).toEqual({
+      expect(diff).toContainEqual({
         path: 'master_file',
         mode: '100644',
         type: 'blob',
         sha: null,
       });
-
-      const addedPath = diff.find(
-        (item) => item.path === 'renamed_master_file',
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'renamed_master_file',
+          mode: '100644',
+          type: 'blob',
+          sha: expect.stringMatching(/^[0-9a-f]{40}$/),
+        }),
       );
-      expect(addedPath).toMatchObject({
-        path: 'renamed_master_file',
-        mode: '100644',
-        type: 'blob',
-      });
-      expect(addedPath?.sha).toMatch(/^[0-9a-f]{40}$/);
     });
   });
 
