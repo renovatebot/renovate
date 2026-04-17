@@ -1593,7 +1593,8 @@ export async function diffCommitTree(
     if (matchGroups) {
       const { oldMode, newMode, newSha, status, paths } = matchGroups;
       const statusCode = status[0];
-      // R/C have two tab-separated paths (old\tnew); A/M/D/T have one
+      // R has two tab-separated paths (old\tnew); A/M/D/T have one.
+      // C also has two paths but falls through to default (only the target matters).
       const [sourcePath, targetPath] = paths.split('\t');
       switch (statusCode) {
         case 'D':
