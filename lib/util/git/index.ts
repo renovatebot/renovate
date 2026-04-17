@@ -64,7 +64,6 @@ import type {
   PushFilesConfig,
   StatusResult,
   StorageConfig,
-  TreeItem,
 } from './types.ts';
 
 export { setNoVerify } from './config.ts';
@@ -1495,54 +1494,11 @@ export async function clearRenovateRefs(): Promise<void> {
   remoteRefsExist = false;
 }
 
-const treeItemRegex = regEx(
-  /^(?<mode>\d{6})\s+(?<type>blob|tree|commit)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/,
-);
-
 const diffTreeLineRegex = regEx(
   /^:(?<oldMode>\d{6})\s+(?<newMode>\d{6})\s+(?<oldSha>[0-9a-f]{40})\s+(?<newSha>[0-9a-f]{40})\s+(?<status>[A-Z]\d*)\t(?<paths>.+)$/,
 );
 
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
-
-/**
- *
- * Obtain top-level items of commit tree.
- * We don't need subtree items, so here are 2 steps only.
- *
- * Step 1: commit SHA -> tree SHA
- *
- *   $ git cat-file -p <commit-sha>
- *
- *   > tree <tree-sha>
- *   > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
- *   > ...
- *
- * Step 2: tree SHA -> tree items (top-level)
- *
- *   $ git cat-file -p <tree-sha>
- *
- *   > 040000 tree 389400684d1f004960addc752be13097fe85d776    src
- *   > ...
- *   > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    package.json
- *
- */
-export async function listCommitTree(
-  commitSha: LongCommitSha,
-): Promise<TreeItem[]> {
-  const treeSha = await getCommitTreeSha(commitSha);
-  const contents = await git.catFile(['-p', treeSha]);
-  const lines = contents.split(newlineRegex);
-  const result: TreeItem[] = [];
-  for (const line of lines) {
-    const matchGroups = treeItemRegex.exec(line)?.groups;
-    if (matchGroups) {
-      const { path, mode, type, sha } = matchGroups;
-      result.push({ path, mode, type, sha: sha as LongCommitSha });
-    }
-  }
-  return result;
-}
 
 /**
  * Get the tree SHA for a commit.

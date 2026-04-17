@@ -109,13 +109,6 @@ export interface CommitResult {
   files: FileChange[];
 }
 
-export interface TreeItem {
-  path: string;
-  mode: string;
-  type: string;
-  sha: LongCommitSha;
-}
-
 export interface DiffTreeItem {
   path: string;
   mode: string;

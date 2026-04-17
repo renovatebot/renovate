@@ -1284,21 +1284,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('listCommitTree', () => {
-    it('creates non-branch ref', async () => {
-      const commit = git.getBranchCommit('develop')!;
-      const res = await git.listCommitTree(commit);
-      expect(res).toEqual([
-        {
-          mode: '100644',
-          path: 'past_file',
-          sha: '913705ab2ca79368053a476efa48aa6912d052c5',
-          type: 'blob',
-        },
-      ]);
-    });
-  });
-
   describe('getCommitTreeSha', () => {
     it('returns the tree SHA for a commit', async () => {
       const commit = git.getBranchCommit('develop')!;
