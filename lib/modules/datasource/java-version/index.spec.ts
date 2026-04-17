@@ -1,5 +1,6 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { range } from '../../../util/range.ts';
@@ -144,9 +145,9 @@ describe('modules/datasource/java-version/index', () => {
 
   describe('getAdoptiumReleases', () => {
     it('re-throws non-HttpError', async () => {
-      const mockHttp = {
+      const mockHttp = partial<Http>({
         getJsonUnchecked: vi.fn().mockRejectedValue(new Error('unexpected')),
-      } as unknown as Http;
+      });
 
       await expect(
         getAdoptiumReleases(mockHttp, {
