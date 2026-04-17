@@ -100,7 +100,7 @@ describe('modules/platform/gerrit/utils', () => {
           'https://gerrit.example.com/context',
           'ssh',
         );
-        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/context/web/apps');
+        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
       });
     });
   });

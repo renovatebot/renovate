@@ -1,6 +1,7 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
+import { clone } from '../../../util/clone.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -17,6 +18,8 @@ import type {
 export const MIN_GERRIT_VERSION = '3.0.0';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
+
+const DEFAULT_SSH_PORT = `29418`;
 
 /**
  * Max comment size in Gerrit (16kiB by default)
@@ -52,7 +55,7 @@ export function getGerritRepoUrl(
       'Init: You must configure a Gerrit Server username/password',
     );
   }
-  const httpUrl = new URL(endpointUrl.toString());
+  const httpUrl = clone(endpointUrl);
   httpUrl.username = opts.username;
   httpUrl.password = opts.password;
   httpUrl.pathname = joinUrlParts(
@@ -61,13 +64,16 @@ export function getGerritRepoUrl(
     encodeURIComponent(repository),
   );
 
-  const sshUrl = new URL(
-    `ssh://${endpointUrl.host}:29418${joinUrlParts(endpointUrl.pathname, repository)}`,
+  const sshUrl = parseUrl(
+    `ssh://${endpointUrl.host}:${DEFAULT_SSH_PORT}/${repository}`,
   );
+  if (!sshUrl) {
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  }
 
   const url = pickUrlFromGitUrl(gitUrl, sshUrl, httpUrl);
   logger.trace(
-    { url: httpUrl.toString() },
+    { url: url.toString() },
     'using URL based on configured endpoint',
   );
 
