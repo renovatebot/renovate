@@ -23,7 +23,10 @@ const Version = z.object({
   gitHead: z.string().optional(),
   dependencies: z.record(z.string()).optional(),
   devDependencies: z.record(z.string()).optional(),
-  engines: z.object({ node: z.string().optional() }).optional(),
+  engines: z
+    .object({ node: z.string().optional() })
+    .optional()
+    .catch(undefined),
   dist: Distribution.optional(),
 });
 
