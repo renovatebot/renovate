@@ -6,7 +6,6 @@
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
-      "replacements:astral-v8-full-semver",
       "replacements:babel-eslint-to-eslint-parser",
       "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
@@ -147,17 +146,6 @@
         "matchPackageNames": ["apollo-reporting-protobuf"],
         "replacementName": "@apollo/usage-reporting-protobuf",
         "replacementVersion": "4.0.0"
-      }
-    ]
-  },
-  "astral-v8-full-semver": {
-    "description": "`astral-sh/setup-astral` now requires full SemVer tags as of v8",
-    "packageRules": [
-      {
-        "matchPackageNames": ["astral-sh/setup-uv"],
-        "matchDatasources": ["github-tags"],
-        "replacementName": "astral-sh/setup-uv",
-        "replacementVersion": "v8.0.0"
       }
     ]
   },

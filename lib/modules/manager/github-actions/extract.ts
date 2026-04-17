@@ -13,7 +13,6 @@ import * as dockerVersioning from '../../versioning/docker/index.ts';
 import * as exactVersioning from '../../versioning/exact/index.ts';
 import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
-import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
@@ -21,14 +20,10 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { CommunityActions } from './community.ts';
-import { ActionsUsingGitHubImmutableTags } from './immutable-actions.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { Steps } from './schema.ts';
 import { Workflow } from './schema.ts';
-
-const semverWithOptionalMinorAndPatchversioning =
-  'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -91,7 +86,7 @@ function extractRepositoryAction(
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
-    versioning: semverPartialVersioning.id,
+    versioning: dockerVersioning.id,
     depType: 'action',
     replaceString: valueString,
     autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
@@ -369,14 +364,6 @@ export function extractPackageFile(
 
   if (!deps.length) {
     return null;
-  }
-
-  for (const dep of deps) {
-    if (
-      ActionsUsingGitHubImmutableTags.includes(dep.packageName ?? dep.depName!)
-    ) {
-      dep.versioning = semverWithOptionalMinorAndPatchversioning;
-    }
   }
 
   return { deps };
