@@ -4759,6 +4759,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
@@ -4779,6 +4781,8 @@ describe('modules/platform/github/index', () => {
           },
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
@@ -4833,6 +4837,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
@@ -4854,6 +4860,8 @@ describe('modules/platform/github/index', () => {
 
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
@@ -4885,6 +4893,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
@@ -4922,6 +4932,8 @@ describe('modules/platform/github/index', () => {
           [
             {
               security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
                 description: 'description',
                 identifiers: [{ type: 'type', value: 'value' }],
                 references: [],
@@ -4942,6 +4954,8 @@ describe('modules/platform/github/index', () => {
             },
             {
               security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
                 description: 'description',
                 identifiers: [{ type: 'type', value: 'value' }],
                 references: [],
@@ -4971,6 +4985,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],

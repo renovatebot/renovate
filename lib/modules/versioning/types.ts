@@ -7,6 +7,12 @@ export interface NewValueConfig {
   currentVersion?: string;
   newVersion: string;
   isReplacement?: boolean;
+  /**
+   * All versions numbers that this given Release has.
+   *
+   * Allows Versioning modules to determine whether the version they're proposing matches a known version.
+   */
+  allVersions?: string[];
 }
 export interface VersioningApi {
   // validation
