@@ -2171,6 +2171,14 @@ async function pushFiles(
     const baseTreeSha = await getCommitTreeSha(parentCommitSha);
     const treeItems = await diffCommitTree(parentCommitSha, commitSha);
 
+    if (treeItems.length === 0) {
+      logger.debug(
+        { branchName },
+        'Platform-native commit: no changed files between commits',
+      );
+      return null;
+    }
+
     const treeRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/trees`,
       { body: { base_tree: baseTreeSha, tree: treeItems } },

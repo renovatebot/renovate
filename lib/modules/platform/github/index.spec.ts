@@ -5090,7 +5090,14 @@ describe('modules/platform/github/index', () => {
       git.getCommitTreeSha.mockResolvedValue(
         '0000000000000000000000000000000000000000' as LongCommitSha,
       );
-      git.diffCommitTree.mockResolvedValue([]);
+      git.diffCommitTree.mockResolvedValue([
+        {
+          path: 'foo.bar',
+          mode: '100644',
+          type: 'blob',
+          sha: 'abc0000000000000000000000000000000000000' as LongCommitSha,
+        },
+      ]);
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -5118,6 +5125,21 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope.post('/repos/some/repo/git/trees').replyWithError('unknown');
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when diff is empty', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      git.diffCommitTree.mockResolvedValueOnce([]);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
