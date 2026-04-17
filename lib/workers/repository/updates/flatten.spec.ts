@@ -316,43 +316,34 @@ describe('workers/repository/updates/flatten', () => {
       expect(res.find((update) => update.depName === 'foo')).toBeDefined();
     });
 
-    it('does not filter vulnerability alerts even if skipReason is set', async () => {
+    it('clears skipReason for vulnerability alert remediations', async () => {
+      config.remediations = {
+        'package-lock.json': [
+          {
+            datasource: 'npm',
+            depName: 'axios',
+            currentVersion: '1.14.0',
+            newVersion: '1.15.0',
+            prBodyNotes: '',
+            skipReason: 'disabled' as SkipReason,
+          },
+        ],
+      };
       const packageFiles = {
         npm: [
           {
             packageFile: 'package.json',
             lockFiles: ['package-lock.json'],
-            deps: [
-              {
-                depName: '@org/a',
-                updates: [
-                  {
-                    newValue: '1.0.0',
-                    sourceUrl: 'https://github.com/org/repo',
-                  },
-                ],
-                skipReason: 'disabled' as SkipReason,
-                isVulnerabilityAlert: true,
-              },
-              {
-                depName: 'foo',
-                updates: [
-                  {
-                    newValue: '2.0.0',
-                    sourceUrl: 'https://github.com/org/repo',
-                  },
-                ],
-                skipReason: 'disabled' as SkipReason,
-              },
-            ],
+            deps: [],
           },
         ],
       };
 
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(1);
-      expect(res.find((update) => update.depName === '@org/a')).toBeDefined();
-      expect(res.find((update) => update.depName === 'foo')).not.toBeDefined();
+      expect(res[0].depName).toBe('axios');
+      expect(res[0].isVulnerabilityAlert).toBeTrue();
+      expect(res[0].skipReason).toBeUndefined();
     });
 
     it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {

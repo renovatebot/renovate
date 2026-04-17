@@ -220,6 +220,7 @@ export async function flattenUpdates(
               updateConfig.newValue = updateConfig.newVersion;
               updateConfig = applyUpdateConfig(updateConfig);
               updateConfig.enabled = true;
+              delete updateConfig.skipReason;
               updates.push(updateConfig);
             }
           }
@@ -235,9 +236,7 @@ export async function flattenUpdates(
   }
   const filteredUpdates = updates
     .filter((update) => update.enabled !== false)
-    .filter(
-      (update) => isUndefined(update.skipReason) || update.isVulnerabilityAlert,
-    )
+    .filter((update) => isUndefined(update.skipReason))
     .map(({ vulnerabilityAlerts: _, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
   if (filteredUpdates.length < updates.length) {
