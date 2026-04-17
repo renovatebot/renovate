@@ -316,6 +316,45 @@ describe('workers/repository/updates/flatten', () => {
       expect(res.find((update) => update.depName === 'foo')).toBeDefined();
     });
 
+    it('does not filter vulnerability alerts even if skipReason is set', async () => {
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                skipReason: 'disabled' as SkipReason,
+                isVulnerabilityAlert: true,
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                skipReason: 'disabled' as SkipReason,
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(res.find((update) => update.depName === '@org/a')).toBeDefined();
+      expect(res.find((update) => update.depName === 'foo')).not.toBeDefined();
+    });
+
     it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {
       // TODO #22198
       config.lockFileMaintenance!.enabled = true;

@@ -235,7 +235,9 @@ export async function flattenUpdates(
   }
   const filteredUpdates = updates
     .filter((update) => update.enabled !== false)
-    .filter((update) => isUndefined(update.skipReason))
+    .filter(
+      (update) => isUndefined(update.skipReason) || update.isVulnerabilityAlert,
+    )
     .map(({ vulnerabilityAlerts: _, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
   if (filteredUpdates.length < updates.length) {
