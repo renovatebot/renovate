@@ -1381,6 +1381,64 @@ describe('util/git/index', { timeout: 10000 }, () => {
         }),
       );
     });
+
+    it('parses R status lines from diff-tree output', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':100644 100644 aaa0000000000000000000000000000000000000 bbb0000000000000000000000000000000000000 R100\told.txt\tnew.txt\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual({
+        path: 'old.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+      expect(diff).toContainEqual({
+        path: 'new.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: 'bbb0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 160000 to type commit for submodules', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 160000 0000000000000000000000000000000000000000 abc0000000000000000000000000000000000000 A\tvendor/sub\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'vendor/sub',
+        mode: '160000',
+        type: 'commit',
+        sha: 'abc0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 040000 to type tree', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 040000 0000000000000000000000000000000000000000 def0000000000000000000000000000000000000 A\tsome/dir\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'some/dir',
+        mode: '040000',
+        type: 'tree',
+        sha: 'def0000000000000000000000000000000000000',
+      });
+    });
   });
 
   describe('getRepoStatus', () => {

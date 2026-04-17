@@ -1581,6 +1581,7 @@ export async function diffCommitTree(
 ): Promise<DiffTreeItem[]> {
   const output = await git.raw([
     'diff-tree',
+    '-M',
     '-r',
     '--no-commit-id',
     parentCommitSha,
