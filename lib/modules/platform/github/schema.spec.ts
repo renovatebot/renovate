@@ -113,6 +113,8 @@ describe('modules/platform/github/schema', () => {
       {
         dismissed_reason: null,
         security_advisory: {
+          ghsa_id: 'GHSA-1111-2222-3333',
+          summary: 'Test advisory',
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
           severity: 'high',
@@ -128,6 +130,8 @@ describe('modules/platform/github/schema', () => {
       {
         dismissed_reason: null,
         security_advisory: {
+          ghsa_id: 'GHSA-4444-5555-6666',
+          summary: 'Test advisory',
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-5678' }],
           severity: 'medium',
@@ -150,6 +154,8 @@ describe('modules/platform/github/schema', () => {
       {
         dismissed_reason: null,
         security_advisory: {
+          ghsa_id: 'GHSA-1111-2222-3333',
+          summary: 'Test advisory',
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
           severity: 'high',
@@ -177,6 +183,8 @@ describe('modules/platform/github/schema', () => {
       {
         dismissed_reason: null,
         security_advisory: {
+          ghsa_id: 'GHSA-4444-5555-6666',
+          summary: 'Test advisory',
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-5678' }],
           severity: 'high',
@@ -200,6 +208,8 @@ describe('modules/platform/github/schema', () => {
       {
         dismissed_reason: null,
         security_advisory: {
+          ghsa_id: 'GHSA-1111-2222-3333',
+          summary: 'Test advisory',
           description: 'Test advisory',
           identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
           severity: 'high',
