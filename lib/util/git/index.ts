@@ -59,6 +59,7 @@ import type {
   CommitFilesConfig,
   CommitResult,
   DiffTreeItem,
+  GitObjectType,
   LocalConfig,
   LongCommitSha,
   PushFilesConfig,
@@ -1517,7 +1518,7 @@ export async function getCommitTreeSha(
   return treeSha as LongCommitSha;
 }
 
-function treeTypeFromMode(mode: string): 'blob' | 'tree' | 'commit' {
+function treeTypeFromMode(mode: string): GitObjectType {
   if (mode === '160000') {
     return 'commit';
   }
