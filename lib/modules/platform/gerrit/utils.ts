@@ -64,13 +64,9 @@ export function getGerritRepoUrl(
     encodeURIComponent(repository),
   );
 
-  const sshUrl = parseUrl(
+  const sshUrl = new URL(
     `ssh://${endpointUrl.host}:${DEFAULT_SSH_PORT}/${repository}`,
   );
-  if (!sshUrl) {
-    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
-  }
-
   const url = pickUrlFromGitUrl(gitUrl, sshUrl, httpUrl);
   logger.trace(
     { url: url.toString() },
