@@ -21,7 +21,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "depName": "docker/setup-qemu-action",
     "depType": "action",
     "replaceString": "docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0",
-    "versioning": "semver-partial",
+    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -31,7 +31,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "depName": "actions/checkout",
     "depType": "action",
     "replaceString": "actions/checkout@1.0.0",
-    "versioning": "semver-partial",
+    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -44,7 +44,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "enabled": false,
     "replaceString": "docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145",
     "skipReason": "unversioned-reference",
-    "versioning": "semver-partial",
+    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -54,7 +54,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "depName": "docker/build-push-action",
     "depType": "action",
     "replaceString": "docker/build-push-action@v2",
-    "versioning": "semver-partial",
+    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -65,7 +65,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "depName": "actions/checkout",
     "depType": "action",
     "replaceString": "actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0",
-    "versioning": "semver-partial",
+    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -76,7 +76,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "depName": "actions-rs/toolchain",
     "depType": "action",
     "replaceString": "actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7",
-    "versioning": "semver-partial",
+    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -86,7 +86,7 @@ exports[`modules/manager/github-actions/extract > extractPackageFile() > extract
     "depName": "actions-rs/cargo",
     "depType": "action",
     "replaceString": "actions-rs/cargo@v1.0.3",
-    "versioning": "semver-partial",
+    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
