@@ -116,6 +116,13 @@ export interface TreeItem {
   sha: LongCommitSha;
 }
 
+export interface DiffTreeItem {
+  path: string;
+  mode: string;
+  type: string;
+  sha: LongCommitSha | null;
+}
+
 /**
  * Represents a git authentication rule in the form of e.g.:
  * git config --global url."https://api@github.com/".insteadOf "https://github.com/"

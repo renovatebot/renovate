@@ -58,6 +58,7 @@ import { configSigningKey, writePrivateKey } from './private-key.ts';
 import type {
   CommitFilesConfig,
   CommitResult,
+  DiffTreeItem,
   LocalConfig,
   LongCommitSha,
   PushFilesConfig,
@@ -1554,13 +1555,6 @@ export async function getCommitTreeSha(
   return treeSha as LongCommitSha;
 }
 
-export interface DiffTreeItem {
-  path: string;
-  mode: string;
-  type: string;
-  sha: LongCommitSha | null;
-}
-
 function treeTypeFromMode(mode: string): 'blob' | 'tree' | 'commit' {
   if (mode === '160000') {
     return 'commit';
@@ -1594,35 +1588,39 @@ export async function diffCommitTree(
       const statusCode = status[0];
       // R/C have two tab-separated paths (old\tnew); A/M/D/T have one
       const [sourcePath, targetPath] = paths.split('\t');
-      if (statusCode === 'D') {
-        result.push({
-          path: sourcePath,
-          mode: oldMode,
-          type: treeTypeFromMode(oldMode),
-          sha: null,
-        });
-      } else if (statusCode === 'R') {
-        // Rename: delete source, add target
-        result.push({
-          path: sourcePath,
-          mode: oldMode,
-          type: treeTypeFromMode(oldMode),
-          sha: null,
-        });
-        result.push({
-          path: targetPath,
-          mode: newMode,
-          type: treeTypeFromMode(newMode),
-          sha: newSha as LongCommitSha,
-        });
-      } else {
-        // A (add), M (modify), T (type change), C (copy)
-        result.push({
-          path: targetPath ?? sourcePath,
-          mode: newMode,
-          type: treeTypeFromMode(newMode),
-          sha: newSha as LongCommitSha,
-        });
+      switch (statusCode) {
+        case 'D':
+          result.push({
+            path: sourcePath,
+            mode: oldMode,
+            type: treeTypeFromMode(oldMode),
+            sha: null,
+          });
+          break;
+        case 'R':
+          // Rename: delete source, add target
+          result.push({
+            path: sourcePath,
+            mode: oldMode,
+            type: treeTypeFromMode(oldMode),
+            sha: null,
+          });
+          result.push({
+            path: targetPath,
+            mode: newMode,
+            type: treeTypeFromMode(newMode),
+            sha: newSha as LongCommitSha,
+          });
+          break;
+        default:
+          // A (add), M (modify), T (type change), C (copy)
+          result.push({
+            path: targetPath ?? sourcePath,
+            mode: newMode,
+            type: treeTypeFromMode(newMode),
+            sha: newSha as LongCommitSha,
+          });
+          break;
       }
     }
   }
