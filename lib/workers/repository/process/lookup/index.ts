@@ -486,6 +486,7 @@ export async function lookupUpdates(
         const sortedReleases = releases.sort((r1, r2) =>
           versioningApi.sortVersions(r1.version, r2.version),
         );
+        const allReleaseVersions = releases.map((r) => r.version);
         const { release, pendingChecks, pendingReleases } =
           await filterInternalChecks(
             depResultConfig,
@@ -508,6 +509,7 @@ export async function lookupUpdates(
           config.lockedVersion ?? currentVersion!,
           bucket,
           release,
+          allReleaseVersions,
         );
 
         // #29034

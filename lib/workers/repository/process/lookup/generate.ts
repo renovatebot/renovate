@@ -17,6 +17,7 @@ export async function generateUpdate(
   currentVersion: string,
   bucket: string,
   release: Release,
+  allVersions: string[],
 ): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {
@@ -60,6 +61,7 @@ export async function generateUpdate(
         rangeStrategy,
         currentVersion,
         newVersion,
+        allVersions,
       })!;
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
