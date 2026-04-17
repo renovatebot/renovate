@@ -18,7 +18,7 @@ import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
-import type { FileChange } from './types.ts';
+import type { FileChange, LongCommitSha } from './types.ts';
 
 vi.mock('./conflicts-cache.ts');
 vi.mock('./behind-base-branch-cache.ts');
@@ -1340,6 +1340,39 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(masterFile?.sha).toBeNull();
       const fileToDelete = diff.find((d) => d.path === 'file_to_delete');
       expect(fileToDelete?.sha).toBeNull();
+    });
+
+    it('returns renames as deletion and addition entries', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.addConfig('user.email', 'Jest@example.com');
+      await repo.addConfig('user.name', 'Jest');
+      const parentCommit = git.getBranchCommit(defaultBranch)!;
+
+      await repo.raw(['mv', 'master_file', 'renamed_master_file']);
+      await repo.commit('rename master file');
+
+      const commit = (await repo.revparse(['HEAD'])) as LongCommitSha;
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+
+      const deletedPath = diff.find((item) => item.path === 'master_file');
+      expect(deletedPath).toEqual({
+        path: 'master_file',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+
+      const addedPath = diff.find(
+        (item) => item.path === 'renamed_master_file',
+      );
+      expect(addedPath).toMatchObject({
+        path: 'renamed_master_file',
+        mode: '100644',
+        type: 'blob',
+      });
+      expect(addedPath?.sha).toMatch(/^[0-9a-f]{40}$/);
     });
   });
 
