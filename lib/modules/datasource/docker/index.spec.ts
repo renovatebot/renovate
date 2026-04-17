@@ -2264,16 +2264,17 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toMatchObject([
         {
           version: '0.9.0',
-          newDigest: 'bbb',
           releaseTimestamp: '2020-01-01T00:00:00.000Z',
         },
         {
           version: '1.0.0',
-          newDigest: 'aaa',
           // no releaseTimestamp
         },
       ]);
 
+      // Digest is not propagated — getDigest() resolves per-arch at lookup time
+      expect(res?.releases[0].newDigest).toBeUndefined();
+      expect(res?.releases[1].newDigest).toBeUndefined();
       expect(res?.releases[1].releaseTimestamp).toBeUndefined();
     });
 

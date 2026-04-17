@@ -1076,29 +1076,19 @@ export class DockerDatasource extends Datasource {
     await cache.save();
 
     const items = cache.getItems();
-    return items.map(
-      ({ name: version, tag_last_pushed, digest: newDigest }) => {
-        const release: Release = { version };
+    return items.map(({ name: version, tag_last_pushed }) => {
+      const release: Release = { version };
 
-        const releaseTimestamp = asTimestamp(tag_last_pushed);
-        if (releaseTimestamp) {
-          release.releaseTimestamp = releaseTimestamp;
-        }
+      const releaseTimestamp = asTimestamp(tag_last_pushed);
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
 
-        if (newDigest) {
-          logger.once.debug(
-            {
-              documentationUrl:
-                'https://github.com/renovatebot/renovate/issues/38659',
-            },
-            'Using the `tag_last_pushed` to determine the age of a release from Docker Hub. If this is a digest update, it may lead to inconsistent behaviour, showing the digest as newer than it actually is',
-          );
-          release.newDigest = newDigest;
-        }
-
-        return release;
-      },
-    );
+      // Digest is intentionally not propagated — the Docker Hub tag API
+      // returns the manifest-list digest, which would bypass arch-aware
+      // resolution in `getDigest()`.
+      return release;
+    });
   }
 
   getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
