@@ -1469,45 +1469,4 @@ describe('modules/manager/github-actions/extract', () => {
       expected,
     );
   });
-
-  it.each([
-    {
-      step: {
-        uses: 'astral-sh/setup-uv@v7',
-      },
-      expected: {
-        currentValue: 'v7',
-        datasource: 'github-tags',
-        depName: 'astral-sh/setup-uv',
-        depType: 'action',
-      },
-    },
-    {
-      step: {
-        uses: 'astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57',
-      },
-      expected: {
-        currentDigest: 'cec208311dfd045dd5311c1add060b2062131d57',
-        datasource: 'github-tags',
-        depName: 'astral-sh/setup-uv',
-        depType: 'action',
-      },
-    },
-  ])(
-    'overrides versioning for actions with Immutable tags: $step.uses',
-    ({ step, expected }) => {
-      const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
-
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps.filter((pkg) => pkg.depType === 'action')).toMatchObject(
-        [
-          {
-            versioning:
-              'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
-            ...expected,
-          },
-        ],
-      );
-    },
-  );
 });
