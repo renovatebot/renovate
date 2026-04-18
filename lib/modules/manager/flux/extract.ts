@@ -219,10 +219,10 @@ function extractOCIRefRange(
       }
       if (item.key.value === 'tag' && isScalar(item.value)) {
         tagKeyRange = item.key.range;
-        tagValueEnd = item.value.range?.[1] ?? null;
+        tagValueEnd = item.value.range[1];
       } else if (item.key.value === 'digest' && isScalar(item.value)) {
         digestKeyRange = item.key.range;
-        digestValueEnd = item.value.range?.[1] ?? null;
+        digestValueEnd = item.value.range[1];
       }
     }
 

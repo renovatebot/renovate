@@ -1282,6 +1282,44 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('extracts OCIRepository with tag and digest when ref contains a non-scalar key', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            ? [seq-key]
+            : ignored
+            tag: v1.8.2
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: \{\{newValue\}\}\n\s*digest: \{\{newDigest\}\}/,
+            ),
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
+            ),
+          },
+        ],
+      });
+    });
+
     it('extracts Kustomization', () => {
       const result = extractPackageFile(
         codeBlock`
