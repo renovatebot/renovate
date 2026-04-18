@@ -1046,7 +1046,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              'ref:\n    "tag": {{newValue}}\n    "digest": {{newDigest}}',
+              '"tag": {{newValue}}\n    "digest": {{newDigest}}',
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
@@ -1054,14 +1054,13 @@ describe('modules/manager/flux/extract', () => {
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
             replaceString:
-              'ref:\n    "tag": v1.8.2\n    "digest": sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+              '"tag": v1.8.2\n    "digest": sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
           },
         ],
       });
     });
 
-    it('ignores OCIRepository when tag/digest block is not found', () => {
-      // Placing "ref": in quotes will fail the block-matching regex, skipping extraction logic
+    it('extracts OCIRepository when ref key is quoted', () => {
       const result = extractPackageFile(
         codeBlock`
         apiVersion: source.toolkit.fluxcd.io/v1beta2
@@ -1079,9 +1078,45 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            currentValue: 'v1.8.2',
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: \{\{newValue\}\}\n\s*digest: \{\{newDigest\}\}/,
+            ),
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('skips OCIRepository when tag value is a YAML alias', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        x-tag: &mytag v1.8.2
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: *mytag
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',

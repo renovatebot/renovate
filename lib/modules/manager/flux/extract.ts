@@ -1,8 +1,9 @@
 import { isString } from '@sindresorhus/is';
+import { isMap, isPair, isScalar, parseAllDocuments } from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { isHttpUrl } from '../../../util/url.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
@@ -178,6 +179,72 @@ function resolveSystemManifest(
   ];
 }
 
+function extractOCIRefRange(
+  content: string,
+  resourceName: string,
+): { replaceString: string; tagFirst: boolean } | null {
+  for (const doc of parseAllDocuments(content, { strict: false })) {
+    const docContents = doc.contents;
+    if (!isMap(docContents)) {
+      continue;
+    }
+    const kindNode = docContents.get('kind', true);
+    if (
+      !isScalar(kindNode) ||
+      (kindNode.value as unknown) !== 'OCIRepository'
+    ) {
+      continue;
+    }
+    const nameNode = docContents.getIn(['metadata', 'name'], true);
+    if (!isScalar(nameNode) || nameNode.value !== resourceName) {
+      continue;
+    }
+    const specNode = docContents.get('spec');
+    if (!isMap(specNode)) {
+      continue;
+    }
+    const refNode = specNode.get('ref');
+    if (!isMap(refNode)) {
+      continue;
+    }
+
+    let tagKeyRange: [number, number, number] | null = null;
+    let tagValueEnd: number | null = null;
+    let digestKeyRange: [number, number, number] | null = null;
+    let digestValueEnd: number | null = null;
+
+    for (const item of refNode.items) {
+      if (!isPair(item) || !isScalar(item.key)) {
+        continue;
+      }
+      if (item.key.value === 'tag' && isScalar(item.value)) {
+        tagKeyRange = item.key.range;
+        tagValueEnd = item.value.range?.[1] ?? null;
+      } else if (item.key.value === 'digest' && isScalar(item.value)) {
+        digestKeyRange = item.key.range;
+        digestValueEnd = item.value.range?.[1] ?? null;
+      }
+    }
+
+    if (
+      !tagKeyRange ||
+      tagValueEnd === null ||
+      !digestKeyRange ||
+      digestValueEnd === null
+    ) {
+      continue;
+    }
+
+    const tagFirst = tagKeyRange[0] < digestKeyRange[0];
+    const start = tagFirst ? tagKeyRange[0] : digestKeyRange[0];
+    const end = tagFirst ? digestValueEnd : tagValueEnd;
+
+    return { replaceString: content.slice(start, end), tagFirst };
+  }
+
+  return null;
+}
+
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
@@ -304,38 +371,22 @@ function resolveResourceManifest(
           // Set currentValue to the tag so the docker datasource can look up the image's new digest
           combinedDep.currentValue = resource.spec.ref.tag;
 
-          // Attempt to find the exact block spanning `tag: ...` to `digest: ...` (or vice-versa) in the source content
-          const escapedTag = escapeRegExp(resource.spec.ref.tag);
-          const escapedDigest = escapeRegExp(resource.spec.ref.digest);
-          const tagFirstRegex = regEx(
-            `ref\\s*:[\\s\\S]+?["']?tag["']?\\s*:\\s*["']?${escapedTag}["']?[\\s\\S]+?["']?digest["']?\\s*:\\s*["']?${escapedDigest}["']?`,
-          );
-          const digestFirstRegex = regEx(
-            `ref\\s*:[\\s\\S]+?["']?digest["']?\\s*:\\s*["']?${escapedDigest}["']?[\\s\\S]+?["']?tag["']?\\s*:\\s*["']?${escapedTag}["']?`,
-          );
-
-          const tagFirstMatch = tagFirstRegex.exec(content);
-          const digestFirstMatch = digestFirstRegex.exec(content);
-          const match = tagFirstMatch ?? digestFirstMatch;
-
-          if (match) {
-            combinedDep.replaceString = match[0];
-            // We use the literals directly for replacement to preserve any surrounding quotes if they exist in the match
-            if (tagFirstMatch) {
-              // tag came first
-              combinedDep.autoReplaceStringTemplate = match[0]
+          const refRange = extractOCIRefRange(content, resource.metadata.name);
+          if (refRange) {
+            combinedDep.replaceString = refRange.replaceString;
+            if (refRange.tagFirst) {
+              combinedDep.autoReplaceStringTemplate = refRange.replaceString
                 .replace(resource.spec.ref.tag, '{{newValue}}')
                 .replace(resource.spec.ref.digest, '{{newDigest}}');
             } else {
-              // digest came first
-              combinedDep.autoReplaceStringTemplate = match[0]
+              combinedDep.autoReplaceStringTemplate = refRange.replaceString
                 .replace(resource.spec.ref.digest, '{{newDigest}}')
                 .replace(resource.spec.ref.tag, '{{newValue}}');
             }
           } else {
             logger.debug(
               { file: manifest.file, name: resource.metadata.name },
-              'Could not find exact tag/digest block in content, skipping extraction',
+              'Could not find tag/digest nodes in content, skipping replacement',
             );
             combinedDep.skipReason = 'invalid-value';
           }
@@ -417,7 +468,6 @@ export async function extractAllPackageFiles(
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
     if (content) {
-      // TODO #22198
       const manifest = readManifest(content, file);
       if (manifest) {
         manifests.push(manifest);
