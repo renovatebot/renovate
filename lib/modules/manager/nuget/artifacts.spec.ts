@@ -41,6 +41,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);
+    fs.getMatchingFiles.mockImplementation(realFs.getMatchingFiles);
     scm.getFileList.mockResolvedValueOnce([]);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

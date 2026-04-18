@@ -1,7 +1,13 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages.ts';
-import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
+import {
+  ensureCachePath,
+  ensureLocalPath,
+  getMatchingFiles,
+  isValidPath,
+  resolveRelativePathToRoot,
+} from './util.ts';
 
 describe('util/fs/util', () => {
   const localDir = upath.resolve('/foo');
@@ -76,5 +82,80 @@ describe('util/fs/util', () => {
     ${'./[foo]/bar'}    | ${true}
   `('isValidPath($value) == $expected', ({ value, expected }) => {
     expect(isValidPath(value, 'cacheDir')).toBe(expected);
+  });
+
+  describe('resolveRelativePathToRoot', () => {
+    it('resolves relative path from a subdirectory file', () => {
+      const result = resolveRelativePathToRoot(
+        'two/two.csproj',
+        '../one/one.csproj',
+      );
+      expect(result).toBe('one/one.csproj');
+    });
+
+    it('resolves same-directory reference', () => {
+      const result = resolveRelativePathToRoot(
+        'moduleA/go.mod',
+        './local/go.mod',
+      );
+      expect(result).toBe('moduleA/local/go.mod');
+    });
+
+    it('resolves parent directory reference', () => {
+      const result = resolveRelativePathToRoot(
+        'services/api/go.mod',
+        '../../libs/shared',
+      );
+      expect(result).toBe('libs/shared');
+    });
+
+    it('resolves from root-level file', () => {
+      const result = resolveRelativePathToRoot('go.mod', './sub');
+      expect(result).toBe('sub');
+    });
+
+    it('resolves deeply nested paths', () => {
+      const result = resolveRelativePathToRoot(
+        'a/b/c/file.txt',
+        '../../../other/file.txt',
+      );
+      expect(result).toBe('other/file.txt');
+    });
+  });
+
+  describe('getMatchingFiles', () => {
+    const allFiles = [
+      'one/one.csproj',
+      'two/two.vbproj',
+      'three/three.fsproj',
+      'readme.md',
+      'go.mod',
+      'api/go.mod',
+      'cmd/go.mod',
+      'go.sum',
+      'package.json',
+    ];
+
+    it('filters files using minimatch pattern', () => {
+      expect(getMatchingFiles('*.{cs,vb,fs}proj', allFiles)).toEqual([
+        'one/one.csproj',
+        'two/two.vbproj',
+        'three/three.fsproj',
+      ]);
+    });
+
+    it('filters go.mod files', () => {
+      expect(getMatchingFiles('go.mod', allFiles)).toEqual([
+        'go.mod',
+        'api/go.mod',
+        'cmd/go.mod',
+      ]);
+    });
+
+    it('returns empty array when no files match', () => {
+      expect(getMatchingFiles('go.mod', ['readme.md', 'package.json'])).toEqual(
+        [],
+      );
+    });
   });
 });
