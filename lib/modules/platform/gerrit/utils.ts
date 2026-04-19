@@ -1,7 +1,6 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
-import { clone } from '../../../util/clone.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -40,55 +39,47 @@ export function getGerritRepoUrl(
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
 ): string {
+  const endpointUrl = parseUrl(endpoint);
+  if (!endpointUrl) {
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  }
+
+  const url =
+    gitUrl === 'ssh'
+      ? createSshUrl(endpointUrl, repository)
+      : createHttpUrl(endpointUrl, endpoint, repository);
+  logger.trace({ url }, 'using URL based on configured endpoint');
+
+  return url;
+}
+
+function createSshUrl(url: URL, repository: string): string {
+  return new URL(
+    `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`,
+  ).toString();
+}
+
+function createHttpUrl(url: URL, endpoint: string, repository: string): string {
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
     hostType: 'gerrit',
     url: endpoint,
   });
 
-  const endpointUrl = parseUrl(endpoint);
-  if (!endpointUrl) {
-    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
-  }
   if (!(opts.username && opts.password)) {
     throw new Error(
       'Init: You must configure a Gerrit Server username/password',
     );
   }
-  const httpUrl = clone(endpointUrl);
-  httpUrl.username = opts.username;
-  httpUrl.password = opts.password;
-  httpUrl.pathname = joinUrlParts(
-    httpUrl.pathname,
+
+  url.username = opts.username;
+  url.password = opts.password;
+  url.pathname = joinUrlParts(
+    url.pathname,
     'a',
     encodeURIComponent(repository),
   );
-
-  const sshUrl = new URL(
-    `ssh://${endpointUrl.host}:${DEFAULT_SSH_PORT}/${repository}`,
-  );
-  const url = pickUrlFromGitUrl(gitUrl, sshUrl, httpUrl);
-  logger.trace(
-    { url: url.toString() },
-    'using URL based on configured endpoint',
-  );
-
-  return url;
-}
-
-function pickUrlFromGitUrl(
-  gitUrl: GitUrlOption | undefined,
-  sshUrl: URL,
-  httpUrl: URL,
-): string {
-  switch (gitUrl) {
-    case 'ssh':
-      return sshUrl.toString();
-    case 'endpoint':
-      return httpUrl.toString();
-    default:
-      return httpUrl.toString();
-  }
+  return url.toString();
 }
 
 export function mapPrStateToGerritFilter(state?: PrState): string | null {
