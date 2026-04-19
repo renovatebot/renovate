@@ -89,7 +89,7 @@ const additionalConstraintNames = [
    */
   'jenkins',
   /**
-   * Used in the `pip-compile` manager datasource to specify a version of `pip-tools` to use.
+   * Used in the `pip-compile` manager to specify a version of `pip-tools` to use.
    *
    * @deprecated TODO remove in #42599
    */
