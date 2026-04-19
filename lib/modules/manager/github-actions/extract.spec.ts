@@ -1382,6 +1382,57 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: '1.1.100' },
+      },
+      expected: [
+        {
+          currentValue: '1.1.100',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: 'PATH' },
+      },
+      expected: [
+        {
+          currentValue: 'PATH',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'golangci/golangci-lint-action@v9',
         with: { version: 'v2.5.0' },
       },
