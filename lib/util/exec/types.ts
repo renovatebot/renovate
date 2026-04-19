@@ -42,6 +42,7 @@ const toolNames = [
   'pixi',
   'poetry',
   'python',
+  /** also used in the `rubygems` datasource */
   'ruby',
   'rust',
   'uv',
@@ -94,6 +95,26 @@ const additionalConstraintNames = [
    * @deprecated TODO remove in #42599
    */
   'pipTools',
+  /**
+   * Used in the `rubygems` datasource to specify the `platform` of that the Gem dependency supports.
+   */
+  'platform',
+  /**
+   * Used in the `rubygems` datasource to specify the version of the `rubygems` tool that is needed to use this Gem.
+   */
+  'rubygems',
+  /**
+   * Used in the `npm` manager to track the version of VSCode that the package is compatible with.
+   */
+  'vscode',
+  /**
+   * Used in the `nuget` manager to track .NET SDK version required.
+   */
+  'dotnet-sdk',
+  /**
+   * Used in the `cpanfile` manager to track Perl version required.
+   */
+  'perl',
 ] as const;
 
 /**

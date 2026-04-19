@@ -4,7 +4,10 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { CombinedHostRule } from '../../../types/index.ts';
-import type { ToolConstraint } from '../../../util/exec/types.ts';
+import type {
+  ConstraintName,
+  ToolConstraint,
+} from '../../../util/exec/types.ts';
 import { coerceNumber } from '../../../util/number.ts';
 import {
   api,
@@ -71,7 +74,7 @@ export function getComposerUpdateArguments(
 }
 
 export function getPhpConstraint(
-  constraints: Record<string, string>,
+  constraints: Partial<Record<ConstraintName, string>>,
 ): string | null {
   const { php } = constraints;
 
