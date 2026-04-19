@@ -1103,6 +1103,27 @@ describe('modules/manager/gradle/extract', () => {
       ]);
     });
 
+    it('ignores version catalog accessor with non-get provider method', async () => {
+      const fsMock = {
+        'gradle/libs.versions.toml': codeBlock`
+          [versions]
+          detekt = "1.18.1"
+        `,
+        'build.gradle.kts': codeBlock`
+          detekt {
+            toolVersion = libs.versions.detekt.getOrNull()
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+      expect(res).toBeNull();
+    });
+
     it('aligns sharedVariableName if version reference has multiple aliases', async () => {
       const fsMock = {
         'gradle/libs.versions.toml': codeBlock`

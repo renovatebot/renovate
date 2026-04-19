@@ -182,6 +182,24 @@ describe('modules/manager/gradle/extract/catalog', () => {
     expect(res).toStrictEqual({ vars: {}, deps: [] });
   });
 
+  it('skips version entries with no resolvable literal value', () => {
+    const input = codeBlock`
+      [versions]
+      kotlin = "1.5.21"
+      bad = { reject = "1.0.0" }
+    `;
+    const res = parseCatalog('gradle/libs.versions.toml', input);
+
+    expect(res.vars).toStrictEqual({
+      kotlin: {
+        key: 'kotlin',
+        value: '1.5.21',
+        fileReplacePosition: 21,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+    });
+  });
+
   it('changes the dependency version, not the comment version', () => {
     const input = codeBlock`
       [versions]
