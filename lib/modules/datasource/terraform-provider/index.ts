@@ -11,6 +11,7 @@ import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   OpenTofuProviderDocsResponse,
+  OpenTofuProviderVersionDetailsResponse,
   TerraformProviderV2Response,
 } from './schema.ts';
 import type {
@@ -150,6 +151,25 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       OpenTofuProviderDocsResponse,
     );
     res.homepage = `https://search.opentofu.org/provider/${repository}`;
+
+    // The versions list endpoint does not expose a source URL, so probe the
+    // latest version's details endpoint for the `link` field.
+    const latestVersion = res.releases[0]?.version;
+    if (latestVersion) {
+      const detailsUrl = joinUrlParts(
+        TerraformProviderDatasource.openTofuApiUrl,
+        'registry/docs/providers',
+        repository,
+        latestVersion,
+        'index.json',
+      );
+      const { body } = await this.http.getJson(
+        detailsUrl,
+        OpenTofuProviderVersionDetailsResponse,
+      );
+      res.sourceUrl = body.link;
+    }
+
     return res;
   }
 

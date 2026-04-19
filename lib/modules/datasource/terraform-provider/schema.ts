@@ -1,5 +1,4 @@
 import { z } from 'zod/v3';
-import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
@@ -48,7 +47,7 @@ const OpenTofuProviderVersion = z
   })
   .transform(
     (version): Release => ({
-      version: version.id.replace(regEx(/^v/), ''),
+      version: version.id,
       releaseTimestamp: version.published,
     }),
   );
@@ -65,4 +64,12 @@ export const OpenTofuProviderDocsResponse = z
 
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse
+>;
+
+export const OpenTofuProviderVersionDetailsResponse = z.object({
+  link: z.string().optional(),
+});
+
+export type OpenTofuProviderVersionDetailsResponse = z.infer<
+  typeof OpenTofuProviderVersionDetailsResponse
 >;
