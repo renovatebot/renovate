@@ -78,6 +78,14 @@ const additionalConstraintNames = [
    */
   'go',
   /**
+   * Used in the `gomod` manager to determine the minimum version of Go required to use this module.
+   *
+   * Note that this is prefixed with a `%` to explicilty note that this is not a tool that Containerbase knows.
+   *
+   * @see https://go.dev/ref/mod#go-mod-file-go
+   */
+  '%goMod',
+  /**
    * Used in the `gomod` manager to specify a tag for `github.com/marwan-at-work/mod`.
    *
    * Must be prefixed with `v`.
