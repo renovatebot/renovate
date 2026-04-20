@@ -41,7 +41,7 @@ function parseRange(input: string): Range | null {
   return { major, minor };
 }
 
-/**
+/*
  * Like parseVersion but also accepts floating tags (e.g. `v1`, `v1.2`)
  * by coercing them to full semver.
  */
