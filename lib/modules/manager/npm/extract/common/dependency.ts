@@ -222,18 +222,9 @@ export function getExtractedConstraints(
       (dep.depType === 'engines' || dep.depType === 'packageManager') &&
       dep.depName &&
       constraints.includes(dep.depName as ConstraintName) &&
+      isConstraintName(dep.depName) &&
       isString(dep.currentValue)
     ) {
-      if (!isConstraintName(dep.depName)) {
-        logger.debug(
-          {
-            depName: dep.depName,
-          },
-          `Skipping constraint extraction for ${dep.depName}, as it was not a valid constraint name`,
-        );
-        continue;
-      }
-
       extractedConstraints[dep.depName] = dep.currentValue;
     }
   }
