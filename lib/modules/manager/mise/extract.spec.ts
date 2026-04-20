@@ -1074,5 +1074,59 @@ describe('modules/manager/mise/extract', () => {
         expect(result?.deps[0]).not.toHaveProperty('versioning');
       },
     );
+
+    it('resolves tools from the mise registry data file via aqua backend', () => {
+      const content = codeBlock`
+      [tools]
+      zola = "0.19.2"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'zola',
+            currentValue: '0.19.2',
+            datasource: 'github-tags',
+            packageName: 'getzola/zola',
+          },
+        ],
+      });
+    });
+
+    it('resolves tools from the mise registry data file via cargo backend', () => {
+      const content = codeBlock`
+      [tools]
+      magika = "0.3.1"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'magika',
+            currentValue: '0.3.1',
+            datasource: 'crate',
+            packageName: 'magika-cli',
+          },
+        ],
+      });
+    });
+
+    it('resolves tools from the mise registry data file via github backend', () => {
+      const content = codeBlock`
+      [tools]
+      allurectl = "2.14.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'allurectl',
+            currentValue: '2.14.0',
+            datasource: 'github-releases',
+            packageName: 'allure-framework/allurectl',
+          },
+        ],
+      });
+    });
   });
 });

@@ -1,3 +1,4 @@
+import miseRegistry from '../../../data/mise-registry.json' with { type: 'json' };
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -555,3 +556,7 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   ...miseCoreTooling,
   ...miseRegistryTooling,
 };
+
+export function getMiseRegistryBackends(toolName: string): string[] {
+  return (miseRegistry as Record<string, string[]>)[toolName] ?? [];
+}
