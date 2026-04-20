@@ -545,7 +545,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
   yarn: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
-      packageName: '@yarnpkg/cli-dist',
+      packageName: '@yarnpkg/cli',
       datasource: NpmDatasource.id,
     },
   },
