@@ -9,6 +9,7 @@ let config: RenovateConfig;
 beforeEach(() => {
   config = partial<RenovateConfig>({
     repoIsOnboarded: true,
+    defaultBranch: 'main',
     branchPrefix: `renovate/`,
     pruneStaleBranches: true,
   });
@@ -28,6 +29,13 @@ describe('workers/repository/finalize/prune', () => {
 
     it('ignores reconfigure branch', async () => {
       delete config.branchList;
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(0);
+    });
+
+    it('returns if no defaultBranch', async () => {
+      delete config.defaultBranch;
+      config.branchList = [];
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(0);
     });

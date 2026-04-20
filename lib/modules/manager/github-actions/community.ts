@@ -2,6 +2,7 @@ import { z } from 'zod/v3';
 
 import type { SkipReason, StageName } from '../../../types/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
@@ -265,6 +266,57 @@ const SetupGolangciLint = z
     };
   });
 
+const ZizmorcoreZizmorAction = z
+  .object({
+    uses: matchAction('zizmorcore/zizmor-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: DockerDatasource.id,
+      depName: 'ghcr.io/zizmorcore/zizmor',
+      packageName: 'ghcr.io/zizmorcore/zizmor',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
+const SetupPyright = z
+  .object({
+    uses: matchAction('jakebailey/pyright-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version || val.version === 'PATH') {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: NpmDatasource.id,
+      depName: 'pyright',
+      versioning: npmVersioning.id,
+      packageName: 'pyright',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -276,10 +328,12 @@ export const CommunityActions = z.union([
   SetupPDM,
   SetupPixi,
   SetupPnpm,
+  SetupPyright,
   SetupUV,
   SetupBun,
   SetupDeno,
   SetupRuby,
   SetupHatch,
   SetupGolangciLint,
+  ZizmorcoreZizmorAction,
 ]);

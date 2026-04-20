@@ -53,7 +53,7 @@ runs:
 
     - name: Restore `node_modules`
       id: node-modules-restore
-      uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -72,7 +72,7 @@ runs:
         standalone: true
 
     - name: Setup Node
-      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
         node-version: ${{ inputs.node-version }}
 
@@ -83,7 +83,7 @@ runs:
 
     - name: Cache and restore `pnpm store`
       if: env.CACHE_HIT != 'true'
-      uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ env.PNPM_STORE }}
         key: |
@@ -97,7 +97,7 @@ runs:
         enableCrossOsArchive: true
 
     - name: Install dependencies
-      uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+      uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
       if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
@@ -106,7 +106,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}

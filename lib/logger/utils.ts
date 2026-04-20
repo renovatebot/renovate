@@ -167,6 +167,13 @@ export function sanitizeValue(
     return sanitize(sanitizeUrls(value));
   }
 
+  // Handle boxed String objects (e.g. from `new String()`), which `isString`
+  // rejects but `isObject` would iterate character-by-character producing
+  // `{"0":"h","1":"e",...}` in log output.
+  if (value instanceof String) {
+    return sanitize(sanitizeUrls(value.toString()));
+  }
+
   if (isDate(value)) {
     return value;
   }
