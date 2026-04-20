@@ -1,21 +1,21 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
-import { getConfigFileNames } from '../../../../config/app-strings';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_NO_CONFIG,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { getCache } from '../../../../util/cache/repository';
-import { getElapsedDays } from '../../../../util/date';
-import { readLocalFile } from '../../../../util/fs';
-import { getBranchCommit } from '../../../../util/git';
-import { getSemanticCommitPrTitle } from '../common';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { getBranchCommit } from '../../../../util/git/index.ts';
+import { getSemanticCommitPrTitle } from '../common.ts';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -49,13 +49,13 @@ async function packageJsonConfigExists(): Promise<boolean> {
 async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   return (
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
-      prTitle: config.onboardingPrTitle,
+      branchName: getInheritedOrGlobal('onboardingBranch')!,
+      prTitle: getInheritedOrGlobal('onboardingPrTitle'),
       state: '!open',
       targetBranch: config.baseBranch,
     })) ??
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
+      branchName: getInheritedOrGlobal('onboardingBranch')!,
       prTitle: getSemanticCommitPrTitle(config),
       state: '!open',
       targetBranch: config.baseBranch,
@@ -79,7 +79,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // - An onboarding cache is present, and
   // - The current default branch SHA matches the default SHA found in the cache
   // Also if there is a closed pr skip using cache as it is outdated
-  if (config.requireConfig === 'optional' && config.onboarding === false) {
+  if (
+    config.requireConfig === 'optional' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     // Return early and avoid checking for config files
     return true;
   }
@@ -94,7 +97,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // if onboarding cache is present and base branch has not been updated; branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
-    config.onboarding &&
+    getInheritedOrGlobal('onboarding') &&
     !closedOnboardingPr &&
     isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha ===
@@ -144,7 +147,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
-  if (config.requireConfig === 'required' && config.onboarding === false) {
+  if (
+    config.requireConfig === 'required' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
@@ -159,8 +165,25 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   }
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications!.includes('onboardingClose')) {
-    const ageOfOnboardingPr = getElapsedDays(closedOnboardingPr.createdAt!);
-    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge');
+    const ageOfOnboardingPr = getElapsedDays(
+      closedOnboardingPr.createdAt!,
+      false,
+    );
+    const onboardingAutoCloseAge = getInheritedOrGlobal(
+      'onboardingAutoCloseAge',
+    );
+    if (onboardingAutoCloseAge) {
+      logger.debug(
+        {
+          onboardingAutoCloseAge,
+          createdAt: closedOnboardingPr.createdAt!,
+          ageOfOnboardingPr,
+        },
+        `Determining that the closed onboarding PR was created at \`${closedOnboardingPr.createdAt!}\` was created ${ageOfOnboardingPr.toFixed(2)} days ago`,
+      );
+    }
+    // if we have onboardingAutoCloseAge, and it hasn't yet passed onboardingAutoCloseAge, add a comment
+    // if it /has/ passed, we'll comment this appropriately in `ensureOnboardingPr`, so there doesn't need to be a comment here
     if (
       !onboardingAutoCloseAge ||
       ageOfOnboardingPr <= onboardingAutoCloseAge
@@ -180,7 +203,7 @@ export async function getOnboardingPr(
   config: RenovateConfig,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
-    config.onboardingBranch!,
+    getInheritedOrGlobal('onboardingBranch')!,
     config.baseBranch,
   );
 }

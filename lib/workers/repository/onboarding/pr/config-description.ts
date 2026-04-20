@@ -1,9 +1,9 @@
 import { isArray, isString } from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import { emojify } from '../../../../util/emoji';
-import { getDefaultConfigFileName } from '../common';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { getDefaultConfigFileName } from '../common.ts';
 
 export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
@@ -33,7 +33,7 @@ export function getConfigDesc(
   _packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
-  const configFile = getDefaultConfigFileName(config);
+  const configFile = getDefaultConfigFileName();
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   const descriptionArr = getDescriptionArray(config);

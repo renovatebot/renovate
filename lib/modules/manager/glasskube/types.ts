@@ -1,4 +1,4 @@
-import type { Package, PackageRepository } from './schema';
+import type { Package, PackageRepository } from './schema.ts';
 
 export interface GlasskubeResources {
   packageFile: string;

@@ -1,12 +1,12 @@
-import { options } from '../config/secrets';
+import { options } from '../config/secrets.ts';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
-} from '../constants/error-messages';
+} from '../constants/error-messages.ts';
 import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
-} from './interpolator';
+} from './interpolator.ts';
 
 describe('util/interpolator', () => {
   describe('validateInterpolatedValues', () => {

@@ -1,4 +1,4 @@
-import type { RenovateConfig, RepoGlobalConfig } from './types';
+import type { RenovateConfig, RepoGlobalConfig } from './types.ts';
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
@@ -13,6 +13,7 @@ export class GlobalConfig {
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
@@ -38,11 +39,21 @@ export class GlobalConfig {
     'includeMirrors',
     'localDir',
     'migratePresets',
+    'onboarding',
     'onboardingAutoCloseAge',
+    'onboardingBranch',
+    'onboardingCommitMessage',
+    'onboardingConfig',
+    'onboardingConfigFileName',
+    'onboardingNoDeps',
+    'onboardingPrTitle',
     'platform',
+    'prCacheSyncMaxPages',
     'presetCachePersistence',
+    'repositoryCacheForceLocal',
     's3Endpoint',
     's3PathStyle',
+    'toolSettings',
     'userAgent',
   ];
 

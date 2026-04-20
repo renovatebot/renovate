@@ -1,12 +1,12 @@
-import { logger } from '../../../../logger';
-import { findLocalSiblingOrParent } from '../../../../util/fs';
+import { logger } from '../../../../logger/index.ts';
+import { findLocalSiblingOrParent } from '../../../../util/fs/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
-} from '../../types';
-import type { PyProject } from '../schema';
-import type { PyProjectProcessor } from './types';
+} from '../../types.ts';
+import type { PyProject } from '../schema.ts';
+import type { PyProjectProcessor } from './types.ts';
 
 export abstract class BasePyProjectProcessor implements PyProjectProcessor {
   // The name of the lockfiles to be searched for.

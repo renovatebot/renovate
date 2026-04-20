@@ -2,32 +2,32 @@ import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { filterMap } from '../../../util/filter-map';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getEnv } from '../../../util/env.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { filterMap } from '../../../util/filter-map.ts';
 import {
   ensureCacheDir,
   findLocalSiblingOrParent,
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import { isValid } from '../../versioning/semver';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isValid } from '../../versioning/semver/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { getExtraDepsNotice } from './artifacts-extra';
+} from '../types.ts';
+import { getExtraDepsNotice } from './artifacts-extra.ts';
 
 const { major, valid } = semver;
 
@@ -121,6 +121,11 @@ export async function updateArtifacts({
     return null;
   }
   const goModDir = upath.dirname(goModFileName);
+  const goModFileBaseName = upath.basename(goModFileName);
+  const modFileFlag =
+    goModFileBaseName === 'go.mod'
+      ? ''
+      : ` -modfile=${quote(goModFileBaseName)}`;
 
   // The "vendor" directory can be next to the go.mod, but also in the parent directory in case
   // the go workspaces are used.
@@ -239,7 +244,7 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get `;
+    let args = `get${modFileFlag} `;
 
     if (goConstraints && !semver.intersects(goConstraints, `>=1.18`)) {
       // For Go versions < 1.18, we need to use the -d flag to avoid builds or installs
@@ -287,7 +292,7 @@ export async function updateArtifacts({
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -314,13 +319,13 @@ export async function updateArtifacts({
         logger.debug('using go work sync');
         execCommands.push(`${cmd} ${args}`);
       } else {
-        args = 'mod vendor';
+        args = `mod vendor${modFileFlag}`;
         logger.debug('using go mod vendor');
         execCommands.push(`${cmd} ${args}`);
       }
 
       if (isGoModTidyRequired) {
-        args = 'mod tidy' + tidyOpts;
+        args = `mod tidy${modFileFlag}${tidyOpts}`;
         logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -328,7 +333,7 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -493,7 +498,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: sumFileName,
+          fileName: sumFileName,
           stderr: err.message,
         },
       },

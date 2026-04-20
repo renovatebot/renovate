@@ -1,4 +1,4 @@
-import { NixPkgsVersioning } from '.';
+import { NixPkgsVersioning } from './index.ts';
 
 describe('modules/versioning/nixpkgs/index', () => {
   const versioning = new NixPkgsVersioning();

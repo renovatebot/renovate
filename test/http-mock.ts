@@ -4,10 +4,10 @@ import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 // eslint-disable-next-line no-restricted-imports
 import nock from 'nock';
-import { makeGraphqlSnapshot } from './graphql-snapshot';
+import { makeGraphqlSnapshot } from './graphql-snapshot.ts';
 
 // eslint-disable-next-line no-restricted-imports
-export type { Scope, ReplyHeaders, Body } from 'nock';
+export type { Body, ReplyHeaders, Scope } from 'nock';
 
 interface RequestLog {
   headers: Record<string, string>;

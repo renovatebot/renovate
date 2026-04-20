@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { streamToString } from './streams';
+import { streamToString } from './streams.ts';
 
 describe('util/streams', () => {
   describe('streamToString', () => {

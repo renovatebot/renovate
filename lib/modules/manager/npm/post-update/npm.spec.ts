@@ -1,14 +1,14 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import { getNodeToolConstraint } from './node-version';
-import * as npmHelper from './npm';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs } from '~test/util';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as npmHelper from './npm.ts';
 
-vi.mock('../../../../util/exec/env');
-vi.mock('../../../../util/fs');
-vi.mock('./node-version');
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./node-version.ts');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -404,7 +404,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -418,7 +418,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -426,7 +426,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           '-v "/tmp":"/tmp" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& ' +
@@ -487,6 +487,94 @@ describe('modules/manager/npm/post-update/npm', () => {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },
     ]);
+  });
+
+  describe('passes NODE_OPTIONS', () => {
+    it('if nodeMaxMemory set on global config', async () => {
+      GlobalConfig.set({
+        localDir: '',
+        toolSettings: {
+          nodeMaxMemory: 3456,
+        },
+      });
+
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+      const skipInstalls = true;
+      const updates = [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: false,
+        },
+      ];
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        updates,
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=3456',
+      );
+    });
+
+    it('if nodeMaxMemory set on repo config', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+      const skipInstalls = true;
+      const updates = [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: false,
+        },
+      ];
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        {
+          skipInstalls,
+          toolSettings: {
+            nodeMaxMemory: 3456,
+          },
+        },
+        updates,
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=3456',
+      );
+    });
   });
 
   describe('installs workspace only packages separately', () => {

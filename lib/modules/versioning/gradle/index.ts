@@ -1,7 +1,7 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import mavenVersion from '../maven';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import mavenVersion from '../maven/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   TokenType,
   compare,
@@ -11,7 +11,7 @@ import {
   parseMavenBasedRange,
   parsePrefixRange,
   parseSingleVersionRange,
-} from './compare';
+} from './compare.ts';
 
 export const id = 'gradle';
 export const displayName = 'Gradle';

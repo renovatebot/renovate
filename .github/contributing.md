@@ -94,6 +94,16 @@ And some options:
 - `--verbose=false` to avoid the test list
 - `--coverage=false` to avoid collecting coverage, faster for the part you need the test to pass
 
+### Quick Local CI Check
+
+For a local check that mirrors CI:
+
+```bash
+pnpm check
+```
+
+This runs all checks in parallel: auto-fixes, lint, type-check, and only the test shards affected by your changes.
+
 ## Do not force push to your pull request branch
 
 Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again.

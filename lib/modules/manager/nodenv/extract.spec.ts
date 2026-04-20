@@ -1,4 +1,4 @@
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/nodenv/extract', () => {
   describe('extractPackageFile()', () => {

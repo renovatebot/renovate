@@ -731,3 +731,15 @@
     You can find the specific Renovate version by checking the `INFO: Repository started` log line.
 
     Thanks, the Renovate team
+
+'auto:discussion-template':
+  comment: >
+    Hi there,
+
+    We notice that the Discussion you've created doesn't quite follow our template.
+
+    Please update the top-level comment in this Discussion to follow the structure of the template.
+
+    This improves the maintainers' time to triage, as key information is clearly indicated in the format we expect.
+
+    Thanks, the Renovate team

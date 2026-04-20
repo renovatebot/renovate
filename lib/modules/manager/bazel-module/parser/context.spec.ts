@@ -1,5 +1,5 @@
-import { Ctx, CtxProcessingError } from './context';
-import * as fragments from './fragments';
+import { Ctx, CtxProcessingError } from './context.ts';
+import * as fragments from './fragments.ts';
 
 describe('modules/manager/bazel-module/parser/context', () => {
   describe('Ctx (failures cases)', () => {

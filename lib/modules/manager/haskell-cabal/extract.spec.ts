@@ -5,7 +5,7 @@ import {
   findDepends,
   findExtents,
   splitSingleDependency,
-} from './extract';
+} from './extract.ts';
 
 const commentCabalFile = `build-depends:
   -- leading

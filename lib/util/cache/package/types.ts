@@ -1,4 +1,4 @@
-export type { CombinedKey, PackageCacheNamespace } from './namespaces';
+export type { CombinedKey, PackageCacheNamespace } from './namespaces.ts';
 
 export interface PackageCache {
   get<T = any>(namespace: string, key: string): Promise<T | undefined>;
@@ -13,7 +13,7 @@ export interface PackageCache {
   cleanup?(): Promise<void>;
 }
 
-export interface DecoratorCachedRecord {
+export interface CachedRecord {
   value: unknown;
   cachedAt: string;
 }

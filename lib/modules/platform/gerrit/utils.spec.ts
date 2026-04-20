@@ -1,7 +1,8 @@
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import { hashBody } from '../pr-body';
+import { hostRules, partial } from '~test/util.ts';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -9,12 +10,11 @@ import type {
   GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRevisionInfo,
-} from './types';
-import * as utils from './utils';
-import { mapBranchStatusToLabel } from './utils';
-import { hostRules, partial } from '~test/util';
+} from './types.ts';
+import * as utils from './utils.ts';
+import { mapBranchStatusToLabel } from './utils.ts';
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules.ts');
 
 const baseUrl = 'https://gerrit.example.com';
 
@@ -360,5 +360,13 @@ describe('modules/platform/gerrit/utils', () => {
         );
       },
     );
+  });
+
+  describe('convertGerritDateToISO()', () => {
+    it('converts Gerrit date format to ISO format', () => {
+      expect(
+        utils.convertGerritDateToISO('2023-05-20 14:25:30.123456789'),
+      ).toBe('2023-05-20T14:25:30.123456789');
+    });
   });
 });

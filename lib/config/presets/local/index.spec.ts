@@ -1,15 +1,15 @@
-import { GlobalConfig } from '../../global';
-import * as _forgejo from '../forgejo';
-import * as _gitea from '../gitea';
-import * as _github from '../github';
-import * as _gitlab from '../gitlab';
-import * as local from '.';
-import { platform } from '~test/util';
+import { platform } from '~test/util.ts';
+import { GlobalConfig } from '../../global.ts';
+import * as _forgejo from '../forgejo/index.ts';
+import * as _gitea from '../gitea/index.ts';
+import * as _github from '../github/index.ts';
+import * as _gitlab from '../gitlab/index.ts';
+import * as local from './index.ts';
 
-vi.mock('../forgejo');
-vi.mock('../gitea');
-vi.mock('../github');
-vi.mock('../gitlab');
+vi.mock('../forgejo/index.ts');
+vi.mock('../gitea/index.ts');
+vi.mock('../github/index.ts');
+vi.mock('../gitlab/index.ts');
 
 const forgejo = vi.mocked(_forgejo);
 const gitea = vi.mocked(_gitea);
@@ -31,31 +31,29 @@ describe('config/presets/local/index', () => {
       GlobalConfig.reset();
     });
 
-    it('throws for unsupported platform', async () => {
+    it('throws for unsupported platform', () => {
       GlobalConfig.set({
         // @ts-expect-error -- testing invalid platform
         platform: 'unsupported-platform',
       });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
-      await expect(async () => {
-        await local.getPreset({
+      expect(() =>
+        local.getPreset({
           repo: 'some/repo',
           presetName: 'default',
-        });
-      }).rejects.toThrow();
+        }),
+      ).toThrow();
     });
 
-    it('throws for missing platform', async () => {
+    it('throws for missing platform', () => {
       GlobalConfig.set({
         platform: undefined,
       });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
-      await expect(async () => {
-        await local.getPreset({
+      expect(() =>
+        local.getPreset({
           repo: 'some/repo',
           presetName: 'default',
-        });
-      }).rejects.toThrow();
+        }),
+      ).toThrow();
     });
 
     it('forwards to azure', async () => {

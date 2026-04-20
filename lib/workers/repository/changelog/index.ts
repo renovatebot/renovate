@@ -1,6 +1,6 @@
-import * as p from '../../../util/promises';
-import type { BranchUpgradeConfig } from '../../types';
-import { getChangeLogJSON } from '../update/pr/changelog';
+import * as p from '../../../util/promises.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
 
 export async function embedChangelog(
   upgrade: BranchUpgradeConfig,

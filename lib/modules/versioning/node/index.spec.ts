@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { api as nodever } from '.';
+import { api as nodever } from './index.ts';
 
 describe('modules/versioning/node/index', () => {
   let dtLocal: any;

@@ -4,9 +4,9 @@ import {
   isString,
 } from '@sindresorhus/is';
 import { join } from 'shlex';
-import { getCustomEnv, getUserEnv } from '../env';
-import { getChildProcessEnv } from './env';
-import type { CommandWithOptions, ExecOptions } from './types';
+import { getCustomEnv, getUserEnv } from '../env.ts';
+import { getChildProcessEnv } from './env.ts';
+import type { CommandWithOptions, ExecOptions } from './types.ts';
 
 export function getChildEnv({
   extraEnv,

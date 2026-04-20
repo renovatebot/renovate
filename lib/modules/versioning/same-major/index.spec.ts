@@ -1,4 +1,4 @@
-import sameMajor from '.';
+import sameMajor from './index.ts';
 
 describe('modules/versioning/same-major/index', () => {
   describe('.isGreaterThan(version, other)', () => {

@@ -1,4 +1,4 @@
-import unity3d from '.';
+import unity3d from './index.ts';
 
 describe('modules/versioning/unity3d/index', () => {
   it.each`

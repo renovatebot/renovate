@@ -1,19 +1,19 @@
 import { isFalsy } from '@sindresorhus/is';
-import { readLocalFile } from '../../../util/fs';
-import { parseYaml } from '../../../util/yaml';
-import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   GlasskubeResource,
   type Package,
   type PackageRepository,
-} from './schema';
-import type { GlasskubeResources } from './types';
+} from './schema.ts';
+import type { GlasskubeResources } from './types.ts';
 
 function parseResources(
   content: string,

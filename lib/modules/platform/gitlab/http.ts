@@ -1,7 +1,7 @@
 import { isEmptyArray } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import type { GitLabUser, GitlabUserStatus } from './types';
+import { logger } from '../../../logger/index.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import type { GitLabUser, GitlabUserStatus } from './types.ts';
 
 export const gitlabApi = new GitlabHttp();
 

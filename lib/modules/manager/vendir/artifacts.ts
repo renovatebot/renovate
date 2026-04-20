@@ -1,15 +1,16 @@
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   getParentDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts({
   packageFileName,
@@ -33,6 +34,7 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Vendir artifacts');
     const execOptions: ExecOptions = {
+      extraEnv: { ...getGitEnvironmentVariables([]) },
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [
@@ -103,7 +105,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

@@ -1,14 +1,17 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import { get as getVersioning } from '../../../versioning';
-import type { UpdateArtifactsResult } from '../../types';
+import {
+  findLocalSiblingOrParent,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { get as getVersioning } from '../../../versioning/index.ts';
+import type { UpdateArtifactsResult } from '../../types.ts';
 import type {
   LineNumbers,
   ProviderLock,
   ProviderLockUpdate,
   ProviderSlice,
-} from './types';
+} from './types.ts';
 
 const providerStartLineRegex = regEx(
   `^provider "(?<registryUrl>[^/]*)/(?<namespace>[^/]*)/(?<depName>[^/]*)"`,

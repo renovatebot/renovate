@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import traverse from 'neotraverse/legacy';
 import upath from 'upath';
-import { rawExec as _exec } from '../lib/util/exec/common';
+import { rawExec as _exec } from '../lib/util/exec/common.ts';
 import type {
   CommandWithOptions,
   RawExecOptions,
-} from '../lib/util/exec/types';
-import { regEx } from '../lib/util/regex';
+} from '../lib/util/exec/types.ts';
+import { regEx } from '../lib/util/regex.ts';
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 

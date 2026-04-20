@@ -1,6 +1,6 @@
 import { isString } from '@sindresorhus/is';
-import { regEx } from '../util/regex';
-import prepareError from './utils';
+import { regEx } from '../util/regex.ts';
+import prepareError from './utils.ts';
 
 Error.stackTraceLimit = 20;
 

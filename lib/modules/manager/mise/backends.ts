@@ -1,18 +1,23 @@
-import { isString, isUndefined, isUrlString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { CrateDatasource } from '../../datasource/crate';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GoDatasource } from '../../datasource/go';
-import { NpmDatasource } from '../../datasource/npm';
-import { NugetDatasource } from '../../datasource/nuget';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import { RubygemsDatasource } from '../../datasource/rubygems';
-import type { PackageDependency } from '../types';
-import type { MiseToolOptions } from './schema';
+import {
+  isNonEmptyString,
+  isString,
+  isUndefined,
+  isUrlString,
+} from '@sindresorhus/is';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GoDatasource } from '../../datasource/go/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { MiseToolOptions } from './schema.ts';
 
 export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
   Required<
@@ -107,6 +112,30 @@ export function createGemToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: RubygemsDatasource.id,
+  };
+}
+
+/**
+ * Create a tooling config for github backend
+ * @link https://mise.jdx.dev/dev-tools/backends/github.html
+ */
+export function createGithubToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const prefix = toolOptions.version_prefix;
+
+  if (isNonEmptyString(prefix)) {
+    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+  }
+
+  return {
+    packageName: name,
+    datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(extractVersion && { extractVersion }),
   };
 }
 

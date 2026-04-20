@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 export const newBlockRegEx = /^\s*-\s*((\w+):\s*(.*))$/;
 export const blockLineRegEx = /^\s*((\w+):\s*(\S+))\s*$/;

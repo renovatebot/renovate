@@ -5,16 +5,16 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
-import type { Release, ReleaseResult } from '..';
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as hostRules from '../../../util/host-rules';
-import { id as versioning } from '../../versioning/maven';
-import { postprocessRelease } from '../postprocess-release';
-import { MAVEN_REPO } from './common';
-import { MavenDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { id as versioning } from '../../versioning/maven/index.ts';
+import type { Release, ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
+import { postprocessRelease } from '../postprocess-release.ts';
+import { MAVEN_REPO } from './common.ts';
+import { MavenDatasource } from './index.ts';
 
 const googleAuth = vi.mocked(_googleAuth);
 vi.mock('google-auth-library');
@@ -67,14 +67,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
       const [major, minor, patch] = latest
         .replace('-SNAPSHOT', '')
         .split('.')
-        .map((x) => parseInt(x))
+        .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       scope
         .get(
           `/${packagePath}/${latest}/${artifact}-${latest.replace(
             '-SNAPSHOT',
             '',
-          )}-20200101.${major}${minor}${patch}-${parseInt(patch)}.pom`,
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
         )
         .reply(200, pom);
     } else {

@@ -1,4 +1,4 @@
-import { BzlmodVersion, Identifier, VersionPart } from './bzlmod-version';
+import { BzlmodVersion, Identifier, VersionPart } from './bzlmod-version.ts';
 
 describe('modules/versioning/bazel-module/bzlmod-version', () => {
   describe('Identifier', () => {

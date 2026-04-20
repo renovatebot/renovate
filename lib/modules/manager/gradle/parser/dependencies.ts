@@ -1,6 +1,6 @@
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
 import {
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
@@ -13,13 +13,13 @@ import {
   qVersion,
   storeInTokenMap,
   storeVarToken,
-} from './common';
+} from './common.ts';
 import {
   handleDepString,
   handleImplicitDep,
   handleKotlinShortNotationDep,
   handleLongFormDep,
-} from './handlers';
+} from './handlers.ts';
 
 // "foo:bar:1.2.3"
 // "foo:bar:$baz"

@@ -1,18 +1,18 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import maven from '../maven';
+import type { RangeStrategy } from '../../../types/versioning.ts';
 import {
   TYPE_QUALIFIER,
   autoExtendMavenRange,
   isSubversion,
   tokenize,
-} from '../maven/compare';
-import type { NewValueConfig, VersioningApi } from '../types';
+} from '../maven/compare.ts';
+import maven from '../maven/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   LATEST_REGEX,
   REV_TYPE_LATEST,
   REV_TYPE_SUBREV,
   parseDynamicRevision,
-} from './parse';
+} from './parse.ts';
 
 export const id = 'ivy';
 export const displayName = 'Ivy';
@@ -24,7 +24,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method */
 const {
   equals,
   getMajor,
@@ -35,7 +35,7 @@ const {
   matches: mavenMatches,
   sortVersions,
 } = maven;
-/* eslint-enable @typescript-eslint/unbound-method */
+/* oxlint-enable typescript/unbound-method */
 
 function isValid(str: string): boolean {
   if (!str) {

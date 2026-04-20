@@ -1,4 +1,4 @@
-import { inferCommandExecDir } from './utils';
+import { inferCommandExecDir } from './utils.ts';
 
 describe('modules/manager/pip-compile/utils', () => {
   describe('inferCommandExecDir()', () => {

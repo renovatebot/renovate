@@ -6,11 +6,11 @@ import {
   isString,
 } from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { toArray } from '../array';
-import { getChildEnv } from '../exec/utils';
-import { regEx } from '../regex';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import { toArray } from '../array.ts';
+import { getChildEnv } from '../exec/utils.ts';
+import { regEx } from '../regex.ts';
 
 // Missing in handlebars
 type Options = HelperOptions & {
@@ -188,7 +188,7 @@ export const allowedFields = {
   manager: 'The (package) manager which detected the dependency',
   newDigest: 'The new digest value',
   newDigestShort:
-    'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
+    'A shortened version of newDigest, for use when the full digest is too long to be conveniently displayed',
   newMajor:
     'The major version of the new version. e.g. "3" if the new version is "3.1.0"',
   newMinor:
@@ -255,7 +255,11 @@ const allowedTemplateFields = new Set([
 ]);
 
 class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
-  constructor(private warnVariables: Set<string>) {}
+  private warnVariables: Set<string>;
+
+  constructor(warnVariables: Set<string>) {
+    this.warnVariables = warnVariables;
+  }
 
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {

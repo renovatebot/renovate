@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
@@ -55,7 +55,7 @@ function isTransition(prevChar: string, nextChar: string): boolean {
 }
 
 function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
-  let currentPrefix = PREFIX_HYPHEN;
+  let currentPrefix = '';
   let currentVal = '';
 
   function yieldToken(transition = false): void {
@@ -64,7 +64,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val),
+        val: parseInt(val, 10),
         isTransition: transition,
       });
     } else {
@@ -88,12 +88,23 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       yieldToken();
       currentPrefix = PREFIX_DOT;
       currentVal = '';
-    } else if (prevChar !== null && isTransition(prevChar, nextChar)) {
-      yieldToken(true);
-      currentPrefix = PREFIX_HYPHEN;
-      currentVal = nextChar;
+    } else if (prevChar === null && (nextChar === 'v' || nextChar === 'V')) {
+      currentPrefix = nextChar;
     } else {
-      currentVal = currentVal.concat(nextChar);
+      if (currentVal !== '' && isTransition(prevChar!, nextChar)) {
+        yieldToken(true);
+        currentPrefix = PREFIX_HYPHEN;
+        currentVal = nextChar;
+      } else if (
+        currentVal === '' &&
+        (currentPrefix === 'v' || currentPrefix === 'V') &&
+        !isDigit(nextChar)
+      ) {
+        currentVal = currentVal.concat(currentPrefix, nextChar);
+        currentPrefix = '';
+      } else {
+        currentVal = currentVal.concat(nextChar);
+      }
     }
   });
 }
@@ -115,7 +126,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
-  iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
+  iterateTokens(versionStr.toLowerCase(), (token) => {
     if (token.prefix === PREFIX_HYPHEN || token.type === TYPE_QUALIFIER) {
       buf = [];
     }
@@ -449,11 +460,14 @@ function rangeToStr(fullRange: Range[] | null): string | null {
 }
 
 function tokensToStr(tokens: Token[]): string {
-  return tokens.reduce((result: string, token: Token, idx) => {
-    const prefix = token.prefix === PREFIX_DOT ? '.' : '-';
-    return `${result}${idx !== 0 && token.val !== '' ? prefix : ''}${
-      token.val
-    }`;
+  return tokens.reduce((result: string, token: Token) => {
+    const prefix =
+      token.prefix === PREFIX_DOT
+        ? '.'
+        : token.prefix === PREFIX_HYPHEN
+          ? '-'
+          : token.prefix;
+    return `${result}${prefix}${token.val}`;
   }, '');
 }
 

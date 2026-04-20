@@ -1,26 +1,26 @@
 import { isNonEmptyObject, isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import { withDebugMessage } from '../../../util/schema-utils';
-import { trimTrailingSlash } from '../../../util/url';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { withDebugMessage } from '../../../util/schema-utils/index.ts';
+import { trimTrailingSlash } from '../../../util/url.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   type ApplicationDefinition,
   ApplicationDefinitions,
   type ApplicationSource,
   type ApplicationSpec,
-} from './schema';
-import { fileTestRegex } from './util';
+} from './schema.ts';
+import { fileTestRegex } from './util.ts';
 
 const kustomizeImageRe = regEx(/=(?<image>.+)$/);
 

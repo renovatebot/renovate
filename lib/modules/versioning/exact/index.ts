@@ -1,4 +1,4 @@
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'exact';
 export const displayName = 'Exact';

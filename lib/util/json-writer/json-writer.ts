@@ -1,5 +1,5 @@
-import type { CodeFormat } from './code-format';
-import type { IndentationType } from './indentation-type';
+import type { CodeFormat } from './code-format.ts';
+import type { IndentationType } from './indentation-type.ts';
 
 export class JSONWriter {
   private readonly indentationType: IndentationType;

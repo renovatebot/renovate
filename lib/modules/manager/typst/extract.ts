@@ -1,7 +1,7 @@
 import stripJsonComments from 'strip-json-comments';
-import { newlineRegex } from '../../../util/regex';
-import { TypstDatasource } from '../../datasource/typst';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { newlineRegex } from '../../../util/regex.ts';
+import { TypstDatasource } from '../../datasource/typst/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(content: string): PackageFileContent {
   const lines = stripJsonComments(content).split(newlineRegex);

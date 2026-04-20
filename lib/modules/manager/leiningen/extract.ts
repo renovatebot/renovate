@@ -1,8 +1,8 @@
-import { coerceArray } from '../../../util/array';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { ClojureDatasource } from '../../datasource/clojure';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { ExtractContext, ExtractedVariables } from './types';
+import { coerceArray } from '../../../util/array.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { ClojureDatasource } from '../../datasource/clojure/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { ExtractContext, ExtractedVariables } from './types.ts';
 
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12872 lookahead

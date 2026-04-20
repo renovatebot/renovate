@@ -4,7 +4,7 @@ import {
   parseComment,
   parseQuote,
   parseUsesLine,
-} from './parse';
+} from './parse.ts';
 
 describe('modules/manager/github-actions/parse', () => {
   describe('parseActionReference', () => {
@@ -244,6 +244,28 @@ describe('modules/manager/github-actions/parse', () => {
         matchedString: 'node/v20',
         pinnedVersion: 'node/v20',
       });
+    });
+
+    it('parses bare non-semver ref', () => {
+      const result = parseComment(' cargo-llvm-cov');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: ' cargo-llvm-cov',
+        ref: 'cargo-llvm-cov',
+      });
+    });
+
+    it('parses bare branch name', () => {
+      const result = parseComment(' main');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: ' main',
+        ref: 'main',
+      });
+    });
+
+    it('ignores multi-word comments', () => {
+      expect(parseComment('do not update')).toEqual({});
     });
   });
 

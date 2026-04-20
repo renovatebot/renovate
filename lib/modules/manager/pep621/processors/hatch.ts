@@ -2,9 +2,9 @@ import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
-} from '../../types';
-import type { PyProject } from '../schema';
-import { BasePyProjectProcessor } from './abstract';
+} from '../../types.ts';
+import type { PyProject } from '../schema.ts';
+import { BasePyProjectProcessor } from './abstract.ts';
 
 export class HatchProcessor extends BasePyProjectProcessor {
   process(

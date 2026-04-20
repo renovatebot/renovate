@@ -1,20 +1,20 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import { ExecError } from '../../../util/exec/exec-error';
-import * as _hostRules from '../../../util/host-rules';
-import { CrateDatasource } from '../../datasource/crate';
-import type { UpdateArtifactsConfig } from '../types';
-import * as cargo from '.';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
-import { env, fs, git } from '~test/util';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as cargo from './index.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http');
-vi.mock('../../../util/fs');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/index.ts');
+vi.mock('../../../util/fs/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 const hostRules = vi.mocked(_hostRules);
@@ -25,7 +25,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 describe('modules/manager/cargo/artifacts', () => {
@@ -160,6 +160,89 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
   });
 
+  it('skips precise update when manifest range has changed', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    const updatedDeps = [
+      {
+        depName: 'pprof',
+        packageName: 'pprof',
+        lockedVersion: '0.13.0',
+        currentValue: '0.13',
+        newVersion: '0.14.0',
+        newValue: '0.14',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+    ]);
+  });
+
+  it('handles mixed deps where some have range changes and some do not', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    const updatedDeps = [
+      {
+        depName: 'pprof',
+        packageName: 'pprof',
+        lockedVersion: '0.13.0',
+        currentValue: '0.13',
+        newVersion: '0.14.0',
+        newValue: '0.14',
+        datasource: CrateDatasource.id,
+      },
+      {
+        depName: 'serde',
+        packageName: 'serde',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --package serde@1.0.0 --precise 1.0.1',
+      },
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+    ]);
+  });
+
   it('returns an artifact error when cargo update fails', async () => {
     const cmd =
       'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1';
@@ -192,7 +275,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Cargo.lock', stderr: 'Exec error' } },
+      { artifactError: { fileName: 'Cargo.lock', stderr: 'Exec error' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd }]);
   });
@@ -452,7 +535,7 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -461,7 +544,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
@@ -518,7 +601,7 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -540,7 +623,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e GIT_CONFIG_VALUE_5 ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
@@ -654,6 +737,7 @@ describe('modules/manager/cargo/artifacts', () => {
               GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
               GIT_CONFIG_VALUE_6: 'ssh://git@gitlab.enterprise.com/',
               GIT_CONFIG_VALUE_7: 'git@gitlab.enterprise.com:',
+              GIT_CONFIG_VALUE_8: 'https://gitlab.enterprise.com/',
             }),
           }),
         }),
@@ -862,7 +946,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Cargo.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Cargo.lock', stderr: 'not found' } },
     ]);
   });
 });

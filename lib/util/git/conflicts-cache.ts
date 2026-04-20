@@ -1,6 +1,6 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { getCache } from '../cache/repository';
+import { logger } from '../../logger/index.ts';
+import { getCache } from '../cache/repository/index.ts';
 
 export function getCachedConflictResult(
   branchName: string,

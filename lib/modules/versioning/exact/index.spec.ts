@@ -1,4 +1,4 @@
-import exact from '.';
+import exact from './index.ts';
 
 describe('modules/versioning/exact/index', () => {
   describe('isValid', () => {

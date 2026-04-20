@@ -1,15 +1,15 @@
 import url from 'node:url';
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
-import * as hostRules from '../../../util/host-rules';
-import type { HttpResponse } from '../../../util/http/types';
-import { parseUrl } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
-import type { GitUrlOption } from '../types';
-import type { GitLabMergeRequest } from './schema';
-import type { GitlabPr, RepoResponse } from './types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { GitUrlOption } from '../types.ts';
+import type { GitLabMergeRequest } from './schema.ts';
+import type { GitlabPr, RepoResponse } from './types.ts';
 
 export const DRAFT_PREFIX = 'Draft: ';
 export const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
@@ -94,9 +94,9 @@ export function getRepoUrl(
     const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const uri = url.format({
-      protocol:
-        /* v8 ignore next: should never happen */
-        protocol.slice(0, -1) || 'https',
+      /* v8 ignore start: should never happen (#40625) */
+      protocol: protocol.slice(0, -1) || 'https',
+      /* v8 ignore stop */
       // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,

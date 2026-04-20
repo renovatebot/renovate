@@ -1,27 +1,29 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { logger, withMeta } from '../../../logger';
-import { detectPlatform } from '../../../util/common';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubRunnersDatasource } from '../../datasource/github-runners';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as dockerVersioning from '../../versioning/docker';
-import * as nodeVersioning from '../../versioning/node';
-import * as npmVersioning from '../../versioning/npm';
-import { getDep } from '../dockerfile/extract';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger, withMeta } from '../../../logger/index.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
+import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import * as dockerVersioning from '../../versioning/docker/index.ts';
+import * as exactVersioning from '../../versioning/exact/index.ts';
+import * as nodeVersioning from '../../versioning/node/index.ts';
+import * as npmVersioning from '../../versioning/npm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { CommunityActions } from './community';
-import type { DockerReference, RepositoryReference } from './parse';
-import { isSha, isShortSha, parseUsesLine } from './parse';
-import type { Steps } from './schema';
-import { Workflow } from './schema';
+} from '../types.ts';
+import { CommunityActions } from './community.ts';
+import type { DockerReference, RepositoryReference } from './parse.ts';
+import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
+import type { Steps } from './schema.ts';
+import { Workflow } from './schema.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -84,7 +86,6 @@ function extractRepositoryAction(
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
-    datasource: GithubTagsDatasource.id,
     versioning: dockerVersioning.id,
     depType: 'action',
     replaceString: valueString,
@@ -98,8 +99,14 @@ function extractRepositoryAction(
     dep.packageName = packageName;
   }
 
+  // Extend replaceString to include relevant comment portions:
+  // - Pinned version or ref: include only up to the matched token (truncate trailing text)
+  // - Ratchet exclude: include the full comment to preserve the marker
+  const pinComment =
+    commentData.pinnedVersion ??
+    (isSha(ref) || isShortSha(ref) ? commentData.ref : undefined);
   if (
-    commentData.pinnedVersion &&
+    pinComment &&
     !is.undefined(commentData.index) &&
     !is.undefined(commentData.matchedString)
   ) {
@@ -114,14 +121,23 @@ function extractRepositoryAction(
   }
 
   if (isSha(ref)) {
-    dep.currentValue = commentData.pinnedVersion;
+    dep.currentValue = commentData.pinnedVersion ?? commentData.ref;
     dep.currentDigest = ref;
   } else if (isShortSha(ref)) {
-    dep.currentValue = commentData.pinnedVersion;
+    dep.currentValue = commentData.pinnedVersion ?? commentData.ref;
     dep.currentDigestShort = ref;
   } else {
     dep.currentValue = ref;
   }
+
+  const isVersionLike =
+    dep.currentValue && versionLikeRe.test(dep.currentValue);
+  if (!dep.datasource && dep.currentValue && !isVersionLike) {
+    dep.datasource = GithubDigestDatasource.id;
+    dep.versioning = exactVersioning.id;
+  }
+
+  dep.datasource ??= GithubTagsDatasource.id;
 
   return dep;
 }

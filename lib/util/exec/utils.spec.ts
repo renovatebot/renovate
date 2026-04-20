@@ -1,5 +1,5 @@
-import type { CommandWithOptions } from './types';
-import { asRawCommands, isCommandWithOptions } from './utils';
+import type { CommandWithOptions } from './types.ts';
+import { asRawCommands, isCommandWithOptions } from './utils.ts';
 
 describe('util/exec/utils', () => {
   describe('isCommandWithOptions', () => {

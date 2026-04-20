@@ -1,4 +1,4 @@
-import { api as hexScheme } from '.';
+import { api as hexScheme } from './index.ts';
 
 describe('modules/versioning/hex/index', () => {
   it.each`
@@ -36,6 +36,21 @@ describe('modules/versioning/hex/index', () => {
   `('isValid("$input") === $expected', ({ input, expected }) => {
     const res = !!hexScheme.isValid(input);
     expect(res).toBe(expected);
+  });
+
+  it.each`
+    version       | expected
+    ${'1.2.3'}    | ${true}
+    ${'== 1.2.3'} | ${true}
+    ${'~> 1.2'}   | ${false}
+    ${'~> 1.2.0'} | ${false}
+    ${'>= 1.0.0'} | ${false}
+  `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+    expect(hexScheme.isSingleVersion(version)).toBe(expected);
+  });
+
+  it('getPinnedValue returns == prefixed version', () => {
+    expect(hexScheme.getPinnedValue!('1.2.3')).toBe('== 1.2.3');
   });
 
   it.each`

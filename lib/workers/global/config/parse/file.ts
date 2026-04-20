@@ -5,9 +5,9 @@ import {
   isUndefined,
 } from '@sindresorhus/is';
 import fs from 'fs-extra';
-import type { AllConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { getParsedContent, migrateAndValidateConfig } from './util';
+import type { AllConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { getParsedContent, migrateAndValidateConfig } from './util.ts';
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';

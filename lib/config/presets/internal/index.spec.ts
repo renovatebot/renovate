@@ -1,13 +1,13 @@
-import { resolveConfigPresets } from '../';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { regEx } from '../../../util/regex';
-import { massageConfig } from '../../massage';
-import { validateConfig } from '../../validation';
-import * as npm from '../npm';
-import * as internal from '.';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { regEx } from '../../../util/regex.ts';
+import { massageConfig } from '../../massage.ts';
+import { validateConfig } from '../../validation.ts';
+import { resolveConfigPresets } from '../index.ts';
+import * as npm from '../npm/index.ts';
+import * as internal from './index.ts';
 
-vi.mock('../npm');
-vi.mock('../../../modules/datasource/npm');
+vi.mock('../npm/index.ts');
+vi.mock('../../../modules/datasource/npm/index.ts');
 
 const getPresetSpy = vi.spyOn(npm, 'getPreset');
 
@@ -27,26 +27,29 @@ describe('config/presets/internal/index', () => {
   });
 
   for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
-    for (const [presetName, presetConfig] of Object.entries(groupPresets)) {
-      const preset = `${groupName}:${presetName}`;
-      if (presetName !== 'description' && !ignoredPresets.includes(preset)) {
-        it(`${preset} validates`, async () => {
-          try {
-            const { config } = await resolveConfigPresets(
-              massageConfig(presetConfig),
-            );
-            const configType = groupName === 'global' ? 'global' : 'repo';
-            const res = await validateConfig(configType, config, true);
-            expect(res.errors).toHaveLength(0);
-            expect(res.warnings).toHaveLength(0);
-          } catch (err) {
-            if (err.validationError) {
-              throw new Error(err.validationError);
-            }
-            throw err;
+    for (const [presetName, presetConfig] of Object.entries(
+      groupPresets,
+    ).filter(
+      ([key]) =>
+        key !== 'description' &&
+        !ignoredPresets.includes(`${groupName}:${key}`),
+    )) {
+      it(`${`${groupName}:${presetName}`} validates`, async () => {
+        try {
+          const { config } = await resolveConfigPresets(
+            massageConfig(presetConfig),
+          );
+          const configType = groupName === 'global' ? 'global' : 'repo';
+          const res = await validateConfig(configType, config, true);
+          expect(res.errors).toHaveLength(0);
+          expect(res.warnings).toHaveLength(0);
+        } catch (err) {
+          if (err.validationError) {
+            throw new Error(err.validationError);
           }
-        });
-      }
+          throw err;
+        }
+      });
     }
   }
 

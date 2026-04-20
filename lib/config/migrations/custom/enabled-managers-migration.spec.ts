@@ -1,4 +1,4 @@
-import { EnabledManagersMigration } from './enabled-managers-migration';
+import { EnabledManagersMigration } from './enabled-managers-migration.ts';
 
 describe('config/migrations/custom/enabled-managers-migration', () => {
   it('migrates', async () => {

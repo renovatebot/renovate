@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
-import { regEx } from '../../../util/regex';
-import { Json } from '../../../util/schema-utils/v4';
+import { regEx } from '../../../util/regex.ts';
+import { Json } from '../../../util/schema-utils/v4.ts';
 
 export const EksAddonsFilter = Json.pipe(
   z.object({

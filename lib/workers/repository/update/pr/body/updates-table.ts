@@ -1,7 +1,7 @@
-import { logger } from '../../../../../logger';
-import { regEx } from '../../../../../util/regex';
-import * as template from '../../../../../util/template';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../../types';
+import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import * as template from '../../../../../util/template/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../../types.ts';
 
 interface TableDefinition {
   header: string;

@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../../config/global';
-import { getPkgReleases } from '../../../datasource';
-import type { UpdateArtifactsConfig } from '../../types';
-import { updateArtifacts } from '../index';
-import { TerraformProviderHash } from './hash';
-import { getNewConstraint } from './index';
-import { fs } from '~test/util';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getPkgReleases } from '../../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../../types.ts';
+import { updateArtifacts } from '../index.ts';
+import { TerraformProviderHash } from './hash.ts';
+import { getNewConstraint } from './index.ts';
 
 // auto-mock fs
-vi.mock('../../../../util/fs');
-vi.mock('./hash');
-vi.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./hash.ts');
+vi.mock('../../../datasource/index.ts', () => mockDeep());
 
 const config = {
   constraints: {},
@@ -46,7 +46,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: '.terraform.lock.hcl',
+          fileName: '.terraform.lock.hcl',
           stderr: 'File not found',
         },
       },
@@ -636,7 +636,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         ]
       }
 
-      provider "registry.terraform.io/hashicorp/random" {
+      provider "registry.opentofu.org/hashicorp/random" {
         version     = "2.2.1"
         constraints = "~> 2.2"
         hashes = [
@@ -709,7 +709,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
               ]
             }
 
-            provider "registry.terraform.io/hashicorp/random" {
+            provider "registry.opentofu.org/hashicorp/random" {
               version     = "2.2.2"
               constraints = "~> 2.2"
               hashes = [
@@ -726,7 +726,31 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
     expect(mockHash.mock.calls).toEqual([
       ['https://registry.terraform.io', 'hashicorp/azurerm', '2.56.0'],
-      ['https://registry.terraform.io', 'hashicorp/random', '2.2.2'],
+      ['https://registry.opentofu.org', 'hashicorp/random', '2.2.2'],
+    ]);
+
+    expect(mockGetPkgReleases.mock.calls).toEqual([
+      [
+        {
+          datasource: 'terraform-provider',
+          packageName: 'hashicorp/aws',
+          registryUrls: ['https://registry.terraform.io'],
+        },
+      ],
+      [
+        {
+          datasource: 'terraform-provider',
+          packageName: 'hashicorp/azurerm',
+          registryUrls: ['https://registry.terraform.io'],
+        },
+      ],
+      [
+        {
+          datasource: 'terraform-provider',
+          packageName: 'hashicorp/random',
+          registryUrls: ['https://registry.opentofu.org'],
+        },
+      ],
     ]);
   });
 

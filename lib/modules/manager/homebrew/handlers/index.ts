@@ -1,7 +1,7 @@
-import type { UrlParsedResult } from '../types';
-import type { HomebrewUrlHandler } from './base';
-import { GitHubUrlHandler } from './github';
-import { NpmUrlHandler } from './npm';
+import type { UrlParsedResult } from '../types.ts';
+import type { HomebrewUrlHandler } from './base.ts';
+import { GitHubUrlHandler } from './github.ts';
+import { NpmUrlHandler } from './npm.ts';
 
 const handlers: HomebrewUrlHandler[] = [
   new GitHubUrlHandler(),

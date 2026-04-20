@@ -1,8 +1,8 @@
-import { getOptions } from '../../config/options';
-import * as _execUtils from '../exec/utils';
-import * as template from '.';
+import { getOptions } from '../../config/options/index.ts';
+import * as _execUtils from '../exec/utils.ts';
+import * as template from './index.ts';
 
-vi.mock('../exec/utils');
+vi.mock('../exec/utils.ts');
 
 const execUtils = vi.mocked(_execUtils);
 

@@ -1,4 +1,3 @@
-import { Stream } from 'node:stream';
 import {
   isArray,
   isBuffer,
@@ -11,49 +10,13 @@ import {
   isObject,
   isPlainObject,
   isString,
-  isUndefined,
 } from '@sindresorhus/is';
-import bunyan from 'bunyan';
-import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
-import { ZodError } from 'zod';
-import { ExecError } from '../util/exec/exec-error';
-import { regEx } from '../util/regex';
-import { redactedFields, sanitize } from '../util/sanitize';
-import type { BunyanRecord, BunyanStream } from './types';
-
-const excludeProps = ['pid', 'time', 'v', 'hostname'];
-
-export class ProblemStream extends Stream {
-  private _problems: BunyanRecord[] = [];
-
-  readable: boolean;
-
-  writable: boolean;
-
-  constructor() {
-    super();
-    this.readable = false;
-    this.writable = true;
-  }
-
-  write(data: BunyanRecord): boolean {
-    const problem = { ...data };
-    for (const prop of excludeProps) {
-      delete problem[prop];
-    }
-    this._problems.push(problem);
-    return true;
-  }
-
-  getProblems(): BunyanRecord[] {
-    return this._problems;
-  }
-
-  clearProblems(): void {
-    this._problems = [];
-  }
-}
+import { DateTime } from 'luxon';
+import { ZodError } from 'zod/v3';
+import { ExecError } from '../util/exec/exec-error.ts';
+import { regEx } from '../util/regex.ts';
+import { redactedFields, sanitize } from '../util/sanitize.ts';
 
 const contentFields = [
   'content',
@@ -76,6 +39,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   }
 
   let err: null | string | string[] = null;
+  // v8 ignore else -- TODO: add test #40625
   if (isArray(input._errors, isString)) {
     if (input._errors.length === 1) {
       err = input._errors[0];
@@ -95,6 +59,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   const entries = Object.entries(input);
   for (const [key, value] of entries.slice(0, 3)) {
     const child = prepareZodIssues(value);
+    // v8 ignore else -- TODO: add test #40625
     if (child !== null) {
       output[key] = child;
     }
@@ -110,10 +75,11 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
 export function prepareZodError(err: ZodError): Record<string, unknown> {
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    /* v8 ignore next 3 -- TODO: drop set? */
+    /* v8 ignore start -- TODO: drop set? */
     set: () => {
       /* intentionally empty */
     },
+    // v8 ignore stop -- TODO: drop set? */
   });
 
   return {
@@ -129,6 +95,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
   }
 
   const response: Record<string, unknown> = {
+    // We want to loose class information, but keep enumerable properties of the error
+    // oxlint-disable-next-line typescript/no-misused-spread
     ...err,
   };
 
@@ -166,6 +134,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
     options.method = err.options.method;
     options.http2 = err.options.http2;
 
+    // v8 ignore else -- TODO: add test #40625
     if (err.response) {
       response.response = {
         statusCode: err.response.statusCode,
@@ -200,6 +169,10 @@ export function sanitizeValue(
 
   if (isDate(value)) {
     return value;
+  }
+
+  if (DateTime.isDateTime(value)) {
+    return value.toISO();
   }
 
   if (isFunction(value)) {
@@ -262,89 +235,6 @@ export function sanitizeValue(
   }
 
   return value;
-}
-
-export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
-  if (streamConfig.type === 'rotating-file') {
-    throw new Error("Rotating files aren't supported");
-  }
-
-  const stream = streamConfig.stream as BunyanStream;
-  if (stream?.writable) {
-    const write = (
-      chunk: BunyanRecord,
-      enc: BufferEncoding,
-      cb: (err?: Error | null) => void,
-    ): void => {
-      const raw = sanitizeValue(chunk);
-      const result =
-        streamConfig.type === 'raw'
-          ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(
-              regEx(/\n?$/),
-              '\n',
-            );
-      stream.write(result, enc, cb);
-    };
-
-    return {
-      ...streamConfig,
-      type: 'raw',
-      stream: { write },
-    } as bunyan.Stream;
-  }
-
-  if (streamConfig.path) {
-    const fileStream = fs.createWriteStream(streamConfig.path, {
-      flags: 'a',
-      encoding: 'utf8',
-    });
-
-    return withSanitizer({ ...streamConfig, stream: fileStream });
-  }
-
-  throw new Error("Missing 'stream' or 'path' for bunyan stream");
-}
-
-/**
- * A function that terminates execution if the log level that was entered is
- *  not a valid value for the Bunyan logger.
- * @param logLevelToCheck
- * @returns returns the logLevel when the logLevelToCheck is valid or the defaultLevel passed as argument when it is undefined. Else it stops execution.
- */
-export function validateLogLevel(
-  logLevelToCheck: string | undefined,
-  defaultLevel: bunyan.LogLevelString,
-): bunyan.LogLevelString {
-  const allowedValues: bunyan.LogLevelString[] = [
-    'trace',
-    'debug',
-    'info',
-    'warn',
-    'error',
-    'fatal',
-  ];
-
-  if (
-    isUndefined(logLevelToCheck) ||
-    (isString(logLevelToCheck) &&
-      allowedValues.includes(logLevelToCheck as bunyan.LogLevelString))
-  ) {
-    // log level is in the allowed values or its undefined
-    return (logLevelToCheck as bunyan.LogLevelString) ?? defaultLevel;
-  }
-
-  const logger = bunyan.createLogger({
-    name: 'renovate',
-    streams: [
-      {
-        level: 'fatal',
-        stream: process.stdout,
-      },
-    ],
-  });
-  logger.fatal({ logLevel: logLevelToCheck }, 'Invalid log level');
-  process.exit(1);
 }
 
 // Can't use `util/regex` because of circular reference to logger

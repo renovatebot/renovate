@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import { emojify } from '../../../util/emoji';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { emojify } from '../../../util/emoji.ts';
+import { regEx } from '../../../util/regex.ts';
 
 const re = regEx(
   `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,

@@ -2,9 +2,9 @@ import { isString } from '@sindresorhus/is';
 import type { SemVer } from 'semver';
 import semver from 'semver';
 import stable from 'semver-stable';
-import { regEx } from '../../../util/regex';
-import { isBreaking as semverIsBreaking } from '../semver';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { isBreaking as semverIsBreaking } from '../semver/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver-coerced';
 export const displayName = 'Coerced Semantic Versioning';

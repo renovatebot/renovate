@@ -1,6 +1,6 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import type { HttpResponse } from '../../util/http/types';
-import { getGoogleAuthToken, isArtifactoryServer } from './util';
+import type { HttpResponse } from '../../util/http/types.ts';
+import { getGoogleAuthToken, isArtifactoryServer } from './util.ts';
 
 vi.mock('google-auth-library');
 

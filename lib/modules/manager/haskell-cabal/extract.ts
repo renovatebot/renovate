@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 const buildDependsRegex = regEx(
   /(?<buildDependsFieldName>build-depends[ \t]*:)/i,

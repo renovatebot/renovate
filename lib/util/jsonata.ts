@@ -1,6 +1,7 @@
 import jsonata from 'jsonata';
-import * as memCache from './cache/memory';
-import { toSha256 } from './hash';
+import * as memCache from './cache/memory/index.ts';
+import { detectPlatform } from './common.ts';
+import { toSha256 } from './hash.ts';
 
 export interface JsonataExpression {
   evaluate(data: unknown, bindings?: Record<string, unknown>): Promise<unknown>;
@@ -16,6 +17,11 @@ export function getExpression(input: string): JsonataExpression | Error {
   let result: jsonata.Expression | Error;
   try {
     const expression = jsonata(input);
+    expression.registerFunction(
+      'detectPlatform',
+      (url: string) => detectPlatform(url),
+      '<s-:s>',
+    );
     // Wrap the evaluate method to default bindings to {} for concurrent evaluation safety.
     // This prevents race conditions when the same cached expression is evaluated
     // concurrently with different data. See #40311 for background.

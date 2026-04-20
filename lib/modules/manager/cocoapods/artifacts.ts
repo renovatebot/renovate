@@ -1,19 +1,19 @@
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
@@ -51,7 +51,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },
@@ -97,7 +97,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.stderr ?? err.stdout ?? err.message,
         },
       },

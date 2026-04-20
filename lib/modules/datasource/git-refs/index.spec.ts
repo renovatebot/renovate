@@ -2,10 +2,10 @@ import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
-import { getPkgReleases } from '..';
-import { add, clear } from '../../../util/host-rules';
-import { GitRefsDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { add, clear } from '../../../util/host-rules.ts';
+import { getPkgReleases } from '../index.ts';
+import { GitRefsDatasource } from './index.ts';
 
 vi.mock('simple-git');
 const simpleGitFactoryMock = vi.mocked(simpleGit);
@@ -98,7 +98,9 @@ describe('modules/datasource/git-refs/index', () => {
         { packageName: 'a tag to look up' },
         'v1.0.4',
       );
-      expect(digest).toBe('2b52829c7c1bd65b3501c450849c53b90b11fa0e');
+      // For annotated tags, we return the dereferenced commit hash (^{})
+      // to match what `git submodule status` returns
+      expect(digest).toBe('3ed9e7d7094fd4ee7751c24a3e6b706060f461ff');
     });
 
     it('ignores refs/for/', async () => {
