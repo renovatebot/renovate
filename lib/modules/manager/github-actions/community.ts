@@ -291,6 +291,32 @@ const ZizmorcoreZizmorAction = z
     };
   });
 
+const SetupPyright = z
+  .object({
+    uses: matchAction('jakebailey/pyright-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version || val.version === 'PATH') {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: NpmDatasource.id,
+      depName: 'pyright',
+      versioning: npmVersioning.id,
+      packageName: 'pyright',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -302,6 +328,7 @@ export const CommunityActions = z.union([
   SetupPDM,
   SetupPixi,
   SetupPnpm,
+  SetupPyright,
   SetupUV,
   SetupBun,
   SetupDeno,
