@@ -70,6 +70,7 @@ interface User {
 }
 
 let config: Config = {} as any;
+let issueService: IssueService;
 
 const defaults: {
   endpoint?: string;
@@ -79,25 +80,6 @@ const defaults: {
 };
 
 export const id = 'azure';
-
-function createIssueOperations(config: Config): {
-  findIssue: (title: string) => Promise<Issue | null>;
-  ensureIssueClosing: (title: string) => Promise<void>;
-  ensureIssue: (
-    issueConfig: EnsureIssueConfig,
-  ) => Promise<EnsureIssueResult | null>;
-  getIssueList: (titleFilter?: string) => Promise<Issue[]>;
-} {
-  const service = new IssueService(config);
-
-  return {
-    findIssue: (title: string) => service.findIssue(title),
-    ensureIssueClosing: (title: string) => service.ensureIssueClosing(title),
-    ensureIssue: (issueConfig: EnsureIssueConfig) =>
-      service.ensureIssue(issueConfig),
-    getIssueList: (titleFilter?: string) => service.getIssueList(titleFilter),
-  };
-}
 
 export function initPlatform({
   endpoint,
@@ -241,6 +223,7 @@ export async function initRepo({
   config.repoId = repo.id!;
 
   config.project = repo.project!.name!;
+  issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
@@ -891,21 +874,21 @@ export function maxBodyLength(): number {
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
-  return await createIssueOperations(config).findIssue(title);
+  return await issueService.findIssue(title);
 }
 
 export async function ensureIssue(
   issueConfig: EnsureIssueConfig,
 ): Promise<EnsureIssueResult | null> {
-  return await createIssueOperations(config).ensureIssue(issueConfig);
+  return await issueService.ensureIssue(issueConfig);
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  return await createIssueOperations(config).ensureIssueClosing(title);
+  return await issueService.ensureIssueClosing(title);
 }
 
 export async function getIssueList(titleFilter?: string): Promise<Issue[]> {
-  return await createIssueOperations(config).getIssueList(titleFilter);
+  return await issueService.getIssueList(titleFilter);
 }
 
 async function getUserIds(users: string[]): Promise<User[]> {

@@ -11,6 +11,7 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
@@ -2108,6 +2109,7 @@ describe('modules/platform/azure/index', () => {
   });
 
   it('findIssue returns null if not found', async () => {
+    await initRepo({ repository: 'some/repo' });
     azureApi.workItemTrackingApi.mockImplementationOnce(
       () =>
         ({
@@ -2121,33 +2123,32 @@ describe('modules/platform/azure/index', () => {
   it('findIssue return first issue if multiple found', async () => {
     await initRepo({ repository: 'some/repo' });
 
-    azureApi.workItemTrackingApi.mockImplementationOnce(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }, { id: 456 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'The title',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Active',
-                'System.Description': 'fake',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValueOnce(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }, { id: 456 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'The title',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
             },
-            {
-              id: 456,
-              fields: {
-                'System.Title': 'The title',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'New',
-                'System.Description': 'another fake description',
-              },
+          },
+          {
+            id: 456,
+            fields: {
+              'System.Title': 'The title',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'New',
+              'System.Description': 'another fake description',
             },
-          ]),
-        }) as any,
+          },
+        ]),
+      }),
     );
     const res = await azure.findIssue('The title');
     expect(res).toMatchObject({
@@ -2580,6 +2581,7 @@ describe('modules/platform/azure/index', () => {
   });
 
   it('getIssueList handles empty wiql result', async () => {
+    await initRepo({ repository: 'some/repo' });
     azureApi.workItemTrackingApi.mockImplementation(
       () =>
         ({

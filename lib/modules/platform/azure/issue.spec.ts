@@ -1,49 +1,29 @@
-import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import type { logger as _logger } from '../../../logger/index.ts';
-import type * as _hostRules from '../../../util/host-rules.ts';
-import type { Platform } from '../types.ts';
+import { logger } from '../../../logger/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import * as azureApi from './azure-got-wrapper.ts';
 import { IssueService } from './issue.ts';
 import type { Config } from './types.ts';
 
-vi.mock('./azure-got-wrapper', () => mockDeep());
-vi.mock('./azure-helper', () => mockDeep());
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/sanitize', () =>
+vi.mock('./azure-got-wrapper.ts', () => mockDeep());
+vi.mock('./azure-helper.ts', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../logger/index.ts', () => mockDeep());
+vi.mock('../../../util/sanitize.ts', () =>
   mockDeep({ sanitize: (s: string) => s }),
 );
-vi.mock('./util', () => ({
+vi.mock('./util.ts', () => ({
   getWorkItemTitle: vi.fn((title: string) => `[Renovate] ${title}`),
 }));
 
 describe('modules/platform/azure/issue', () => {
-  let hostRules: Mocked<typeof _hostRules>;
-  let azure: Platform;
-  let azureApi: Mocked<typeof import('./azure-got-wrapper.ts')>;
-  let logger: MockedObject<typeof _logger>;
   let config: Config;
   let issueService: IssueService;
 
-  beforeEach(async () => {
-    // reset module
-    vi.resetModules();
-    hostRules = await vi.importMock('../../../util/host-rules.ts');
-    azure = await vi.importActual('./index.ts');
-    azureApi = await vi.importMock('./azure-got-wrapper.ts');
-    logger = (
-      await vi.importMock<typeof import('../../../logger/index.ts')>(
-        '../../../logger/index.ts',
-      )
-    ).logger;
-    hostRules.find.mockReturnValue({
-      token: 'token',
-    });
-
-    await azure.initPlatform({
-      endpoint: 'https://dev.azure.com/renovate12345',
-      token: 'token',
-    });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(hostRules.find).mockReturnValue({ token: 'token' });
 
     config = {
       repository: 'test/repo',
@@ -681,70 +661,6 @@ describe('modules/platform/azure/issue', () => {
       // Should fall through and create a new issue
       expect(createWorkItemMock).toHaveBeenCalled();
       expect(result).toBe('created');
-    });
-  });
-
-  describe('integration with main azure Platform', () => {
-    it('getIssueList should work interface', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [],
-            }),
-          }) as any,
-      );
-
-      const result = await azure.getIssueList();
-      expect(result).toEqual([]);
-    });
-
-    it('findIssue should work', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [],
-            }),
-          }) as any,
-      );
-
-      const result = await azure.findIssue('Test Issue');
-      expect(result).toBeNull();
-    });
-
-    it('ensureIssue should work', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [],
-            }),
-            createWorkItem: vi.fn().mockResolvedValue({ id: 123 }),
-          }) as any,
-      );
-
-      const result = await azure.ensureIssue({
-        title: 'Test Issue',
-        body: 'Test body content',
-      });
-
-      expect(result).toEqual('created');
-    });
-
-    it('ensureIssueClosing should work', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [],
-            }),
-          }) as any,
-      );
-
-      await expect(
-        azure.ensureIssueClosing('Test Issue'),
-      ).resolves.not.toThrow();
     });
   });
 });
