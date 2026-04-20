@@ -289,7 +289,6 @@ export async function ensurePr(
   await embedChangelogs({
     upgrades: upgrades,
     stage: 'pr',
-    fetchChangeLogs: config.fetchChangeLogs,
   });
 
   // Get changelog and then generate template strings

@@ -103,7 +103,6 @@ describe('workers/repository/update/pr/index', () => {
         expect(embedChangelogs).toHaveBeenCalledExactlyOnceWith({
           upgrades: config.upgrades,
           stage: 'pr',
-          fetchChangeLogs: config.fetchChangeLogs,
         });
       });
 

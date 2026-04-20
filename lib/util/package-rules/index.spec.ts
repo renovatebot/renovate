@@ -1378,7 +1378,7 @@ describe('util/package-rules/index', () => {
       ],
     };
     const res = await applyPackageRules(config);
-    expect(res.fetchChangeLogs).toBeUndefined();
+    expect(res).not.toHaveProperty('fetchChangeLogs');
   });
 
   it('compiles sourceUrl with template helper functions', async () => {

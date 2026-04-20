@@ -652,7 +652,6 @@ export async function processBranch(
       await embedChangelogs({
         upgrades: config.upgrades,
         stage: 'branch',
-        fetchChangeLogs: config.fetchChangeLogs,
       });
 
       const postUpgradeCommandResults =

@@ -1,9 +1,7 @@
 import { partial } from '~test/util.ts';
-import type { FetchChangeLogsOptions } from '../../../config/types.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
 import { embedChangelogs } from './index.ts';
-import type { SupportedChangelogStages } from './types.ts';
 
 vi.mock('../update/pr/changelog/index.ts');
 
@@ -17,24 +15,27 @@ describe('workers/repository/changelog/index', () => {
       hasReleaseNotes: true,
     });
     vi.mocked(getChangeLogJSON).mockResolvedValueOnce(null);
-    const branches = [
-      partial<BranchUpgradeConfig>({ logJSON: null }),
-      partial<BranchUpgradeConfig>(),
-      partial<BranchUpgradeConfig>(),
-      partial<BranchUpgradeConfig>({ changelogContent: 'testContent' }),
+    const upgrades = [
+      partial<BranchUpgradeConfig>({ fetchChangeLogs: 'pr', logJSON: null }),
+      partial<BranchUpgradeConfig>({ fetchChangeLogs: 'pr' }),
+      partial<BranchUpgradeConfig>({ fetchChangeLogs: 'pr' }),
+      partial<BranchUpgradeConfig>({
+        fetchChangeLogs: 'pr',
+        changelogContent: 'testContent',
+      }),
     ];
     await expect(
       embedChangelogs({
-        upgrades: branches,
+        upgrades,
         stage: 'pr',
-        fetchChangeLogs: 'pr',
       }),
     ).toResolve();
-    expect(branches).toEqual([
-      { logJSON: null },
-      { logJSON: { hasReleaseNotes: true } },
-      { logJSON: null },
+    expect(upgrades).toEqual([
+      { fetchChangeLogs: 'pr', logJSON: null },
+      { fetchChangeLogs: 'pr', logJSON: { hasReleaseNotes: true } },
+      { fetchChangeLogs: 'pr', logJSON: null },
       {
+        fetchChangeLogs: 'pr',
         changelogContent: 'testContent',
         logJSON: {
           hasReleaseNotes: true,
@@ -51,147 +52,61 @@ describe('workers/repository/changelog/index', () => {
     ]);
   });
 
-  interface FetchChangeLogsTestCase {
-    fetchChangeLogs?: FetchChangeLogsOptions;
-    stage: SupportedChangelogStages;
-    expectations: () => void;
-  }
+  it('only fetches changelogs for upgrades whose fetchChangeLogs matches the stage name', async () => {
+    const freshUpgrades = (): BranchUpgradeConfig[] => [
+      {
+        branchName: 'foo',
+        manager: 'bar',
+        groupName: 'fetchChangeLogs is pr',
+        fetchChangeLogs: 'pr',
+      },
+      {
+        branchName: 'foo2',
+        manager: 'bar',
+        groupName: 'fetchChangeLogs is branch',
+        fetchChangeLogs: 'branch',
+      },
+      {
+        branchName: 'foo3',
+        manager: 'bar',
+        groupName: 'fetchChangeLogs is off',
+        fetchChangeLogs: 'off',
+      },
+    ];
 
-  const testCases: FetchChangeLogsTestCase[] = [
-    {
-      stage: 'pr',
-      fetchChangeLogs: undefined, // should default to 'pr'
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(2);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({
-            groupName: 'fetchChangeLogs is undefined',
-          }),
-        );
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is pr' }),
-        );
-      },
-    },
-    {
-      stage: 'pr',
-      fetchChangeLogs: 'pr',
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(2);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({
-            groupName: 'fetchChangeLogs is undefined',
-          }),
-        );
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is pr' }),
-        );
-      },
-    },
-    {
-      stage: 'pr',
-      fetchChangeLogs: 'branch',
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(1);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is pr' }),
-        );
-      },
-    },
-    {
-      stage: 'pr',
-      fetchChangeLogs: 'off',
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(1);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is pr' }),
-        );
-      },
-    },
-    {
-      stage: 'branch',
-      fetchChangeLogs: undefined, // should default to 'pr'
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(1);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is branch' }),
-        );
-      },
-    },
-    {
-      stage: 'branch',
-      fetchChangeLogs: 'branch',
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(2);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({
-            groupName: 'fetchChangeLogs is undefined',
-          }),
-        );
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is branch' }),
-        );
-      },
-    },
-    {
-      stage: 'branch',
-      fetchChangeLogs: 'pr',
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(1);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is branch' }),
-        );
-      },
-    },
-    {
-      stage: 'branch',
-      fetchChangeLogs: 'off',
-      expectations: () => {
-        expect(getChangeLogJSON).toHaveBeenCalledTimes(1);
-        expect(getChangeLogJSON).toHaveBeenCalledWith(
-          expect.objectContaining({ groupName: 'fetchChangeLogs is branch' }),
-        );
-      },
-    },
-  ];
+    await expect(
+      embedChangelogs({
+        upgrades: freshUpgrades(),
+        stage: 'branch',
+      }),
+    ).toResolve();
 
-  test.each(testCases)(
-    'stage is "$stage", top-level fetchChangeLogs is "$fetchChangeLogs"',
-    async ({ fetchChangeLogs, stage, expectations }) => {
-      vi.mocked(getChangeLogJSON).mockResolvedValue({
-        hasReleaseNotes: true,
-      });
-      const branches = [
-        partial<BranchUpgradeConfig>({
-          groupName: 'fetchChangeLogs is undefined',
-        }),
-        partial<BranchUpgradeConfig>({
-          groupName: 'fetchChangeLogs is pr',
-          fetchChangeLogs: 'pr',
-        }),
-        partial<BranchUpgradeConfig>({
-          groupName: 'fetchChangeLogs is branch',
-          fetchChangeLogs: 'branch',
-        }),
-        partial<BranchUpgradeConfig>({
-          groupName: 'fetchChangeLogs is off',
-          fetchChangeLogs: 'off',
-        }),
-      ];
-      await expect(
-        embedChangelogs({
-          upgrades: branches,
-          stage,
-          fetchChangeLogs,
-        }),
-      ).toResolve();
+    expect(getChangeLogJSON).toHaveBeenCalledTimes(1);
+    expect(getChangeLogJSON).toHaveBeenCalledWith(
+      expect.objectContaining({ groupName: 'fetchChangeLogs is branch' }),
+    );
 
-      expectations();
+    // When fetchChangeLogs is explicitly set to 'off', no changelogs should be fetched.
+    expect(getChangeLogJSON).not.toHaveBeenCalledWith(
+      expect.objectContaining({ groupName: 'fetchChangeLogs is off' }),
+    );
 
-      // When fetchChangeLogs is explicitly set to 'off', no changelogs should be fetched.
-      expect(getChangeLogJSON).not.toHaveBeenCalledWith(
-        expect.objectContaining({ groupName: 'fetchChangeLogs is off' }),
-      );
-    },
-  );
+    vitest.mocked(getChangeLogJSON).mockClear();
+    await expect(
+      embedChangelogs({
+        upgrades: freshUpgrades(),
+        stage: 'pr',
+      }),
+    ).toResolve();
+
+    expect(getChangeLogJSON).toHaveBeenCalledTimes(1);
+    expect(getChangeLogJSON).toHaveBeenCalledWith(
+      expect.objectContaining({ groupName: 'fetchChangeLogs is pr' }),
+    );
+
+    // When fetchChangeLogs is explicitly set to 'off', no changelogs should be fetched.
+    expect(getChangeLogJSON).not.toHaveBeenCalledWith(
+      expect.objectContaining({ groupName: 'fetchChangeLogs is off' }),
+    );
+  });
 });

@@ -1241,7 +1241,6 @@ describe('workers/repository/update/branch/index', () => {
       expect(changelog.embedChangelogs).toHaveBeenCalledExactlyOnceWith({
         upgrades: config.upgrades,
         stage: 'branch',
-        fetchChangeLogs: config.fetchChangeLogs,
       });
     });
 

@@ -1,4 +1,3 @@
-import type { FetchChangeLogsOptions } from '../../../config/types.ts';
 import * as p from '../../../util/promises.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
@@ -45,30 +44,13 @@ export async function embedChangelog(
   }
 }
 
-// Merges the top-level fetchChangeLogs value with the upgrade's fetchChangeLogs value (prioritizing the latter, if defined).
-function resolveFetchChangeLogs(
-  fetchChangeLogs?: FetchChangeLogsOptions,
-  upgradeFetchChangeLogs?: FetchChangeLogsOptions,
-): FetchChangeLogsOptions {
-  // Default to 'pr' if top-level fetchChangeLogs is undefined.
-  let fetchChangeLogsResolved: FetchChangeLogsOptions = fetchChangeLogs ?? 'pr';
-  if (upgradeFetchChangeLogs) {
-    // Override using the upgrade's fetchChangeLogs value.
-    fetchChangeLogsResolved = upgradeFetchChangeLogs;
-  }
-  return fetchChangeLogsResolved;
-}
-
 export async function embedChangelogs({
   upgrades,
   stage,
-  fetchChangeLogs,
 }: EmbedChangelogsOptions): Promise<void> {
-  // Filter down to branch upgrades that match the stage and fetchChangeLogs configuration.
+  // Only process upgrades whose fetchChangeLogs value match the stage.
   const filteredUpgrades = upgrades.filter(
-    (upgrade) =>
-      resolveFetchChangeLogs(fetchChangeLogs, upgrade.fetchChangeLogs) ===
-      stage,
+    (upgrade) => upgrade.fetchChangeLogs === stage,
   );
   await p.map(filteredUpgrades, embedChangelog, { concurrency: 10 });
 }
