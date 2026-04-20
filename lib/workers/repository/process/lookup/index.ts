@@ -776,17 +776,15 @@ export async function lookupUpdates(
       );
     }
 
-    let release: any;
-    if (res.updates.length > 0) {
-      release = dependency?.releases.find(
-        (r) => r.version === res.updates[0].newValue,
-      );
-      release ??= dependency?.releases.find(
-        (r) => r.version === res.updates[0].newVersion,
-      );
-    } else {
-      release = null;
-    }
+    const release =
+      res.updates.length > 0
+        ? (dependency?.releases.find(
+            (r) => r.version === res.updates[0].newValue,
+          ) ??
+          dependency?.releases.find(
+            (r) => r.version === res.updates[0].newVersion,
+          ))
+        : null;
 
     if (release?.changelogContent) {
       res.changelogContent = release.changelogContent;
