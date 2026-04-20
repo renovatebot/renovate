@@ -2,6 +2,7 @@ import { regEx } from '../../../util/regex.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
+const ALPHA_SUFFIX = '-alpha';
 
 const TYPE_NUMBER = 'TYPE_NUMBER';
 const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
@@ -544,7 +545,7 @@ function autoExtendMavenRange(
   } else if (
     leftValue !== null &&
     rightValue !== null &&
-    incrementRangeValue(leftValue) + '-alpha' === rightValue
+    incrementRangeValue(leftValue) + ALPHA_SUFFIX === rightValue
   ) {
     // same as last if, but properly considering Maven ordering specification documented at
     // https://maven.apache.org/pom.html#Version_Order_Specification
@@ -560,7 +561,8 @@ function autoExtendMavenRange(
     /* v8 ignore next */
     if (compare(newValue, leftValue) !== -1) {
       interval.leftValue = coerceRangeValue(leftValue, newValue);
-      interval.rightValue = incrementRangeValue(interval.leftValue) + '-alpha';
+      interval.rightValue =
+        incrementRangeValue(interval.leftValue) + ALPHA_SUFFIX;
     }
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
