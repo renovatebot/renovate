@@ -1,15 +1,16 @@
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { logger } from '../../../logger/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
-import * as azureApi from './azure-got-wrapper.ts';
+import { logger as _logger } from '~test/util.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import * as _azureApi from './azure-got-wrapper.ts';
 import { IssueService } from './issue.ts';
 import type { Config } from './types.ts';
+
+const logger = _logger.logger;
 
 vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 vi.mock('./azure-helper.ts', () => mockDeep());
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
-vi.mock('../../../logger/index.ts', () => mockDeep());
 vi.mock('../../../util/sanitize.ts', () =>
   mockDeep({ sanitize: (s: string) => s }),
 );
@@ -17,13 +18,16 @@ vi.mock('./util.ts', () => ({
   getWorkItemTitle: vi.fn((title: string) => `[Renovate] ${title}`),
 }));
 
+const azureApi = vi.mocked(_azureApi, true);
+const hostRules = vi.mocked(_hostRules);
+
 describe('modules/platform/azure/issue', () => {
   let config: Config;
   let issueService: IssueService;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(hostRules.find).mockReturnValue({ token: 'token' });
+    hostRules.find.mockReturnValue({ token: 'token' });
 
     config = {
       repository: 'test/repo',
