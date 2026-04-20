@@ -41,6 +41,22 @@ function parseRange(input: string): Range | null {
   return { major, minor };
 }
 
+/*
+ * Like parseVersion but also accepts floating minor-level tags (e.g. `v1.2`)
+ * by coercing them to full semver. Rejects major-only tags (e.g. `v1`).
+ */
+function parseVersionCoerced(input: string): SemVer | null {
+  const v = parseVersion(input);
+  if (v) {
+    return v;
+  }
+  const stripped = massageValue(input);
+  if (regEx(/^\d+$/).test(stripped)) {
+    return null;
+  }
+  return semver.coerce(stripped);
+}
+
 function isValid(input: string): boolean {
   return !!parseVersion(input) || !!parseRange(input);
 }
@@ -50,11 +66,21 @@ function isVersion(input: string | undefined | null): boolean {
     return false;
   }
 
-  return !!parseVersion(input);
+  if (parseVersion(input)) {
+    return true;
+  }
+
+  const stripped = massageValue(input);
+  if (!regEx(/^\d/).test(stripped)) {
+    return false;
+  }
+
+  const r = parseRange(input);
+  return r !== null && !isUndefined(r.minor);
 }
 
 function isStable(version: string): boolean {
-  const v = parseVersion(version);
+  const v = parseVersionCoerced(version);
   if (!v) {
     return false;
   }
@@ -63,24 +89,24 @@ function isStable(version: string): boolean {
 }
 
 function isSingleVersion(input: string): boolean {
-  return isVersion(input);
+  return !!parseVersion(input);
 }
 
 function getMajor(version: string): number | null {
-  return parseVersion(version)?.major ?? null;
+  return parseVersionCoerced(version)?.major ?? null;
 }
 
 function getMinor(version: string): number | null {
-  return parseVersion(version)?.minor ?? null;
+  return parseVersionCoerced(version)?.minor ?? null;
 }
 
 function getPatch(version: string): number | null {
-  return parseVersion(version)?.patch ?? null;
+  return parseVersionCoerced(version)?.patch ?? null;
 }
 
 function sortVersions(x: string, y: string): number {
-  const a = parseVersion(x);
-  const b = parseVersion(y);
+  const a = parseVersionCoerced(x);
+  const b = parseVersionCoerced(y);
   if (!a || !b) {
     return 0;
   }
@@ -88,8 +114,8 @@ function sortVersions(x: string, y: string): number {
 }
 
 function equals(x: string, y: string): boolean {
-  const a = parseVersion(x);
-  const b = parseVersion(y);
+  const a = parseVersionCoerced(x);
+  const b = parseVersionCoerced(y);
   if (!a || !b) {
     return false;
   }
@@ -97,8 +123,8 @@ function equals(x: string, y: string): boolean {
 }
 
 function isGreaterThan(x: string, y: string): boolean {
-  const a = parseVersion(x);
-  const b = parseVersion(y);
+  const a = parseVersionCoerced(x);
+  const b = parseVersionCoerced(y);
   if (!a || !b) {
     return false;
   }
@@ -163,7 +189,7 @@ function minSatisfyingVersion(
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  const v = parseVersion(version);
+  const v = parseVersionCoerced(version);
   const r = parseRange(range);
 
   if (!v || !r) {
