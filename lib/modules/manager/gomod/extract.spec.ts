@@ -551,6 +551,10 @@ describe('modules/manager/gomod/extract', () => {
     expect(versioning).toBeDefined();
     const constraint = res!.extractedConstraints!['%goMod']!;
 
+    it('is a valid constraint', () => {
+      expect(versioning.isValid(constraint)).toBeTrue();
+    });
+
     // even though it's a valid `go` directive
     // TODO #31831
     it('does not match with the version 1.19, as it is not valid SemVer', () => {
