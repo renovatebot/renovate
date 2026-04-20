@@ -4,7 +4,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
@@ -1420,10 +1420,12 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses Docker Hub tag cache digest without HEAD request', async () => {
-      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce({
-        getDigestForTag: vi.fn().mockReturnValue('sha256:cached-digest'),
-        getArchDigestForTag: vi.fn().mockReturnValue(null),
-      } as never);
+      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
+        partial<DockerHubCache>({
+          getDigestForTag: vi.fn().mockReturnValue('sha256:cached-digest'),
+          getArchDigestForTag: vi.fn().mockReturnValue(null),
+        }),
+      );
 
       const res = await getDigest(
         { datasource: 'docker', packageName: 'some-dep' },
@@ -1469,10 +1471,12 @@ describe('modules/datasource/docker/index', () => {
           architecture: 'amd64',
         });
 
-      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce({
-        getDigestForTag: vi.fn().mockReturnValue(null),
-        getArchDigestForTag: vi.fn().mockReturnValue('sha256:cached-amd64'),
-      } as never);
+      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
+        partial<DockerHubCache>({
+          getDigestForTag: vi.fn().mockReturnValue(null),
+          getArchDigestForTag: vi.fn().mockReturnValue('sha256:cached-amd64'),
+        }),
+      );
 
       const res = await getDigest(
         {
