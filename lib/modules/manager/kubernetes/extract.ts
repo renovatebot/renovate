@@ -34,6 +34,7 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [
     ...extractImages(content, config),
+    ...extractImageVolumes(manifests, config),
     ...extractApis(manifests),
   ];
 
@@ -66,6 +67,30 @@ function extractImages(
           currentDigest: dep.currentDigest,
         },
         'Kubernetes image',
+      );
+      deps.push(dep);
+    }
+  }
+
+  return deps;
+}
+
+function extractImageVolumes(
+  manifests: KubernetesManifest[],
+  config: ExtractConfig,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+
+  for (const manifest of manifests) {
+    for (const currentFrom of manifest.imageVolumeReferences) {
+      const dep = getDep(currentFrom, true, config.registryAliases);
+      logger.debug(
+        {
+          depName: dep.depName,
+          currentValue: dep.currentValue,
+          currentDigest: dep.currentDigest,
+        },
+        'Kubernetes image volume',
       );
       deps.push(dep);
     }

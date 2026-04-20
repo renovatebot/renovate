@@ -524,6 +524,93 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('disables naked SHA pins without version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        currentValue: undefined,
+        enabled: false,
+        skipReason: 'unversioned-reference',
+      });
+    });
+
+    it('disables naked short SHA pins without version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigestShort: 'c85c95e',
+        currentValue: undefined,
+        enabled: false,
+        skipReason: 'unversioned-reference',
+      });
+    });
+
+    it('does not disable SHA pins with version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toEqual({
+        depName: 'actions/checkout',
+        commitMessageTopic: '{{{depName}}} action',
+        versioning: 'docker',
+        depType: 'action',
+        replaceString:
+          'actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        currentValue: 'v4',
+        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('does not disable short SHA pins with version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e # v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toEqual({
+        depName: 'actions/checkout',
+        commitMessageTopic: '{{{depName}}} action',
+        versioning: 'docker',
+        depType: 'action',
+        replaceString: 'actions/checkout@c85c95e # v4',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        currentValue: 'v4',
+        currentDigestShort: 'c85c95e',
+        datasource: 'github-tags',
+      });
+    });
+
     it('extracts actions with fqdn', () => {
       const res = extractPackageFile(
         codeBlock`
@@ -1295,6 +1382,57 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: '1.1.100' },
+      },
+      expected: [
+        {
+          currentValue: '1.1.100',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: 'PATH' },
+      },
+      expected: [
+        {
+          currentValue: 'PATH',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'golangci/golangci-lint-action@v9',
         with: { version: 'v2.5.0' },
       },
@@ -1321,6 +1459,56 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'golangci/golangci-lint',
           depType: 'uses-with',
           packageName: 'golangci/golangci-lint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {
+          version: 'v1.23.1',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.23.1',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {
+          version: '1.23.1',
+        },
+      },
+      expected: [
+        {
+          currentValue: '1.23.1',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
         },
       ],
     },

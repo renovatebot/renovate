@@ -25,6 +25,11 @@ import { sanitizeMarkdown } from '../../../util/markdown.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { titleCase } from '../../../util/string.ts';
+import { datasourceToOsvEcosystem } from '../../../util/vulnerability/ecosystem.ts';
+import {
+  getFixedVersionConstraint,
+  getLastAffectedVersionConstraint,
+} from '../../../util/vulnerability/utils.ts';
 import type {
   DependencyVulnerabilities,
   SeverityDetails,
@@ -39,21 +44,7 @@ export class Vulnerabilities {
 
   private osvOffline: OsvOffline;
 
-  private static readonly datasourceEcosystemMap: Record<
-    string,
-    Ecosystem | undefined
-  > = {
-    crate: 'crates.io',
-    go: 'Go',
-    hackage: 'Hackage',
-    hex: 'Hex',
-    maven: 'Maven',
-    npm: 'npm',
-    nuget: 'NuGet',
-    packagist: 'Packagist',
-    pypi: 'PyPI',
-    rubygems: 'RubyGems',
-  };
+  private static readonly datasourceEcosystemMap = datasourceToOsvEcosystem;
 
   private constructor(osvOffline: OsvOffline) {
     this.osvOffline = osvOffline;
@@ -226,6 +217,17 @@ export class Vulnerabilities {
           continue;
         }
 
+        this.skipMaliciousPackages(
+          ecosystem,
+          packageName,
+          depVersion,
+          versioningApi,
+          dep,
+          packageFileConfig.manager,
+          packageFileConfig.packageFile,
+          osvVulnerability,
+        );
+
         for (const affected of osvVulnerability.affected ?? []) {
           const isVulnerable = this.isPackageVulnerable(
             ecosystem,
@@ -267,6 +269,78 @@ export class Vulnerabilities {
         'Error fetching vulnerability information for package',
       );
       return null;
+    }
+  }
+
+  private skipMaliciousPackages(
+    ecosystem: Ecosystem,
+    packageName: string,
+    depVersion: string,
+    versioningApi: VersioningApi,
+    dep: PackageDependency,
+    manager: string | undefined,
+    packageFile: string,
+    osvVulnerability: Osv.Vulnerability,
+  ): void {
+    // the OpenSSF's Malicious Packages (https://github.com/ossf/malicious-packages) is a source of advisories through osv.dev, which takes various sources of advisories, and will re-publish them with more specific information about their malicious usage
+    if (osvVulnerability.id.startsWith('MAL-')) {
+      // is the current dependency vulnerable?
+      for (const affected of osvVulnerability.affected ?? []) {
+        // is the current dependency vulnerable?
+        const isVulnerable = this.isPackageVulnerable(
+          ecosystem,
+          packageName,
+          depVersion,
+          affected,
+          versioningApi,
+        );
+
+        if (isVulnerable) {
+          logger.debug(
+            {
+              packageFile: packageFile,
+              depName: dep.depName,
+              packageName: dep.packageName,
+              manager: manager,
+              datasource: dep.datasource,
+              currentVersion: depVersion,
+            },
+            `Marking ${dep.depName} as skipReason=malicious-version-in-use, as it is affected by ${osvVulnerability.id}`,
+          );
+          dep.skipReason = 'malicious-version-in-use';
+          dep.skipStage = 'lookup';
+        }
+
+        // or are any of the updates vulnerable?
+        for (const update of dep.updates ?? []) {
+          const newVersion = update.newVersion ?? update.newValue!;
+
+          const isUpdateVulnerable = this.isPackageVulnerable(
+            ecosystem,
+            packageName,
+            newVersion,
+            affected,
+            versioningApi,
+          );
+
+          if (isUpdateVulnerable) {
+            logger.debug(
+              {
+                packageFile: packageFile,
+                depName: dep.depName,
+                packageName: dep.packageName,
+                manager: manager,
+                datasource: dep.datasource,
+                currentVersion: depVersion,
+                newVersion,
+              },
+              `Marking ${dep.depName}'s update to ${newVersion} as skipReason=malicious-update-proposed, as it is affected by ${osvVulnerability.id}`,
+            );
+            dep.skipReason = 'malicious-update-proposed';
+            dep.skipStage = 'lookup';
+          }
+        }
+      }
     }
   }
 
@@ -441,24 +515,14 @@ export class Vulnerabilities {
     fixedVersion: string,
     ecosystem: Ecosystem,
   ): string {
-    if (ecosystem === 'Maven' || ecosystem === 'NuGet') {
-      return `[${fixedVersion},)`;
-    }
-
-    // crates.io, Go, Hex, npm, RubyGems, PyPI
-    return `>= ${fixedVersion}`;
+    return getFixedVersionConstraint(fixedVersion, ecosystem);
   }
 
   private getLastAffectedByEcosystem(
     lastAffected: string,
     ecosystem: Ecosystem,
   ): string {
-    if (ecosystem === 'Maven') {
-      return `(${lastAffected},)`;
-    }
-
-    // crates.io, Go, Hex, npm, RubyGems, PyPI
-    return `> ${lastAffected}`;
+    return getLastAffectedVersionConstraint(lastAffected, ecosystem);
   }
 
   private isVersionGt(

@@ -11,6 +11,8 @@ description: Requires Renovate to wait for a specified amount of time before sug
 
 The use of `minimumReleaseAge` is not to slow down fast releasing project updates, but to provide a means to reduce risk supply chain security risks.
 
+In other ecosystems and package managers, this may be referred to as a "dependency cooldown".
+
 For example, `minimumReleaseAge=14 days` would ensure that a package update is not suggested by Renovate until 14 days after its release, which allows plenty of time to allow security researchers and automated security tools to catch malicious intent in packages.
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
@@ -205,13 +207,14 @@ The below is a non-exhaustive list of public registries which support release ti
 | `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
 | `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
-| `terraform-provider` | `https://registry.terraform.io`                    | ✅        | Not always returned                                              |
+| `terraform-provider` | `https://registry.terraform.io`                    | ✅        |                                                                  |
 | `github-tags`        | `https://github.com`                               | ✅        |                                                                  |
 | `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                                  |
 | `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                                  |
 | `maven`              | `https://repo1.maven.org/maven2`                   | ✅        |                                                                  |
 | `node-version`       | `https://nodejs.org/dist`                          | ✅        |                                                                  |
 | `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                                  |
+| `nuget`              | `https://api.nuget.org/v3/index.json`              | ✅        |                                                                  |
 | `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                                  |
 | `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                                  |
 | `jsr`                | `https://jsr.io`                                   | ✅        | For packages without explicit timestamps, defaults to 2025-09-18 |
