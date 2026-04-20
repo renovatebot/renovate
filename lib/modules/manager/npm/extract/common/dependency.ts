@@ -221,8 +221,8 @@ export function getExtractedConstraints(
       !dep.skipReason &&
       (dep.depType === 'engines' || dep.depType === 'packageManager') &&
       dep.depName &&
-      constraints.includes(dep.depName as ConstraintName) &&
       isConstraintName(dep.depName) &&
+      constraints.includes(dep.depName) &&
       isString(dep.currentValue)
     ) {
       extractedConstraints[dep.depName] = dep.currentValue;
