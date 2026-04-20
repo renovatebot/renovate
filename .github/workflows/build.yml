@@ -195,7 +195,7 @@ jobs:
           os: ${{ runner.os }}
           save-cache: true
 
-  lint-eslint:
+  lint-oxlint:
     needs:
       - setup-build
     runs-on: ubuntu-latest
@@ -219,26 +219,6 @@ jobs:
       - name: Lint with biome
         run: pnpm biome-ci
 
-      - name: Restore eslint cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: .cache/eslint
-          # we need to add the hash because eslint cache doesn't detect plugin changes
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
-
-      - name: Lint with eslint
-        run: pnpm eslint-ci
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-
-      - name: Save eslint cache
-        if: github.event_name == 'push'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: .cache/eslint
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
-
   lint-prettier:
     needs:
       - setup-build
@@ -258,7 +238,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/prettier
           # we need to add the hash because prettier cache doesn't detect plugin changes
@@ -276,7 +256,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/prettier
           key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -333,7 +313,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore tsbuildinfo cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
@@ -344,7 +324,7 @@ jobs:
 
       - name: Save tsbuildinfo cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -366,6 +346,8 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
+    permissions:
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -378,6 +360,11 @@ jobs:
         uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
         with:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
+        with:
+          version: 1.24.1
 
   test:
     needs: [setup, prefetch]
@@ -411,7 +398,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .cache/vitest
           key: |
@@ -437,7 +424,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
           use_oidc: true
           report_type: test_results
@@ -459,7 +446,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: success() && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -490,7 +477,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -625,7 +612,7 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: renovate-dist
           path: dist/
@@ -719,7 +706,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docs
           path: tmp/docs/
@@ -767,7 +754,7 @@ jobs:
     needs:
       - setup-build
       - build-docker
-      - lint-eslint
+      - lint-oxlint
       - lint-prettier
       - lint-docs
       - lint-other
@@ -825,7 +812,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@9e2c008ec1b3662cb83d8ccdf68b2f0168c7f5d9 # v4.5.9
+        uses: containerbase/internal-tools@c5bbb40464e0ca4dd03b5bb10331eb331762e125 # v4.5.28
         with:
           command: docker-config
 
@@ -885,7 +872,7 @@ jobs:
 
       - name: Upload docs artifact for deployment
         if: github.ref_name == 'main'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: mkdocs-site
           path: tmp/mkdocs-site.tgz
@@ -927,13 +914,13 @@ jobs:
           curl --retry 5 --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
 
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: tools/mkdocs/site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
 
   notify-release-failure:
     runs-on: ubuntu-latest
@@ -943,7 +930,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
@@ -963,7 +950,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
