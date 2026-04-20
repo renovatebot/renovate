@@ -417,9 +417,8 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
   pnpm: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
-      packageName: 'pnpm/pnpm',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      packageName: 'pnpm',
+      datasource: NpmDatasource.id,
     },
   },
   redis: {
@@ -546,9 +545,8 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
   yarn: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
-      packageName: 'yarnpkg/berry',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
+      packageName: '@yarnpkg/cli-dist',
+      datasource: NpmDatasource.id,
     },
   },
 };
