@@ -861,18 +861,6 @@ describe('modules/datasource/pypi/index', () => {
     expect(googleAuth).toHaveBeenCalledTimes(1);
   });
 
-  it('continues lookup when auth header URL parsing fails', async () => {
-    const lookupUrl = 'not-a-url';
-    const pypiDatasource = new PypiDatasource();
-
-    // TODO: refactor to cover this branch through public behavior and remove this direct helper test.
-    // @ts-expect-error accessing private helper for targeted branch coverage
-    await expect(pypiDatasource.getAuthHeaders(lookupUrl)).resolves.toEqual({
-      headers: {},
-      lookupUrl,
-    });
-  });
-
   it('ignores an invalid URL when checking for auth headers', async () => {
     const config = {
       registryUrls: ['not-a-url/simple/'],

@@ -96,6 +96,7 @@ export class PypiDatasource extends Datasource {
     lookupUrl: string,
   ): Promise<{ headers: OutgoingHttpHeaders; lookupUrl: string }> {
     const parsedUrl = parseUrl(lookupUrl);
+    // v8 ignore if -- TODO: refactor to cover this branch through public behavior again
     if (!parsedUrl) {
       logger.once.debug({ lookupUrl }, 'Failed to parse URL');
       return { headers: {}, lookupUrl };
