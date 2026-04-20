@@ -41,9 +41,9 @@ function parseRange(input: string): Range | null {
   return { major, minor };
 }
 
-/*
- * Like parseVersion but also accepts floating minor-level tags (e.g. `v1.2`)
- * by coercing them to full semver. Rejects major-only tags (e.g. `v1`).
+/**
+ * Like parseVersion but also accepts floating tags (e.g. `v1`, `v1.2`)
+ * by coercing them to full semver.
  */
 function parseVersionCoerced(input: string): SemVer | null {
   const v = parseVersion(input);
@@ -51,7 +51,7 @@ function parseVersionCoerced(input: string): SemVer | null {
     return v;
   }
   const stripped = massageValue(input);
-  if (regEx(/^\d+$/).test(stripped)) {
+  if (!regEx(/^\d/).test(stripped)) {
     return null;
   }
   return semver.coerce(stripped);
@@ -75,8 +75,7 @@ function isVersion(input: string | undefined | null): boolean {
     return false;
   }
 
-  const r = parseRange(input);
-  return r !== null && !isUndefined(r.minor);
+  return parseRange(input) !== null;
 }
 
 function isStable(version: string): boolean {
