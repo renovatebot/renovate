@@ -1,5 +1,10 @@
 import { isTruthy } from '@sindresorhus/is';
-import { parsePEP508 } from './utils.ts';
+import {
+  extractPythonConstraintFromMarker,
+  parsePEP508,
+  pep508ToPackageDependency,
+  pythonConstraintToMarkerSlug,
+} from './utils.ts';
 
 describe('modules/manager/pep621/utils', () => {
   describe('parsePEP508()', () => {
@@ -29,6 +34,127 @@ describe('modules/manager/pep621/utils', () => {
         expect(result).toEqual(expected);
       },
     );
+  });
+
+  describe('pep508ToPackageDependency()', () => {
+    it('should store marker and pep508String in managerData when marker is present', () => {
+      const result = pep508ToPackageDependency(
+        'project.dependencies',
+        'pytest>=6.0,<7.0; python_version < "3.10"',
+      );
+      expect(result).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=6.0,<7.0',
+        managerData: {
+          marker: 'python_version < "3.10"',
+          pep508String: 'pytest>=6.0,<7.0; python_version < "3.10"',
+        },
+      });
+      expect(result?.replaceString).toBeUndefined();
+    });
+
+    it('should not set managerData or replaceString when no marker', () => {
+      const result = pep508ToPackageDependency(
+        'project.dependencies',
+        'pytest>=6.0,<7.0',
+      );
+      expect(result).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=6.0,<7.0',
+      });
+      expect(result?.managerData).toBeUndefined();
+      expect(result?.replaceString).toBeUndefined();
+    });
+  });
+
+  describe('extractPythonConstraintFromMarker()', () => {
+    it('should extract >= constraint', () => {
+      expect(
+        extractPythonConstraintFromMarker('python_version >= "3.10"'),
+      ).toBe('>=3.10');
+    });
+
+    it('should extract == constraint', () => {
+      expect(extractPythonConstraintFromMarker('python_version == "3.9"')).toBe(
+        '==3.9',
+      );
+    });
+
+    it('should extract < constraint', () => {
+      expect(extractPythonConstraintFromMarker('python_version < "3.10"')).toBe(
+        '<3.10',
+      );
+    });
+
+    it('should extract constraint from single-quoted marker', () => {
+      expect(
+        extractPythonConstraintFromMarker("python_version >= '3.10'"),
+      ).toBe('>=3.10');
+    });
+
+    it('should extract python_full_version constraint', () => {
+      expect(
+        extractPythonConstraintFromMarker('python_full_version >= "3.10.0"'),
+      ).toBe('>=3.10.0');
+    });
+
+    it('should extract ~= constraint', () => {
+      expect(
+        extractPythonConstraintFromMarker('python_version ~= "3.10"'),
+      ).toBe('~=3.10');
+    });
+
+    it('should return null for non-Python marker', () => {
+      expect(
+        extractPythonConstraintFromMarker('sys_platform == "win32"'),
+      ).toBeNull();
+    });
+
+    it('should return null for complex marker with and', () => {
+      expect(
+        extractPythonConstraintFromMarker(
+          'python_version >= "3.10" and sys_platform == "linux"',
+        ),
+      ).toBeNull();
+    });
+
+    it('should return null for complex marker with or', () => {
+      expect(
+        extractPythonConstraintFromMarker(
+          'python_version >= "3.10" or python_version == "3.9"',
+        ),
+      ).toBeNull();
+    });
+  });
+
+  describe('pythonConstraintToMarkerSlug()', () => {
+    it('should handle >= operator', () => {
+      expect(pythonConstraintToMarkerSlug('>=3.10')).toBe('py310plus');
+    });
+
+    it('should handle == operator', () => {
+      expect(pythonConstraintToMarkerSlug('==3.9')).toBe('py39');
+    });
+
+    it('should handle < operator', () => {
+      expect(pythonConstraintToMarkerSlug('<3.10')).toBe('pylt310');
+    });
+
+    it('should handle > operator', () => {
+      expect(pythonConstraintToMarkerSlug('>3.10')).toBe('py310gt');
+    });
+
+    it('should handle <= operator', () => {
+      expect(pythonConstraintToMarkerSlug('<=3.10')).toBe('pylte310');
+    });
+
+    it('should handle != operator', () => {
+      expect(pythonConstraintToMarkerSlug('!=3.9')).toBe('pyne39');
+    });
+
+    it('should handle ~= operator', () => {
+      expect(pythonConstraintToMarkerSlug('~=3.10')).toBe('pycompat310');
+    });
   });
 });
 

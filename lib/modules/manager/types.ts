@@ -1,5 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
+  ConstraintsFilter,
   MatchStringsStrategy,
   ToolSettingsOptions,
   UpdateType,
@@ -32,6 +33,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   repository?: string;
   currentDigest?: string;
   newDigest?: string | null;
+  splitPythonMarkers?: boolean;
 }
 
 export interface UpdateArtifactsConfig {
@@ -198,6 +200,11 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+
+  constraints?: Record<string, string>;
+  constraintsFiltering?: ConstraintsFilter;
+  additionalBranchPrefix?: string;
+  commitMessageSuffix?: string;
   /**
    * Whether the package registry has attestation information for the given update.
    *

@@ -2718,6 +2718,18 @@ const options: Readonly<RenovateOptions>[] = [
     },
   },
   {
+    name: 'splitPythonMarkers',
+    description:
+      'When enabled, pep621 deps with Python-version environment markers ' +
+      'get separate PRs per marker variant, each constrained to the ' +
+      'Python version range the marker describes.',
+    type: 'boolean',
+    default: false,
+    stage: 'package',
+    cli: false,
+    supportedManagers: ['pep621'],
+  },
+  {
     name: 'hostRules',
     description: 'Host rules/configuration including credentials.',
     type: 'array',
