@@ -1,10 +1,10 @@
-import { createRequire } from 'node:module';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import {
   NodeTracerProvider,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
+import { bunyan } from '../expose.ts';
 import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import {
@@ -162,13 +162,11 @@ describe('instrumentation/index', () => {
       process.env.RENOVATE_TRACING_CONSOLE_EXPORTER = 'true';
       init();
 
-      const bunyan = createRequire(import.meta.url)(
-        'bunyan',
-      ) as typeof import('bunyan');
+      const mod = bunyan();
 
       // shimmer marks wrapped functions with __wrapped = true
       expect(
-        (bunyan.prototype as unknown as Record<string, unknown>)._emit,
+        (mod.prototype as unknown as Record<string, unknown>)._emit,
       ).toHaveProperty('__wrapped', true);
     });
   });

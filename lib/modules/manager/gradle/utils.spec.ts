@@ -3,7 +3,9 @@ import {
   getVars,
   isDependencyString,
   isGradleBuildFile,
+  isGradleDefaultCatalogFile,
   isGradleScriptFile,
+  isGradleSettingsFile,
   isGradleVersionsFile,
   isKotlinSourceFile,
   isPropsFile,
@@ -12,6 +14,7 @@ import {
   reorderFiles,
   toAbsolutePath,
   updateVars,
+  updateVarsFromDefaultCatalog,
   versionLikeSubstring,
 } from './utils.ts';
 
@@ -103,6 +106,11 @@ describe('modules/manager/gradle/utils', () => {
     expect(isGradleScriptFile('/a/Somefile.gradle.kts')).toBeTrue();
     expect(isGradleScriptFile('/a/Somefile.gradle')).toBeTrue();
     expect(isGradleVersionsFile('/a/versions.gradle.kts')).toBeTrue();
+    expect(isGradleSettingsFile('/a/settings.gradle')).toBeTrue();
+    expect(isGradleSettingsFile('/a/settings.gradle.kts')).toBeTrue();
+    expect(
+      isGradleDefaultCatalogFile('/a/gradle/libs.versions.toml'),
+    ).toBeTrue();
     expect(isGradleBuildFile('/a/build.gradle')).toBeTrue();
     expect(isPropsFile('/a/gradle.properties')).toBeTrue();
     expect(isKotlinSourceFile('/a/Somefile.kt')).toBeTrue();
@@ -157,6 +165,58 @@ describe('modules/manager/gradle/utils', () => {
     expect(
       reorderFiles(['b.gradle', 'c.gradle', 'a.gradle', 'gradle.properties']),
     ).toStrictEqual(['gradle.properties', 'a.gradle', 'b.gradle', 'c.gradle']);
+
+    expect(
+      reorderFiles([
+        'b.gradle',
+        'settings.gradle',
+        'gradle/libs.versions.toml',
+        'gradle.properties',
+      ]),
+    ).toStrictEqual([
+      'gradle.properties',
+      'settings.gradle',
+      'gradle/libs.versions.toml',
+      'b.gradle',
+    ]);
+
+    expect(
+      reorderFiles([
+        'independent-project-in-subfolder/some.gradle',
+        'build.gradle',
+        'independent-project-in-subfolder/gradle/libs.versions.toml',
+        'settings.gradle',
+        'gradle/libs.versions.toml',
+        'independent-project-in-subfolder/gradle.properties',
+        'gradle.properties',
+        'gradle/commonLibs.versions.toml',
+        'b/another.gradle',
+        'independent-project-in-subfolder/settings.gradle',
+        'someothergradle.gradle',
+        'z/some.gradle',
+        'gradle/whatever.gradle',
+        'o/build.gradle',
+        'a/some.gradle',
+        'o/settings.gradle',
+      ]),
+    ).toStrictEqual([
+      'gradle.properties',
+      'settings.gradle',
+      'gradle/libs.versions.toml',
+      'someothergradle.gradle',
+      'build.gradle',
+      'a/some.gradle',
+      'b/another.gradle',
+      'gradle/commonLibs.versions.toml',
+      'gradle/whatever.gradle',
+      'independent-project-in-subfolder/gradle.properties',
+      'independent-project-in-subfolder/settings.gradle',
+      'independent-project-in-subfolder/gradle/libs.versions.toml',
+      'independent-project-in-subfolder/some.gradle',
+      'o/settings.gradle',
+      'o/build.gradle',
+      'z/some.gradle',
+    ]);
 
     expect(
       reorderFiles([
@@ -238,6 +298,113 @@ describe('modules/manager/gradle/utils', () => {
         bar: { key: 'bar', value: 'bar' },
         baz: { key: 'baz', value: 'baz' },
         qux: { key: 'qux', value: 'qux' },
+      });
+    });
+  });
+
+  describe('updateVarsFromDefaultCatalog', () => {
+    it('no default catalog file', () => {
+      const registry: VariableRegistry = {};
+      updateVarsFromDefaultCatalog(
+        registry,
+        '/a/gradle',
+        '/a/gradle/other-catalog.toml',
+        {},
+      );
+      expect(registry).toStrictEqual({});
+    });
+
+    it('adds variables with default "libs" prefix', () => {
+      const registry: VariableRegistry = {};
+      const newVars: PackageVariables = {
+        kotlin: {
+          key: 'kotlin',
+          value: '1.5.21',
+          fileReplacePosition: 10,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
+        coroutines: {
+          key: 'coroutines',
+          value: '1.5.0',
+          fileReplacePosition: 40,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
+      };
+      updateVarsFromDefaultCatalog(
+        registry,
+        '/project/gradle',
+        '/project/gradle/libs.versions.toml',
+        newVars,
+      );
+
+      const res = getVars(registry, '/project/build.gradle');
+      expect(res).toStrictEqual({
+        'libs.versions.kotlin': {
+          key: 'libs.versions.kotlin',
+          value: '1.5.21',
+          fileReplacePosition: 10,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
+        'libs.versions.coroutines': {
+          key: 'libs.versions.coroutines',
+          value: '1.5.0',
+          fileReplacePosition: 40,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
+      });
+    });
+
+    it('adds variables with custom libraries extension name', () => {
+      const registry: VariableRegistry = {};
+      const newVars: PackageVariables = {
+        kotlin: {
+          key: 'kotlin',
+          value: '1.5.21',
+          fileReplacePosition: 10,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
+        coroutines: {
+          key: 'coroutines',
+          value: '1.5.0',
+          fileReplacePosition: 40,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
+      };
+      updateVars(registry, '/project', {
+        defaultLibrariesExtensionName: {
+          key: 'defaultLibrariesExtensionName',
+          value: 'myLibs',
+          fileReplacePosition: 50,
+          packageFile: '/project/settings.gradle',
+        },
+      });
+      updateVarsFromDefaultCatalog(
+        registry,
+        '/project/gradle',
+        '/project/gradle/libs.versions.toml',
+        newVars,
+      );
+
+      const res = getVars(registry, '/project/build.gradle');
+      expect(res).toStrictEqual({
+        defaultLibrariesExtensionName: {
+          key: 'defaultLibrariesExtensionName',
+          value: 'myLibs',
+          fileReplacePosition: 50,
+          packageFile: '/project/settings.gradle',
+        },
+        'myLibs.versions.kotlin': {
+          key: 'myLibs.versions.kotlin',
+          value: '1.5.21',
+          fileReplacePosition: 10,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
+        'myLibs.versions.coroutines': {
+          key: 'myLibs.versions.coroutines',
+          value: '1.5.0',
+          fileReplacePosition: 40,
+          packageFile: '/project/gradle/libs.versions.toml',
+        },
       });
     });
   });
