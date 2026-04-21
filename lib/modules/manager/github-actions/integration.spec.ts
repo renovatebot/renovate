@@ -1,8 +1,6 @@
 import { codeBlock } from 'common-tags';
-import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { Result } from '../../../util/result.ts';
 import * as lookup from '../../../workers/repository/process/lookup/index.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
@@ -28,11 +26,6 @@ describe('modules/manager/github-actions/integration', () => {
       // TODO: fix types #22198
       baseConfig = partial<LookupUpdateConfig>(getConfig() as never);
       baseConfig.manager = 'github-actions';
-    });
-
-    afterEach(() => {
-      httpMock.clear(false);
-      hostRules.clear();
     });
 
     function makeConfig(dep: PackageDependency): LookupUpdateConfig {
