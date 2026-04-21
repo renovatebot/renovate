@@ -25,7 +25,7 @@ function generateCombinedTooling(): string {
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   for (const { name, url, source } of allTools) {
-    content += `| [${name}](${url}) | ${source} |\n`;
+    content += `| [\`${name}\`](${url}) | ${source} |\n`;
   }
 
   return content;
