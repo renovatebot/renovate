@@ -20,7 +20,7 @@ export interface CommunityActionConfig {
   /**
    * should return `true` if the version is invalid and should be skipped
    */
-  validator?: (value: string) => boolean;
+  isInvalid?: (value: string) => boolean;
 
   withSchema?: z.ZodEffects<
     z.ZodTypeAny,
@@ -32,7 +32,7 @@ type ActionSchema = z.ZodEffects<z.ZodTypeAny, PackageDependency>;
 
 function actionSchema(
   name: string,
-  { validator, withSchema, ...cfg }: CommunityActionConfig,
+  { isInvalid, withSchema, ...cfg }: CommunityActionConfig,
 ): ActionSchema {
   return z
     .object({
@@ -43,7 +43,7 @@ function actionSchema(
       ({ with: { val, ...meta } }): PackageDependency => ({
         ...cfg,
         ...meta,
-        ...parseValue(val, validator),
+        ...parseValue(val, isInvalid),
       }),
     )
     .transform((dep) => {
@@ -60,7 +60,7 @@ function matchAction(action: string): z.ZodString {
 
 function parseValue(
   currentValue: string | undefined,
-  validator?: (val: string) => boolean,
+  isInvalid?: (val: string) => boolean,
 ): PackageDependency {
   if (!currentValue) {
     return {
@@ -69,7 +69,7 @@ function parseValue(
       depType: 'uses-with',
     };
   }
-  if (validator?.(currentValue) === true) {
+  if (isInvalid?.(currentValue) === true) {
     return {
       skipStage: 'extract',
       skipReason: 'invalid-version',
@@ -128,7 +128,7 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'jakebailey/pyright-action': {
     datasource: NpmDatasource.id,
     packageName: 'pyright',
-    validator: (val) => val === 'PATH',
+    isInvalid: (val) => val === 'PATH',
   },
   'jaxxstorm/action-install-gh-release': {
     datasource: GithubReleasesDatasource.id,
