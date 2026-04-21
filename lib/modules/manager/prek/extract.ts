@@ -13,6 +13,8 @@ const repoSectionRegex = regEx(/^\s*\[\[\s*repos\s*\]\]\s*(?:#.*)?$/);
 const repoLineRegex = regEx(
   /^\s*repo\s*=\s*(?<quote>["'])(?<repo>.+?)["']\s*(?:#.*)?$/,
 );
+// Matches SHA-only rev assignments and captures trailing comment text so
+// parseShaComment() can decide whether the line carries a usable version anchor.
 const revLineRegex = regEx(
   /^\s*rev\s*=\s*(?<quote>["'])(?<currentDigest>[a-f0-9]{40})["'](?<commentWhiteSpaces>\s*)(?:#(?<comment>.*))?\s*$/,
 );
@@ -144,6 +146,8 @@ function extractWithRegex(content: string): Map<string, RegexDep[]> {
       }
 
       const quotedDigest = `${quote}${currentDigest}${quote}`;
+      // Preserve both quote style and comment prefix so replacements keep the
+      // original formatting while updating digest+version together.
       storeDep({
         currentDigest,
         currentValue: parsedComment.currentValue,
