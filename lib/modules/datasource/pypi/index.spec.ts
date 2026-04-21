@@ -1,6 +1,7 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { PypiDatasource } from './index.ts';
@@ -204,14 +205,11 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
-      googleAuth.mockImplementationOnce(
-        // TODO: fix typing
-        vi.fn<any>(
-          class {
-            getAccessToken = vi.fn().mockResolvedValue('some-token');
-          },
-        ),
-      );
+      googleAuth.mockImplementationOnce(function () {
+        return partial<InstanceType<typeof _googleAuth>>({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
+        });
+      });
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -231,14 +229,11 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
-      googleAuth.mockImplementation(
-        // TODO: fix typing
-        vi.fn<any>(
-          class {
-            getAccessToken = vi.fn();
-          },
-        ),
-      );
+      googleAuth.mockImplementation(function () {
+        return partial<InstanceType<typeof _googleAuth>>({
+          getAccessToken: vi.fn(),
+        });
+      });
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -803,14 +798,11 @@ describe('modules/datasource/pypi/index', () => {
         'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
-    googleAuth.mockImplementationOnce(
-      // TODO: fix typing
-      vi.fn<any>(
-        class {
-          getAccessToken = vi.fn().mockResolvedValue('some-token');
-        },
-      ),
-    );
+    googleAuth.mockImplementationOnce(function () {
+      return partial<InstanceType<typeof _googleAuth>>({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
+      });
+    });
     expect(
       await getPkgReleases({
         datasource,
@@ -837,14 +829,11 @@ describe('modules/datasource/pypi/index', () => {
         'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
-    googleAuth.mockImplementationOnce(
-      // TODO: fix typing
-      vi.fn<any>(
-        class {
-          getAccessToken = vi.fn().mockResolvedValue('some-token');
-        },
-      ),
-    );
+    googleAuth.mockImplementationOnce(function () {
+      return partial<InstanceType<typeof _googleAuth>>({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
+      });
+    });
     expect(
       await getPkgReleases({
         datasource,
