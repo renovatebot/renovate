@@ -148,14 +148,14 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return true;
     }
 
-    if (
-      this.checkCacheControlHeader &&
-      isString(resp.headers['cache-control'])
-    ) {
-      const isPublic = resp.headers['cache-control']
-        .toLocaleLowerCase()
-        .split(regEx(/\s*,\s*/))
-        .includes('public');
+    if (this.checkCacheControlHeader) {
+      const cacheControl = resp.headers['cache-control'];
+      const isPublic =
+        isString(cacheControl) &&
+        cacheControl
+          .toLocaleLowerCase()
+          .split(regEx(/\s*,\s*/))
+          .includes('public');
 
       if (!isPublic) {
         return false;
