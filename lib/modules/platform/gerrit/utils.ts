@@ -54,9 +54,7 @@ export function getGerritRepoUrl(
 }
 
 function createSshUrl(url: URL, repository: string): string {
-  return new URL(
-    `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`,
-  ).toString();
+  return `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
 }
 
 function createHttpUrl(url: URL, endpoint: string, repository: string): string {
