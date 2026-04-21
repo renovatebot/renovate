@@ -8,8 +8,6 @@ import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
-import * as pep440versioning from '../../versioning/pep440/index.ts';
-import * as rubyVersioning from '../../versioning/ruby/index.ts';
 import type { PackageDependency } from '../types.ts';
 
 function matchAction(action: string): z.ZodString {
@@ -18,7 +16,7 @@ function matchAction(action: string): z.ZodString {
     .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(?:@.+)?$`));
 }
 
-function validateValue(
+function parseValue(
   currentValue: string | undefined,
   validator?: () => boolean,
 ): PackageDependency {
@@ -52,7 +50,7 @@ const SetupUV = z
       depName: 'astral-sh/uv',
       versioning: npmVersioning.id,
       packageName: 'astral-sh/uv',
-      ...validateValue(val.version),
+      ...parseValue(val.version),
     }),
   );
 
@@ -67,9 +65,8 @@ const SetupPnpm = z
     ({ with: val }): PackageDependency => ({
       datasource: NpmDatasource.id,
       depName: 'pnpm',
-      versioning: npmVersioning.id,
       packageName: 'pnpm',
-      ...validateValue(val.version),
+      ...parseValue(val.version),
     }),
   );
 
@@ -84,9 +81,8 @@ const SetupBun = z
     ({ with: val }): PackageDependency => ({
       datasource: NpmDatasource.id,
       depName: 'bun',
-      versioning: npmVersioning.id,
       packageName: 'bun',
-      ...validateValue(val['bun-version']),
+      ...parseValue(val['bun-version']),
     }),
   );
 
@@ -101,9 +97,8 @@ const SetupDeno = z
     ({ with: val }): PackageDependency => ({
       datasource: NpmDatasource.id,
       depName: 'deno',
-      versioning: npmVersioning.id,
       packageName: 'deno',
-      ...validateValue(val['deno-version']),
+      ...parseValue(val['deno-version']),
     }),
   );
 
@@ -118,9 +113,8 @@ const SetupRuby = z
     ({ with: val }): PackageDependency => ({
       datasource: RubyVersionDatasource.id,
       depName: 'ruby',
-      versioning: rubyVersioning.id,
       packageName: 'ruby',
-      ...validateValue(val['ruby-version']),
+      ...parseValue(val['ruby-version']),
     }),
   );
 
@@ -133,9 +127,8 @@ const SetupPDM = z
     ({ with: val }): PackageDependency => ({
       datasource: PypiDatasource.id,
       depName: 'pdm',
-      versioning: pep440versioning.id,
       packageName: 'pdm',
-      ...validateValue(val.version),
+      ...parseValue(val.version),
     }),
   );
 
@@ -152,7 +145,7 @@ const InstallBinary = z
       datasource: GithubReleasesDatasource.id,
       depName: val.repo,
       packageName: val.repo,
-      ...validateValue(val.tag),
+      ...parseValue(val.tag),
     };
   });
 
@@ -167,7 +160,7 @@ const SetupPixi = z
       versioning: condaVersioning.id,
       depName: 'prefix-dev/pixi',
       packageName: 'prefix-dev/pixi',
-      ...validateValue(val['pixi-version']),
+      ...parseValue(val['pixi-version']),
     };
   });
 
@@ -182,7 +175,7 @@ const SetupHatch = z
       datasource: GithubReleasesDatasource.id,
       depName: 'pypa/hatch',
       packageName: 'pypa/hatch',
-      ...validateValue(val.version),
+      ...parseValue(val.version),
       // Strip hatch- prefix from release tags
       extractVersion: '^hatch-(?<version>.+)$',
     }),
@@ -198,7 +191,7 @@ const SetupGolangciLint = z
       datasource: GithubReleasesDatasource.id,
       depName: 'golangci/golangci-lint',
       packageName: 'golangci/golangci-lint',
-      ...validateValue(val.version),
+      ...parseValue(val.version),
     }),
   );
 
@@ -212,7 +205,7 @@ const ZizmorcoreZizmorAction = z
       datasource: DockerDatasource.id,
       depName: 'ghcr.io/zizmorcore/zizmor',
       packageName: 'ghcr.io/zizmorcore/zizmor',
-      ...validateValue(val.version),
+      ...parseValue(val.version),
     }),
   );
 
@@ -225,9 +218,8 @@ const SetupPyright = z
     ({ with: val }): PackageDependency => ({
       datasource: NpmDatasource.id,
       depName: 'pyright',
-      versioning: npmVersioning.id,
       packageName: 'pyright',
-      ...validateValue(val.version, () => val.version === 'PATH'),
+      ...parseValue(val.version, () => val.version === 'PATH'),
     }),
   );
 
