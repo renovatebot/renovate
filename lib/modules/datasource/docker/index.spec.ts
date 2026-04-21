@@ -2345,9 +2345,9 @@ describe('modules/datasource/docker/index', () => {
       ]);
 
       // Digest is not propagated — getDigest() resolves per-arch at lookup time
-      expect(res?.releases[0].newDigest).toBeUndefined();
-      expect(res?.releases[1].newDigest).toBeUndefined();
-      expect(res?.releases[1].releaseTimestamp).toBeUndefined();
+      expect(res?.releases[0]).not.toHaveProperty('newDigest');
+      expect(res?.releases[1]).not.toHaveProperty('newDigest');
+      expect(res?.releases[1]).not.toHaveProperty('releaseTimestamp');
     });
 
     it('adds no library/ prefix for other registries', async () => {
