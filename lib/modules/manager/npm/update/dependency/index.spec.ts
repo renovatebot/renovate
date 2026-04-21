@@ -491,6 +491,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         );
         const res = npmUpdater.updateDependency({
           fileContent: input,
+          packageFile: 'package.json',
           upgrade,
         });
         expect(JSON.parse(res!)?.dependencies).toEqual({
@@ -511,6 +512,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         );
         const res = npmUpdater.updateDependency({
           fileContent: input,
+          packageFile: 'package.json',
           upgrade,
         });
         expect(JSON.parse(res!)?.dependencies).toEqual({
@@ -532,6 +534,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         );
         const res = npmUpdater.updateDependency({
           fileContent: input,
+          packageFile: 'package.json',
           upgrade,
         });
         expect(JSON.parse(res!)?.dependencies).toEqual({
@@ -556,6 +559,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         );
         const res = npmUpdater.updateDependency({
           fileContent: input,
+          packageFile: 'package.json',
           upgrade,
         });
         const parsed = JSON.parse(res!);
