@@ -354,7 +354,7 @@ describe('modules/platform/github/index', () => {
       httpMock
         .scope(githubApiHost, {
           reqheaders: {
-            authorization: 'token ghs_123test',
+            authorization: 'Bearer ghs_123test',
           },
         })
         .post('/graphql')
@@ -450,7 +450,7 @@ describe('modules/platform/github/index', () => {
       httpMock
         .scope('https://ghe.renovatebot.com', {
           reqheaders: {
-            authorization: 'token ghs_123test',
+            authorization: 'Bearer ghs_123test',
           },
         })
         .head('/')
@@ -4759,15 +4759,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'npm',
                 name: 'left-pad',
               },
+              severity: 'high',
               vulnerable_version_range: '0.0.2',
               first_patched_version: { identifier: '0.0.3' },
             },
@@ -4777,9 +4781,12 @@ describe('modules/platform/github/index', () => {
           },
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: null,
             dependency: {
@@ -4830,15 +4837,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'npm',
                 name: 'left-pad',
               },
+              severity: 'high',
               vulnerable_version_range: '0.0.2',
               first_patched_version: { identifier: '0.0.3' },
             },
@@ -4849,9 +4860,12 @@ describe('modules/platform/github/index', () => {
 
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: null,
             dependency: {
@@ -4879,15 +4893,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'medium',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'pip',
                 name: 'FrIeNdLy.-.BARD',
               },
+              severity: 'medium',
               vulnerable_version_range: '0.0.2',
               first_patched_version: { identifier: '0.0.3' },
             },
@@ -4914,15 +4932,19 @@ describe('modules/platform/github/index', () => {
           [
             {
               security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
                 description: 'description',
                 identifiers: [{ type: 'type', value: 'value' }],
                 references: [],
+                severity: 'high',
               },
               security_vulnerability: {
                 package: {
                   ecosystem: 'npm',
                   name: 'left-pad',
                 },
+                severity: 'high',
                 vulnerable_version_range: '0.0.2',
                 first_patched_version: { identifier: '0.0.3' },
               },
@@ -4932,15 +4954,19 @@ describe('modules/platform/github/index', () => {
             },
             {
               security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
                 description: 'description',
                 identifiers: [{ type: 'type', value: 'value' }],
                 references: [],
+                severity: 'critical',
               },
               security_vulnerability: {
                 package: {
                   ecosystem: 'npm',
                   name: 'right-pad',
                 },
+                severity: 'critical',
                 vulnerable_version_range: '0.0.1',
                 first_patched_version: { identifier: '0.0.2' },
               },
@@ -4959,15 +4985,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'low',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'npm',
                 name: 'center-pad',
               },
+              severity: 'low',
               vulnerable_version_range: '0.0.3',
               first_patched_version: { identifier: '0.0.4' },
             },

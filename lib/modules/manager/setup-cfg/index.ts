@@ -15,3 +15,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

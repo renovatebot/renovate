@@ -602,7 +602,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ).toEqual([
         {
           artifactError: {
-            lockFile: 'build.gradle',
+            fileName: 'build.gradle',
             stderr: 'failed',
           },
         },

@@ -156,6 +156,7 @@ Allowed options:
 
 | Option          | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.  |
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
@@ -461,6 +462,7 @@ Other valid cache namespaces are as follows:
 - `datasource-docker-releases-v2`
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
+- `datasource-elm-package`
 - `datasource-endoflife-date`
 - `datasource-forgejo-releases`
 - `datasource-forgejo-tags`
@@ -1041,7 +1043,7 @@ If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 Then you must set this variable at the _server_ and the _workers_.
 
-But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `packageRule`, you only need to set this variable at the _workers_.
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#packagerulesmatchconfidence) `packageRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
 
@@ -1362,6 +1364,10 @@ Renovate also supports connecting to Redis clusters as well. In order to connect
 
 Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
 
+## reportFormatting
+
+This option only applies when [`reportType`](#reporttype) is `file` or `s3`.
+
 ## reportPath
 
 `reportPath` describes the location where the report is written to.
@@ -1423,7 +1429,7 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
 
 <!-- prettier-ignore -->
 !!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 

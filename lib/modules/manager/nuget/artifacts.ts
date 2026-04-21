@@ -23,6 +23,7 @@ import type {
 } from '../types.ts';
 import { createNuGetConfigXml } from './config-formatter.ts';
 import {
+  DIRECTORY_BUILD_PROPS,
   GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
@@ -125,9 +126,14 @@ export async function updateArtifacts({
 
   const isGlobalJson = packageFileName === GLOBAL_JSON;
 
+  const isDirectoryBuildProps =
+    packageFileName === DIRECTORY_BUILD_PROPS ||
+    packageFileName.endsWith(`/${DIRECTORY_BUILD_PROPS}`);
+
   if (
     !isCentralManagement &&
     !isGlobalJson &&
+    !isDirectoryBuildProps &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -143,7 +149,7 @@ export async function updateArtifacts({
 
   const deps = await getDependentPackageFiles(
     packageFileName,
-    isCentralManagement,
+    isCentralManagement || isDirectoryBuildProps,
     isGlobalJson,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
@@ -212,7 +218,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileNames.join(', '),
+          fileName: lockFileNames.join(', '),
           // error is written to stdout
           stderr: err.stdout ?? err.message,
         },
