@@ -1422,7 +1422,7 @@ describe('modules/manager/github-actions/extract', () => {
         {
           currentValue: 'PATH',
           skipStage: 'extract',
-          skipReason: 'unspecified-version',
+          skipReason: 'invalid-version',
           datasource: 'npm',
           depName: 'pyright',
           depType: 'uses-with',
