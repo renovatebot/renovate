@@ -1,5 +1,6 @@
 import * as ansible from './ansible/index.ts';
 import * as ansibleGalaxy from './ansible-galaxy/index.ts';
+import * as ant from './ant/index.ts';
 import * as argoCD from './argocd/index.ts';
 import * as asdf from './asdf/index.ts';
 import * as azurePipelines from './azure-pipelines/index.ts';
@@ -110,10 +111,12 @@ import * as unity3d from './unity3d/index.ts';
 import * as velaci from './velaci/index.ts';
 import * as vendir from './vendir/index.ts';
 import * as woodpecker from './woodpecker/index.ts';
+import * as xcodegen from './xcodegen/index.ts';
 
 const api = new Map<string, ManagerApi>();
 export default api;
 
+api.set('ant', ant);
 api.set('ansible', ansible);
 api.set('ansible-galaxy', ansibleGalaxy);
 api.set('argocd', argoCD);
@@ -225,3 +228,4 @@ api.set('unity3d', unity3d);
 api.set('velaci', velaci);
 api.set('vendir', vendir);
 api.set('woodpecker', woodpecker);
+api.set('xcodegen', xcodegen);

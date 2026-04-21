@@ -743,3 +743,15 @@
     This improves the maintainers' time to triage, as key information is clearly indicated in the format we expect.
 
     Thanks, the Renovate team
+
+'auto:monorepos-preset':
+  comment: >
+    Hi there,
+
+    When adding a new monorepo to the `monorepo.json`, please note that:
+
+    - [ ] Any dependency update(s) from this monorepo will be upgraded in a single PR
+    - [ ] If the dependencies are not all versioned identically (i.e. they're all at `16.0.5` and a release in one requires all being updated) this will lead to [Immortal PRs](https://docs.renovatebot.com/key-concepts/pull-requests/#immortal-prs)
+      - This is not be the intended behaviour, and is generally not recommended by Renovate maintainers. We only accept it if the packages strictly need to be updated together.
+
+    It is worth both the author of the PR and the reviewer confirming that this is the intended behaviour.

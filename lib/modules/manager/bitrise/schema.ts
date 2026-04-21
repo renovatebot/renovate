@@ -13,7 +13,9 @@ export const BitriseFile = Yaml.pipe(
             .object({
               steps: z
                 .array(z.record(z.unknown()).transform((x) => Object.keys(x)))
-                .transform((steps) => steps.flat()),
+                .transform((steps) => steps.flat())
+                .optional()
+                .default([]),
             })
             .transform(({ steps }) => steps),
         )

@@ -23,15 +23,18 @@ import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-import { parseJson } from '../../../util/common.ts';
+import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
 import { setUserEnv } from '../../../util/env.ts';
 import { readLocalFile, readSystemFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as queue from '../../../util/http/queue.ts';
 import * as throttle from '../../../util/http/throttle.ts';
 import { maskToken } from '../../../util/mask.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
 import { getOnboardingConfig } from '../onboarding/branch/config.ts';
 import {
   getOnboardingConfigFromCache,
@@ -42,7 +45,7 @@ import {
   OnboardingState,
   getDefaultConfigFileName,
 } from '../onboarding/common.ts';
-import type { RepoFileConfig } from './types.ts';
+import type { RepoFileConfig, RepositoryWorkerConfig } from './types.ts';
 
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
@@ -103,7 +106,7 @@ export async function detectRepoFileConfig(
   if (OnboardingState.onboardingCacheValid) {
     configFileName = getOnboardingFileNameFromCache();
   } else {
-    configFileName = (await detectConfigFile()) ?? undefined;
+    configFileName = coerceString(await detectConfigFile());
   }
 
   if (!configFileName) {
@@ -184,12 +187,12 @@ export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
 
 // Check for repository config
 export async function mergeRenovateConfig(
-  config: RenovateConfig,
+  config: RepositoryWorkerConfig,
   branchName?: string,
 ): Promise<RenovateConfig> {
-  let returnConfig = { ...config };
+  let returnConfig: RepositoryWorkerConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
-  if (config.requireConfig !== 'ignored') {
+  if (getInheritedOrGlobal('requireConfig') !== 'ignored') {
     repoConfig = await detectRepoFileConfig(branchName);
   }
   if (!repoConfig.configFileParsed && config.mode === 'silent') {
@@ -202,16 +205,56 @@ export async function mergeRenovateConfig(
       configFileParsed: await getOnboardingConfig(config),
     };
   }
-  const configFileParsed = repoConfig?.configFileParsed ?? {};
+  const configFileParsed = coerceObject(repoConfig?.configFileParsed);
   const resolvedRepoConfig = await resolveStaticRepoConfig(
     configFileParsed,
     process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
 
+  // Apply the repositories[] object-entry config between global config and
+  // repository file config.
+  // Must run after repository file config is loaded so its `ignorePresets` can
+  // be included when resolving object-entry presets.
+  const repoEntryConfig = returnConfig.repositoryEntryConfig;
+  delete returnConfig.repositoryEntryConfig;
+
+  if (isNonEmptyObject(repoEntryConfig)) {
+    const repoEntry = repoEntryConfig as RenovateConfig;
+    const toResolve: RenovateConfig = {
+      ...repoEntry,
+      extends: [
+        ...coerceArray(returnConfig.extends),
+        ...coerceArray(repoEntry.extends),
+      ],
+      ignorePresets: [
+        ...coerceArray(returnConfig.ignorePresets),
+        ...coerceArray(repoEntry.ignorePresets),
+        ...coerceArray(resolvedRepoConfig.ignorePresets),
+      ],
+    };
+    delete returnConfig.extends;
+
+    const { config: resolvedRepoEntry } = await presets.resolveConfigPresets(
+      toResolve,
+      config,
+    );
+
+    applyNpmrc(resolvedRepoEntry, 'resolvedRepoEntry');
+
+    const resolvedRepoEntryWithSecrets = applySecretsAndVariablesToConfig({
+      config: resolvedRepoEntry,
+      secrets: config.secrets,
+      variables: config.variables,
+    });
+
+    applyHostRules(resolvedRepoEntryWithSecrets);
+    returnConfig = mergeChildConfig(returnConfig, resolvedRepoEntryWithSecrets);
+  }
+
   if (isNonEmptyArray(returnConfig.extends)) {
     resolvedRepoConfig.extends = [
-      ...returnConfig.extends,
-      ...(resolvedRepoConfig.extends ?? []),
+      ...coerceArray(returnConfig.extends),
+      ...coerceArray(resolvedRepoConfig.extends),
     ];
     delete returnConfig.extends;
   }
@@ -229,7 +272,7 @@ export async function mergeRenovateConfig(
   }
   if (migratedConfig.warnings) {
     returnConfig.warnings = [
-      ...(returnConfig.warnings ?? []),
+      ...coerceArray(returnConfig.warnings),
       ...migratedConfig.warnings,
     ];
   }
@@ -263,12 +306,12 @@ export async function mergeRenovateConfig(
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
     secrets: mergeChildConfig(
-      config.secrets ?? {},
-      resolvedConfig.secrets ?? {},
+      coerceObject(config.secrets),
+      coerceObject(resolvedConfig.secrets),
     ),
     variables: mergeChildConfig(
-      config.variables ?? {},
-      resolvedConfig.variables ?? {},
+      coerceObject(config.variables),
+      coerceObject(resolvedConfig.variables),
     ),
   });
 
@@ -295,7 +338,7 @@ export async function mergeRenovateConfig(
 
 export function applyNpmrc(
   config: RenovateConfig,
-  configType?: 'resolved' | 'decrypted',
+  configType?: 'resolved' | 'resolvedRepoEntry' | 'decrypted',
 ): void {
   setNpmTokenInNpmrc(config);
   if (!isString(config.npmrc)) {
@@ -427,7 +470,10 @@ export function mergeStaticConfig(
 ): AllConfig {
   // merge extends
   if (isNonEmptyArray(staticRepoConfig.extends)) {
-    config.extends = [...staticRepoConfig.extends, ...(config.extends ?? [])];
+    config.extends = [
+      ...staticRepoConfig.extends,
+      ...coerceArray(config.extends),
+    ];
     delete staticRepoConfig.extends;
   }
 
