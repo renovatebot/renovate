@@ -297,7 +297,7 @@ function getShortestMatchingVersion(
   prefix: string,
   newParsed: SemVer,
   allVersions: Set<string>,
-  minLevel: 'major' | 'minor' | 'patch' = 'major',
+  minLevel: 'major' | 'minor' = 'major',
 ): string | null {
   const { major, minor, patch } = newParsed;
   const versions = new Set(allVersions);
@@ -310,11 +310,9 @@ function getShortestMatchingVersion(
     }
   }
 
-  if (minLevel !== 'patch') {
-    const v = `${prefix}${major}.${minor}`;
-    if (versions.has(v)) {
-      return v;
-    }
+  const v = `${prefix}${major}.${minor}`;
+  if (versions.has(v)) {
+    return v;
   }
 
   const patchVersion = `${prefix}${major}.${minor}.${patch}`;

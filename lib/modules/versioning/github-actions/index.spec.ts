@@ -658,6 +658,27 @@ describe('modules/versioning/github-actions/index', () => {
         expect(res).toEqual('v8.0.0-rc3');
       });
 
+      it('returns newVersion when newVersion is a floating tag and allVersions is not set', () => {
+        const res = githubActions.getNewValue({
+          currentValue: 'v7',
+          currentVersion: 'v7.6.0',
+          newVersion: 'v8',
+          rangeStrategy: 'replace',
+        });
+        expect(res).toEqual('v8');
+      });
+
+      it('returns the floating newVersion when it exists in allVersions', () => {
+        const res = githubActions.getNewValue({
+          currentValue: 'v7',
+          currentVersion: 'v7.6.0',
+          newVersion: 'v8',
+          rangeStrategy: 'replace',
+          allVersions: new Set(['v7.6.0', 'v8']),
+        });
+        expect(res).toEqual('v8');
+      });
+
       describe('if the newVersion is not found in allVersions', () => {
         // because this is not a valid case - if the newVersion wasn't found in allVersions, how would we have been called?
         it('newVersion is returned anyway', () => {
