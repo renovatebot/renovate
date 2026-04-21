@@ -217,6 +217,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Gitea](../modules/platform/gitea/index.md)
 - [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
 - [GitLab](../modules/platform/gitlab/index.md)
+- [SCM-Manager](../modules/platform/scm-manager/index.md)
 
 ### GitHub.com token for changelogs (and tools)
 
@@ -233,3 +234,7 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 ### Self-hosting examples
 
 For more examples on running Renovate self-hosted, read our [Self-hosted examples](../examples/self-hosting.md) page.
+
+### Community tools
+
+There are also some [community-maintained tools](../community-tools.md) which may help running Renovate.

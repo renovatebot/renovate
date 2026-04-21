@@ -1486,13 +1486,13 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'These dependencies are either deprecated or have replacements available',
+            'The following dependencies are either deprecated or have replacements available.',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            '| npm | `cookie-parser` | ![Unavailable]',
+            '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'npm | `express-handlebars` | ![Available]',
+            'npm | [express-handlebars](https://redirect.github.com/express-handlebars/express-handlebars) | ![Available]',
           );
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1970,8 +1970,15 @@ None detected
 
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
+      expect(result).toContain('## Abandoned Dependencies');
+      expect(result).toContain(
+        'The following dependencies have not received updates for an extended period and may be unmaintained.',
+      );
+      expect(result).toContain(
+        '<summary>View abandoned dependencies (1)</summary>',
+      );
       expect(result).toContain('> ℹ️ **Note**');
-      expect(result).toContain('| Datasource | Name | Last Updated |');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
     });
@@ -2012,6 +2019,15 @@ None detected
 
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
+      expect(result).toContain('## Abandoned Dependencies');
+      expect(result).toContain(
+        'The following dependencies have not received updates for an extended period and may be unmaintained.',
+      );
+      expect(result).toContain(
+        '<summary>View abandoned dependencies (3)</summary>',
+      );
+      expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| gradle | `org.example:lib` | `2019-07-22` |');
       expect(result).toContain('| npm | `pkg1` | `2021-01-10` |');
       expect(result).toContain('| npm | `pkg3` | `2020-11-05` |');
@@ -2037,6 +2053,15 @@ None detected
 
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
+      expect(result).toContain('## Abandoned Dependencies');
+      expect(result).toContain(
+        'The following dependencies have not received updates for an extended period and may be unmaintained.',
+      );
+      expect(result).toContain(
+        '<summary>View abandoned dependencies (2)</summary>',
+      );
+      expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `pkg-with-date` | `2021-03-17` |');
       expect(result).toContain('| npm | `pkg-no-date` | `unknown` |');
     });

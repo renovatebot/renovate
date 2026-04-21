@@ -33,7 +33,7 @@ vi.mock('fs-extra', async () => {
 });
 
 // TODO: why do we need git here?
-vi.unmock('../../util/git');
+vi.unmock('../../util/git/index.ts');
 
 const addSecretForSanitizing = vi.spyOn(secrets, 'addSecretForSanitizing');
 const parseConfigs = vi.spyOn(configParser, 'parseConfigs');
@@ -73,6 +73,28 @@ describe('workers/global/index', () => {
       expect(repoConfig.topLevelOrg).toBe('a');
       expect(repoConfig.parentOrg).toBe('a');
       expect(repoConfig.repository).toBe('a/b');
+    });
+
+    it('stores repositoryEntryConfig for repositories[] object entries', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(globalConfig, {
+        repository: 'test/repo',
+        extends: [':automergeAll'],
+        packageRules: [{ matchPackageNames: ['lodash'], enabled: false }],
+      });
+      expect(repoConfig.repositoryEntryConfig).toEqual({
+        extends: [':automergeAll'],
+        packageRules: [{ matchPackageNames: ['lodash'], enabled: false }],
+      });
+      expect(repoConfig.repository).toBe('test/repo');
+    });
+
+    it('does not store repositoryEntryConfig for repositories[] string entries', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        globalConfig,
+        'test/repo',
+      );
+      expect(repoConfig.repositoryEntryConfig).toBeUndefined();
+      expect(repoConfig.repository).toBe('test/repo');
     });
   });
 
@@ -179,6 +201,19 @@ describe('workers/global/index', () => {
       },
     ]);
     await expect(globalWorker.start()).resolves.toBe(0);
+  });
+
+  it('does not log info message when log level is not info', async () => {
+    logger.logLevel.mockImplementation(() => 'debug');
+    parseConfigs.mockResolvedValueOnce({
+      baseDir: '/tmp/base',
+      cacheDir: '/tmp/cache',
+      repositories: [],
+    });
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(logger.logger.info).not.toHaveBeenCalledExactlyOnceWith(
+      expect.stringContaining('Set LOG_LEVEL=debug'),
+    );
   });
 
   describe('processes platforms', () => {

@@ -1,5 +1,6 @@
 import { isEmptyArray, isEmptyObject } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import { newlineRegex } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
@@ -58,7 +59,7 @@ export const GemVersions = LooseArray(
         metadata,
       }): Release => {
         const result: Release = { version, releaseTimestamp };
-        const constraints: Record<string, string[]> = {};
+        const constraints: Partial<Record<ConstraintName, string[]>> = {};
 
         if (platform) {
           constraints.platform = [platform];

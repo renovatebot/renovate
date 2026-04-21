@@ -44,7 +44,9 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     httpMock
       .scope('https://example.com')
       .get('/.well-known/terraform.json')
-      .reply(200, '');
+      .reply(200, {})
+      .get('/test/gitlab/versions')
+      .reply(200, { versions: [] });
     const result = TerraformProviderHash.createHashes(
       'https://example.com',
       'test/gitlab',

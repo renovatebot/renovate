@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { UtcDate } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release } from '../types.ts';

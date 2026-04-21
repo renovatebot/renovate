@@ -96,15 +96,15 @@ describe('workers/repository/process/libyear', () => {
       calculateLibYears(config, packageFiles);
 
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
-        'No currentVersionTimestamp for some/image',
+        'LibYears: no currentVersionTimestamp for some/image',
       );
 
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
-        'No releaseTimestamp for dep1 update to 3.0.0',
+        'LibYears: no releaseTimestamp for dep1 update to 3.0.0',
       );
 
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
-        'No currentVersionTimestamp for dep3',
+        'LibYears: no currentVersionTimestamp for dep3',
       );
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -136,6 +136,88 @@ describe('workers/repository/process/libyear', () => {
         dependencyStatus: {
           outdated: 4,
           total: 5,
+        },
+      });
+    });
+
+    // NOTE that it shouldn't be possible for `updates` to be set when `enabled: false`
+    it('skips disabled dependencies when calculating libYears', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                datasource: 'npm',
+                currentVersion: '0.1.0',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '2.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '3.0.0',
+                  },
+                ],
+              },
+              {
+                depName: 'dep2',
+                enabled: false,
+                datasource: 'npm',
+                currentVersion: '0.1.0',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                // NOTE that updates shouldn't be set when `enabled: false`, but this clarifies that the existing behaviour is to take that into effect
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '2.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                  {
+                    newVersion: '3.0.0',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      calculateLibYears(config, packageFiles);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          libYears: {
+            managers: {
+              npm: 1,
+            },
+            total: 1,
+          },
+          dependencyStatus: {
+            outdated: 1,
+            total: 1,
+          },
+        },
+        'Repository libYears',
+      );
+      expect(addLibYears).toHaveBeenCalledExactlyOnceWith(config, {
+        libYears: {
+          managers: {
+            npm: 1,
+          },
+          total: 1,
+        },
+        dependencyStatus: {
+          outdated: 1,
+          total: 1,
         },
       });
     });
@@ -213,6 +295,49 @@ describe('workers/repository/process/libyear', () => {
           dependencyStatus: {
             outdated: 2,
             total: 2,
+          },
+        },
+        'Repository libYears',
+      );
+    });
+
+    it('ignores disabled dependencies', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'disabled-dep',
+                datasource: 'npm',
+                currentVersion: '1.0.0',
+                enabled: false,
+                updates: [
+                  {
+                    newVersion: '2.0.0',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      calculateLibYears(config, packageFiles);
+
+      expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+        'No currentVersionTimestamp for disabled-dep',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          libYears: {
+            managers: {},
+            total: 0,
+          },
+          dependencyStatus: {
+            outdated: 0,
+            total: 0,
           },
         },
         'Repository libYears',

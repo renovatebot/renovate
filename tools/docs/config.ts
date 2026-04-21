@@ -1,10 +1,15 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
+import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
-import { allManagersList } from '../../lib/modules/manager/index.ts';
+import {
+  allManagersList,
+  getManagers,
+} from '../../lib/modules/manager/index.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
-import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
+import { formatCell, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -52,25 +57,31 @@ function buildHtmlTable(data: string[][]): string {
     return '';
   }
   let table = `<table>\n`;
-  for (const [i, row] of data.entries()) {
-    if (i === 0) {
+  for (const [rowIndex, row] of data.entries()) {
+    if (rowIndex === 0) {
       table += indent`${1}<thead>\n`;
     }
 
-    if (i === 1) {
+    if (rowIndex === 1) {
       table += indent`${1}</thead>\n` + indent`${1}<tbody>\n`;
     }
 
     table += indent`${2}<tr>\n`;
-    for (const col of row) {
-      if (i === 0) {
+    for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      const col = row[colIndex];
+
+      if (rowIndex === 0) {
+        // header row
         table += indent`${3}<th>${col}</th>\n`;
         continue;
       }
+
+      const cellHtml = formatCell(row, colIndex);
+
       table +=
-        indent`${3}<td>${col}` +
+        indent`${3}${cellHtml}` +
         (`${col}`.endsWith('\n') ? indent`${3}` : '') +
-        `</td>\n`;
+        `\n`;
     }
     table += indent`${2}</tr>\n`;
   }
@@ -137,18 +148,21 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     }
   });
 
-  if (type === 'array') {
-    data.push(['default', '<code>[]</code>']);
+  if (data.find((k) => k[0] === 'default') === undefined) {
+    if (type === 'array') {
+      data.push(['default', '<code>[]</code>']);
+    }
+    if (type === 'string' && def === undefined) {
+      data.push(['default', '<code>null</code>']);
+    }
+    if (type === 'boolean' && def === undefined) {
+      data.push(['default', '<code>true</code>']);
+    }
+    if (type === 'boolean' && def === null) {
+      data.push(['default', '<code>null</code>']);
+    }
   }
-  if (type === 'string' && def === undefined) {
-    data.push(['default', '<code>null</code>']);
-  }
-  if (type === 'boolean' && def === undefined) {
-    data.push(['default', '<code>true</code>']);
-  }
-  if (type === 'boolean' && def === null) {
-    data.push(['default', '<code>null</code>']);
-  }
+
   return buildHtmlTable(data);
 }
 
@@ -217,6 +231,49 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   return indexed;
 }
 
+function generateLockFileTable(): string {
+  const allManagers = getManagers();
+  const rows: { name: string; lockFiles: string[] }[] = [];
+
+  for (const [name, definition] of allManagers) {
+    if (
+      definition.supportsLockFileMaintenance &&
+      definition.lockFileNames?.length
+    ) {
+      rows.push({ name, lockFiles: definition.lockFileNames });
+    }
+  }
+
+  rows.sort((a, b) => a.name.localeCompare(b.name));
+
+  let table = '\n| Manager | Lockfile |\n';
+  table += '| :-- | :-- |\n';
+  for (const row of rows) {
+    const lockFiles = row.lockFiles.map((f) => `\`${f}\``).join(', ');
+    table += `| \`${row.name}\` | ${lockFiles} |\n`;
+  }
+
+  return table;
+}
+
+function generateConfigFileNames(): string {
+  // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
+  const filenames = getConfigFileNames();
+
+  const all = Array.from(new Set(filenames))
+    // remove `package.json`, as we'll write a custom line item for it
+    .filter((v) => v !== 'package.json');
+
+  let output = '';
+  for (const f of all) {
+    output += `1. \`${f}\`\n`;
+  }
+
+  output += '1. `package.json` _(within a `"renovate"` section)_\n';
+
+  return output.trimEnd();
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -237,36 +294,68 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
 
-      if (!indexed[option.name]) {
-        throw new Error(
-          `Config option "${option.name}" is missing an entry in ${configFile}`,
-        );
+      // Child options are indexed as "parent.optionName"; collect all matching keys
+      let lookupKeys: string[] = [];
+      for (const parent of option.parents ?? []) {
+        if (parent !== '.') {
+          const key = `${parent}.${option.name}`;
+          if (indexed[key]) {
+            lookupKeys.push(key);
+          }
+        }
       }
-
-      const [headerIndex, footerIndex] = indexed[option.name];
+      // Fall back to plain name for top-level ## options (e.g. enabled, managerFilePatterns)
+      if (lookupKeys.length === 0) {
+        if (!indexed[option.name]) {
+          throw new Error(
+            `Config option "${option.name}" is missing an entry in ${configFile}`,
+          );
+        }
+        lookupKeys = [option.name];
+      }
 
       el.cli = getCliName(option);
       el.env = getEnvName(option);
       stringifyArrays(el);
 
-      configOptionsRaw[headerIndex] +=
-        `\n${option.description}\n\n` +
-        genTable(Object.entries(el), option.type, option.default);
+      for (const key of lookupKeys) {
+        const [headerIndex, footerIndex] = indexed[key];
 
-      if (el.advancedUse) {
-        configOptionsRaw[headerIndex] += generateAdvancedUse();
-      }
+        configOptionsRaw[headerIndex] +=
+          `\n${option.description}\n\n` +
+          genTable(Object.entries(el), option.type, option.default);
 
-      if (el.experimental) {
-        configOptionsRaw[footerIndex] += genExperimentalMsg(el);
-      }
+        if (el.advancedUse) {
+          configOptionsRaw[headerIndex] += generateAdvancedUse();
+        }
 
-      if (is.nonEmptyString(el.deprecationMsg)) {
-        configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+        if (el.experimental) {
+          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+        }
+
+        if (is.nonEmptyString(el.deprecationMsg)) {
+          configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+        }
       }
     });
 
-  await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));
+  let content = configOptionsRaw.join('\n');
+
+  if (!bot) {
+    content = replaceContent(content, generateLockFileTable(), {
+      replaceStart: '<!-- lock-file-maintenance-table-start -->',
+      replaceStop: '<!-- lock-file-maintenance-table-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateConfigFileNames(), {
+      replaceStart: '<!-- config-filenames-begin -->',
+      replaceStop: '<!-- config-filenames-end -->',
+    });
+  }
+
+  await updateFile(`${dist}/${configFile}`, content);
 }
 
 function generateAdvancedUse(): string {

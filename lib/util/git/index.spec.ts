@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import tmp from 'tmp-promise';
@@ -19,13 +20,13 @@ import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
 
-vi.mock('./conflicts-cache');
-vi.mock('./behind-base-branch-cache');
-vi.mock('./modified-cache');
+vi.mock('./conflicts-cache.ts');
+vi.mock('./behind-base-branch-cache.ts');
+vi.mock('./modified-cache.ts');
 vi.mock('timers/promises');
-vi.mock('../cache/repository');
-vi.mock('./auth');
-vi.unmock('.');
+vi.mock('../cache/repository/index.ts');
+vi.mock('./auth.ts');
+vi.unmock('./index.ts');
 
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
@@ -62,9 +63,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await fs.writeFile(base.path + '/master_file', defaultBranch);
     await fs.writeFile(base.path + '/file_to_delete', 'bye');
     await repo.add(['master_file', 'file_to_delete']);
-    await repo.commit('master message', [
-      '--date=' + masterCommitDate.toISOString(),
-    ]);
+    process.env.GIT_COMMITTER_DATE = masterCommitDate.toISOString();
+    await repo.commit('master message');
+    delete process.env.GIT_COMMITTER_DATE;
 
     await repo.checkout(['-b', 'renovate/future_branch', defaultBranch]);
     await fs.writeFile(base.path + '/future_file', 'future');
@@ -93,6 +94,19 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('nested message');
 
+    await repo.checkout(['-b', 'renovate/hidden-unicode', defaultBranch]);
+    await fs.writeFile(base.path + '/Dockerfile', 'FROM scratch\u00A0');
+    await repo.add(['Dockerfile']);
+    await repo.commit('hidden Unicode');
+
+    await repo.checkout(['-b', 'renovate/binary-file', defaultBranch]);
+    const binaryContent = Buffer.from([
+      0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x00,
+    ]); // 0xe2 0x80 0x8b is UTF-8 encoding of U+200B (zero-width space)
+    await fs.writeFile(base.path + '/binary.dat', binaryContent);
+    await repo.add(['binary.dat']);
+    await repo.commit('add binary file');
+
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
     await repo.checkoutBranch(
@@ -105,9 +119,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
     await repo.checkout(defaultBranch);
-
-    // eslint-disable-next-line vitest/no-standalone-expect
-    expect(git.getBranchList()).toBeEmptyArray();
   });
 
   let tmpDir: tmp.DirectoryResult;
@@ -132,6 +143,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     // override some local git settings for better testing
     const local = simpleGit(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
+    await local.addConfig('user.name', 'Jest');
+    await local.addConfig('user.email', 'Jest@example.com');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
@@ -428,6 +441,52 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
+  describe('getBranchUpdateDate(branchName)', () => {
+    it('should return same value for equal refs', async () => {
+      await git.checkoutBranchFromRemote('renovate/equal_branch', 'origin');
+      await git.fetchBranch(defaultBranch);
+      const date = await git.getBranchUpdateDate('renovate/equal_branch');
+      const defaultDate = await git.getBranchUpdateDate(defaultBranch);
+      expect(date!.toISO()).toBe(defaultDate!.toISO());
+      expect(date).toBeInstanceOf(DateTime);
+    });
+
+    it('should return null when branch does not exist', async () => {
+      expect(await git.getBranchUpdateDate('not_found')).toBeNull();
+    });
+
+    it('should return null and log error when git show fails', async () => {
+      // Create a valid branch first
+      const branchName = 'renovate/test_error_branch';
+      await git.commitFiles({
+        branchName,
+        files: [
+          {
+            type: 'addition',
+            path: 'error-test-file',
+            contents: 'test content',
+          },
+        ],
+        message: 'Test commit',
+      });
+
+      // Spy on DateTime.fromISO to simulate an error in getCommitDate
+      const fromISOSpy = vi
+        .spyOn(DateTime, 'fromISO')
+        .mockImplementationOnce(() => {
+          throw new Error('simulated git show error');
+        });
+
+      const result = await git.getBranchUpdateDate(branchName);
+
+      expect(result).toBeNull();
+      expect(fromISOSpy).toHaveBeenCalled();
+
+      // Restore original implementation
+      fromISOSpy.mockRestore();
+    });
+  });
+
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
       const file: FileChange = {
@@ -559,6 +618,28 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('returns null for 404', async () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
+    });
+
+    it('logs a warning if hidden Unciode characters are found', async () => {
+      await git.getFile('Dockerfile', 'renovate/hidden-unicode');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'Dockerfile', hiddenCharacters: '\\u00A0' },
+        'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
+    });
+
+    it('logs a trace message (not warning) if hidden Unicode characters are found in a binary file', async () => {
+      await git.getFile('binary.dat', 'renovate/binary-file');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        {
+          file: 'binary.dat',
+          hiddenCharacters: expect.stringContaining('\\u200B'),
+        },
+        'Hidden Unicode characters discovered in file `binary.dat`, but not logging higher than TRACE as it appears to be a binary file',
+      );
     });
   });
 
@@ -826,8 +907,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   describe('getCommitMessages()', () => {
-    it('returns commit messages', async () => {
-      expect(await git.getCommitMessages()).toEqual([
+    it('returns commit messages without merge commits', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.merge(['--no-ff', 'origin/renovate/future_branch']);
+      expect((await git.getCommitMessages()).sort()).toEqual([
+        'future message',
         'master message',
         'past message',
       ]);
@@ -963,6 +1047,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const repo = simpleGit(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
+    });
+
+    it('should not pass extraCloneOpts to ls-remote when local repo exists', async () => {
+      const extraCloneOpts = {
+        '-c': 'extra.clone.config=test-extra-config-value',
+      };
+
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+      await git.syncGit();
+
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+
+      expect(rawSpy).toHaveBeenCalledWith([
+        'ls-remote',
+        '--heads',
+        origin.path,
+      ]);
     });
   });
 
@@ -1275,6 +1379,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
       expect(branch).toBe('develop');
+    });
+
+    it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
+      // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+      process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+      await git.initRepo({
+        url: origin.path,
+      });
+
+      // initialise the repo
+      await git.syncGit();
+      // then hit the RENOVATE_X_CLEAR_HOOKS code path
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
+      expect(hooksPath).toBe('/dev/null');
+      delete process.env.RENOVATE_X_CLEAR_HOOKS;
     });
   });
 

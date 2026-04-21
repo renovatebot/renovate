@@ -130,6 +130,7 @@ export function exec(
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
       detached: process.platform !== 'win32',
       shell,
+      extendEnv: false,
     });
 
     // handle streams

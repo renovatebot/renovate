@@ -122,6 +122,40 @@ export async function parseConfigs(
   logger.debug({ config: resolvedGlobalExtends }, 'Resolved global extends');
   logger.debug({ config: combinedConfig }, 'Combined config');
 
+  // TODO #41551
+  if (isNonEmptyArray(cliConfig.repositories)) {
+    const existingRepos = [
+      ...(fileConfig.repositories ?? []),
+      ...(additionalFileConfig.repositories ?? []),
+      ...(envConfig.repositories ?? []),
+    ];
+
+    if (isNonEmptyArray(existingRepos)) {
+      const allStrings = existingRepos.every(
+        (repo) => typeof repo === 'string',
+      );
+      let shouldWarn = true;
+
+      if (allStrings) {
+        const areEqual =
+          cliConfig.repositories.length === existingRepos.length &&
+          cliConfig.repositories.every(
+            (repo, idx) => repo === existingRepos[idx],
+          );
+
+        if (areEqual) {
+          shouldWarn = false;
+        }
+      }
+
+      if (shouldWarn) {
+        logger.warn(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      }
+    }
+  }
+
   if (config.detectGlobalManagerConfig) {
     logger.debug('Detecting global manager config');
     const globalManagerConfig = await detectAllGlobalConfig();

@@ -8,7 +8,7 @@ import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
 import { setCustomEnv } from '../env.ts';
 import * as dockerModule from './docker/index.ts';
 import { getHermitEnvs } from './hermit.ts';
-import { exec, getToolSettingsOptions } from './index.ts';
+import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
@@ -21,7 +21,7 @@ import { asRawCommand } from './utils.ts';
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
 vi.mock('./hermit.ts', async () => ({
-  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit')),
+  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit.ts')),
   getHermitEnvs: vi.fn(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
@@ -1413,6 +1413,140 @@ describe('util/exec/index', () => {
           );
         });
       });
+    });
+
+    describe('for Node settings', () => {
+      beforeEach(() => {
+        GlobalConfig.set({
+          toolSettings: { nodeMaxMemory: 1024 },
+        });
+
+        // remove any test-specific overrides
+        delete config.toolSettings;
+      });
+
+      it('does not return a default value if no global or repo config', () => {
+        GlobalConfig.set({});
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          nodeMaxMemory: undefined,
+        });
+      });
+
+      it('does not return default values if empty global config', () => {
+        GlobalConfig.set({
+          toolSettings: {},
+        });
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          nodeMaxMemory: undefined,
+        });
+      });
+
+      describe('does not allow floating point numbers', () => {
+        it('in global config', () => {
+          GlobalConfig.set({
+            toolSettings: { nodeMaxMemory: 1024.1536 },
+          });
+
+          const res = getToolSettingsOptions(undefined);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+
+        it('in repo config', () => {
+          GlobalConfig.set({});
+
+          config.toolSettings = {
+            nodeMaxMemory: 1024.1536,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+      });
+
+      describe('when using repo config to override memory limits', () => {
+        it('when below global settings, repo settings are used', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 700,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 700,
+          });
+        });
+
+        it('when repo settings are the same as global settings, they are used', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 1024,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+
+        it('when repo nodeMaxMemory setting is lower than global settings, it is applied', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 128,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 128,
+          });
+        });
+
+        it('when repo nodeMaxMemory setting is higher than global settings, they are ignored', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+
+        it('when repo nodeMaxMemory setting is higher than global settings, a debug log is logged', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'A higher nodeMaxMemory (8192) than the global configuration (1024) is not permitted for Node invocations. Using global configuration instead',
+          );
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+      });
+    });
+  });
+
+  describe('gradleJvmArg()', () => {
+    it('takes the values given to it, and returns the JVM arguments', () => {
+      const result = gradleJvmArg({ jvmMemory: 256, jvmMaxMemory: 768 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx768m"');
     });
   });
 });

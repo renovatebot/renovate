@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '~test/util.ts';
 import { platform } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
@@ -12,6 +13,7 @@ describe('workers/repository/init/apis', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
+      GlobalConfig.reset();
       config = { ...getConfig() };
       config.errors = [];
       config.warnings = [];
@@ -120,6 +122,7 @@ describe('workers/repository/init/apis', () => {
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
+      GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,

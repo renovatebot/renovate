@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { toArray } from '../../../util/array.ts';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 import { trimLeadingSlash } from '../../../util/url.ts';

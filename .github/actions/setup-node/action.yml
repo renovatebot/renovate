@@ -21,6 +21,25 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # Per #41288 and #41289, make sure that we fail if the values are provided as an empty string
+    - name: Make sure that required parameters aren't an empty string
+      shell: bash
+      run: |
+        error=0
+        if [[ -z "${{ inputs.node-version }}" ]]; then
+          >&2 echo 'Error: `node-version` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ -z "${{ inputs.os }}" ]]; then
+          >&2 echo 'Error: `os` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ $error -ne 0 ]]; then
+          exit 1
+        fi
+
     - name: Calculate `CACHE_KEY`
       shell: bash
       run: |
@@ -34,7 +53,7 @@ runs:
 
     - name: Restore `node_modules`
       id: node-modules-restore
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -48,12 +67,12 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+      uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
       with:
         standalone: true
 
     - name: Setup Node
-      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
         node-version: ${{ inputs.node-version }}
 
@@ -64,7 +83,7 @@ runs:
 
     - name: Cache and restore `pnpm store`
       if: env.CACHE_HIT != 'true'
-      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ env.PNPM_STORE }}
         key: |
@@ -78,7 +97,7 @@ runs:
         enableCrossOsArchive: true
 
     - name: Install dependencies
-      uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+      uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
       if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
@@ -87,7 +106,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}

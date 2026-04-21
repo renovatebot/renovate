@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { filterMap } from '../../../util/filter-map.ts';
 import { Yaml } from '../../../util/schema-utils/index.ts';
 import { parseStep } from './utils.ts';
@@ -13,7 +13,9 @@ export const BitriseFile = Yaml.pipe(
             .object({
               steps: z
                 .array(z.record(z.unknown()).transform((x) => Object.keys(x)))
-                .transform((steps) => steps.flat()),
+                .transform((steps) => steps.flat())
+                .optional()
+                .default([]),
             })
             .transform(({ steps }) => steps),
         )

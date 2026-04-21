@@ -17,6 +17,7 @@ import type {
 } from '../modules/manager/types.ts';
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
+import type { ConstraintName } from '../util/exec/types.ts';
 import type { FileChange } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -28,7 +29,8 @@ import type {
 export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
 export interface BranchUpgradeConfig
-  extends Merge<RenovateConfig, PackageDependency>,
+  extends
+    Merge<RenovateConfig, PackageDependency>,
     Partial<LookupUpdate>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
@@ -118,6 +120,8 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+
+  constraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -140,7 +144,8 @@ export type BranchResult =
   | 'pr-created'
   | 'pr-edited'
   | 'pr-limit-reached'
-  | 'commit-limit-reached'
+  | 'commit-per-run-limit-reached'
+  | 'commit-hourly-limit-reached'
   | 'branch-limit-reached'
   | 'rebase'
   | 'update-not-scheduled'
@@ -152,9 +157,7 @@ export type CacheFingerprintMatchResult =
   | 'no-fingerprint';
 
 export interface BranchConfig
-  extends BranchUpgradeConfig,
-    LegacyAdminConfig,
-    PlatformPrOptions {
+  extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
   automergeComment?: string;
   automergedPreviously?: boolean;
   baseBranch: string;
@@ -249,7 +252,7 @@ export interface UpgradeFingerprintConfig {
   lockedVersion?: string;
   manager?: string | null;
   newName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   packageFile?: string;

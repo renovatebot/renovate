@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { toArray } from '../../../util/array.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';

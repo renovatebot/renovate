@@ -15,14 +15,13 @@ vi.mock('../../../../util/cache/repository/index.ts');
 const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
-  beforeAll(() => {
-    GlobalConfig.reset();
+  beforeEach(() => {
+    GlobalConfig.set({ onboarding: true, requireConfig: 'required' });
   });
 
   const config = partial<RenovateConfig>({
     requireConfig: 'required',
     suppressNotifications: [],
-    onboarding: true,
   });
 
   const bodyStruct = {

@@ -16,9 +16,14 @@ import { id as rubyVersioningId } from '../../modules/versioning/ruby/index.ts';
 import { id as semverVersioningId } from '../../modules/versioning/semver/index.ts';
 import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced/index.ts';
 import { getEnv } from '../env.ts';
-import type { Opt, ToolConfig, ToolConstraint } from './types.ts';
+import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
-const allToolConfig: Record<string, ToolConfig> = {
+const allToolConfig: Record<ToolName, ToolConfig> = {
+  bazelisk: {
+    datasource: 'github-releases',
+    packageName: 'bazelbuild/bazelisk',
+    versioning: semverVersioningId,
+  },
   bun: {
     datasource: 'github-releases',
     packageName: 'oven-sh/bun',
@@ -236,18 +241,18 @@ const allToolConfig: Record<string, ToolConfig> = {
 };
 
 let _getPkgReleases: Promise<
-  typeof import('../../modules/datasource/index.js')
+  typeof import('../../modules/datasource/index.ts')
 > | null = null;
 
 async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
-  _getPkgReleases ??= import('../../modules/datasource/index.js');
+  _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);
 }
 
-export function supportsDynamicInstall(toolName: string): boolean {
+export function supportsDynamicInstall(toolName: ToolName): boolean {
   return !!allToolConfig[toolName];
 }
 

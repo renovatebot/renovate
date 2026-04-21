@@ -35,6 +35,32 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowShellExecutorForPostUpgradeCommands
 
+Enabling this allows `postUpgradeTasks`' `commands` to execute as if they're in a shell.
+
+This takes effect if you are using shell semantics, such as:
+
+```json title="allowShellExecutorForPostUpgradeCommands=true will allow this to run as expected"
+{
+  "postUpgradeTasks": {
+    "commands": ["echo '...' > go.mod", "go mod tidy || true"],
+    "fileFilters": ["**/*.go"],
+    "executionMode": "branch"
+  }
+}
+```
+
+This will not affect calling a script like:
+
+```json title="allowShellExecutorForPostUpgradeCommands=true will have not effect"
+{
+  "postUpgradeTasks": {
+    "commands": ["bash .scripts/post-yarn-update.sh"],
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "update"
+  }
+}
+```
+
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
@@ -130,7 +156,8 @@ Allowed options:
 
 | Option          | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
-| `goGenerate`    | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update.     |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.  |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
 ## autodiscover
@@ -435,6 +462,7 @@ Other valid cache namespaces are as follows:
 - `datasource-docker-releases-v2`
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
+- `datasource-elm-package`
 - `datasource-endoflife-date`
 - `datasource-forgejo-releases`
 - `datasource-forgejo-tags`
@@ -1015,7 +1043,7 @@ If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 Then you must set this variable at the _server_ and the _workers_.
 
-But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `packageRule`, you only need to set this variable at the _workers_.
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#packagerulesmatchconfidence) `packageRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
 
@@ -1129,6 +1157,10 @@ The intention is that this allows Renovate to do a faster `git fetch` between ru
 It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
 ## platform
+
+## prCacheSyncMaxPages
+
+Maximum number of pages to fetch when syncing the pull request cache.
 
 ## prCommitsPerRunLimit
 
@@ -1332,6 +1364,10 @@ Renovate also supports connecting to Redis clusters as well. In order to connect
 
 Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
 
+## reportFormatting
+
+This option only applies when [`reportType`](#reporttype) is `file` or `s3`.
+
 ## reportPath
 
 `reportPath` describes the location where the report is written to.
@@ -1368,6 +1404,12 @@ Set this to `"enabled"` to have Renovate maintain a JSON file cache per-reposito
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
+## repositoryCacheForceLocal
+
+If set to `true`, Renovate will persist repository cache locally after uploading to S3.
+
+This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
+
 ## repositoryCacheType
 
 ```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
@@ -1387,7 +1429,7 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
 
 <!-- prettier-ignore -->
 !!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 

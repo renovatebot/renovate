@@ -1,5 +1,5 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -11,6 +11,7 @@ import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { Release, ReleaseResult } from '../types.ts';
+import { CachedPackument } from './schema.ts';
 import type { NpmResponse } from './types.ts';
 
 const SHORT_REPO_REGEX = regEx(
@@ -80,6 +81,7 @@ export async function getDependency(
       namespace: 'datasource-npm:cache-provider',
       checkAuthorizationHeader: false, // We don't rely on whether user token is provided or not
       checkCacheControlHeader: true,
+      writeSchema: CachedPackument,
     });
     const options: HttpOptions = { cacheProvider };
 

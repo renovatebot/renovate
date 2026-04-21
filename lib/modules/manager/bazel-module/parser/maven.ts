@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { MavenDatasource } from '../../../datasource/maven/index.ts';
 import { id as versioning } from '../../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../../types.ts';
@@ -55,6 +55,7 @@ const MavenInstallTarget = ExtensionTagFragment.extend({
       const result: ArtifactSpec[] = [];
       for (const { value } of artifacts.items) {
         const [group, artifact, version] = value.split(':');
+        // v8 ignore else -- TODO: add test #40625
         if (group && artifact && version) {
           result.push({ group, artifact, version });
         }
@@ -89,7 +90,9 @@ export function fillRegistryUrls(
 
   // registry urls are specified only in maven.install, not in maven.artifact
   packageDeps.flat().forEach((dep) => {
+    // v8 ignore else -- TODO: add test #40625
     if (dep.depType === depTypeByTag(installTag)) {
+      // v8 ignore else -- TODO: add test #40625
       if (Array.isArray(dep.registryUrls)) {
         registryUrls.push(...dep.registryUrls);
         result.push(dep);

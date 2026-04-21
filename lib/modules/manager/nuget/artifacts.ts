@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -18,14 +19,17 @@ import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../types.ts';
 import { createNuGetConfigXml } from './config-formatter.ts';
 import {
+  DIRECTORY_BUILD_PROPS,
   GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
 } from './package-tree.ts';
+import type { Registry } from './types.ts';
 import {
   findGlobalJson,
   getConfiguredRegistries,
@@ -35,11 +39,23 @@ import {
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string,
+  updatedDeps: Upgrade[],
 ): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  const contents = createNuGetConfigXml(registries);
+  const updatedDepsRegistries: Registry[] = Array.from(
+    new Set(
+      updatedDeps
+        .flatMap((dep) => dep.registryUrls ?? [])
+        .filter(isNonEmptyString),
+    ),
+    (url) => ({ url }),
+  );
+
+  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+
+  const contents = createNuGetConfigXml(combinedRegistries);
 
   const cachedNugetConfigFile = upath.join(nugetCacheDir, `nuget.config`);
   await ensureDir(nugetCacheDir);
@@ -52,12 +68,14 @@ async function runDotnetRestore(
   packageFileName: string,
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig,
+  updatedDeps: Upgrade[],
 ): Promise<void> {
   const nugetCacheDir = upath.join(privateCacheDir(), 'nuget');
 
   const nugetConfigFile = await createCachedNuGetConfigFile(
     nugetCacheDir,
     packageFileName,
+    updatedDeps,
   );
 
   const dotnetVersion =
@@ -108,9 +126,14 @@ export async function updateArtifacts({
 
   const isGlobalJson = packageFileName === GLOBAL_JSON;
 
+  const isDirectoryBuildProps =
+    packageFileName === DIRECTORY_BUILD_PROPS ||
+    packageFileName.endsWith(`/${DIRECTORY_BUILD_PROPS}`);
+
   if (
     !isCentralManagement &&
     !isGlobalJson &&
+    !isDirectoryBuildProps &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -126,7 +149,7 @@ export async function updateArtifacts({
 
   const deps = await getDependentPackageFiles(
     packageFileName,
-    isCentralManagement,
+    isCentralManagement || isDirectoryBuildProps,
     isGlobalJson,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
@@ -163,7 +186,7 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    await runDotnetRestore(packageFileName, packageFiles, config);
+    await runDotnetRestore(packageFileName, packageFiles, config, updatedDeps);
 
     const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
@@ -195,7 +218,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileNames.join(', '),
+          fileName: lockFileNames.join(', '),
           // error is written to stdout
           stderr: err.stdout ?? err.message,
         },

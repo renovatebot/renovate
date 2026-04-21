@@ -279,6 +279,36 @@ describe('modules/manager/npm/post-update/index', () => {
       ).resolves.toBeUndefined();
       expect(fs.writeLocalFile).not.toHaveBeenCalled();
     });
+
+    it('prefers artifact content over package file content for the same path', async () => {
+      await writeUpdatedPackageFiles({
+        ...baseConfig,
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: 'catalog:\n  effect: ^3.20.0\nminimumReleaseAge: 10080\n',
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'deletion',
+            path: 'some-deleted-file.yaml',
+          },
+          {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'catalog:\n  effect: ^3.20.0\nminimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - effect@3.20.0\n',
+          },
+        ],
+      });
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'pnpm-workspace.yaml',
+        'catalog:\n  effect: ^3.20.0\nminimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - effect@3.20.0\n',
+      );
+    });
   });
 
   describe('updateYarnBinary()', () => {
@@ -624,7 +654,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [
-          { lockFile: 'package-lock.json', stderr: 'some-error' },
+          { fileName: 'package-lock.json', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
       });
@@ -638,7 +668,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalFiles,
         ),
       ).toStrictEqual({
-        artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
+        artifactErrors: [{ fileName: 'yarn.lock', stderr: 'some-error' }],
         updatedArtifacts: [],
       });
     });
@@ -660,7 +690,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [
-          { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
+          { fileName: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
       });

@@ -1,12 +1,15 @@
 import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import type { ZodType } from 'zod/v3';
 import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../cache/package/index.ts';
 import { resolveTtlValues } from '../../cache/package/ttl.ts';
 import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import { regEx } from '../../regex.ts';
 import { HttpCacheStats } from '../../stats.ts';
 import type { HttpResponse } from '../types.ts';
+import { copyResponse } from '../util.ts';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
 import type { HttpCache } from './schema.ts';
 
@@ -15,13 +18,13 @@ export interface PackageHttpCacheProviderOptions {
   softTtlMinutes?: number;
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
+  writeSchema?: ZodType<unknown>;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
-
-  private softTtlMinutes: number;
-  private hardTtlMinutes: number;
+  private defaultTtlMinutes: number;
+  private writeSchema?: ZodType<unknown>;
 
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
@@ -31,14 +34,30 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     softTtlMinutes = 15,
     checkCacheControlHeader = false,
     checkAuthorizationHeader = false,
+    writeSchema,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttlValues = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttlValues.softTtlMinutes;
-    this.hardTtlMinutes = ttlValues.hardTtlMinutes;
+    this.defaultTtlMinutes = softTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
+    this.writeSchema = writeSchema;
+  }
+
+  private get softTtlMinutes(): number {
+    const { softTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return softTtlMinutes;
+  }
+
+  private get hardTtlMinutes(): number {
+    const { hardTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return hardTtlMinutes;
   }
 
   private cacheKey(method: string, url: string): string {
@@ -53,10 +72,43 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   async persist(method: string, url: string, data: HttpCache): Promise<void> {
+    if (!data) {
+      return;
+    }
+
+    if (!this.writeSchema) {
+      await packageCache.setWithRawTtl(
+        this.namespace,
+        this.cacheKey(method, url),
+        data,
+        this.hardTtlMinutes,
+      );
+      return;
+    }
+
+    const httpResponse = copyResponse(
+      data.httpResponse as HttpResponse<unknown>,
+      false,
+    );
+
+    const { data: body, error: err } = this.writeSchema.safeParse(
+      httpResponse.body,
+    );
+
+    if (err) {
+      logger.once.debug(
+        { err, method, namespace: this.namespace, url },
+        'http cache: writeSchema validation failed for response body, skipping cache write',
+      );
+      return;
+    }
+
+    httpResponse.body = body;
+
     await packageCache.setWithRawTtl(
       this.namespace,
       this.cacheKey(method, url),
-      data,
+      { ...data, httpResponse },
       this.hardTtlMinutes,
     );
   }

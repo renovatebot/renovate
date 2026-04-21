@@ -4,6 +4,7 @@ import {
   setUserConfigFileNames,
 } from '../../../config/app-strings.ts';
 import * as decrypt from '../../../config/decrypt.ts';
+import { InheritConfig } from '../../../config/inherit.ts';
 import * as presets_ from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import * as validation from '../../../config/validation.ts';
@@ -31,6 +32,7 @@ describe('workers/repository/init/inherited', () => {
       inheritConfigStrict: false,
     };
     hostRules.clear();
+    InheritConfig.reset();
   });
 
   it('should return the same config if repository or inheritConfig is not defined', async () => {
@@ -93,7 +95,7 @@ describe('workers/repository/init/inherited', () => {
     );
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(InheritConfig.get('onboarding')).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -193,7 +195,7 @@ describe('workers/repository/init/inherited', () => {
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(InheritConfig.get('onboarding')).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
 
     expect(logger.debug).toHaveBeenCalledWith(
@@ -336,7 +338,7 @@ describe('workers/repository/init/inherited', () => {
     );
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(InheritConfig.get('onboarding')).toBeFalse();
     expect(getConfigFileNames()[0]).toBe('some-other-file.json');
   });
 
@@ -349,7 +351,7 @@ describe('workers/repository/init/inherited', () => {
     );
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(InheritConfig.get('onboarding')).toBeFalse();
     expect(getConfigFileNames()[0]).toBe('some-file.json');
   });
 });

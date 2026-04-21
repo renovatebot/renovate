@@ -44,6 +44,7 @@ const backendDatasources = {
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
   dotnet: [NugetDatasource.id],
   gem: [RubygemsDatasource.id],
+  github: [GithubReleasesDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],

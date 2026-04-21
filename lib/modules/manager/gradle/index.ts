@@ -3,10 +3,12 @@ import { MavenDatasource } from '../../datasource/maven/index.ts';
 import * as gradleVersioning from '../../versioning/gradle/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes } from './dep-types.ts';
 export { extractAllPackageFiles } from './extract.ts';
 export { updateDependency } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['gradle.lockfile'];
 
 export const url =
   'https://docs.gradle.org/current/userguide/getting_started_dep_man.html';

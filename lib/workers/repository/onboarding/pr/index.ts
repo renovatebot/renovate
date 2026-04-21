@@ -95,8 +95,9 @@ export async function ensureOnboardingPr(
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
   // TODO #22198
+  const onboardingBranch = getInheritedOrGlobal('onboardingBranch')!;
   const existingPr = await platform.getBranchPr(
-    config.onboardingBranch!,
+    onboardingBranch,
     config.defaultBranch,
   );
   if (existingPr) {
@@ -109,7 +110,7 @@ export async function ensureOnboardingPr(
     if (
       await isOnboardingBranchConflicted(
         config.defaultBranch!,
-        config.onboardingBranch!,
+        onboardingBranch,
       )
     ) {
       if (GlobalConfig.get('dryRun')) {
@@ -133,21 +134,35 @@ export async function ensureOnboardingPr(
     return;
   }
 
-  const onboardingConfigHashComment =
-    await getOnboardingConfigHashComment(config);
+  const onboardingConfigHashComment = await getOnboardingConfigHashComment();
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
     config.productLinks!.homepage
   })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
-    config.requireConfig === 'required'
+    getInheritedOrGlobal('requireConfig') === 'required'
       ? emojify(
           `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
         )
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
         );
+
+  prTemplate += emojify(
+    `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+  );
+
+  const configFile = getDefaultConfigFileName();
+  prTemplate += emojify(
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
+  );
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
+  prTemplate += '\n\n';
   // TODO #22198
   prTemplate += emojify(
     `
@@ -190,7 +205,7 @@ If you need any further assistance then you can also [request help here](${
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
-    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
+    logger.info(`DRY-RUN: Would check branch ${onboardingBranch}`);
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
@@ -246,9 +261,9 @@ If you need any further assistance then you can also [request help here](${
       const prTitle =
         config.semanticCommits === 'enabled'
           ? getSemanticCommitPrTitle(config)
-          : config.onboardingPrTitle!;
+          : getInheritedOrGlobal('onboardingPrTitle')!;
       const pr = await platform.createPr({
-        sourceBranch: config.onboardingBranch!,
+        sourceBranch: onboardingBranch,
         targetBranch: config.defaultBranch!,
         prTitle,
         prBody,
@@ -274,7 +289,7 @@ If you need any further assistance then you can also [request help here](${
       logger.warn(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
       );
-      await scm.deleteBranch(config.onboardingBranch!);
+      await scm.deleteBranch(onboardingBranch);
       return;
     }
     throw err;
@@ -291,12 +306,10 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
   return rebaseCheckBox;
 }
 
-async function getOnboardingConfigHashComment(
-  config: RenovateConfig,
-): Promise<string> {
-  const configFile = getDefaultConfigFileName(config);
+async function getOnboardingConfigHashComment(): Promise<string> {
+  const configFile = getDefaultConfigFileName();
   const existingContents =
-    (await getFile(configFile, config.onboardingBranch)) ?? '';
+    (await getFile(configFile, getInheritedOrGlobal('onboardingBranch'))) ?? '';
   const hash = toSha256(existingContents);
 
   return `\n<!--renovate-config-hash:${hash}-->\n`;

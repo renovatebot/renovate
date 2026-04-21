@@ -13,6 +13,7 @@ export { updateArtifacts } from './lockfile/index.ts';
 export { updateLockedDependency } from './lockfile/update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['.terraform.lock.hcl'];
 
 export const url = 'https://developer.hashicorp.com/terraform/docs';
 export const categories: Category[] = ['iac', 'terraform'];
@@ -33,3 +34,5 @@ export const supportedDatasources = [
   TerraformModuleDatasource.id,
   TerraformProviderDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';
