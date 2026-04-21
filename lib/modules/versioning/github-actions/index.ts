@@ -1,4 +1,4 @@
-import { isEmptyArray, isUndefined } from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { SemVer } from 'semver';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
@@ -240,7 +240,7 @@ function getNewValue({
 
   const [prefix] = currentValue.split(massageValue(currentValue));
 
-  if (isUndefined(allVersions) || isEmptyArray(allVersions)) {
+  if (isUndefined(allVersions) || allVersions.size === 0) {
     if (isUndefined(range.minor)) {
       return `${prefix}${newParsed.major}`;
     }
@@ -271,7 +271,7 @@ function getNewValue({
 function getShortestMatchingVersion(
   prefix: string,
   newParsed: SemVer,
-  allVersions: string[],
+  allVersions: Set<string>,
 ): string | null {
   // in shortest-first order
   const options = [
@@ -282,7 +282,7 @@ function getShortestMatchingVersion(
   ];
 
   for (const option of options) {
-    if (allVersions.includes(option)) {
+    if (allVersions.has(option)) {
       return option;
     }
   }

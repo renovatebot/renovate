@@ -508,7 +508,7 @@ describe('modules/versioning/github-actions/index', () => {
             currentVersion: 'v7.6.0',
             newVersion: 'v8.1.0',
             rangeStrategy: 'replace',
-            allVersions: [],
+            allVersions: new Set(),
           });
           // NOTE that this may not actually be valid, depending on whether the Action is using Immutable Tags, which requires full SemVer pinning
           expect(res).toEqual(expected);
@@ -540,7 +540,7 @@ describe('modules/versioning/github-actions/index', () => {
           currentVersion: 'v7.6.0',
           newVersion: 'v8.0.0',
           rangeStrategy: 'replace',
-          allVersions: ['v7.5.0', 'v7.6.0', ...availableVersions],
+          allVersions: new Set(['v7.5.0', 'v7.6.0', ...availableVersions]),
         });
         expect(res).toEqual(expected);
       });
@@ -551,13 +551,13 @@ describe('modules/versioning/github-actions/index', () => {
           currentVersion: 'v7.6.0',
           newVersion: 'v8.0.0-rc3',
           rangeStrategy: 'replace',
-          allVersions: [
+          allVersions: new Set([
             'v7.5.0',
             'v7.6.0',
             'v8.0.0-rc1',
             'v8.0.0-rc2',
             'v8.0.0-rc3',
-          ],
+          ]),
         });
         expect(res).toEqual('v8.0.0-rc3');
       });
@@ -570,7 +570,7 @@ describe('modules/versioning/github-actions/index', () => {
             currentVersion: 'v7.6.0',
             newVersion: 'v8.5.0',
             rangeStrategy: 'replace',
-            allVersions: ['v7.5.0', 'v7.6.0'],
+            allVersions: new Set(['v7.5.0', 'v7.6.0']),
           });
           expect(res).toEqual('v8.5.0');
         });
@@ -581,7 +581,7 @@ describe('modules/versioning/github-actions/index', () => {
             currentVersion: 'v7.6.0',
             newVersion: 'v8.5.0',
             rangeStrategy: 'replace',
-            allVersions: ['v7.5.0', 'v7.6.0'],
+            allVersions: new Set(['v7.5.0', 'v7.6.0']),
           });
 
           expect(logger.logger.once.debug).toHaveBeenCalledWith(
@@ -591,7 +591,7 @@ describe('modules/versioning/github-actions/index', () => {
               currentVersion: 'v7.6.0',
               newVersion: 'v8.5.0',
               rangeStrategy: 'replace',
-              allVersions: ['v7.5.0', 'v7.6.0'],
+              allVersions: new Set(['v7.5.0', 'v7.6.0']),
             },
             'Suggested newValue `v8.5.0` was not included in allVersions, but it should have been. Returning it anyway',
           );
