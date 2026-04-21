@@ -1,5 +1,4 @@
 import * as hostRules from '../../../../util/host-rules.ts';
-import { defaultRegistryUrl } from '../../../datasource/npm/common.ts';
 import { processHostRules } from './rules.ts';
 
 describe('modules/manager/npm/post-update/rules', () => {
@@ -65,7 +64,7 @@ describe('modules/manager/npm/post-update/rules', () => {
     it('returns mixed rules content', () => {
       hostRules.add({
         hostType: 'npm',
-        matchHost: defaultRegistryUrl,
+        matchHost: 'https://registry.npmjs.org',
         token: 'token123',
       });
       hostRules.add({
