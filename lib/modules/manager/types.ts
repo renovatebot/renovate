@@ -65,7 +65,7 @@ export interface PackageFileContent<
   T = Record<string, any>,
 > extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  extractedConstraints?: Record<string, string>;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
