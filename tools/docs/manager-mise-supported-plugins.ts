@@ -5,16 +5,30 @@ import {
 import { readFile, updateFile } from '../utils/index.ts';
 import { replaceContent } from './utils.ts';
 
-function generateMiseTooling(): string {
-  return Object.entries(miseTooling)
-    .map(([name, { misePluginUrl }]) => `- [${name} (mise)](${misePluginUrl})`)
-    .join('\n');
-}
+function generateCombinedTooling(): string {
+  let content = `
+  | Name | Source |
+  | ---- | ------ |
+  `;
 
-function generateAsdfTooling(): string {
-  return Object.entries(asdfTooling)
-    .map(([name, { asdfPluginUrl }]) => `- [${name} (asdf)](${asdfPluginUrl})`)
-    .join('\n');
+  const allTools = [
+    ...Object.entries(miseTooling).map(([name, { misePluginUrl }]) => ({
+      name,
+      url: misePluginUrl,
+      source: 'mise',
+    })),
+    ...Object.entries(asdfTooling).map(([name, { asdfPluginUrl }]) => ({
+      name,
+      url: asdfPluginUrl,
+      source: 'asdf',
+    })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
+  for (const { name, url, source } of allTools) {
+    content += `| [${name}](${url}) | ${source} |\n`;
+  }
+
+  return content;
 }
 
 export async function generateManagerMiseSupportedPlugins(
@@ -23,7 +37,7 @@ export async function generateManagerMiseSupportedPlugins(
   const indexFileName = `${dist}/modules/manager/mise/index.md`;
   let indexContent = await readFile(indexFileName);
   // Combine the output of both mise and asdf tooling generation
-  const combinedTooling = `${generateMiseTooling()}\n${generateAsdfTooling()}`;
+  const combinedTooling = generateCombinedTooling();
   indexContent = replaceContent(indexContent, combinedTooling);
   await updateFile(indexFileName, indexContent);
 }
