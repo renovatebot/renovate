@@ -693,6 +693,31 @@ describe('config/migration', () => {
     expect(migratedConfig).toMatchSnapshot();
   });
 
+  it('does not migrate legacy template identifiers within larger identifiers', () => {
+    const config = {
+      autoReplaceStringTemplate:
+        'val correttoVersion = "{{{newValue}}}"\n    val imageSha256 = "{{{newDigest}}}"',
+    } as RenovateConfig;
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeFalse();
+    expect(migratedConfig).toEqual(config);
+  });
+
+  it('migrates standalone legacy template identifiers in template expressions', () => {
+    const config: RenovateConfig = {
+      commitMessage:
+        '{{#if toVersion}}{{fromVersion}} -> {{{toVersion}}} {{newValueMajor}}/{{newValueMinor}} {{newVersionMajor}}/{{newVersionMinor}}{{/if}}',
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toEqual({
+      commitMessage:
+        '{{#if newVersion}}{{currentVersion}} -> {{{newVersion}}} {{newMajor}}/{{newMinor}} {{newMajor}}/{{newMinor}}{{/if}}',
+    });
+  });
+
   it('migrates pip-compile', () => {
     const config: RenovateConfig = {
       // @ts-expect-error -- TODO: fix me
