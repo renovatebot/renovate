@@ -1,11 +1,11 @@
-import { isTruthy } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
+import { isNonEmptyArray, isTruthy, isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
+import type { VirtualBranch } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -32,12 +32,13 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
-import { configureScm } from './scm.ts';
+import { configureScm, pushForReview } from './scm.ts';
 import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
+  extractSourceBranch,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
@@ -146,13 +147,9 @@ export async function initRepo({
     config: projectInfo,
     labels: projectInfo.labels ?? {},
   };
-  const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository, config.gerritUsername!);
-  await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
   //abandon "open" and "rejected" changes at startup
-  const rejectedChanges = await client.findChanges(config.repository!, {
+  const rejectedChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
     label: '-2',
@@ -166,6 +163,45 @@ export async function initRepo({
       `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
     );
   }
+
+  // Collect open Gerrit changes to initialize as virtual branches.
+  // This allows DefaultGitScm to treat them as regular Git branches.
+  const openChanges = await client.findChanges(repository, {
+    branchName: '',
+    state: 'open',
+    requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+  });
+  const virtualBranches: VirtualBranch[] = [];
+  for (const change of openChanges) {
+    const branchName = extractSourceBranch(change);
+    if (!branchName) {
+      continue;
+    }
+    const sha = change.current_revision!;
+    const ref = change.revisions![sha].ref;
+    virtualBranches.push({
+      name: branchName,
+      ref,
+      sha,
+    });
+  }
+
+  if (isNonEmptyArray(virtualBranches)) {
+    logger.debug(
+      `Will fetch ${virtualBranches.length} Gerrit changes as virtual branches`,
+    );
+  }
+
+  const baseUrl = defaults.endpoint!;
+  const url = getGerritRepoUrl(repository, baseUrl);
+  configureScm(repository);
+  await git.initRepo({
+    url,
+    cloneSubmodules,
+    cloneSubmodulesFilter,
+    virtualBranches,
+  });
+
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
@@ -211,6 +247,10 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
+  await client.setHashtags(prConfig.number, {
+    add: prConfig.addLabels,
+    remove: prConfig.removeLabels,
+  });
   if (prConfig.targetBranch) {
     await client.moveChange(prConfig.number, prConfig.targetBranch);
   }
@@ -225,6 +265,24 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       prConfig.labels?.toString() ?? ''
     })`,
   );
+
+  logger.debug(
+    `Pushing commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+  );
+  const pushResult = await pushForReview({
+    sourceRef: prConfig.sourceBranch,
+    targetBranch: prConfig.targetBranch,
+    files: [],
+    autoApprove: prConfig.platformPrOptions?.autoApprove,
+    labels: prConfig.labels ?? undefined,
+  });
+
+  if (!pushResult) {
+    throw new Error(
+      `Failed to push commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+    );
+  }
+
   const change = (
     await client.findChanges(config.repository!, {
       branchName: prConfig.sourceBranch,
@@ -234,16 +292,9 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
-  if (change === undefined) {
+  if (isUndefined(change)) {
     throw new Error(
-      `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
-    );
-  }
-  const created = DateTime.fromISO(change.created.replace(' ', 'T'), {});
-  const fiveMinutesAgo = DateTime.utc().minus({ minutes: 5 });
-  if (created < fiveMinutesAgo) {
-    throw new Error(
-      `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
+      `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
   }
   await client.addMessage(
@@ -514,7 +565,7 @@ export async function deleteLabel(
   number: number,
   label: string,
 ): Promise<void> {
-  await client.deleteHashtag(number, label);
+  await client.setHashtags(number, { remove: [label] });
 }
 
 export function ensureCommentRemoval(

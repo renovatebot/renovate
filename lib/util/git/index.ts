@@ -1,5 +1,10 @@
 import URL from 'node:url';
-import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
+import {
+  isBoolean,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isString,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -227,6 +232,13 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] =
           sha as LongCommitSha;
       });
+
+    if (isNonEmptyArray(config.virtualBranches)) {
+      for (const branch of config.virtualBranches) {
+        config.branchCommits[branch.name] = branch.sha;
+      }
+    }
+
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
@@ -241,8 +253,8 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   }
 }
 
-export async function fetchRevSpec(revSpec: string): Promise<void> {
-  await gitRetry(() => git.fetch(['origin', revSpec]));
+export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', ...revSpec]));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -540,6 +552,15 @@ export const syncGit = withInstrumenting(
       });
     }
 
+    if (isNonEmptyArray(config.virtualBranches)) {
+      const refs = config.virtualBranches.map((branch) => branch.ref);
+      await fetchRevSpec(...refs);
+      for (const branch of config.virtualBranches) {
+        await setVirtualBranch(branch.name, branch.sha);
+      }
+      logger.debug(`Fetched ${config.virtualBranches.length} virtual branches`);
+    }
+
     config.currentBranchSha = (
       await git.revparse('HEAD')
     ).trim() as LongCommitSha;
@@ -676,6 +697,49 @@ export async function checkoutBranchFromRemote(
     }
     throw err;
   }
+}
+
+/**
+ * Delete a virtual branch and its associated remote-tracking ref.
+ *
+ * @param branchName Virtual branch name to delete
+ */
+export async function deleteVirtualBranch(branchName: string): Promise<void> {
+  // Delete local branch if it exists
+  await deleteBranch(branchName, { localBranch: true });
+
+  // Delete remote-tracking ref that was created during init
+  // Note: git update-ref -d succeeds even if ref doesn't exist
+  await git.raw(['update-ref', '-d', `refs/remotes/origin/${branchName}`]);
+  logger.debug(
+    `Deleted remote-tracking ref: refs/remotes/origin/${branchName}`,
+  );
+}
+
+/**
+ * Set a virtual branch's remote-tracking ref and commit tracking.
+ * Used both during init (to create virtual branches from fetched refs)
+ * and after pushing (to keep tracking in sync with the remote).
+ *
+ * @param branchName Virtual branch name to set
+ * @param commitSha The commit SHA the virtual branch points to.
+ */
+export async function setVirtualBranch(
+  branchName: string,
+  commitSha: LongCommitSha,
+): Promise<void> {
+  await git.raw(['update-ref', `refs/remotes/origin/${branchName}`, commitSha]);
+  config.branchCommits[branchName] = commitSha;
+}
+
+/**
+ * Update a virtual branch's tracking to match the current local branch.
+ * To be called after a commit is pushed.
+ */
+export async function updateVirtualBranch(branchName: string): Promise<void> {
+  const commitSha = (await git.revparse([branchName])).trim() as LongCommitSha;
+  await setVirtualBranch(branchName, commitSha);
+  config.branchIsModified[branchName] = false;
 }
 
 export async function resetHardFromRemote(
@@ -948,24 +1012,29 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(branchName: string): Promise<void> {
+export async function deleteBranch(
+  branchName: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   await syncGit();
-  try {
-    const deleteCommand = ['push', '--delete', 'origin', branchName];
+  if (!options?.localBranch) {
+    try {
+      const deleteCommand = ['push', '--delete', 'origin', branchName];
 
-    if (getNoVerify().includes('push')) {
-      deleteCommand.push('--no-verify');
-    }
+      if (getNoVerify().includes('push')) {
+        deleteCommand.push('--no-verify');
+      }
 
-    await gitRetry(() => git.raw(deleteCommand));
-    logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
-    if (errChecked) {
-      throw errChecked;
+      await gitRetry(() => git.raw(deleteCommand));
+      logger.debug(`Deleted remote branch: ${branchName}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore if -- TODO: add test #40625 */
+      if (errChecked) {
+        throw errChecked;
+      }
+      logger.debug(`No remote branch to delete with name: ${branchName}`);
     }
-    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);
@@ -982,7 +1051,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+export async function mergeToLocal(
+  refSpecToMerge: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -996,8 +1068,12 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await fetchRevSpec(refSpecToMerge);
-    await gitRetry(() => git.merge(['FETCH_HEAD']));
+    if (options?.localBranch) {
+      await git.merge([refSpecToMerge]);
+    } else {
+      await fetchRevSpec(refSpecToMerge);
+      await gitRetry(() => git.merge(['FETCH_HEAD']));
+    }
   } catch (err) {
     logger.debug(
       {
