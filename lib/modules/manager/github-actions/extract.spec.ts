@@ -1033,6 +1033,90 @@ describe('modules/manager/github-actions/extract', () => {
   it.each([
     {
       step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {
+          version: 'v0.70.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.70.0',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/trivy-action@v0.35.0',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/trivy-action@v0.35.0',
+        with: {
+          version: 'v0.70.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.70.0',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'astral-sh/setup-uv@v5',
         with: {
           version: 'latest',

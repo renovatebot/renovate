@@ -1,3 +1,6 @@
+/**
+ * Update readme if new actions are added here.
+ */
 import { z } from 'zod/v3';
 
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
@@ -10,6 +13,9 @@ import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
 
+/**
+ * match actions
+ */
 function matchAction(action: string): z.ZodString {
   return z
     .string()
@@ -224,12 +230,35 @@ const SetupPyright = z
   );
 
 /**
+ *  Both actions are used to setup trivy.
+ * - https://github.com/aquasecurity/setup-trivy
+ * - https://github.com/aquasecurity/trivy-action
+ */
+const AquaSecurityTrivy = z
+  .object({
+    uses: z.union([
+      matchAction('aquasecurity/setup-trivy'),
+      matchAction('aquasecurity/trivy-action'),
+    ]),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(
+    ({ with: val }): PackageDependency => ({
+      datasource: GithubReleasesDatasource.id,
+      depName: 'aquasecurity/trivy',
+      packageName: 'aquasecurity/trivy',
+      ...parseValue(val.version),
+    }),
+  );
+
+/**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
  *
  * each type should return `PackageDependency | undefined`
  */
 export const CommunityActions = z.union([
+  AquaSecurityTrivy,
   InstallBinary,
   SetupPDM,
   SetupPixi,
