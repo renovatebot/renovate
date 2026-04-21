@@ -3247,6 +3247,7 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: [
       'bitbucket-server',
       'forgejo',
+      'gerrit',
       'gitea',
       'gitlab',
       'scm-manager',
