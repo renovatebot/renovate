@@ -35,6 +35,7 @@ describe('modules/datasource/span-processor', () => {
             [ATTR_RENOVATE_REGISTRY_URL]: npmDefaultRegistryUrl,
             [ATTR_RENOVATE_PACKAGE_NAME]: 'lodash',
           },
+          duration: [1, 500_123_000], // 1.500123 seconds = 1500.123ms
         }),
       );
 
