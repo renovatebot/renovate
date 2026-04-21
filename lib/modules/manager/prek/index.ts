@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
@@ -8,6 +9,7 @@ export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'prek';
 export const url = 'https://prek.j178.dev';
+export const categories: Category[] = ['git'];
 
 export const defaultConfig = {
   commitMessageTopic: 'prek hook {{depName}}',
