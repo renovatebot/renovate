@@ -380,6 +380,7 @@ export interface RenovateConfig
   defaultBranch?: string;
   branchList?: string[];
   cloneSubmodules?: boolean;
+  cloneSubmodulesRecursive?: boolean;
   cloneSubmodulesFilter?: string[];
   description?: string | string[];
   detectGlobalManagerConfig?: boolean;
