@@ -96,8 +96,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@redis/client':
-        specifier: 5.12.0
-        version: 5.12.0(@opentelemetry/api@1.9.1)
+        specifier: 5.12.1
+        version: 5.12.1(@opentelemetry/api@1.9.1)
       '@renovatebot/detect-tools':
         specifier: 3.0.0
         version: 3.0.0
@@ -1863,8 +1863,8 @@ packages:
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
-  '@redis/client@5.12.0':
-    resolution: {integrity: sha512-rFtRx68ZOtFO6aQwEfMaje3dh/x6BOr0kAauIiTimUw+A6RVbx5QVLbYHQXL+hlxondnm8dbNV6lsgzShg3yKQ==}
+  '@redis/client@5.12.1':
+    resolution: {integrity: sha512-7aPGWeqA3uFm43o19umzdl16CEjK/JQGtSXVPevplTaOU3VJA/rseBC1QvYUz9lLDIMBimc4SW/zrW4S89BaCA==}
     engines: {node: '>= 18.19.0'}
     peerDependencies:
       '@node-rs/xxhash': ^1.1.0
@@ -7792,7 +7792,7 @@ snapshots:
     dependencies:
       quansync: 1.0.0
 
-  '@redis/client@5.12.0(@opentelemetry/api@1.9.1)':
+  '@redis/client@5.12.1(@opentelemetry/api@1.9.1)':
     dependencies:
       cluster-key-slot: 1.1.2
     optionalDependencies:
