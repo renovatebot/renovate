@@ -203,6 +203,21 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
+  it('prevents caching when cache-control header is missing', async () => {
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = createCacheProvider({
+      checkCacheControlHeader: true,
+    });
+
+    httpMock.scope(url).get('').reply(200, 'unmarked response');
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('unmarked response');
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+  });
+
   it('prevents caching when the request contains authorization header', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
@@ -468,9 +483,9 @@ describe('util/http/cache/package-http-cache-provider', () => {
       ${false}             | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${undefined}  | ${false}
       ${false}             | ${true}                 | ${'max-age=180, private'} | ${false}                 | ${true}       | ${false}
       ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${true}       | ${false}
-      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${false}      | ${true}
-      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${undefined}  | ${true}
-      ${false}             | ${true}                 | ${undefined}              | ${false}                 | ${true}       | ${true}
+      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${false}      | ${false}
+      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${undefined}  | ${false}
+      ${false}             | ${true}                 | ${undefined}              | ${false}                 | ${true}       | ${false}
       ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${false}
       ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${false}      | ${true}
       ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${undefined}  | ${true}
