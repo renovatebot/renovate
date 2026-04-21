@@ -300,8 +300,9 @@ describe('modules/datasource/npm/get', () => {
   });
 
   it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules without protocol disables abortOnError', async () => {
+    const host = new URL(defaultRegistryUrl).host;
     hostRules.add({
-      matchHost: 'registry.npmjs.org',
+      matchHost: host,
       abortOnError: false,
     });
     httpMock
