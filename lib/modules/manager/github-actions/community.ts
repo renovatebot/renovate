@@ -18,7 +18,7 @@ function matchAction(action: string): z.ZodString {
     .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(?:@.+)?$`));
 }
 
-function setSkipReasonIfVersionMissing(
+function validateValue(
   currentValue: string | undefined,
   validator?: () => boolean,
 ): PackageDependency {
@@ -52,7 +52,7 @@ const SetupUV = z
       depName: 'astral-sh/uv',
       versioning: npmVersioning.id,
       packageName: 'astral-sh/uv',
-      ...setSkipReasonIfVersionMissing(val.version),
+      ...validateValue(val.version),
     }),
   );
 
@@ -69,7 +69,7 @@ const SetupPnpm = z
       depName: 'pnpm',
       versioning: npmVersioning.id,
       packageName: 'pnpm',
-      ...setSkipReasonIfVersionMissing(val.version),
+      ...validateValue(val.version),
     }),
   );
 
@@ -86,7 +86,7 @@ const SetupBun = z
       depName: 'bun',
       versioning: npmVersioning.id,
       packageName: 'bun',
-      ...setSkipReasonIfVersionMissing(val['bun-version']),
+      ...validateValue(val['bun-version']),
     }),
   );
 
@@ -103,7 +103,7 @@ const SetupDeno = z
       depName: 'deno',
       versioning: npmVersioning.id,
       packageName: 'deno',
-      ...setSkipReasonIfVersionMissing(val['deno-version']),
+      ...validateValue(val['deno-version']),
     }),
   );
 
@@ -120,7 +120,7 @@ const SetupRuby = z
       depName: 'ruby',
       versioning: rubyVersioning.id,
       packageName: 'ruby',
-      ...setSkipReasonIfVersionMissing(val['ruby-version']),
+      ...validateValue(val['ruby-version']),
     }),
   );
 
@@ -135,7 +135,7 @@ const SetupPDM = z
       depName: 'pdm',
       versioning: pep440versioning.id,
       packageName: 'pdm',
-      ...setSkipReasonIfVersionMissing(val.version),
+      ...validateValue(val.version),
     }),
   );
 
@@ -152,7 +152,7 @@ const InstallBinary = z
       datasource: GithubReleasesDatasource.id,
       depName: val.repo,
       packageName: val.repo,
-      ...setSkipReasonIfVersionMissing(val.tag),
+      ...validateValue(val.tag),
     };
   });
 
@@ -167,7 +167,7 @@ const SetupPixi = z
       versioning: condaVersioning.id,
       depName: 'prefix-dev/pixi',
       packageName: 'prefix-dev/pixi',
-      ...setSkipReasonIfVersionMissing(val['pixi-version']),
+      ...validateValue(val['pixi-version']),
     };
   });
 
@@ -182,7 +182,7 @@ const SetupHatch = z
       datasource: GithubReleasesDatasource.id,
       depName: 'pypa/hatch',
       packageName: 'pypa/hatch',
-      ...setSkipReasonIfVersionMissing(val.version),
+      ...validateValue(val.version),
       // Strip hatch- prefix from release tags
       extractVersion: '^hatch-(?<version>.+)$',
     }),
@@ -198,7 +198,7 @@ const SetupGolangciLint = z
       datasource: GithubReleasesDatasource.id,
       depName: 'golangci/golangci-lint',
       packageName: 'golangci/golangci-lint',
-      ...setSkipReasonIfVersionMissing(val.version),
+      ...validateValue(val.version),
     }),
   );
 
@@ -212,7 +212,7 @@ const ZizmorcoreZizmorAction = z
       datasource: DockerDatasource.id,
       depName: 'ghcr.io/zizmorcore/zizmor',
       packageName: 'ghcr.io/zizmorcore/zizmor',
-      ...setSkipReasonIfVersionMissing(val.version),
+      ...validateValue(val.version),
     }),
   );
 
@@ -227,10 +227,7 @@ const SetupPyright = z
       depName: 'pyright',
       versioning: npmVersioning.id,
       packageName: 'pyright',
-      ...setSkipReasonIfVersionMissing(
-        val.version,
-        () => val.version === 'PATH',
-      ),
+      ...validateValue(val.version, () => val.version === 'PATH'),
     }),
   );
 
