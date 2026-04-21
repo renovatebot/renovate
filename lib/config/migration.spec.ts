@@ -694,10 +694,10 @@ describe('config/migration', () => {
   });
 
   it('does not migrate legacy template identifiers within larger identifiers', () => {
-    const config: RenovateConfig = {
+    const config = {
       autoReplaceStringTemplate:
         'val correttoVersion = "{{{newValue}}}"\n    val imageSha256 = "{{{newDigest}}}"',
-    };
+    } as RenovateConfig;
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeFalse();

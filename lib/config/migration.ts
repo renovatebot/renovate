@@ -149,16 +149,17 @@ export function migrateConfig(
         }
       }
 
-      // @ts-expect-error -- TODO: fix me
-      if (isString(migratedConfig[key])) {
+      const migratedValue = Reflect.get(migratedConfig, key);
+      if (typeof migratedValue === 'string') {
+        let migratedStringValue = migratedValue;
         for (const [from, to] of Object.entries(migratedTemplates)) {
-          // @ts-expect-error -- TODO: fix me
-          migratedConfig[key] = replaceStandaloneTemplateIdentifier(
-            migratedConfig[key] as string,
+          migratedStringValue = replaceStandaloneTemplateIdentifier(
+            migratedStringValue,
             from,
             to,
           );
         }
+        Reflect.set(migratedConfig, key, migratedStringValue);
       }
     }
     const languages = [
