@@ -62,7 +62,7 @@ export function updateDependency({
           'g',
         );
 
-        updatedContent = updatedContent.replace(
+        updatedContent = updatedContent.replaceAll(
           patternSharedVariable,
           (match) => {
             return match.replace(currentValue, newValue);
@@ -77,7 +77,7 @@ export function updateDependency({
           `(scalaVersion\\s*:=\\s*)"${escapeRegExp(currentValue)}"`,
           'g',
         );
-        updatedContent = updatedContent.replace(pattern, `$1"${newValue}"`);
+        updatedContent = updatedContent.replaceAll(pattern, `$1"${newValue}"`);
       }
       // Early return, no replacement expected for Scala version updates
       return updatedContent;
@@ -94,7 +94,7 @@ export function updateDependency({
         'g',
       );
 
-      updatedContent = updatedContent.replace(
+      updatedContent = updatedContent.replaceAll(
         patternSharedVariable,
         (match) => {
           return match.replace(currentValue, newValue);
@@ -111,7 +111,7 @@ export function updateDependency({
         'g',
       );
 
-      updatedContent = updatedContent.replace(pattern, (match) => {
+      updatedContent = updatedContent.replaceAll(pattern, (match) => {
         return match.replace(currentValue, newValue);
       });
     }
@@ -131,7 +131,7 @@ export function updateDependency({
       'g',
     );
 
-    updatedContent = updatedContent.replace(pattern, (match) => {
+    updatedContent = updatedContent.replaceAll(pattern, (match) => {
       return match
         .replace(groupId, newGroupId)
         .replace(artifactId, newArtifactId);
