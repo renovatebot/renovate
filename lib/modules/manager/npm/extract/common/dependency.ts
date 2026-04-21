@@ -207,7 +207,7 @@ export function extractDependency(
 
 export function getExtractedConstraints(
   deps: PackageDependency[],
-): Record<string, string> {
+): Partial<Record<ConstraintName, string>> {
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   const constraints: ConstraintName[] = [
     'node',

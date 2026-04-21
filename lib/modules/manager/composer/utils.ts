@@ -99,7 +99,7 @@ export function requireComposerDependencyInstallation({
 export function extractConstraints(
   { config, require, requireDev }: PackageFile,
   { pluginApiVersion }: Lockfile,
-): Record<string, string> {
+): Partial<Record<ConstraintName, string>> {
   const res: Record<string, string> = { composer: '1.*' };
 
   // extract php
