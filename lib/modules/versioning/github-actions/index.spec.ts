@@ -109,8 +109,13 @@ describe('modules/versioning/github-actions/index', () => {
       ${'invalid'}        | ${'1'}       | ${false}
       ${'~latest'}        | ${'1'}       | ${false}
       ${'1'}              | ${'1'}       | ${true}
+      ${'1'}              | ${'v1'}      | ${true}
+      ${'v1'}             | ${'v1'}      | ${true}
+      ${'v1'}             | ${'1'}       | ${true}
       ${'1.2'}            | ${'1.2'}     | ${true}
-      ${'1.2.3'}          | ${'1.2.3'}   | ${true}
+      ${'1.2'}            | ${'v1.2'}    | ${true}
+      ${'v1.2'}           | ${'v1.2'}    | ${true}
+      ${'v1.2'}           | ${'1.2'}     | ${true}
       ${'1.2.4'}          | ${'1.2.3'}   | ${false}
       ${'not-semver-ver'} | ${'1'}       | ${false}
       ${'1.0.0-alpha'}    | ${'1'}       | ${false}
