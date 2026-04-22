@@ -1362,7 +1362,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
           path: 'renamed_master_file',
           mode: '100644',
           type: 'blob',
-          sha: expect.stringMatching(regEx(/^[0-9a-f]{40}$/)),
+          sha: expect.stringMatching(/^[0-9a-f]{40}$/),
         }),
       );
     });
