@@ -149,6 +149,9 @@ describe('workers/repository/process/lookup/index', () => {
           newVersion: '0.9.7',
           registryUrl: undefined,
           updateType: 'rollback',
+          prBodyNotes: expect.arrayContaining([
+            expect.stringContaining('The version of `q` in use (`0.9.99`)'),
+          ]),
         },
         {
           bucket: 'major',
@@ -185,6 +188,9 @@ describe('workers/repository/process/lookup/index', () => {
           newVersion: '0.9.7',
           registryUrl: undefined,
           updateType: 'rollback',
+          prBodyNotes: expect.arrayContaining([
+            expect.stringContaining('The version of `q` in use (`^0.9.99`)'),
+          ]),
         },
       ]);
     });
@@ -3012,6 +3018,11 @@ describe('workers/repository/process/lookup/index', () => {
           newVersion: '3.0.1-insiders.20180726',
           registryUrl: undefined,
           updateType: 'rollback',
+          prBodyNotes: expect.arrayContaining([
+            expect.stringContaining(
+              'The version of `typescript` in use (`3.1.0-dev.20180813`)',
+            ),
+          ]),
         },
       ]);
     });
@@ -3267,6 +3278,11 @@ describe('workers/repository/process/lookup/index', () => {
           newVersion: '1.16.0',
           registryUrl: undefined,
           updateType: 'rollback',
+          prBodyNotes: expect.arrayContaining([
+            expect.stringContaining(
+              'The version of `coffeelint` in use (`1.16.1`)',
+            ),
+          ]),
         },
       ]);
     });
@@ -5468,6 +5484,9 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: `2.5.16`,
           newVersion: `2.5.16`,
           updateType: `rollback`,
+          prBodyNotes: expect.arrayContaining([
+            expect.stringContaining('The version of `vue` in use (`2.5.17`)'),
+          ]),
         },
       ]);
     });
