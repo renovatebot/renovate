@@ -9,11 +9,12 @@ This PR contains the following updates:
 
 | Package | Type | Update | Change |
 |---|---|---|---|
-| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final | minor | \`19.46.0-slim\` -> \`19.47.0-slim\` |
+| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final | minor |
 
----
-
-### Relea"
+> ✂ **Note**
+> 
+> PR body was truncated to here.
+"
 `;
 
 exports[`modules/platform/utils/pr-body > .smartTruncate > truncates to 1000 1`] = `
@@ -32,9 +33,12 @@ This PR contains the following updates:
 ### Release Notes
 
 <details>
-<summary>renovatebot/renovate</summary>
+<summar
 
-### [\`v19.47.0\`](
+> ✂ **Note**
+> 
+> PR body was truncated to here.
+
 
 </details>
 
