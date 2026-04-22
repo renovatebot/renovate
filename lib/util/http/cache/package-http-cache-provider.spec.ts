@@ -320,6 +320,42 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
   });
 
+  it('does not refresh disallowed cache entry after 304', async () => {
+    mockTime('2024-06-15T00:15:00.000Z');
+    cache[url] = {
+      etag: 'etag-value',
+      lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+      httpResponse: {
+        statusCode: 200,
+        headers: { etag: 'etag-value' },
+        body: 'cached response',
+      },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+    const cacheProvider = createCacheProvider({
+      checkCacheControlHeader: true,
+    });
+    httpMock.scope(url).get('').reply(304);
+
+    const res = await http.getText(url, { cacheProvider });
+
+    expect(res.body).toBe('cached response');
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+    expect(cache).toEqual({
+      'http://example.com/foo/bar': {
+        etag: 'etag-value',
+        lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+        httpResponse: {
+          statusCode: 200,
+          cached: true,
+          headers: { etag: 'etag-value' },
+          body: 'cached response',
+        },
+        timestamp: '2024-06-15T00:00:00.000Z',
+      },
+    });
+  });
+
   describe('HEAD requests', () => {
     it('handles cache miss for HEAD request', async () => {
       const cacheProvider = createCacheProvider();
