@@ -81,11 +81,17 @@ export interface Release {
   attestation?: boolean;
 }
 
+export interface ReleaseTags {
+  /** The latest release, according to the datasource **/
+  latest?: string;
+  [key: string]: string | undefined;
+}
+
 export interface ReleaseResult {
   deprecationMessage?: string;
   isPrivate?: boolean;
   releases: Release[];
-  tags?: Record<string, string> | undefined;
+  tags?: ReleaseTags | undefined;
   changelogContent?: string;
   // URL metadata
   changelogUrl?: string;
