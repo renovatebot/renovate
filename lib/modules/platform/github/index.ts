@@ -2162,12 +2162,17 @@ async function pushFiles(
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
-    // Push the commit to GitHub using a custom ref
-    // The associated blobs will be pushed automatically
+    // Hybrid git/REST commit strategy (see #13824, #14271):
+    // 1. The git push below uploads blobs to GitHub via a custom ref
+    //    (refs/renovate/branches/*) which does NOT trigger CI/Actions.
+    // 2. We then recreate the tree+commit via REST API so that:
+    //    - The commit is signed by GitHub ("committed via GitHub" badge)
+    //    - Force-push and file mode bits are supported (GraphQL can't do this)
+    //    - We can use base_tree to send only changed files, avoiding org
+    //      ruleset file-path restrictions on unchanged files (#42554)
+    // Reusing the pushed commit/tree SHAs directly does not work because
+    // the branch ref must point to an API-created commit for signing.
     await pushCommitToRenovateRef(commitSha, branchName);
-
-    // Use base_tree with only changed files to avoid org ruleset
-    // file-path restrictions on unchanged files (#42554)
     const baseTreeSha = await getCommitTreeSha(parentCommitSha);
     const treeItems = await diffCommitTree(parentCommitSha, commitSha);
 
