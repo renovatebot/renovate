@@ -108,6 +108,8 @@ Renovate's `mise` manager does not support the following tool syntax:
   The `version_prefix` option is converted to `extractVersion` by escaping special regex characters.
   If the version is not updated or updated incorrectly, override `extractVersion` manually in the Renovate config.
 
+- Renovate will prefer the `github:` backend over other backends, if using the tool definition from the mise registry
+
 ### Supported default registry tool short names
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
