@@ -63,6 +63,7 @@ let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
+let optionSupportsTemplating: Set<string>;
 
 const managerList = getManagerList();
 
@@ -142,6 +143,7 @@ function initOptions(): void {
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
   optionAllowsNegativeIntegers = new Set();
+  optionSupportsTemplating = new Set();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -164,6 +166,10 @@ function initOptions(): void {
 
     if (option.allowNegative) {
       optionAllowsNegativeIntegers.add(option.name);
+    }
+
+    if (option.supportsTemplating) {
+      optionSupportsTemplating.add(option.name);
     }
   }
 
@@ -262,14 +268,7 @@ export async function validateConfig(
           message: getDeprecationMessage(key)!,
         });
       }
-      const templateKeys = [
-        'branchName',
-        'commitBody',
-        'commitMessage',
-        'prTitle',
-        'semanticCommitScope',
-      ];
-      if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
+      if (optionSupportsTemplating.has(key) && val) {
         try {
           // TODO: validate string #22198
           let res = template.compile((val as string).toString(), config, false);

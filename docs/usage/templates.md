@@ -15,6 +15,13 @@ Some are configuration options passed through, while others are generated as par
 
 `logJSON` and `releases` are only allowed in `commitBody` template.
 
+## Options that support templating
+
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
+<!-- Autogenerate end -->
+
+<!-- Automatically insert options that support templating here -->
+
 ## Exposed config options
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
