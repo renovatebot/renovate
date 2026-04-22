@@ -35,7 +35,7 @@ function parseRange(input: string): Range | null {
     return null;
   }
   const coerced = semver.coerce(stripped);
-  /* v8 ignore next -- unreachable: floatingMinorTagRegex should guarantee coerce() succeeds */
+  /* v8 ignore if -- unreachable: floatingMinorTagRegex should guarantee coerce() succeeds */
   if (!coerced) {
     return null;
   }
