@@ -1377,6 +1377,22 @@ If the list of allowed commands is empty then no commands will be executed.
 `customUpdateCommands` can be applied to specific dependencies using `packageRules`.
 For running commands _after_ a file has already been updated by Renovate, see [`postUpgradeTasks`](#postupgradetasks) instead.
 
+```json title="Use custom script to update versions"
+{
+  "packageRules": [
+    {
+      "matchFiles": ["lib/data/**"],
+      "customUpdateCommands": {
+        "commands": [
+          "node scripts/bump-versions.ts {{packageName}} {{currentValue}} {{newValue}}}"
+        ]
+      }
+    }
+  ],
+  "allowedCommands": ["^node scripts\\/bump-versions.ts \\w+ \\w+ \\w$"]
+}
+```
+
 ```json title="Example — using the Backstage CLI to bump all Backstage packages at once"
 {
   "customManagers": [
