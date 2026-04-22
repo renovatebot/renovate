@@ -1,12 +1,18 @@
 import { execSync } from 'child_process';
+import { z } from 'zod/v4';
 import { updateJsonFile } from './utils.mjs';
+
+const MiseVersion = z.object({ version: z.string() });
+const MiseRegistry = z.array(
+  z.object({ short: z.string(), backends: z.array(z.string()) }),
+);
 
 // use the JSON output, as the default output includes a banner
 const versionOutput = execSync('mise version --json', { encoding: 'utf8' });
-const version = JSON.parse(versionOutput) as { version: string };
+const version = MiseVersion.parse(JSON.parse(versionOutput));
 console.log(`Generating mise registry using mise version ${version.version}`);
 const output = execSync('mise registry --json', { encoding: 'utf8' });
-const tools = JSON.parse(output) as { short: string; backends: string[] }[];
+const tools = MiseRegistry.parse(JSON.parse(output));
 
 const registry = Object.fromEntries(
   tools
