@@ -133,6 +133,7 @@ function getToolConfig(
           version,
           toolOptions,
         );
+        // v8 ignore else -- TODO: add test #40625
         if (result !== null) {
           return result;
         }
