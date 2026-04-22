@@ -565,6 +565,20 @@ function getRegistry(): Record<string, string[]> {
   return parsedMiseRegistry;
 }
 
-export function getMiseRegistryBackends(toolName: string): string[] {
-  return getRegistry()[toolName] ?? [];
+export function getOrderedMiseRegistryBackends(toolName: string): string[] {
+  const backends = getRegistry()[toolName] ?? [];
+  return backends.sort(sortBackend);
+}
+
+/** prioritise the github backend as the best source for data */
+function sortBackend(a: string, b: string): number {
+  const [aType] = a.split(':', 2);
+  const [bType] = b.split(':', 2);
+  if (aType === 'github') {
+    return -1;
+  }
+  if (bType === 'github') {
+    return 1;
+  }
+  return aType.localeCompare(bType);
 }

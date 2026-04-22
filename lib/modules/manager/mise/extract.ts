@@ -27,7 +27,7 @@ import type { MiseTool, MiseToolOptions } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
 import {
   asdfTooling,
-  getMiseRegistryBackends,
+  getOrderedMiseRegistryBackends,
   miseTooling,
 } from './upgradeable-tooling.ts';
 import { parseTomlFile } from './utils.ts';
@@ -125,7 +125,7 @@ function getToolConfig(
       }
 
       // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
-      for (const backendStr of getMiseRegistryBackends(toolName)) {
+      for (const backendStr of getOrderedMiseRegistryBackends(toolName)) {
         const [backendType, backendName] = backendStr.split(':', 2);
         const result = getToolConfig(
           backendType,

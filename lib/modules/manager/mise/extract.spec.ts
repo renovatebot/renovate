@@ -1128,5 +1128,23 @@ describe('modules/manager/mise/extract', () => {
         ],
       });
     });
+
+    it('resolves a tool from the mise registry, prioritising the github backend over others', () => {
+      const content = codeBlock`
+      [tools]
+      bitwarden-secrets-manager = "1.2.3"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'bitwarden-secrets-manager',
+            currentValue: '1.2.3',
+            datasource: 'github-releases',
+            packageName: 'bitwarden/sdk',
+          },
+        ],
+      });
+    });
   });
 });
