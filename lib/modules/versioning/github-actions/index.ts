@@ -131,6 +131,11 @@ function isGreaterThan(x: string, y: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
+  // if we have a valid floating tag provided, and it's the same as the range, treat it as the same
+  if (parseVersionCoerced(version) && version === range) {
+    return true;
+  }
+
   const v = parseVersion(version);
   if (!v) {
     return false;

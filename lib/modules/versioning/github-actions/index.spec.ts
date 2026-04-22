@@ -108,8 +108,8 @@ describe('modules/versioning/github-actions/index', () => {
       ${'1.0.0-rc'}       | ${'1.0'}     | ${false}
       ${'invalid'}        | ${'1'}       | ${false}
       ${'~latest'}        | ${'1'}       | ${false}
-      ${'1'}              | ${'1'}       | ${false}
-      ${'1.2'}            | ${'1.2'}     | ${false}
+      ${'1'}              | ${'1'}       | ${true}
+      ${'1.2'}            | ${'1.2'}     | ${true}
       ${'1.2.3'}          | ${'1.2.3'}   | ${true}
       ${'1.2.4'}          | ${'1.2.3'}   | ${false}
       ${'not-semver-ver'} | ${'1'}       | ${false}
