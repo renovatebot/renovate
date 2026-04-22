@@ -178,6 +178,24 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return resp;
     }
 
+    if (resp.statusCode === 304) {
+      const httpCache = await this.get(method, url);
+      if (!httpCache) {
+        return resp;
+      }
+
+      const cachedResp = copyResponse(
+        httpCache.httpResponse as HttpResponse<T>,
+        true,
+      );
+      cachedResp.authorization = resp.authorization;
+
+      if (!this.cacheAllowed(cachedResp)) {
+        HttpCacheStats.incRemoteHits(url);
+        return cachedResp;
+      }
+    }
+
     return await super.wrapServerResponse(method, url, resp);
   }
 }
