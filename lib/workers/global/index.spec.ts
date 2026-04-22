@@ -96,6 +96,14 @@ describe('workers/global/index', () => {
       expect(repoConfig.repositoryEntryConfig).toBeUndefined();
       expect(repoConfig.repository).toBe('test/repo');
     });
+
+    it('applies force values over global config (e.g. CLI overrides platform defaults)', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        { ...globalConfig, dryRun: 'lookup', force: { dryRun: 'full' } },
+        'test/repo',
+      );
+      expect(repoConfig.dryRun).toBe('full');
+    });
   });
 
   it('handles config warnings and errors', async () => {
