@@ -1023,17 +1023,119 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('does not validate constraints children', async () => {
-      const config = {
-        constraints: { packageRules: [{}] },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config as never, // TODO: #15963
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+    describe('constraints', () => {
+      it('can contain an valid tool name for Containerbase', async () => {
+        const config: RenovateConfig = {
+          constraints: {
+            go: '1.26.0',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('can contain a constraint for a non-Containerbase tool', async () => {
+        const config: RenovateConfig = {
+          constraints: {
+            gomodMod: 'latest',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('warns if an unsupported constraint is specified', async () => {
+        const config = {
+          constraints: {
+            'not-supported': '4.5.6',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          // @ts-expect-error: contains invalid values
+          config,
+          true,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraints.not-supported`: `not-supported` is not a supported constraint name',
+          },
+        ]);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('warns if a constraint is not valid', async () => {
+        const config: RenovateConfig = {
+          constraints: {
+            node: '1.2.3foo',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraints.node=1.2.3foo` is not a valid tool version constraint, according to `node` versioning',
+          },
+        ]);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('errors if constraints is a malformed object', async () => {
+        const config = {
+          constraints: { packageRules: [{}] },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          // @ts-expect-error: contains invalid values
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraints` should be an object of key-value pairs of constraints and their value',
+          },
+        ]);
+      });
+
+      it('errors if constraints is a malformed array', async () => {
+        const config = {
+          constraints: [1, 2, 3],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          // @ts-expect-error: contains invalid values
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraints` should be a json object',
+          },
+        ]);
+      });
     });
 
     it('validates object with ignored children', async () => {
