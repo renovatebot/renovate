@@ -18,6 +18,8 @@ interface ToolDocumentation {
   supportNote?: string;
 }
 
+const defaultMisePluginUrl = 'https://mise.jdx.dev/registry.html#tools';
+
 function generateCombinedTooling(): string {
   let content = `
   | Name | Source | Supported |
@@ -57,6 +59,7 @@ function generateCombinedTooling(): string {
     if (backendNames.some((b) => supportedBackendDatasources.has(b))) {
       allTools.push({
         name,
+        url: defaultMisePluginUrl,
         source: 'mise',
         supported: true,
       });
@@ -65,6 +68,7 @@ function generateCombinedTooling(): string {
     ) {
       allTools.push({
         name,
+        url: defaultMisePluginUrl,
         source: 'mise',
         supported: 'maybe',
         supportNote: `Possibly unsupported due to backend(s): \`${JSON.stringify(backendNames)}\``,
@@ -72,6 +76,7 @@ function generateCombinedTooling(): string {
     } else {
       allTools.push({
         name,
+        url: defaultMisePluginUrl,
         source: 'mise',
         supported: false,
       });
