@@ -33,6 +33,7 @@ export type RenovateSplit =
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
+export type PersistRepoDataType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -289,6 +290,7 @@ export interface LegacyAdminConfig {
   optimizeForDisabled?: boolean;
 
   persistRepoData?: boolean;
+  persistRepoDataType?: PersistRepoDataType;
 
   prCommitsPerRunLimit?: number;
 
