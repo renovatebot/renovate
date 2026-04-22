@@ -28,6 +28,9 @@ interface Range {
 
 function parseRange(input: string): Range | null {
   const stripped = massageValue(input);
+  if (!regEx(/^\d+(\.\d+)?$/).test(stripped)) {
+    return null;
+  }
   const coerced = semver.coerce(stripped);
   if (!coerced) {
     return null;

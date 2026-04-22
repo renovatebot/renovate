@@ -16,6 +16,10 @@ describe('modules/versioning/github-actions/index', () => {
       ${'v1.2.3-alpha'} | ${true}
       ${'invalid'}      | ${false}
       ${''}             | ${false}
+      ${'<6'}           | ${false}
+      ${'>=5'}          | ${false}
+      ${'~4'}           | ${false}
+      ${'^3'}           | ${false}
     `('isValid("$version") === $expected', ({ version, expected }) => {
       expect(githubActions.isValid(version)).toBe(expected);
     });
