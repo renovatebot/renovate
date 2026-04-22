@@ -58,32 +58,32 @@ export async function extractPackageFile(
 
   // Post-process: for SHA-pinned GitHub module sources, extract version from
   // inline comment in the raw file content (the HCL parser strips comments).
-  const sourceDigestWithCommentRegex = regEx(
+  // Scan the content once and build a lookup map before iterating over deps.
+  const shaCommentRegex = regEx(
     /\?ref=(?<sha>[0-9a-f]{40})"(?:[^\S\r\n]*#[^\S\r\n]*(?<version>v?[^\s]+))?/gi,
   );
+  const shaInfoMap = new Map<
+    string,
+    { version: string | undefined; replaceString: string }
+  >();
+  for (const match of content.matchAll(shaCommentRegex)) {
+    const sha = match.groups!.sha;
+    shaInfoMap.set(sha, {
+      version: match.groups?.version,
+      replaceString: match[0].slice('?ref='.length),
+    });
+  }
+
   for (const dep of dependencies) {
     if (dep.currentDigest && dep.depType === 'module') {
-      const sha = dep.currentDigest;
-      sourceDigestWithCommentRegex.lastIndex = 0;
-      let match: RegExpExecArray | null;
-      let found = false;
-      while ((match = sourceDigestWithCommentRegex.exec(content)) !== null) {
-        if (match.groups?.sha === sha) {
-          found = true;
-          const version = match.groups?.version;
-          if (version) {
-            dep.currentValue = version;
-            // replaceString: everything from the SHA to end of inline comment
-            // e.g. `6c5e082b...29" # v5.12.0`
-            dep.replaceString = match[0].slice('?ref='.length);
-            dep.autoReplaceStringTemplate = '{{currentDigest}}" # {{newValue}}';
-          } else {
-            dep.skipReason = 'unversioned-reference';
-          }
-          break;
-        }
-      }
-      if (!found && !dep.currentValue && !dep.skipReason) {
+      const info = shaInfoMap.get(dep.currentDigest);
+      if (info?.version) {
+        dep.currentValue = info.version;
+        // replaceString: SHA + closing quote + inline comment
+        // e.g. `6c5e082b...29" # v5.12.0`
+        dep.replaceString = info.replaceString;
+        dep.autoReplaceStringTemplate = '{{currentDigest}}" # {{newValue}}';
+      } else {
         dep.skipReason = 'unversioned-reference';
       }
     }
