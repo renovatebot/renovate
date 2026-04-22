@@ -1384,12 +1384,12 @@ For running commands _after_ a file has already been updated by Renovate, see [`
       "matchFiles": ["lib/data/**"],
       "customUpdateCommands": {
         "commands": [
-          "node scripts/bump-versions.ts {{packageName}} {{currentValue}} {{newValue}}}"
+          "node scripts/bump-versions.ts {{packageName}} {{currentValue}} {{newValue}}"
         ]
       }
     }
   ],
-  "allowedCommands": ["^node scripts\\/bump-versions.ts \\w+ \\w+ \\w$"]
+  "allowedCommands": ["^node scripts/bump-versions\\.ts \\w+ \\w+ \\w+$"]
 }
 ```
 
