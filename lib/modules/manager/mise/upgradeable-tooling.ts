@@ -561,13 +561,17 @@ export const miseTooling: Record<string, ToolingDefinition> = {
 let parsedMiseRegistry: Record<string, string[]> | undefined;
 
 function getRegistry(): Record<string, string[]> {
-  parsedMiseRegistry ??= MiseRegistryJson.parse(miseRegistry);
+  if (!parsedMiseRegistry) {
+    const parsed = MiseRegistryJson.parse(miseRegistry);
+    parsedMiseRegistry = Object.fromEntries(
+      Object.entries(parsed).map(([k, v]) => [k, v.sort(sortBackend)]),
+    );
+  }
   return parsedMiseRegistry;
 }
 
 export function getOrderedMiseRegistryBackends(toolName: string): string[] {
-  const backends = getRegistry()[toolName] ?? [];
-  return backends.sort(sortBackend);
+  return getRegistry()[toolName] ?? [];
 }
 
 /** prioritise the github backend as the best source for data */
