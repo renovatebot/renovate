@@ -28,7 +28,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
 
 env:
   # are we on a release branch?
@@ -772,6 +772,7 @@ jobs:
       # never cancel a release that has already started, as it may have started pushing artifacts
       cancel-in-progress: false
     permissions:
+      actions: write
       contents: write
       issues: write
       pull-requests: write
@@ -779,6 +780,17 @@ jobs:
       packages: write
 
     steps:
+      # right at the start of the job, make sure we're not seeing another commit that's landed
+      - name: Check for newer commits on ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          latest_sha=$(git ls-remote origin "refs/heads/${{ github.ref_name }}" | cut -f1)
+          if [[ "$latest_sha" != "${{ github.sha }}" ]]; then
+            echo "Newer commit detected on ${{ github.ref_name }} ($latest_sha), cancelling release run"
+            gh run cancel "${{ github.run_id }}"
+          fi
+
       - run: df -h
 
       # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
@@ -848,6 +860,17 @@ jobs:
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{env.DO_RELEASE}}" == "true" ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
+          fi
+
+      # and one final check, in case preparing the environment has taken long enough for new commits
+      - name: Check for newer commits on ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          latest_sha=$(git ls-remote origin "refs/heads/${{ github.ref_name }}" | cut -f1)
+          if [[ "$latest_sha" != "${{ github.sha }}" ]]; then
+            echo "Newer commit detected on ${{ github.ref_name }} ($latest_sha), cancelling release run"
+            gh run cancel "${{ github.run_id }}"
           fi
 
       - name: semantic-release
