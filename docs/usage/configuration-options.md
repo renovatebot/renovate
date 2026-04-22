@@ -2695,6 +2695,8 @@ Add to this object if you wish to define rules that apply only to major updates.
 ## maxMajorIncrement
 
 This is particularly useful for preventing upgrades from [SemVer](https://semver.org/)-based versions to [CalVer](https://calver.org/)-based ones.
+Be aware that in some cases, `maxMajorIncrement` will also prevent legitimate updates within a CalVer versioning scheme, e.g. `20251231` to `20260101`.
+In order to distinguish between SemVer and CalVer, please refer to [maxMajorIncrementThreshold](#maxmajorincrementthreshold).
 
 For example, if you're on version `19.0.0`, Renovate will upgrade to `22.0.0` but filter out versions like `999.0.0` and `2025.0.0`.
 
@@ -2727,6 +2729,20 @@ Alternatively, to limit major upgrades to within 10 versions:
   ]
 }
 ```
+
+## maxMajorIncrementThreshold
+
+`maxMajorIncrement` prevents updating too many major versions at once.
+While this may be a good practice in general, it will lead to missed updates in versioning schemes like [CalVer](https://calver.org/) or similar.
+
+`maxMajorIncrementThreshold` can be used to define a threshold for the current major version, from which on it is OK to suggest updates exceeding the `maxMajorIncrement` restriction.
+
+For example with `maxMajorIncrement` set to 10 and `maxMajorIncrementThreshold` set to 1000, Renovate will:
+
+- ignore an update from version `12.34` to `20260101`
+- allow an update from version `20250101` to `20260101`
+
+The threshold is disabled by setting `maxMajorIncrementThreshold` to `0`.
 
 ## managerFilePatterns
 

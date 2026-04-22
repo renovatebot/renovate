@@ -1837,6 +1837,16 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'maxMajorIncrementThreshold',
+    description:
+      'Disables maxMajorIncrement if the current version exceeds this threshold. Set to 0 to disable.',
+    stage: 'package',
+    type: 'integer',
+    default: 1000,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'respectLatest',
     description: 'Ignore versions newer than npm "latest" version.',
     stage: 'package',
