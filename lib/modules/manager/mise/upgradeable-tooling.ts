@@ -12,6 +12,7 @@ import * as semverVersioning from '../../versioning/semver/index.ts';
 import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
+import { MiseRegistryJson } from './schema.ts';
 
 export interface ToolingDefinition {
   config: ToolingConfig;
@@ -557,6 +558,13 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   ...miseRegistryTooling,
 };
 
+let parsedMiseRegistry: Record<string, string[]> | undefined;
+
+function getRegistry(): Record<string, string[]> {
+  parsedMiseRegistry ??= MiseRegistryJson.parse(miseRegistry);
+  return parsedMiseRegistry;
+}
+
 export function getMiseRegistryBackends(toolName: string): string[] {
-  return (miseRegistry as Record<string, string[]>)[toolName] ?? [];
+  return getRegistry()[toolName] ?? [];
 }

@@ -1,6 +1,8 @@
 import { z } from 'zod/v3';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
+export const MiseRegistryJson = z.record(z.string(), z.array(z.string()));
+
 const MiseToolOptions = z.object({
   // ubi backend only
   tag_regex: z.string().optional(),

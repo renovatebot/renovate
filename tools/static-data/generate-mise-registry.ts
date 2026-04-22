@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import { z } from 'zod/v4';
+import { MiseRegistryJson } from '../../lib/modules/manager/mise/schema.ts';
 import { updateJsonFile } from './utils.mjs';
 
 const MiseVersion = z.object({ version: z.string() });
@@ -14,10 +15,12 @@ console.log(`Generating mise registry using mise version ${version.version}`);
 const output = execSync('mise registry --json', { encoding: 'utf8' });
 const tools = MiseRegistry.parse(JSON.parse(output));
 
-const registry = Object.fromEntries(
-  tools
-    .map(({ short, backends }): [string, string[]] => [short, backends])
-    .sort(([a], [b]) => a.localeCompare(b)),
+const registry = MiseRegistryJson.parse(
+  Object.fromEntries(
+    tools
+      .map(({ short, backends }): [string, string[]] => [short, backends])
+      .sort(([a], [b]) => a.localeCompare(b)),
+  ),
 );
 
 await updateJsonFile(
