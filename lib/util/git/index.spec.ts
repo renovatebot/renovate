@@ -1290,7 +1290,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const treeSha = await git.getCommitTreeSha(commit);
       expect(treeSha).toBeString();
       expect(treeSha).toHaveLength(40);
-      expect(treeSha).toMatch(/^[0-9a-f]{40}$/);
+      expect(treeSha).toMatch(regEx(/^[0-9a-f]{40}$/));
     });
 
     it('throws if commit output does not contain a tree SHA', async () => {
@@ -1322,7 +1322,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         expect.objectContaining({ path: 'file_to_delete' }),
       );
       for (const item of diff) {
-        expect(item.sha).toMatch(/^[0-9a-f]{40}$/);
+        expect(item.sha).toMatch(regEx(/^[0-9a-f]{40}$/));
       }
     });
 
@@ -1362,7 +1362,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
           path: 'renamed_master_file',
           mode: '100644',
           type: 'blob',
-          sha: expect.stringMatching(/^[0-9a-f]{40}$/),
+          sha: expect.stringMatching(regEx(/^[0-9a-f]{40}$/)),
         }),
       );
     });
