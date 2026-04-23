@@ -304,6 +304,19 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
           }
         }
       }
+      //
+      // don't allow undocumented config options to be documented
+      if (option.undocumented && lookupKeys.includes(option.name)) {
+        throw new Error(
+          `Config option "${option.name}" is marked as undocumented, but has an entry in ${configFile}`,
+        );
+      }
+
+      // and don't proces it otherwise
+      if (option.undocumented) {
+        return;
+      }
+
       // Fall back to plain name for top-level ## options (e.g. enabled, managerFilePatterns)
       if (lookupKeys.length === 0) {
         if (!indexed[option.name]) {
