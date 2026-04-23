@@ -184,7 +184,9 @@ export async function ensurePr(
     } else if (prCache) {
       logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
-      if (validatePrCache(prCache, prBodyFingerprint)) {
+      // skip cache when autoApprove is set, since new commits may have
+      // reset platform approvals (e.g. GitLab's "Remove all approvals" setting)
+      if (validatePrCache(prCache, prBodyFingerprint) && !config.autoApprove) {
         return { type: 'with-pr', pr: existingPr };
       }
     } else if (config.repositoryCache === 'enabled') {
@@ -414,7 +416,8 @@ export async function ensurePr(
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash &&
-        !labelsNeedUpdate
+        !labelsNeedUpdate &&
+        !config.autoApprove
       ) {
         // adds or-cache for existing PRs
         setPrCache(branchName, prBodyFingerprint, false);

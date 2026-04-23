@@ -27,13 +27,13 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
-## allowCustomCrateRegistries
+## `allowCustomCrateRegistries`
 
-## allowPlugins
+## `allowPlugins`
 
-## allowScripts
+## `allowScripts`
 
-## allowShellExecutorForPostUpgradeCommands
+## `allowShellExecutorForPostUpgradeCommands`
 
 Enabling this allows `postUpgradeTasks`' `commands` to execute as if they're in a shell.
 
@@ -61,7 +61,7 @@ This will not affect calling a script like:
 }
 ```
 
-## allowedCommands
+## `allowedCommands`
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
 
@@ -78,7 +78,7 @@ For example:
 
 This configuration option was formerly known as `allowedPostUpgradeCommands`.
 
-## allowedEnv
+## `allowedEnv`
 
 Bot administrators can allow users to configure custom environment variables within repo config.
 Only environment variables matching the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
@@ -105,7 +105,7 @@ module.exports = {
 `allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
 For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
 
-## allowedHeaders
+## `allowedHeaders`
 
 `allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
 By default, all headers starting with "X-" are allowed.
@@ -144,7 +144,7 @@ module.exports = {
 };
 ```
 
-## allowedUnsafeExecutions
+## `allowedUnsafeExecutions`
 
 This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.
 
@@ -160,12 +160,12 @@ Allowed options:
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
-## autodiscover
+## `autodiscover`
 
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
 You can limit which repositories Renovate can access by using the `autodiscoverFilter` config option.
 
-## autodiscoverFilter
+## `autodiscoverFilter`
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 The pattern matches against the organization/repo path.
@@ -210,7 +210,7 @@ If using negations, all repositories except those who match the regex are added 
 }
 ```
 
-## autodiscoverNamespaces
+## `autodiscoverNamespaces`
 
 You can use this option to autodiscover projects in specific namespaces (a.k.a. groups/organizations/workspaces).
 In contrast to `autodiscoverFilter` the filtering is done by the platform and therefore more efficient.
@@ -229,7 +229,7 @@ For example:
     On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
     Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
 
-## autodiscoverProjects
+## `autodiscoverProjects`
 
 You can use this option to filter the list of autodiscovered repositories by project names.
 This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
@@ -244,13 +244,13 @@ This feature is useful for users who want Renovate to only work on repositories 
 The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
-## autodiscoverRepoOrder
+## `autodiscoverRepoOrder`
 
 The order method for autodiscover server side repository search.
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
-## autodiscoverRepoSort
+## `autodiscoverRepoSort`
 
 The sort method for autodiscover server side repository search.
 
@@ -263,7 +263,7 @@ Platform supported sort options:
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
-## autodiscoverTopics
+## `autodiscoverTopics`
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
 topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
@@ -276,7 +276,7 @@ For example:
 }
 ```
 
-## baseDir
+## `baseDir`
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
 You can override this default with the `baseDir` option.
@@ -289,7 +289,7 @@ For example:
 }
 ```
 
-## bbUseDevelopmentBranch
+## `bbUseDevelopmentBranch`
 
 By default, Renovate will use a repository's "main branch" (typically called `main` or `master`) as the "default branch".
 
@@ -297,7 +297,7 @@ Configuring this to `true` means that Renovate will detect and use the Bitbucket
 
 If the "development branch" is configured but the branch itself does not exist (e.g. it was deleted), Renovate will fall back to using the repository's "main branch". This fall back behavior matches that of the Bitbucket Cloud web interface.
 
-## binarySource
+## `binarySource`
 
 Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
 
@@ -321,7 +321,7 @@ For this to work, `docker` needs to be installed and the Docker socket available
 
 If you are using this mode, and cannot migrate to `binarySource=install`, [please provide feedback in this Discussion](https://github.com/renovatebot/renovate/discussions/40742).
 
-## cacheDir
+## `cacheDir`
 
 By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
 Use the `cacheDir` option to override this default.
@@ -338,7 +338,7 @@ For example:
 }
 ```
 
-## cacheHardTtlMinutes
+## `cacheHardTtlMinutes`
 
 This experimental feature configures the physical lifetime of cache entries.
 Renovate internally uses two types of Time-to-Live (TTL) for its cache:
@@ -367,11 +367,11 @@ When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stal
 - The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
 - If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
-## cachePrivatePackages
+## `cachePrivatePackages`
 
 In the self-hosted setup, use option to enable caching of private packages to improve performance.
 
-## cacheTtlOverride
+## `cacheTtlOverride`
 
 Use this key-value map to override the default package cache TTL values for a specific namespace.
 This object contains pairs of namespaces and their corresponding TTL values in minutes.
@@ -523,7 +523,7 @@ Other valid cache namespaces are as follows:
 
 <!-- cache-namespaces-end -->
 
-## checkedBranches
+## `checkedBranches`
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
 
@@ -532,7 +532,7 @@ It is highly unlikely that you should ever need to add this to your permanent gl
 
 Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
 
-## configFileNames
+## `configFileNames`
 
 A list of filenames where repository config can be stored.
 
@@ -550,17 +550,17 @@ Example:
 !!! note
     If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
 
-## configValidationError
+## `configValidationError`
 
 If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
 
-## containerbaseDir
+## `containerbaseDir`
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
 
 Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
 
-## customEnvVariables
+## `customEnvVariables`
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.
 
@@ -589,7 +589,7 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
-## deleteAdditionalConfigFile
+## `deleteAdditionalConfigFile`
 
 If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.
 
@@ -599,7 +599,7 @@ The process that runs Renovate must have the correct permissions to delete the a
 !!! tip
     You can tell Renovate where to find your config file with the `RENOVATE_ADDITONAL_CONFIG_FILE` environment variable.
 
-## deleteConfigFile
+## `deleteConfigFile`
 
 If set to `true` Renovate tries to delete the self-hosted config file after reading it.
 
@@ -609,7 +609,7 @@ The process that runs Renovate must have the correct permissions to delete the c
 !!! tip
     You can tell Renovate where to find your config file with the `RENOVATE_CONFIG_FILE` environment variable.
 
-## detectGlobalManagerConfig
+## `detectGlobalManagerConfig`
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
 
@@ -618,7 +618,7 @@ This config option is disabled by default because it may prove surprising or und
 Currently this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
 If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
 
-## detectHostRulesFromEnv
+## `detectHostRulesFromEnv`
 
 The format of the environment variables must follow:
 
@@ -706,7 +706,7 @@ You can skip the host part, and use only the datasource and credentials.
 }
 ```
 
-## dockerChildPrefix
+## `dockerChildPrefix`
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
@@ -719,7 +719,7 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 !!! note
     Dangling containers are only removed when Renovate runs again with the same prefix.
 
-## dockerCliOptions
+## `dockerCliOptions`
 
 You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar Docker containers.
 
@@ -727,12 +727,12 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
-## dockerMaxPages
+## `dockerMaxPages`
 
 If set to an positive integer, Renovate will use this value as the maximum page number.
 Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
 
-## dockerSidecarImage
+## `dockerSidecarImage`
 
 By default Renovate pulls the sidecar Docker containers from `ghcr.io/renovatebot/base-image`.
 You can use the `dockerSidecarImage` option to override this default.
@@ -748,7 +748,7 @@ You would put this in your configuration file:
 
 Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/renovatebot/base-image`.
 
-## dockerUser
+## `dockerUser`
 
 Override default user and group used by Docker-based tools.
 The user-id (UID) and group-id (GID) must match the user that executes Renovate.
@@ -771,7 +771,7 @@ Like this:
 > export RENOVATE_DOCKER_USER="$(id -u):0" # 500:0 (username:root)
 ```
 
-## dryRun
+## `dryRun`
 
 Use `dryRun` to preview the behavior of Renovate in logs, without making any changes to the repository files.
 
@@ -784,20 +784,20 @@ You can choose from the following behaviors for the `dryRun` config option:
 
 Information provided mainly in debug log level.
 
-## encryptedWarning
+## `encryptedWarning`
 
 Use this if you want to stop supporting `encrypted` configuration capabilities but want to warn users first to migrate.
 
 If set to a string value, Renovate will log warnings with the `encryptedWarning` text, meaning the message will be visible to users such as on the Dependency Dashboard.
 
-## endpoint
+## `endpoint`
 
-## executionTimeout
+## `executionTimeout`
 
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
 
-## exposeAllEnv
+## `exposeAllEnv`
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
 If you must expose all environment variables to package managers, you can set this option to `true`.
@@ -812,25 +812,25 @@ Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuratio
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
-## force
+## `force`
 
 This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository.
 For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently inactive.
 
 In practice, it is implemented by converting the `force` configuration into a `packageRule` that matches all packages.
 
-## forceCli
+## `forceCli`
 
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkCreation
+## `forkCreation`
 
 This configuration lets you disable the runtime forking of repositories when running in "fork mode".
 
 Usually you will need to keep this as the default `true`, and only set to `false` if you have some out of band process to handle the creation of forks.
 
-## forkOrg
+## `forkOrg`
 
 This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
 It must be set to a GitHub Organization name and not a GitHub user account.
@@ -843,7 +843,7 @@ If you've set a `forkOrg` then Renovate will:
 1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
 1. If no fork exists: it will be created in the `forkOrg`, not the user account
 
-## forkToken
+## `forkToken`
 
 If this value is configured then Renovate:
 
@@ -856,14 +856,14 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 !!! note
     Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
-## gitNoVerify
+## `gitNoVerify`
 
 Controls when Renovate passes the `--no-verify` flag to `git`.
 The flag can be passed to `git commit` and/or `git push`.
 Read the documentation for [git commit --no-verify](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify) and [git push --no-verify](https://git-scm.com/docs/git-push#Documentation/git-push.txt---no-verify) to learn exactly what each flag does.
 To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
 
-## gitPrivateKey
+## `gitPrivateKey`
 
 This is a private PGP or SSH key for signing Git commits.
 
@@ -883,7 +883,7 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
-## gitPrivateKeyPassphrase
+## `gitPrivateKeyPassphrase`
 
 Passphrase for the `gitPrivateKey` when the private key is protected with a passphrase.
 
@@ -898,11 +898,11 @@ When provided, Renovate will automatically decrypt the SSH private key during th
 !!! warning
     Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
 
-## gitTimeout
+## `gitTimeout`
 
 To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
 
-## gitUrl
+## `gitUrl`
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
 
@@ -912,13 +912,13 @@ Possible values:
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
-## githubTokenWarn
+## `githubTokenWarn`
 
 By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
 Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
-## globalExtends
+## `globalExtends`
 
 Unlike the `extends` field, which is passed through unresolved to be part of repository config, any presets in `globalExtends` are resolved immediately as part of global config.
 Use the `globalExtends` field if your preset has any global-only configuration options, such as the list of repositories to run against.
@@ -931,7 +931,7 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
-## httpCacheTtlDays
+## `httpCacheTtlDays`
 
 This option sets the number of days that Renovate will cache HTTP responses.
 The default value is 90 days.
@@ -941,7 +941,7 @@ Value of `0` means no caching.
 !!! warning
     When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
 
-## ignorePrAuthor
+## `ignorePrAuthor`
 
 This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
 An additional use case is for GitLab users of project or group access tokens who need to rotate them.
@@ -951,13 +951,13 @@ You should only want to enable this if you are changing the bot account (e.g. fr
 
 Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
 
-## includeMirrors
+## `includeMirrors`
 
 By default, Renovate does not autodiscover repositories that are mirrors.
 
 Change this setting to `true` to include repositories that are mirrors as Renovate targets.
 
-## inheritConfig
+## `inheritConfig`
 
 When you enable this option, Renovate will look for the `inheritConfigFileName` file in the `inheritConfigRepoName` repository before processing a repository, and read this in as config.
 
@@ -990,17 +990,17 @@ We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions o
 This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
 We will add a smart/dynamic approach in future, so that we can selectively enable `inheritConfig` per organization.
 
-## inheritConfigFileName
+## `inheritConfigFileName`
 
 Change this setting if you want Renovate to look for a different file name within the `inheritConfigRepoName` repository.
 You may use nested files, for example: `"some-dir/config.json"`.
 
-## inheritConfigRepoName
+## `inheritConfigRepoName`
 
 Change this setting if you want Renovate to look in an alternative repository for the inherited config.
 The repository must be on the same platform and endpoint, and Renovate's token must have `read` permissions to the repository.
 
-## inheritConfigStrict
+## `inheritConfigStrict`
 
 By default Renovate will silently (debug log message only) ignore cases where `inheritConfig=true` but no inherited config is found.
 When you set `inheritConfigStrict=true` then Renovate will abort the run and raise a config error if Renovate can't find the inherited config.
@@ -1009,12 +1009,12 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 !!! warning
     Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
 
-## logContext
+## `logContext`
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
 If left as default (null), a random short ID will be selected.
 
-## mergeConfidenceDatasources
+## `mergeConfidenceDatasources`
 
 This feature is applicable only if you have an access token for Mend's Merge Confidence API.
 
@@ -1029,7 +1029,7 @@ modules.exports = {
 };
 ```
 
-## mergeConfidenceEndpoint
+## `mergeConfidenceEndpoint`
 
 This feature is applicable only if you have an access token for Mend's Merge Confidence API.
 
@@ -1047,7 +1047,7 @@ But if you have specified the token as a [`matchConfidence`](configuration-optio
 
 This feature is in private beta.
 
-## migratePresets
+## `migratePresets`
 
 Use this if you have repositories that extend from a particular preset, which has now been renamed or removed.
 This is handy if you have a large number of repositories that all extend from a particular preset which you want to rename, without the hassle of manually updating every repository individually.
@@ -1069,7 +1069,7 @@ In the above example any reference to the `@company` preset will be replaced wit
 !!! tip
     Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
 
-## onboarding
+## `onboarding`
 
 Only set this to `false` if all three statements are true:
 
@@ -1077,13 +1077,13 @@ Only set this to `false` if all three statements are true:
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
 
-## onboardingAutoCloseAge
+## `onboardingAutoCloseAge`
 
 Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs.
 
 By default this option is set to `null`.
 
-## onboardingBranch
+## `onboardingBranch`
 
 <!-- prettier-ignore -->
 !!! note
@@ -1092,13 +1092,13 @@ By default this option is set to `null`.
 For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
 If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
-## onboardingCommitMessage
+## `onboardingCommitMessage`
 
 If `commitMessagePrefix` or `semanticCommits` values are set then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
-## onboardingConfig
+## `onboardingConfig`
 
-## onboardingConfigFileName
+## `onboardingConfigFileName`
 
 If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
@@ -1107,7 +1107,7 @@ Falls back to `renovate.json` if the name provided is not valid.
 !!! note
     If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
 
-## onboardingNoDeps
+## `onboardingNoDeps`
 
 The default `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
 
@@ -1116,14 +1116,14 @@ In other words, the default behavior is:
 - If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
 - If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
-## onboardingPrTitle
+## `onboardingPrTitle`
 
 If you have an existing Renovate installation and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
 This is similar to what happens when you change the `onboardingBranch` config option.
 
-## onboardingRebaseCheckbox
+## `onboardingRebaseCheckbox`
 
-## optimizeForDisabled
+## `optimizeForDisabled`
 
 When this option is `true`, Renovate will do the following during repository initialization:
 
@@ -1148,28 +1148,28 @@ In that case, Renovate searches the repository config file for any of these conf
 If Renovate finds any of the above configurations, it continues initializing the repository.
 If not, then Renovate skips the repository without cloning it.
 
-## password
+## `password`
 
-## persistRepoData
+## `persistRepoData`
 
 Set this to `true` if you want Renovate to persist repo data between runs.
 The intention is that this allows Renovate to do a faster `git fetch` between runs rather than `git clone`.
 It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
-## platform
+## `platform`
 
-## prCacheSyncMaxPages
+## `prCacheSyncMaxPages`
 
 Maximum number of pages to fetch when syncing the pull request cache.
 
-## prCommitsPerRunLimit
+## `prCommitsPerRunLimit`
 
 Parameter to reduce CI load.
 CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events.
 Set as an integer.
 Default is no limit.
 
-## presetCachePersistence
+## `presetCachePersistence`
 
 When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
 
@@ -1180,7 +1180,7 @@ TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachet
      Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
      You should only enable this when all repositories are trusted, such as a corporate environment.
 
-## privateKey
+## `privateKey`
 
 This private key is used to decrypt config files.
 
@@ -1294,7 +1294,7 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
     We deprecated this approach and removed the documentation for it.
     If you're _still_ using public key encryption then we recommend that you use private keys instead.
 
-## privateKeyOld
+## `privateKeyOld`
 
 Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
 Decryption with this key will be tried after `privateKey`.
@@ -1308,15 +1308,15 @@ You can remove the `privateKeyOld` config option once all the old encrypted valu
 !!! note
     Renovate now logs a warning whenever repositories use non-PGP encrypted config variables.
 
-## privateKeyPath
+## `privateKeyPath`
 
 Used as an alternative to `privateKey`, if you want the key to be read from disk instead.
 
-## privateKeyPathOld
+## `privateKeyPathOld`
 
 Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
-## processEnv
+## `processEnv`
 
 Used to set environment variables through the configuration file instead of using actual environment variables.
 
@@ -1338,16 +1338,16 @@ Example:
 - All values must be provided as strings, e.g., `"true"` instead of `true`
 - Only supported in file configuration (not via CLI or environment).
 
-## productLinks
+## `productLinks`
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
-## redisPrefix
+## `redisPrefix`
 
 If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
 It's only used if `redisUrl` is configured.
 
-## redisUrl
+## `redisUrl`
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
 The global cache is used to store lookup results (e.g. dependency versions and changelogs) between repositories and runs.
@@ -1364,11 +1364,11 @@ Renovate also supports connecting to Redis clusters as well. In order to connect
 
 Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
 
-## reportFormatting
+## `reportFormatting`
 
 This option only applies when [`reportType`](#reporttype) is `file` or `s3`.
 
-## reportPath
+## `reportPath`
 
 `reportPath` describes the location where the report is written to.
 
@@ -1378,7 +1378,7 @@ For example: `/foo/bar.json`.
 If the value `s3` is used in [`reportType`](#reporttype), then use a S3 URI.
 For example: `s3://bucket-name/key-name`.
 
-## reportType
+## `reportType`
 
 Defines how the report is exposed:
 
@@ -1387,7 +1387,7 @@ Defines how the report is exposed:
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
 - `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
 
-## repositories
+## `repositories`
 
 Elements in the `repositories` array can be an object if you wish to define more settings.
 Example:
@@ -1398,19 +1398,19 @@ Example:
 }
 ```
 
-## repositoryCache
+## `repositoryCache`
 
 Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
-## repositoryCacheForceLocal
+## `repositoryCacheForceLocal`
 
 If set to `true`, Renovate will persist repository cache locally after uploading to S3.
 
 This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
 
-## repositoryCacheType
+## `repositoryCacheType`
 
 ```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
 {
@@ -1431,7 +1431,7 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
 !!! note
     S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
-## requireConfig
+## `requireConfig`
 
 By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
 
@@ -1450,11 +1450,11 @@ The combinations of `requireConfig` and `onboarding` are:
 | `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
 | `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
 
-## s3Endpoint
+## `s3Endpoint`
 
 If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.
 
-## s3PathStyle
+## `s3PathStyle`
 
 If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
 
@@ -1467,7 +1467,7 @@ For example:
 
 Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html) to learn more about path-style URLs.
 
-## secrets
+## `secrets`
 
 Secrets may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
 For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
@@ -1510,14 +1510,14 @@ It could then be used in a repository config or preset like so:
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
 
-## token
+## `token`
 
-## unicodeEmoji
+## `unicodeEmoji`
 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
 
-## useCloudMetadataServices
+## `useCloudMetadataServices`
 
 Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
 You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
@@ -1526,18 +1526,18 @@ You can control if Renovate should try to access these services with the `useClo
 !!! note
     This should only be set via an environment variable, as it is used before Renovate initialises its global configuration.
 
-## userAgent
+## `userAgent`
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
 Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
 
-## username
+## `username`
 
 The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
 You don't need to configure `username` directly if you have already configured `token`.
 Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
 
-## variables
+## `variables`
 
 Variables may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
 This config option behaves exactly like [secrets](#secrets), except that it won't be masked in the logs.
@@ -1579,7 +1579,7 @@ It could then be used in a repository config or preset like so:
 }
 ```
 
-## writeDiscoveredRepos
+## `writeDiscoveredRepos`
 
 By default, Renovate processes each repository that it finds.
 You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.

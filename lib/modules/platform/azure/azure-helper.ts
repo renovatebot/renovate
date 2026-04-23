@@ -167,7 +167,7 @@ export async function getMergeMethod(
 
   try {
     // TODO: fix me, wrong types
-    return Object.keys(policyConfigurations)
+    const method = Object.keys(policyConfigurations)
       .map(
         (p) =>
           GitPullRequestMergeStrategy[
@@ -175,7 +175,18 @@ export async function getMergeMethod(
           ] as never as GitPullRequestMergeStrategy,
       )
       .find((p) => p)!;
+    logger.debug(
+      { policyConfigurations },
+      // TODO: types (#22198)
+      `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[method]}`,
+    );
+    return method;
   } catch {
+    logger.debug(
+      { policyConfigurations },
+      // TODO: types (#22198)
+      `getMergeMethod(branchRef=${branchRef!})=NoFastForward, as an error occured`,
+    );
     return GitPullRequestMergeStrategy.NoFastForward;
   }
 }

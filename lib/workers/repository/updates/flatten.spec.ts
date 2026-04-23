@@ -2,6 +2,7 @@ import { isNumber } from '@sindresorhus/is';
 import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { SkipReason } from '../../../types/skip-reason.ts';
 import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 
 vi.mock('../../../util/git/semantic.ts');
@@ -235,6 +236,84 @@ describe('workers/repository/updates/flatten', () => {
         ),
       ).toHaveLength(2);
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
+    });
+
+    it('when a dependency is enabled=false, it is filtered', async () => {
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                enabled: false,
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(
+        res.find((update) => update.depName === '@org/a'),
+      ).not.toBeDefined();
+      expect(res.find((update) => update.depName === 'foo')).toBeDefined();
+    });
+
+    it('when a skipReason is found on a dependency, it is filtered', async () => {
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                skipReason: 'disabled' as SkipReason,
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(
+        res.find((update) => update.depName === '@org/a'),
+      ).not.toBeDefined();
+      expect(res.find((update) => update.depName === 'foo')).toBeDefined();
     });
 
     it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {

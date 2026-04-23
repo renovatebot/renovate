@@ -4,10 +4,17 @@ on:
   pull_request_target:
     types:
       - opened
+      - ready_for_review
+      - converted_to_draft
 
 jobs:
   review:
-    if: github.event.action == 'opened' && !endsWith(github.event.pull_request.user.login, '[bot]')
+    if: >-
+      !endsWith(github.event.pull_request.user.login, '[bot]') &&
+      (
+        (github.event.action == 'opened' && !github.event.pull_request.draft) ||
+        github.event.action == 'ready_for_review'
+      )
     runs-on: ubuntu-24.04
     permissions:
       pull-requests: write
@@ -16,3 +23,31 @@ jobs:
         with:
           reviewers: ${{ vars.REVIEWERS }}
           max-num-of-reviewers: 2
+
+  remove-review:
+    if: >-
+      !endsWith(github.event.pull_request.user.login, '[bot]') &&
+      github.event.action == 'converted_to_draft'
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { data: { users, teams } } = await github.rest.pulls.listRequestedReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            const reviewers = users.map(u => u.login);
+            const team_reviewers = teams.map(t => t.slug);
+            if (reviewers.length || team_reviewers.length) {
+              await github.rest.pulls.removeRequestedReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                reviewers,
+                team_reviewers,
+              });
+            }

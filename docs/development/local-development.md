@@ -15,8 +15,7 @@ You need the following dependencies for local development:
 - pnpm `^10.0.0`
 - C++ compiler
 
-We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
-Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
+We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Mise](https://mise.jdx.dev/) to manage your tool versions.
 
 For building the documentation, you also need:
 
@@ -155,10 +154,13 @@ Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 ### Quick Local CI
 
-For fast iteration during development, use `pnpm check`, which runs all checks in parallel and only tests the shards affected by your changes:
+For fast iteration during development, use `pnpm check`, which runs lint and tests in parallel:
 
 ```bash
 pnpm check
+pnpm check lib/util/http        # scope to a directory
+pnpm check lib/util/hash.ts     # scope to a file
+pnpm check --fix lib/util/http  # auto-fix only
 ```
 
 ### Vitest

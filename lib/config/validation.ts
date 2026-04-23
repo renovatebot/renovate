@@ -13,6 +13,7 @@ import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import { allManagersList, getManagerList } from '../modules/manager/index.ts';
 import type { HostRule } from '../types/index.ts';
+import { isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -32,6 +33,7 @@ import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
 import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
+import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
@@ -397,6 +399,14 @@ export async function validateConfig(
                       });
                     }
                   }
+                  try {
+                    parsePreset(subval);
+                  } catch {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `${currentPath}: preset "${subval}" is not valid`,
+                    });
+                  }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
@@ -740,6 +750,15 @@ export async function validateConfig(
                       message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
                     });
                   }
+                }
+              }
+            } else if (key === 'installTools') {
+              for (const toolName of Object.keys(val)) {
+                if (!isToolName(toolName)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${toolName}\` configuration: not a valid tool name.`,
+                  });
                 }
               }
             } else {

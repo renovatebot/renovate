@@ -578,19 +578,19 @@ function isSubversion(majorVersion: string, minorVersion: string): boolean {
 }
 
 export {
+  EXCLUDING_POINT,
+  INCLUDING_POINT,
   PREFIX_DOT,
   PREFIX_HYPHEN,
   TYPE_NUMBER,
   TYPE_QUALIFIER,
-  tokenize,
-  isSubversion,
+  autoExtendMavenRange,
   compare,
+  isSubversion,
+  isValid,
   isVersion,
   isVersion as isSingleVersion,
-  isValid,
   parseRange,
   rangeToStr,
-  INCLUDING_POINT,
-  EXCLUDING_POINT,
-  autoExtendMavenRange,
+  tokenize,
 };

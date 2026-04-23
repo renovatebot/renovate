@@ -13,6 +13,7 @@ import type {
   SkipReason,
   StageName,
 } from '../../types/index.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
@@ -35,7 +36,7 @@ export interface ExtractConfig extends CustomExtractConfig {
 
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
@@ -64,7 +65,7 @@ export interface PackageFileContent<
   T = Record<string, any>,
 > extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  extractedConstraints?: Record<string, string>;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
@@ -373,7 +374,7 @@ export type ManagerApi = ManagerApiBase &
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>, ManagerData<T> {
   // TODO: remove null
-  constraints?: Record<string, string> | null;
+  constraints?: Partial<Record<ConstraintName, string>> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipArtifactsUpdate?: boolean;
