@@ -4,6 +4,10 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
+import {
+  additionalConstraintNames,
+  toolNames,
+} from '../../lib/util/exec/types.ts';
 import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
 
@@ -122,6 +126,38 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   ) {
     temp.$ref = '#';
   }
+
+  if (option.name === 'constraints') {
+    temp.properties = {};
+
+    for (const tool of [...toolNames]) {
+      temp.properties[tool] = {
+        type: 'string',
+        description: `A constraint for the \`${tool}\` Containerbase tool`,
+      };
+    }
+
+    for (const constraintName of [...additionalConstraintNames]) {
+      temp.properties[constraintName] = {
+        type: 'string',
+        description: `A constraint for \`${constraintName}\``,
+      };
+    }
+  }
+
+  if (option.name === 'installTools') {
+    temp.additionalProperties = false;
+    temp.properties = {};
+
+    for (const tool of [...toolNames]) {
+      temp.properties[tool] = {
+        type: 'object',
+        description: `Install the \`${tool}\` Containerbase tool`,
+        additionalProperties: false,
+      };
+    }
+  }
+
   return temp;
 }
 
