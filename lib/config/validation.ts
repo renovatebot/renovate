@@ -1,5 +1,6 @@
 import is, {
   isArray,
+  isEmptyArray,
   isEmptyString,
   isNonEmptyArray,
   isNonEmptyString,
@@ -37,6 +38,7 @@ import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
+  BumpVersionConfig,
   RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
@@ -836,6 +838,25 @@ export async function validateConfig(
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
+          });
+        }
+      }
+    }
+
+    if (key === 'bumpVersions' && isArray(val)) {
+      for (const [index, entry] of val.entries()) {
+        const bumpVersionConfig = entry as BumpVersionConfig
+        if (!bumpVersionConfig.filePatterns.length) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `${currentPath}[${index}]: invalid bumpVersions configuration: filePatterns must not be empty`,
+          });
+        }
+
+        if (!bumpVersionConfig.matchStrings.length) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `${currentPath}[${index}]: invalid bumpVersions configuration: matchStrings must not be empty`,
           });
         }
       }
