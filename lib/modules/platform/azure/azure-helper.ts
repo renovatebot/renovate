@@ -117,6 +117,23 @@ export async function getCommitDetails(
   return results;
 }
 
+interface MergeStrategyPolicyConfiguration {
+  allowNoFastForward?: boolean;
+  allowSquash?: boolean;
+  allowRebase?: boolean;
+  allowRebaseMerge?: boolean;
+}
+
+const policyKeyByStrategy: Record<
+  GitPullRequestMergeStrategy,
+  keyof MergeStrategyPolicyConfiguration
+> = {
+  [GitPullRequestMergeStrategy.NoFastForward]: 'allowNoFastForward',
+  [GitPullRequestMergeStrategy.Squash]: 'allowSquash',
+  [GitPullRequestMergeStrategy.Rebase]: 'allowRebase',
+  [GitPullRequestMergeStrategy.RebaseMerge]: 'allowRebaseMerge',
+};
+
 export async function getMergeMethod(
   repoId: string,
   project: string,
@@ -165,30 +182,24 @@ export async function getMergeMethod(
     `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy`,
   );
 
-  try {
-    // TODO: fix me, wrong types
-    const method = Object.keys(policyConfigurations)
-      .map(
-        (p) =>
-          GitPullRequestMergeStrategy[
-            p.slice(5) as never
-          ] as never as GitPullRequestMergeStrategy,
-      )
-      .find((p) => p)!;
-    logger.debug(
-      { policyConfigurations },
-      // TODO: types (#22198)
-      `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[method]}`,
-    );
-    return method;
-  } catch {
-    logger.debug(
-      { policyConfigurations },
-      // TODO: types (#22198)
-      `getMergeMethod(branchRef=${branchRef!})=NoFastForward, as an error occured`,
-    );
-    return GitPullRequestMergeStrategy.NoFastForward;
+  // Note that this will iterate in the order of GitPullRequestMergeStrategy
+  for (const [key, policyKey] of Object.entries(policyKeyByStrategy)) {
+    if (policyConfigurations?.[policyKey] === true) {
+      const method = Number(key) satisfies GitPullRequestMergeStrategy;
+      logger.debug(
+        { policyConfigurations },
+        `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[method]}`,
+      );
+      return method;
+    }
   }
+
+  logger.debug(
+    { policyConfigurations },
+    // TODO: types (#22198)
+    `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[GitPullRequestMergeStrategy.NoFastForward]}`,
+  );
+  return GitPullRequestMergeStrategy.NoFastForward;
 }
 
 export async function getAllProjectTeams(
