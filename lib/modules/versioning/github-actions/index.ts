@@ -13,6 +13,9 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
 
+const floatingMinorTagRegex = regEx(/^\d+(\.\d+)?$/);
+const majorOnlyRegex = regEx(/^\d+$/);
+
 function massageValue(input: string): string {
   return input.trim().replace(regEx(/^v/i), '');
 }
@@ -28,13 +31,17 @@ interface Range {
 
 function parseRange(input: string): Range | null {
   const stripped = massageValue(input);
+  if (!floatingMinorTagRegex.test(stripped)) {
+    return null;
+  }
   const coerced = semver.coerce(stripped);
+  /* v8 ignore if -- unreachable: floatingMinorTagRegex should guarantee coerce() succeeds */
   if (!coerced) {
     return null;
   }
   const { major, minor } = coerced;
 
-  if (regEx(/^\d+$/).test(stripped)) {
+  if (majorOnlyRegex.test(stripped)) {
     return { major };
   }
 
