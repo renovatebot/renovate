@@ -287,6 +287,7 @@ export async function validateConfig(
         }
       }
       const parentName = getParentName(parentPath);
+      // v8 ignore next -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
       if (
         !isPreset &&
         optionParents[key] &&
@@ -809,7 +810,6 @@ export async function validateConfig(
             });
           }
         } else {
-          // v8 ignore next -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
           logger.debug(
             {},
             `Unhandled validation for ${type} at \`${currentPath}\``,
