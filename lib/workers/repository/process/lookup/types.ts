@@ -17,6 +17,7 @@ export interface FilterConfig {
   ignoreDeprecated?: boolean;
   ignoreUnstable?: boolean;
   maxMajorIncrement?: number;
+  maxMajorIncrementThreshold?: number;
   respectLatest?: boolean;
   updatePinnedDependencies?: boolean;
   versioning?: string;
