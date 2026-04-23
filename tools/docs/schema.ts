@@ -128,6 +128,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   }
 
   if (option.name === 'constraints') {
+    temp.additionalProperties = false;
     temp.properties = {};
 
     for (const tool of [...toolNames]) {
