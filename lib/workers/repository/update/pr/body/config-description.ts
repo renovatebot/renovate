@@ -1,7 +1,5 @@
-import { CronPattern } from 'croner';
-import cronstrue from 'cronstrue';
 import { emojify } from '../../../../../util/emoji.ts';
-import { capitalize } from '../../../../../util/string.ts';
+import { getReadableCronSchedule } from '../../../../../util/schedule.ts';
 import type { BranchConfig } from '../../../../types.ts';
 
 export function getPrConfigDescription(config: BranchConfig): string {
@@ -74,27 +72,4 @@ function scheduleToString(
     scheduleLines.push('At any time (no schedule defined)');
   }
   return '  - ' + scheduleLines.join('\n  - ');
-}
-
-/**
- * Return human-readable cron schedule summary if the schedule is a valid cron
- * else return null
- */
-function getReadableCronSchedule(scheduleText: string[]): string[] | null {
-  // assuming if one schedule is cron the others in the array will be cron too
-  try {
-    new CronPattern(scheduleText[0]); // validate cron
-    return scheduleText.map(
-      (cron) =>
-        capitalize(
-          cronstrue
-            .toString(cron, {
-              throwExceptionOnParseError: false,
-            })
-            .replace('Every minute, ', ''),
-        ) + ` (\`${cron}\`)`,
-    );
-  } catch {
-    return null;
-  }
 }

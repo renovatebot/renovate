@@ -530,6 +530,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName3',
         },
         {
@@ -537,6 +538,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName4',
         },
         {
@@ -634,6 +636,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName3',
         },
         {
@@ -641,6 +644,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName4',
           dependencyDashboardCategory: 'Category #1',
         },
@@ -1293,6 +1297,7 @@ None detected
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName3',
         },
       ];
@@ -1318,7 +1323,7 @@ None detected
 
         The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
-         - [x] <!-- unschedule-branch=branchName3 -->pr3
+         - [x] <!-- unschedule-branch=branchName3 -->pr3 → [Schedule: Between 12:00 AM and 03:59 AM (\`* 0-3 * * *\`)]
 
          - [x] <!-- rebase-all-open-prs -->'
         `,

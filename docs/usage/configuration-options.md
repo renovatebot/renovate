@@ -1553,6 +1553,14 @@ This helps you identify dependencies that may need attention due to lack of main
 
 Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
 
+## dependencyDashboardReportSchedules
+
+Controls whether schedule descriptions are reported in the dependency dashboard..
+
+When enabled (default), Renovate will display the schedule details for any PR awaiting schedule..
+
+Set this to `false` if you prefer not to see schedule descriptions in your dependency dashboard.
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
