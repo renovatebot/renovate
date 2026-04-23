@@ -6,7 +6,7 @@ import type { Options as ExecaOptions } from 'execa';
  *
  * TODO #41849 replace with upstream types
  */
-const toolNames = [
+export const toolNames = [
   'bazelisk',
   'bun',
   'bundler',
@@ -62,7 +62,7 @@ export function isToolName(value: unknown): value is ToolName {
 /**
  * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
  */
-const additionalConstraintNames = [
+export const additionalConstraintNames = [
   /**
    * Used in the `gomod` manager to specify the version of the Go toolchain to use.
    *
