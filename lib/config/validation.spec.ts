@@ -2352,6 +2352,25 @@ describe('config/validation', () => {
       );
     });
 
+    it('does not validate postUpgradeTasks.installTools contents', async () => {
+      const config = {
+        postUpgradeTasks: {
+          installTools: {
+            npm: {},
+            node: {},
+            unknownTool: {},
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: installTools.unknownTool is not a valid tool
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
       const config = {
         packageRules: [
