@@ -3,9 +3,10 @@ import {
   isString,
   isUndefined,
 } from '@sindresorhus/is';
-import * as bunyan from 'bunyan';
+
 import fs from 'fs-extra';
 import upath from 'upath';
+import { bunyan } from '../expose.ts';
 import cmdSerializer from './cmd-serializer.ts';
 import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
@@ -28,9 +29,7 @@ export function createDefaultStreams(
 
   // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
-    // TODO: typings (#9615)
-    const prettyStdOut = new RenovateStream() as any;
-    prettyStdOut.pipe(process.stdout);
+    const prettyStdOut = new RenovateStream(process.stdout);
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
@@ -68,14 +67,21 @@ function createLogFileStream(logFile: string): BunyanStream {
     isNonEmptyStringAndNotWhitespace(logFileFormat) &&
     logFileFormat === 'pretty'
   ) {
+    const fileStream = fs.createWriteStream(logFile, {
+      flags: 'a',
+      encoding: 'utf8',
+    });
+    const prettyFile = new RenovateStream(fileStream, false);
+    file.stream = prettyFile;
     file.type = 'raw';
+    delete file.path;
   }
 
   return file;
 }
 
 function serializedSanitizedLogger(streams: BunyanStream[]): BunyanLogger {
-  return bunyan.createLogger({
+  return bunyan().createLogger({
     name: 'renovate',
     serializers: {
       body: configSerializer,
@@ -132,7 +138,7 @@ export function validateLogLevel(
     return (logLevelToCheck as BunyanLogLevel) ?? defaultLevel;
   }
 
-  const logger = bunyan.createLogger({
+  const logger = bunyan().createLogger({
     name: 'renovate',
     streams: [
       {

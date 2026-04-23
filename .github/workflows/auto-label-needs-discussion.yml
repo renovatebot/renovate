@@ -1,0 +1,67 @@
+name: 'Auto-apply `needs-discussion` label to externally raised Issues'
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  label-if-external:
+    runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate'
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const author = context.payload.issue.user.login;
+
+            let roleName;
+            try {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: author,
+              });
+              roleName = data.role_name;
+            } catch (err) {
+              if (err.status === 404) {
+                // User is not a collaborator — treat as no access
+                roleName = 'none';
+              } else {
+                throw err;
+              }
+            }
+
+            // allow users who have a minimum of Triage access on the project to raise Issues without auto-labelling
+            const triagePlus = ['admin', 'maintain', 'write', 'triage'];
+            if (!triagePlus.includes(roleName)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                labels: ['needs-discussion'],
+              });
+              core.info(`Added 'needs-discussion' label (author role: ${roleName})`);
+
+              // GitHub Actions adding the label won't trigger dessant/label-actions, so we need to do it manually
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: `**Please create a GitHub Discussion instead of this issue.**\n\nIssues in this repository are for creation by Maintainers only - please create a GitHub Discussion instead.\nIf needed, a Renovate maintainer will create an Issue after your Discussion been triaged and confirmed.\n\nThis Issue will now be closed and locked. We may later batch-delete this issue. This way we keep Issues actionable, and free of duplicates or wrong bug reports.\n\nThanks, the Renovate team`,
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                state: 'closed',
+                state_reason: 'not_planned',
+              });
+
+              core.info(`Commented and closed issue as not planned`);
+            } else {
+              core.info(`Skipping label — author has ${roleName} access`);
+            }

@@ -1263,6 +1263,41 @@ describe('workers/repository/update/pr/index', () => {
           'PR cache not found',
         );
       });
+
+      it('skips cache early return when autoApprove is set', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          bodyFingerprint: fingerprint(generatePrBodyFingerprintConfig(config)),
+          lastEdited: '2020-01-20T00:00:00Z',
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        const res = await ensurePr({ ...config, autoApprove: true });
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: existingPr,
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
+        );
+        // updatePr should be called to re-trigger approval
+        expect(platform.updatePr).toHaveBeenCalled();
+      });
+    });
+
+    describe('autoApprove', () => {
+      it('updates PR when autoApprove is set even if PR does not need updating', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, autoApprove: true });
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, bodyStruct },
+        });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+      });
     });
   });
 });

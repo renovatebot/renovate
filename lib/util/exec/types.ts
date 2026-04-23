@@ -1,7 +1,148 @@
+import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
 
+/**
+ * A `tool` that Containerbase supports.
+ *
+ * TODO #41849 replace with upstream types
+ */
+const toolNames = [
+  'bazelisk',
+  'bun',
+  'bundler',
+  'cocoapods',
+  'composer',
+  'conan',
+  'copier',
+  'corepack',
+  'devbox',
+  'dotnet',
+  'erlang',
+  'elixir',
+  'flux',
+  'gleam',
+  'golang',
+  'gradle',
+  'hashin',
+  'helm',
+  'helmfile',
+  'java',
+  'java-maven',
+  'jb',
+  'kustomize',
+  'maven',
+  'nix',
+  'node',
+  'npm',
+  'pdm',
+  'php',
+  'pip-tools',
+  'pipenv',
+  'pnpm',
+  'pixi',
+  'poetry',
+  'python',
+  /** also used in the `rubygems` datasource */
+  'ruby',
+  'rust',
+  'uv',
+  'yarn',
+  'yarn-slim',
+  'dart',
+  'flutter',
+  'vendir',
+] as const;
+
+export type ToolName = (typeof toolNames)[number];
+
+export function isToolName(value: unknown): value is ToolName {
+  return isString(value) && toolNames.includes(value as ToolName);
+}
+
+/**
+ * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
+ */
+const additionalConstraintNames = [
+  /**
+   * Used in the `gomod` manager to specify the version of the Go toolchain to use.
+   *
+   * In precedence order:
+   *
+   * 1. config: `constraints.go`
+   * 1. `go.mod`: `toolchain` directive
+   * 1. `go.mod`: `go` directive
+   *
+   * NOTE that the `constraints.golang` is not used (https://github.com/renovatebot/renovate/issues/42601)
+   *
+   * @deprecated TODO remove in #42600
+   */
+  'go',
+  /**
+   * Used in the `gomod` manager to specify a tag for `github.com/marwan-at-work/mod`.
+   *
+   * Must be prefixed with `v`.
+   *
+   * @see https://github.com/marwan-at-work/mod
+   */
+  'gomodMod',
+  /**
+   * Used in the `jenkins-plugins` datasource to specify a minimum version of the Jenkins that a plugin must support.
+   */
+  'jenkins',
+  /**
+   * Used in the `pip-compile` manager to specify a version of `pip-tools` to use.
+   *
+   * @deprecated TODO remove in #42599
+   */
+  'pipTools',
+  /**
+   * Used in the `rubygems` datasource to specify the `platform` of that the Gem dependency supports.
+   */
+  'platform',
+  /**
+   * Used in the `rubygems` datasource to specify the version of the `rubygems` tool that is needed to use this Gem.
+   */
+  'rubygems',
+  /**
+   * Used in the `npm` manager to track the version of VSCode that the package is compatible with.
+   */
+  'vscode',
+  /**
+   * Used in the `nuget` manager to track .NET SDK version required.
+   */
+  'dotnet-sdk',
+  /**
+   * Used in the `cpanfile` manager to track Perl version required.
+   */
+  'perl',
+] as const;
+
+/**
+ * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
+ */
+export type AdditionalConstraintName =
+  (typeof additionalConstraintNames)[number];
+
+export function isAdditionalConstraintName(
+  value: unknown,
+): value is AdditionalConstraintName {
+  return (
+    isString(value) &&
+    additionalConstraintNames.includes(value as AdditionalConstraintName)
+  );
+}
+
+/**
+ * A name usable as a key in a `constraints` record, which may be tools that Containerbase supports.
+ */
+export type ConstraintName = ToolName | AdditionalConstraintName;
+
+export function isConstraintName(value: unknown): value is ConstraintName {
+  return isToolName(value) || isAdditionalConstraintName(value);
+}
+
 export interface ToolConstraint {
-  toolName: string;
+  toolName: ToolName;
   constraint?: string | null;
 }
 

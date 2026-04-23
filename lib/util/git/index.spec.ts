@@ -20,13 +20,13 @@ import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
 
-vi.mock('./conflicts-cache');
-vi.mock('./behind-base-branch-cache');
-vi.mock('./modified-cache');
+vi.mock('./conflicts-cache.ts');
+vi.mock('./behind-base-branch-cache.ts');
+vi.mock('./modified-cache.ts');
 vi.mock('timers/promises');
-vi.mock('../cache/repository');
-vi.mock('./auth');
-vi.unmock('.');
+vi.mock('../cache/repository/index.ts');
+vi.mock('./auth.ts');
+vi.unmock('./index.ts');
 
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
@@ -143,6 +143,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     // override some local git settings for better testing
     const local = simpleGit(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
+    await local.addConfig('user.name', 'Jest');
+    await local.addConfig('user.email', 'Jest@example.com');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
@@ -905,8 +907,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   describe('getCommitMessages()', () => {
-    it('returns commit messages', async () => {
-      expect(await git.getCommitMessages()).toEqual([
+    it('returns commit messages without merge commits', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.merge(['--no-ff', 'origin/renovate/future_branch']);
+      expect((await git.getCommitMessages()).sort()).toEqual([
+        'future message',
         'master message',
         'past message',
       ]);
@@ -1042,6 +1047,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const repo = simpleGit(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
+    });
+
+    it('should not pass extraCloneOpts to ls-remote when local repo exists', async () => {
+      const extraCloneOpts = {
+        '-c': 'extra.clone.config=test-extra-config-value',
+      };
+
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+      await git.syncGit();
+
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+
+      expect(rawSpy).toHaveBeenCalledWith([
+        'ls-remote',
+        '--heads',
+        origin.path,
+      ]);
     });
   });
 
@@ -1354,6 +1379,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
       expect(branch).toBe('develop');
+    });
+
+    it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
+      // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+      process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+      await git.initRepo({
+        url: origin.path,
+      });
+
+      // initialise the repo
+      await git.syncGit();
+      // then hit the RENOVATE_X_CLEAR_HOOKS code path
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
+      expect(hooksPath).toBe('/dev/null');
+      delete process.env.RENOVATE_X_CLEAR_HOOKS;
     });
   });
 

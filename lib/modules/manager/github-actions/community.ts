@@ -1,21 +1,47 @@
+/**
+ * Update readme if new actions are added here.
+ */
 import { z } from 'zod/v3';
 
-import type { SkipReason, StageName } from '../../../types/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
-import * as pep440versioning from '../../versioning/pep440/index.ts';
-import * as rubyVersioning from '../../versioning/ruby/index.ts';
 import type { PackageDependency } from '../types.ts';
 
-function matchAction(action: string): z.Schema {
+/**
+ * match actions
+ */
+function matchAction(action: string): z.ZodString {
   return z
     .string()
     .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(?:@.+)?$`));
+}
+
+function parseValue(
+  currentValue: string | undefined,
+  validator?: () => boolean,
+): PackageDependency {
+  if (!currentValue) {
+    return {
+      skipStage: 'extract',
+      skipReason: 'unspecified-version',
+      depType: 'uses-with',
+    };
+  }
+  if (validator?.() === true) {
+    return {
+      skipStage: 'extract',
+      skipReason: 'invalid-version',
+      depType: 'uses-with',
+      currentValue,
+    };
+  }
+  return { currentValue, depType: 'uses-with' };
 }
 
 const SetupUV = z
@@ -24,26 +50,15 @@ const SetupUV = z
     uses: matchAction('astral-sh/setup-uv'),
     with: z.object({ version: z.string().optional() }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: GithubReleasesDatasource.id,
       depName: 'astral-sh/uv',
       versioning: npmVersioning.id,
       packageName: 'astral-sh/uv',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val.version,
-      depType: 'uses-with',
-    };
-  });
+      ...parseValue(val.version),
+    }),
+  );
 
 const SetupPnpm = z
   .object({
@@ -52,25 +67,14 @@ const SetupPnpm = z
       version: z.string().optional(),
     }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: NpmDatasource.id,
       depName: 'pnpm',
-      versioning: npmVersioning.id,
       packageName: 'pnpm',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val.version,
-      depType: 'uses-with',
-    };
-  });
+      ...parseValue(val.version),
+    }),
+  );
 
 const SetupBun = z
   .object({
@@ -79,25 +83,14 @@ const SetupBun = z
       'bun-version': z.string().optional(),
     }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val['bun-version']) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: NpmDatasource.id,
       depName: 'bun',
-      versioning: npmVersioning.id,
       packageName: 'bun',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val['bun-version'],
-      depType: 'uses-with',
-    };
-  });
+      ...parseValue(val['bun-version']),
+    }),
+  );
 
 const SetupDeno = z
   .object({
@@ -106,25 +99,14 @@ const SetupDeno = z
       'deno-version': z.string().optional(),
     }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val['deno-version']) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: NpmDatasource.id,
       depName: 'deno',
-      versioning: npmVersioning.id,
       packageName: 'deno',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val['deno-version'],
-      depType: 'uses-with',
-    };
-  });
+      ...parseValue(val['deno-version']),
+    }),
+  );
 
 const SetupRuby = z
   .object({
@@ -133,50 +115,28 @@ const SetupRuby = z
       'ruby-version': z.string().optional(),
     }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val['ruby-version']) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: RubyVersionDatasource.id,
       depName: 'ruby',
-      versioning: rubyVersioning.id,
       packageName: 'ruby',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val['ruby-version'],
-      depType: 'uses-with',
-    };
-  });
+      ...parseValue(val['ruby-version']),
+    }),
+  );
 
 const SetupPDM = z
   .object({
     uses: matchAction('pdm-project/setup-pdm'),
     with: z.object({ version: z.string().optional() }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: PypiDatasource.id,
       depName: 'pdm',
-      versioning: pep440versioning.id,
       packageName: 'pdm',
-      currentValue: val.version,
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      depType: 'uses-with',
-    };
-  });
+      ...parseValue(val.version),
+    }),
+  );
 
 const InstallBinary = z
   .object({
@@ -191,8 +151,7 @@ const InstallBinary = z
       datasource: GithubReleasesDatasource.id,
       depName: val.repo,
       packageName: val.repo,
-      currentValue: val.tag,
-      depType: 'uses-with',
+      ...parseValue(val.tag),
     };
   });
 
@@ -207,8 +166,7 @@ const SetupPixi = z
       versioning: condaVersioning.id,
       depName: 'prefix-dev/pixi',
       packageName: 'prefix-dev/pixi',
-      currentValue: val['pixi-version'],
-      depType: 'uses-with',
+      ...parseValue(val['pixi-version']),
     };
   });
 
@@ -218,52 +176,80 @@ const SetupHatch = z
     uses: matchAction('pypa/hatch'),
     with: z.object({ version: z.string().optional() }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: GithubReleasesDatasource.id,
       depName: 'pypa/hatch',
       packageName: 'pypa/hatch',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val.version,
-      depType: 'uses-with',
+      ...parseValue(val.version),
       // Strip hatch- prefix from release tags
       extractVersion: '^hatch-(?<version>.+)$',
-    };
-  });
+    }),
+  );
 
 const SetupGolangciLint = z
   .object({
     uses: matchAction('golangci/golangci-lint-action'),
     with: z.object({ version: z.string().optional() }),
   })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
+  .transform(
+    ({ with: val }): PackageDependency => ({
       datasource: GithubReleasesDatasource.id,
       depName: 'golangci/golangci-lint',
       packageName: 'golangci/golangci-lint',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val.version,
-      depType: 'uses-with',
-    };
-  });
+      ...parseValue(val.version),
+    }),
+  );
+
+const ZizmorcoreZizmorAction = z
+  .object({
+    uses: matchAction('zizmorcore/zizmor-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(
+    ({ with: val }): PackageDependency => ({
+      datasource: DockerDatasource.id,
+      depName: 'ghcr.io/zizmorcore/zizmor',
+      packageName: 'ghcr.io/zizmorcore/zizmor',
+      ...parseValue(val.version),
+    }),
+  );
+
+const SetupPyright = z
+  .object({
+    uses: matchAction('jakebailey/pyright-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(
+    ({ with: val }): PackageDependency => ({
+      datasource: NpmDatasource.id,
+      depName: 'pyright',
+      packageName: 'pyright',
+      ...parseValue(val.version, () => val.version === 'PATH'),
+    }),
+  );
+
+/**
+ *  Both actions are used to setup trivy.
+ * - https://github.com/aquasecurity/setup-trivy
+ * - https://github.com/aquasecurity/trivy-action
+ */
+const AquaSecurityTrivy = z
+  .object({
+    uses: z.union([
+      matchAction('aquasecurity/setup-trivy'),
+      matchAction('aquasecurity/trivy-action'),
+    ]),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(
+    ({ with: val }): PackageDependency => ({
+      datasource: GithubReleasesDatasource.id,
+      depName: 'aquasecurity/trivy',
+      packageName: 'aquasecurity/trivy',
+      ...parseValue(val.version),
+    }),
+  );
 
 /**
  * schema here should match the whole step,
@@ -272,14 +258,17 @@ const SetupGolangciLint = z
  * each type should return `PackageDependency | undefined`
  */
 export const CommunityActions = z.union([
+  AquaSecurityTrivy,
   InstallBinary,
   SetupPDM,
   SetupPixi,
   SetupPnpm,
+  SetupPyright,
   SetupUV,
   SetupBun,
   SetupDeno,
   SetupRuby,
   SetupHatch,
   SetupGolangciLint,
+  ZizmorcoreZizmorAction,
 ]);

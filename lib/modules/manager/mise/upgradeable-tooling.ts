@@ -369,6 +369,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  openfga: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'openfga/openfga',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   packer: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -404,6 +412,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'protocolbuffers/protobuf',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  pnpm: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'pnpm',
+      datasource: NpmDatasource.id,
     },
   },
   redis: {
@@ -525,6 +540,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'jdx/usage',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  yarn: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: '@yarnpkg/cli',
+      datasource: NpmDatasource.id,
     },
   },
 };

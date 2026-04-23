@@ -50,7 +50,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
 
       // buildin providers https://github.com/terraform-providers
       if (source.groups.namespace === 'terraform-providers') {
-        dep.registryUrls = [`https://releases.hashicorp.com`];
+        dep.registryUrls = [TerraformProviderDatasource.hashicorpReleaseUrl];
       } else if (source.groups.hostname) {
         dep.registryUrls = [`https://${source.groups.hostname}`];
         dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
@@ -63,7 +63,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
         if (
           foundLocks.length === 1 &&
           foundLocks[0].registryUrl !==
-            TerraformProviderDatasource.defaultRegistryUrls[0]
+            TerraformProviderDatasource.terraformRegistryUrl
         ) {
           logger.debug(
             { dep, foundLocks },

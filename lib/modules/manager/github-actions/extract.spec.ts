@@ -163,7 +163,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pascalgn/automerge-action',
           depType: 'action',
           replaceString: '"pascalgn/automerge-action@v0.13.1"',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: 'v2.3.5',
@@ -172,7 +172,7 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString:
             'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: 'v1',
@@ -180,7 +180,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           depType: 'action',
           replaceString: 'actions/checkout@v1',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: 'v1.1.2',
@@ -188,7 +188,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: '1.37.0-glibc',
@@ -236,7 +236,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString:
             'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
@@ -249,7 +249,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString:
             "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1",
@@ -262,7 +262,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString:
             '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1',
@@ -275,7 +275,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString: '"actions/checkout@v2"',
           autoReplaceStringTemplate:
@@ -286,7 +286,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-java',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString: '"actions/setup-java@v2"',
           autoReplaceStringTemplate:
@@ -524,6 +524,93 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('disables naked SHA pins without version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        currentValue: undefined,
+        enabled: false,
+        skipReason: 'unversioned-reference',
+      });
+    });
+
+    it('disables naked short SHA pins without version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/checkout',
+        currentDigestShort: 'c85c95e',
+        currentValue: undefined,
+        enabled: false,
+        skipReason: 'unversioned-reference',
+      });
+    });
+
+    it('does not disable SHA pins with version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toEqual({
+        depName: 'actions/checkout',
+        commitMessageTopic: '{{{depName}}} action',
+        versioning: 'github-actions',
+        depType: 'action',
+        replaceString:
+          'actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        currentValue: 'v4',
+        currentDigest: 'c85c95e3d7251135ab7dc9ce3241c5835cc595a9',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('does not disable short SHA pins with version comment', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@c85c95e # v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toEqual({
+        depName: 'actions/checkout',
+        commitMessageTopic: '{{{depName}}} action',
+        versioning: 'github-actions',
+        depType: 'action',
+        replaceString: 'actions/checkout@c85c95e # v4',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        currentValue: 'v4',
+        currentDigestShort: 'c85c95e',
+        datasource: 'github-tags',
+      });
+    });
+
     it('extracts actions with fqdn', () => {
       const res = extractPackageFile(
         codeBlock`
@@ -689,7 +776,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -700,7 +787,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -711,7 +798,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-go',
           depType: 'action',
           replaceString: 'actions/setup-go@v5',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -722,7 +809,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-python',
           depType: 'action',
           replaceString: 'actions/setup-python@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -733,7 +820,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           depName: 'node',
@@ -839,7 +926,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -850,7 +937,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -861,7 +948,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-go',
           depType: 'action',
           replaceString: 'actions/setup-go@v5',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -872,7 +959,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-python',
           depType: 'action',
           replaceString: 'actions/setup-python@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -883,7 +970,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           depName: 'node',
@@ -946,6 +1033,90 @@ describe('modules/manager/github-actions/extract', () => {
   it.each([
     {
       step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {
+          version: 'v0.70.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.70.0',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/trivy-action@v0.35.0',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/trivy-action@v0.35.0',
+        with: {
+          version: 'v0.70.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.70.0',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'astral-sh/setup-uv@v5',
         with: {
           version: 'latest',
@@ -958,7 +1129,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'astral-sh/uv',
           depType: 'uses-with',
           packageName: 'astral-sh/uv',
-          versioning: 'npm',
         },
       ],
     },
@@ -977,7 +1147,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'astral-sh/uv',
           depType: 'uses-with',
           packageName: 'astral-sh/uv',
-          versioning: 'npm',
         },
       ],
     },
@@ -1031,7 +1200,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1048,7 +1216,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1088,7 +1255,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1106,7 +1272,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1124,7 +1289,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pdm',
           depType: 'uses-with',
           packageName: 'pdm',
-          versioning: 'pep440',
         },
       ],
     },
@@ -1141,7 +1305,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pdm',
           depType: 'uses-with',
           packageName: 'pdm',
-          versioning: 'pep440',
         },
       ],
     },
@@ -1176,7 +1339,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'bun',
           depType: 'uses-with',
           packageName: 'bun',
-          versioning: 'npm',
         },
       ],
     },
@@ -1192,7 +1354,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'bun',
           depType: 'uses-with',
           packageName: 'bun',
-          versioning: 'npm',
         },
       ],
     },
@@ -1209,7 +1370,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'deno',
           depType: 'uses-with',
           packageName: 'deno',
-          versioning: 'npm',
         },
       ],
     },
@@ -1225,7 +1385,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'deno',
           depType: 'uses-with',
           packageName: 'deno',
-          versioning: 'npm',
         },
       ],
     },
@@ -1242,7 +1401,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'ruby',
           depType: 'uses-with',
           packageName: 'ruby',
-          versioning: 'ruby',
         },
       ],
     },
@@ -1258,7 +1416,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'ruby',
           depType: 'uses-with',
           packageName: 'ruby',
-          versioning: 'ruby',
         },
       ],
     },
@@ -1295,6 +1452,54 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: '1.1.100' },
+      },
+      expected: [
+        {
+          currentValue: '1.1.100',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: 'PATH' },
+      },
+      expected: [
+        {
+          currentValue: 'PATH',
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'golangci/golangci-lint-action@v9',
         with: { version: 'v2.5.0' },
       },
@@ -1321,6 +1526,56 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'golangci/golangci-lint',
           depType: 'uses-with',
           packageName: 'golangci/golangci-lint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {
+          version: 'v1.23.1',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.23.1',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'zizmorcore/zizmor-action@v0.5.2',
+        with: {
+          version: '1.23.1',
+        },
+      },
+      expected: [
+        {
+          currentValue: '1.23.1',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
         },
       ],
     },
