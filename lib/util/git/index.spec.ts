@@ -485,6 +485,41 @@ describe('util/git/index', { timeout: 10000 }, () => {
       // Restore original implementation
       fromISOSpy.mockRestore();
     });
+
+    it('works if running with a Repo Cache', async () => {
+      // Create a branch with a commit so it exists in the remote
+      const branchName = 'renovate/cache-test-branch';
+      await git.commitFiles({
+        branchName,
+        files: [
+          {
+            type: 'addition',
+            path: 'cache-test-file',
+            contents: 'test content',
+          },
+        ],
+        message: 'Test commit',
+      });
+
+      // Simulate a new run of Renovate, when running from a fresh localDir, where we've not already cloned anything, as happens when using RENOVATE_REPOSITORY_CACHE=enabled
+      const freshDir = await tmp.dir({ unsafeCleanup: true });
+      try {
+        GlobalConfig.set({ localDir: freshDir.path });
+        await git.initRepo({ url: origin.path });
+        git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+        git.setGitAuthor('Jest <Jest@example.com>');
+        setNoVerify([]);
+
+        // will sync Git
+        const result = await git.getBranchUpdateDate(branchName);
+
+        expect(result).toBeInstanceOf(DateTime);
+        expect(result).not.toBeNull();
+      } finally {
+        await freshDir.cleanup();
+        GlobalConfig.set({ localDir: tmpDir.path });
+      }
+    });
   });
 
   describe('getBranchFiles(branchName)', () => {
