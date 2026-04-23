@@ -11,6 +11,7 @@ export const url = 'https://kas.readthedocs.io/en/latest/';
 export const defaultConfig = {
   commitMessageTopic: 'KAS',
   commitMessageExtra: 'to {{newValue}}',
+  managerFilePatterns: [],
   enabled: false,
 };
 
