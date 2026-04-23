@@ -420,7 +420,7 @@ function extractPackageFileInternal(
         versioning: semverVersioning.id,
         currentValue: sbtVersion,
         replaceString: matchString,
-        extractVersion: '^v(?<version>\\S+)',
+        extractVersion: ['^v(?<version>\\S+)'],
         registryUrls: [],
       };
 

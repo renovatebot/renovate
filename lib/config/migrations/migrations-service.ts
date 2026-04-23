@@ -21,6 +21,7 @@ import { DepTypesMigration } from './custom/dep-types-migration.ts';
 import { DryRunMigration } from './custom/dry-run-migration.ts';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration.ts';
 import { ExtendsMigration } from './custom/extends-migration.ts';
+import { ExtractVersionMigration } from './custom/extract-version-migration.ts';
 import { FetchReleaseNotesMigration } from './custom/fetch-release-notes-migration.ts';
 import { FileMatchMigration } from './custom/file-match-migration.ts';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration.ts';
@@ -129,6 +130,7 @@ export class MigrationsService {
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
     ExtendsMigration,
+    ExtractVersionMigration,
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,

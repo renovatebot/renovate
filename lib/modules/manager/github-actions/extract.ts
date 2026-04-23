@@ -272,7 +272,7 @@ function extractVersionedAction(step: Steps): PackageDependency | null {
       depName: action,
       packageName: `actions/${action}-versions`,
       versioning,
-      extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+      extractVersion: ['^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$'],
       currentValue,
       depType: 'uses-with',
     };

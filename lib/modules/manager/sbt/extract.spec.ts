@@ -483,7 +483,7 @@ describe('modules/manager/sbt/extract', () => {
             currentValue: '1.6.0',
             replaceString: 'sbt.version=1.6.0',
             versioning: 'semver',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: ['^v(?<version>\\S+)'],
           },
         ],
       });
@@ -507,7 +507,7 @@ describe('modules/manager/sbt/extract', () => {
             currentValue: '1.6.0',
             replaceString: 'sbt.version=1.6.0',
             versioning: 'semver',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: ['^v(?<version>\\S+)'],
           },
         ],
       });
@@ -658,7 +658,7 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '1.6.0',
               replaceString: 'sbt.version=1.6.0',
               versioning: 'semver',
-              extractVersion: '^v(?<version>\\S+)',
+              extractVersion: ['^v(?<version>\\S+)'],
               registryUrls: [],
             },
           ],

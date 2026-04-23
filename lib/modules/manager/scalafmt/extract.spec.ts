@@ -16,7 +16,7 @@ describe('modules/manager/scalafmt/extract', () => {
             depName: 'scalafmt',
             currentValue: '3.8.0',
             versioning: 'semver',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: ['^v(?<version>\\S+)'],
           },
         ],
       });
@@ -35,7 +35,7 @@ describe('modules/manager/scalafmt/extract', () => {
             depName: 'scalafmt',
             currentValue: '3.8.0',
             versioning: 'semver',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: ['^v(?<version>\\S+)'],
           },
         ],
       });

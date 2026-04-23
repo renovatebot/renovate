@@ -42,7 +42,15 @@
               "replacementVersion": { "type": "string" },
               "description": { "type": "string" },
               "replacementNameTemplate": { "type": "string" },
-              "replacementVersionTemplate": { "type": "string" }
+              "replacementVersionTemplate": { "type": "string" },
+              "extractVersion": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1,
+                "maxItems": 2
+              },
+              "versioning": { "type": "string" },
+              "matchCurrentValue": { "type": "string" }
             },
             "required": ["matchDatasources", "matchPackageNames"]
           },

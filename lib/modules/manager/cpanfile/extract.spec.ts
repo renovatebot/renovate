@@ -28,7 +28,7 @@ describe('modules/manager/cpanfile/extract', () => {
               packageName: 'Perl/perl5',
               currentValue: expected,
               datasource: 'github-tags',
-              extractVersion: '^v(?<version>\\S+)',
+              extractVersion: ['^v(?<version>\\S+)'],
             },
           ],
           extractedConstraints: { perl: expected },

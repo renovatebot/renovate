@@ -24,9 +24,9 @@ Given the above `.tfvars` file, you put this in your `renovate.json`:
     {
       "customType": "regex",
       "description": "Update Kubernetes version for Amazon EKS in tfvars files",
-      "managerFilePatterns": ["/.+\\.tfvars$/"],
+      "managerFilePatterns": ["/.+\\\\.tfvars$/"],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s.*?_version\\s*=\\s*\"(?<currentValue>.*)\""
+        "#\\\\s*renovate:\\\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\\\s.*?_version\\\\s*=\\\\s*\\\"(?<currentValue>.*)\\\""
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{/if}}"
     }
@@ -35,7 +35,7 @@ Given the above `.tfvars` file, you put this in your `renovate.json`:
     {
       "matchDatasources": ["endoflife-date"],
       "matchPackageNames": ["amazon-eks"],
-      "extractVersion": "^(?<version>.*)-eks.+$"
+      "extractVersion": ["^(?<version>.*)-eks.+$"]
     }
   ]
 }
