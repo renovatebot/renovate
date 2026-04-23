@@ -398,7 +398,8 @@ export class Vulnerabilities {
   ): boolean {
     return (
       affected.package?.name === packageName &&
-      affected.package?.ecosystem === ecosystem
+      (affected.package?.ecosystem === ecosystem ||
+        affected.package?.ecosystem.startsWith(`${ecosystem}:`))
     );
   }
 
