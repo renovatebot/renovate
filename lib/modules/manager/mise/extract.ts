@@ -125,8 +125,23 @@ function getToolConfig(
       }
 
       // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
-      for (const backendStr of getOrderedMiseRegistryBackends(toolName)) {
-        const [backendType, backendName] = backendStr.split(':', 2);
+      const backends = getOrderedMiseRegistryBackends(toolName);
+
+      // prioritise the github backend as the best source for data
+      if (backends.github) {
+        const result = getToolConfig(
+          'github',
+          backends.github,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+
+      for (const [backendType, backendName] of Object.entries(backends)) {
         const result = getToolConfig(
           backendType,
           backendName,

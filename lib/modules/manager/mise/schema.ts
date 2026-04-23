@@ -1,7 +1,25 @@
 import { z } from 'zod/v3';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
-export const MiseRegistryJson = z.record(z.string(), z.array(z.string()));
+function createRecord(input: string[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const registry of input) {
+    const [type, url] = registry.split(':');
+    result[type] = url;
+  }
+  return result;
+}
+
+export const MiseRegistryJson = z
+  .record(z.string(), z.array(z.string()))
+  .transform((input) => {
+    const result: Record<string, Record<string, string>> = {};
+
+    for (const [key, val] of Object.entries(input)) {
+      result[key] = createRecord(val);
+    }
+    return result;
+  });
 
 const MiseToolOptions = z.object({
   // ubi backend only
