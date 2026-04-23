@@ -10,6 +10,10 @@ import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as withCacheModule from '../../../util/cache/package/with-cache.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
+import {
+  add as addHostRule,
+  clear as clearHostRules,
+} from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -41,6 +45,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     );
 
     resetPrefetchedImages();
+    clearHostRules();
 
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -988,5 +993,45 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         'wrapperSha256Sum=oldwrapperhash456',
       );
     });
+  });
+
+  it('should set MVNW_USERNAME and MVNW_PASSWORD when hostRules are configured', async () => {
+    addHostRule({
+      hostType: 'maven',
+      matchHost: 'private-registry.example.com',
+      username: 'test-user',
+      password: 'test-password',
+    });
+
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+
+    await updateArtifacts({
+      packageFileName: 'maven-wrapper',
+      newPackageFileContent: '',
+      updatedDeps: [
+        {
+          depName: 'maven-wrapper',
+          replaceString:
+            'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+        },
+      ],
+      config: {
+        currentValue: '3.0.0',
+        newValue: '3.3.1',
+      },
+    });
+
+    // Verify environment variables are set
+    expect(execSnapshots[0].options!.env).toMatchObject({
+      MVNW_USERNAME: 'test-user',
+      MVNW_PASSWORD: 'test-password',
+      MVNW_REPOURL: 'https://private-registry.example.com/maven2',
+    });
+
+    // Verify command is still just wrapper:wrapper
+    expect(execSnapshots[0].cmd).toBe('./mvnw wrapper:wrapper -Dtype=script');
+
+    clearHostRules();
   });
 });
