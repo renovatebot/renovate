@@ -223,7 +223,7 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
         indexed[optionName] = [start, i - 1];
       }
       start = i;
-      optionName = line.split(' ')[1];
+      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
     }
   }
   indexed[optionName] = [start, lines.length - 1];

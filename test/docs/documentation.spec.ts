@@ -47,7 +47,9 @@ describe('docs/documentation', () => {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
         return matches
-          .map((match) => match.substring(4, match.length - 1))
+          .map((match) =>
+            match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
+          )
           .filter(
             (header) =>
               header !== 'managerFilePatterns' && header !== 'enabled',
@@ -148,7 +150,9 @@ describe('docs/documentation', () => {
       async function getSelfHostedHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
-        return matches.map((match) => match.substring(4, match.length - 1));
+        return matches.map((match) =>
+          match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
+        );
       }
 
       function getRequiredSelfHostedOptions(): string[] {
