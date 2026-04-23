@@ -39,6 +39,16 @@ describe('workers/repository/update/pr/changelog/source', () => {
         'renovatebot/renovate',
       );
     });
+
+    it('handles azure sourceUrl', () => {
+      expect(
+        changelogSource.getRepositoryFromUrl({
+          ...upgrade,
+          sourceUrl:
+            'https://dev.azure.com/some-org/some-project/_git/some-repo',
+        }),
+      ).toBe('some-org/some-project/_git/some-repo');
+    });
   });
 
   describe('hasValidRepository', () => {
