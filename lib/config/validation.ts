@@ -9,6 +9,7 @@ import is, {
   isUndefined,
 } from '@sindresorhus/is';
 import type { PlatformId } from '../constants/index.ts';
+import { logger } from '../logger/index.ts';
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import { allManagersList, getManagerList } from '../modules/manager/index.ts';
@@ -807,6 +808,12 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a json object`,
             });
           }
+        } else {
+          // v8 ignore next -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
+          logger.debug(
+            {},
+            `Unhandled validation for ${type} at \`${currentPath}\``,
+          );
         }
       }
     }
