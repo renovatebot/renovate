@@ -133,6 +133,7 @@ export interface GhRepo {
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;
+  deleteBranchOnMerge: boolean;
   defaultBranchRef: {
     name: string;
     target: {
