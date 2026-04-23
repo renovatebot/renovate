@@ -185,7 +185,7 @@ export async function getMergeMethod(
   // Note that this will iterate in the order of GitPullRequestMergeStrategy
   for (const [key, policyKey] of Object.entries(policyKeyByStrategy)) {
     if (policyConfigurations?.[policyKey] === true) {
-      const method = Number(key) satisfies GitPullRequestMergeStrategy;
+      const method = parseInt(key, 10) satisfies GitPullRequestMergeStrategy;
       logger.debug(
         { policyConfigurations },
         `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[method]}`,
