@@ -649,7 +649,7 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
-        } else if (type === 'object' && currentPath !== 'compatibility') {
+        } else if (type === 'object') {
           if (isPlainObject(val)) {
             if (key === 'registryAliases') {
               const res = validatePlainObject(val);
