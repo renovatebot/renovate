@@ -810,6 +810,7 @@ export async function validateConfig(
             });
           }
         } else {
+          // v8 ignore next -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
           logger.debug(
             {},
             `Unhandled validation for ${type} at \`${currentPath}\``,
