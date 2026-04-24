@@ -695,4 +695,124 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res).toBe('>=9');
     });
   });
+
+  describe('minimumReleaseAge with pnpm-workspace.yaml', () => {
+    it('injects minimumReleaseAge into pnpm-workspace.yaml when configured', async () => {
+      const execSnapshots = mockExecAll();
+      const workspaceContent = 'packages:\n  - packages/*\n';
+      fs.getSiblingFileName.mockReturnValue('some-dir/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        if (fileName === 'some-dir/pnpm-workspace.yaml') {
+          return Promise.resolve(workspaceContent);
+        }
+        if (fileName === 'some-dir/pnpm-lock.yaml') {
+          return Promise.resolve('package-lock-contents');
+        }
+        return Promise.resolve('{}');
+      });
+      const res = await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        { ...config, minimumReleaseAge: '3 days' },
+        [{ isLockFileMaintenance: true }],
+      );
+      expect(res.lockFile).toBe('package-lock-contents');
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'some-dir/pnpm-workspace.yaml',
+        expect.stringContaining('minimumReleaseAge: 4320'),
+      );
+      // Should restore original content after exec
+      expect(fs.writeLocalFile).toHaveBeenLastCalledWith(
+        'some-dir/pnpm-workspace.yaml',
+        workspaceContent,
+      );
+      expect(execSnapshots).toHaveLength(1);
+    });
+
+    it('skips injection when minimumReleaseAge is invalid', async () => {
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValue('some-dir/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        if (fileName === 'some-dir/pnpm-lock.yaml') {
+          return Promise.resolve('package-lock-contents');
+        }
+        return Promise.resolve('{}');
+      });
+      await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        { ...config, minimumReleaseAge: 'invalid garbage' },
+        [{ isLockFileMaintenance: true }],
+      );
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(execSnapshots).toHaveLength(1);
+    });
+
+    it('skips injection when workspace file is unreadable', async () => {
+      const execSnapshots = mockExecAll();
+      let workspaceReadCount = 0;
+      fs.getSiblingFileName.mockReturnValue('some-dir/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        if (fileName === 'some-dir/pnpm-workspace.yaml') {
+          workspaceReadCount++;
+          // First read (workspace packages check) returns valid content;
+          // second read (minimumReleaseAge injection) returns null
+          if (workspaceReadCount === 1) {
+            return Promise.resolve('packages:\n  - packages/*\n');
+          }
+          return Promise.resolve(null);
+        }
+        if (fileName === 'some-dir/pnpm-lock.yaml') {
+          return Promise.resolve('package-lock-contents');
+        }
+        return Promise.resolve('{}');
+      });
+      await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        { ...config, minimumReleaseAge: '3 days' },
+        [{ isLockFileMaintenance: true }],
+      );
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(execSnapshots).toHaveLength(1);
+    });
+
+    it('does not inject when workspace already has minimumReleaseAge', async () => {
+      const execSnapshots = mockExecAll();
+      const workspaceContent =
+        'packages:\n  - packages/*\nminimumReleaseAge: 1440\n';
+      fs.getSiblingFileName.mockReturnValue('some-dir/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        if (fileName === 'some-dir/pnpm-workspace.yaml') {
+          return Promise.resolve(workspaceContent);
+        }
+        if (fileName === 'some-dir/pnpm-lock.yaml') {
+          return Promise.resolve('package-lock-contents');
+        }
+        return Promise.resolve('{}');
+      });
+      await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        { ...config, minimumReleaseAge: '3 days' },
+        [{ isLockFileMaintenance: true }],
+      );
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(execSnapshots).toHaveLength(1);
+    });
+
+    it('does not inject when minimumReleaseAge is not configured', async () => {
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      await pnpmHelper.generateLockFile('some-dir', {}, config, [
+        { isLockFileMaintenance: true },
+      ]);
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(execSnapshots).toHaveLength(1);
+    });
+  });
 });
