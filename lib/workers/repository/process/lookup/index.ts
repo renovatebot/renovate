@@ -338,11 +338,18 @@ export async function lookupUpdates(
         return Result.ok(res);
       }
 
-      res.currentVersion = currentVersion!;
+      res.currentVersion = currentVersion;
+
+      // Use lockedVersion for the timestamp lookup when available, because
+      // res.currentVersion is later overwritten to lockedVersion (see below).
+      // Without this, strategies like "replace" would compute the timestamp
+      // for the highest satisfying version (e.g. 1.4.1) while the reported
+      // currentVersion ends up being the locked one (e.g. 1.0.0).
+      const versionForTimestamp = config.lockedVersion ?? currentVersion;
       const currentVersionTimestamp = await getTimestamp(
         config,
         allVersions,
-        currentVersion,
+        versionForTimestamp,
         versioningApi,
       );
 
