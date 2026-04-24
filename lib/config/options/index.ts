@@ -376,6 +376,14 @@ const options: Readonly<RenovateOptions>[] = [
     },
   },
   {
+    name: 'artifactsCheckWhen',
+    description:
+      'Control when the `renovate/artifacts` status check is set.',
+    type: 'string',
+    default: 'failed',
+    allowedValues: ['failed', 'always', 'never'],
+  },
+  {
     name: 'extends',
     description: 'Configuration presets to use or extend.',
     stage: 'package',
