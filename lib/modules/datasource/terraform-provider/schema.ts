@@ -39,3 +39,37 @@ export const TerraformProviderV2Response = z
 export type TerraformProviderV2Response = z.infer<
   typeof TerraformProviderV2Response
 >;
+
+const OpenTofuProviderVersion = z
+  .object({
+    id: z.string(),
+    published: MaybeTimestamp,
+  })
+  .transform(
+    (version): Release => ({
+      version: version.id,
+      releaseTimestamp: version.published,
+    }),
+  );
+
+export const OpenTofuProviderDocsResponse = z
+  .object({
+    versions: LooseArray(OpenTofuProviderVersion).catch([]),
+  })
+  .transform(
+    (response): ReleaseResult => ({
+      releases: response.versions,
+    }),
+  );
+
+export type OpenTofuProviderDocsResponse = z.infer<
+  typeof OpenTofuProviderDocsResponse
+>;
+
+export const OpenTofuProviderVersionDetailsResponse = z.object({
+  link: z.string().optional(),
+});
+
+export type OpenTofuProviderVersionDetailsResponse = z.infer<
+  typeof OpenTofuProviderVersionDetailsResponse
+>;

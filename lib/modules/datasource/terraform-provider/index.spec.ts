@@ -215,6 +215,62 @@ describe('modules/datasource/terraform-provider/index', () => {
           'https://github.com/terraform-providers/terraform-provider-google-beta',
       });
     });
+
+    it('processes real data from OpenTofu registry docs API', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/providers/hashicorp/azurerm/index.json')
+        .reply(200, {
+          versions: [
+            { id: 'v2.53.0', published: '2019-11-26T08:22:56Z' },
+            { id: 'v2.52.0', published: '2019-11-19T08:22:56Z' },
+          ],
+        })
+        .get('/registry/docs/providers/hashicorp/azurerm/v2.53.0/index.json')
+        .reply(200, {
+          link: 'https://github.com/opentofu/terraform-provider-azurerm/tree/v2.53.0',
+        });
+
+      const res = await getPkgReleases({
+        datasource: TerraformProviderDatasource.id,
+        packageName: 'hashicorp/azurerm',
+        registryUrls: ['https://registry.opentofu.org'],
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
+        registryUrl: 'https://registry.opentofu.org',
+        sourceUrl: 'https://github.com/opentofu/terraform-provider-azurerm',
+        releases: [
+          {
+            releaseTimestamp: '2019-11-19T08:22:56.000Z',
+            version: 'v2.52.0',
+          },
+          {
+            releaseTimestamp: '2019-11-26T08:22:56.000Z',
+            version: 'v2.53.0',
+          },
+        ],
+      });
+    });
+
+    it('returns an empty release list for OpenTofu registry without versions', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/providers/hashicorp/azurerm/index.json')
+        .reply(200, {});
+
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          packageName: 'hashicorp/azurerm',
+          registryUrls: ['https://registry.opentofu.org'],
+        }),
+      ).toEqual({
+        homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
+        releases: [],
+      });
+    });
   });
 
   describe('getBuilds', () => {
