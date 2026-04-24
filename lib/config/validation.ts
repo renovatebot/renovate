@@ -287,7 +287,7 @@ export async function validateConfig(
         }
       }
       const parentName = getParentName(parentPath);
-      // v8 ignore next -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
+      // v8 ignore else -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
       if (
         !isPreset &&
         optionParents[key] &&
