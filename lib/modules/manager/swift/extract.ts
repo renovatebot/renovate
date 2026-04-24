@@ -1,4 +1,5 @@
 import { detectPlatform } from '../../../util/common.ts';
+import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -137,10 +138,22 @@ function parseUrl(
   if (!url) {
     return null;
   }
+
+  // Convert SCP-style SSH URLs (git@host:path) and ssh:// URLs to HTTPS
+  // so that new URL() and detectPlatform() can handle them
+  let normalizedUrl = url;
+  if (regEx(/^git@[^:]+:/).test(url) || url.startsWith('ssh://')) {
+    try {
+      normalizedUrl = getHttpUrl(url);
+    } catch {
+      return null;
+    }
+  }
+
   try {
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(normalizedUrl);
     const { host, pathname, protocol } = parsedUrl;
-    const platform = detectPlatform(url);
+    const platform = detectPlatform(normalizedUrl);
     if (platform === 'github' || platform === 'gitlab') {
       const depName = pathname
         .replace(regEx(/^\//), '')
