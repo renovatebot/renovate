@@ -227,6 +227,13 @@ describe('util/cache/package/impl/sqlite', () => {
         try {
           iterator.next();
 
+          // not sure how to test it with node:sqlite as it's using different defines
+          // https://github.com/nodejs/node/blob/main/deps/sqlite/sqlite.gyp
+          // https://github.com/WiseLibs/better-sqlite3/blob/master/deps/download.sh
+          vi.spyOn(sqlite.client, 'close').mockImplementationOnce(() => {
+            throw new Error('close failed');
+          });
+
           await expect(sqlite.destroy()).resolves.toBeUndefined();
 
           expect(logger.warn).toHaveBeenCalledWith(
@@ -234,6 +241,7 @@ describe('util/cache/package/impl/sqlite', () => {
             'SQLite package cache close failed',
           );
         } finally {
+          expect(sqlite.client.isOpen).toBe(true);
           iterator.return?.();
           sqlite.client.close();
         }
