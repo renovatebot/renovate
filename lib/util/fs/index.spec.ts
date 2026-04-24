@@ -32,6 +32,7 @@ import {
   readLocalFile,
   readLocalSymlink,
   readSystemFile,
+  renameCacheFile,
   renameLocalFile,
   rmCache,
   statCacheFile,
@@ -236,6 +237,21 @@ describe('util/fs/index', () => {
       await renameLocalFile('foo.txt', 'bar.txt');
       expect(await fs.pathExists(sourcePath)).toBeFalse();
       expect(await fs.pathExists(targetPath)).toBeTrue();
+    });
+  });
+
+  describe('renameCacheFile', () => {
+    it('renames file and replaces existing target', async () => {
+      const sourcePath = `${cacheDir}/foo.txt`;
+      const targetPath = `${cacheDir}/bar.txt`;
+      await fs.outputFile(sourcePath, 'source');
+      await fs.outputFile(targetPath, 'target');
+
+      expect(await fs.pathExists(sourcePath)).toBeTrue();
+      expect(await fs.readFile(targetPath, 'utf8')).toBe('target');
+      await renameCacheFile('foo.txt', 'bar.txt');
+      expect(await fs.pathExists(sourcePath)).toBeFalse();
+      expect(await fs.readFile(targetPath, 'utf8')).toBe('source');
     });
   });
 
