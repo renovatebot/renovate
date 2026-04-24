@@ -297,6 +297,59 @@ function removeKnownPlaceholders(str: string): string {
   return str.replace(regEx(/\/tree\/\${[^}]+}/), '');
 }
 
+function normalizeScmTag(scmTag: string | undefined): string | undefined {
+  const trimmedTag = scmTag?.trim();
+  if (!trimmedTag || trimmedTag.toUpperCase() === 'HEAD') {
+    return undefined;
+  }
+
+  return trimmedTag;
+}
+
+export async function resolveReleaseGitRef(
+  http: Http,
+  repoUrl: string,
+  pomContent: XmlDocument,
+  recursionLimit = 5,
+): Promise<string | undefined> {
+  const gitRef = normalizeScmTag(pomContent.valueWithPath('scm.tag'));
+  if (gitRef || recursionLimit <= 0) {
+    return gitRef;
+  }
+
+  const parent = pomContent.childNamed('parent');
+  if (!parent) {
+    return undefined;
+  }
+
+  const [parentGroupId, parentArtifactId, parentVersion] = [
+    'groupId',
+    'artifactId',
+    'version',
+  ].map((key) => parent.valueWithPath(key)?.replace(/\s+/g, ''));
+  if (!parentGroupId || !parentArtifactId || !parentVersion) {
+    return undefined;
+  }
+
+  const parentDependency = getDependencyParts(
+    `${parentGroupId}:${parentArtifactId}`,
+  );
+  const path = await createUrlForDependencyPom(
+    http,
+    parentVersion,
+    parentDependency,
+    repoUrl,
+  );
+  const pomUrl = getMavenUrl(parentDependency, repoUrl, path);
+  const parentPomXmlResult = await downloadMavenXml(http, pomUrl);
+  const { val, err } = parentPomXmlResult.unwrap();
+  if (err) {
+    return undefined;
+  }
+
+  return resolveReleaseGitRef(http, repoUrl, val.data, recursionLimit - 1);
+}
+
 export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
