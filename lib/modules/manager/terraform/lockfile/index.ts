@@ -1,13 +1,18 @@
-import { isTruthy } from '@sindresorhus/is';
+import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
+import { coerceNumber } from '../../../../util/number.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
 import * as p from '../../../../util/promises.ts';
 import { escapeRegExp, regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
 import type { GetPkgReleasesConfig } from '../../../datasource/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
+import type { Release } from '../../../datasource/types.ts';
 import { get as getVersioning } from '../../../versioning/index.ts';
 import type {
   UpdateArtifact,
+  UpdateArtifactsConfig,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
@@ -23,8 +28,71 @@ import {
   writeLockUpdates,
 } from './util.ts';
 
+function getLatestAllowedVersion(
+  lock: ProviderLock,
+  releases: Release[],
+  config: UpdateArtifactsConfig,
+): string | null {
+  const versioning = getVersioning(getDefaultVersioning('terraform-provider'));
+  const satisfyingReleases = releases.filter((release) =>
+    versioning.matches(release.version, lock.constraints),
+  );
+
+  if (!satisfyingReleases.length) {
+    return null;
+  }
+
+  const minimumReleaseAgeMs = isNonEmptyString(config.minimumReleaseAge)
+    ? coerceNumber(toMs(config.minimumReleaseAge), 0)
+    : 0;
+
+  if (!minimumReleaseAgeMs) {
+    return satisfyingReleases.at(-1)?.version ?? null;
+  }
+
+  const minimumReleaseAgeBehaviour =
+    config.minimumReleaseAgeBehaviour ?? 'timestamp-required';
+
+  for (const release of [...satisfyingReleases].reverse()) {
+    if (release.releaseTimestamp) {
+      if (getElapsedMs(release.releaseTimestamp) >= minimumReleaseAgeMs) {
+        return release.version;
+      }
+
+      logger.trace(
+        { depName: lock.packageName, check: 'minimumReleaseAge' },
+        `Skipping pending lockfile maintenance release ${release.version}`,
+      );
+      continue;
+    }
+
+    if (minimumReleaseAgeBehaviour === 'timestamp-optional') {
+      logger.once.warn(
+        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+      logger.once.debug(
+        {
+          depName: lock.packageName,
+          versions: [release.version],
+          check: 'minimumReleaseAge',
+        },
+        `${release.version} did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+      );
+      return release.version;
+    }
+
+    logger.trace(
+      { depName: lock.packageName, check: 'minimumReleaseAge' },
+      `Skipping lockfile maintenance release ${release.version} without releaseTimestamp`,
+    );
+  }
+
+  return null;
+}
+
 async function updateAllLocks(
   locks: ProviderLock[],
+  config: UpdateArtifactsConfig,
 ): Promise<ProviderLockUpdate[]> {
   const updates = await p.map(
     locks,
@@ -38,14 +106,7 @@ async function updateAllLocks(
       if (!releases) {
         return null;
       }
-      const versioning = getVersioning(
-        getDefaultVersioning('terraform-provider'),
-      );
-      const versionsList = releases.map((release) => release.version);
-      const newVersion = versioning.getSatisfyingVersion(
-        versionsList,
-        lock.constraints,
-      );
+      const newVersion = getLatestAllowedVersion(lock, releases, config);
 
       // if the new version is the same as the last, signal that no update is needed
       if (!newVersion || newVersion === lock.version) {
@@ -159,7 +220,7 @@ export async function updateArtifacts({
     const updates: ProviderLockUpdate[] = [];
     if (config.isLockFileMaintenance) {
       // update all locks in the file during maintenance --> only update version in constraints
-      const maintenanceUpdates = await updateAllLocks(locks);
+      const maintenanceUpdates = await updateAllLocks(locks, config);
       updates.push(...maintenanceUpdates);
     } else {
       const providerDeps = updatedDeps.filter((dep) =>
