@@ -26,8 +26,10 @@ export function extractPackageFile(
       const toolConfig = getToolConfig(constraint);
       deps.push({
         ...toolConfig,
+        depName: constraint,
         currentValue: value,
         depType: 'tool-constraint',
+        commitMessageTopic: 'tool constraint {{{depName}}}',
       });
     } else {
       deps.push({
@@ -35,6 +37,7 @@ export function extractPackageFile(
         currentValue: value,
         skipReason: 'unsupported',
         depType: 'constraint',
+        commitMessageTopic: 'constraint {{{depName}}}',
       });
     }
   }

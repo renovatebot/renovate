@@ -56,17 +56,21 @@ describe('modules/manager/renovate-constraints/extract', () => {
         deps: [
           {
             datasource: 'github-releases',
+            depName: 'bazelisk',
             packageName: 'bazelbuild/bazelisk',
             versioning: 'semver',
             currentValue: '1.2.3',
             depType: 'tool-constraint',
+            commitMessageTopic: 'tool constraint {{{depName}}}',
           },
           {
             datasource: 'github-releases',
+            depName: 'maven',
             packageName: 'containerbase/maven-prebuild',
             versioning: 'maven',
             currentValue: '4.0.0',
             depType: 'tool-constraint',
+            commitMessageTopic: 'tool constraint {{{depName}}}',
           },
         ],
       });
@@ -89,17 +93,21 @@ describe('modules/manager/renovate-constraints/extract', () => {
         deps: [
           {
             datasource: 'github-releases',
+            depName: 'bazelisk',
             packageName: 'bazelbuild/bazelisk',
             versioning: 'semver',
             currentValue: '>= 1.2.3',
             depType: 'tool-constraint',
+            commitMessageTopic: 'tool constraint {{{depName}}}',
           },
           {
             datasource: 'github-releases',
+            depName: 'maven',
             packageName: 'containerbase/maven-prebuild',
             versioning: 'maven',
             currentValue: '< 4.0.0',
             depType: 'tool-constraint',
+            commitMessageTopic: 'tool constraint {{{depName}}}',
           },
         ],
       });
@@ -123,6 +131,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             skipReason: 'unsupported',
             currentValue: '1.2.0',
             depType: 'constraint',
+            commitMessageTopic: 'constraint {{{depName}}}',
           },
         ],
       });
@@ -145,17 +154,21 @@ describe('modules/manager/renovate-constraints/extract', () => {
         deps: [
           {
             datasource: 'github-releases',
+            depName: 'bazelisk',
             packageName: 'bazelbuild/bazelisk',
             versioning: 'semver',
-            currentValue: '>= 1.2.3', // TODO
+            currentValue: '>= 1.2.3',
             depType: 'tool-constraint',
+            commitMessageTopic: 'tool constraint {{{depName}}}',
           },
           {
             datasource: 'github-releases',
+            depName: 'maven',
             packageName: 'containerbase/maven-prebuild',
             versioning: 'maven',
-            currentValue: '< 4.0.0', // TODO
+            currentValue: '< 4.0.0',
             depType: 'tool-constraint',
+            commitMessageTopic: 'tool constraint {{{depName}}}',
           },
         ],
       });
@@ -179,10 +192,12 @@ describe('modules/manager/renovate-constraints/extract', () => {
         deps: [
           {
             datasource: 'github-releases',
+            depName: 'gleam',
             packageName: 'gleam-lang/gleam',
             versioning: 'semver',
             currentValue: '3.4.5',
             depType: 'tool-constraint',
+            commitMessageTopic: 'tool constraint {{{depName}}}',
           },
         ],
       });
