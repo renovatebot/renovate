@@ -610,44 +610,48 @@ describe('modules/datasource/npm/get', () => {
       httpMock
         .scope('https://example.com')
         .get('/some-package')
-        .reply(200, {
-          _id: 'some-package',
-          name: 'some-package',
-          repository: {
-            type: 'git',
-            url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
-            directory: 'packages/foo',
-          },
-          homepage: 'https://example.com/package',
-          time: {
-            created: '2024-06-01T00:00:00.000Z',
-            '1.0.0': '2024-06-02T00:00:00.000Z',
-          },
-          'dist-tags': { latest: '1.0.0' },
-          versions: {
-            '1.0.0': {
-              repository: {
-                type: 'git',
-                url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
-              },
-              homepage: 'https://example.com/package/v1',
-              deprecated: 'use 2.0.0',
-              gitHead: 'abc123',
-              dependencies: { foo: '^1.0.0' },
-              devDependencies: { bar: '^2.0.0' },
-              engines: { node: '>=18', bun: '>=1.0.0' },
-              dist: {
-                attestations: {
-                  url: 'https://example.com/attestations',
-                  issuer: 'ignore me',
-                },
-                tarball: 'https://example.com/some-package.tgz',
-              },
-              scripts: { test: 'vitest' },
+        .reply(
+          200,
+          {
+            _id: 'some-package',
+            name: 'some-package',
+            repository: {
+              type: 'git',
+              url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+              directory: 'packages/foo',
             },
+            homepage: 'https://example.com/package',
+            time: {
+              created: '2024-06-01T00:00:00.000Z',
+              '1.0.0': '2024-06-02T00:00:00.000Z',
+            },
+            'dist-tags': { latest: '1.0.0' },
+            versions: {
+              '1.0.0': {
+                repository: {
+                  type: 'git',
+                  url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+                },
+                homepage: 'https://example.com/package/v1',
+                deprecated: 'use 2.0.0',
+                gitHead: 'abc123',
+                dependencies: { foo: '^1.0.0' },
+                devDependencies: { bar: '^2.0.0' },
+                engines: { node: '>=18', bun: '>=1.0.0' },
+                dist: {
+                  attestations: {
+                    url: 'https://example.com/attestations',
+                    issuer: 'ignore me',
+                  },
+                  tarball: 'https://example.com/some-package.tgz',
+                },
+                scripts: { test: 'vitest' },
+              },
+            },
+            readme: 'huge',
           },
-          readme: 'huge',
-        });
+          { 'cache-control': 'max-age=180, public' },
+        );
 
       const dep = await getDependency(
         http,
@@ -701,6 +705,26 @@ describe('modules/datasource/npm/get', () => {
         }),
         expect.any(Number),
       );
+    });
+
+    it('skips cache write when registry omits cache-control', async () => {
+      httpMock
+        .scope('https://npm.pkg.github.com')
+        .get('/@stedi%2Fdls')
+        .reply(200, {
+          name: '@stedi/dls',
+          'dist-tags': { latest: '1.0.0' },
+          versions: { '1.0.0': {} },
+        });
+
+      const dep = await getDependency(
+        http,
+        'https://npm.pkg.github.com',
+        '@stedi/dls',
+      );
+
+      expect(dep).toMatchObject({ tags: { latest: '1.0.0' } });
+      expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
     });
 
     it('returns unexpired cache', async () => {

@@ -148,14 +148,14 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return true;
     }
 
-    if (
-      this.checkCacheControlHeader &&
-      isString(resp.headers['cache-control'])
-    ) {
-      const isPublic = resp.headers['cache-control']
-        .toLocaleLowerCase()
-        .split(regEx(/\s*,\s*/))
-        .includes('public');
+    if (this.checkCacheControlHeader) {
+      const cacheControl = resp.headers['cache-control'];
+      const isPublic =
+        isString(cacheControl) &&
+        cacheControl
+          .toLocaleLowerCase()
+          .split(regEx(/\s*,\s*/))
+          .includes('public');
 
       if (!isPublic) {
         return false;
@@ -176,6 +176,24 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   ): Promise<HttpResponse<T>> {
     if (resp.statusCode === 200 && !this.cacheAllowed(resp)) {
       return resp;
+    }
+
+    if (resp.statusCode === 304) {
+      const httpCache = await this.get(method, url);
+      if (!httpCache) {
+        return resp;
+      }
+
+      const cachedResp = copyResponse(
+        httpCache.httpResponse as HttpResponse<T>,
+        true,
+      );
+      cachedResp.authorization = resp.authorization;
+
+      if (!this.cacheAllowed(cachedResp)) {
+        HttpCacheStats.incRemoteHits(url);
+        return cachedResp;
+      }
     }
 
     return await super.wrapServerResponse(method, url, resp);
