@@ -272,6 +272,10 @@ export function applyConstraintsFiltering<
     const packageName = config.packageName;
     const releases = filteredReleases.join(', ');
     logger.debug(
+      {
+        datasource: config.datasource,
+        packageName: config.packageName,
+      },
       `Filtered out ${count} non-matching releases out of ${startingLength} total for ${packageName} due to constraintsFiltering=strict: ${releases}`,
     );
   }
