@@ -75,7 +75,10 @@
     ],
     "aspnet aspnetwebstack": "https://github.com/aspnet/AspNetWebStack",
     "aspnet extensions": "https://github.com/aspnet/Extensions",
-    "aspnet-api-versioning": "https://github.com/dotnet/aspnet-api-versioning",
+    "aspnet-api-versioning": [
+      "https://github.com/Microsoft/aspnet-api-versioning",
+      "https://github.com/dotnet/aspnet-api-versioning"
+    ],
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
     "aspnet-security-oauth-providers": "https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers",
     "astro": "https://github.com/withastro/astro",
