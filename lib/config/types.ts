@@ -42,6 +42,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type ArtifactsCheckWhen = 'failed' | 'always' | 'never';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -61,6 +62,7 @@ export interface RenovateSharedConfig {
   $schema?: string;
   abandonmentThreshold?: Nullish<string>;
   addLabels?: string[];
+  artifactsCheckWhen?: ArtifactsCheckWhen;
   assignAutomerge?: boolean;
   autoApprove?: boolean;
   autoReplaceGlobalMatch?: boolean;

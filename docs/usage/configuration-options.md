@@ -157,6 +157,16 @@ For example, when adding focused reviewers for a specific package group.
 
 Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
+## `artifactsCheckWhen`
+
+Control when Renovate sets the `renovate/artifacts` status check on branches.
+
+Allowed values:
+
+- `failed` (default): Renovate only sets the status check when artifact updates fail. This is the current/legacy behavior.
+- `always`: Renovate always sets the status check on every branch commit — green when artifacts succeed, red when they fail. Use this if you want to make the artifacts check a required status check.
+- `never`: Renovate never sets the artifacts status check. Use this to skip the check entirely.
+
 ## `assignAutomerge`
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
