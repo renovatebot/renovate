@@ -52,7 +52,7 @@ export function getGitAuthenticatedEnvironmentVariables(
       gitConfigCount = 0;
     }
 
-    if (gitConfigCount > 0) {
+    if (gitConfigCount > 0 && !environmentVariables?.GIT_CONFIG_COUNT) {
       for (let i = 0; i < gitConfigCount; i++) {
         let envKey = `GIT_CONFIG_KEY_${i}`;
         if (env[envKey] === undefined) {
