@@ -87,7 +87,9 @@ describe('docs/documentation', () => {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n### (.*?)\n/g) ?? [];
         return matches
-          .map((match) => match.substring(5, match.length - 1))
+          .map((match) =>
+            match.substring(5, match.length - 1).replace(/^`|`$/g, ''),
+          )
           .sort();
       }
 
