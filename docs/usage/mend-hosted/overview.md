@@ -40,7 +40,7 @@ Details of the Mend Renovate Cloud versions are shown in the table below.
 | Concurrent jobs per Org       | 1                                    | 16                             |
 | Job scheduling (active repos) | Every 4 hours                        | Hourly (\*1)                   |
 | Job runner CPUs               | 1 CPU                                | 2 CPU                          |
-| Job runner Memory             | 2Gb                                  | 8Gb                            |
+| Job runner Memory             | 3GB                                  | 8Gb                            |
 | Job runner Disk space         | 15Gb                                 | 40Gb                           |
 | Job timeout                   | 30 minutes                           | 60 minutes                     |
 | Merge Confidence Workflows    | Not included                         | Included                       |
