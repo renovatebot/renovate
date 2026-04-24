@@ -29,7 +29,7 @@ export function extractPackageFile(
         depName: constraint,
         currentValue: value,
         depType: 'tool-constraint',
-        commitMessageTopic: 'tool constraint {{{depName}}}',
+        commitMessageTopic: '{{{depName}}} tool constraint',
       });
     } else {
       deps.push({
@@ -37,7 +37,7 @@ export function extractPackageFile(
         currentValue: value,
         skipReason: 'unsupported',
         depType: 'constraint',
-        commitMessageTopic: 'constraint {{{depName}}}',
+        commitMessageTopic: '{{{depName}}} constraint',
       });
     }
   }

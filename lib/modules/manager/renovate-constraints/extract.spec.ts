@@ -61,7 +61,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             versioning: 'semver',
             currentValue: '1.2.3',
             depType: 'tool-constraint',
-            commitMessageTopic: 'tool constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} tool constraint',
           },
           {
             datasource: 'github-releases',
@@ -70,7 +70,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             versioning: 'maven',
             currentValue: '4.0.0',
             depType: 'tool-constraint',
-            commitMessageTopic: 'tool constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} tool constraint',
           },
         ],
       });
@@ -98,7 +98,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             versioning: 'semver',
             currentValue: '>= 1.2.3',
             depType: 'tool-constraint',
-            commitMessageTopic: 'tool constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} tool constraint',
           },
           {
             datasource: 'github-releases',
@@ -107,7 +107,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             versioning: 'maven',
             currentValue: '< 4.0.0',
             depType: 'tool-constraint',
-            commitMessageTopic: 'tool constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} tool constraint',
           },
         ],
       });
@@ -131,7 +131,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             skipReason: 'unsupported',
             currentValue: '1.2.0',
             depType: 'constraint',
-            commitMessageTopic: 'constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} constraint',
           },
         ],
       });
@@ -159,7 +159,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             versioning: 'semver',
             currentValue: '>= 1.2.3',
             depType: 'tool-constraint',
-            commitMessageTopic: 'tool constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} tool constraint',
           },
           {
             datasource: 'github-releases',
@@ -168,7 +168,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             versioning: 'maven',
             currentValue: '< 4.0.0',
             depType: 'tool-constraint',
-            commitMessageTopic: 'tool constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} tool constraint',
           },
         ],
       });
@@ -197,7 +197,7 @@ describe('modules/manager/renovate-constraints/extract', () => {
             versioning: 'semver',
             currentValue: '3.4.5',
             depType: 'tool-constraint',
-            commitMessageTopic: 'tool constraint {{{depName}}}',
+            commitMessageTopic: '{{{depName}}} tool constraint',
           },
         ],
       });
