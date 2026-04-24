@@ -81,9 +81,6 @@ release-plan 0.14.0 (minor)
   * [#152](https://github.com/embroider-build/release-plan/pull/152) remove conditional coverage run
 `;
 
-// Keep-a-Changelog style: trailing link reference definitions after the last dated section
-// mention every version. The body-matcher must not treat those ref-defs as real mentions,
-// or it will return the oldest section's body for every version (regression for #42829).
 const keepAChangelogMd = `# Changelog
 
 ## [Unreleased]
