@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  MinimumReleaseAgeBehaviour,
   ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -9,6 +10,7 @@ import type { Category } from '../../constants/index.ts';
 import type {
   MaybePromise,
   ModuleApi,
+  Nullish,
   RangeStrategy,
   SkipReason,
   StageName,
@@ -51,6 +53,8 @@ export interface UpdateArtifactsConfig {
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
   toolSettings?: ToolSettingsOptions;
+  minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {

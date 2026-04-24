@@ -152,6 +152,9 @@ const UvConfig = z.object({
   'dev-dependencies': LooseArray(
     Pep508Dependency(depTypes.uvDevDependencies),
   ).catch([]),
+  'exclude-newer': z
+    .union([z.string(), z.date().transform((d) => d.toISOString())])
+    .optional(),
   'required-version': z.string().optional(),
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
