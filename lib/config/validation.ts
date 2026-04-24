@@ -766,7 +766,7 @@ export async function validateConfig(
                 if (!isString(v)) {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Configuration option \`${currentPath}\` should be an object of key-value pairs of constraints and their value`,
+                    message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of constraints and their value`,
                   });
                   break;
                 }

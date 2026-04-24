@@ -1112,7 +1112,7 @@ describe('config/validation', () => {
           {
             topic: 'Configuration Error',
             message:
-              'Configuration option `constraints` should be an object of key-value pairs of constraints and their value',
+              'Configuration option `constraints.packageRules` should be an object of key-value pairs of constraints and their value',
           },
         ]);
       });
