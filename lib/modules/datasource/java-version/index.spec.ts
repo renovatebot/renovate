@@ -1,8 +1,11 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import type { Http } from '../../../util/http/index.ts';
 import { range } from '../../../util/range.ts';
 import { getPkgReleases } from '../index.ts';
+import { getAdoptiumReleases } from './adoptium.ts';
 import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
 
 function getPath(page: number, imageType = 'jdk', args = ''): string {
@@ -137,6 +140,22 @@ describe('modules/datasource/java-version/index', () => {
         packageName: 'java-jre?system=true',
       });
       expect(res?.releases).toHaveLength(2);
+    });
+  });
+
+  describe('getAdoptiumReleases', () => {
+    it('re-throws non-HttpError', async () => {
+      const mockHttp = partial<Http>({
+        getJsonUnchecked: vi.fn().mockRejectedValue(new Error('unexpected')),
+      });
+
+      await expect(
+        getAdoptiumReleases(mockHttp, {
+          imageType: 'jdk',
+          architecture: null,
+          os: null,
+        }),
+      ).rejects.toThrow('unexpected');
     });
   });
 });
