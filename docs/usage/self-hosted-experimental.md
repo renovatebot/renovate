@@ -87,6 +87,11 @@ Default value: `250` (milliseconds).
 If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
 This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
 
+## `RENOVATE_X_GLOBAL_AGENT`
+
+If set to `true` value, Renovate will use the `global-agent` package to apply HTTP proxy settings globally for all outgoing requests.
+By default renovate will use Node.js's built-in proxy.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
