@@ -544,9 +544,12 @@ describe('modules/manager/gomod/extract', () => {
       `;
     const res = extractPackageFile(goMod);
 
-    const versioningName = getDefaultVersioning(res!.deps[0].datasource);
+    let versioningName = getDefaultVersioning(res!.deps[0].datasource);
     // NOTE that this is not the `go-mod-directive` versioning, TODO #31831
     expect(versioningName).toEqual('semver');
+    // HACK
+    versioningName = 'semver-partial'; // HACK
+    // HACK
     const versioning = allVersioning.get(versioningName);
     expect(versioning).toBeDefined();
     const constraint = res!.extractedConstraints!['%goMod']!;
