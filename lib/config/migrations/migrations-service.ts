@@ -112,7 +112,6 @@ export class MigrationsService {
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
     ['baseBranches', 'baseBranchPatterns'],
-    ['updateCommands', 'customUpdateCommands'],
   ]);
 
   static readonly customMigrations: readonly MigrationConstructor[] = [
