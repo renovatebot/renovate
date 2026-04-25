@@ -31,6 +31,7 @@ import { IncludeForksMigration } from './custom/include-forks-migration.ts';
 import { MatchDatasourcesMigration } from './custom/match-datasources-migration.ts';
 import { MatchManagersMigration } from './custom/match-managers-migration.ts';
 import { MatchStringsMigration } from './custom/match-strings-migration.ts';
+import { MinimumMinorAgeMigration } from './custom/minimum-minor-age-migration.ts';
 import { NodeMigration } from './custom/node-migration.ts';
 import { PackageFilesMigration } from './custom/package-files-migration.ts';
 import { PackageNameMigration } from './custom/package-name-migration.ts';
@@ -167,6 +168,7 @@ export class MigrationsService {
     StabilityDaysMigration,
     FetchReleaseNotesMigration,
     MatchManagersMigration,
+    MinimumMinorAgeMigration,
     CustomManagersMigration,
     PlatformCommitMigration,
     FileMatchMigration,
