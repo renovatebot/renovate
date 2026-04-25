@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -22,6 +23,8 @@ import {
   renameLocalFile,
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
@@ -34,6 +37,35 @@ import {
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
+
+const npmrcBeforeRegex = regEx(
+  /^\s*before\s*=\s*"?(\d{4}-\d{2}-\d{2}(?:T[\d:.]+Z?)?)"?(?:\s+[;#].*)?\s*$/m,
+);
+const npmrcMinReleaseAgeRegex = regEx(
+  /^\s*min-release-age\s*=\s*"?(\d+)"?(?:\s+[;#].*)?\s*$/m,
+);
+
+export function parseNpmrcCooldownDate(
+  npmrcContent: string | null,
+): DateTime<true> | null {
+  const dateStr = npmrcContent?.match(npmrcBeforeRegex)?.[1];
+  if (dateStr) {
+    const parsed = DateTime.fromISO(dateStr, { zone: 'utc' });
+    if (parsed.isValid) {
+      return parsed;
+    }
+    logger.debug(`Invalid before date in .npmrc: ${dateStr}, ignoring`);
+  }
+
+  const daysStr = npmrcContent?.match(npmrcMinReleaseAgeRegex)?.[1];
+  if (daysStr) {
+    return DateTime.now()
+      .minus({ days: parseInt(daysStr, 10) })
+      .toUTC();
+  }
+
+  return null;
+}
 
 async function getNpmConstraintFromPackageLock(
   lockFileDir: string,
@@ -67,6 +99,7 @@ export async function generateLockFile(
   filename: string,
   config: Partial<PostUpdateConfig> = {},
   upgrades: Upgrade[] = [],
+  npmrcContent: string | null = null,
 ): Promise<GenerateLockFileResult> {
   // TODO: don't assume package-lock.json is in the same directory
   const lockFileName = upath.join(lockFileDir, filename);
@@ -75,6 +108,7 @@ export async function generateLockFile(
   const { skipInstalls, postUpdateOptions } = config;
 
   let lockFile: string | null = null;
+  let beforeFallback = false;
   try {
     const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
@@ -111,6 +145,43 @@ export async function generateLockFile(
       cmdOptions += ' --ignore-scripts';
     }
 
+    let beforeFlag = '';
+    if (config.minimumReleaseAge) {
+      const ms = toMs(config.minimumReleaseAge);
+      if (ms === null) {
+        logger.debug(
+          {
+            minimumReleaseAge: config.minimumReleaseAge,
+          },
+          'Invalid minimumReleaseAge, skipping --before for npm install',
+        );
+      } else {
+        let beforeDate = DateTime.now().minus(ms).toUTC();
+
+        const npmrcDate = parseNpmrcCooldownDate(npmrcContent);
+        if (npmrcDate && npmrcDate < beforeDate) {
+          logger.debug(
+            {
+              npmrcDate: npmrcDate.toISO(),
+              beforeDate: beforeDate.toISO(),
+            },
+            'Using stricter .npmrc cooldown date over minimumReleaseAge date',
+          );
+          beforeDate = npmrcDate;
+        }
+
+        const beforeISO = beforeDate.toISO();
+        logger.debug(
+          {
+            beforeISO,
+            minimumReleaseAge: config.minimumReleaseAge,
+          },
+          'Setting npm --before based on minimumReleaseAge',
+        );
+        beforeFlag = ` --before=${beforeISO}`;
+      }
+    }
+
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
@@ -140,7 +211,7 @@ export async function generateLockFile(
 
     if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
       // This command updates the lock file based on package.json
-      commands.push(`npm install ${cmdOptions}`.trim());
+      commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
     }
 
     // rangeStrategy = update-lockfile
@@ -160,7 +231,7 @@ export async function generateLockFile(
 
         // v8 ignore else -- TODO: add test #40625
         if (currentWorkspaceUpdates.length) {
-          const updateCmd = `npm install ${cmdOptions} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
+          const updateCmd = `npm install ${cmdOptions}${beforeFlag} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
             .map(quote)
             .join(' ')}`;
           commands.push(updateCmd);
@@ -170,7 +241,7 @@ export async function generateLockFile(
 
     if (lockRootUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
-      const updateCmd = `npm install ${cmdOptions} ${lockRootUpdates
+      const updateCmd = `npm install ${cmdOptions}${beforeFlag} ${lockRootUpdates
         .map((update) => update.managerData?.packageKey)
         .map(quote)
         .join(' ')}`;
@@ -179,7 +250,7 @@ export async function generateLockFile(
 
     if (upgrades.some((upgrade) => upgrade.isRemediation)) {
       // We need to run twice to get the correct lock file
-      commands.push(`npm install ${cmdOptions}`.trim());
+      commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
     }
 
     // postUpdateOptions
@@ -220,8 +291,18 @@ export async function generateLockFile(
       }
     }
 
-    // Run the commands
-    await exec(commands, execOptions);
+    // Run the commands, retrying without --before on ETARGET if needed
+    await exec(commands, execOptions).catch(async (err) => {
+      if (beforeFlag && err.stderr?.includes('with a date before')) {
+        logger.debug('npm --before caused ETARGET, retrying without --before');
+        const commandsWithoutBefore = commands.map((cmd) =>
+          cmd.replace(beforeFlag, ''),
+        );
+        beforeFallback = true;
+        return exec(commandsWithoutBefore, execOptions);
+      }
+      throw err;
+    });
 
     // massage to shrinkwrap if necessary
     if (
@@ -284,7 +365,7 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr };
   }
-  return { error: !lockFile, lockFile };
+  return { error: !lockFile, lockFile, beforeFallback };
 }
 
 export function divideWorkspaceAndRootDeps(
