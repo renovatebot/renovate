@@ -7,6 +7,7 @@ import {
   isString,
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -23,7 +24,9 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
+import { MiseLockFile } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
 import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
 import { parseTomlFile } from './utils.ts';
@@ -32,10 +35,15 @@ import { parseTomlFile } from './utils.ts';
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
 
-export function extractPackageFile(
+/**
+ * Extracts mise tool dependencies from a mise configuration file.
+ * Supports various backends (core, asdf, aqua, cargo, etc.) and
+ * extracts locked versions when a corresponding lock file exists.
+ */
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`mise.extractPackageFile(${packageFile})`);
 
   const misefile = parseTomlFile(content, packageFile);
@@ -44,31 +52,58 @@ export function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [];
-  const tools = misefile.tools;
 
-  if (tools) {
-    for (const [name, toolData] of Object.entries(tools)) {
-      const version = parseVersion(toolData);
-      // Parse the tool options in the tool name
-      const { name: depName, options: optionsInName } =
-        optionInToolNameRegex.exec(name.trim())!.groups!;
-      const delimiterIndex = name.indexOf(':');
-      const backend = depName.substring(0, delimiterIndex);
-      const toolName = depName.substring(delimiterIndex + 1);
-      const options = parseOptions(
-        optionsInName,
-        isNonEmptyObject(toolData) ? toolData : {},
+  for (const [name, toolData] of Object.entries(misefile.tools)) {
+    const version = parseVersion(toolData);
+    // Parse the tool options in the tool name
+    const { name: depName, options: optionsInName } =
+      optionInToolNameRegex.exec(name.trim())!.groups!;
+    const delimiterIndex = name.indexOf(':');
+    const backend = depName.substring(0, delimiterIndex);
+    const toolName = depName.substring(delimiterIndex + 1);
+    const options = parseOptions(
+      optionsInName,
+      isNonEmptyObject(toolData) ? toolData : {},
+    );
+    const toolConfig =
+      version === null
+        ? null
+        : getToolConfig(backend, toolName, version, options);
+    const dep = createDependency(depName, version, toolConfig);
+    deps.push(dep);
+  }
+
+  if (!deps.length) {
+    return null;
+  }
+
+  const result: PackageFileContent = { deps };
+
+  const lockFileName = getLockFileName(packageFile);
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+
+  if (lockFileContent) {
+    const lockFileParsed = MiseLockFile.safeParse(lockFileContent);
+    if (lockFileParsed.success) {
+      result.lockFiles = [lockFileName];
+      for (const dep of deps) {
+        const lockedVersion = getLockedVersion(
+          lockFileParsed.data,
+          dep.depName!,
+        );
+        if (lockedVersion) {
+          dep.lockedVersion = lockedVersion;
+        }
+      }
+    } else {
+      logger.debug(
+        { lockFileName, error: lockFileParsed.error },
+        'Failed to parse mise lock file',
       );
-      const toolConfig =
-        version === null
-          ? null
-          : getToolConfig(backend, toolName, version, options);
-      const dep = createDependency(depName, version, toolConfig);
-      deps.push(dep);
     }
   }
 
-  return deps.length ? { deps } : null;
+  return result;
 }
 
 function parseVersion(toolData: MiseTool): string | null {
