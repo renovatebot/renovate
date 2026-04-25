@@ -18,7 +18,7 @@ import { id as semverCoercedVersioningId } from '../../modules/versioning/semver
 import { getEnv } from '../env.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
-const allToolConfig: Record<ToolName, ToolConfig> = {
+export const allToolConfig: Record<ToolName, ToolConfig> = {
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
@@ -238,7 +238,11 @@ const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'carvel-dev/vendir',
     versioning: semverVersioningId,
   },
-};
+} as const;
+
+export function getToolConfig(name: ToolName): ToolConfig {
+  return allToolConfig[name];
+}
 
 let _getPkgReleases: Promise<
   typeof import('../../modules/datasource/index.ts')
