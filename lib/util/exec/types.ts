@@ -29,6 +29,7 @@ export const toolNames = [
   'java',
   'java-maven',
   'jb',
+  'kas',
   'kustomize',
   'maven',
   'nix',
