@@ -567,13 +567,13 @@ describe('modules/manager/gomod/extract', () => {
     });
 
     it('does not match the next SemVer minor', () => {
-      expect(versioning.matches('1.20.0', constraint)).toBeTrue();
-      expect(versioning.matches('1.20.10', constraint)).toBeTrue();
+      expect(versioning.matches('1.20.0', constraint)).toBeFalse();
+      expect(versioning.matches('1.20.10', constraint)).toBeFalse();
     });
 
     it('does not match the previous SemVer minor', () => {
-      expect(versioning.matches('1.19.0', constraint)).toBeTrue();
-      expect(versioning.matches('1.19.5', constraint)).toBeTrue();
+      expect(versioning.matches('1.18.0', constraint)).toBeFalse();
+      expect(versioning.matches('1.18.5', constraint)).toBeFalse();
     });
   });
 });
