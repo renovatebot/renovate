@@ -11,6 +11,7 @@ import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { Release, ReleaseResult } from '../types.ts';
+import { defaultRegistryUrl } from './common.ts';
 import { CachedPackument } from './schema.ts';
 import type { NpmResponse } from './types.ts';
 
@@ -87,16 +88,15 @@ export async function getDependency(
 
     // set abortOnError for registry.npmjs.org if no hostRule with explicit abortOnError exists
     if (
-      registryUrl === 'https://registry.npmjs.org' &&
-      hostRules.find({ url: 'https://registry.npmjs.org' })?.abortOnError ===
-        undefined
+      registryUrl === defaultRegistryUrl &&
+      hostRules.find({ url: defaultRegistryUrl })?.abortOnError === undefined
     ) {
       logger.trace(
-        { packageName, registry: 'https://registry.npmjs.org' },
+        { packageName, registry: defaultRegistryUrl },
         'setting abortOnError hostRule for well known host',
       );
       hostRules.add({
-        matchHost: 'https://registry.npmjs.org',
+        matchHost: defaultRegistryUrl,
         abortOnError: true,
       });
     }
