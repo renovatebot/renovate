@@ -4,6 +4,7 @@ import { logger } from '../../../../../logger/index.ts';
 import { escapeRegExp, regEx } from '../../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../../util/string.ts';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types.ts';
+import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
 import type {
   DependenciesMeta,
   NpmPackage,
@@ -12,7 +13,7 @@ import type {
 } from '../../extract/types.ts';
 import type { NpmDepType, NpmManagerData } from '../../types.ts';
 import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
-import { updatePnpmCatalogDependency } from './pnpm.ts';
+import { updatePnpmWorkspaceDependency } from './pnpm.ts';
 import { updateYarnrcCatalogDependency } from './yarn.ts';
 
 function renameObjKey(
@@ -54,6 +55,7 @@ function replaceAsString(
       [newValue]: parsedContents[depType]![oldValue],
     })[oldValue];
   } else if (depType === 'dependenciesMeta') {
+    // v8 ignore else -- TODO: add test #40625
     if (oldValue !== newValue) {
       parsedContents.dependenciesMeta = renameObjKey(
         // TODO #22198
@@ -69,6 +71,7 @@ function replaceAsString(
       parents,
       depName,
     );
+    // v8 ignore else -- TODO: add test #40625
     if (depObjectReference) {
       depObjectReference[overrideDepName] = newValue;
     }
@@ -109,20 +112,32 @@ function replaceAsString(
         return testContent;
       }
     }
-    /* v8 ignore next 3 -- needs test */
   }
+  // v8 ignore next -- TODO: add test #40625
   throw new Error();
 }
 
 export function updateDependency({
   fileContent,
+  packageFile: packageFileName,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  if (upgrade.depType?.startsWith('pnpm.catalog')) {
-    return updatePnpmCatalogDependency({ fileContent, upgrade });
+  if (
+    upgrade.depType?.startsWith('pnpm.catalog') ||
+    upgrade.depType === pnpmWorkspaceOverrides
+  ) {
+    return updatePnpmWorkspaceDependency({
+      fileContent,
+      packageFile: packageFileName,
+      upgrade,
+    });
   }
   if (upgrade.depType?.startsWith('yarn.catalog')) {
-    return updateYarnrcCatalogDependency({ fileContent, upgrade });
+    return updateYarnrcCatalogDependency({
+      fileContent,
+      packageFile: packageFileName,
+      upgrade,
+    });
   }
 
   const { depType, managerData } = upgrade;
@@ -143,6 +158,7 @@ export function updateDependency({
       newValue = `${depName}@${newValue}`;
     } else if (isOverrideObject(upgrade)) {
       overrideDepParents = managerData?.parents;
+      // v8 ignore else -- TODO: add test #40625
       if (overrideDepParents) {
         // old version when there is an object as a value in overrides block
         const { depObjectReference, overrideDepName } = overrideDepPosition(
@@ -150,6 +166,7 @@ export function updateDependency({
           overrideDepParents,
           depName,
         );
+        // v8 ignore else -- TODO: add test #40625
         if (depObjectReference) {
           oldVersion = depObjectReference[overrideDepName]!;
         }
@@ -287,6 +304,7 @@ function overrideDepPosition(
   const lastParent = parents[parents.length - 1];
   let overrideDep: OverrideDependency = overrideBlock;
   for (const parent of parents) {
+    // v8 ignore else -- TODO: add test #40625
     if (overrideDep) {
       overrideDep = overrideDep[parent] as Record<string, RecursiveOverride>;
     }

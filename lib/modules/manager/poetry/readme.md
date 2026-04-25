@@ -2,15 +2,6 @@ Poetry 0.x, 1.x and 2.x versions are supported.
 
 Whenever the `pyproject.toml` file is updated, the Poetry lock file will be checked for updates as well.
 
-The following `depTypes` are supported by the Poetry manager:
-
-- `build-system.requires`
-- `dependencies`
-- `dev-dependencies`
-- `dependency-groups`
-- `extras`
-- `<group-name>` (dynamic, based on the group name, per [dependency groups documentation](https://python-poetry.org/docs/managing-dependencies/#dependency-groups))
-
 <!-- prettier-ignore -->
 !!! warning
     Updating locked versions of Poetry dependencies is at times unreliable.

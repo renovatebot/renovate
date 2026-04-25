@@ -136,6 +136,24 @@ describe('instrumentation/reporting', () => {
     );
   });
 
+  it('write formatted report if reportFormatting is enabled', async () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'file',
+      reportPath: './report.json',
+      reportFormatting: true,
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+
+    await exportStats(config);
+
+    const [[, writtenContent]] = fs.writeSystemFile.mock.calls;
+    expect(JSON.parse(writtenContent as string)).toEqual(expectedReport);
+    expect(writtenContent).not.toBe(JSON.stringify(expectedReport));
+  });
+
   it('send report to an S3 bucket if reportType is s3', async () => {
     const mockClient = mock<S3Client>();
     s3.parseS3Url.mockReturnValue({ Bucket: 'bucket-name', Key: 'key-name' });

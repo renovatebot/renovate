@@ -5,6 +5,7 @@ import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { exec } from '../../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../../util/exec/types.ts';
+import { isConstraintName, isToolName } from '../../../../util/exec/types.ts';
 import { ensureLocalDir, readLocalFile } from '../../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../../util/git/index.ts';
@@ -76,6 +77,20 @@ export async function executeCustomUpdateCommands(
         if (updateCommands.installTools) {
           execOpts.toolConstraints ??= [];
           for (const [tool] of Object.entries(updateCommands.installTools)) {
+            const validTool = isToolName(tool);
+            const validConstraint = isConstraintName(tool);
+            if (!validTool) {
+              logger.warn(
+                {
+                  tool,
+                  validTool,
+                  validConstraint,
+                },
+                `Skipping ${validConstraint ? 'valid' : 'invalid'} constraint that is not a tool that Containerbase knows`,
+              );
+              continue;
+            }
+
             execOpts.toolConstraints.push({
               toolName: tool,
               constraint: upgrade.constraints?.[tool],

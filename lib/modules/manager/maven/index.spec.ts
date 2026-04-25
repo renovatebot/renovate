@@ -30,6 +30,7 @@ describe('modules/manager/maven/index', () => {
       const dep = selectDep(deps);
       const updatedContent = updateDependency({
         fileContent: simpleContent,
+        packageFile: 'pom.xml',
         upgrade: { ...dep, newValue },
       })!;
 
@@ -50,6 +51,7 @@ describe('modules/manager/maven/index', () => {
       const dep = selectDep(deps, 'org.example:quux');
       const updatedContent = updateDependency({
         fileContent: parentPomContent,
+        packageFile: 'pom.xml',
         upgrade: { ...dep, newValue },
       })!;
 
@@ -67,6 +69,7 @@ describe('modules/manager/maven/index', () => {
       const dep = selectDep(deps);
       const updatedContent = updateDependency({
         fileContent: simpleContent,
+        packageFile: 'pom.xml',
         upgrade: { ...dep, newValue: '1.2.3' },
       });
 
@@ -84,35 +87,48 @@ describe('modules/manager/maven/index', () => {
       const updatedOutside = groupingContent.replace('1.0.0', '1.0.1');
 
       expect(
-        updateDependency({ fileContent: groupingContent, upgrade: upgrade1 }),
+        updateDependency({
+          fileContent: groupingContent,
+          packageFile: 'pom.xml',
+          upgrade: upgrade1,
+        }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.2'));
       expect(
         updateDependency({
           fileContent: updatedOutside,
+          packageFile: 'pom.xml',
+
           upgrade: upgrade1,
         }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.2'));
 
       const updatedByPrevious = updateDependency({
         fileContent: groupingContent,
+        packageFile: 'pom.xml',
         upgrade: upgrade1,
       })!;
 
       expect(
         updateDependency({
           fileContent: updatedByPrevious,
+          packageFile: 'pom.xml',
           upgrade: upgrade2,
         }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.3'));
       expect(
         updateDependency({
           fileContent: updatedOutside,
+          packageFile: 'pom.xml',
           upgrade: upgrade2,
         }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.3'));
 
       expect(
-        updateDependency({ fileContent: groupingContent, upgrade: upgrade2 }),
+        updateDependency({
+          fileContent: groupingContent,
+          packageFile: 'pom.xml',
+          upgrade: upgrade2,
+        }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.3'));
     });
 
@@ -125,6 +141,7 @@ describe('modules/manager/maven/index', () => {
 
       const updatedContent = updateDependency({
         fileContent: updatedOutside,
+        packageFile: 'pom.xml',
         upgrade: { ...dep, newValue: '2.0.2' },
       });
       expect(updatedContent).toBeNull();
@@ -136,6 +153,7 @@ describe('modules/manager/maven/index', () => {
 
       const updatedContent = updateDependency({
         fileContent: simpleContent,
+        packageFile: 'pom.xml',
         upgrade: { ...dep, currentValue: '1.2.2', newValue: '1.2.4' },
       });
       expect(updatedContent).toBeNull();
@@ -150,6 +168,7 @@ describe('modules/manager/maven/index', () => {
       const newContent = extractPackage(
         updateDependency({
           fileContent: simpleContent,
+          packageFile: 'pom.xml',
           upgrade: { ...dep, newValue },
         })!,
         'some-file',
@@ -167,9 +186,13 @@ describe('modules/manager/maven/index', () => {
       expect(dep).not.toBeNull();
 
       const upgrade = { ...dep, newValue: '[1.0.0]' };
-      expect(updateDependency({ fileContent: simpleContent, upgrade })).toEqual(
-        simpleContent,
-      );
+      expect(
+        updateDependency({
+          fileContent: simpleContent,
+          packageFile: 'pom.xml',
+          upgrade,
+        }),
+      ).toEqual(simpleContent);
     });
   });
 });

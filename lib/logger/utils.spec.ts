@@ -23,6 +23,19 @@ describe('logger/utils', () => {
     expect(sanitizeValue(input)).toBe(output);
   });
 
+  it('sanitizes boxed String objects as strings', () => {
+    const input = {
+      commands: [
+        'clone',
+        new String('https://token@domain.com/repo.git'),
+        new String('.'),
+      ],
+    };
+    expect(sanitizeValue(input)).toEqual({
+      commands: ['clone', 'https://**redacted**@domain.com/repo.git', '.'],
+    });
+  });
+
   it('preserves secret template strings in redacted fields', () => {
     const input = {
       normal: 'value',

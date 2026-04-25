@@ -314,6 +314,7 @@ export async function getUpdatedPackageFiles(
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = await updateDependency({
+        packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });

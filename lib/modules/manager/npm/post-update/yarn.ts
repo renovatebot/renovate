@@ -158,6 +158,7 @@ export async function generateLockFile(
     if (config.skipInstalls !== false) {
       if (isYarn1) {
         const { offlineMirror, yarnPath } = await checkYarnrc(lockFileDir);
+        // v8 ignore else -- TODO: add test #40625
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
@@ -226,12 +227,14 @@ export async function generateLockFile(
 
     const allEnv = getEnv();
     if (allEnv.RENOVATE_X_YARN_PROXY) {
+      // v8 ignore else -- TODO: add test #40625
       if (allEnv.HTTP_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpProxy');
         commands.push(
           `yarn config set --home httpProxy ${quote(allEnv.HTTP_PROXY)}`,
         );
       }
+      // v8 ignore else -- TODO: add test #40625
       if (allEnv.HTTPS_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpsProxy');
         commands.push(
@@ -304,8 +307,8 @@ export async function generateLockFile(
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');
-        /* v8 ignore next -- needs test */
       } catch (err) {
+        // v8 ignore next -- TODO: add test #40625
         logger.debug(
           { err, lockFileName },
           'Error clearing `yarn.lock` for lock file maintenance',
@@ -318,8 +321,8 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore next -- needs test */
   } catch (err) {
+    // v8 ignore if -- TODO: add test #40625
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -331,12 +334,14 @@ export async function generateLockFile(
       'lock file error',
     );
     const stdouterr = String(err.stdout) + String(err.stderr);
+    // v8 ignore if -- TODO: add test #40625
     if (
       stdouterr.includes('ENOSPC: no space left on device') ||
       stdouterr.includes('Out of diskspace')
     ) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
+    // v8 ignore if -- TODO: add test #40625
     if (
       stdouterr.includes('The registry may be down.') ||
       stdouterr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||

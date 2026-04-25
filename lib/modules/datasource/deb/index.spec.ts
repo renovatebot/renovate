@@ -19,7 +19,7 @@ import {
   getRegistryUrl,
 } from './url.ts';
 
-vi.unmock('../../../util/mutex');
+vi.unmock('../../../util/mutex.ts');
 
 const debBaseUrl = 'http://deb.debian.org';
 

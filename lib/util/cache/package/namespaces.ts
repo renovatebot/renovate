@@ -49,6 +49,7 @@ export const packageCacheNamespaces = [
   'datasource-docker-releases-v2',
   'datasource-docker-tags',
   'datasource-dotnet-version',
+  'datasource-elm-package',
   'datasource-endoflife-date',
   'datasource-galaxy-collection',
   'datasource-galaxy',

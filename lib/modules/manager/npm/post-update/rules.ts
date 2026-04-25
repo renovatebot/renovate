@@ -84,6 +84,7 @@ export function processHostRules(): HostRulesResult {
       continue;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (isString(hostRule.username) && isString(hostRule.password)) {
       logger.debug(
         `Adding npmrc entry for ${cleanedUri} with username/password`,

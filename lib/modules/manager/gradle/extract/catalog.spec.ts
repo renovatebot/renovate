@@ -23,7 +23,21 @@ describe('modules/manager/gradle/extract/catalog', () => {
       multiJvm = "org.danilopianini.multi-jvm-test-plugin:0.3.0"
     `;
     const res = parseCatalog('gradle/libs.versions.toml', input);
-    expect(res).toStrictEqual([
+    expect(res.vars).toStrictEqual({
+      kotlin: {
+        key: 'kotlin',
+        value: '1.5.21',
+        fileReplacePosition: 21,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+      'retro.fit': {
+        key: 'retro.fit',
+        value: '2.8.2',
+        fileReplacePosition: 42,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+    });
+    expect(res.deps).toStrictEqual([
       {
         depName: 'com.squareup.okhttp3:okhttp',
         currentValue: '4.9.0',
@@ -130,7 +144,15 @@ describe('modules/manager/gradle/extract/catalog', () => {
     `;
     const res = parseCatalog('gradle/libs.versions.toml', input);
 
-    expect(res).toStrictEqual([
+    expect(res.vars).toStrictEqual({
+      detekt: {
+        key: 'detekt',
+        value: '1.18.1',
+        fileReplacePosition: 21,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+    });
+    expect(res.deps).toStrictEqual([
       {
         depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
         sharedVariableName: 'detekt',
@@ -157,7 +179,25 @@ describe('modules/manager/gradle/extract/catalog', () => {
 
   it('ignores empty TOML file', () => {
     const res = parseCatalog('gradle/libs.versions.toml', '');
-    expect(res).toBeEmptyArray();
+    expect(res).toStrictEqual({ vars: {}, deps: [] });
+  });
+
+  it('skips version entries with no resolvable literal value', () => {
+    const input = codeBlock`
+      [versions]
+      kotlin = "1.5.21"
+      bad = { reject = "1.0.0" }
+    `;
+    const res = parseCatalog('gradle/libs.versions.toml', input);
+
+    expect(res.vars).toStrictEqual({
+      kotlin: {
+        key: 'kotlin',
+        value: '1.5.21',
+        fileReplacePosition: 21,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+    });
   });
 
   it('changes the dependency version, not the comment version', () => {
@@ -175,7 +215,21 @@ describe('modules/manager/gradle/extract/catalog', () => {
     `;
     const res = parseCatalog('gradle/libs.versions.toml', input);
 
-    expect(res).toStrictEqual([
+    expect(res.vars).toStrictEqual({
+      'mocha.junit.reporter': {
+        key: 'mocha.junit.reporter',
+        value: '2.0.2',
+        fileReplacePosition: 82,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+      junit: {
+        key: 'junit',
+        value: '1.4.9',
+        fileReplacePosition: 124,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+    });
+    expect(res.deps).toStrictEqual([
       {
         depName: 'junit:junit',
         sharedVariableName: 'junit',
@@ -215,7 +269,21 @@ describe('modules/manager/gradle/extract/catalog', () => {
     `;
     const res = parseCatalog('gradle/libs.versions.toml', input);
 
-    expect(res).toStrictEqual([
+    expect(res.vars).toStrictEqual({
+      'mocha.junit.reporter': {
+        key: 'mocha.junit.reporter',
+        value: '2.0.2',
+        fileReplacePosition: 82,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+      junit: {
+        key: 'junit',
+        value: '1.4.9',
+        fileReplacePosition: 166,
+        packageFile: 'gradle/libs.versions.toml',
+      },
+    });
+    expect(res.deps).toStrictEqual([
       {
         depName: 'junit:junit',
         sharedVariableName: 'junit',
