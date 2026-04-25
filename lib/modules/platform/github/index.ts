@@ -29,7 +29,8 @@ import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import {
-  listCommitTree,
+  diffCommitTree,
+  getCommitTreeSha,
   pushCommitToRenovateRef,
 } from '../../../util/git/index.ts';
 import type {
@@ -2161,18 +2162,31 @@ async function pushFiles(
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
-    // Push the commit to GitHub using a custom ref
-    // The associated blobs will be pushed automatically
+    // Hybrid git/REST commit strategy (see #13824, #14271):
+    // 1. The git push below uploads blobs to GitHub via a custom ref
+    //    (refs/renovate/branches/*) which does NOT trigger CI/Actions.
+    // 2. We then recreate the tree+commit via REST API so that:
+    //    - The commit is signed by GitHub ("committed via GitHub" badge)
+    //    - Force-push and file mode bits are supported (GraphQL can't do this)
+    //    - We can use base_tree to send only changed files, avoiding org
+    //      ruleset file-path restrictions on unchanged files (#42554)
+    // Reusing the pushed commit/tree SHAs directly does not work because
+    // the branch ref must point to an API-created commit for signing.
     await pushCommitToRenovateRef(commitSha, branchName);
-    // Get all the blobs which the commit/tree points to
-    // The blob SHAs will be the same locally as on GitHub
-    const treeItems = await listCommitTree(commitSha);
+    const baseTreeSha = await getCommitTreeSha(parentCommitSha);
+    const treeItems = await diffCommitTree(parentCommitSha, commitSha);
 
-    // For reasons unknown, we need to recreate our tree+commit on GitHub
-    // Attempting to reuse the tree or commit SHA we pushed does not work
+    if (treeItems.length === 0) {
+      logger.debug(
+        { branchName },
+        'Platform-native commit: no changed files between commits',
+      );
+      return null;
+    }
+
     const treeRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/trees`,
-      { body: { tree: treeItems } },
+      { body: { base_tree: baseTreeSha, tree: treeItems } },
     );
     const treeSha = treeRes.body.sha;
 
