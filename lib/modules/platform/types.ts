@@ -90,6 +90,7 @@ export interface Issue {
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
+  automergeCommitMessage?: string;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
