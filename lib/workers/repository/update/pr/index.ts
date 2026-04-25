@@ -287,10 +287,11 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchChangeLogs === 'pr') {
-    // fetch changelogs when not already done;
-    await embedChangelogs(upgrades);
-  }
+  // fetch changelogs for matching upgrades.
+  await embedChangelogs({
+    upgrades: upgrades,
+    stage: 'pr',
+  });
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
