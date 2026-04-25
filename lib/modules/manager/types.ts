@@ -69,7 +69,7 @@ export interface PackageFileContent<
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
-  deps: PackageDependency[];
+  deps: PackageDependency<T>[];
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;
