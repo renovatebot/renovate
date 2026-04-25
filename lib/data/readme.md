@@ -5,13 +5,14 @@ This readme explains what each file is used for.
 
 ## Summary
 
-| File                  | What is the file about?                   |
-| --------------------- | ----------------------------------------- |
-| `monorepo.json`       | Group related packages into a single PR.  |
-| `replacements.json`   | Rename old packages to new replacement.   |
-| `changelog-urls.json` | Tell Renovate where to find changelogs.   |
-| `source-urls.json`    | Tell Renovate the source URL of packages. |
-| `node-schedule.json`  | Node.js versioning schedule.              |
+| File                  | What is the file about?                             |
+| --------------------- | --------------------------------------------------- |
+| `monorepo.json`       | Group related packages into a single PR.            |
+| `replacements.json`   | Rename old packages to new replacement.             |
+| `changelog-urls.json` | Tell Renovate where to find changelogs.             |
+| `source-urls.json`    | Tell Renovate the source URL of packages.           |
+| `node-schedule.json`  | Node.js versioning schedule.                        |
+| `mise-registry.json`  | Mise tool registry: short names mapped to backends. |
 
 ## Group related packages (`monorepo.json`)
 
@@ -121,3 +122,13 @@ This will be added to the `orb` group in the `source-urls.json` file since the p
 
 This file is automatically updated by a scheduled workflow.
 It can be manually updated by running `pnpm update-static-data:node-schedule`.
+
+## Mise tool registry (`mise-registry.json`)
+
+This file is automatically updated by a scheduled workflow.
+It can be manually updated by running `pnpm update-static-data:mise-registry`.
+
+It maps `mise` tool short names (e.g. `zola`) to their available backends (e.g. `["aqua:getzola/zola", "asdf:salasrod/asdf-zola"]`).
+The data is generated from `mise registry --json` using the [mise CLI](https://mise.jdx.dev).
+
+This enables Renovate to automatically support all tools in the [mise registry](https://github.com/jdx/mise/tree/main/registry) without manual updates.
