@@ -20,6 +20,7 @@ import type {
 } from '../../../../modules/manager/types.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import * as _autoReplace from './auto-replace.ts';
+import * as _executeUpdateCommands from './execute-update-commands.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
 
 const bundler = vi.mocked(_bundler);
@@ -30,6 +31,7 @@ const helmv3 = vi.mocked(_helmv3);
 const npm = vi.mocked(_npm);
 const batectWrapper = vi.mocked(_batectWrapper);
 const autoReplace = vi.mocked(_autoReplace);
+const executeUpdateCommandsMod = vi.mocked(_executeUpdateCommands);
 const pep621 = vi.mocked(_pep621);
 const pipCompile = vi.mocked(_pipCompile);
 const poetry = vi.mocked(_poetry);
@@ -45,6 +47,7 @@ vi.mock('../../../../modules/manager/pep621/index.ts');
 vi.mock('../../../../modules/manager/pip-compile/index.ts');
 vi.mock('../../../../modules/manager/poetry/index.ts');
 vi.mock('./auto-replace.ts');
+vi.mock('./execute-update-commands.ts', () => mockDeep());
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
@@ -1780,6 +1783,210 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res.artifactErrors[0]).toMatchObject({
         fileName: 'composer.json',
         stderr: expect.stringContaining('1.3.0'),
+      });
+    });
+
+    describe('customUpdateCommands', () => {
+      it('skips auto-replace and uses executeCustomUpdateCommands when customUpdateCommands is set', async () => {
+        config.upgrades.push({
+          packageFile: 'backstage.json',
+          manager: 'regex',
+          branchName: '',
+          depName: 'backstage/backstage',
+          newValue: '1.2.3',
+          customUpdateCommands: {
+            commands: ['yarn backstage-cli versions:bump --release 1.2.3'],
+          },
+        });
+        git.getFile.mockResolvedValueOnce('{"version":"1.0.0"}');
+        executeUpdateCommandsMod.executeCustomUpdateCommands.mockResolvedValueOnce(
+          {
+            updatedPackageFiles: [
+              {
+                type: 'addition',
+                path: 'backstage.json',
+                contents: '{"version":"1.2.3"}',
+              },
+            ],
+            updatedArtifacts: [
+              {
+                type: 'addition',
+                path: 'yarn.lock',
+                contents: 'updated lockfile',
+              },
+            ],
+            artifactErrors: [],
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(autoReplace.doAutoReplace).not.toHaveBeenCalled();
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).toHaveBeenCalledOnce();
+        expect(res).toMatchObject({
+          updatedPackageFiles: [{ path: 'backstage.json' }],
+          updatedArtifacts: [{ path: 'yarn.lock' }],
+          artifactErrors: [],
+        });
+      });
+
+      it('forces rebase when reuseExistingBranch is true and customUpdateCommands is set', async () => {
+        config.reuseExistingBranch = true;
+        config.upgrades.push({
+          packageFile: 'backstage.json',
+          manager: 'regex',
+          branchName: '',
+          depName: 'backstage/backstage',
+          newValue: '1.2.3',
+          customUpdateCommands: {
+            commands: ['yarn backstage-cli versions:bump --release 1.2.3'],
+          },
+        });
+        git.getFile.mockResolvedValueOnce('{"version":"1.0.0"}');
+        // Second call after rebase
+        git.getFile.mockResolvedValueOnce('{"version":"1.0.0"}');
+        executeUpdateCommandsMod.executeCustomUpdateCommands.mockResolvedValueOnce(
+          {
+            updatedPackageFiles: [],
+            updatedArtifacts: [],
+            artifactErrors: [],
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        // Should have been called with reuseExistingBranch: false after forced rebase
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).toHaveBeenCalledOnce();
+        expect(res).toMatchObject({ reuseExistingBranch: false });
+      });
+
+      it('merges artifact errors from customUpdateCommands into final result', async () => {
+        config.upgrades.push({
+          packageFile: 'backstage.json',
+          manager: 'regex',
+          branchName: '',
+          depName: 'backstage/backstage',
+          newValue: '1.2.3',
+          customUpdateCommands: {
+            commands: ['disallowed-command'],
+          },
+        });
+        git.getFile.mockResolvedValueOnce('{"version":"1.0.0"}');
+        executeUpdateCommandsMod.executeCustomUpdateCommands.mockResolvedValueOnce(
+          {
+            updatedPackageFiles: [],
+            updatedArtifacts: [],
+            artifactErrors: [
+              {
+                fileName: 'backstage.json',
+                stderr: 'command not in allowedCommands',
+              },
+            ],
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(autoReplace.doAutoReplace).not.toHaveBeenCalled();
+        expect(res).toMatchObject({
+          artifactErrors: [{ fileName: 'backstage.json' }],
+        });
+      });
+
+      it('uses customUpdateCommands for lockFileMaintenance instead of updateArtifacts', async () => {
+        config.upgrades.push({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          updateType: 'lockFileMaintenance',
+          customUpdateCommands: {
+            commands: ['composer update'],
+            fileFilters: ['composer.lock'],
+          },
+        } satisfies BranchUpgradeConfig);
+        git.getFile.mockResolvedValueOnce('{"require":{}}');
+        executeUpdateCommandsMod.executeCustomUpdateCommands.mockResolvedValueOnce(
+          {
+            updatedPackageFiles: [],
+            updatedArtifacts: [
+              {
+                type: 'addition',
+                path: 'composer.lock',
+                contents: 'updated lockfile',
+              },
+            ],
+            artifactErrors: [],
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).toHaveBeenCalledOnce();
+        expect(composer.updateArtifacts).not.toHaveBeenCalled();
+        expect(res).toMatchObject({
+          updatedArtifacts: [{ path: 'composer.lock' }],
+          artifactErrors: [],
+        });
+      });
+
+      it('forces rebase for lockFileMaintenance when reuseExistingBranch is true and customUpdateCommands is set', async () => {
+        config.reuseExistingBranch = true;
+        config.upgrades.push({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          updateType: 'lockFileMaintenance',
+          customUpdateCommands: {
+            commands: ['composer update'],
+          },
+        } satisfies BranchUpgradeConfig);
+        git.getFile.mockResolvedValueOnce('{"require":{}}');
+        // Second call after forced rebase
+        git.getFile.mockResolvedValueOnce('{"require":{}}');
+        executeUpdateCommandsMod.executeCustomUpdateCommands.mockResolvedValueOnce(
+          {
+            updatedPackageFiles: [],
+            updatedArtifacts: [],
+            artifactErrors: [],
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).toHaveBeenCalledOnce();
+        expect(res).toMatchObject({ reuseExistingBranch: false });
+      });
+
+      it('falls through to normal lockFileMaintenance when customUpdateCommands is not set', async () => {
+        config.upgrades.push({
+          manager: 'composer',
+          updateType: 'lockFileMaintenance',
+          branchName: 'some-branch',
+        } satisfies BranchUpgradeConfig);
+        composer.updateArtifacts.mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'composer.lock',
+              contents: 'some contents',
+            },
+          },
+        ]);
+
+        await getUpdatedPackageFiles(config);
+
+        expect(composer.updateArtifacts).toHaveBeenCalledOnce();
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).not.toHaveBeenCalled();
       });
     });
   });

@@ -35,7 +35,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## `allowShellExecutorForPostUpgradeCommands`
 
-Enabling this allows `postUpgradeTasks`' `commands` to execute as if they're in a shell.
+Enabling this allows `customUpdateCommands` or `postUpgradeTasks`' `commands` to execute as if they're in a shell.
 
 This takes effect if you are using shell semantics, such as:
 
@@ -63,7 +63,7 @@ This will not affect calling a script like:
 
 ## `allowedCommands`
 
-A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
+A list of regular expressions that decide which commands in `customUpdateCommands` or `postUpgradeTasks` are allowed to run.
 
 If you are using a template command, the regular expression should match the final resolved value.
 If this list is empty then no tasks will be executed.
