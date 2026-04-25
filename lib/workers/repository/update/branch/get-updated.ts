@@ -149,6 +149,32 @@ export async function getUpdatedPackageFiles(
       });
     }
     if (upgrade.updateType === 'lockFileMaintenance') {
+      if (upgrade.customUpdateCommands?.commands?.length) {
+        if (reuseExistingBranch) {
+          logger.debug(
+            { packageFile, depName },
+            'Need to rebase branch as customUpdateCommands cannot verify existing branch output',
+          );
+          return getUpdatedPackageFiles({
+            ...config,
+            reuseExistingBranch: false,
+          });
+        }
+        logger.debug(
+          { packageFile, depName },
+          'Using customUpdateCommands instead of lockFileMaintenance',
+        );
+        const result = await executeCustomUpdateCommands(upgrade, config);
+        for (const file of result.updatedPackageFiles) {
+          if (file.type === 'addition') {
+            updatedFileContents[file.path] = file.contents!.toString();
+            delete nonUpdatedFileContents[file.path];
+          }
+        }
+        updateCommandArtifacts.push(...result.updatedArtifacts);
+        updateCommandErrors.push(...result.artifactErrors);
+        continue;
+      }
       lockFileMaintenanceFiles.push(packageFile);
     } else if (upgrade.isRemediation) {
       const { status, files } = await updateLockedDependency({
@@ -255,12 +281,8 @@ export async function getUpdatedPackageFiles(
             delete nonUpdatedFileContents[file.path];
           }
         }
-        for (const artifact of result.updatedArtifacts) {
-          updateCommandArtifacts.push(artifact);
-        }
-        for (const error of result.artifactErrors) {
-          updateCommandErrors.push(error);
-        }
+        updateCommandArtifacts.push(...result.updatedArtifacts);
+        updateCommandErrors.push(...result.artifactErrors);
         continue;
       }
       const updateDependency = get(manager, 'updateDependency');

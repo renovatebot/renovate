@@ -1381,7 +1381,8 @@ For running commands _after_ a file has already been updated by Renovate, see [`
 {
   "packageRules": [
     {
-      "matchFiles": ["lib/data/**"],
+      "matchFileNames": ["lib/data/**"],
+      "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
       "customUpdateCommands": {
         "commands": [
           "node scripts/bump-versions.ts {{packageName}} {{currentValue}} {{newValue}}"
@@ -1407,6 +1408,7 @@ For running commands _after_ a file has already been updated by Renovate, see [`
   "packageRules": [
     {
       "matchDepNames": ["backstage/backstage"],
+      "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
       "customUpdateCommands": {
         "commands": [
           "yarn backstage-cli versions:bump --release {{{newValue}}}"
@@ -1424,7 +1426,24 @@ For running commands _after_ a file has already been updated by Renovate, see [`
 }
 ```
 
-The `customUpdateCommands` configuration consists of four fields:
+`customUpdateCommands` can also be used to replace the default lock file refresh performed during [`lockFileMaintenance`](#lockfilemaintenance).
+When set on a `lockFileMaintenance` upgrade (via `packageRules`), the custom commands will run instead of the manager's built-in `updateArtifacts` logic.
+
+```json title="Run a custom lock file maintenance command"
+{
+  "lockFileMaintenance": { "enabled": true },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "customUpdateCommands": {
+        "commands": ["npm install --package-lock-only"],
+        "fileFilters": ["package-lock.json"]
+      }
+    }
+  ],
+  "allowedCommands": ["^npm install --package-lock-only$"]
+}
+```
 
 ### customUpdateCommands.commands
 

@@ -1896,6 +1896,98 @@ describe('workers/repository/update/branch/get-updated', () => {
           artifactErrors: [{ fileName: 'backstage.json' }],
         });
       });
+
+      it('uses customUpdateCommands for lockFileMaintenance instead of updateArtifacts', async () => {
+        config.upgrades.push({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          updateType: 'lockFileMaintenance',
+          customUpdateCommands: {
+            commands: ['composer update'],
+            fileFilters: ['composer.lock'],
+          },
+        } satisfies BranchUpgradeConfig);
+        git.getFile.mockResolvedValueOnce('{"require":{}}');
+        executeUpdateCommandsMod.executeCustomUpdateCommands.mockResolvedValueOnce(
+          {
+            updatedPackageFiles: [],
+            updatedArtifacts: [
+              {
+                type: 'addition',
+                path: 'composer.lock',
+                contents: 'updated lockfile',
+              },
+            ],
+            artifactErrors: [],
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).toHaveBeenCalledOnce();
+        expect(composer.updateArtifacts).not.toHaveBeenCalled();
+        expect(res).toMatchObject({
+          updatedArtifacts: [{ path: 'composer.lock' }],
+          artifactErrors: [],
+        });
+      });
+
+      it('forces rebase for lockFileMaintenance when reuseExistingBranch is true and customUpdateCommands is set', async () => {
+        config.reuseExistingBranch = true;
+        config.upgrades.push({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          updateType: 'lockFileMaintenance',
+          customUpdateCommands: {
+            commands: ['composer update'],
+          },
+        } satisfies BranchUpgradeConfig);
+        git.getFile.mockResolvedValueOnce('{"require":{}}');
+        // Second call after forced rebase
+        git.getFile.mockResolvedValueOnce('{"require":{}}');
+        executeUpdateCommandsMod.executeCustomUpdateCommands.mockResolvedValueOnce(
+          {
+            updatedPackageFiles: [],
+            updatedArtifacts: [],
+            artifactErrors: [],
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).toHaveBeenCalledOnce();
+        expect(res).toMatchObject({ reuseExistingBranch: false });
+      });
+
+      it('falls through to normal lockFileMaintenance when customUpdateCommands is not set', async () => {
+        config.upgrades.push({
+          manager: 'composer',
+          updateType: 'lockFileMaintenance',
+          branchName: 'some-branch',
+        } satisfies BranchUpgradeConfig);
+        composer.updateArtifacts.mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'composer.lock',
+              contents: 'some contents',
+            },
+          },
+        ]);
+
+        await getUpdatedPackageFiles(config);
+
+        expect(composer.updateArtifacts).toHaveBeenCalledOnce();
+        expect(
+          executeUpdateCommandsMod.executeCustomUpdateCommands,
+        ).not.toHaveBeenCalled();
+      });
     });
   });
 });
