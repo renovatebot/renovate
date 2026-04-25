@@ -89,6 +89,7 @@ export abstract class ChangeLogSource {
     const versioning = config.versioning!;
     const currentVersion = config.currentVersion!;
     const newVersion = config.newVersion!;
+    const changelogUrl = config.changelogUrl!;
     const sourceUrl = config.sourceUrl!;
     const packageName = config.packageName!;
     const depName = config.depName!;
@@ -151,7 +152,12 @@ export abstract class ChangeLogSource {
       }
       let release = await packageCache.get(
         this.cacheNamespace,
-        this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
+        this.getCacheKey(
+          sourceUrl ?? changelogUrl,
+          packageName,
+          prev.version,
+          next.version,
+        ),
       );
       if (!release) {
         release = {
@@ -188,7 +194,12 @@ export abstract class ChangeLogSource {
         const cacheMinutes = 55;
         await packageCache.set(
           this.cacheNamespace,
-          this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
+          this.getCacheKey(
+            sourceUrl ?? changelogUrl,
+            packageName,
+            prev.version,
+            next.version,
+          ),
           release,
           cacheMinutes,
         );
@@ -206,6 +217,7 @@ export abstract class ChangeLogSource {
         sourceDirectory,
         packageName,
         depName,
+        changelogUrl,
       },
       versions: changelogReleases,
     };
