@@ -10,15 +10,12 @@ Catalog definitions are extracted from the root `package.json`, whether defined 
 
 ```json
 {
-  "workspaces": {
-    "packages": ["packages/*"],
-    "catalog": {
-      "react": "^19.0.0"
-    },
-    "catalogs": {
-      "testing": {
-        "jest": "30.0.0"
-      }
+  "catalog": {
+    "react": "^19.0.0"
+  },
+  "catalogs": {
+    "testing": {
+      "jest": "30.0.0"
     }
   }
 }
