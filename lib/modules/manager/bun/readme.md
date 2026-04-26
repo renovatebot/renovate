@@ -22,4 +22,4 @@ Catalog definitions are extracted from the root `package.json`, whether defined 
 ```
 
 Catalog dependencies produce dynamic `depType` values: `bun.catalog.default` for the default catalog, and `bun.catalog.<name>` for named catalogs.
-You can use these `depType` values in [`packageRules`](../../usage/configuration-options.md#packagerules) to target catalog dependencies specifically.
+You can use these `depType` values in [`packageRules`](../../../configuration-options.md#packagerules) to target catalog dependencies specifically.
