@@ -4,9 +4,10 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
+import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
-  additionalConstraintNames,
-  toolNames,
+  additionalConstraintDefinitions,
+  toolDefinitions,
 } from '../../lib/util/exec/types.ts';
 import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
@@ -131,17 +132,25 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     temp.additionalProperties = false;
     temp.properties = {};
 
-    for (const tool of [...toolNames]) {
-      temp.properties[tool] = {
+    for (const {
+      name,
+      description,
+    } of toolDefinitions as readonly ConstraintDefinition[]) {
+      const base = `A constraint for the \`${name}\` Containerbase tool`;
+      temp.properties[name] = {
         type: 'string',
-        description: `A constraint for the \`${tool}\` Containerbase tool`,
+        description: description ? `${base}. ${description}` : base,
       };
     }
 
-    for (const constraintName of [...additionalConstraintNames]) {
-      temp.properties[constraintName] = {
+    for (const {
+      name,
+      description,
+    } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+      temp.properties[name] = {
         type: 'string',
-        description: `A constraint for \`${constraintName}\``,
+        // prioritise contraint definitions, as they're more useful than the generated one
+        description: description ?? `A constraint for \`${name}\``,
       };
     }
   }
@@ -150,10 +159,14 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     temp.additionalProperties = false;
     temp.properties = {};
 
-    for (const tool of [...toolNames]) {
-      temp.properties[tool] = {
+    for (const {
+      name,
+      description,
+    } of toolDefinitions as readonly ConstraintDefinition[]) {
+      const base = `Install the \`${name}\` Containerbase tool`;
+      temp.properties[name] = {
         type: 'object',
-        description: `Install the \`${tool}\` Containerbase tool`,
+        description: description ? `${base}. ${description}` : base,
         additionalProperties: false,
       };
     }
