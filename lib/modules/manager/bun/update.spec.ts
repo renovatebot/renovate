@@ -1,5 +1,13 @@
 import { updateDependency } from './update.ts';
 
+vi.mock('jsonc-weaver', async (importOriginal) => {
+  const original = await importOriginal<typeof import('jsonc-weaver')>();
+  return {
+    ...original,
+    weave: vi.fn(original.weave),
+  };
+});
+
 describe('modules/manager/bun/update', () => {
   describe('updateDependency()', () => {
     it('updates default catalog dependency at top level', () => {
@@ -275,6 +283,38 @@ describe('modules/manager/bun/update', () => {
       expect(result).not.toBeNull();
       const parsed = JSON.parse(result!);
       expect(parsed.dependencies.dep1).toBe('2.0.0');
+    });
+
+    it('falls back to JSON.stringify when jsonc-weaver fails', async () => {
+      const { weave } = await import('jsonc-weaver');
+      vi.mocked(weave).mockImplementationOnce(() => {
+        throw new Error('weave failure');
+      });
+
+      const fileContent = JSON.stringify(
+        {
+          name: 'my-monorepo',
+          catalog: {
+            react: '^18.0.0',
+          },
+        },
+        null,
+        2,
+      );
+
+      const result = updateDependency({
+        fileContent,
+        packageFile: 'package.json',
+        upgrade: {
+          depType: 'bun.catalog.default',
+          depName: 'react',
+          newValue: '^19.0.0',
+        },
+      });
+
+      expect(result).not.toBeNull();
+      const parsed = JSON.parse(result!);
+      expect(parsed.catalog.react).toBe('^19.0.0');
     });
 
     it('returns null for named catalog that does not exist', () => {

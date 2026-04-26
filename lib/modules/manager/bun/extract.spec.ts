@@ -536,5 +536,33 @@ describe('modules/manager/bun/extract', () => {
       );
       expect(subCatalogDeps).toEqual([]);
     });
+
+    it('skips workspace sub-packages that fail to parse', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+
+      vi.mocked(fs.readLocalFile)
+        // Root package file
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'my-monorepo',
+            version: '1.0.0',
+            workspaces: ['packages/*'],
+          }),
+        )
+        // Sub-package returns invalid JSON
+        .mockResolvedValueOnce('invalid json');
+
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      // Only root package file should be included
+      expect(packageFiles).toHaveLength(1);
+      expect(packageFiles[0].packageFile).toBe('package.json');
+    });
   });
 });
