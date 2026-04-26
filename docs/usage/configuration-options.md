@@ -898,9 +898,19 @@ If you need to _override_ constraints that Renovate detects from the repository,
 }
 ```
 
+The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
+
+<!-- constraints-tools-begin -->
+<!-- constraints-tools-end -->
+
 <!-- prettier-ignore -->
 !!! note
     When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
+
+Additionally, there are several additional constraints that can be specified:
+
+<!-- additional-constraints-begin -->
+<!-- additional-constraints-end -->
 
 <!-- prettier-ignore -->
 !!! note
@@ -4106,7 +4116,10 @@ Specify a custom value for this if you wish to exclude certain files which are m
 
 Whether to install any additional tools dynamically before executing the `commands`.
 
-These must be known by [Containerbase](https://github.com/containerbase/base).
+The possible tool names that are known by [Containerbase](https://github.com/containerbase/base) are:
+
+<!-- installTools-tools-begin -->
+<!-- installTools-tools-end -->
 
 <!-- prettier-ignore -->
 !!! note
