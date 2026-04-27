@@ -29,6 +29,13 @@ export const protoTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  gh: {
+    config: {
+      packageName: 'cli/cli',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   go: {
     config: {
       packageName: 'golang/go',
@@ -61,10 +68,17 @@ export const protoTooling: Record<string, ToolingDefinition> = {
       datasource: NpmDatasource.id,
     },
   },
-  yarn: {
+  poetry: {
     config: {
-      packageName: '@yarnpkg/cli',
-      datasource: NpmDatasource.id,
+      packageName: 'python-poetry/poetry',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  proto: {
+    config: {
+      packageName: 'moonrepo/proto',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   python: {
@@ -87,30 +101,16 @@ export const protoTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
     },
   },
-  proto: {
-    config: {
-      packageName: 'moonrepo/proto',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
-  gh: {
-    config: {
-      packageName: 'cli/cli',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
-  poetry: {
-    config: {
-      packageName: 'python-poetry/poetry',
-      datasource: GithubReleasesDatasource.id,
-    },
-  },
   uv: {
     config: {
       packageName: 'astral-sh/uv',
       datasource: GithubReleasesDatasource.id,
+    },
+  },
+  yarn: {
+    config: {
+      packageName: '@yarnpkg/cli',
+      datasource: NpmDatasource.id,
     },
   },
 };

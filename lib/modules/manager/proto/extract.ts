@@ -28,8 +28,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   for (const [toolName, version] of Object.entries(versions)) {
-    const dep = createDependency(toolName, version);
-    deps.push(dep);
+    deps.push(createDependency(toolName, version));
   }
 
   return deps.length ? { deps } : null;

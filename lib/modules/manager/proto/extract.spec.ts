@@ -1,12 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
 const protoFilename = '.prototools';
-
-const prototools1 = Fixtures.get('Prototools.1.toml');
 
 describe('modules/manager/proto/extract', () => {
   describe('extractPackageFile()', () => {
@@ -222,7 +219,27 @@ describe('modules/manager/proto/extract', () => {
     });
 
     it('extracts all supported tools from fixture', () => {
-      const result = extractPackageFile(prototools1, protoFilename);
+      const content = codeBlock`
+        node = "22.14.0"
+        bun = "1.2.2"
+        npm = "11.6.2"
+        go = "~1.22"
+        proto = "0.56.0"
+
+        [settings]
+        auto-install = true
+        detect-strategy = "prefer-prototools"
+
+        [plugins.tools]
+        my-tool = "https://raw.githubusercontent.com/my/tool/master/proto-plugin.toml"
+
+        [tools.node]
+        bundled-npm = true
+
+        [env]
+        DEBUG = "*"
+      `;
+      const result = extractPackageFile(content, protoFilename);
       expect(result).not.toBeNull();
       expect(result!.deps).toHaveLength(5);
       expect(result!.deps).toMatchObject([
