@@ -129,4 +129,4 @@ const ltr = (version: string, range: string): boolean => {
   return results.reduce((accumulator, value) => accumulator && value, true);
 };
 
-export { parse, ltr };
+export { ltr, parse };

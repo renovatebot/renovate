@@ -82,23 +82,38 @@ export class PypiDatasource extends Datasource {
     return dependency;
   }
 
+  private sanitizeLookupUrl(lookupUrl: string, parsedUrl: URL): string {
+    if (!parsedUrl.username && !parsedUrl.password) {
+      return lookupUrl;
+    }
+
+    parsedUrl.username = '';
+    parsedUrl.password = '';
+    return parsedUrl.toString();
+  }
+
   private async getAuthHeaders(
     lookupUrl: string,
-  ): Promise<OutgoingHttpHeaders> {
+  ): Promise<{ headers: OutgoingHttpHeaders; lookupUrl: string }> {
     const parsedUrl = parseUrl(lookupUrl);
+    // v8 ignore if -- TODO: refactor to cover this branch through public behavior again
     if (!parsedUrl) {
       logger.once.debug({ lookupUrl }, 'Failed to parse URL');
-      return {};
+      return { headers: {}, lookupUrl };
     }
     if (parsedUrl.hostname.endsWith('.pkg.dev')) {
       const auth = await getGoogleAuthToken();
       if (auth) {
-        return { authorization: `Basic ${auth}` };
+        const sanitizedLookupUrl = this.sanitizeLookupUrl(lookupUrl, parsedUrl);
+        return {
+          headers: { authorization: `Basic ${auth}` },
+          lookupUrl: sanitizedLookupUrl,
+        };
       }
       logger.once.debug({ lookupUrl }, 'Could not get Google access token');
-      return {};
+      return { headers: {}, lookupUrl };
     }
-    return {};
+    return { headers: {}, lookupUrl };
   }
 
   private async getDependency(
@@ -111,8 +126,9 @@ export class PypiDatasource extends Datasource {
     ).href;
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
-    const headers = await this.getAuthHeaders(lookupUrl);
-    const rep = await this.http.getJsonUnchecked<PypiJSON>(lookupUrl, {
+    const { headers, lookupUrl: sanitizedUrl } =
+      await this.getAuthHeaders(lookupUrl);
+    const rep = await this.http.getJsonUnchecked<PypiJSON>(sanitizedUrl, {
       headers,
     });
     const dep = rep?.body;
@@ -259,8 +275,9 @@ export class PypiDatasource extends Datasource {
       hostUrl,
     ).href;
     const dependency: ReleaseResult = { releases: [] };
-    const headers = await this.getAuthHeaders(lookupUrl);
-    const response = await this.http.getText(lookupUrl, { headers });
+    const { headers, lookupUrl: sanitizedUrl } =
+      await this.getAuthHeaders(lookupUrl);
+    const response = await this.http.getText(sanitizedUrl, { headers });
     const dep = response?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');

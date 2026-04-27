@@ -199,6 +199,116 @@ describe('util/package-rules/index', () => {
     expect(res.skipStage).toBeUndefined();
   });
 
+  it('does not set skipReason=package-rules if the last packageRule has force.enabled=true', async () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          // this is a vulnerability alert
+          force: {
+            enabled: true,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)', async () => {
+    const dep: any = {
+      depName: 'foo',
+      enabled: false,
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          // this is a vulnerability alert
+          force: {
+            enabled: true,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)', async () => {
+    const dep: any = {
+      depName: 'foo',
+      enabled: false,
+      // for instance, if we've already merged a vulnrability alert
+      force: {
+        enabled: true,
+      },
+      packageRules: [
+        {
+          enabled: false,
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  // TODO naming
+
+  it('sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false)', async () => {
+    const dep: any = {
+      depName: 'foo',
+      enabled: false,
+      // for instance, if we've already merged a vulnerability alert
+      force: {
+        enabled: true,
+      },
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          force: {
+            enabled: false,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeFalse();
+    expect(res.skipReason).toBe('package-rules');
+    expect(res.skipStage).toBe('datasource-merge');
+  });
+
+  it('sets skipReason=package-rules if the last packageRule has force.enabled=false', async () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: true,
+        },
+        {
+          force: {
+            enabled: false,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeFalse();
+    expect(res.skipReason).toBe('package-rules');
+    expect(res.skipStage).toBe('datasource-merge');
+  });
+
   it('skips skipReason=package-rules if enabled=true', async () => {
     const dep: any = {
       enabled: false,
@@ -1349,6 +1459,36 @@ describe('util/package-rules/index', () => {
     const res = await applyPackageRules(config);
     expect(res.depName).toBe('node');
     expect(res.packageName).toBe('docker.io/library/node');
+  });
+
+  it('propagates fetchChangeLogs from matching packageRule', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['npm'],
+          fetchChangeLogs: 'off',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.fetchChangeLogs).toBe('off');
+  });
+
+  it('does not set fetchChangeLogs when packageRule does not match', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['pypi'],
+          fetchChangeLogs: 'off',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res).not.toHaveProperty('fetchChangeLogs');
   });
 
   it('compiles sourceUrl with template helper functions', async () => {

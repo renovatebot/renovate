@@ -44,5 +44,6 @@ export default {
     '.opencode/**',
     'AGENTS.md',
     'CLAUDE.md',
+    '.worktrees/**/*',
   ],
 };

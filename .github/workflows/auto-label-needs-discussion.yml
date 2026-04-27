@@ -44,6 +44,24 @@ jobs:
                 labels: ['needs-discussion'],
               });
               core.info(`Added 'needs-discussion' label (author role: ${roleName})`);
+
+              // GitHub Actions adding the label won't trigger dessant/label-actions, so we need to do it manually
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: `**Please create a GitHub Discussion instead of this issue.**\n\nIssues in this repository are for creation by Maintainers only - please create a GitHub Discussion instead.\nIf needed, a Renovate maintainer will create an Issue after your Discussion been triaged and confirmed.\n\nThis Issue will now be closed and locked. We may later batch-delete this issue. This way we keep Issues actionable, and free of duplicates or wrong bug reports.\n\nThanks, the Renovate team`,
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                state: 'closed',
+                state_reason: 'not_planned',
+              });
+
+              core.info(`Commented and closed issue as not planned`);
             } else {
               core.info(`Skipping label — author has ${roleName} access`);
             }
