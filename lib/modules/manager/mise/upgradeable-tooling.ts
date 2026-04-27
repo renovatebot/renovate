@@ -252,6 +252,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'clang-format': {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'llvm/llvm-project',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^llvmorg-(?<version>\\S+)',
+    },
+  },
   committed: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
