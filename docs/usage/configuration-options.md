@@ -1606,6 +1606,10 @@ For example, if you wanted to disable Renovate completely on a repository, you c
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    When Renovate is disabled on a repository entirely (via `enabled=false`), if Renovate runs against the repo again, it will perform a one-time cleanup of the repository, closing open Issues, PRs and deleting any branches.
+
 To disable Renovate for all `eslint` packages, you can configure a package rule like:
 
 ```json
