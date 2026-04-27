@@ -1,7 +1,12 @@
 import * as httpMock from '~test/http-mock.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import * as versioning from '../../versioning/maven/index.ts';
-import { getPkgReleases, getRawPkgReleases } from '../index.ts';
+import { applyConstraintsFiltering } from '../common.ts';
+import {
+  type GetPkgReleasesConfig,
+  getPkgReleases,
+  getRawPkgReleases,
+} from '../index.ts';
 import { JenkinsPluginsDatasource } from './index.ts';
 import type {
   JenkinsPluginsInfoResponse,
@@ -99,7 +104,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
                 releaseTimestamp: '2020-05-13T00:11:40.000Z' as Timestamp,
                 version: '3.0.0',
                 constraints: {
-                  jenkins: ['>=2.164.3'],
+                  jenkins: ['2.164.3'],
                 },
               },
             ],
@@ -208,6 +213,125 @@ describe('modules/datasource/jenkins-plugins/index', () => {
             version: '3.0.0',
           },
         ],
+        sourceUrl: 'https://source-url.example.com',
+      });
+    });
+  });
+
+  describe('should filter releases based on constraints if constraintsFiltering is strict', () => {
+    it('with a range', async () => {
+      httpMock
+        .scope('https://updates.jenkins.io')
+        .get('/current/update-center.actual.json')
+        .reply(200, jenkinsPluginsInfo);
+
+      httpMock
+        .scope('https://updates.jenkins.io')
+        .get('/current/plugin-versions.json')
+        .reply(200, {
+          plugins: {
+            foobar: {
+              '1.0.0': {
+                version: '1.0.0',
+                url: 'https://download.example.com',
+                requiredCore: '2.100.0',
+              },
+              '2.0.0': {
+                version: '2.0.0',
+                url: 'https://download.example.com',
+                buildDate: 'Jan 02, 2020',
+                requiredCore: '2.100.9',
+              },
+              '3.0.0': {
+                version: '3.0.0',
+                url: 'https://download.example.com',
+                releaseTimestamp: '2020-05-13T00:11:40.00Z' as Timestamp,
+                requiredCore: '2.164.3',
+              },
+            },
+          },
+        });
+
+      const params: GetPkgReleasesConfig = {
+        versioning: versioning.id,
+        datasource: JenkinsPluginsDatasource.id,
+        packageName: 'foobar',
+        registryUrls: ['https://updates.jenkins.io/'],
+        constraints: {
+          // anything in this minor version
+          jenkins: '(2.164.0,2.165.0)',
+        },
+        constraintsFiltering: 'strict',
+      };
+
+      const res = await getPkgReleases(params);
+      expect(res).not.toBeNull();
+      const filteredRes = applyConstraintsFiltering(res!, params);
+
+      expect(filteredRes).toEqual({
+        registryUrl: 'https://updates.jenkins.io',
+        releases: [
+          {
+            downloadUrl: 'https://download.example.com',
+            releaseTimestamp: '2020-05-13T00:11:40.000Z' as Timestamp,
+            version: '3.0.0',
+          },
+        ],
+        sourceUrl: 'https://source-url.example.com',
+      });
+    });
+
+    it('with an exact version', async () => {
+      httpMock
+        .scope('https://updates.jenkins.io')
+        .get('/current/update-center.actual.json')
+        .reply(200, jenkinsPluginsInfo);
+
+      httpMock
+        .scope('https://updates.jenkins.io')
+        .get('/current/plugin-versions.json')
+        .reply(200, {
+          plugins: {
+            foobar: {
+              '1.0.0': {
+                version: '1.0.0',
+                url: 'https://download.example.com',
+                requiredCore: '2.100.0',
+              },
+              '2.0.0': {
+                version: '2.0.0',
+                url: 'https://download.example.com',
+                buildDate: 'Jan 02, 2020',
+                requiredCore: '2.100.9',
+              },
+              '3.0.0': {
+                version: '3.0.0',
+                url: 'https://download.example.com',
+                releaseTimestamp: '2020-05-13T00:11:40.00Z' as Timestamp,
+                requiredCore: '2.164.3',
+              },
+            },
+          },
+        });
+
+      const params: GetPkgReleasesConfig = {
+        versioning: versioning.id,
+        datasource: JenkinsPluginsDatasource.id,
+        packageName: 'foobar',
+        registryUrls: ['https://updates.jenkins.io/'],
+        constraints: {
+          jenkins: '2.100.1',
+        },
+        constraintsFiltering: 'strict',
+      };
+
+      const res = await getPkgReleases(params);
+      expect(res).not.toBeNull();
+      const filteredRes = applyConstraintsFiltering(res!, params);
+
+      expect(filteredRes).toEqual({
+        registryUrl: 'https://updates.jenkins.io',
+        releases: [],
         sourceUrl: 'https://source-url.example.com',
       });
     });
