@@ -7,27 +7,38 @@ For example, the files could be put in the `https://custom.registry.renovatebot.
 
 ## Constraints Filtering
 
-This datasource makes it possible to only suggest Jenkins plugin updates based on the `requiredCore` metadata field.
+This datasource makes it possible to filter Jenkins plugin updates based on the Jenkins Core version the plugin requires, when setting [`constraintsFiltering=strict`](../../../configuration-options.md#constraintsfiltering).
 This allows you to only see Jenkins plugin updates based on your Jenkins core version.
 
-If you wish to use [`constraintsFiltering=strict`](../../../configuration-options.md#constraintsfiltering), it is recommended to specify a [Maven-style range](../../versioning/maven/readme.md):
+This constraint is derived from the `requiredCore` metadata field in the API response.
 
-```json title="Allow Jenkins plugins that work up to the next Jenkins Core version"
+If using [`constraintsFiltering=strict`](../../../configuration-options.md#constraintsfiltering), it is recommended to specify a [Maven-style range](../../versioning/maven/readme.md):
+
+```json title="Allow Jenkins plugins that require Jenkins Core <2.545.0"
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "constraints": {
-    "jenkins": "[,2.165.0)"
+    "jenkins": "(,2.545.0)"
+  }
+}
+```
+
+```json title="Allow Jenkins plugins that require Jenkins Core 2.545.x"
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "constraints": {
+    "jenkins": "[2.545.0,2.546.0]"
   }
 }
 ```
 
 <!-- prettier-ignore -->
 !!! warning
-    Using an exact match is not recommended, as it is likely to **??**
+    Using an exact match is not recommended, as it is unlikely there will be many plugins that support the exact patch version of Jenkins Core you have specified.
 
 You can also specify an exact version, which will perform a strict match:
 
-```json title="Only allow plugin versions that "
+```json title="Only allow plugin versions that require exactly Jenkins Core 2.164.3"
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "constraints": {
