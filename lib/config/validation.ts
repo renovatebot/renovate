@@ -287,7 +287,6 @@ export async function validateConfig(
         }
       }
       const parentName = getParentName(parentPath);
-      // v8 ignore else -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
       if (
         !isPreset &&
         optionParents[key] &&
@@ -301,6 +300,8 @@ export async function validateConfig(
           message,
         });
       }
+
+      // v8 ignore else -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
       if (!optionTypes[key]) {
         errors.push({
           topic: 'Configuration Error',
