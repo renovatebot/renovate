@@ -793,7 +793,7 @@ jobs:
           EXPECTED_SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
         run: |
-          latest_sha=$(git ls-remote origin "refs/heads/$REF_NAME" | cut -f1)
+          latest_sha=$(git ls-remote https://github.com/renovatebot/renovate "refs/heads/$REF_NAME" | cut -f1)
           if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
             echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
             gh run cancel "$RUN_ID"
@@ -878,7 +878,7 @@ jobs:
           EXPECTED_SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
         run: |
-          latest_sha=$(git ls-remote origin "refs/heads/$REF_NAME" | cut -f1)
+          latest_sha=$(git ls-remote https://github.com/renovatebot/renovate "refs/heads/$REF_NAME" | cut -f1)
           if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
             echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
             gh run cancel "$RUN_ID"
