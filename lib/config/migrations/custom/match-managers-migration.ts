@@ -10,9 +10,16 @@ export class MatchManagersMigration extends AbstractMigration {
     }
 
     // prefix custom. before custom managers if not present
-    const newValue = value.map((manager) =>
-      manager === 'regex' ? 'custom.regex' : manager,
-    );
+    const newValue = value.map((manager) => {
+      switch (manager) {
+        case 'regex':
+          return 'custom.regex';
+        case 'renovate-config-presets':
+          return 'renovate-config';
+        default:
+          return manager;
+      }
+    });
     this.rewrite(newValue);
   }
 }
