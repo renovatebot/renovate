@@ -326,14 +326,14 @@ export function applyConstraintsFiltering<
             configConstraint,
             releaseConstraint,
           },
-          `applyConstraintsFiltering(${release.version}): versioning.subset?.(${configConstraint}, ${releaseConstraint}=${isSubset}`,
+          `applyConstraintsFiltering(${release.version}): versioning.subset?.(${configConstraint}, ${releaseConstraint})=${isSubset}`,
         );
         if (isSubset) {
           satisfiesConstraints = true;
           break;
         }
 
-        const doesMatch = versioning.matches(
+        const doesMatchConfig = versioning.matches(
           configConstraint,
           releaseConstraint,
         );
@@ -344,9 +344,22 @@ export function applyConstraintsFiltering<
             configConstraint,
             releaseConstraint,
           },
-          `applyConstraintsFiltering(${release.version}): versioning.matches(${configConstraint}, ${releaseConstraint}=${isSubset}`,
+          `applyConstraintsFiltering(${release.version}): versioning.matches(${configConstraint}, ${releaseConstraint})=${isSubset}`,
         );
-        if (doesMatch) {
+        const doesMatchRelease = versioning.matches(
+          releaseConstraint,
+          configConstraint,
+        );
+        logger.trace(
+          {
+            release,
+            versioning: versioningName,
+            configConstraint,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): versioning.matches(${releaseConstraint}, ${configConstraint})=${isSubset}`,
+        );
+        if (doesMatchConfig || doesMatchRelease) {
           satisfiesConstraints = true;
           break;
         }
