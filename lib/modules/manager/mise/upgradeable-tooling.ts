@@ -558,15 +558,13 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   ...miseRegistryTooling,
 };
 
-let parsedMiseRegistry: Record<string, Record<string, string>> | undefined;
-
-function getRegistry(): Record<string, Record<string, string>> {
-  parsedMiseRegistry ??= MiseRegistryJson.parse(miseRegistry);
-  return parsedMiseRegistry;
-}
+const parsedMiseRegistry: Record<
+  string,
+  Record<string, string>
+> = Object.freeze(MiseRegistryJson.parse(miseRegistry));
 
 export function getOrderedMiseRegistryBackends(
   toolName: string,
 ): Record<string, string> {
-  return getRegistry()[toolName] ?? [];
+  return parsedMiseRegistry[toolName] ?? [];
 }
