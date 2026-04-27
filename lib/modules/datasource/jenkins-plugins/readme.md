@@ -10,7 +10,7 @@ For example, the files could be put in the `https://custom.registry.renovatebot.
 This datasource makes it possible to only suggest Jenkins plugin updates based on the `requiredCore` metadata field.
 This allows you to only see Jenkins plugin updates based on your Jenkins core version.
 
-If you wish to use [`constraintsFiltering=strict`](../../../configuration-options.md#constraintsfiltering), you will need to either specify a [Maven-style range](../../versioning/maven/readme.md):
+If you wish to use [`constraintsFiltering=strict`](../../../configuration-options.md#constraintsfiltering), it is recommended to specify a [Maven-style range](../../versioning/maven/readme.md):
 
 ```json title="Allow Jenkins plugins that work up to the next Jenkins Core version"
 {
@@ -21,9 +21,13 @@ If you wish to use [`constraintsFiltering=strict`](../../../configuration-option
 }
 ```
 
+<!-- prettier-ignore -->
+!!! warning
+    Using an exact match is not recommended, as it is likely to **??**
+
 You can also specify an exact version, which will perform a strict match:
 
-```json title="Performing an exact match on Jenkins Core version"
+```json title="Only allow plugin versions that "
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "constraints": {
