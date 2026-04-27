@@ -240,10 +240,6 @@ const allToolConfig: Record<ToolName, ToolConfig> = {
   },
 };
 
-export function getToolConfig(name: ToolName): ToolConfig {
-  return allToolConfig[name];
-}
-
 let _getPkgReleases: Promise<
   typeof import('../../modules/datasource/index.ts')
 > | null = null;
