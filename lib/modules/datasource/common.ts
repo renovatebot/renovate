@@ -252,7 +252,10 @@ export function applyConstraintsFiltering<
           break;
         }
 
-        if (versioning.matches(configConstraint, releaseConstraint)) {
+        if (
+          versioning.matches(configConstraint, releaseConstraint) ||
+          versioning.matches(releaseConstraint, configConstraint)
+        ) {
           satisfiesConstraints = true;
           break;
         }
