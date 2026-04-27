@@ -252,7 +252,7 @@ async function getPkgReleases(
   return getPkgReleases(toolConfig);
 }
 
-export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
+export function getToolConfig(toolName: ToolName): ToolConfig {
   return allToolConfig[toolName];
 }
 
