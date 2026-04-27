@@ -65,11 +65,3 @@ export const OpenTofuProviderDocsResponse = z
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse
 >;
-
-export const OpenTofuProviderVersionDetailsResponse = z.object({
-  link: z.string().optional(),
-});
-
-export type OpenTofuProviderVersionDetailsResponse = z.infer<
-  typeof OpenTofuProviderVersionDetailsResponse
->;

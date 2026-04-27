@@ -11,7 +11,6 @@ import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   OpenTofuProviderDocsResponse,
-  OpenTofuProviderVersionDetailsResponse,
   TerraformProviderV2Response,
 } from './schema.ts';
 import type {
@@ -53,7 +52,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     'The release timestamp is only available for `registry.terraform.io` (v2 API) and `registry.opentofu.org` (via `api.opentofu.org`). Other registries using the Provider Registry Protocol do not provide timestamps.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source URL is determined from the the `source` field in the results.';
+    'For `registry.terraform.io`, the source URL is taken from the `source` field of the v2 API response. For `registry.opentofu.org`, it is derived from the package name following the OpenTofu registry policy of `github.com/NAMESPACE/terraform-provider-NAME`.';
 
   private async _getReleases({
     packageName,
@@ -152,23 +151,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     );
     res.homepage = `https://search.opentofu.org/provider/${repository}`;
 
-    // The versions list endpoint does not expose a source URL, so probe the
-    // latest version's details endpoint for the `link` field.
-    const latestVersion = res.releases[0]?.version;
-    if (latestVersion) {
-      const detailsUrl = joinUrlParts(
-        TerraformProviderDatasource.openTofuApiUrl,
-        'registry/docs/providers',
-        repository,
-        latestVersion,
-        'index.json',
-      );
-      const { body } = await this.http.getJson(
-        detailsUrl,
-        OpenTofuProviderVersionDetailsResponse,
-      );
-      res.sourceUrl = body.link;
-    }
+    // The OpenTofu registry only indexes providers hosted on GitHub under the
+    // `NAMESPACE/terraform-provider-NAME` repository naming convention, so the
+    // source URL can be derived deterministically from the package name.
+    // https://github.com/opentofu/registry/blob/main/PROCEDURES.md
+    const [namespace, name] = repository.split('/');
+    res.sourceUrl = `https://github.com/${namespace}/terraform-provider-${name}`;
 
     return res;
   }

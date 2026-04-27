@@ -225,10 +225,6 @@ describe('modules/datasource/terraform-provider/index', () => {
             { id: 'v2.53.0', published: '2019-11-26T08:22:56Z' },
             { id: 'v2.52.0', published: '2019-11-19T08:22:56Z' },
           ],
-        })
-        .get('/registry/docs/providers/hashicorp/azurerm/v2.53.0/index.json')
-        .reply(200, {
-          link: 'https://github.com/opentofu/terraform-provider-azurerm/tree/v2.53.0',
         });
 
       const res = await getPkgReleases({
@@ -240,7 +236,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(res).toEqual({
         homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
         registryUrl: 'https://registry.opentofu.org',
-        sourceUrl: 'https://github.com/opentofu/terraform-provider-azurerm',
+        sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
         releases: [
           {
             releaseTimestamp: '2019-11-19T08:22:56.000Z',
@@ -268,6 +264,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         }),
       ).toEqual({
         homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
+        sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
         releases: [],
       });
     });
