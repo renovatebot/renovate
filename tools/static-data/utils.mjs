@@ -1,6 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
-import { prettier } from '../../lib/expose.ts';
+import prettier from 'prettier';
 
 /**
  * Update given file with new provided data.
