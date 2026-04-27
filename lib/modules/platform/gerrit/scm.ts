@@ -125,12 +125,13 @@ export class GerritScm extends DefaultGitScm {
   }
 
   override async mergeToLocal(branchName: string): Promise<void> {
-    // Unpushed branches can't be fetched from origin, merge locally instead
-    if (pendingChangeBranches.has(branchName)) {
-      logger.debug(`Merging local branch ${branchName} (not yet pushed)`);
-      return git.mergeToLocal(branchName, { localBranch: true });
-    }
-    return super.mergeToLocal(branchName);
+    // Pending branches only have a local ref (refs/heads/<branchName>).
+    // Non-pending virtual branches have a remote-tracking ref (refs/remotes/origin/<branchName>).
+    // Both are already local, so no fetch is needed.
+    const ref = pendingChangeBranches.has(branchName)
+      ? branchName
+      : `refs/remotes/origin/${branchName}`;
+    return git.mergeToLocal(ref, { localBranch: true });
   }
 }
 
