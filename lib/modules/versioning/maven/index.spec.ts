@@ -220,4 +220,62 @@ describe('modules/versioning/maven/index', () => {
       expect(res).toBe(expected);
     },
   );
+
+  describe('range constraints for Jenkins-style version numbers', () => {
+    describe('>=2.164.0 <2.165.0', () => {
+      const range = '[2.164.0,2.165.0)';
+
+      it.each`
+        version               | expected
+        ${'2.164.0'}          | ${true}
+        ${'2.164.1'}          | ${true}
+        ${'2.164.99'}         | ${true}
+        ${'2.165.0'}          | ${false}
+        ${'2.163.9'}          | ${false}
+        ${'2.164.0-SNAPSHOT'} | ${false}
+      `(
+        'matches("$version", "' + range + '") === $expected',
+        ({ version, expected }) => {
+          expect(matches(version, range)).toBe(expected);
+        },
+      );
+    });
+
+    describe('>=2.164.0 <=2.165.0', () => {
+      const range = '[2.164.0,2.165.0]';
+
+      it.each`
+        version               | expected
+        ${'2.164.0'}          | ${true}
+        ${'2.164.1'}          | ${true}
+        ${'2.164.99'}         | ${true}
+        ${'2.165.0'}          | ${true}
+        ${'2.163.9'}          | ${false}
+        ${'2.164.0-SNAPSHOT'} | ${false}
+      `(
+        'matches("$version", "' + range + '") === $expected',
+        ({ version, expected }) => {
+          expect(matches(version, range)).toBe(expected);
+        },
+      );
+    });
+
+    describe('<2.164.0', () => {
+      const range = '(,2.164.0)';
+
+      it.each`
+        version               | expected
+        ${'2.164.0'}          | ${false}
+        ${'2.164.1'}          | ${false}
+        ${'2.163.9'}          | ${true}
+        ${'2.164.0-SNAPSHOT'} | ${true}
+        ${'1.0.0'}            | ${true}
+      `(
+        'matches("$version", "' + range + '") === $expected',
+        ({ version, expected }) => {
+          expect(matches(version, range)).toBe(expected);
+        },
+      );
+    });
+  });
 });
