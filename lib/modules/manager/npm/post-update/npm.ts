@@ -1,5 +1,6 @@
 // TODO: types (#22198)
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
+import ini from 'ini';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -24,7 +25,6 @@ import {
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
-import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
@@ -38,30 +38,33 @@ import {
   lazyLoadPackageJson,
 } from './utils.ts';
 
-const npmrcBeforeRegex = regEx(
-  /^\s*before\s*=\s*"?(\d{4}-\d{2}-\d{2}(?:T[\d:.]+Z?)?)"?(?:\s+[;#].*)?\s*$/m,
-);
-const npmrcMinReleaseAgeRegex = regEx(
-  /^\s*min-release-age\s*=\s*"?(\d+)"?(?:\s+[;#].*)?\s*$/m,
-);
-
 export function parseNpmrcCooldownDate(
   npmrcContent: string | null,
 ): DateTime<true> | null {
-  const dateStr = npmrcContent?.match(npmrcBeforeRegex)?.[1];
-  if (dateStr) {
-    const parsed = DateTime.fromISO(dateStr, { zone: 'utc' });
+  if (!npmrcContent) {
+    return null;
+  }
+
+  const parsed = ini.parse(npmrcContent);
+
+  const before = parsed.before;
+  if (isNonEmptyString(before)) {
+    const parsed = DateTime.fromISO(before, { zone: 'utc' });
     if (parsed.isValid) {
       return parsed;
     }
-    logger.debug(`Invalid before date in .npmrc: ${dateStr}, ignoring`);
+    logger.debug(`Invalid before date in .npmrc: ${before}, ignoring`);
   }
 
-  const daysStr = npmrcContent?.match(npmrcMinReleaseAgeRegex)?.[1];
-  if (daysStr) {
-    return DateTime.now()
-      .minus({ days: parseInt(daysStr, 10) })
-      .toUTC();
+  const minReleaseAge = parsed['min-release-age'];
+  if (isNonEmptyString(minReleaseAge)) {
+    const days = parseInt(minReleaseAge, 10);
+    if (isNumber(days) && days >= 0) {
+      return DateTime.now().minus({ days }).toUTC();
+    }
+    logger.debug(
+      `Invalid min-release-age in .npmrc: ${minReleaseAge}, ignoring`,
+    );
   }
 
   return null;

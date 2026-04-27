@@ -1188,9 +1188,11 @@ describe('modules/manager/npm/post-update/npm', () => {
       it.each`
         content
         ${null}
+        ${''}
         ${'registry=https://registry.npmjs.org\n'}
         ${'before=not-a-date\n'}
         ${'before=2026-13-99T00:00:00.000Z\n'}
+        ${'min-release-age=not-a-number\n'}
       `('for: $content', ({ content }: { content: string | null }) => {
         expect(npmHelper.parseNpmrcCooldownDate(content)).toBeNull();
       });
