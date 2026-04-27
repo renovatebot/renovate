@@ -1579,6 +1579,22 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'docker/setup-docker-action@v4',
+        with: { version: 'v27.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v27.1.0',
+          datasource: 'github-releases',
+          depName: 'docker/setup-docker-action',
+          depType: 'uses-with',
+          packageName: 'moby/moby',
+          extractVersion: '^docker-(?<version>.+)$',
+        },
+      ],
+    },
   ])('extract from $step.uses', ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
