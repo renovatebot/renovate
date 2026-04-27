@@ -1,4 +1,3 @@
-import miseRegistry from '../../lib/data/mise-registry.json' with { type: 'json' };
 import {
   maybeSupportedBackendDatasources,
   supportedBackendDatasources,
@@ -6,6 +5,7 @@ import {
 import {
   asdfTooling,
   miseTooling,
+  parsedMiseRegistry,
 } from '../../lib/modules/manager/mise/upgradeable-tooling.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { replaceContent } from './utils.ts';
@@ -25,8 +25,6 @@ function generateCombinedTooling(): string {
   | Name | Source | Supported |
   | ---- | ------ | --------- |
   `;
-  const registry = miseRegistry as Record<string, string[]>;
-
   let allTools: ToolDocumentation[] = [
     ...Object.entries(miseTooling).map(
       ([name, { misePluginUrl }]) =>
@@ -50,12 +48,12 @@ function generateCombinedTooling(): string {
 
   const existingTools = new Set(allTools.map((tool) => tool.name));
 
-  for (const [name, backends] of Object.entries(registry)) {
+  for (const [name, backends] of Object.entries(parsedMiseRegistry)) {
     if (existingTools.has(name)) {
       continue;
     }
 
-    const backendNames = backends.map((b) => b.split(':')[0]);
+    const backendNames = Object.keys(backends);
     if (backendNames.some((b) => supportedBackendDatasources.has(b))) {
       allTools.push({
         name,

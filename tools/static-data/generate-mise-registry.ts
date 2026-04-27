@@ -22,7 +22,15 @@ const tools = MiseRegistry.parse(JSON.parse(output.stdout));
 const registry = MiseRegistryJson.parse(
   Object.fromEntries(
     tools
-      .map(({ short, backends }): [string, string[]] => [short, backends])
+      .map(({ short, backends }): [string, Record<string, string>] => {
+        const result: Record<string, string> = {};
+        for (const backend of backends.sort()) {
+          const [type, url] = backend.split(':');
+          result[type] = url;
+        }
+
+        return [short, result];
+      })
       .sort(([a], [b]) => a.localeCompare(b)),
   ),
 );

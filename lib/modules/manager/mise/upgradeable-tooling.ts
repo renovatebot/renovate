@@ -558,7 +558,7 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   ...miseRegistryTooling,
 };
 
-const parsedMiseRegistry: Record<
+export const parsedMiseRegistry: Record<
   string,
   Record<string, string>
 > = Object.freeze(MiseRegistryJson.parse(miseRegistry));
