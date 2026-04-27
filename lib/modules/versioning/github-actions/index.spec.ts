@@ -14,6 +14,7 @@ describe('modules/versioning/github-actions/index', () => {
       ${'v1.2'}         | ${true}
       ${'v1.2.3'}       | ${true}
       ${'v1.2.3-alpha'} | ${true}
+      ${'v2.2-rc.1'}    | ${true}
       ${'invalid'}      | ${false}
       ${''}             | ${false}
       ${'<6'}           | ${false}
@@ -39,6 +40,7 @@ describe('modules/versioning/github-actions/index', () => {
       ${'v1.2.3'}       | ${true}
       ${'v1.2.3-alpha'} | ${true}
       ${'v1.2.3-rc.1'}  | ${true}
+      ${'v2.2-rc.1'}    | ${true}
       ${'invalid'}      | ${false}
       ${''}             | ${false}
       ${'#1.0.0'}       | ${false}
@@ -68,6 +70,7 @@ describe('modules/versioning/github-actions/index', () => {
       ${'v1.2'}           | ${true}
       ${'1'}              | ${true}
       ${'v1'}             | ${true}
+      ${'v2.2-rc.1'}      | ${false}
       ${'not-a-version'}  | ${false}
     `('isStable("$version") === $expected', ({ version, expected }) => {
       expect(githubActions.isStable(version)).toBe(expected);
@@ -86,6 +89,7 @@ describe('modules/versioning/github-actions/index', () => {
       ${'v1.2'}         | ${false}
       ${'v1.2.3'}       | ${true}
       ${'v1.2.3-alpha'} | ${true}
+      ${'v2.2-rc.1'}    | ${true}
     `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
       expect(githubActions.isSingleVersion(version)).toBe(expected);
     });
