@@ -47,6 +47,7 @@ export const CategoryNames: Record<Category, string> = {
   docker: 'Docker',
   dotnet: '.NET',
   elixir: 'Elixir',
+  git: 'Git',
   golang: 'Go',
   haskell: 'Haskell',
   helm: 'Helm',
