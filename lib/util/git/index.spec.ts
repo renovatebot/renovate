@@ -1470,6 +1470,19 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await git.initRepo({ url: origin.path });
       await expect(git.syncGit()).resolves.toBeUndefined();
     });
+
+    it('should work when PAGER is set in the environment', async () => {
+      // Users often have PAGER=less (or similar) in their environment, set via their
+      // shell profile or git config. This ends up in the env passed to simple-git via
+      // getEnv(). simple-git 3.36.0 blocks git operations when PAGER is present unless
+      // allowUnsafePager is enabled.
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+      process.env.PAGER = 'less';
+
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+    });
   });
 
   describe('pushCommit', () => {
