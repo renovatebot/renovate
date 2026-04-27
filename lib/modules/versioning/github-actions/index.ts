@@ -13,12 +13,21 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
 
+const floatingMinorTagRegex = regEx(/^\d+(\.\d+)?$/);
+const majorOnlyRegex = regEx(/^\d+$/);
+
 function massageValue(input: string): string {
   return input.trim().replace(regEx(/^v/i), '');
 }
 
 function parseVersion(input: string): SemVer | null {
-  return semver.parse(massageValue(input));
+  const stripped = massageValue(input);
+  const v = semver.parse(stripped);
+  if (v) {
+    return v;
+  }
+  // Handle major.minor-prerelease format (e.g. v2.2-rc.1) by normalizing to major.minor.0-prerelease
+  return semver.parse(stripped.replace(regEx(/^(\d+\.\d+)(-.+)$/), '$1.0$2'));
 }
 
 interface Range {
@@ -28,13 +37,17 @@ interface Range {
 
 function parseRange(input: string): Range | null {
   const stripped = massageValue(input);
+  if (!floatingMinorTagRegex.test(stripped)) {
+    return null;
+  }
   const coerced = semver.coerce(stripped);
+  /* v8 ignore if -- unreachable: floatingMinorTagRegex should guarantee coerce() succeeds */
   if (!coerced) {
     return null;
   }
   const { major, minor } = coerced;
 
-  if (regEx(/^\d+$/).test(stripped)) {
+  if (majorOnlyRegex.test(stripped)) {
     return { major };
   }
 
@@ -131,6 +144,14 @@ function isGreaterThan(x: string, y: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
+  // if we have a valid floating tag provided, and it's the same as the range, treat it as the same
+  if (
+    parseVersionCoerced(version) &&
+    massageValue(version) === massageValue(range)
+  ) {
+    return true;
+  }
+
   const v = parseVersion(version);
   if (!v) {
     return false;

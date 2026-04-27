@@ -42,11 +42,11 @@ The `replacements.json` file has all the replacement presets.
 
 When a package gets renamed, you need to tell Renovate:
 
-- the datasource of the package -> `matchDatasources`
-- the old package name -> `matchPackageNames`
-- the new package name -> `replacementName`
-- the last version available for the old package name -> `matchCurrentVersion`
-- the first version available for the new package name -> `replacementVersion`
+- the datasource of the package → `matchDatasources`
+- the old package name → `matchPackageNames`
+- the new package name → `replacementName`
+- the last version available for the old package name → `matchCurrentVersion`
+- the first version available for the new package name → `replacementVersion`
 
 You can omit `replacementVersion` if the current version is the same as the new version.
 

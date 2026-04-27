@@ -132,6 +132,8 @@ export interface LookupUpdate {
    * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
    */
   hasAttestation?: boolean;
+
+  prBodyNotes?: string[];
 }
 
 /**
