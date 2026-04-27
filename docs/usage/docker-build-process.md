@@ -9,7 +9,7 @@ As part of this build process, there are two key variants of this:
 
 Renovate's "slim" image is recommended as the minimal set of installed tools on a given container to be able to run Renovate.
 
-It uses [`binarySource=install`](https://docs.renovatebot.com/self-hosted-configuration/#binarysource) to dynamically install tools as they're needed.
+It uses [`binarySource=install`](./self-hosted-configuration.md#binarysource) to dynamically install tools as they're needed.
 This keeps the base container quite lightweight (hence "slim") but requires outbound network access at runtime.
 
 It is possible to make the "slim" container even more lightweight by removing some of the tools and packages - for instance to reduce the attack surface, or reduce the size of the resulting image - but that is left as an exercise to the reader.
@@ -18,7 +18,7 @@ It is possible to make the "slim" container even more lightweight by removing so
 
 Renovate's "full" image is recommended for users who prefer to have most tools pre-installed, and not require any outbound access at runtime.
 
-It uses [`binarySource=global`](https://docs.renovatebot.com/self-hosted-configuration/#binarysource) which only uses tools that are installed in the image.
+It uses [`binarySource=global`](./self-hosted-configuration.md#binarysource) which only uses tools that are installed in the image.
 
 When using the "full" image, there are some tools and packages installed in the container that you may not be using.
 It is possible to remove these - for instance to reduce the attack surface, or reduce the size of the resulting image - but that is left as an exercise to the reader.
