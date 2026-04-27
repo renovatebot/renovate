@@ -58,6 +58,7 @@ describe('modules/manager/mise/extract', () => {
       buf = "1.27.0"
       caddy = "2.10.2"
       ccache = "4.11.3"
+      clang-format = "20.1.0"
       committed = "1.1.7"
       conan = "2.24.0"
       consul = "1.14.3"
@@ -144,6 +145,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'ccache',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'ccache/ccache',
+          },
+          {
+            currentValue: '20.1.0',
+            datasource: 'github-releases',
+            depName: 'clang-format',
+            extractVersion: '^llvmorg-(?<version>\\S+)',
+            packageName: 'llvm/llvm-project',
           },
           {
             currentValue: '1.1.7',

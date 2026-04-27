@@ -191,6 +191,80 @@ describe('modules/manager/nuget/artifacts', () => {
     expect(execSnapshots).toBeEmptyArray();
   });
 
+  it('updates lock file for Directory.Build.props', async () => {
+    const execSnapshots = mockExecAll();
+    scm.getFileList.mockReset();
+    scm.getFileList.mockResolvedValueOnce(['project.csproj']);
+    fs.getSiblingFileName
+      .mockReturnValueOnce('packages.lock.json')
+      .mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'Directory.Build.props',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
+  });
+
+  it('updates lock file for nested Directory.Build.props', async () => {
+    const execSnapshots = mockExecAll();
+    scm.getFileList.mockReset();
+    scm.getFileList.mockResolvedValueOnce(['src/project.csproj']);
+    fs.getSiblingFileName
+      .mockReturnValueOnce('src/packages.lock.json')
+      .mockReturnValueOnce('src/packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'src/packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'src/packages.lock.json': 'New packages.lock.json',
+    });
+
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'src/Directory.Build.props',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'src/packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet restore src/project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
+  });
+
   it('does not update lock file when no deps changed', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');

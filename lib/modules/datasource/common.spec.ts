@@ -245,6 +245,24 @@ describe('modules/datasource/common', () => {
       });
     });
 
+    it('should return all releases when no configConstraints', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['^1.0.0'] } },
+          { version: '2.0.0' },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+
     it('should match exact constraints', () => {
       const config = {
         datasource: 'pypi',
@@ -257,6 +275,46 @@ describe('modules/datasource/common', () => {
         releases: [
           { version: '1.0.0', constraints: { python: ['^1.0.0'] } },
           { version: '2.0.0', constraints: { python: ['>=3.8'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it('should handle config with a range constraint, and a release with an exact version', () => {
+      // TODO
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '>=3.8' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it('should handle config with an exact version, and a release with a range constraint', () => {
+      // TODO
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '3.8.1' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({

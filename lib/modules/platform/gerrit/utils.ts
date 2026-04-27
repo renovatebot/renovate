@@ -5,7 +5,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
-import type { Pr } from '../types.ts';
+import type { GitUrlOption, Pr } from '../types.ts';
 import type {
   GerritChange,
   GerritChangeStatus,
@@ -16,6 +16,8 @@ import type {
 export const MIN_GERRIT_VERSION = '3.0.0';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
+
+const DEFAULT_SSH_PORT = `29418`;
 
 /**
  * Max comment size in Gerrit (16kiB by default)
@@ -31,32 +33,48 @@ export const REQUEST_DETAILS_FOR_PRS: GerritRequestDetail[] = [
   'COMMIT_FOOTERS', // to get the commit message
 ] as const;
 
-export function getGerritRepoUrl(repository: string, endpoint: string): string {
+export function getGerritRepoUrl(
+  repository: string,
+  endpoint: string,
+  gitUrl: GitUrlOption | undefined,
+): string {
+  const endpointUrl = parseUrl(endpoint);
+  if (!endpointUrl) {
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  }
+
+  const url =
+    gitUrl === 'ssh'
+      ? createSshUrl(endpointUrl, repository)
+      : createHttpUrl(endpointUrl, endpoint, repository);
+  logger.trace({ url }, 'using URL based on configured endpoint');
+
+  return url;
+}
+
+function createSshUrl(url: URL, repository: string): string {
+  return `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+}
+
+function createHttpUrl(url: URL, endpoint: string, repository: string): string {
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
     hostType: 'gerrit',
     url: endpoint,
   });
 
-  const url = parseUrl(endpoint);
-  if (!url) {
-    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
-  }
   if (!(opts.username && opts.password)) {
     throw new Error(
       'Init: You must configure a Gerrit Server username/password',
     );
   }
+
   url.username = opts.username;
   url.password = opts.password;
   url.pathname = joinUrlParts(
     url.pathname,
     'a',
     encodeURIComponent(repository),
-  );
-  logger.trace(
-    { url: url.toString() },
-    'using URL based on configured endpoint',
   );
   return url.toString();
 }

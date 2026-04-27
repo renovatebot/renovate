@@ -202,7 +202,7 @@ export async function initRepo({
   }
 
   const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl);
+  const url = getGerritRepoUrl(repository, baseUrl, gitUrl);
   configureScm(repository);
   await git.initRepo({
     url,

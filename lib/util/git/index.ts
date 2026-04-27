@@ -602,6 +602,7 @@ export async function getBranchUpdateDate(
   if (!branchSha) {
     return null;
   }
+  await syncGit();
   try {
     return await getCommitDate(branchSha);
   } catch (err) {

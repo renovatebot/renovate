@@ -18,3 +18,7 @@ It wraps the Renovate CLI in a Kubernetes operator and adds features like:
 - Built-in web dashboard for monitoring and management
 - Webhook API for on-demand runs
 - Prometheus metrics and health checks
+
+## `renovate-pretty-log-tui`
+
+[`renovate-pretty-log-tui`](https://gitlab.com/tanna.dev/renovate-pretty-log/) is a Terminal User Interface (TUI) to provide a richer, local-only view, for your Renovate debug logs.

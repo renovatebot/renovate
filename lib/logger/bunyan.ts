@@ -1,18 +1,12 @@
-import { createRequire } from 'node:module';
 import {
   isNonEmptyStringAndNotWhitespace,
   isString,
   isUndefined,
 } from '@sindresorhus/is';
 
-// Use createRequire so that @opentelemetry/instrumentation-bunyan can patch
-// bunyan via require-in-the-middle. A plain ESM `import` bypasses the hook.
-const bunyan = createRequire(import.meta.url)(
-  'bunyan',
-) as typeof import('bunyan');
-
 import fs from 'fs-extra';
 import upath from 'upath';
+import { bunyan } from '../expose.ts';
 import cmdSerializer from './cmd-serializer.ts';
 import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
@@ -87,7 +81,7 @@ function createLogFileStream(logFile: string): BunyanStream {
 }
 
 function serializedSanitizedLogger(streams: BunyanStream[]): BunyanLogger {
-  return bunyan.createLogger({
+  return bunyan().createLogger({
     name: 'renovate',
     serializers: {
       body: configSerializer,
@@ -144,7 +138,7 @@ export function validateLogLevel(
     return (logLevelToCheck as BunyanLogLevel) ?? defaultLevel;
   }
 
-  const logger = bunyan.createLogger({
+  const logger = bunyan().createLogger({
     name: 'renovate',
     streams: [
       {
