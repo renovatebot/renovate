@@ -1,9 +1,4 @@
-import {
-  isArray,
-  isNonEmptyString,
-  isNonEmptyStringAndNotWhitespace,
-  isString,
-} from '@sindresorhus/is';
+import { isArray, isNonEmptyString, isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { markdownTable } from 'markdown-table';
 import semver from 'semver';
@@ -146,7 +141,7 @@ function compilePrTitle(
   if (!upgrade.prTitleStrict) {
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {
-      const hasVersionInTitle = isNonEmptyStringAndNotWhitespace(
+      const hasVersionInTitle = !!semver.coerce(
         template.compile(upgrade.commitMessageExtra ?? '', upgrade),
       );
       if (!hasVersionInTitle) {

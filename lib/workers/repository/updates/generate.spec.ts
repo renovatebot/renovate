@@ -1229,6 +1229,29 @@ describe('workers/repository/updates/generate', () => {
       expect(generateBranchConfig(minorWithVersionInTitle)).toMatchObject({
         prTitle: 'some-title',
       });
+
+      // Appends suffix when commitMessageExtra is non-version text
+      const majorWithNonVersionExtra = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '2.0.0',
+          newVersion: '2.0.0',
+          newMajor: 2,
+          prettyNewMajor: 'v2',
+          commitMessageExtra: 'from upstream',
+          isGroup: true,
+          separateMajorMinor: true,
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 0,
+        },
+      ];
+      expect(generateBranchConfig(majorWithNonVersionExtra)).toMatchObject({
+        prTitle: 'some-title (major)',
+      });
     });
 
     it('combines prBodyColumns', () => {
