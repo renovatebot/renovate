@@ -326,7 +326,7 @@ export function applyConstraintsFiltering<
             configConstraint,
             releaseConstraint,
           },
-          `applyConstraintsFiltering(${release.version}): versioning.subset?.(${configConstraint}, ${releaseConstraint}=${isSubset}`,
+          `applyConstraintsFiltering(${release.version}): versioning.subset?.(${configConstraint}, ${releaseConstraint})=${isSubset}`,
         );
         if (isSubset) {
           satisfiesConstraints = true;
@@ -344,7 +344,7 @@ export function applyConstraintsFiltering<
             configConstraint,
             releaseConstraint,
           },
-          `applyConstraintsFiltering(${release.version}): versioning.matches(${configConstraint}, ${releaseConstraint}=${isSubset}`,
+          `applyConstraintsFiltering(${release.version}): versioning.matches(${configConstraint}, ${releaseConstraint})=${isSubset}`,
         );
         if (doesMatch) {
           satisfiesConstraints = true;
