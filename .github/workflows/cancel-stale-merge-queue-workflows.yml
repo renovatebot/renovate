@@ -29,7 +29,7 @@ jobs:
       - name: Cancel Workflow Runs by SHA
         run: |
           # Get all workflow runs for the specific SHA
-          workflow_runs=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+          workflow_runs=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs?head_sha=${{ github.sha }}")
 
           # Extract run IDs and cancel them (except current workflow)
@@ -39,7 +39,10 @@ jobs:
             echo "Run ID: $run_id"
             if [ -n "$run_id" ] && [ "$run_id" != "$current_run_id" ]; then
               echo "Cancelling workflow run $run_id"
-              curl -X POST -H "Authorization: Bearer ${{ github.token }}" \
+              curl -X POST -H "Authorization: Bearer ${GITHUB_TOKEN}" \
                 "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run_id/cancel"
             fi
           done
+
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

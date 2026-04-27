@@ -834,9 +834,13 @@ jobs:
 
       - name: Docker registry login
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+          echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup PDM
         uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
         with:
@@ -849,12 +853,14 @@ jobs:
 
       - name: Check dry run
         run: |
-          if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
+          if [[ "${{github.event_name}}" == "workflow_dispatch" && "${INPUT_DRYRUN}" != "true"  ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{env.DO_RELEASE}}" == "true" ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
+        env:
+          INPUT_DRYRUN: ${{ github.event.inputs.dryRun }}
       - name: semantic-release
         run: |
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
