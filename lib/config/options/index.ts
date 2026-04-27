@@ -3184,6 +3184,7 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: ['off', 'branch', 'pr'],
     default: 'pr',
     cli: false,
+    parents: ['.', 'packageRules'],
   },
   {
     name: 'cloneSubmodules',
