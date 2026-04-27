@@ -103,7 +103,7 @@ export class JenkinsPluginsDatasource extends Datasource {
         const releaseTimestamp =
           plugins[name][version]?.releaseTimestamp ?? asTimestamp(buildDate);
         const jenkins = plugins[name][version]?.requiredCore;
-        const constraints = jenkins ? { jenkins: [`>=${jenkins}`] } : undefined;
+        const constraints = jenkins ? { jenkins: [jenkins] } : undefined;
         return {
           version,
           downloadUrl,
