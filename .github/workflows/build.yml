@@ -43,6 +43,7 @@ env:
     patches/
     tools/
     package.json
+    pnpm-workspace.yaml
     pnpm-lock.yaml
 
 jobs:
@@ -745,7 +746,11 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Install dependencies
-        run: pnpm test-e2e:install
+        run: |
+          # as `--ignore-workspace` doesn't seem to apply to `minimumReleaseAge`, forcibly delete our workspace
+          rm pnpm-workspace.yaml
+
+          pnpm test-e2e:install
 
       - name: E2E Test
         run: pnpm test-e2e:run
@@ -812,7 +817,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@b4ae852a7c41333ca1876519026160d1b3c37206 # v4.6.1
+        uses: containerbase/internal-tools@2156d6f872e2649c6fe2d834c4fbc6ad8fb30d1c # v4.6.6
         with:
           command: docker-config
 

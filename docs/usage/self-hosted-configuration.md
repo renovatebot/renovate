@@ -61,6 +61,12 @@ This will not affect calling a script like:
 }
 ```
 
+<!-- prettier-ignore -->
+!!! warning
+    This has the risk of arbitrary environment variable access or additional command execution.
+    It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`),
+    as there may be special characters included in the given commands that can be leveraged
+
 ## `allowedCommands`
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
