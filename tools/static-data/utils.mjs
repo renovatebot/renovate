@@ -17,7 +17,7 @@ export async function updateJsonFile(file, newData) {
           newData.byteOffset,
           newData.byteLength,
         ).toString('utf8');
-    const pretty = await prettier().format(newString, { parser: 'json' });
+    const pretty = await prettier.format(newString, { parser: 'json' });
     await fs.writeFile(file, pretty);
   } catch (e) {
     console.error(e.toString());
