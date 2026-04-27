@@ -784,11 +784,14 @@ jobs:
       - name: Check for newer commits on ${{ github.ref_name }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
         run: |
-          latest_sha=$(git ls-remote origin "refs/heads/${{ github.ref_name }}" | cut -f1)
-          if [[ "$latest_sha" != "${{ github.sha }}" ]]; then
-            echo "Newer commit detected on ${{ github.ref_name }} ($latest_sha), cancelling release run"
-            gh run cancel "${{ github.run_id }}"
+          latest_sha=$(git ls-remote origin "refs/heads/$REF_NAME" | cut -f1)
+          if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
+            gh run cancel "$RUN_ID"
           fi
 
       - run: df -h
@@ -866,11 +869,14 @@ jobs:
       - name: Check for newer commits on ${{ github.ref_name }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
         run: |
-          latest_sha=$(git ls-remote origin "refs/heads/${{ github.ref_name }}" | cut -f1)
-          if [[ "$latest_sha" != "${{ github.sha }}" ]]; then
-            echo "Newer commit detected on ${{ github.ref_name }} ($latest_sha), cancelling release run"
-            gh run cancel "${{ github.run_id }}"
+          latest_sha=$(git ls-remote origin "refs/heads/$REF_NAME" | cut -f1)
+          if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
+            gh run cancel "$RUN_ID"
           fi
 
       - name: semantic-release
