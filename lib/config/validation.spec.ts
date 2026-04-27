@@ -2352,6 +2352,48 @@ describe('config/validation', () => {
       );
     });
 
+    it('validates postUpgradeTasks.installTools tool names', async () => {
+      const config = {
+        postUpgradeTasks: {
+          executionMode: 'update' as const,
+          installTools: {
+            npm: {},
+            node: {},
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('rejects invalid postUpgradeTasks.installTools tool names', async () => {
+      const config = {
+        postUpgradeTasks: {
+          installTools: {
+            npm: {},
+            unknownTool: {},
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: installTools.unknownTool is not a valid tool
+        config,
+      );
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid `postUpgradeTasks.installTools.unknownTool` configuration: not a valid tool name.',
+        },
+      ]);
+      expect(errors).toHaveLength(0);
+    });
+
     it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
       const config = {
         packageRules: [

@@ -95,6 +95,17 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
+      it('fetches changelogs for the "pr" stage', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        await ensurePr(config);
+
+        expect(embedChangelogs).toHaveBeenCalledExactlyOnceWith({
+          upgrades: config.upgrades,
+          stage: 'pr',
+        });
+      });
+
       it('aborts PR creation once limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
