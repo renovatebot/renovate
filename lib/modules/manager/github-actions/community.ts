@@ -121,6 +121,13 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: 'deno',
     withSchema: valSchema('deno-version'),
   },
+  // https://github.com/docker/setup-docker-action
+  'docker/setup-docker-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'docker/setup-docker-action',
+    packageName: 'moby/moby',
+    extractVersion: '^docker-(?<version>.+)$',
+  },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',

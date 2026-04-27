@@ -600,9 +600,9 @@ All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help 
 
 It's possible to bump short versions:
 
-- `1` -> `2` (major)
-- `1.1` -> `2.0` (major)
-- `1.2` -> `1.3` (minor)
+- `1` → `2` (major)
+- `1.1` → `2.0` (major)
+- `1.2` → `1.3` (minor)
 
 ### `bumpVersions.bumpType`
 
@@ -898,9 +898,19 @@ If you need to _override_ constraints that Renovate detects from the repository,
 }
 ```
 
+The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
+
+<!-- constraints-tools-begin -->
+<!-- constraints-tools-end -->
+
 <!-- prettier-ignore -->
 !!! note
     When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
+
+Additionally, there are several additional constraints that can be specified:
+
+<!-- additional-constraints-begin -->
+<!-- additional-constraints-end -->
 
 <!-- prettier-ignore -->
 !!! note
@@ -1799,6 +1809,32 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs-and-tools) to allow Renovate to fetch changelogs notes from `github.com`.
 
+You may use [package rules](#packagerules) to override the value of `fetchChangeLogs` for matching depeendencies, with later rules overriding earlier ones.
+
+The following re-enables fetching of changelogs when creating pull-requests for lodash updates.
+
+```json
+{
+  "fetchChangeLogs": "off",
+  "packageRules": {
+    "matchSourceUrls": ["https://github.com/lodash/lodash"],
+    "fetchChangeLogs": "pr"
+  }
+}
+```
+
+The following disables fetching of changelogs for any package in aws-sdk-go-v2,
+which can be time-consuming due to the repository's large number of tags:
+
+```json
+{
+  "packageRules": {
+    "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+    "fetchChangeLogs": "off"
+  }
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
     Renovate can only show changelogs from some platforms and some package managers.
@@ -2337,7 +2373,7 @@ registry=https://gitlab.myorg.com/api/v4/packages/npm/
 
 <!-- prettier-ignore -->
 !!! note
-    Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
+    Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` → `https://domain.com/path`)
 
 ### `hostRules.maxRequestsPerSecond`
 
@@ -3879,7 +3915,7 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 
 Use the `replacementVersionTemplate` config option to control the replacement version.
 
-For example, the following package rule can be used to replace version with major-only version (17.0.1 -> 17):
+For example, the following package rule can be used to replace version with major-only version (17.0.1 → 17):
 
 ```json
 {
@@ -4106,7 +4142,10 @@ Specify a custom value for this if you wish to exclude certain files which are m
 
 Whether to install any additional tools dynamically before executing the `commands`.
 
-These must be known by [Containerbase](https://github.com/containerbase/base).
+The possible tool names that are known by [Containerbase](https://github.com/containerbase/base) are:
+
+<!-- installTools-tools-begin -->
+<!-- installTools-tools-end -->
 
 <!-- prettier-ignore -->
 !!! note
@@ -4385,10 +4424,10 @@ You can configure `pruneStaleBranches=false` to disable deleting orphan branches
 Behavior:
 
 - `auto` = Renovate decides (this will be done on a manager-by-manager basis)
-- `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
-- `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
+- `pin` = convert ranges to exact versions, e.g. `^1.0.0` → `1.1.0`
+- `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` → `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
-- `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+- `widen` = Widen the range with newer one, e.g. `^1.0.0` → `^1.0.0 || ^2.0.0`
 - `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform`, `poetry` and `uv` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 

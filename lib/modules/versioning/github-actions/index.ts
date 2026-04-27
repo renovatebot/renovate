@@ -21,7 +21,13 @@ function massageValue(input: string): string {
 }
 
 function parseVersion(input: string): SemVer | null {
-  return semver.parse(massageValue(input));
+  const stripped = massageValue(input);
+  const v = semver.parse(stripped);
+  if (v) {
+    return v;
+  }
+  // Handle major.minor-prerelease format (e.g. v2.2-rc.1) by normalizing to major.minor.0-prerelease
+  return semver.parse(stripped.replace(regEx(/^(\d+\.\d+)(-.+)$/), '$1.0$2'));
 }
 
 interface Range {
