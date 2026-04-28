@@ -248,19 +248,17 @@ async function applyLockedVersion(
 ): Promise<void> {
   // apply locked versions from lock files
   // use cache to avoid reading the same lock file multiple times
-  const lockFileCache = new Map<string, LockFile>();
+  const lockFileCache: Record<string, LockFile> = {};
   for (const pkg of packageFiles) {
     if (!isNonEmptyArray(pkg.lockFiles)) {
       continue;
     }
     const lockFile = pkg.lockFiles[0];
-    let lockFileContent: LockFile;
+    let lockFileContent = lockFileCache[lockFile];
 
-    if (lockFileCache.has(lockFile)) {
-      lockFileContent = lockFileCache.get(lockFile)!;
-    } else {
+    if (!lockFileContent) {
       lockFileContent = await getDenoLock(lockFile);
-      lockFileCache.set(lockFile, lockFileContent);
+      lockFileCache[lockFile] = lockFileContent;
     }
 
     const withLockedVersionDeps = pkg.deps.map((dep) => {
