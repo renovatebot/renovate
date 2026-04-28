@@ -1,6 +1,5 @@
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
-import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -8,16 +7,13 @@ import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
-import { updateArtifacts, updateLockedDependency } from './artifacts.ts';
+import { updateArtifacts } from './artifacts.ts';
 import * as lockfile from './lockfile.ts';
+import { updateLockedDependency } from './update-locked.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../../util/git/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-vi.mock('./lockfile.ts', async (importOriginal) => ({
-  ...(await importOriginal<typeof lockfile>()),
-}));
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -43,7 +39,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.find.mockReturnValue({ token: undefined });
+    hostRules.clear();
   });
 
   it('returns null if lock file does not exist', async () => {
@@ -204,7 +200,11 @@ describe('modules/manager/mise/artifacts', () => {
         modified: ['mise.lock'],
       }),
     );
-    hostRules.find.mockReturnValueOnce({ token: 'github-token' });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'https://api.github.com/',
+      token: 'github-token',
+    });
 
     const res = await updateArtifacts({
       packageFileName: 'mise.toml',

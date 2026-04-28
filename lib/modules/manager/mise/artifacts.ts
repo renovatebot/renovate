@@ -1,4 +1,4 @@
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -8,18 +8,8 @@ import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
 import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsResult,
-  UpdateLockedConfig,
-  UpdateLockedResult,
-} from '../types.ts';
-import {
-  getConfigType,
-  getLockFileName,
-  getLockedVersion,
-} from './lockfile.ts';
-import { MiseLockFile } from './schema.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { getConfigType, getLockFileName } from './lockfile.ts';
 
 /**
  * Updates mise lock files when dependencies are updated.
@@ -106,7 +96,7 @@ export async function updateArtifacts({
     }
 
     const errorOutput = [err.stdout, err.stderr, err.message]
-      .filter(Boolean)
+      .filter(isString)
       .join('\n');
 
     logger.warn({ err }, `Error updating ${lockFileName}`);
@@ -118,45 +108,5 @@ export async function updateArtifacts({
         },
       },
     ];
-  }
-}
-
-/**
- * Check if a dependency is already at the target version in the lock file.
- * Returns 'already-updated' if the locked version matches newVersion,
- * 'unsupported' otherwise (letting Renovate proceed with the update).
- */
-export function updateLockedDependency(
-  config: UpdateLockedConfig,
-): UpdateLockedResult {
-  const { depName, newVersion, lockFile, lockFileContent } = config;
-  logger.debug(
-    `mise.updateLockedDependency: ${depName} -> ${newVersion} [${lockFile}]`,
-  );
-
-  if (!depName) {
-    return { status: 'unsupported' };
-  }
-
-  if (!lockFileContent) {
-    return { status: 'unsupported' };
-  }
-
-  try {
-    const parsed = MiseLockFile.safeParse(lockFileContent);
-    if (!parsed.success) {
-      return { status: 'unsupported' };
-    }
-
-    const lockedVersion = getLockedVersion(parsed.data, depName);
-
-    if (lockedVersion === newVersion) {
-      return { status: 'already-updated' };
-    }
-
-    return { status: 'unsupported' };
-  } catch (err) {
-    logger.debug({ err }, 'mise.updateLockedDependency() error');
-    return { status: 'update-failed' };
   }
 }

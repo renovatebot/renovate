@@ -23,9 +23,9 @@ When a lock file is present:
 Renovate recognizes environment-specific lock files:
 
 - `mise.lock` - default lock file
-- `mise.local.lock` - local configuration lock file
+- `mise.local.lock` - local configuration lock file, typically ignored alongside `mise.local.toml`
 - `mise.{env}.lock` - environment-specific lock files (e.g., `mise.production.lock`)
-- `mise.{env}.local.lock` - environment-specific local lock files
+- `mise.{env}.local.lock` - environment-specific local lock files, typically ignored alongside `mise.{env}.local.toml`
 
 For more information about mise lock files, see the [mise lock file documentation](https://mise.jdx.dev/dev-tools/mise-lock.html).
 

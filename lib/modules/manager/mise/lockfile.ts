@@ -15,12 +15,13 @@ export interface MiseConfigType {
  */
 export function getConfigType(configPath: string): MiseConfigType {
   const filename = upath.basename(configPath);
-  const isLocal = filename.includes('.local.');
+  const isLocal = filename.endsWith('.local.toml');
   // Patterns: mise.{env}.toml, mise.{env}.local.toml, .mise.{env}.toml, config.{env}.toml
   const envMatch = regEx(
-    /^(?:\.?mise|config)\.([^.]+)(?:\.local)?\.toml$/,
+    /^(?:\.?mise|config)\.(?<env>[^.]+)(?:\.local)?\.toml$/,
   ).exec(filename);
-  const env = envMatch?.[1] === 'local' ? undefined : envMatch?.[1];
+  const env =
+    envMatch?.groups?.env === 'local' ? undefined : envMatch?.groups?.env;
   return { isLocal, env };
 }
 

@@ -10,11 +10,6 @@ const miseFilename = 'mise.toml';
 const mise1toml = Fixtures.get('Mise.1.toml');
 
 describe('modules/manager/mise/extract', () => {
-  beforeEach(() => {
-    // By default, mock no lock file found
-    fs.readLocalFile.mockResolvedValue(null);
-  });
-
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('', miseFilename)).toBeNull();

@@ -14,8 +14,9 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
 
-export { updateArtifacts, updateLockedDependency } from './artifacts.ts';
+export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
+export { updateLockedDependency } from './update-locked.ts';
 
 export const displayName = 'mise-en-place';
 export const supportsLockFileMaintenance = true;
