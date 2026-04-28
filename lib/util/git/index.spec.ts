@@ -118,6 +118,16 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.addConfig('user.email', 'author2@example.com');
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
+    // Branch where author matches Renovate but committer is different
+    // (simulates rebase or amend and force push by a different user)
+    await repo.checkoutBranch('renovate/different_committer', defaultBranch);
+    await repo.addConfig('user.email', 'Jest@example.com');
+    process.env.GIT_COMMITTER_EMAIL = 'someone-else@example.com';
+    await fs.writeFile(base.path + '/committer_file', 'test');
+    await repo.add(['committer_file']);
+    await repo.commit('committed by someone else');
+    delete process.env.GIT_COMMITTER_EMAIL;
+
     await repo.checkout(defaultBranch);
   });
 
@@ -418,6 +428,15 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should return true when custom author is unknown', async () => {
       expect(
         await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeTrue();
+    });
+
+    it('should return true when committer is different from author', async () => {
+      expect(
+        await git.isBranchModified(
+          'renovate/different_committer',
+          defaultBranch,
+        ),
       ).toBeTrue();
     });
 
