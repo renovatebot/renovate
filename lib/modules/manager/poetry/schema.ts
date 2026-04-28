@@ -1,5 +1,6 @@
 import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import {
@@ -338,11 +339,12 @@ export const PoetryPyProject = Toml.pipe(
 
       const deps: PackageDependency[] = [];
 
-      const projectDependencies = project?.dependencies ?? [];
+      const projectDependencies = coerceArray(project?.dependencies);
       deps.push(...projectDependencies);
 
-      const projectOptionalDependencies =
-        project?.['optional-dependencies'] ?? [];
+      const projectOptionalDependencies = coerceArray(
+        project?.['optional-dependencies'],
+      );
       deps.push(...projectOptionalDependencies);
 
       deps.push(...dependencyGroups);
@@ -360,11 +362,13 @@ export const PoetryPyProject = Toml.pipe(
         deps.push(...buildSystem.requires);
       }
 
-      const poetryDependencies = tool?.poetry?.dependencies ?? [];
+      const poetryDependencies = coerceArray(tool?.poetry?.dependencies);
 
-      const poetryDevDependencies = tool?.poetry?.['dev-dependencies'] ?? [];
+      const poetryDevDependencies = coerceArray(
+        tool?.poetry?.['dev-dependencies'],
+      );
 
-      const poetryGroupDependencies = tool?.poetry?.group ?? [];
+      const poetryGroupDependencies = coerceArray(tool?.poetry?.group);
 
       for (const poetryDep of [
         ...poetryDependencies,
