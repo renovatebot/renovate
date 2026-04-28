@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '~test/fixtures.ts';
 import {
   extractRepoStrings,
   getLockFilePath,
@@ -108,10 +107,47 @@ describe('modules/manager/kas/extract', () => {
 
   describe('extractRepoStrings()', () => {
     it('extracts repo strings from yaml kas file', () => {
-      const kasFile = Fixtures.get('kas-branch-commit.yml');
+      const kasFile = codeBlock`
+        header:
+          version: 1
+
+        build_system: isar
+
+        repos:
+          meta-test:
+            path: meta-test/
+            layers:
+              .:
+          isar:
+            url: https://github.com/ilbers/isar.git
+            branch: next
+            commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+            layers:
+              meta:
+              meta-isar:
+      `;
       const expected = new Map<string, string>([
-        ['isar', Fixtures.get('replace-string-isar.yml')],
-        ['meta-test', Fixtures.get('replace-string-meta-test.yml')],
+        [
+          'isar',
+          codeBlock`
+            isar:
+                url: https://github.com/ilbers/isar.git
+                branch: next
+                commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+                layers:
+                  meta:
+                  meta-isar:
+          `,
+        ],
+        [
+          'meta-test',
+          codeBlock`
+            meta-test:
+                path: meta-test/
+                layers:
+                  .:
+          `,
+        ],
       ]);
       expect(extractRepoStrings(kasFile, 'project.yml')).toEqual(expected);
     });
@@ -126,7 +162,19 @@ describe('modules/manager/kas/extract', () => {
     });
 
     it('returns empty map for JSON files', () => {
-      const kasFile = Fixtures.get('kas-branch-commit.json');
+      const kasFile = JSON.stringify({
+        header: { version: 1 },
+        build_system: 'isar',
+        repos: {
+          'meta-test': { path: 'meta-test/', layers: { '.': {} } },
+          isar: {
+            url: 'https://github.com/ilbers/isar.git',
+            branch: 'next',
+            commit: 'd63a1cbae6f737aa843d00d8812547fe7b87104a',
+            layers: { meta: {}, 'meta-isar': {} },
+          },
+        },
+      });
       expect(extractRepoStrings(kasFile, 'project.json')).toEqual(new Map());
     });
   });

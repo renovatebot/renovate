@@ -1,11 +1,84 @@
-import { Fixtures } from '~test/fixtures.ts';
+import { codeBlock } from 'common-tags';
 import { _extractPackageFile } from './extract.ts';
 import type { KasDump } from './schema.ts';
 
-const kasHeadTracking = Fixtures.get('kas-head-tracking.yml');
-const kasBranchCommit = Fixtures.get('kas-branch-commit.yml');
-const kasTag = Fixtures.get('kas-tag.yml');
-const kasTagCommit = Fixtures.get('kas-tag-commit.yml');
+const kasHeadTracking = codeBlock`
+  header:
+    version: 1
+
+  build_system: isar
+
+  repos:
+    meta-test:
+      path: meta-test/
+      layers:
+        .:
+    isar:
+      url: https://github.com/ilbers/isar.git
+      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      layers:
+        meta:
+        meta-isar:
+`;
+
+const kasBranchCommit = codeBlock`
+  header:
+    version: 1
+
+  build_system: isar
+
+  repos:
+    meta-test:
+      path: meta-test/
+      layers:
+        .:
+    isar:
+      url: https://github.com/ilbers/isar.git
+      branch: next
+      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      layers:
+        meta:
+        meta-isar:
+`;
+
+const kasTag = codeBlock`
+  header:
+    version: 1
+
+  build_system: isar
+
+  repos:
+    meta-test:
+      path: meta-test/
+      layers:
+        .:
+    isar:
+      url: https://github.com/ilbers/isar.git
+      tag: v0.0.1
+      layers:
+        meta:
+        meta-isar:
+`;
+
+const kasTagCommit = codeBlock`
+  header:
+    version: 1
+
+  build_system: isar
+
+  repos:
+    meta-test:
+      path: meta-test/
+      layers:
+        .:
+    isar:
+      url: https://github.com/ilbers/isar.git
+      tag: v0.0.1
+      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      layers:
+        meta:
+        meta-isar:
+`;
 
 const isarCommitSha = 'd63a1cbae6f737aa843d00d8812547fe7b87104a';
 const isarTag = 'v0.0.1';
@@ -157,15 +230,15 @@ describe('modules/manager/kas/extract-package-file', () => {
   });
 
   it('skips mercurial repos', () => {
-    const content = [
-      'header:',
-      '  version: 1',
-      'repos:',
-      '  hg-repo:',
-      '    url: https://example.com/repo',
-      '    type: hg',
-      '    commit: abc123',
-    ].join('\n');
+    const content = codeBlock`
+      header:
+        version: 1
+      repos:
+        hg-repo:
+          url: https://example.com/repo
+          type: hg
+          commit: abc123
+    `;
     const dump = makeDump({
       'hg-repo': {
         url: 'https://example.com/repo',
@@ -210,13 +283,13 @@ describe('modules/manager/kas/extract-package-file', () => {
   });
 
   it('skips when no repo URL found for non-lock file', () => {
-    const content = [
-      'header:',
-      '  version: 1',
-      'repos:',
-      '  local-repo:',
-      '    commit: abc123',
-    ].join('\n');
+    const content = codeBlock`
+      header:
+        version: 1
+      repos:
+        local-repo:
+          commit: abc123
+    `;
     const dump = makeDump({
       'local-repo': {
         commit: 'abc123',
@@ -246,14 +319,14 @@ describe('modules/manager/kas/extract-package-file', () => {
 
   it('uses overrides commit from dump when available', () => {
     const overriddenCommit = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
-    const content = [
-      'header:',
-      '  version: 1',
-      'repos:',
-      '  isar:',
-      `    url: ${isarUrl}`,
-      `    commit: ${overriddenCommit}`,
-    ].join('\n');
+    const content = codeBlock`
+      header:
+        version: 1
+      repos:
+        isar:
+          url: ${isarUrl}
+          commit: ${overriddenCommit}
+    `;
     const dump = makeDump(
       {
         isar: {
@@ -280,12 +353,12 @@ describe('modules/manager/kas/extract-package-file', () => {
   });
 
   it('extracts dependencies from lock file overrides section', () => {
-    const lockContent = [
-      'overrides:',
-      '  repos:',
-      '    isar:',
-      `      commit: ${isarCommitSha}`,
-    ].join('\n');
+    const lockContent = codeBlock`
+      overrides:
+        repos:
+          isar:
+            commit: ${isarCommitSha}
+    `;
     const dump = makeDump({
       isar: {
         url: isarUrl,
@@ -310,12 +383,12 @@ describe('modules/manager/kas/extract-package-file', () => {
   });
 
   it('returns null for lock file without overrides section', () => {
-    const lockContent = [
-      'some_key:',
-      '  repos:',
-      '    isar:',
-      `      commit: ${isarCommitSha}`,
-    ].join('\n');
+    const lockContent = codeBlock`
+      some_key:
+        repos:
+          isar:
+            commit: ${isarCommitSha}
+    `;
     const dump = makeDump({
       isar: {
         url: isarUrl,

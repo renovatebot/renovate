@@ -1,18 +1,107 @@
+import { codeBlock } from 'common-tags';
 import { vi } from 'vitest';
 
 vi.mock('../../../util/fs/index.ts', () => ({
   writeLocalFile: vi.fn(),
 }));
 
-import { Fixtures } from '~test/fixtures.ts';
 import { updateDependency } from './update.ts';
 
-const kasFileYamlBranch = Fixtures.get('kas-branch-commit.yml');
-const kasFileYamlTag = Fixtures.get('kas-tag-commit.yml');
-const replaceStringIsarYaml = Fixtures.get('replace-string-isar.yml');
-const replaceStringIsarYamlTag = Fixtures.get('replace-string-isar-tag.yml');
-const kasFileJsonBranch = Fixtures.get('kas-branch-commit.json');
-const kasFileJsonTag = Fixtures.get('kas-tag-commit.json');
+const kasFileYamlBranch = codeBlock`
+  header:
+    version: 1
+
+  build_system: isar
+
+  repos:
+    meta-test:
+      path: meta-test/
+      layers:
+        .:
+    isar:
+      url: https://github.com/ilbers/isar.git
+      branch: next
+      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      layers:
+        meta:
+        meta-isar:
+`;
+
+const kasFileYamlTag = codeBlock`
+  header:
+    version: 1
+
+  build_system: isar
+
+  repos:
+    meta-test:
+      path: meta-test/
+      layers:
+        .:
+    isar:
+      url: https://github.com/ilbers/isar.git
+      tag: v0.0.1
+      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      layers:
+        meta:
+        meta-isar:
+`;
+
+const replaceStringIsarYaml = codeBlock`
+  isar:
+      url: https://github.com/ilbers/isar.git
+      branch: next
+      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      layers:
+        meta:
+        meta-isar:
+`;
+
+const replaceStringIsarYamlTag = codeBlock`
+  isar:
+      url: https://github.com/ilbers/isar.git
+      tag: v0.0.1
+      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      layers:
+        meta:
+        meta-isar:
+`;
+
+const kasFileJsonBranch = JSON.stringify(
+  {
+    header: { version: 1 },
+    build_system: 'isar',
+    repos: {
+      'meta-test': { path: 'meta-test/', layers: { '.': {} } },
+      isar: {
+        url: 'https://github.com/ilbers/isar.git',
+        branch: 'next',
+        commit: 'd63a1cbae6f737aa843d00d8812547fe7b87104a',
+        layers: { meta: {}, 'meta-isar': {} },
+      },
+    },
+  },
+  null,
+  4,
+);
+
+const kasFileJsonTag = JSON.stringify(
+  {
+    header: { version: 1 },
+    build_system: 'isar',
+    repos: {
+      'meta-test': { path: 'meta-test/', layers: { '.': {} } },
+      isar: {
+        url: 'https://github.com/ilbers/isar.git',
+        tag: 'v0.0.1',
+        commit: 'd63a1cbae6f737aa843d00d8812547fe7b87104a',
+        layers: { meta: {}, 'meta-isar': {} },
+      },
+    },
+  },
+  null,
+  4,
+);
 
 describe('modules/manager/kas/update', () => {
   describe('updateDependency()', () => {
