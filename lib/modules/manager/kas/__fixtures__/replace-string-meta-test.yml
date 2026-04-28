@@ -1,4 +1,0 @@
-meta-test:
-    path: meta-test/
-    layers:
-      .:
