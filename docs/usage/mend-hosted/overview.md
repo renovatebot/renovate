@@ -40,7 +40,7 @@ Details of the Mend Renovate Cloud versions are shown in the table below.
 | Concurrent jobs per Org       | 1                                    | 16                             |
 | Job scheduling (active repos) | Every 4 hours                        | Hourly (\*1)                   |
 | Job runner CPUs               | 1 CPU                                | 2 CPU                          |
-| Job runner Memory             | 2Gb                                  | 8Gb                            |
+| Job runner Memory             | 3GB                                  | 8Gb                            |
 | Job runner Disk space         | 15Gb                                 | 40Gb                           |
 | Job timeout                   | 30 minutes                           | 60 minutes                     |
 | Merge Confidence Workflows    | Not included                         | Included                       |
@@ -57,3 +57,12 @@ Details of the Mend Renovate Cloud versions are shown in the table below.
     OSS-licensed orgs can request increased resources on Mend Renovate Community Cloud.
     To request increased resources, create a “[Suggest an Idea](https://github.com/renovatebot/renovate/discussions/categories/suggest-an-idea)” item on the Renovate discussions board on GitHub.
     Acceptance is at the discretion of Mend.io.
+
+## IP Addresses used
+
+If you are looking at restricting access to your source code via IP allowlisting, you will need to know which public IPs Mend's Developer Platform accesses from.
+
+These can be found documented [on the Mend docs site](https://docs.mend.io/platform/latest/ip-addresses-used-by-mend-io) under the `developer-platform` section.
+
+- the `us` grouping is for [`developer.mend.io`](https://developer.mend.io/)
+- the `eu` grouping is for [`developer-eu.mend.io/`](https://developer-eu.mend.io/)

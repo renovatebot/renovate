@@ -204,8 +204,20 @@ describe('modules/datasource/common', () => {
       };
       const releaseResult: ReleaseResult = {
         releases: [
-          { version: '1.0.0', constraints: { foo: ['^1.0.0'] } },
-          { version: '2.0.0', constraints: { foo: ['^2.0.0'] } },
+          {
+            version: '1.0.0',
+            constraints: {
+              // @ts-expect-error -- intentionally using invalid constraint names
+              foo: ['^1.0.0'],
+            },
+          },
+          {
+            version: '2.0.0',
+            constraints: {
+              // @ts-expect-error -- intentionally using invalid constraint names
+              foo: ['^2.0.0'],
+            },
+          },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
@@ -218,13 +230,32 @@ describe('modules/datasource/common', () => {
         datasource: 'foo',
         packageName: 'bar',
         constraintsFiltering: 'strict' as const,
-        constraints: { baz: '^1.0.0', qux: 'invalid' },
+        constraints: { baz: '^1.0.0', qux: 'invalid' } as never,
       };
       const releaseResult = {
         releases: [
           { version: '1.0.0' },
           { version: '2.0.0', constraints: { baz: [undefined] } as never },
           { version: '3.0.0', constraints: { baz: ['^0.9.0', 'invalid'] } },
+        ],
+      };
+      // @ts-expect-error -- intentionally using invalid constraint names
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+
+    it('should return all releases when no configConstraints', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['^1.0.0'] } },
+          { version: '2.0.0' },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
@@ -244,6 +275,46 @@ describe('modules/datasource/common', () => {
         releases: [
           { version: '1.0.0', constraints: { python: ['^1.0.0'] } },
           { version: '2.0.0', constraints: { python: ['>=3.8'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it('should handle config with a range constraint, and a release with an exact version', () => {
+      // TODO
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '>=3.8' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it('should handle config with an exact version, and a release with a range constraint', () => {
+      // TODO
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '3.8.1' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({

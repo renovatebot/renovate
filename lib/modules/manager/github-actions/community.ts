@@ -1,259 +1,191 @@
 import { z } from 'zod/v3';
 
-import type { SkipReason, StageName } from '../../../types/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
-import * as pep440versioning from '../../versioning/pep440/index.ts';
-import * as rubyVersioning from '../../versioning/ruby/index.ts';
 import type { PackageDependency } from '../types.ts';
 
-function matchAction(action: string): z.Schema {
+export interface CommunityActionConfig {
+  datasource: string;
+  depName?: string;
+  packageName: string;
+  versioning?: string;
+  extractVersion?: string;
+
+  /**
+   * should return `true` if the version is invalid and should be skipped
+   */
+  isInvalid?: (value: string) => boolean;
+
+  withSchema?: z.ZodEffects<
+    z.ZodTypeAny,
+    { val: string | undefined } & Record<string, unknown>
+  >;
+}
+
+type ActionSchema = z.ZodEffects<z.ZodTypeAny, PackageDependency>;
+
+function actionSchema(
+  name: string,
+  { isInvalid, withSchema, ...cfg }: CommunityActionConfig,
+): ActionSchema {
+  return z
+    .object({
+      uses: matchAction(name),
+      with: withSchema ?? VersionValSchema,
+    })
+    .transform(
+      ({ with: { val, ...meta } }): PackageDependency => ({
+        ...cfg,
+        ...meta,
+        ...parseValue(val, isInvalid),
+      }),
+    )
+    .transform((dep) => {
+      dep.depName ??= dep.packageName;
+      return dep;
+    });
+}
+
+function matchAction(action: string): z.ZodString {
   return z
     .string()
     .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(?:@.+)?$`));
 }
 
-const SetupUV = z
-  .object({
-    // https://github.com/astral-sh/setup-uv
-    uses: matchAction('astral-sh/setup-uv'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
+function parseValue(
+  currentValue: string | undefined,
+  isInvalid?: (val: string) => boolean,
+): PackageDependency {
+  if (!currentValue) {
     return {
-      datasource: GithubReleasesDatasource.id,
-      depName: 'astral-sh/uv',
-      versioning: npmVersioning.id,
-      packageName: 'astral-sh/uv',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val.version,
+      skipStage: 'extract',
+      skipReason: 'unspecified-version',
       depType: 'uses-with',
     };
-  });
-
-const SetupPnpm = z
-  .object({
-    uses: matchAction('pnpm/action-setup'),
-    with: z.object({
-      version: z.string().optional(),
-    }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
+  }
+  if (isInvalid?.(currentValue) === true) {
     return {
-      datasource: NpmDatasource.id,
-      depName: 'pnpm',
-      versioning: npmVersioning.id,
-      packageName: 'pnpm',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val.version,
+      skipStage: 'extract',
+      skipReason: 'invalid-version',
       depType: 'uses-with',
+      currentValue,
     };
-  });
+  }
+  return { currentValue, depType: 'uses-with' };
+}
 
-const SetupBun = z
-  .object({
-    uses: matchAction('oven-sh/setup-bun'),
-    with: z.object({
-      'bun-version': z.string().optional(),
-    }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val['bun-version']) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
+function valSchema(
+  key: string,
+): z.ZodEffects<z.ZodTypeAny, { val: string | undefined }> {
+  return z
+    .object({ [key]: z.string().optional() })
+    .transform((val) => ({ val: val[key] }));
+}
 
-    return {
-      datasource: NpmDatasource.id,
-      depName: 'bun',
-      versioning: npmVersioning.id,
-      packageName: 'bun',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val['bun-version'],
-      depType: 'uses-with',
-    };
-  });
+const VersionValSchema = z
+  .object({ version: z.string().optional() })
+  .transform((val) => ({ val: val.version }));
 
-const SetupDeno = z
-  .object({
-    uses: matchAction('denoland/setup-deno'),
-    with: z.object({
-      'deno-version': z.string().optional(),
-    }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val['deno-version']) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
-      datasource: NpmDatasource.id,
-      depName: 'deno',
-      versioning: npmVersioning.id,
-      packageName: 'deno',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val['deno-version'],
-      depType: 'uses-with',
-    };
-  });
-
-const SetupRuby = z
-  .object({
-    uses: matchAction('ruby/setup-ruby'),
-    with: z.object({
-      'ruby-version': z.string().optional(),
-    }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val['ruby-version']) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
-      datasource: RubyVersionDatasource.id,
-      depName: 'ruby',
-      versioning: rubyVersioning.id,
-      packageName: 'ruby',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val['ruby-version'],
-      depType: 'uses-with',
-    };
-  });
-
-const SetupPDM = z
-  .object({
-    uses: matchAction('pdm-project/setup-pdm'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
-      datasource: PypiDatasource.id,
-      depName: 'pdm',
-      versioning: pep440versioning.id,
-      packageName: 'pdm',
-      currentValue: val.version,
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      depType: 'uses-with',
-    };
-  });
-
-const InstallBinary = z
-  .object({
-    uses: z.union([
-      matchAction('jaxxstorm/action-install-gh-release'),
-      matchAction('sigoden/install-binary'),
-    ]),
-    with: z.object({ repo: z.string(), tag: z.string() }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    return {
-      datasource: GithubReleasesDatasource.id,
-      depName: val.repo,
-      packageName: val.repo,
-      currentValue: val.tag,
-      depType: 'uses-with',
-    };
-  });
-
-const SetupPixi = z
-  .object({
-    uses: matchAction('prefix-dev/setup-pixi'),
-    with: z.object({ 'pixi-version': z.string() }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    return {
-      datasource: GithubReleasesDatasource.id,
-      versioning: condaVersioning.id,
-      depName: 'prefix-dev/pixi',
-      packageName: 'prefix-dev/pixi',
-      currentValue: val['pixi-version'],
-      depType: 'uses-with',
-    };
-  });
-
-const SetupHatch = z
-  .object({
-    // https://github.com/pypa/hatch/tree/install
-    uses: matchAction('pypa/hatch'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    let skipStage: StageName | undefined;
-    let skipReason: SkipReason | undefined;
-
-    if (!val.version) {
-      skipStage = 'extract';
-      skipReason = 'unspecified-version';
-    }
-
-    return {
-      datasource: GithubReleasesDatasource.id,
-      depName: 'pypa/hatch',
-      packageName: 'pypa/hatch',
-      ...(skipStage && { skipStage }),
-      ...(skipReason && { skipReason }),
-      currentValue: val.version,
-      depType: 'uses-with',
-      // Strip hatch- prefix from release tags
-      extractVersion: '^hatch-(?<version>.+)$',
-    };
-  });
+const InstallBinaryWithSchema = z
+  .object({ repo: z.string(), tag: z.string() })
+  .transform(({ repo, tag }) => ({ packageName: repo, val: tag }));
 
 /**
- * schema here should match the whole step,
- * there may be some actions use env as arguments version.
- *
- * each type should return `PackageDependency | undefined`
+ * Community contributed actions with known version input schemas.
  */
-export const CommunityActions = z.union([
-  InstallBinary,
-  SetupPDM,
-  SetupPixi,
-  SetupPnpm,
-  SetupUV,
-  SetupBun,
-  SetupDeno,
-  SetupRuby,
-  SetupHatch,
-]);
+export const communityActions: Record<string, CommunityActionConfig> = {
+  // https://github.com/aquasecurity/setup-trivy
+  'aquasecurity/setup-trivy': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'aquasecurity/trivy',
+  },
+  // https://github.com/aquasecurity/trivy-action
+  'aquasecurity/trivy-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'aquasecurity/trivy',
+  },
+  // https://github.com/astral-sh/setup-uv
+  'astral-sh/setup-uv': {
+    datasource: GithubReleasesDatasource.id,
+    versioning: npmVersioning.id,
+    packageName: 'astral-sh/uv',
+  },
+  'denoland/setup-deno': {
+    datasource: NpmDatasource.id,
+    packageName: 'deno',
+    withSchema: valSchema('deno-version'),
+  },
+  // https://github.com/docker/setup-docker-action
+  'docker/setup-docker-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'docker/setup-docker-action',
+    packageName: 'moby/moby',
+    extractVersion: '^docker-(?<version>.+)$',
+  },
+  'golangci/golangci-lint-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'golangci/golangci-lint',
+  },
+  'jakebailey/pyright-action': {
+    datasource: NpmDatasource.id,
+    packageName: 'pyright',
+    isInvalid: (val) => val === 'PATH',
+  },
+  'jaxxstorm/action-install-gh-release': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input
+    withSchema: InstallBinaryWithSchema,
+  },
+  'oven-sh/setup-bun': {
+    datasource: NpmDatasource.id,
+    packageName: 'bun',
+    withSchema: valSchema('bun-version'),
+  },
+  'pdm-project/setup-pdm': {
+    datasource: PypiDatasource.id,
+    packageName: 'pdm',
+  },
+  'pnpm/action-setup': {
+    datasource: NpmDatasource.id,
+    packageName: 'pnpm',
+  },
+  'prefix-dev/setup-pixi': {
+    datasource: GithubReleasesDatasource.id,
+    versioning: condaVersioning.id,
+    packageName: 'prefix-dev/pixi',
+    withSchema: valSchema('pixi-version'),
+  },
+  // https://github.com/pypa/hatch/tree/install
+  'pypa/hatch': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'pypa/hatch',
+    // Strip hatch- prefix from release tags
+    extractVersion: '^hatch-(?<version>.+)$',
+  },
+  'ruby/setup-ruby': {
+    datasource: RubyVersionDatasource.id,
+    packageName: 'ruby',
+    withSchema: valSchema('ruby-version'),
+  },
+  'sigoden/install-binary': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input
+    withSchema: InstallBinaryWithSchema,
+  },
+  'zizmorcore/zizmor-action': {
+    datasource: DockerDatasource.id,
+    packageName: 'ghcr.io/zizmorcore/zizmor',
+  },
+};
+
+export const CommunityActions = z.union(
+  Object.entries(communityActions).map(([name, cfg]) =>
+    actionSchema(name, cfg),
+  ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
+);

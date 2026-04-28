@@ -4,7 +4,7 @@ import {
   isString,
   isUrlInstance,
 } from '@sindresorhus/is';
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
 import { logger } from '../logger/index.ts';
@@ -80,7 +80,7 @@ export function getQueryString(params: Record<string, any>): string {
     if (isArray<object>(v)) {
       for (const item of v) {
         // TODO: fix me?
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        // oxlint-disable-next-line typescript/no-base-to-string
         usp.append(k, item.toString());
       }
     } else {

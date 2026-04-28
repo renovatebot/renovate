@@ -1,4 +1,5 @@
 import { gzipSync } from 'node:zlib';
+import { codeBlock } from 'common-tags';
 import * as httpMock from '~test/http-mock.ts';
 import { RpmDatasource } from './index.ts';
 
@@ -8,17 +9,41 @@ describe('modules/datasource/rpm/index', () => {
     const rpmDatasource = new RpmDatasource();
 
     it('returns the correct primary.xml URL', async () => {
-      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/gzip' });
+
+      const primaryXmlUrl = await rpmDatasource.getPrimaryGzipUrl(registryUrl);
+
+      expect(primaryXmlUrl).toBe(
+        'https://example.com/repo/repodata/somesha256-primary.xml.gz',
+      );
+    });
+
+    it('returns the correct primary.xml URL when repomd.xml omits xml declaration', async () => {
+      const repomdXml = codeBlock`
+        <repomd xmlns="http://linux.duke.edu/metadata/repo"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
+
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       const primaryXmlUrl = await rpmDatasource.getPrimaryGzipUrl(registryUrl);
 
@@ -49,12 +74,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if repomdXml is not in XML format', async () => {
-      const repomdXml = `<?invalidxml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?invalidxml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
       httpMock
         .scope(registryUrl)
         .get('/repomd.xml')
@@ -65,12 +92,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if no primary data is found', async () => {
-      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="non-primary">
-    <location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="non-primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -85,12 +114,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if no location element is found', async () => {
-      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <non-location href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <non-location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -105,12 +136,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if location href is missing', async () => {
-      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
-<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="primary">
-    <location non-href="repodata/somesha256-primary.xml.gz"/>
-  </data>
-</repomd>`;
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location non-href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+        </repomd>
+      `;
 
       httpMock
         .scope(registryUrl)
@@ -132,30 +165,31 @@ describe('modules/datasource/rpm/index', () => {
       'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 
     it('returns the correct releases', async () => {
-      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://linux.duke.edu/metadata/common">
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.1" rel="1.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.1" rel="2.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.2"/>
-  </package>
-</metadata>
-`;
+      const primaryXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <metadata xmlns="http://linux.duke.edu/metadata/common">
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1" rel="1.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.2"/>
+          </package>
+        </metadata>
+      `;
       // gzip the primaryXml content
       const gzippedPrimaryXml = gzipSync(primaryXml);
       httpMock
@@ -213,15 +247,16 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if no element package is found in primary.xml', async () => {
-      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://linux.duke.edu/metadata/common">
-  <nonpackage type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-  </nonpackage>
-</metadata>
-`;
+      const primaryXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <metadata xmlns="http://linux.duke.edu/metadata/common">
+          <nonpackage type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </nonpackage>
+        </metadata>
+      `;
       // gzip the primaryXml content
       const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
@@ -238,15 +273,16 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if the specific packageName is not found in primary.xml', async () => {
-      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://linux.duke.edu/metadata/common">
-  <nonpackage type="rpm">
-    <name>wrong-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-  </nonpackage>
-</metadata>
-`;
+      const primaryXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <metadata xmlns="http://linux.duke.edu/metadata/common">
+          <nonpackage type="rpm">
+            <name>wrong-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </nonpackage>
+        </metadata>
+      `;
       // gzip the primaryXml content
       const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
@@ -264,15 +300,16 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns an empty array if version is not found in a version element', async () => {
-      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://linux.duke.edu/metadata/common">
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <non-version epoch="0" ver="1.0" rel="2.azl3"/>
-  </package>
-</metadata>
-`;
+      const primaryXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <metadata xmlns="http://linux.duke.edu/metadata/common">
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <non-version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+        </metadata>
+      `;
       // gzip the primaryXml content
       const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
@@ -292,20 +329,21 @@ describe('modules/datasource/rpm/index', () => {
     it('returns an array of releases without duplicate versionWithRel', async () => {
       const primaryXmlUrl =
         'https://example.com/repo/repodata/somesha256-primary.xml.gz';
-      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://linux.duke.edu/metadata/common">
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
-  </package>
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
-  </package>
-</metadata>
-`;
+      const primaryXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <metadata xmlns="http://linux.duke.edu/metadata/common">
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="dulp.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="dulp.azl3"/>
+          </package>
+        </metadata>
+      `;
       // gzip the primaryXml content
       const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
@@ -328,14 +366,16 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('handles parser error event in getReleasesByPackageName', async () => {
-      const primaryXmlMalformed = `<?xml version="1.0" encoding="UTF-8"?>
-<%$#metadata xmlns="http://linux.duke.edu/metadata/common">
-  <package type="rpm">
-    <name>example-package</name>
-    <arch>x86_64</arch>
-    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
-  </package>
-</metadata>`;
+      const primaryXmlMalformed = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <%$#metadata xmlns="http://linux.duke.edu/metadata/common">
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="dulp.azl3"/>
+          </package>
+        </metadata>
+      `;
       // gzip the primaryXml content
       const gzippedprimaryXml = gzipSync(primaryXmlMalformed);
       httpMock

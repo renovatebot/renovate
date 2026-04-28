@@ -1,3 +1,4 @@
+import * as apk from './apk/index.ts';
 import * as awsEksAddon from './aws-eks-addon/index.ts';
 import * as amazonMachineImage from './aws-machine-image/index.ts';
 import * as azureRestApi from './azure-rest-api/index.ts';
@@ -14,6 +15,7 @@ import * as docker from './docker/index.ts';
 import * as elm from './elm/index.ts';
 import * as exact from './exact/index.ts';
 import * as git from './git/index.ts';
+import * as githubActions from './github-actions/index.ts';
 import * as glasskube from './glasskube/index.ts';
 import * as goModDirective from './go-mod-directive/index.ts';
 import * as gradle from './gradle/index.ts';
@@ -54,6 +56,7 @@ import * as unity3dPackages from './unity3d-packages/index.ts';
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
 
+api.set(apk.id, apk.api);
 api.set(awsEksAddon.id, awsEksAddon.api);
 api.set(amazonMachineImage.id, amazonMachineImage.api);
 api.set(azureRestApi.id, azureRestApi.api);
@@ -70,6 +73,7 @@ api.set(docker.id, docker.api);
 api.set(elm.id, elm.api);
 api.set(exact.id, exact.api);
 api.set(git.id, git.api);
+api.set(githubActions.id, githubActions.api);
 api.set(glasskube.id, glasskube.api);
 api.set(goModDirective.id, goModDirective.api);
 api.set(gradle.id, gradle.api);

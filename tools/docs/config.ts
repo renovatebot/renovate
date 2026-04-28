@@ -1,14 +1,22 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
+import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
   allManagersList,
   getManagers,
 } from '../../lib/modules/manager/index.ts';
+import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
+import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
+import {
+  additionalConstraintDefinitions,
+  toolDefinitions,
+  toolNames,
+} from '../../lib/util/exec/types.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
-import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { replaceContent } from './utils.ts';
+import { formatCell, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -56,25 +64,31 @@ function buildHtmlTable(data: string[][]): string {
     return '';
   }
   let table = `<table>\n`;
-  for (const [i, row] of data.entries()) {
-    if (i === 0) {
+  for (const [rowIndex, row] of data.entries()) {
+    if (rowIndex === 0) {
       table += indent`${1}<thead>\n`;
     }
 
-    if (i === 1) {
+    if (rowIndex === 1) {
       table += indent`${1}</thead>\n` + indent`${1}<tbody>\n`;
     }
 
     table += indent`${2}<tr>\n`;
-    for (const col of row) {
-      if (i === 0) {
+    for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      const col = row[colIndex];
+
+      if (rowIndex === 0) {
+        // header row
         table += indent`${3}<th>${col}</th>\n`;
         continue;
       }
+
+      const cellHtml = formatCell(row, colIndex);
+
       table +=
-        indent`${3}<td>${col}` +
+        indent`${3}${cellHtml}` +
         (`${col}`.endsWith('\n') ? indent`${3}` : '') +
-        `</td>\n`;
+        `\n`;
     }
     table += indent`${2}</tr>\n`;
   }
@@ -216,7 +230,7 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
         indexed[optionName] = [start, i - 1];
       }
       start = i;
-      optionName = line.split(' ')[1];
+      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
     }
   }
   indexed[optionName] = [start, lines.length - 1];
@@ -249,6 +263,65 @@ function generateLockFileTable(): string {
   return table;
 }
 
+function generateConfigFileNames(): string {
+  // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
+  const filenames = getConfigFileNames();
+
+  const all = Array.from(new Set(filenames))
+    // remove `package.json`, as we'll write a custom line item for it
+    .filter((v) => v !== 'package.json');
+
+  let output = '';
+  for (const f of all) {
+    output += `1. \`${f}\`\n`;
+  }
+
+  output += '1. `package.json` _(within a `"renovate"` section)_\n';
+
+  return output.trimEnd();
+}
+
+function generateToolsForConstraints(): string {
+  let output = '| Tool | Additional Information | Versioning | Datasource |\n';
+  output += '| --- | --- | --- | --- |\n';
+  for (const toolDef of toolDefinitions) {
+    const toolConfig = getToolConfig(toolDef.name);
+    if (!toolConfig) {
+      continue;
+    }
+    const def: ConstraintDefinition = toolDef;
+    // Newlines in the Markdown-rendered table will break table rendering
+    const desc = def.description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${toolDef.name}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
+  }
+
+  return output;
+}
+
+function generateAdditionalConstraints(): string {
+  let output = '| Constraint | Additional Information |\n';
+  output += '| --- | --- |\n';
+  for (const {
+    name,
+    description,
+  } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+    // Newlines in the Markdown-rendered table will break table rendering
+    const desc = description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${name}\` | ${desc} |\n`;
+  }
+
+  return output;
+}
+
+function generateToolsForInstallTools(): string {
+  let output = '';
+  for (const tool of [...toolNames]) {
+    output += `- \`${tool}\`\n`;
+  }
+
+  return output;
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -269,39 +342,86 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
 
-      if (!indexed[option.name]) {
-        throw new Error(
-          `Config option "${option.name}" is missing an entry in ${configFile}`,
-        );
+      // Child options are indexed as "parent.optionName"; collect all matching keys
+      let lookupKeys: string[] = [];
+      for (const parent of option.parents ?? []) {
+        if (parent !== '.') {
+          const key = `${parent}.${option.name}`;
+          if (indexed[key]) {
+            lookupKeys.push(key);
+          }
+        }
       }
-
-      const [headerIndex, footerIndex] = indexed[option.name];
+      // Fall back to plain name for top-level ## options (e.g. enabled, managerFilePatterns)
+      if (lookupKeys.length === 0) {
+        if (!indexed[option.name]) {
+          throw new Error(
+            `Config option "${option.name}" is missing an entry in ${configFile}`,
+          );
+        }
+        lookupKeys = [option.name];
+      }
 
       el.cli = getCliName(option);
       el.env = getEnvName(option);
       stringifyArrays(el);
 
-      configOptionsRaw[headerIndex] +=
-        `\n${option.description}\n\n` +
-        genTable(Object.entries(el), option.type, option.default);
+      for (const key of lookupKeys) {
+        const [headerIndex, footerIndex] = indexed[key];
 
-      if (el.advancedUse) {
-        configOptionsRaw[headerIndex] += generateAdvancedUse();
-      }
+        configOptionsRaw[headerIndex] +=
+          `\n${option.description}\n\n` +
+          genTable(Object.entries(el), option.type, option.default);
 
-      if (el.experimental) {
-        configOptionsRaw[footerIndex] += genExperimentalMsg(el);
-      }
+        if (el.advancedUse) {
+          configOptionsRaw[headerIndex] += generateAdvancedUse();
+        }
 
-      if (is.nonEmptyString(el.deprecationMsg)) {
-        configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+        if (el.experimental) {
+          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+        }
+
+        if (is.nonEmptyString(el.deprecationMsg)) {
+          configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+        }
       }
     });
 
   let content = configOptionsRaw.join('\n');
 
   if (!bot) {
-    content = replaceContent(content, generateLockFileTable());
+    content = replaceContent(content, generateLockFileTable(), {
+      replaceStart: '<!-- lock-file-maintenance-table-start -->',
+      replaceStop: '<!-- lock-file-maintenance-table-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateConfigFileNames(), {
+      replaceStart: '<!-- config-filenames-begin -->',
+      replaceStop: '<!-- config-filenames-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateToolsForConstraints(), {
+      replaceStart: '<!-- constraints-tools-begin -->',
+      replaceStop: '<!-- constraints-tools-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateAdditionalConstraints(), {
+      replaceStart: '<!-- additional-constraints-begin -->',
+      replaceStop: '<!-- additional-constraints-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateToolsForInstallTools(), {
+      replaceStart: '<!-- installTools-tools-begin -->',
+      replaceStop: '<!-- installTools-tools-end -->',
+    });
   }
 
   await updateFile(`${dist}/${configFile}`, content);

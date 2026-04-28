@@ -274,16 +274,17 @@ describe('config/presets/index', () => {
           {
             groupName: 'eslint',
             matchPackageNames: [
-              '@types/eslint',
-              'babel-eslint',
+              '*/eslint-plugin',
               '@babel/eslint-parser',
               '@eslint/**',
               '@eslint-community/**',
               '@stylistic/eslint-plugin**',
+              '@types/eslint',
               '@types/eslint__**',
               '@typescript-eslint/**',
-              'typescript-eslint',
+              'babel-eslint',
               'eslint**',
+              'typescript-eslint',
             ],
           },
         ],
@@ -295,7 +296,7 @@ describe('config/presets/index', () => {
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(10);
+      expect(res.matchPackageNames).toHaveLength(11);
     });
 
     it('resolves linters', async () => {
@@ -303,7 +304,7 @@ describe('config/presets/index', () => {
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(21);
+      expect(res.matchPackageNames).toHaveLength(22);
     });
 
     it('resolves nested groups', async () => {
@@ -312,7 +313,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(21);
+      expect(rule.matchPackageNames).toHaveLength(22);
     });
 
     it('migrates automerge in presets', async () => {
@@ -636,6 +637,8 @@ describe('config/presets/index', () => {
           'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
+          'helpers:forgejoDigestChangelogs',
+          'helpers:giteaDigestChangelogs',
           'helpers:githubDigestChangelogs',
           'helpers:goXPackagesChangelogLink',
           'helpers:goXPackagesNameLink',

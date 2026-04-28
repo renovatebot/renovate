@@ -11,6 +11,8 @@ description: Requires Renovate to wait for a specified amount of time before sug
 
 The use of `minimumReleaseAge` is not to slow down fast releasing project updates, but to provide a means to reduce risk supply chain security risks.
 
+In other ecosystems and package managers, this may be referred to as a "dependency cooldown".
+
 For example, `minimumReleaseAge=14 days` would ensure that a package update is not suggested by Renovate until 14 days after its release, which allows plenty of time to allow security researchers and automated security tools to catch malicious intent in packages.
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
@@ -28,6 +30,21 @@ The following configuration options can be used to enable and tune the functiona
 - [`internalChecksFilter`](../configuration-options.md#internalchecksfilter)
 
 ## FAQs
+
+### My package manager has support for minimum release age, how does Renovate work with that? Do I need to set it in both?
+
+We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
+
+Renovate's concept of `minimumReleaseAge` is set independently to your package manager's configuration, and is used by Renovate to decide whether to suggest dependency updates.
+Renovate does not currently have the ability to determine the `minimumReleaseAge` from your package manager's configuration.
+
+When Renovate performs a dependency update, it may delegate to your package manager to update artifacts, such as the lockfile.
+In some cases, this can lead to a transitive dependency being introduced, [which Renovate is not aware of](#what-happens-to-transitive-dependencies), and so could lead to a dependency being introduced without Renovate's `minimumReleaseAge` check being followed.
+
+To protect against this, it's recommended to ensure that your package manager configuration includes the relevant minimum release age checks, too.
+
+There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
+If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
@@ -91,13 +108,21 @@ The recommendation is to set `internalChecksFilter=strict` when using `minimumRe
 
 Depending on your manager, datasource and the given package(s), it may be that some updates provide a release timestamp that can have `minimumReleaseAge` enforced.
 
-It's most likely the case that `major`, `minor`, and `patch` update types will have a corresponding `minimumReleaseAge`.
+<!-- markdownlint-disable MD060 -->
 
-Generally, Renovate does not provide release timestamps for `digest` updates.
-
-The `replacement` update type [does not currently](https://github.com/renovatebot/renovate/issues/39400) provide release timestamps.
-
-The `lockFileMaintenance` update type does not provide release timestamps, as the package manager performs the required changes to update package(s).
+| Update Type           | Supports `minimumReleaseAge`? | Notes                                                                                                     |
+| --------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `major`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
+| `minor`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
+| `patch`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
+| `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
+| `digest`              | 🟡                            | Generally not supported. Depends on the Manager, Datasource, and package(s)                               |
+| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
+| `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
+| `lockFileUpdate`      | ❌                            |                                                                                                           |
+| `rollback`            | ❌                            |                                                                                                           |
+| `bump`                | ❌                            |                                                                                                           |
+| `replacement`         | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/39400)                                 |
 
 You can validate which update types may have release timestamps by following something similar to how [verify if the registry you're using](#which-registries-support-release-timestamps).
 
@@ -182,13 +207,15 @@ The below is a non-exhaustive list of public registries which support release ti
 | `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
 | `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
-| `terraform-provider` | `https://registry.terraform.io`                    | ✅        | Not always returned                                              |
+| `terraform-provider` | `https://registry.terraform.io`                    | ✅        |                                                                  |
+| `terraform-provider` | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
 | `github-tags`        | `https://github.com`                               | ✅        |                                                                  |
 | `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                                  |
 | `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                                  |
 | `maven`              | `https://repo1.maven.org/maven2`                   | ✅        |                                                                  |
 | `node-version`       | `https://nodejs.org/dist`                          | ✅        |                                                                  |
 | `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                                  |
+| `nuget`              | `https://api.nuget.org/v3/index.json`              | ✅        |                                                                  |
 | `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                                  |
 | `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                                  |
 | `jsr`                | `https://jsr.io`                                   | ✅        | For packages without explicit timestamps, defaults to 2025-09-18 |

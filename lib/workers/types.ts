@@ -17,6 +17,7 @@ import type {
 } from '../modules/manager/types.ts';
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
+import type { ConstraintName } from '../util/exec/types.ts';
 import type { FileChange } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -119,6 +120,8 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+
+  constraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -249,7 +252,7 @@ export interface UpgradeFingerprintConfig {
   lockedVersion?: string;
   manager?: string | null;
   newName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   packageFile?: string;

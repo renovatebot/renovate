@@ -73,9 +73,9 @@ describe('util/http/github', () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'some-accept, application/vnd.github.machine-man-preview+json',
+        'some-accept, application/vnd.github.v3+json',
       );
-      expect(req.headers.authorization).toBe('token 123test');
+      expect(req.headers.authorization).toBe('Bearer 123test');
     });
 
     it('supports different datasources', async () => {
@@ -666,9 +666,7 @@ describe('util/http/github', () => {
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json',
-      );
+      expect(req.headers.accept).toBe('application/vnd.github.v3+json');
     });
 
     it('returns empty array for undefined data', async () => {

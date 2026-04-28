@@ -1,3 +1,4 @@
+import { getOptions } from '../../lib/config/options/index.ts';
 import {
   allowedFields,
   exposedConfigOptions,
@@ -6,13 +7,23 @@ import { readFile, updateFile } from '../utils/index.ts';
 import { replaceContent } from './utils.ts';
 
 export async function generateTemplates(dist: string): Promise<void> {
+  const options = getOptions();
+  const optionParentMap = new Map(
+    options
+      .filter((o) => o.parents?.length)
+      .map((o) => [o.name, o.parents![0]]),
+  );
+
   let exposedConfigOptionsText =
-    'The following configuration options are passed through for templating: \n';
+    'The following configuration options are passed through for templating: \n\n';
   exposedConfigOptionsText += exposedConfigOptions
-    .map(
-      (field) =>
-        ` - [${field}](configuration-options.md#${field.toLowerCase()})`,
-    )
+    .map((field) => {
+      const parent = optionParentMap.get(field);
+      const anchor = parent
+        ? `${parent}${field}`.toLowerCase()
+        : field.toLowerCase();
+      return ` - [${field}](configuration-options.md#${anchor})`;
+    })
     .join('\n');
 
   let runtimeText =

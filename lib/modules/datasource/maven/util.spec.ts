@@ -7,6 +7,7 @@ import { Http, HttpError } from '../../../util/http/index.ts';
 import { MAVEN_REPO } from './common.ts';
 import type { MavenFetchError } from './types.ts';
 import {
+  downloadHttpContent,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
@@ -73,6 +74,23 @@ describe('modules/datasource/maven/util', () => {
         ok: false,
         err: { type: 'xml-parse-error', err: expect.any(Error) },
       });
+    });
+  });
+
+  describe('downloadHttpContent', () => {
+    it('returns the downloaded text body', async () => {
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom text',
+            headers: {},
+          }),
+      });
+
+      await expect(
+        downloadHttpContent(http, 'https://example.com/'),
+      ).resolves.toBe('pom text');
     });
   });
 

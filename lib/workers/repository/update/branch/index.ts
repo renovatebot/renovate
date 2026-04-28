@@ -648,9 +648,11 @@ export async function processBranch(
       } else {
         logger.debug('No updated lock files in branch');
       }
-      if (config.fetchChangeLogs === 'branch') {
-        await embedChangelogs(config.upgrades);
-      }
+
+      await embedChangelogs({
+        upgrades: config.upgrades,
+        stage: 'branch',
+      });
 
       const postUpgradeCommandResults =
         await executePostUpgradeCommands(config);
@@ -1030,7 +1032,7 @@ export async function processBranch(
         content += '\n\nThe artifact failure details are included below:\n\n';
         // TODO: types (#22198)
         config.artifactErrors.forEach((error) => {
-          content += `##### File name: ${error.lockFile!}\n\n`;
+          content += `##### File name: ${error.fileName!}\n\n`;
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content, config.rebaseLabel);
