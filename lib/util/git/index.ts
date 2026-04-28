@@ -595,9 +595,7 @@ export async function getBranchUpdateDate(
   await syncGit();
   try {
     const result = await getCommitDate(branchSha);
-    if (result) {
-      setCachedUpdateDateResult(branchName, result);
-    }
+    setCachedUpdateDateResult(branchName, result);
     return result;
   } catch (err) {
     logger.debug({ err, branchName }, 'Error getting branch update date');
