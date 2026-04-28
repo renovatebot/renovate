@@ -30,35 +30,15 @@ const migratedTemplates = {
   newVersionMinor: 'newMinor',
   toVersion: 'newVersion',
 } as const;
-const templateIdentifierCharRegex = regEx(/[A-Za-z0-9_]/);
+const migratedTemplatePatterns = Object.entries(migratedTemplates).map(
+  ([from, to]) => ({
+    pattern: regEx(`\\b${escapeRegExp(from)}\\b`, 'g'),
+    replacement: to,
+  }),
+);
 
 export function fixShortHours(input: string): string {
   return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
-}
-
-function isTemplateIdentifierChar(char: string | undefined): boolean {
-  return !!char && templateIdentifierCharRegex.test(char);
-}
-
-function replaceStandaloneTemplateIdentifier(
-  input: string,
-  from: string,
-  to: string,
-): string {
-  return input.replace(
-    regEx(escapeRegExp(from), 'g'),
-    (match: string, offset: number, fullString: string): string => {
-      const previousChar = fullString[offset - 1];
-      const nextChar = fullString[offset + match.length];
-      if (
-        isTemplateIdentifierChar(previousChar) ||
-        isTemplateIdentifierChar(nextChar)
-      ) {
-        return match;
-      }
-      return to;
-    },
-  );
 }
 
 let optionTypes: Record<string, RenovateOptions['type']>;
@@ -152,11 +132,10 @@ export function migrateConfig(
       const migratedValue = Reflect.get(migratedConfig, key);
       if (typeof migratedValue === 'string') {
         let migratedStringValue = migratedValue;
-        for (const [from, to] of Object.entries(migratedTemplates)) {
-          migratedStringValue = replaceStandaloneTemplateIdentifier(
-            migratedStringValue,
-            from,
-            to,
+        for (const { pattern, replacement } of migratedTemplatePatterns) {
+          migratedStringValue = migratedStringValue.replace(
+            pattern,
+            replacement,
           );
         }
         Reflect.set(migratedConfig, key, migratedStringValue);
