@@ -54,6 +54,7 @@
     "start": "node lib/renovate.ts",
     "test": "run-s lint test-schema jest",
     "test-dirty": "git diff --exit-code",
+    "test-integration:gerrit": "vitest run -c vitest.integration.config.mts test/integration/gerrit",
     "test-e2e": "run-s 'test-e2e:*'",
     "test-e2e:pack": "pnpm pack",
     "test-e2e:install": "cd test/e2e && pnpm --ignore-workspace install --no-lockfile --prod",
@@ -346,6 +347,7 @@
     "typescript": "6.0.3",
     "unified": "11.0.5",
     "vite": "8.0.5",
+    "testcontainers": "11.14.0",
     "vitest": "4.1.4",
     "vitest-mock-extended": "4.0.0"
   },
