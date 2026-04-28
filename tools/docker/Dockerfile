@@ -64,6 +64,7 @@ ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 COPY --link .npmrc ./
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
+COPY --link pnpm-workspace.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
