@@ -3,7 +3,10 @@ import {
   isNonEmptyStringAndNotWhitespace,
 } from '@sindresorhus/is';
 import { logger } from '../../logger/index.ts';
-import type { ConstraintName } from '../../util/exec/types.ts';
+import {
+  type ConstraintName,
+  isAdditionalConstraintName,
+} from '../../util/exec/types.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { regEx } from '../../util/regex.ts';
 import * as allVersioning from '../versioning/index.ts';
@@ -165,6 +168,7 @@ export function applyConstraintsFiltering<
   Config extends Pick<
     GetPkgReleasesConfig,
     | 'constraintsFiltering'
+    | 'constraintsVersioning'
     | 'versioning'
     | 'datasource'
     | 'constraints'
@@ -213,21 +217,34 @@ export function applyConstraintsFiltering<
     for (const [name, configConstraint] of Object.entries(
       configConstraints,
     ) as [ConstraintName, string][]) {
+      let constraintVersioningName = versioningName;
+      if (
+        isAdditionalConstraintName(name) &&
+        config.constraintsVersioning?.[name]
+      ) {
+        const val = config.constraintsVersioning[name];
+        logger.debug(
+          `applyConstraintsFiltering(${release.version}): overriding constraintsVersioning from ${constraintVersioningName} to ${val}`,
+        );
+        constraintVersioningName = val;
+      }
+      const constraintVersioning = allVersioning.get(constraintVersioningName);
+
       logger.trace(
         {
           release,
-          versioning: versioningName,
+          versioning: constraintVersioningName,
           constraintName: name,
           constraint: configConstraint,
         },
         `applyConstraintsFiltering(${release.version}) for constraint ${name}`,
       );
 
-      const isValid = versioning.isValid(configConstraint);
+      const isValid = constraintVersioning.isValid(configConstraint);
       logger.trace(
         {
           release,
-          versioning: versioningName,
+          versioning: constraintVersioningName,
         },
         `applyConstraintsFiltering(${release.version}): versioning.isValid(${configConstraint})=${isValid}`,
       );
@@ -236,7 +253,7 @@ export function applyConstraintsFiltering<
           {
             packageName: config.packageName,
             constraint: configConstraint,
-            versioning: versioningName,
+            versioning: constraintVersioningName,
           },
           'Invalid constraint used with strict constraintsFiltering',
         );
@@ -247,7 +264,7 @@ export function applyConstraintsFiltering<
       logger.trace(
         {
           release,
-          versioning: versioningName,
+          versioning: constraintVersioningName,
         },
         `applyConstraintsFiltering(${release.version}): releaseConstraints[${name}]=${JSON.stringify(constraint)}`,
       );
@@ -261,7 +278,7 @@ export function applyConstraintsFiltering<
         logger.trace(
           {
             release,
-            versioning: versioningName,
+            versioning: constraintVersioningName,
             releaseConstraint,
           },
           `applyConstraintsFiltering(${release.version}): releaseConstraint=${releaseConstraint}`,
@@ -271,7 +288,7 @@ export function applyConstraintsFiltering<
           logger.once.debug(
             {
               packageName: config.packageName,
-              versioning: versioningName,
+              versioning: constraintVersioningName,
               constraint: releaseConstraint,
             },
             'Undefined release constraint',
@@ -279,20 +296,30 @@ export function applyConstraintsFiltering<
           break;
         }
 
-        const isValid = versioning.isValid(releaseConstraint);
+        const isValidConstraintVersion =
+          constraintVersioning.isValid(releaseConstraint);
         logger.trace(
           {
             release,
-            versioning: versioningName,
+            versioning: constraintVersioningName,
             releaseConstraint,
           },
-          `applyConstraintsFiltering(${release.version}): versioning.isValid(${releaseConstraint})=${isValid}`,
+          `applyConstraintsFiltering(${release.version}): constraintVersioning.isValid(${releaseConstraint})=${isValidConstraintVersion}`,
         );
-        if (!isValid) {
+        const isValidVersion = versioning.isValid(releaseConstraint);
+        logger.trace(
+          {
+            release,
+            versioning: constraintVersioningName,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): versioning.isValid(${releaseConstraint})=${isValidVersion}`,
+        );
+        if (!isValidVersion || !isValidConstraintVersion) {
           logger.once.debug(
             {
               packageName: config.packageName,
-              versioning: versioningName,
+              versioning: constraintVersioningName,
               constraint: releaseConstraint,
             },
             'Invalid release constraint',
@@ -304,7 +331,7 @@ export function applyConstraintsFiltering<
         logger.trace(
           {
             release,
-            versioning: versioningName,
+            versioning: constraintVersioningName,
             configConstraint,
             releaseConstraint,
           },
@@ -315,14 +342,14 @@ export function applyConstraintsFiltering<
           break;
         }
 
-        const isSubset = versioning.subset?.(
+        const isSubset = constraintVersioning.subset?.(
           configConstraint,
           releaseConstraint,
         );
         logger.trace(
           {
             release,
-            versioning: versioningName,
+            versioning: constraintVersioningName,
             configConstraint,
             releaseConstraint,
           },
@@ -333,27 +360,27 @@ export function applyConstraintsFiltering<
           break;
         }
 
-        const doesMatchConfig = versioning.matches(
+        const doesMatchConfig = constraintVersioning.matches(
           configConstraint,
           releaseConstraint,
         );
         logger.trace(
           {
             release,
-            versioning: versioningName,
+            versioning: constraintVersioningName,
             configConstraint,
             releaseConstraint,
           },
           `applyConstraintsFiltering(${release.version}): versioning.matches(${configConstraint}, ${releaseConstraint})=${doesMatchConfig}`,
         );
-        const doesMatchRelease = versioning.matches(
+        const doesMatchRelease = constraintVersioning.matches(
           releaseConstraint,
           configConstraint,
         );
         logger.trace(
           {
             release,
-            versioning: versioningName,
+            versioning: constraintVersioningName,
             configConstraint,
             releaseConstraint,
           },
@@ -368,7 +395,7 @@ export function applyConstraintsFiltering<
       logger.trace(
         {
           release,
-          versioning: versioningName,
+          versioning: constraintVersioningName,
         },
         `applyConstraintsFiltering(${release.version}): satisfiesConstraints=${satisfiesConstraints}`,
       );

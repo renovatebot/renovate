@@ -11,7 +11,11 @@ import type {
   SkipReason,
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
-import type { ConstraintName, ToolName } from '../util/exec/types.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+  ToolName,
+} from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -454,6 +458,7 @@ export interface RenovateConfig
   variables?: Record<string, string>;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
