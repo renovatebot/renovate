@@ -187,9 +187,25 @@ export function applyConstraintsFiltering<
   const filteredReleases: string[] = [];
   const startingLength = releaseResult.releases.length;
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    logger.trace(
+      {
+        release,
+        versioning: versioningName,
+      },
+      `applyConstraintsFiltering(${release.version})`,
+    );
     const releaseConstraints = release.constraints;
     delete release.constraints;
 
+    logger.trace(
+      {
+        release,
+        versioning: versioningName,
+        configConstraints: configConstraints ?? 'undefined',
+        releaseConstraints: releaseConstraints ?? 'undefined',
+      },
+      `applyConstraintsFiltering(${release.version}): checking constraints`,
+    );
     if (!configConstraints || !releaseConstraints) {
       return release;
     }
@@ -197,7 +213,25 @@ export function applyConstraintsFiltering<
     for (const [name, configConstraint] of Object.entries(
       configConstraints,
     ) as [ConstraintName, string][]) {
-      if (!versioning.isValid(configConstraint)) {
+      logger.trace(
+        {
+          release,
+          versioning: versioningName,
+          constraintName: name,
+          constraint: configConstraint,
+        },
+        `applyConstraintsFiltering(${release.version}) for constraint ${name}`,
+      );
+
+      const isValid = versioning.isValid(configConstraint);
+      logger.trace(
+        {
+          release,
+          versioning: versioningName,
+        },
+        `applyConstraintsFiltering(${release.version}): versioning.isValid(${configConstraint})=${isValid}`,
+      );
+      if (!isValid) {
         logger.once.warn(
           {
             packageName: config.packageName,
@@ -210,6 +244,13 @@ export function applyConstraintsFiltering<
       }
 
       const constraint = releaseConstraints[name];
+      logger.trace(
+        {
+          release,
+          versioning: versioningName,
+        },
+        `applyConstraintsFiltering(${release.version}): releaseConstraints[${name}]=${JSON.stringify(constraint)}`,
+      );
       if (!isNonEmptyArray(constraint)) {
         // A release with no constraints is OK
         continue;
@@ -217,6 +258,14 @@ export function applyConstraintsFiltering<
 
       let satisfiesConstraints = false;
       for (const releaseConstraint of constraint) {
+        logger.trace(
+          {
+            release,
+            versioning: versioningName,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): releaseConstraint=${releaseConstraint}`,
+        );
         if (!releaseConstraint) {
           satisfiesConstraints = true;
           logger.once.debug(
@@ -230,7 +279,16 @@ export function applyConstraintsFiltering<
           break;
         }
 
-        if (!versioning.isValid(releaseConstraint)) {
+        const isValid = versioning.isValid(releaseConstraint);
+        logger.trace(
+          {
+            release,
+            versioning: versioningName,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): versioning.isValid(${releaseConstraint})=${isValid}`,
+        );
+        if (!isValid) {
           logger.once.debug(
             {
               packageName: config.packageName,
@@ -242,22 +300,78 @@ export function applyConstraintsFiltering<
           break;
         }
 
-        if (configConstraint === releaseConstraint) {
+        const isEqual = configConstraint === releaseConstraint;
+        logger.trace(
+          {
+            release,
+            versioning: versioningName,
+            configConstraint,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): ${configConstraint} === ${releaseConstraint}=${isValid}`,
+        );
+        if (isEqual) {
           satisfiesConstraints = true;
           break;
         }
 
-        if (versioning.subset?.(configConstraint, releaseConstraint)) {
+        const isSubset = versioning.subset?.(
+          configConstraint,
+          releaseConstraint,
+        );
+        logger.trace(
+          {
+            release,
+            versioning: versioningName,
+            configConstraint,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): versioning.subset?.(${configConstraint}, ${releaseConstraint})=${isSubset}`,
+        );
+        if (isSubset) {
           satisfiesConstraints = true;
           break;
         }
 
-        if (versioning.matches(configConstraint, releaseConstraint)) {
+        const doesMatchConfig = versioning.matches(
+          configConstraint,
+          releaseConstraint,
+        );
+        logger.trace(
+          {
+            release,
+            versioning: versioningName,
+            configConstraint,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): versioning.matches(${configConstraint}, ${releaseConstraint})=${isSubset}`,
+        );
+        const doesMatchRelease = versioning.matches(
+          releaseConstraint,
+          configConstraint,
+        );
+        logger.trace(
+          {
+            release,
+            versioning: versioningName,
+            configConstraint,
+            releaseConstraint,
+          },
+          `applyConstraintsFiltering(${release.version}): versioning.matches(${releaseConstraint}, ${configConstraint})=${isSubset}`,
+        );
+        if (doesMatchConfig || doesMatchRelease) {
           satisfiesConstraints = true;
           break;
         }
       }
 
+      logger.trace(
+        {
+          release,
+          versioning: versioningName,
+        },
+        `applyConstraintsFiltering(${release.version}): satisfiesConstraints=${satisfiesConstraints}`,
+      );
       if (!satisfiesConstraints) {
         filteredReleases.push(release.version);
         return null;

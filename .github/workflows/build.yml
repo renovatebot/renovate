@@ -28,7 +28,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
 
 env:
   # are we on a release branch?
@@ -777,6 +777,7 @@ jobs:
       # never cancel a release that has already started, as it may have started pushing artifacts
       cancel-in-progress: false
     permissions:
+      actions: write
       contents: write
       issues: write
       pull-requests: write
@@ -784,6 +785,21 @@ jobs:
       packages: write
 
     steps:
+      # right at the start of the job, make sure we're not seeing another commit that's landed
+      - name: Check for newer commits
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: renovatebot/renovate
+          REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          latest_sha=$(git ls-remote https://github.com/renovatebot/renovate "refs/heads/$REF_NAME" | cut -f1)
+          if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
+            gh run cancel "$RUN_ID"
+          fi
+
       - run: df -h
 
       # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
@@ -817,7 +833,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@2b5249aab239073c2269c9c737709ecd97e92ccd # v4.6.4
+        uses: containerbase/internal-tools@2156d6f872e2649c6fe2d834c4fbc6ad8fb30d1c # v4.6.6
         with:
           command: docker-config
 
@@ -853,6 +869,20 @@ jobs:
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{env.DO_RELEASE}}" == "true" ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
+          fi
+
+      # and one final check, in case preparing the environment has taken long enough for new commits
+      - name: Check for newer commits
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          latest_sha=$(git ls-remote https://github.com/renovatebot/renovate "refs/heads/$REF_NAME" | cut -f1)
+          if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
+            gh run cancel "$RUN_ID"
           fi
 
       - name: semantic-release
