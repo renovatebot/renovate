@@ -355,6 +355,22 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
+    it('handles invalid OCI source URL', async () => {
+      const src = codeBlock`
+        module "bad_oci" {
+          source = "oci://not a valid url"
+        }
+      `;
+      const res = await extractPackageFile(src, 'oci.tf', {});
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          depName: 'bad_oci',
+          depType: 'module',
+          skipReason: 'invalid-url',
+        },
+      ]);
+    });
+
     it('extracts OCI modules and providers', async () => {
       const src = codeBlock`
         module "vpc_oci" {
