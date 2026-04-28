@@ -40,7 +40,7 @@ export async function updateArtifacts({
     const tools = updatedDeps
       .map(({ depName }) => depName)
       .filter(isNonEmptyStringAndNotWhitespace)
-      .map((depName) => quote(depName))
+      .map(quote)
       .join(' ');
     cmd = tools ? `mise lock${localFlag} ${tools}` : `mise lock${localFlag}`;
   }
