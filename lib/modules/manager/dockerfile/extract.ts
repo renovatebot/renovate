@@ -194,15 +194,11 @@ export function getDep(
     );
     const valueWithSlash = ensureTrailingSlash(value);
     const dep = getDep(`${valueWithSlash}${depName}`, false);
-    // retain depName, not sure if condition is necessary
+    // TODO: when the inner getDep strips a `library/` prefix (or similar)
+    // the depName no longer starts with `valueWithSlash` and the alias-rooted
+    // depName is not restored.
     if (dep.depName?.startsWith(valueWithSlash)) {
       dep.packageName = dep.depName;
-      // Restore the original alias-rooted depName, dropping any tag/digest
-      // suffix. We use the part of currentFrom before `@` so a digest never
-      // leaks into the depName, and only trim the tag colon when the inner
-      // getDep actually parsed a currentValue (otherwise a `:` inside the
-      // alias key, e.g. `${VAR:-}` or `localhost:5000/...`, would be mistaken
-      // for the tag separator).
       const [imageAndTag] = currentFrom.split('@');
       dep.depName = dep.currentValue
         ? imageAndTag.substring(0, imageAndTag.lastIndexOf(':'))
