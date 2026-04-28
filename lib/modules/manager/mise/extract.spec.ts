@@ -1084,12 +1084,12 @@ describe('modules/manager/mise/extract', () => {
       },
     );
 
-    it('resolves tools from the mise registry data file via aqua backend', () => {
+    it('resolves tools from the mise registry data file via aqua backend', async () => {
       const content = codeBlock`
       [tools]
       zola = "0.19.2"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -1102,12 +1102,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('resolves tools from the mise registry data file via cargo backend', () => {
+    it('resolves tools from the mise registry data file via cargo backend', async () => {
       const content = codeBlock`
       [tools]
       magika = "0.3.1"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -1120,12 +1120,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('resolves tools from the mise registry data file via github backend', () => {
+    it('resolves tools from the mise registry data file via github backend', async () => {
       const content = codeBlock`
       [tools]
       allurectl = "2.14.0"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -1138,12 +1138,12 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('resolves a tool from the mise registry, prioritising the github backend over others', () => {
+    it('resolves a tool from the mise registry, prioritising the github backend over others', async () => {
       const content = codeBlock`
       [tools]
       bitwarden-secrets-manager = "1.2.3"
     `;
-      const result = extractPackageFile(content, miseFilename);
+      const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
