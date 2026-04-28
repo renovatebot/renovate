@@ -1,3 +1,4 @@
+import miseRegistry from '../../../data/mise-registry.json' with { type: 'json' };
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -11,6 +12,7 @@ import * as semverVersioning from '../../versioning/semver/index.ts';
 import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
+import { MiseRegistryJson } from './schema.ts';
 
 export interface ToolingDefinition {
   config: ToolingConfig;
@@ -563,3 +565,14 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   ...miseCoreTooling,
   ...miseRegistryTooling,
 };
+
+export const parsedMiseRegistry: Record<
+  string,
+  Record<string, string>
+> = Object.freeze(MiseRegistryJson.parse(miseRegistry));
+
+export function getOrderedMiseRegistryBackends(
+  toolName: string,
+): Record<string, string> {
+  return parsedMiseRegistry[toolName] ?? [];
+}

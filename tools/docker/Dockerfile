@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.38.4@sha256:23f7b578103b83693fd38e0f2552a6776dfb7e2d00d597bb6c32f905d0a9df23 AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.40.1@sha256:c765b98d5cccf2bc0298c2a0170ae472e66f4b7a8c75e486584fba7c674ffd59 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.38.4-full@sha256:0fca377c4f551cacf1d849c74085724dc3ca8d96b3f2136a021e857f405bca73 AS full-base
+FROM ghcr.io/renovatebot/base-image:13.40.1-full@sha256:c178746bcca90fc2c8fe127833bde54524d49e1418946175fe367b5ecb4308ca AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.38.4@sha256:23f7b578103b83693fd38e0f2552a6776dfb7e2d00d597bb6c32f905d0a9df23 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.40.1@sha256:c765b98d5cccf2bc0298c2a0170ae472e66f4b7a8c75e486584fba7c674ffd59 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
@@ -64,6 +64,7 @@ ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 COPY --link .npmrc ./
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
+COPY --link pnpm-workspace.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
