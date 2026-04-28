@@ -283,7 +283,6 @@ describe('modules/datasource/common', () => {
     });
 
     it('should handle config with a range constraint, and a release with an exact version', () => {
-      // TODO
       const config = {
         datasource: 'pypi',
         packageName: 'bar',
@@ -303,7 +302,6 @@ describe('modules/datasource/common', () => {
     });
 
     it('should handle config with an exact version, and a release with a range constraint', () => {
-      // TODO
       const config = {
         datasource: 'pypi',
         packageName: 'bar',

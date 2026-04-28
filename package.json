@@ -66,6 +66,7 @@
     "update-static-data": "run-s 'update-static-data:*'",
     "update-static-data:distro-info": "node tools/static-data/generate-distro-info.mjs",
     "update-static-data:lambda-node-schedule": "node tools/static-data/generate-lambda-node-schedule.mjs",
+    "update-static-data:mise-registry": "node tools/static-data/generate-mise-registry.ts",
     "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs"
   },
   "repository": {
@@ -332,7 +333,7 @@
     "markdownlint-cli2": "0.22.0",
     "markdownlint-cli2-formatter-template": "0.0.4",
     "memfs": "4.57.2",
-    "nock": "14.0.12",
+    "nock": "14.0.13",
     "npm-run-all2": "8.0.4",
     "nyc": "18.0.0",
     "oxlint": "1.57.0",
@@ -353,29 +354,5 @@
   "files": [
     "dist",
     "renovate-schema.json"
-  ],
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "core-js-pure",
-      "esbuild",
-      "protobufjs",
-      "unrs-resolver"
-    ],
-    "ignoredOptionalDependencies": [
-      "dtrace-provider",
-      "moment",
-      "mv",
-      "safe-json-stringify"
-    ],
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "re2"
-    ],
-    "overrides": {
-      "@aws-sdk/xml-builder@3.972.4>fast-xml-parser": "^5.3.6",
-      "@yarnpkg/core@4.5.0>tar": "$tar",
-      "esbuild": "$esbuild",
-      "vite": "$vite"
-    }
-  }
+  ]
 }
