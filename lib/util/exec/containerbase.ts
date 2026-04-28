@@ -258,6 +258,10 @@ async function getPkgReleases(
   return getPkgReleases(toolConfig);
 }
 
+export function getToolConfig(toolName: ToolName): ToolConfig {
+  return allToolConfig[toolName];
+}
+
 export function supportsDynamicInstall(toolName: ToolName): boolean {
   return !!allToolConfig[toolName];
 }

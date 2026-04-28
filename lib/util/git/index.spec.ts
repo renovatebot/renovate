@@ -143,6 +143,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     // override some local git settings for better testing
     const local = simpleGit(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
+    await local.addConfig('user.name', 'Jest');
+    await local.addConfig('user.email', 'Jest@example.com');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
@@ -483,6 +485,41 @@ describe('util/git/index', { timeout: 10000 }, () => {
       // Restore original implementation
       fromISOSpy.mockRestore();
     });
+
+    it('works if running with a Repo Cache', async () => {
+      // Create a branch with a commit so it exists in the remote
+      const branchName = 'renovate/cache-test-branch';
+      await git.commitFiles({
+        branchName,
+        files: [
+          {
+            type: 'addition',
+            path: 'cache-test-file',
+            contents: 'test content',
+          },
+        ],
+        message: 'Test commit',
+      });
+
+      // Simulate a new run of Renovate, when running from a fresh localDir, where we've not already cloned anything, as happens when using RENOVATE_REPOSITORY_CACHE=enabled
+      const freshDir = await tmp.dir({ unsafeCleanup: true });
+      try {
+        GlobalConfig.set({ localDir: freshDir.path });
+        await git.initRepo({ url: origin.path });
+        git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+        git.setGitAuthor('Jest <Jest@example.com>');
+        setNoVerify([]);
+
+        // will sync Git
+        const result = await git.getBranchUpdateDate(branchName);
+
+        expect(result).toBeInstanceOf(DateTime);
+        expect(result).not.toBeNull();
+      } finally {
+        await freshDir.cleanup();
+        GlobalConfig.set({ localDir: tmpDir.path });
+      }
+    });
   });
 
   describe('getBranchFiles(branchName)', () => {
@@ -554,6 +591,32 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
+    it('should merge a local-only branch without fetching from origin', async () => {
+      // Create a local-only branch (never pushed to origin)
+      await git.prepareCommit({
+        branchName: 'renovate/local_only_branch',
+        message: 'local only commit',
+        files: [
+          { type: 'addition', path: 'local_only_file', contents: 'local' },
+        ],
+      });
+      // Reset working tree back to default branch so the file is not present yet
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+      await git.mergeToLocal('renovate/local_only_branch', {
+        localBranch: true,
+      });
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(pushSpy).not.toHaveBeenCalled();
+    });
+
     it('should throw', async () => {
       await expect(git.mergeToLocal('not_found')).rejects.toThrow();
     });
@@ -588,6 +651,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
         'renovate/something',
         '--no-verify',
       ]);
+    });
+
+    it('should only delete local branch when localBranch option is set', async () => {
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      await git.deleteBranch('renovate/past_branch', { localBranch: true });
+      expect(rawSpy).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['push', '--delete']),
+      );
     });
   });
 

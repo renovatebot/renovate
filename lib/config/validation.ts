@@ -9,10 +9,14 @@ import is, {
   isUndefined,
 } from '@sindresorhus/is';
 import type { PlatformId } from '../constants/index.ts';
+import { logger } from '../logger/index.ts';
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import { allManagersList, getManagerList } from '../modules/manager/index.ts';
+import * as allVersioning from '../modules/versioning/index.ts';
 import type { HostRule } from '../types/index.ts';
+import { getToolConfig } from '../util/exec/containerbase.ts';
+import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -296,6 +300,8 @@ export async function validateConfig(
           message,
         });
       }
+
+      // v8 ignore else -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
       if (!optionTypes[key]) {
         errors.push({
           topic: 'Configuration Error',
@@ -646,11 +652,7 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
-        } else if (
-          type === 'object' &&
-          currentPath !== 'compatibility' &&
-          key !== 'constraints'
-        ) {
+        } else if (type === 'object') {
           if (isPlainObject(val)) {
             if (key === 'registryAliases') {
               const res = validatePlainObject(val);
@@ -751,6 +753,42 @@ export async function validateConfig(
                   }
                 }
               }
+            } else if (key === 'installTools') {
+              for (const toolName of Object.keys(val)) {
+                if (!isToolName(toolName)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${toolName}\` configuration: not a valid tool name.`,
+                  });
+                }
+              }
+            } else if (key === 'constraints') {
+              for (const [k, v] of Object.entries(val)) {
+                if (!isString(v)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of constraints and their value`,
+                  });
+                  break;
+                }
+
+                if (!isConstraintName(k)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a supported constraint name`,
+                  });
+                } else if (isToolName(k)) {
+                  // TODO: #31831
+                  const versioningId = getToolConfig(k).versioning;
+                  const versioning = allVersioning.get(versioningId);
+                  if (!versioning.isValid(v)) {
+                    warnings.push({
+                      topic: 'Configuration Error',
+                      message: `Configuration option \`${currentPath}.${k}=${v}\` is not a valid tool version constraint, according to \`${versioningId}\` versioning`,
+                    });
+                  }
+                }
+              }
             } else {
               const ignoredObjects = options
                 .filter((option) => option.freeChoice)
@@ -772,6 +810,12 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a json object`,
             });
           }
+        } else {
+          // v8 ignore next -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
+          logger.debug(
+            {},
+            `Unhandled validation for ${type} at \`${currentPath}\``,
+          );
         }
       }
     }

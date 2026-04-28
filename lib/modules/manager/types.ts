@@ -65,7 +65,7 @@ export interface PackageFileContent<
   T = Record<string, any>,
 > extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  extractedConstraints?: Record<string, string>;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
@@ -132,6 +132,8 @@ export interface LookupUpdate {
    * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
    */
   hasAttestation?: boolean;
+
+  prBodyNotes?: string[];
 }
 
 /**
