@@ -1,5 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
@@ -55,7 +56,11 @@ export function applyOciDependency(
   source: string,
   registryAliases?: Record<string, string>,
 ): void {
-  const url = new URL(source);
+  const url = parseUrl(source);
+  if (!url) {
+    dep.skipReason = 'invalid-url';
+    return;
+  }
 
   // Strip optional `//subfolder` sub-path (e.g. `example.com/repo//modules/vpc`)
   const imageRef = (url.host + url.pathname).replace(regEx(/\/\/.+$/), '');
