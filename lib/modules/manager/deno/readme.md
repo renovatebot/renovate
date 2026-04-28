@@ -1,5 +1,5 @@
-Extracts dependencies from the Deno's projects `deno.json` and `deno.jsonc` files.  
-The deno manager also supports the `package.json` file for Deno's [node-compat](https://docs.deno.com/runtime/fundamentals/node/) as long as a `deno.lock` file is placed next to the `package.json` file.
+Extracts dependencies from the Deno's projects `deno.json` and `deno.jsonc` files.
+The deno manager also supports the `package.json` file for Deno's [node-compat](https://docs.deno.com/runtime/fundamentals/node/) as long as a `deno.lock` file is placed next to the `package.json` file. It could support [another lock filename](https://docs.deno.com/runtime/fundamentals/modules/#changing-lockfile-path) that specified in `deno.json` or `deno.jsonc`.
 
 ### Supported Dependency Types
 
@@ -21,7 +21,7 @@ The deno manager also supports some `depTypes` that supported by [npm manager](.
 
 <!-- prettier-ignore -->
 !!! note
-    In source dependencies are not supported.  
+    In source dependencies are not supported.
     ```ts
     import { assert } from "jsr:@std/assert@1.0.0";
     ```
