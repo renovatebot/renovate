@@ -77,7 +77,7 @@ describe('util/git/update-date-cache', () => {
         DateTime.fromISO('2023-05-20T14:25:30.123Z'),
       );
       expect(repoCache).toEqual({});
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         'setCachedUpdateDateResult(): Branch cache not present',
       );
     });
@@ -88,7 +88,7 @@ describe('util/git/update-date-cache', () => {
         DateTime.fromISO('2023-05-20T14:25:30.123Z'),
       );
       expect(repoCache).toEqual({});
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         'setCachedUpdateDateResult(): Branch cache not present',
       );
     });
@@ -99,9 +99,13 @@ describe('util/git/update-date-cache', () => {
         partial<BranchCache>({ branchName: 'foo', sha: 'aaa' }),
       ];
       setCachedUpdateDateResult('foo', DateTime.fromISO(timestamp));
-      expect(repoCache.branches?.[0].commitTimestamp).toBe(
-        DateTime.fromISO(timestamp).toISO(),
-      );
+      expect(repoCache.branches).toEqual([
+        partial<BranchCache>({
+          branchName: 'foo',
+          sha: 'aaa',
+          commitTimestamp: DateTime.fromISO(timestamp).toISO()!,
+        }),
+      ]);
     });
 
     it('handles multiple branches', () => {
@@ -116,12 +120,18 @@ describe('util/git/update-date-cache', () => {
       repositoryCache.getCache.mockReturnValue(repoCache);
       setCachedUpdateDateResult('foo-1', DateTime.fromISO(timestamp1));
       setCachedUpdateDateResult('foo-2', DateTime.fromISO(timestamp2));
-      expect(repoCache.branches?.[0].commitTimestamp).toBe(
-        DateTime.fromISO(timestamp1).toISO(),
-      );
-      expect(repoCache.branches?.[1].commitTimestamp).toBe(
-        DateTime.fromISO(timestamp2).toISO(),
-      );
+      expect(repoCache.branches).toEqual([
+        partial<BranchCache>({
+          branchName: 'foo-1',
+          sha: '111',
+          commitTimestamp: DateTime.fromISO(timestamp1).toISO()!,
+        }),
+        partial<BranchCache>({
+          branchName: 'foo-2',
+          sha: 'aaa',
+          commitTimestamp: DateTime.fromISO(timestamp2).toISO()!,
+        }),
+      ]);
     });
   });
 });
