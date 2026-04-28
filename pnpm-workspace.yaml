@@ -1,6 +1,6 @@
 packages: []
 
-saveExact: true
+savePrefix: ""
 # updates are handled by Renovate itself
 updateNotifier: false
 # https://pnpm.io/cli/run
@@ -20,6 +20,12 @@ overrides:
   "@yarnpkg/core@4.5.0>tar": $tar
   esbuild: $esbuild
   vite: $vite
+
+ignoredOptionalDependencies:
+  - dtrace-provider
+  - moment
+  - mv
+  - safe-json-stringify
 
 strictPeerDependencies: true
 
