@@ -83,11 +83,16 @@ describe('util/git/update-date-cache', () => {
     });
 
     it('returns without updating when branch not found', () => {
+      repoCache.branches = [
+        partial<BranchCache>({ branchName: 'bar', sha: 'bbb' }),
+      ];
       setCachedUpdateDateResult(
         'foo',
         DateTime.fromISO('2023-05-20T14:25:30.123Z'),
       );
-      expect(repoCache).toEqual({});
+      expect(repoCache.branches).toEqual([
+        partial<BranchCache>({ branchName: 'bar', sha: 'bbb' }),
+      ]);
       expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         'setCachedUpdateDateResult(): Branch cache not present',
       );
