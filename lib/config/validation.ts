@@ -13,6 +13,7 @@ import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import { allManagersList, getManagerList } from '../modules/manager/index.ts';
 import type { HostRule } from '../types/index.ts';
+import { isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -749,6 +750,15 @@ export async function validateConfig(
                       message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
                     });
                   }
+                }
+              }
+            } else if (key === 'installTools') {
+              for (const toolName of Object.keys(val)) {
+                if (!isToolName(toolName)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${toolName}\` configuration: not a valid tool name.`,
+                  });
                 }
               }
             } else {

@@ -1,6 +1,3 @@
-/**
- * Update readme if new actions are added here.
- */
 import { z } from 'zod/v3';
 
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
@@ -13,9 +10,48 @@ import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
 
-/**
- * match actions
- */
+export interface CommunityActionConfig {
+  datasource: string;
+  depName?: string;
+  packageName: string;
+  versioning?: string;
+  extractVersion?: string;
+
+  /**
+   * should return `true` if the version is invalid and should be skipped
+   */
+  isInvalid?: (value: string) => boolean;
+
+  withSchema?: z.ZodEffects<
+    z.ZodTypeAny,
+    { val: string | undefined } & Record<string, unknown>
+  >;
+}
+
+type ActionSchema = z.ZodEffects<z.ZodTypeAny, PackageDependency>;
+
+function actionSchema(
+  name: string,
+  { isInvalid, withSchema, ...cfg }: CommunityActionConfig,
+): ActionSchema {
+  return z
+    .object({
+      uses: matchAction(name),
+      with: withSchema ?? VersionValSchema,
+    })
+    .transform(
+      ({ with: { val, ...meta } }): PackageDependency => ({
+        ...cfg,
+        ...meta,
+        ...parseValue(val, isInvalid),
+      }),
+    )
+    .transform((dep) => {
+      dep.depName ??= dep.packageName;
+      return dep;
+    });
+}
+
 function matchAction(action: string): z.ZodString {
   return z
     .string()
@@ -24,7 +60,7 @@ function matchAction(action: string): z.ZodString {
 
 function parseValue(
   currentValue: string | undefined,
-  validator?: () => boolean,
+  isInvalid?: (val: string) => boolean,
 ): PackageDependency {
   if (!currentValue) {
     return {
@@ -33,7 +69,7 @@ function parseValue(
       depType: 'uses-with',
     };
   }
-  if (validator?.() === true) {
+  if (isInvalid?.(currentValue) === true) {
     return {
       skipStage: 'extract',
       skipReason: 'invalid-version',
@@ -44,231 +80,112 @@ function parseValue(
   return { currentValue, depType: 'uses-with' };
 }
 
-const SetupUV = z
-  .object({
-    // https://github.com/astral-sh/setup-uv
-    uses: matchAction('astral-sh/setup-uv'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: GithubReleasesDatasource.id,
-      depName: 'astral-sh/uv',
-      versioning: npmVersioning.id,
-      packageName: 'astral-sh/uv',
-      ...parseValue(val.version),
-    }),
-  );
+function valSchema(
+  key: string,
+): z.ZodEffects<z.ZodTypeAny, { val: string | undefined }> {
+  return z
+    .object({ [key]: z.string().optional() })
+    .transform((val) => ({ val: val[key] }));
+}
 
-const SetupPnpm = z
-  .object({
-    uses: matchAction('pnpm/action-setup'),
-    with: z.object({
-      version: z.string().optional(),
-    }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: NpmDatasource.id,
-      depName: 'pnpm',
-      packageName: 'pnpm',
-      ...parseValue(val.version),
-    }),
-  );
+const VersionValSchema = z
+  .object({ version: z.string().optional() })
+  .transform((val) => ({ val: val.version }));
 
-const SetupBun = z
-  .object({
-    uses: matchAction('oven-sh/setup-bun'),
-    with: z.object({
-      'bun-version': z.string().optional(),
-    }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: NpmDatasource.id,
-      depName: 'bun',
-      packageName: 'bun',
-      ...parseValue(val['bun-version']),
-    }),
-  );
-
-const SetupDeno = z
-  .object({
-    uses: matchAction('denoland/setup-deno'),
-    with: z.object({
-      'deno-version': z.string().optional(),
-    }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: NpmDatasource.id,
-      depName: 'deno',
-      packageName: 'deno',
-      ...parseValue(val['deno-version']),
-    }),
-  );
-
-const SetupRuby = z
-  .object({
-    uses: matchAction('ruby/setup-ruby'),
-    with: z.object({
-      'ruby-version': z.string().optional(),
-    }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: RubyVersionDatasource.id,
-      depName: 'ruby',
-      packageName: 'ruby',
-      ...parseValue(val['ruby-version']),
-    }),
-  );
-
-const SetupPDM = z
-  .object({
-    uses: matchAction('pdm-project/setup-pdm'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: PypiDatasource.id,
-      depName: 'pdm',
-      packageName: 'pdm',
-      ...parseValue(val.version),
-    }),
-  );
-
-const InstallBinary = z
-  .object({
-    uses: z.union([
-      matchAction('jaxxstorm/action-install-gh-release'),
-      matchAction('sigoden/install-binary'),
-    ]),
-    with: z.object({ repo: z.string(), tag: z.string() }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    return {
-      datasource: GithubReleasesDatasource.id,
-      depName: val.repo,
-      packageName: val.repo,
-      ...parseValue(val.tag),
-    };
-  });
-
-const SetupPixi = z
-  .object({
-    uses: matchAction('prefix-dev/setup-pixi'),
-    with: z.object({ 'pixi-version': z.string() }),
-  })
-  .transform(({ with: val }): PackageDependency => {
-    return {
-      datasource: GithubReleasesDatasource.id,
-      versioning: condaVersioning.id,
-      depName: 'prefix-dev/pixi',
-      packageName: 'prefix-dev/pixi',
-      ...parseValue(val['pixi-version']),
-    };
-  });
-
-const SetupHatch = z
-  .object({
-    // https://github.com/pypa/hatch/tree/install
-    uses: matchAction('pypa/hatch'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: GithubReleasesDatasource.id,
-      depName: 'pypa/hatch',
-      packageName: 'pypa/hatch',
-      ...parseValue(val.version),
-      // Strip hatch- prefix from release tags
-      extractVersion: '^hatch-(?<version>.+)$',
-    }),
-  );
-
-const SetupGolangciLint = z
-  .object({
-    uses: matchAction('golangci/golangci-lint-action'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: GithubReleasesDatasource.id,
-      depName: 'golangci/golangci-lint',
-      packageName: 'golangci/golangci-lint',
-      ...parseValue(val.version),
-    }),
-  );
-
-const ZizmorcoreZizmorAction = z
-  .object({
-    uses: matchAction('zizmorcore/zizmor-action'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: DockerDatasource.id,
-      depName: 'ghcr.io/zizmorcore/zizmor',
-      packageName: 'ghcr.io/zizmorcore/zizmor',
-      ...parseValue(val.version),
-    }),
-  );
-
-const SetupPyright = z
-  .object({
-    uses: matchAction('jakebailey/pyright-action'),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: NpmDatasource.id,
-      depName: 'pyright',
-      packageName: 'pyright',
-      ...parseValue(val.version, () => val.version === 'PATH'),
-    }),
-  );
+const InstallBinaryWithSchema = z
+  .object({ repo: z.string(), tag: z.string() })
+  .transform(({ repo, tag }) => ({ packageName: repo, val: tag }));
 
 /**
- *  Both actions are used to setup trivy.
- * - https://github.com/aquasecurity/setup-trivy
- * - https://github.com/aquasecurity/trivy-action
+ * Community contributed actions with known version input schemas.
  */
-const AquaSecurityTrivy = z
-  .object({
-    uses: z.union([
-      matchAction('aquasecurity/setup-trivy'),
-      matchAction('aquasecurity/trivy-action'),
-    ]),
-    with: z.object({ version: z.string().optional() }),
-  })
-  .transform(
-    ({ with: val }): PackageDependency => ({
-      datasource: GithubReleasesDatasource.id,
-      depName: 'aquasecurity/trivy',
-      packageName: 'aquasecurity/trivy',
-      ...parseValue(val.version),
-    }),
-  );
+export const communityActions: Record<string, CommunityActionConfig> = {
+  // https://github.com/aquasecurity/setup-trivy
+  'aquasecurity/setup-trivy': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'aquasecurity/trivy',
+  },
+  // https://github.com/aquasecurity/trivy-action
+  'aquasecurity/trivy-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'aquasecurity/trivy',
+  },
+  // https://github.com/astral-sh/setup-uv
+  'astral-sh/setup-uv': {
+    datasource: GithubReleasesDatasource.id,
+    versioning: npmVersioning.id,
+    packageName: 'astral-sh/uv',
+  },
+  'denoland/setup-deno': {
+    datasource: NpmDatasource.id,
+    packageName: 'deno',
+    withSchema: valSchema('deno-version'),
+  },
+  // https://github.com/docker/setup-docker-action
+  'docker/setup-docker-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'docker/setup-docker-action',
+    packageName: 'moby/moby',
+    extractVersion: '^docker-(?<version>.+)$',
+  },
+  'golangci/golangci-lint-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'golangci/golangci-lint',
+  },
+  'jakebailey/pyright-action': {
+    datasource: NpmDatasource.id,
+    packageName: 'pyright',
+    isInvalid: (val) => val === 'PATH',
+  },
+  'jaxxstorm/action-install-gh-release': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input
+    withSchema: InstallBinaryWithSchema,
+  },
+  'oven-sh/setup-bun': {
+    datasource: NpmDatasource.id,
+    packageName: 'bun',
+    withSchema: valSchema('bun-version'),
+  },
+  'pdm-project/setup-pdm': {
+    datasource: PypiDatasource.id,
+    packageName: 'pdm',
+  },
+  'pnpm/action-setup': {
+    datasource: NpmDatasource.id,
+    packageName: 'pnpm',
+  },
+  'prefix-dev/setup-pixi': {
+    datasource: GithubReleasesDatasource.id,
+    versioning: condaVersioning.id,
+    packageName: 'prefix-dev/pixi',
+    withSchema: valSchema('pixi-version'),
+  },
+  // https://github.com/pypa/hatch/tree/install
+  'pypa/hatch': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'pypa/hatch',
+    // Strip hatch- prefix from release tags
+    extractVersion: '^hatch-(?<version>.+)$',
+  },
+  'ruby/setup-ruby': {
+    datasource: RubyVersionDatasource.id,
+    packageName: 'ruby',
+    withSchema: valSchema('ruby-version'),
+  },
+  'sigoden/install-binary': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input
+    withSchema: InstallBinaryWithSchema,
+  },
+  'zizmorcore/zizmor-action': {
+    datasource: DockerDatasource.id,
+    packageName: 'ghcr.io/zizmorcore/zizmor',
+  },
+};
 
-/**
- * schema here should match the whole step,
- * there may be some actions use env as arguments version.
- *
- * each type should return `PackageDependency | undefined`
- */
-export const CommunityActions = z.union([
-  AquaSecurityTrivy,
-  InstallBinary,
-  SetupPDM,
-  SetupPixi,
-  SetupPnpm,
-  SetupPyright,
-  SetupUV,
-  SetupBun,
-  SetupDeno,
-  SetupRuby,
-  SetupHatch,
-  SetupGolangciLint,
-  ZizmorcoreZizmorAction,
-]);
+export const CommunityActions = z.union(
+  Object.entries(communityActions).map(([name, cfg]) =>
+    actionSchema(name, cfg),
+  ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
+);

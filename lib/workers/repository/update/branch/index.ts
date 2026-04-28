@@ -648,9 +648,11 @@ export async function processBranch(
       } else {
         logger.debug('No updated lock files in branch');
       }
-      if (config.fetchChangeLogs === 'branch') {
-        await embedChangelogs(config.upgrades);
-      }
+
+      await embedChangelogs({
+        upgrades: config.upgrades,
+        stage: 'branch',
+      });
 
       const postUpgradeCommandResults =
         await executePostUpgradeCommands(config);
