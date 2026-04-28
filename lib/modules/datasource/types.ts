@@ -37,6 +37,9 @@ export interface GetReleasesConfig {
   registryUrl?: string;
   currentValue?: string;
   constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   constraintsFiltering?: ConstraintsFilter;
 }
@@ -58,6 +61,9 @@ export interface GetPkgReleasesConfig {
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   registryStrategy?: RegistryStrategy;
 }
