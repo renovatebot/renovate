@@ -27,10 +27,8 @@ export class RustVersionDatasource extends Datasource {
     super(RustVersionDatasource.id);
   }
 
-  private async getManifests(
-    registryUrl: string,
-  ): Promise<ParsedManifestUrl[]> {
-    const response = await this.http.getPlain(registryUrl);
+  private async getManifests(url: URL): Promise<ParsedManifestUrl[]> {
+    const response = await this.http.getText(url);
     const lines = response.body.split('\n');
 
     const parsedResults = [];
@@ -53,7 +51,7 @@ export class RustVersionDatasource extends Datasource {
 
     let parsedResults: ParsedManifestUrl[];
     try {
-      parsedResults = await this.getManifests(url.toString());
+      parsedResults = await this.getManifests(url);
     } catch (err) {
       this.handleGenericErrors(err);
     }
