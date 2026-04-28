@@ -789,6 +789,7 @@ jobs:
       - name: Check for newer commits
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: renovatebot/renovate
           REF_NAME: ${{ github.ref_name }}
           EXPECTED_SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
