@@ -1,10 +1,14 @@
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { isHttpUrl } from '../../../util/url.ts';
+import { getQueryString, isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { TerraformDatasource } from './base.ts';
-import { ProtocolModuleResponse, TerraformModuleResponse } from './schema.ts';
+import {
+  ProtocolModuleResponse,
+  TerraformModuleResponse,
+  TerraformModuleV2Response,
+} from './schema.ts';
 import { createSDBackendURL, getRegistryRepository } from './utils.ts';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
@@ -14,11 +18,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   static readonly defaultRegistryUrls = [
     TerraformModuleDatasource.terraformRegistryUrl,
-  ];
-
-  static readonly extendedApiRegistryUrls = [
-    TerraformModuleDatasource.terraformRegistryUrl,
-    TerraformModuleDatasource.terraformCloudUrl,
   ];
 
   constructor() {
@@ -32,7 +31,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results.';
+    'For `registry.terraform.io`, release timestamps are determined from the `published-at` field of the v2 API response. For `app.terraform.io`, only the latest version is annotated, using the `published_at` field from the extended module endpoint.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the the `source` field in the results.';
@@ -63,9 +62,10 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     );
 
     try {
-      if (
-        TerraformModuleDatasource.extendedApiRegistryUrls.includes(registry)
-      ) {
+      if (registry === TerraformModuleDatasource.terraformRegistryUrl) {
+        return await this.queryTerraformRegistryV2(registry, repository);
+      }
+      if (registry === TerraformModuleDatasource.terraformCloudUrl) {
         return await this.queryTerraformRegistry(registry, repository);
       }
 
@@ -85,6 +85,29 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       },
       () => this._getReleases(config),
     );
+  }
+
+  /**
+   * Query the Terraform Registry using the undocumented v2 JSON:API.
+   *
+   * Returns release timestamps for all versions, unlike the v1 extended
+   * module endpoint which only exposed the timestamp for the latest version.
+   */
+  private async queryTerraformRegistryV2(
+    registryUrl: string,
+    repository: string,
+  ): Promise<ReleaseResult> {
+    const moduleUrl = `${joinUrlParts(
+      registryUrl,
+      'v2/modules',
+      repository,
+    )}?${getQueryString({ include: 'module-versions' })}`;
+    const { body: res } = await this.http.getJson(
+      moduleUrl,
+      TerraformModuleV2Response,
+    );
+    res.homepage = `${registryUrl}/modules/${repository}`;
+    return res;
   }
 
   /**

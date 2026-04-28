@@ -63,6 +63,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'npryce/adr-tools',
     },
   },
+  apm: {
+    asdfPluginUrl: 'https://github.com/edwinhern/asdf-apm',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'microsoft/apm',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   argocd: {
     asdfPluginUrl: 'https://github.com/beardix/asdf-argocd',
     config: {

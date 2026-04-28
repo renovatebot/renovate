@@ -66,6 +66,7 @@
     "update-static-data": "run-s 'update-static-data:*'",
     "update-static-data:distro-info": "node tools/static-data/generate-distro-info.mjs",
     "update-static-data:lambda-node-schedule": "node tools/static-data/generate-lambda-node-schedule.mjs",
+    "update-static-data:mise-registry": "node tools/static-data/generate-mise-registry.ts",
     "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs"
   },
   "repository": {
@@ -315,7 +316,7 @@
     "@types/semver-utils": "1.1.3",
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
-    "@vitest/coverage-v8": "4.1.4",
+    "@vitest/coverage-v8": "4.1.5",
     "ajv": "8.18.0",
     "ajv-formats": "3.0.1",
     "aws-sdk-client-mock": "4.1.0",
@@ -346,36 +347,12 @@
     "typescript": "6.0.3",
     "unified": "11.0.5",
     "vite": "8.0.5",
-    "vitest": "4.1.4",
+    "vitest": "4.1.5",
     "vitest-mock-extended": "4.0.0"
   },
   "packageManager": "pnpm@10.33.0",
   "files": [
     "dist",
     "renovate-schema.json"
-  ],
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "core-js-pure",
-      "esbuild",
-      "protobufjs",
-      "unrs-resolver"
-    ],
-    "ignoredOptionalDependencies": [
-      "dtrace-provider",
-      "moment",
-      "mv",
-      "safe-json-stringify"
-    ],
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "re2"
-    ],
-    "overrides": {
-      "@aws-sdk/xml-builder@3.972.4>fast-xml-parser": "^5.3.6",
-      "@yarnpkg/core@4.5.0>tar": "$tar",
-      "esbuild": "$esbuild",
-      "vite": "$vite"
-    }
-  }
+  ]
 }
