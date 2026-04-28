@@ -260,6 +260,29 @@ describe('modules/manager/bun/update', () => {
       expect(result).toBeNull();
     });
 
+    it('delegates to npm updateDependency when depType is undefined', () => {
+      const fileContent = JSON.stringify(
+        {
+          name: 'test',
+          dependencies: { dep1: '1.0.0' },
+        },
+        null,
+        2,
+      );
+
+      const result = updateDependency({
+        fileContent,
+        packageFile: 'package.json',
+        upgrade: {
+          depName: 'dep1',
+          newValue: '2.0.0',
+        },
+      });
+
+      // npm updateDependency cannot update without a depType, so returns null
+      expect(result).toBeNull();
+    });
+
     it('delegates non-catalog dependencies to npm updateDependency', () => {
       const fileContent = JSON.stringify(
         {
