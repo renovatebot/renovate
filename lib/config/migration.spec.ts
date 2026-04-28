@@ -10,6 +10,7 @@ import type {
 
 interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig;
+  autoReplaceStringTemplate?: string;
 }
 
 describe('config/migration', () => {
@@ -694,7 +695,7 @@ describe('config/migration', () => {
   });
 
   it('does not migrate legacy template identifiers within larger identifiers', () => {
-    const config = partial<RenovateConfig>({
+    const config = partial<TestRenovateConfig>({
       autoReplaceStringTemplate:
         'val correttoVersion = "{{{newValue}}}"\n    val imageSha256 = "{{{newDigest}}}"\n    val toVersionSuffix = "{{{newValue}}}"\n    val _toVersion = "{{{newValue}}}"\n    val toVersion_ = "{{{newValue}}}"\n    val foo_toVersion_bar = "{{{newValue}}}"',
     });
