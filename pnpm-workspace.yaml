@@ -5,7 +5,6 @@ savePrefix: ""
 updateNotifier: false
 # https://pnpm.io/cli/run
 shellEmulator: true
-enablePrePostScripts: true
 
 allowBuilds:
   core-js-pure: false
