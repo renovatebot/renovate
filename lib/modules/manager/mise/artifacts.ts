@@ -62,6 +62,12 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv,
+    toolConstraints: [
+      {
+        toolName: 'mise',
+        constraint: config.constraints?.mise,
+      },
+    ],
     docker: {},
   };
 
