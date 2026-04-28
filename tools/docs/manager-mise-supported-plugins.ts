@@ -1,31 +1,110 @@
 import {
+  maybeSupportedBackendDatasources,
+  supportedBackendDatasources,
+} from '../../lib/modules/manager/mise/index.ts';
+import {
   asdfTooling,
   miseTooling,
+  parsedMiseRegistry,
 } from '../../lib/modules/manager/mise/upgradeable-tooling.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { replaceContent } from './utils.ts';
 
+interface ToolDocumentation {
+  name: string;
+  url?: string;
+  source: 'asdf' | 'mise';
+  supported: boolean | 'maybe';
+  supportNote?: string;
+}
+
+const defaultMisePluginUrl = 'https://mise.jdx.dev/registry.html#tools';
+
 function generateCombinedTooling(): string {
   let content = `
-  | Name | Source |
-  | ---- | ------ |
+  | Name | Source | Supported |
+  | ---- | ------ | --------- |
   `;
+  let allTools: ToolDocumentation[] = [
+    ...Object.entries(miseTooling).map(
+      ([name, { misePluginUrl }]) =>
+        ({
+          name,
+          url: misePluginUrl,
+          source: 'mise',
+          supported: true,
+        }) satisfies ToolDocumentation,
+    ),
+    ...Object.entries(asdfTooling).map(
+      ([name, { asdfPluginUrl }]) =>
+        ({
+          name,
+          url: asdfPluginUrl,
+          source: 'asdf',
+          supported: true,
+        }) satisfies ToolDocumentation,
+    ),
+  ];
 
-  const allTools = [
-    ...Object.entries(miseTooling).map(([name, { misePluginUrl }]) => ({
-      name,
-      url: misePluginUrl,
-      source: 'mise',
-    })),
-    ...Object.entries(asdfTooling).map(([name, { asdfPluginUrl }]) => ({
-      name,
-      url: asdfPluginUrl,
-      source: 'asdf',
-    })),
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  const existingTools = new Set(allTools.map((tool) => tool.name));
 
-  for (const { name, url, source } of allTools) {
-    content += `| [\`${name}\`](${url}) | ${source} |\n`;
+  for (const [name, backends] of Object.entries(parsedMiseRegistry)) {
+    if (existingTools.has(name)) {
+      continue;
+    }
+
+    const backendNames = Object.keys(backends);
+    if (backendNames.some((b) => supportedBackendDatasources.has(b))) {
+      allTools.push({
+        name,
+        url: defaultMisePluginUrl,
+        source: 'mise',
+        supported: true,
+      });
+    } else if (
+      backendNames.some((b) => maybeSupportedBackendDatasources.has(b))
+    ) {
+      allTools.push({
+        name,
+        url: defaultMisePluginUrl,
+        source: 'mise',
+        supported: 'maybe',
+        supportNote: `Possibly unsupported due to backend(s): \`${JSON.stringify(backendNames)}\``,
+      });
+    } else {
+      allTools.push({
+        name,
+        url: defaultMisePluginUrl,
+        source: 'mise',
+        supported: false,
+      });
+    }
+  }
+
+  allTools = allTools.sort((a, b) => a.name.localeCompare(b.name));
+
+  const total = allTools.length;
+  const supportedCount = allTools.filter((t) => t.supported === true).length;
+  const maybeCount = allTools.filter((t) => t.supported === 'maybe').length;
+  const unsupportedCount = allTools.filter((t) => t.supported === false).length;
+
+  content =
+    `Renovate's \`mise\` manager can version the following tool short names.\nOut of ${total} known tools: ${supportedCount} supported, ${maybeCount} possibly supported, ${unsupportedCount} unsupported.\n` +
+    content;
+
+  for (const { name, url, source, supported, supportNote } of allTools) {
+    let supportedOutput = '❌';
+    if (supported === true) {
+      supportedOutput = '✅';
+    } else if (supported === 'maybe') {
+      supportedOutput = `🤔 ${supportNote}`;
+    }
+
+    if (url) {
+      content += `| [\`${name}\`](${url}) | ${source} | ${supportedOutput} | \n`;
+    } else {
+      content += `| \`${name}\`           | ${source} | ${supportedOutput} | \n`;
+    }
   }
 
   return content;

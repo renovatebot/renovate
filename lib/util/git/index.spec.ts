@@ -609,6 +609,32 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
+    it('should merge a local-only branch without fetching from origin', async () => {
+      // Create a local-only branch (never pushed to origin)
+      await git.prepareCommit({
+        branchName: 'renovate/local_only_branch',
+        message: 'local only commit',
+        files: [
+          { type: 'addition', path: 'local_only_file', contents: 'local' },
+        ],
+      });
+      // Reset working tree back to default branch so the file is not present yet
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+      await git.mergeToLocal('renovate/local_only_branch', {
+        localBranch: true,
+      });
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(pushSpy).not.toHaveBeenCalled();
+    });
+
     it('should throw', async () => {
       await expect(git.mergeToLocal('not_found')).rejects.toThrow();
     });
@@ -643,6 +669,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
         'renovate/something',
         '--no-verify',
       ]);
+    });
+
+    it('should only delete local branch when localBranch option is set', async () => {
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      await git.deleteBranch('renovate/past_branch', { localBranch: true });
+      expect(rawSpy).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['push', '--delete']),
+      );
     });
   });
 
