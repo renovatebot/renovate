@@ -1024,7 +1024,7 @@ describe('config/validation', () => {
     });
 
     describe('constraints', () => {
-      it('can contain an valid tool name for Containerbase', async () => {
+      it('can contain a valid tool name for Containerbase', async () => {
         const config: RenovateConfig = {
           constraints: {
             go: '1.26.0',
