@@ -1,5 +1,5 @@
 import { Fixtures } from '~test/fixtures.ts';
-import type { UpdateDependencyConfig } from '../types.ts';
+import type { Upgrade } from '../types.ts';
 import type { DenoManagerData } from './types.ts';
 import { updateDependency } from './update.ts';
 
@@ -17,7 +17,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'https://deno.land/std',
           depType: 'imports',
           currentValue: '0.223.0',
@@ -48,7 +48,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'https://deno.land/std',
           depType: 'imports',
           currentValue: '0.223.0',
@@ -74,7 +74,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@scope/dep1',
           depType: 'scopes',
           currentValue: 'latest',
@@ -108,7 +108,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@scope/dep1',
           depType: 'scopes',
           currentValue: 'latest',
@@ -138,7 +138,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'tasks',
           currentValue: '4.0.0',
@@ -169,7 +169,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep2',
           depType: 'tasks.command',
           currentValue: '14.0.1',
@@ -202,7 +202,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'tasks',
           currentValue: '4.0.0',
@@ -232,7 +232,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'tasks.command',
           currentValue: '14.0.1',
@@ -261,7 +261,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@types/dep2',
           depType: 'compilerOptions.types',
           currentValue: '18.0.0',
@@ -289,7 +289,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@types/dep2',
           depType: 'compilerOptions.types',
           currentValue: '18.0.0',
@@ -316,7 +316,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@types/dep2',
           depType: 'compilerOptions.types',
           currentValue: '18.0.0',
@@ -345,7 +345,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'https://deno.land/x/dep2',
           depType: 'compilerOptions.jsxImportSource',
           currentValue: '18.0.0',
@@ -375,7 +375,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'https://deno.land/x/dep2',
           depType: 'compilerOptions.jsxImportSource',
           currentValue: '18.0.0',
@@ -402,7 +402,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@types/dep2',
           depType: 'compilerOptions.jsxImportSourceTypes',
           currentValue: '18.0.0',
@@ -431,7 +431,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@types/dep2',
           depType: 'compilerOptions.jsxImportSourceTypes',
           currentValue: '18.0.0',
@@ -461,7 +461,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'lint.plugins',
           currentValue: '5.0.0',
@@ -489,7 +489,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'lint.plugins',
           currentValue: '5.0.0',
@@ -516,7 +516,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'lint.plugins',
           currentValue: '5.0.0',
@@ -543,7 +543,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: undefined,
@@ -562,7 +562,7 @@ describe('modules/manager/deno/update', () => {
 
       it('returns null if packageFile is not defined', () => {
         const fileContent = JSON.stringify({}, null, 2);
-        const upgrade: UpdateDependencyConfig['upgrade'] = {};
+        const upgrade: Upgrade = {};
 
         const result = updateDependency({
           fileContent,
@@ -583,7 +583,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -610,7 +610,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'https://deno.land/std/fs',
           depType: 'imports',
           newValue: '2.0.0',
@@ -629,7 +629,7 @@ describe('modules/manager/deno/update', () => {
       it('returns null for missing required values', () => {
         const fileContent = '{}';
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: undefined,
           depType: undefined,
           currentValue: '1.0.0',
@@ -669,7 +669,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -693,7 +693,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -712,7 +712,7 @@ describe('modules/manager/deno/update', () => {
       it('returns null if empty file', () => {
         const fileContent = '{}';
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: undefined,
           depType: undefined,
           currentValue: '1.0.0',
@@ -731,7 +731,7 @@ describe('modules/manager/deno/update', () => {
       it('handles error during update gracefully', () => {
         const fileContent = 'invalid json';
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -754,7 +754,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: undefined,
           depType: 'imports',
           currentValue: '1.0.0',
@@ -773,7 +773,7 @@ describe('modules/manager/deno/update', () => {
       it('unsupported packageFile', () => {
         const fileContent = JSON.stringify({});
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -797,7 +797,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -822,7 +822,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'unknown.type',
           currentValue: '1.0.0',
@@ -845,7 +845,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: '@types/dep2',
           depType: 'compilerOptions.types',
           currentValue: '18.0.0',
@@ -868,7 +868,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depName: 'dep1',
           depType: 'lint.plugins',
           currentValue: '5.0.0',
@@ -893,7 +893,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
+        const upgrade: Upgrade<DenoManagerData> = {
           depName: '@scope/dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -916,7 +916,7 @@ describe('modules/manager/deno/update', () => {
       it('handles error during update gracefully', () => {
         const fileContent = 'invalid json';
 
-        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
+        const upgrade: Upgrade<DenoManagerData> = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -946,7 +946,7 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
+        const upgrade: Upgrade<DenoManagerData> = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
@@ -972,7 +972,7 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
+        const upgrade: Upgrade<DenoManagerData> = {
           depName: undefined,
           depType: 'imports',
           currentValue: '1.0.0',
@@ -998,7 +998,7 @@ describe('modules/manager/deno/update', () => {
         const readFixture = (x: string): string => Fixtures.get(x, '../npm');
 
         const input01Content = readFixture('inputs/01.json');
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: Upgrade = {
           depType: 'dependencies',
           depName: 'cheerio',
           newValue: '0.22.1',
