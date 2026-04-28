@@ -21,7 +21,7 @@ vi.mock('../../../util/http/index.ts');
 vi.mock('../../../util/fs/index.ts', async () => {
   // restore
   return mockDeep({
-    isValidLocalPath: (await vi.importActual<FS>('../../../util/fs'))
+    isValidLocalPath: (await vi.importActual<FS>('../../../util/fs/index.ts'))
       .isValidLocalPath,
   });
 });

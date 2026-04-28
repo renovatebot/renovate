@@ -47,6 +47,7 @@
     ],
     "no-unassigned-vars": "error",
 
+    "renovate/enforce-ts-extension": "error",
     "renovate/no-tools-import": "error",
 
     "typescript/await-thenable": "error",
@@ -120,7 +121,25 @@
     "no-empty-function": "error",
     "typescript/no-inferrable-types": "error",
     "typescript/prefer-for-of": "error",
-    "typescript/prefer-function-type": "error"
+    "typescript/prefer-function-type": "error",
+
+    "no-case-declarations": "error",
+    "no-empty": "error",
+    "no-fallthrough": "error",
+    "no-prototype-builtins": "error",
+    "no-regex-spaces": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "typescript/ban-ts-comment": "error",
+    "typescript/consistent-type-definitions": "error",
+    "typescript/no-array-constructor": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-function-type": "error"
   },
   "overrides": [
     {
@@ -153,7 +172,10 @@
       }
     },
     {
-      "files": ["lib/config/presets/internal/*.preset.ts"],
+      "files": [
+        "lib/config/presets/internal/index.ts",
+        "lib/config/presets/internal/*.preset.ts"
+      ],
       "rules": {
         "sort-keys": [
           "error",
@@ -172,7 +194,8 @@
       "files": ["**/*.js", "**/*.mjs", "**/*.cjs"],
       "rules": {
         "typescript/restrict-template-expressions": "off",
-        "typescript/explicit-function-return-type": "off"
+        "typescript/explicit-function-return-type": "off",
+        "renovate/enforce-ts-extension": "off"
       }
     }
   ],
@@ -196,6 +219,12 @@
     "tools/mkdocs/site",
     ".github/workflows/**/*.js",
     ".worktrees/**/*",
-    ".markdownlint-cli2.mjs"
+    ".markdownlint-cli2.mjs",
+    "tools/mkdocs/.cache",
+    "**/.agents/**",
+    "**/.claude/**",
+    "**/.opencode/**",
+    "**/AGENTS.md",
+    "**/CLAUDE.md"
   ]
 }

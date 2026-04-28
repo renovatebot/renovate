@@ -16,7 +16,7 @@ describe('modules/platform/azure/azure-helper', () => {
     // reset module
     vi.resetModules();
     azureHelper = await vi.importActual('./azure-helper.ts');
-    azureApi = await vi.importMock('./azure-got-wrapper');
+    azureApi = await vi.importMock('./azure-got-wrapper.ts');
   });
 
   describe('getRef', () => {
@@ -214,6 +214,58 @@ describe('modules/platform/azure/azure-helper', () => {
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(
         GitPullRequestMergeStrategy.NoFastForward,
+      );
+    });
+
+    it('should return NoFastForward when policy explicitly set', async () => {
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: vi.fn(() => [
+              {
+                settings: {
+                  allowNoFastForward: true,
+                  scope: [
+                    {
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          }) as any,
+      );
+      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+        GitPullRequestMergeStrategy.NoFastForward,
+      );
+    });
+
+    it('should return RebaseMerge', async () => {
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: vi.fn(() => [
+              {
+                settings: {
+                  allowRebaseMerge: true,
+                  scope: [
+                    {
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          }) as any,
+      );
+      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+        GitPullRequestMergeStrategy.RebaseMerge,
       );
     });
 

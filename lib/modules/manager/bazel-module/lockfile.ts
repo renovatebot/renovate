@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -13,6 +14,17 @@ export async function updateBazelLockfile(
   bazeliskConstraint: string | undefined,
 ): Promise<UpdateArtifactsResult[] | null> {
   try {
+    const allowlist = GlobalConfig.get('allowedUnsafeExecutions', []);
+
+    const command = 'bazel mod deps --lockfile_mode=update';
+
+    if (!allowlist.includes('bazelModDeps')) {
+      logger.once.warn(
+        `Bazel command, \`${command}\`, was requested to run, but \`bazelModDeps\` is not permitted in the allowedUnsafeExecutions`,
+      );
+      return null;
+    }
+
     if (isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
@@ -24,7 +36,7 @@ export async function updateBazelLockfile(
         { toolName: 'bazelisk', constraint: bazeliskConstraint },
       ],
     };
-    await exec('bazel mod deps --lockfile_mode=update', execOptions);
+    await exec(command, execOptions);
 
     const status = await getRepoStatus();
     if (

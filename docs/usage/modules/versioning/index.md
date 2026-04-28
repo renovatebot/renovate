@@ -79,7 +79,7 @@ The configuration below overrides Renovate's default `docker` versioning for the
 In most ecosystems, especially SemVer, major upgrades are treated as breaking changes.
 But other updates may have breaking changes too, for example:
 
-- In SemVer, any update from a 0.x version may be breaking (including `0.1.0` -> `0.1.1`, `0.1.0` -> `0.2.0` and `0.1.0` -> `1.0.0`)
+- In SemVer, any update from a 0.x version may be breaking (including `0.1.0` → `0.1.1`, `0.1.0` → `0.2.0` and `0.1.0` → `1.0.0`)
 - Updates from pre-release versions like `1.0.0-pre.1` to other versions (including stable versions like `1.0.0`) can be breaking
 - Python makes breaking changes in minor updates, e.g. from `3.12` to `3.13`
 

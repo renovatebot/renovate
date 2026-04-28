@@ -1197,6 +1197,23 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('errors on invalid preset syntax', async () => {
+      const config = {
+        extends: [
+          'github>owner/repo//path@commitHash',
+          'github>owner/repo//path#commitHash',
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].message).toContain('github>owner/repo//path@commitHash');
+    });
+
     it('warns if only selectors in packageRules', async () => {
       const config = {
         packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],
@@ -2333,6 +2350,48 @@ describe('config/validation', () => {
       expect(warnings[0].message).toContain(
         'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers',
       );
+    });
+
+    it('validates postUpgradeTasks.installTools tool names', async () => {
+      const config = {
+        postUpgradeTasks: {
+          executionMode: 'update' as const,
+          installTools: {
+            npm: {},
+            node: {},
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('rejects invalid postUpgradeTasks.installTools tool names', async () => {
+      const config = {
+        postUpgradeTasks: {
+          installTools: {
+            npm: {},
+            unknownTool: {},
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: installTools.unknownTool is not a valid tool
+        config,
+      );
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid `postUpgradeTasks.installTools.unknownTool` configuration: not a valid tool name.',
+        },
+      ]);
+      expect(errors).toHaveLength(0);
     });
 
     it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
