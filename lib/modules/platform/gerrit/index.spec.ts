@@ -656,6 +656,17 @@ describe('modules/platform/gerrit/index', () => {
       ).resolves.toBeNull();
     });
 
+    it('getBranchPr() - falls back to first match when targetBranch does not match', async () => {
+      const change = makeChange({ status: 'NEW', branch: 'develop' });
+      const pr = mapGerritChangeToPr(change, {
+        sourceBranch: 'renovate/dependency-1.x',
+      })!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.getBranchPr('renovate/dependency-1.x', 'master'),
+      ).resolves.toHaveProperty('number', 123456);
+    });
+
     it('getBranchPr() - found even without targetBranch', async () => {
       const change = makeChange({ status: 'NEW' });
       const pr = mapGerritChangeToPr(change, {
