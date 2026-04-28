@@ -1,7 +1,7 @@
 # based on https://github.com/PierreRAFFA/cancel-previous-runs-action/blob/main/.github/workflows/test.yaml
 name: Cancel stale merge queue workflows
 on:
-  pull_request:
+  pull_request: {}
   merge_group:
     types:
       - checks_requested
