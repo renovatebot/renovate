@@ -6,11 +6,28 @@ const serviceDiscoveryResult = {
   'modules.v1': '/v1/modules/',
 };
 
-const registryModuleResponse = {
-  source: 'https://github.com/hashicorp/terraform-aws-consul',
-  versions: ['0.3.8', '0.4.0'],
-  version: '0.4.0',
-  published_at: '2018-09-20T11:25:22.957Z',
+const registryModuleV2Response = {
+  data: {
+    attributes: {
+      source: 'https://github.com/hashicorp/terraform-aws-consul',
+    },
+  },
+  included: [
+    {
+      type: 'module-versions',
+      attributes: {
+        version: '0.3.8',
+        'published-at': '2018-08-21T22:26:36Z',
+      },
+    },
+    {
+      type: 'module-versions',
+      attributes: {
+        version: '0.4.0',
+        'published-at': '2018-09-20T11:25:22Z',
+      },
+    },
+  ],
 };
 
 const moduleVersionsResponse = {
@@ -23,13 +40,10 @@ const baseUrl = TerraformModuleDatasource.terraformRegistryUrl;
 type MockVariant = 'empty' | '404' | 'error';
 
 function mockDefaultRegistryLookup(variant: MockVariant): void {
-  httpMock
-    .scope(baseUrl)
-    .get('/.well-known/terraform.json')
-    .reply(200, serviceDiscoveryResult);
   const registryScope = httpMock
     .scope(baseUrl)
-    .get('/v1/modules/hashicorp/consul/aws');
+    .get('/v2/modules/hashicorp/consul/aws')
+    .query({ include: 'module-versions' });
 
   if (variant === 'empty') {
     registryScope.reply(200, {});
@@ -86,10 +100,9 @@ describe('modules/datasource/terraform-module/index', () => {
     it('returns releases, homepage, and source URL from the default registry', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/v1/modules/hashicorp/consul/aws')
-        .reply(200, registryModuleResponse)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
+        .get('/v2/modules/hashicorp/consul/aws')
+        .query({ include: 'module-versions' })
+        .reply(200, registryModuleV2Response);
       const res = await getPkgReleases({
         datasource,
         packageName: 'hashicorp/consul/aws',
@@ -99,44 +112,12 @@ describe('modules/datasource/terraform-module/index', () => {
         registryUrl: 'https://registry.terraform.io',
         releases: [
           {
+            releaseTimestamp: '2018-08-21T22:26:36.000Z',
             version: '0.3.8',
           },
           {
-            releaseTimestamp: '2018-09-20T11:25:22.957Z',
+            releaseTimestamp: '2018-09-20T11:25:22.000Z',
             version: '0.4.0',
-          },
-        ],
-        sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
-      });
-    });
-
-    it('omits releaseTimestamp when the reported latest version is absent from versions', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/v1/modules/hashicorp/consul/aws')
-        .reply(200, {
-          namespace: 'hashicorp',
-          name: 'consul',
-          provider: 'aws',
-          versions: ['0.3.8'],
-          version: '9.9.9',
-          published_at: '2018-09-20T11:25:22.957Z',
-          source: 'https://github.com/hashicorp/terraform-aws-consul',
-        })
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'hashicorp/consul/aws',
-      });
-
-      expect(res).toEqual({
-        homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
-        registryUrl: 'https://registry.terraform.io',
-        releases: [
-          {
-            version: '0.3.8',
           },
         ],
         sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
@@ -218,10 +199,9 @@ describe('modules/datasource/terraform-module/index', () => {
     it('uses the registry embedded in packageName', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/v1/modules/hashicorp/consul/aws')
-        .reply(200, registryModuleResponse)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
+        .get('/v2/modules/hashicorp/consul/aws')
+        .query({ include: 'module-versions' })
+        .reply(200, registryModuleV2Response);
       const res = await getPkgReleases({
         datasource,
         packageName: 'registry.terraform.io/hashicorp/consul/aws',
@@ -229,6 +209,41 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(res).toEqual({
         homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
         registryUrl: 'https://registry.terraform.io',
+        releases: [
+          {
+            releaseTimestamp: '2018-08-21T22:26:36.000Z',
+            version: '0.3.8',
+          },
+          {
+            releaseTimestamp: '2018-09-20T11:25:22.000Z',
+            version: '0.4.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
+      });
+    });
+
+    it('uses the v1 extended endpoint for Terraform Cloud', async () => {
+      const cloudUrl = TerraformModuleDatasource.terraformCloudUrl;
+      httpMock
+        .scope(cloudUrl)
+        .get('/v1/modules/hashicorp/consul/aws')
+        .reply(200, {
+          source: 'https://github.com/hashicorp/terraform-aws-consul',
+          versions: ['0.3.8', '0.4.0'],
+          version: '0.4.0',
+          published_at: '2018-09-20T11:25:22.957Z',
+        })
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'hashicorp/consul/aws',
+        registryUrls: [cloudUrl],
+      });
+      expect(res).toEqual({
+        homepage: 'https://app.terraform.io/modules/hashicorp/consul/aws',
+        registryUrl: 'https://app.terraform.io',
         releases: [
           {
             version: '0.3.8',
