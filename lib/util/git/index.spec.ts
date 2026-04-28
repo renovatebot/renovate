@@ -453,6 +453,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const defaultDate = await git.getBranchUpdateDate(defaultBranch);
       expect(date!.toISO()).toBe(defaultDate!.toISO());
       expect(date).toBeInstanceOf(DateTime);
+      expect(updateDateCache.setCachedUpdateDateResult).toHaveBeenCalledWith(
+        'renovate/equal_branch',
+        expect.any(DateTime),
+      );
     });
 
     it('should return null when branch does not exist', async () => {
