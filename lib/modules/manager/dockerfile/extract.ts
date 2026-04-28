@@ -180,16 +180,12 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    // Match the alias key as either:
-    //   - "${name}/..." — bare identifier keys like `$CI_REGISTRY` need a slash
-    //     boundary so they don't overmatch (e.g. `$CI_REGISTRY` vs `$CI_REGISTRY_IMAGE`).
-    //   - "${name}..." — only when `name` already ends in a non-identifier
-    //     boundary character (typically `}` from `${VAR:-...}` defaults), so
-    //     e.g. `${VAR:-}image` resolves correctly without requiring a slash.
+    // Allow `${VAR}`/`${VAR:-...}` keys to match without a trailing slash
+    // (`}` is an unambiguous boundary). Bare identifier keys like
+    // `$CI_REGISTRY` still require `/` so they can't eat `$CI_REGISTRY_IMAGE/`.
     const matchedWithSlash = currentFrom.startsWith(`${name}/`);
-    const endsAtBoundary = regEx(/[^A-Za-z0-9_]$/).test(name);
     const matchedAtBoundary =
-      !matchedWithSlash && endsAtBoundary && currentFrom.startsWith(name);
+      !matchedWithSlash && name.endsWith('}') && currentFrom.startsWith(name);
     if (!matchedWithSlash && !matchedAtBoundary) {
       continue;
     }
