@@ -2,7 +2,7 @@ import { isNonEmptyArray } from '@sindresorhus/is';
 import { z } from 'zod/v3';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
-import type { Release } from '../types.ts';
+import type { Release, ReleaseResult } from '../types.ts';
 
 export const ServiceDiscoveryResponse = z.object({
   'modules.v1': z.string().optional(),
@@ -32,6 +32,43 @@ export const TerraformModuleResponse = z
   }));
 
 export type TerraformModuleResponse = z.infer<typeof TerraformModuleResponse>;
+
+const ModuleAttributes = z.object({
+  source: z.string().optional(),
+});
+
+const ModuleVersion = z
+  .object({
+    type: z.literal('module-versions'),
+    attributes: z.object({
+      version: z.string(),
+      'published-at': MaybeTimestamp,
+    }),
+  })
+  .transform(
+    (resource): Release => ({
+      version: resource.attributes.version,
+      releaseTimestamp: resource.attributes['published-at'],
+    }),
+  );
+
+export const TerraformModuleV2Response = z
+  .object({
+    data: z.object({
+      attributes: ModuleAttributes,
+    }),
+    included: LooseArray(ModuleVersion).catch([]),
+  })
+  .transform(
+    (response): ReleaseResult => ({
+      sourceUrl: response.data.attributes.source,
+      releases: response.included,
+    }),
+  );
+
+export type TerraformModuleV2Response = z.infer<
+  typeof TerraformModuleV2Response
+>;
 
 export const TerraformModuleVersion = z
   .object({ version: z.string() })

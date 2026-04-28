@@ -535,6 +535,7 @@ jobs:
       - codecov
       - coverage-threshold
       - lint-actions
+      - build-docker
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -591,6 +592,15 @@ jobs:
           needs.lint-actions.result == 'skipped'
         run: exit 1
 
+      - name: Fail for skipped or failed docker build when needed
+        if: |
+          (
+            github.event_name != 'pull_request' ||
+            (github.event.pull_request.draft != true && contains(github.event.pull_request.labels.*.name, 'ci:fulltest'))
+          ) &&
+          (needs.build-docker.result == 'skipped' || needs.build-docker.result == 'failure')
+        run: exit 1
+
   build:
     needs:
       - setup-build
@@ -624,7 +634,7 @@ jobs:
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
+    if: github.event_name != 'pull_request' || (github.event.pull_request.draft != true && contains(github.event.pull_request.labels.*.name, 'ci:fulltest'))
     steps:
       - run: df -h
 

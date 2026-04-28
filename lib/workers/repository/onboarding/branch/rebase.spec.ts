@@ -20,6 +20,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       GlobalConfig.set({
         localDir: '',
         onboardingConfigFileName: 'renovate.json',
+        onboardingPrTitle: 'Configure Renovate',
         platform: 'github',
       });
       memCache.init();
@@ -47,12 +48,16 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('rebases onboarding branch', async () => {
       await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].prTitle).toBe(
+        'Configure Renovate',
+      );
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
       GlobalConfig.set({
         localDir: '',
         onboardingConfigFileName: '.github/renovate.json',
+        onboardingPrTitle: 'Configure Renovate',
         platform: 'github',
       });
       await rebaseOnboardingBranch(config, hash);
@@ -63,10 +68,17 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
         '.github/renovate.json',
       );
+      expect(scm.commitAndPush.mock.calls[0][0].prTitle).toBe(
+        'Configure Renovate',
+      );
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      GlobalConfig.set({ localDir: '', platform: 'github' });
+      GlobalConfig.set({
+        localDir: '',
+        onboardingPrTitle: 'Configure Renovate',
+        platform: 'github',
+      });
       await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
@@ -75,11 +87,17 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
         'renovate.json',
       );
+      expect(scm.commitAndPush.mock.calls[0][0].prTitle).toBe(
+        'Configure Renovate',
+      );
     });
 
     it('handles a missing previous config hash', async () => {
       await rebaseOnboardingBranch(config, undefined);
       expect(scm.commitAndPush).toHaveBeenCalled();
+      expect(scm.commitAndPush.mock.calls[0][0].prTitle).toBe(
+        'Configure Renovate',
+      );
     });
 
     it('does nothing if config hashes match', async () => {
@@ -97,6 +115,25 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         'DRY-RUN: Would rebase files in onboarding branch',
       );
       expect(scm.commitAndPush).not.toHaveBeenCalled();
+    });
+
+    it('uses semantic commit PR title when semanticCommits is enabled', async () => {
+      GlobalConfig.set({
+        localDir: '',
+        onboardingPrTitle: 'Configure Renovate',
+        platform: 'github',
+      });
+      await rebaseOnboardingBranch(
+        {
+          ...config,
+          semanticCommits: 'enabled',
+        },
+        hash,
+      );
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].prTitle).toBe(
+        'chore: Configure Renovate',
+      );
     });
 
     // does not rebase on platforms that do not support html comments
