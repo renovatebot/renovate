@@ -6,7 +6,7 @@ If you're seeing that your jobs are regularly hitting a `timeout` / `kernel-out-
 
 On Mend-hosted apps, it is recommended to use the repo-level configuration, [`toolSettings.nodeMaxMemory`](../configuration-options.md#toolsettingsnodemaxmemory), to tune the maximum memory available for the `pnpm`/`yarn` commands to use this.
 
-Mend-hosted apps don't set a maximum allowed `nodeMaxMemory`, so you can use [the upper limit of memory from your plan](./overview.md) as the maximum limit.
+Mend-hosted apps don't set a maximum allowed `nodeMaxMemory`, so you can use [the upper limit of memory from your plan](./overview.md#resources-and-scheduling) as the maximum limit.
 
 It is recommended to set this between 1.5GB and 2.5GB but may require tweaking according to your repository.
 
