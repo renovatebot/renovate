@@ -2,6 +2,10 @@ import { isPlainObject } from '@sindresorhus/is';
 import { weave } from 'jsonc-weaver';
 import { logger } from '../../../logger/index.ts';
 import { BUN_CATALOG_DEPENDENCY } from '../npm/extract/common/catalogs.ts';
+import {
+  getNewGitValue,
+  getNewNpmAliasValue,
+} from '../npm/update/dependency/common.ts';
 import { updateDependency as npmUpdateDependency } from '../npm/update/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
@@ -93,7 +97,9 @@ export function updateDependency({
 
   const catalogName = catalogMatch.groups.catalogName;
 
-  const { newValue } = upgrade;
+  let { newValue } = upgrade;
+  newValue = getNewGitValue(upgrade) ?? newValue;
+  newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   if (!depName || !newValue) {
     logger.debug('Missing depName or newValue for bun catalog update');

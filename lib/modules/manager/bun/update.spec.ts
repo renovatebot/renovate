@@ -315,6 +315,94 @@ describe('modules/manager/bun/update', () => {
       expect(result).toBeNull();
     });
 
+    it('updates git version tag in catalog entry', () => {
+      const fileContent = JSON.stringify(
+        {
+          name: 'my-monorepo',
+          catalog: {
+            'my-lib': 'github:user/my-lib#v1.0.0',
+          },
+        },
+        null,
+        2,
+      );
+
+      const result = updateDependency({
+        fileContent,
+        packageFile: 'package.json',
+        upgrade: {
+          depType: 'bun.catalog.default',
+          depName: 'my-lib',
+          currentRawValue: 'github:user/my-lib#v1.0.0',
+          currentValue: 'v1.0.0',
+          newValue: 'v2.0.0',
+        },
+      });
+
+      expect(result).not.toBeNull();
+      const parsed = JSON.parse(result!);
+      expect(parsed.catalog['my-lib']).toBe('github:user/my-lib#v2.0.0');
+    });
+
+    it('updates git digest in catalog entry', () => {
+      const fileContent = JSON.stringify(
+        {
+          name: 'my-monorepo',
+          catalog: {
+            'my-lib': 'github:user/my-lib#abcd1234',
+          },
+        },
+        null,
+        2,
+      );
+
+      const result = updateDependency({
+        fileContent,
+        packageFile: 'package.json',
+        upgrade: {
+          depType: 'bun.catalog.default',
+          depName: 'my-lib',
+          currentRawValue: 'github:user/my-lib#abcd1234',
+          currentDigest: 'abcd1234',
+          newDigest: 'efgh5678',
+          newValue: 'v2.0.0',
+        },
+      });
+
+      expect(result).not.toBeNull();
+      const parsed = JSON.parse(result!);
+      expect(parsed.catalog['my-lib']).toBe('github:user/my-lib#efgh5678');
+    });
+
+    it('updates npm alias in catalog entry', () => {
+      const fileContent = JSON.stringify(
+        {
+          name: 'my-monorepo',
+          catalog: {
+            'my-react': 'npm:react@^18.0.0',
+          },
+        },
+        null,
+        2,
+      );
+
+      const result = updateDependency({
+        fileContent,
+        packageFile: 'package.json',
+        upgrade: {
+          depType: 'bun.catalog.default',
+          depName: 'my-react',
+          npmPackageAlias: true,
+          packageName: 'react',
+          newValue: '^19.0.0',
+        },
+      });
+
+      expect(result).not.toBeNull();
+      const parsed = JSON.parse(result!);
+      expect(parsed.catalog['my-react']).toBe('npm:react@^19.0.0');
+    });
+
     it('returns null for named catalog that does not exist', () => {
       const fileContent = JSON.stringify(
         {
