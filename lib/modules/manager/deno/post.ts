@@ -159,9 +159,9 @@ export function normalizeWorkspace(
   const workspaceContexts: WorkspaceContext[] = [];
 
   // create reference map for packageFile object
-  const packageMap = new Map<string, PackageFile<DenoManagerData>>();
+  const packageMap: Record<string, PackageFile<DenoManagerData>> = {};
   for (const pkg of packageFiles) {
-    packageMap.set(pkg.packageFile, pkg);
+    packageMap[pkg.packageFile] = pkg;
   }
 
   for (const pkg of packageFiles) {
@@ -211,7 +211,7 @@ export function normalizeWorkspace(
     }
   }
   for (const packageFile of invalidPackageFiles) {
-    const pkg = packageMap.get(packageFile);
+    const pkg = packageMap[packageFile];
     // remove invalid workspace
     delete pkg?.managerData?.workspaces;
   }
