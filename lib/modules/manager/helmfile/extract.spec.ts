@@ -572,5 +572,47 @@ describe('modules/manager/helmfile/extract', () => {
         ],
       });
     });
+
+    it('parses templates key alongside releases', async () => {
+      const content = codeBlock`
+        repositories:
+          - name: kiwigrid
+            url: https://kiwigrid.github.io
+
+        templates:
+          common:
+            name: common
+            version: 1.0.0
+            chart: kiwigrid/common
+          shared:
+            name: shared
+            version: 2.0.0
+            chart: kiwigrid/shared
+
+        releases:
+          - name: my-release
+            version: 3.0.0
+            chart: kiwigrid/my-chart
+      `;
+      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '3.0.0',
+            depName: 'my-chart',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'common',
+          },
+          {
+            currentValue: '2.0.0',
+            depName: 'shared',
+          },
+        ],
+      });
+    });
   });
 });

@@ -67,7 +67,10 @@ export async function extractPackageFile(
       );
     }
 
-    for (const dep of coerceArray(doc.releases)) {
+    for (const dep of [
+      ...coerceArray(doc.releases),
+      ...Object.values(doc.templates ?? {}),
+    ]) {
       let depName = dep.chart;
       let packageName: string | null = null;
       let repoName: string | null = null;
