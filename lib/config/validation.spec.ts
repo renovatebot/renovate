@@ -1027,7 +1027,7 @@ describe('config/validation', () => {
       it('can contain a valid tool name for Containerbase', async () => {
         const config: RenovateConfig = {
           constraints: {
-            go: '1.26.0',
+            golang: '1.26.0',
           },
         };
         const { warnings, errors } = await configValidation.validateConfig(
