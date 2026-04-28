@@ -11,7 +11,7 @@ import type {
   SkipReason,
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
-import type { ConstraintName, ToolName } from '../util/exec/types.ts';
+import type { ConstraintName } from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -174,7 +174,6 @@ export interface GlobalInheritableConfig {
   onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
-  requireConfig?: RequiredConfig;
 }
 
 // Config options used only within the global worker
@@ -307,7 +306,7 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
-  installTools?: Partial<Record<ToolName, Record<never, never>>>;
+  installTools?: Record<string, Record<never, never>>;
 }
 
 export type UpdateConfig<
