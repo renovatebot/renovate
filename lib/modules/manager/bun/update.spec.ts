@@ -285,7 +285,7 @@ describe('modules/manager/bun/update', () => {
       expect(parsed.dependencies.dep1).toBe('2.0.0');
     });
 
-    it('falls back to JSON.stringify when jsonc-weaver fails', async () => {
+    it('returns null when jsonc-weaver fails', async () => {
       const { weave } = await import('jsonc-weaver');
       vi.mocked(weave).mockImplementationOnce(() => {
         throw new Error('weave failure');
@@ -312,9 +312,7 @@ describe('modules/manager/bun/update', () => {
         },
       });
 
-      expect(result).not.toBeNull();
-      const parsed = JSON.parse(result!);
-      expect(parsed.catalog.react).toBe('^19.0.0');
+      expect(result).toBeNull();
     });
 
     it('returns null for named catalog that does not exist', () => {

@@ -123,9 +123,7 @@ export async function extractAllPackageFiles(
       const { packageFileResult: res, packageJson } = processResult;
 
       // Extract bun catalog dependencies from the root package.json
-      const bunCatalogs = bunCatalogsToArray(
-        packageJson as unknown as Record<string, unknown>,
-      );
+      const bunCatalogs = bunCatalogsToArray(packageJson);
       if (bunCatalogs.length > 0) {
         const catalogDeps = extractCatalogDeps(bunCatalogs, 'bun');
         res.deps.push(...catalogDeps);

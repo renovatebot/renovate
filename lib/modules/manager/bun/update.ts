@@ -2,10 +2,6 @@ import { isPlainObject } from '@sindresorhus/is';
 import { weave } from 'jsonc-weaver';
 import { logger } from '../../../logger/index.ts';
 import { BUN_CATALOG_DEPENDENCY } from '../npm/extract/common/catalogs.ts';
-import {
-  getNewGitValue,
-  getNewNpmAliasValue,
-} from '../npm/update/dependency/common.ts';
 import { updateDependency as npmUpdateDependency } from '../npm/update/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
@@ -46,41 +42,32 @@ function findCatalogTargets(
   catalogName: string,
 ): Record<string, string>[] {
   const targets: Record<string, string>[] = [];
+  const workspaces = parsedContents.workspaces;
 
   if (catalogName === 'default') {
     // Default catalog: look in `catalog` at top level and under `workspaces`
     if (isPlainObject(parsedContents.catalog)) {
       targets.push(parsedContents.catalog as Record<string, string>);
     }
-    const workspaces = parsedContents.workspaces;
-    if (
-      isPlainObject(workspaces) &&
-      isPlainObject((workspaces as Record<string, unknown>).catalog)
-    ) {
-      targets.push(
-        (workspaces as Record<string, unknown>).catalog as Record<
-          string,
-          string
-        >,
-      );
+    if (isPlainObject(workspaces) && isPlainObject(workspaces.catalog)) {
+      targets.push(workspaces.catalog as Record<string, string>);
     }
   } else {
     // Named catalog: look in `catalogs.<name>` at top level and under `workspaces`
-    if (isPlainObject(parsedContents.catalogs)) {
-      const namedCatalogs = parsedContents.catalogs as Record<string, unknown>;
-      if (isPlainObject(namedCatalogs[catalogName])) {
-        targets.push(namedCatalogs[catalogName] as Record<string, string>);
-      }
+    if (
+      isPlainObject(parsedContents.catalogs) &&
+      isPlainObject(parsedContents.catalogs[catalogName])
+    ) {
+      targets.push(
+        parsedContents.catalogs[catalogName] as Record<string, string>,
+      );
     }
-    const workspaces = parsedContents.workspaces;
-    if (isPlainObject(workspaces)) {
-      const wsCatalogs = (workspaces as Record<string, unknown>).catalogs;
-      if (isPlainObject(wsCatalogs)) {
-        const namedCatalogs = wsCatalogs as Record<string, unknown>;
-        if (isPlainObject(namedCatalogs[catalogName])) {
-          targets.push(namedCatalogs[catalogName] as Record<string, string>);
-        }
-      }
+    if (
+      isPlainObject(workspaces) &&
+      isPlainObject(workspaces.catalogs) &&
+      isPlainObject(workspaces.catalogs[catalogName])
+    ) {
+      targets.push(workspaces.catalogs[catalogName] as Record<string, string>);
     }
   }
 
@@ -106,9 +93,7 @@ export function updateDependency({
 
   const catalogName = catalogMatch.groups.catalogName;
 
-  let { newValue } = upgrade;
-  newValue = getNewGitValue(upgrade) ?? newValue;
-  newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
+  const { newValue } = upgrade;
 
   if (!depName || !newValue) {
     logger.debug('Missing depName or newValue for bun catalog update');
@@ -154,11 +139,8 @@ export function updateDependency({
   } catch (err) {
     logger.warn(
       { err },
-      'Error weaving JSON to preserve formatting for bun catalog update, falling back to JSON.stringify',
+      'Error weaving JSON to preserve formatting for bun catalog update',
     );
-    // Fallback: detect indentation from original and stringify
-    const indentRe = /^(\s+)"/m;
-    const indent = indentRe.exec(fileContent)?.[1] ?? '  ';
-    return JSON.stringify(parsedContents, null, indent) + '\n';
+    return null;
   }
 }
