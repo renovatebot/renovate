@@ -125,11 +125,12 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
-    it('delegates to super.mergeToLocal() when there is no pending change branch', async () => {
+    it('uses local merge for non-pending virtual branches', async () => {
       git.mergeToLocal.mockResolvedValueOnce();
       await expect(gerritScm.mergeToLocal('existingChange')).toResolve();
       expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
-        'existingChange',
+        'refs/remotes/origin/existingChange',
+        { localBranch: true },
       );
     });
   });
