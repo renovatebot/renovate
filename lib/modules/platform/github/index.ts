@@ -1378,12 +1378,24 @@ export async function findIssue(title: string): Promise<Issue | null> {
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
   const repo = config.parentRepo ?? config.repository;
-  const { body: closedIssue } = await githubApi.patchJson(
-    `repos/${repo}/issues/${issueNumber}`,
-    { body: { state: 'closed' } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(closedIssue);
+  try {
+    const { body: closedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNumber}`,
+      { body: { state: 'closed' } },
+      Issue,
+    );
+    GithubIssueCache.updateIssue(closedIssue);
+  } catch (err) {
+    const statusCode = err.response?.statusCode;
+    if (statusCode === 404 || statusCode === 410) {
+      logger.debug(
+        `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
+      );
+      GithubIssueCache.deleteIssue(issueNumber);
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function ensureIssue({
