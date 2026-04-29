@@ -932,6 +932,7 @@ Additionally, the "datasource" within Renovate must be capable of returning `con
 This feature is limited to the following datasources:
 
 - `crate`
+- `go`
 - `jenkins-plugins`
 - `npm`
 - `packagist`
