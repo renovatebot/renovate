@@ -9,9 +9,9 @@ export class MatchManagersMigration extends AbstractMigration {
       return;
     }
 
-    // prefix custom. before custom managers if not present
     const newValue = value.map((manager) => {
       switch (manager) {
+        // prefix custom. before custom managers if not present
         case 'regex':
           return 'custom.regex';
         case 'renovate-config-presets':
