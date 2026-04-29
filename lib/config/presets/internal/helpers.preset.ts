@@ -44,7 +44,7 @@ export const presets: Record<string, Preset> = {
         changelogUrl:
           '{{sourceUrl}}/-/compare/{{currentDigest}}...{{newDigest}}',
         matchDatasources: ['git-refs', 'git-tags'],
-        matchJsonata:  ["$detectPlatform(sourceUrl) = 'gitlab'"],
+        matchJsonata: ["$detectPlatform(sourceUrl) = 'gitlab'"],
         matchUpdateTypes: ['digest'],
       },
       {
