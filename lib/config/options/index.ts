@@ -3480,6 +3480,20 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'constraintsVersioning',
+    description:
+      'Override the versioning scheme used when filtering releases by specific constraint names. Does not apply to tools.',
+    type: 'object',
+    default: {},
+    mergeable: true,
+    cli: false,
+    env: false,
+    freeChoice: true,
+    additionalProperties: {
+      type: 'string',
+    },
+  },
 ];
 
 export function getOptions(): Readonly<RenovateOptions>[] {

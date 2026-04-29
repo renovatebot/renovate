@@ -966,6 +966,30 @@ When using with `npm`, we recommend you:
 - Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
 
+## `constraintsVersioning`
+
+Use `constraintsVersioning` to override the versioning scheme used when filtering releases by specific constraint names with [`constraintsFiltering`](#constraintsfiltering).
+
+<!-- prettier-ignore -->
+!!! note
+    Each key must be an [additional constraint name](#constraints) (i.e. not a tool name), and each value must be a valid versioning scheme ID.
+
+Datasources that support constraints filtering may set sensible defaults for their constraints.
+You can override these defaults in your Renovate config.
+
+For example, to use a SemVer-style versioning scheme when defining the `rubygems` constraint:
+
+```json title="Use SemVer-style range for defining version constraint, instead of 'ruby' versioning"
+{
+  "constraints": {
+    "rubygems": "^1.3"
+  },
+  "constraintsVersioning": {
+    "rubygems": "semver-coerced"
+  }
+}
+```
+
 ## `customDatasources`
 
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
