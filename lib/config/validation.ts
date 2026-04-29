@@ -19,6 +19,7 @@ import { regEx } from '../util/regex.ts';
 import {
   getRegexPredicate,
   isRegexMatch,
+  looksLikeUnwrappedRegex,
   matchRegexOrGlobList,
 } from '../util/string-match.ts';
 import * as template from '../util/template/index.ts';
@@ -605,6 +606,11 @@ export async function validateConfig(
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
                     });
                   }
+                } else if (looksLikeUnwrappedRegex(pattern)) {
+                  warnings.push({
+                    topic: 'Configuration Warning',
+                    message: `${currentPath}: pattern \`${pattern}\` looks like a regex but is not wrapped in slashes. It will be treated as a glob and likely match nothing. Wrap it as \`/${pattern.replace(/^!/, '')}/\` (prefix with \`!\` to negate) to use as a regex.`,
+                  });
                 }
               }
             }

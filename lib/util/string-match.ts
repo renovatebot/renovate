@@ -104,3 +104,28 @@ export function getRegexPredicate(input: string): StringMatchPredicate | null {
   }
   return null;
 }
+
+const regexClassEscape = regEx(/\\[bdwsBDWS]/);
+
+/**
+ * Heuristically detect a pattern that looks like a regex but is not wrapped in
+ * `/.../` slashes. Such patterns silently fall through to glob matching and
+ * almost never match what the author intended.
+ */
+export function looksLikeUnwrappedRegex(input: unknown): boolean {
+  if (!isString(input) || isRegexMatch(input)) {
+    return false;
+  }
+  // Strip leading "!" used for negation in match lists
+  const raw: string = input;
+  const pattern = raw.startsWith('!') ? raw.slice(1) : raw;
+  if (!pattern) {
+    return false;
+  }
+  return (
+    pattern.startsWith('^') ||
+    pattern.endsWith('$') ||
+    pattern.includes('(?') ||
+    regexClassEscape.test(pattern)
+  );
+}

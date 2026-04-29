@@ -1,6 +1,7 @@
 import {
   anyMatchRegexOrGlobList,
   getRegexPredicate,
+  looksLikeUnwrappedRegex,
   matchRegexOrGlob,
   matchRegexOrGlobList,
 } from './string-match.ts';
@@ -115,6 +116,29 @@ describe('util/string-match', () => {
 
     it('returns false if negative pattern is matched', () => {
       expect(matchRegexOrGlob('test', '!/te/')).toBeFalse();
+    });
+  });
+
+  describe('looksLikeUnwrappedRegex()', () => {
+    it.each`
+      input               | expected
+      ${'^foo'}           | ${true}
+      ${'foo$'}           | ${true}
+      ${'^(?!@scope/).+'} | ${true}
+      ${'!^foo'}          | ${true}
+      ${'\\d+'}           | ${true}
+      ${'foo\\bbar'}      | ${true}
+      ${'/^foo/'}         | ${false}
+      ${'!/^foo/'}        | ${false}
+      ${'foo'}            | ${false}
+      ${'@scope/*'}       | ${false}
+      ${'**/*.json'}      | ${false}
+      ${'[^abc]'}         | ${false}
+      ${'foo?bar'}        | ${false}
+      ${''}               | ${false}
+      ${'!'}              | ${false}
+    `('returns $expected for $input', ({ input, expected }) => {
+      expect(looksLikeUnwrappedRegex(input)).toBe(expected);
     });
   });
 });
