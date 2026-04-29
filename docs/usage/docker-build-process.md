@@ -25,7 +25,7 @@ It is possible to remove these - for instance to reduce the attack surface, or r
 
 ## Build process flow
 
-Renovate leverages [Containerbase](https://github.com/containerbase), a project is maintained by the same maintainers as the Renovate CLI project itself, which provides base images and utilities for managing dependencies.
+Renovate leverages [Containerbase](https://github.com/containerbase), a project maintained by the same maintainers as the Renovate CLI project itself, which provides base images and utilities for managing dependencies.
 
 This leads to a release process that requires multiple different container releases to result in the Renovate container image being updated.
 
