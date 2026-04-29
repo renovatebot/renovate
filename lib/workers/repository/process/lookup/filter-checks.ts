@@ -1,19 +1,16 @@
-import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import type { MinimumReleaseAgeBehaviour } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
-import { getElapsedMs } from '../../../../util/date.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
-import { coerceNumber } from '../../../../util/number.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import { getUpdateType } from './update-type.ts';
 
@@ -79,54 +76,34 @@ export async function filterInternalChecks(
       }
       candidateRelease = updatedCandidateRelease;
 
-      // Now check for a minimumReleaseAge config
-      const { minimumConfidence, minimumReleaseAge, updateType } =
-        releaseConfig;
+      const { minimumConfidence, updateType } = releaseConfig;
 
-      const minimumReleaseAgeMs = isNonEmptyString(minimumReleaseAge)
-        ? coerceNumber(toMs(minimumReleaseAge), 0)
-        : 0;
+      const minimumReleaseAgeStatus = checkMinimumReleaseAge(
+        candidateRelease,
+        releaseConfig,
+      );
 
-      if (minimumReleaseAgeMs) {
-        const minimumReleaseAgeBehaviour =
-          releaseConfig.minimumReleaseAgeBehaviour;
+      if (minimumReleaseAgeStatus === 'pending-elapsed') {
+        logger.trace(
+          { depName, check: 'minimumReleaseAge' },
+          `Release ${candidateRelease.version} is pending status checks`,
+        );
+        pendingReleases.unshift(candidateRelease);
+        continue;
+      }
 
-        // if there is a releaseTimestamp, regardless of `minimumReleaseAgeBehaviour`, we should process it
-        // v8 ignore else -- TODO: add test #40625
-        if (candidateRelease.releaseTimestamp) {
-          // we should skip this if we have a timestamp that isn't passing checks:
-          if (
-            getElapsedMs(candidateRelease.releaseTimestamp) <
-            minimumReleaseAgeMs
-          ) {
-            // Skip it if it doesn't pass checks
-            logger.trace(
-              { depName, check: 'minimumReleaseAge' },
-              `Release ${candidateRelease.version} is pending status checks`,
-            );
-            pendingReleases.unshift(candidateRelease);
-            continue;
-          }
-        } // or if there is no timestamp, and we're running in `minimumReleaseAgeBehaviour=timestamp-required`
-        else if (
-          isNullOrUndefined(candidateRelease.releaseTimestamp) &&
-          minimumReleaseAgeBehaviour === 'timestamp-required'
-        ) {
-          // Skip it, as we require a timestamp
-          candidateVersionsWithoutReleaseTimestamp[
-            minimumReleaseAgeBehaviour
-          ].push(candidateRelease.version);
-          pendingReleases.unshift(candidateRelease);
-          continue;
-        } // if there is no timestamp, and we're running in `optional` mode, we can allow it
-        else if (
-          isNullOrUndefined(candidateRelease.releaseTimestamp) &&
-          minimumReleaseAgeBehaviour === 'timestamp-optional'
-        ) {
-          candidateVersionsWithoutReleaseTimestamp[
-            minimumReleaseAgeBehaviour
-          ].push(candidateRelease.version);
-        }
+      if (minimumReleaseAgeStatus === 'pending-no-timestamp') {
+        candidateVersionsWithoutReleaseTimestamp['timestamp-required'].push(
+          candidateRelease.version,
+        );
+        pendingReleases.unshift(candidateRelease);
+        continue;
+      }
+
+      if (minimumReleaseAgeStatus === 'allowed-no-timestamp') {
+        candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].push(
+          candidateRelease.version,
+        );
       }
 
       // TODO #22198

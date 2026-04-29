@@ -1,8 +1,6 @@
-import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
-import { getElapsedMs } from '../../../../util/date.ts';
-import { coerceNumber } from '../../../../util/number.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import * as p from '../../../../util/promises.ts';
 import { escapeRegExp, regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
@@ -38,35 +36,13 @@ function getLatestAllowedVersion(
     versioning.matches(release.version, lock.constraints),
   );
 
-  if (!satisfyingReleases.length) {
-    return null;
-  }
-
-  const minimumReleaseAgeMs = isNonEmptyString(config.minimumReleaseAge)
-    ? coerceNumber(toMs(config.minimumReleaseAge), 0)
-    : 0;
-
-  if (!minimumReleaseAgeMs) {
-    return satisfyingReleases.at(-1)?.version ?? null;
-  }
-
-  const minimumReleaseAgeBehaviour =
-    config.minimumReleaseAgeBehaviour ?? 'timestamp-required';
-
   for (const release of [...satisfyingReleases].reverse()) {
-    if (release.releaseTimestamp) {
-      if (getElapsedMs(release.releaseTimestamp) >= minimumReleaseAgeMs) {
-        return release.version;
-      }
-
-      logger.trace(
-        { depName: lock.packageName, check: 'minimumReleaseAge' },
-        `Skipping pending lockfile maintenance release ${release.version}`,
-      );
-      continue;
+    const status = checkMinimumReleaseAge(release, config);
+    if (status === 'allowed') {
+      return release.version;
     }
 
-    if (minimumReleaseAgeBehaviour === 'timestamp-optional') {
+    if (status === 'allowed-no-timestamp') {
       logger.once.warn(
         "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
       );
@@ -83,7 +59,9 @@ function getLatestAllowedVersion(
 
     logger.trace(
       { depName: lock.packageName, check: 'minimumReleaseAge' },
-      `Skipping lockfile maintenance release ${release.version} without releaseTimestamp`,
+      status === 'pending-elapsed'
+        ? `Skipping pending lockfile maintenance release ${release.version}`
+        : `Skipping lockfile maintenance release ${release.version} without releaseTimestamp`,
     );
   }
 
