@@ -309,5 +309,60 @@ describe('modules/datasource/terraform-module/index', () => {
         ],
       });
     });
+
+    it('processes real data from OpenTofu registry docs API', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/modules/terraform-aws-modules/vpc/aws/index.json')
+        .reply(200, {
+          versions: [
+            { id: 'v0.4.0', published: '2018-09-20T11:25:22Z' },
+            { id: 'v0.3.8', published: '2018-08-21T22:26:36Z' },
+          ],
+        });
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'terraform-aws-modules/vpc/aws',
+        registryUrls: ['https://registry.opentofu.org'],
+      });
+
+      expect(res).toEqual({
+        homepage:
+          'https://search.opentofu.org/module/terraform-aws-modules/vpc/aws',
+        registryUrl: 'https://registry.opentofu.org',
+        sourceUrl: 'https://github.com/terraform-aws-modules/terraform-aws-vpc',
+        releases: [
+          {
+            releaseTimestamp: '2018-08-21T22:26:36.000Z',
+            version: 'v0.3.8',
+          },
+          {
+            releaseTimestamp: '2018-09-20T11:25:22.000Z',
+            version: 'v0.4.0',
+          },
+        ],
+      });
+    });
+
+    it('returns an empty release list for OpenTofu registry without versions', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/modules/terraform-aws-modules/vpc/aws/index.json')
+        .reply(200, {});
+
+      expect(
+        await getPkgReleases({
+          datasource,
+          packageName: 'terraform-aws-modules/vpc/aws',
+          registryUrls: ['https://registry.opentofu.org'],
+        }),
+      ).toEqual({
+        homepage:
+          'https://search.opentofu.org/module/terraform-aws-modules/vpc/aws',
+        sourceUrl: 'https://github.com/terraform-aws-modules/terraform-aws-vpc',
+        releases: [],
+      });
+    });
   });
 });
