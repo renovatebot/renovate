@@ -1,6 +1,7 @@
 import { isEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
