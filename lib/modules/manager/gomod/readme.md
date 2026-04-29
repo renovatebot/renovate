@@ -24,9 +24,9 @@ Unlike the `go` directive, it's valid to keep bumping this, and you should see u
 ### Only suggesting updates that match your `go` directive
 
 In `go.mod`, the `go` directive essentially means "Compatible with this version or later".
-It is generally recommended for Go projects to _not_ bump this version unless necessary, and as [noted above](#updating-of-go-mod-and-toolchain-directives), Renovate doesn't update this.
+It is generally recommended for Go projects to _not_ bump this version unless necessary.
 
-However, dependency updates can lead to a package you rely on bumping their `go` directive, which means you can't accept the proposed update without also bumping your `go` directive.
+As [noted above](#updating-of-go-mod-and-toolchain-directives), Renovate doesn't update this directly, but dependency updates can lead to a package you rely on bumping their `go` directive, which means you can't accept the proposed update without also bumping your `go` directive.
 
 To make this simpler, you can use [`constraintsFiltering=strict`](../../../configuration-options.md#constraintsfiltering) to make sure that Renovate will only propose updates that match the [`constraints`](../../../configuration-options.md#constraints) you specify.
 
