@@ -3,9 +3,10 @@ import {
   isString,
   isUndefined,
 } from '@sindresorhus/is';
-import * as bunyan from 'bunyan';
+
 import fs from 'fs-extra';
 import upath from 'upath';
+import { bunyan } from '../expose.ts';
 import cmdSerializer from './cmd-serializer.ts';
 import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
@@ -80,7 +81,7 @@ function createLogFileStream(logFile: string): BunyanStream {
 }
 
 function serializedSanitizedLogger(streams: BunyanStream[]): BunyanLogger {
-  return bunyan.createLogger({
+  return bunyan().createLogger({
     name: 'renovate',
     serializers: {
       body: configSerializer,
@@ -137,7 +138,7 @@ export function validateLogLevel(
     return (logLevelToCheck as BunyanLogLevel) ?? defaultLevel;
   }
 
-  const logger = bunyan.createLogger({
+  const logger = bunyan().createLogger({
     name: 'renovate',
     streams: [
       {

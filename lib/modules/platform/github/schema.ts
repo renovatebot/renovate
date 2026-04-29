@@ -43,6 +43,8 @@ const CvssSeverity = z.object({
 });
 
 const SecurityAdvisory = z.object({
+  ghsa_id: z.string(),
+  summary: z.string(),
   description: z.string(),
   identifiers: z.array(
     z.object({

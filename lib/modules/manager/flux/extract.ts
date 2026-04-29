@@ -1,4 +1,5 @@
 import { isString } from '@sindresorhus/is';
+import { isMap, isPair, isScalar, parseAllDocuments } from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -48,6 +49,7 @@ function readManifest(
     return {
       kind: 'system',
       file: packageFile,
+      content,
       version: versionMatch[1],
       components: versionMatch[2],
     };
@@ -56,6 +58,7 @@ function readManifest(
   return {
     kind: 'resource',
     file: packageFile,
+    content,
     resources: parseYaml(content, {
       customSchema: FluxResource,
       failureBehaviour: 'filter',
@@ -176,10 +179,77 @@ function resolveSystemManifest(
   ];
 }
 
+function extractOCIRefRange(
+  content: string,
+  resourceName: string,
+): { replaceString: string; tagFirst: boolean } | null {
+  for (const doc of parseAllDocuments(content, { strict: false })) {
+    const docContents = doc.contents;
+    if (!isMap(docContents)) {
+      continue;
+    }
+    const kindNode = docContents.get('kind', true);
+    if (
+      !isScalar(kindNode) ||
+      (kindNode.value as unknown) !== 'OCIRepository'
+    ) {
+      continue;
+    }
+    const nameNode = docContents.getIn(['metadata', 'name'], true);
+    if (!isScalar(nameNode) || nameNode.value !== resourceName) {
+      continue;
+    }
+    const specNode = docContents.get('spec');
+    if (!isMap(specNode)) {
+      continue;
+    }
+    const refNode = specNode.get('ref');
+    if (!isMap(refNode)) {
+      continue;
+    }
+
+    let tagKeyRange: [number, number, number] | null = null;
+    let tagValueEnd: number | null = null;
+    let digestKeyRange: [number, number, number] | null = null;
+    let digestValueEnd: number | null = null;
+
+    for (const item of refNode.items) {
+      if (!isPair(item) || !isScalar(item.key)) {
+        continue;
+      }
+      if (item.key.value === 'tag' && isScalar(item.value)) {
+        tagKeyRange = item.key.range;
+        tagValueEnd = item.value.range[1];
+      } else if (item.key.value === 'digest' && isScalar(item.value)) {
+        digestKeyRange = item.key.range;
+        digestValueEnd = item.value.range[1];
+      }
+    }
+
+    if (
+      !tagKeyRange ||
+      tagValueEnd === null ||
+      !digestKeyRange ||
+      digestValueEnd === null
+    ) {
+      continue;
+    }
+
+    const tagFirst = tagKeyRange[0] < digestKeyRange[0];
+    const start = tagFirst ? tagKeyRange[0] : digestKeyRange[0];
+    const end = tagFirst ? digestValueEnd : tagValueEnd;
+
+    return { replaceString: content.slice(start, end), tagFirst };
+  }
+
+  return null;
+}
+
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
+  content: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
@@ -292,18 +362,45 @@ function resolveResourceManifest(
       }
       case 'OCIRepository': {
         const container = removeOCIPrefix(resource.spec.url);
-        let dep = getDep(container, false, registryAliases);
-        if (resource.spec.ref?.digest) {
-          dep = getDep(
+        if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
+          const combinedDep = getDep(
             `${container}@${resource.spec.ref.digest}`,
             false,
             registryAliases,
           );
-          if (resource.spec.ref?.tag) {
-            logger.debug('A digest and tag was found, ignoring tag');
+          // Set currentValue to the tag so the docker datasource can look up the image's new digest
+          combinedDep.currentValue = resource.spec.ref.tag;
+
+          const refRange = extractOCIRefRange(content, resource.metadata.name);
+          if (refRange) {
+            combinedDep.replaceString = refRange.replaceString;
+            if (refRange.tagFirst) {
+              combinedDep.autoReplaceStringTemplate = refRange.replaceString
+                .replace(resource.spec.ref.tag, '{{newValue}}')
+                .replace(resource.spec.ref.digest, '{{newDigest}}');
+            } else {
+              combinedDep.autoReplaceStringTemplate = refRange.replaceString
+                .replace(resource.spec.ref.digest, '{{newDigest}}')
+                .replace(resource.spec.ref.tag, '{{newValue}}');
+            }
+          } else {
+            logger.debug(
+              { file: manifest.file, name: resource.metadata.name },
+              'Could not find tag/digest nodes in content, skipping replacement',
+            );
+            combinedDep.skipReason = 'invalid-value';
           }
+
+          deps.push(combinedDep);
+        } else if (resource.spec.ref?.digest) {
+          const dep = getDep(
+            `${container}@${resource.spec.ref.digest}`,
+            false,
+            registryAliases,
+          );
+          deps.push(dep);
         } else if (resource.spec.ref?.tag) {
-          dep = getDep(
+          const dep = getDep(
             `${container}:${resource.spec.ref.tag}`,
             false,
             registryAliases,
@@ -311,10 +408,12 @@ function resolveResourceManifest(
           dep.autoReplaceStringTemplate =
             '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
+          deps.push(dep);
         } else {
+          const dep = getDep(container, false, registryAliases);
           dep.skipReason = 'unversioned-reference';
+          deps.push(dep);
         }
-        deps.push(dep);
         break;
       }
 
@@ -351,6 +450,7 @@ export function extractPackageFile(
         manifest,
         helmRepositories,
         config?.registryAliases,
+        content,
       );
       break;
     }
@@ -367,10 +467,11 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    // TODO #22198
-    const manifest = readManifest(content!, file);
-    if (manifest) {
-      manifests.push(manifest);
+    if (content) {
+      const manifest = readManifest(content, file);
+      if (manifest) {
+        manifests.push(manifest);
+      }
     }
   }
 
@@ -387,6 +488,7 @@ export async function extractAllPackageFiles(
           manifest,
           helmRepositories,
           config.registryAliases,
+          manifest.content,
         );
         break;
       }

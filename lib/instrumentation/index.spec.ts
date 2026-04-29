@@ -4,6 +4,7 @@ import {
   NodeTracerProvider,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
+import { bunyan } from '../expose.ts';
 import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import {
@@ -150,6 +151,23 @@ describe('instrumentation/index', () => {
           },
         ],
       },
+    });
+  });
+
+  describe('BunyanInstrumentation', () => {
+    // OpenTelemetry's context propagation currently uses `AsyncLocalStorage`, which does not behave the same way in vitest worker threads as in a real Node.js process, so we cannot write a full end-to-end here to validate the `span_id`, `trace_id` and `trace_flags` are set
+    //
+    // Claude Sonnet 4.6 suggests that we instead create an (admittedly brittle) test to validate that this is marked as `__wrapped`.
+    it('patches bunyan Logger._emit when tracing is enabled', () => {
+      process.env.RENOVATE_TRACING_CONSOLE_EXPORTER = 'true';
+      init();
+
+      const mod = bunyan();
+
+      // shimmer marks wrapped functions with __wrapped = true
+      expect(
+        (mod.prototype as unknown as Record<string, unknown>)._emit,
+      ).toHaveProperty('__wrapped', true);
     });
   });
 

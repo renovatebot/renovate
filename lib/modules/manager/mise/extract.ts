@@ -25,7 +25,11 @@ import {
 } from './backends.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
-import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
+import {
+  asdfTooling,
+  getOrderedMiseRegistryBackends,
+  miseTooling,
+} from './upgradeable-tooling.ts';
 import { parseTomlFile } from './utils.ts';
 
 // Tool names can have options in the tool name
@@ -113,9 +117,44 @@ function getToolConfig(
   toolOptions: MiseToolOptions,
 ): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
-    case '':
+    case '': {
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
-      return getRegistryToolConfig(toolName, version);
+      const staticResult = getRegistryToolConfig(toolName, version);
+      if (staticResult) {
+        return staticResult;
+      }
+
+      // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
+      const backends = getOrderedMiseRegistryBackends(toolName);
+
+      // prioritise the github backend as the best source for data
+      if (backends.github) {
+        const result = getToolConfig(
+          'github',
+          backends.github,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+
+      for (const [backendType, backendName] of Object.entries(backends)) {
+        const result = getToolConfig(
+          backendType,
+          backendName,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+      return null;
+    }
     // We can specify core, asdf, vfox, aqua backends for tools in the default registry
     // e.g. 'core:rust', 'asdf:rust', 'vfox:clang', 'aqua:act'
     case 'core':

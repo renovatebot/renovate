@@ -4,6 +4,7 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { extractRegistries } from '../maven/extract.ts';
 import { isXmlElement } from '../nuget/util.ts';
 import type {
   ExtractConfig,
@@ -75,10 +76,45 @@ interface RawDep {
   depPackageFile: string;
 }
 
+async function collectRegistryUrls(
+  node: XmlElement,
+  baseDir: string,
+): Promise<string[]> {
+  const urls: string[] = [];
+
+  // Read registry URLs from settingsFile attribute
+  const settingsFile = node.attr.settingsFile;
+  if (settingsFile) {
+    const settingsPath = settingsFile.startsWith('/')
+      ? settingsFile
+      : upath.join(baseDir, settingsFile);
+    const settingsContent = await readLocalFile(settingsPath, 'utf8');
+    if (settingsContent) {
+      urls.push(...extractRegistries(settingsContent));
+    } else {
+      logger.debug(`ant manager: could not read settings file ${settingsPath}`);
+    }
+  }
+
+  // Collect inline <remoteRepository url="..." /> elements
+  for (const child of node.children) {
+    if (
+      isXmlElement(child) &&
+      child.name === 'remoteRepository' &&
+      child.attr.url
+    ) {
+      urls.push(child.attr.url);
+    }
+  }
+
+  return [...new Set(urls)];
+}
+
 function collectCoordsDependency(
   node: XmlElement,
   packageFile: string,
   content: string,
+  registryUrls: string[],
 ): RawDep | null {
   const coordsStr = node.attr.coords;
 
@@ -92,7 +128,7 @@ function collectCoordsDependency(
     depName: `${parsed.groupId}:${parsed.artifactId}`,
     currentValue: parsed.rawVersion,
     depType: getDependencyType(parsed.scope ?? node.attr.scope),
-    registryUrls: [],
+    ...(registryUrls?.length && { registryUrls }),
   };
 
   // Position at the version substring within the coords attribute value
@@ -107,9 +143,10 @@ function collectDependency(
   node: XmlElement,
   packageFile: string,
   content: string,
+  registryUrls: string[] = [],
 ): RawDep | null {
   if (node.attr.coords) {
-    return collectCoordsDependency(node, packageFile, content);
+    return collectCoordsDependency(node, packageFile, content, registryUrls);
   }
 
   const { groupId, artifactId, version, scope } = node.attr;
@@ -123,7 +160,7 @@ function collectDependency(
     depName: `${groupId}:${artifactId}`,
     currentValue: version,
     depType: getDependencyType(scope),
-    registryUrls: [],
+    ...(registryUrls?.length && { registryUrls }),
   };
 
   dep.fileReplacePosition = findAttrValuePosition(content, node, 'version');
@@ -188,6 +225,7 @@ async function walkNodeInOrder(
   visitedFiles: Set<string>,
   allProps: Record<string, AntProp>,
   allRawDeps: RawDep[],
+  registryUrls: string[] = [],
 ): Promise<void> {
   const baseDir = upath.dirname(packageFile);
 
@@ -230,11 +268,20 @@ async function walkNodeInOrder(
       );
       await walkXmlFile(importedFile, visitedFiles, allProps, allRawDeps);
     } else if (child.name === 'dependency') {
-      const rawDep = collectDependency(child, packageFile, content);
+      const rawDep = collectDependency(
+        child,
+        packageFile,
+        content,
+        registryUrls,
+      );
       if (rawDep) {
         allRawDeps.push(rawDep);
       }
     } else {
+      // Collect registry URLs from settingsFile and remoteRepository
+      const childRegistries = await collectRegistryUrls(child, baseDir);
+      const mergedUrls =
+        childRegistries.length > 0 ? childRegistries : registryUrls;
       await walkNodeInOrder(
         child,
         packageFile,
@@ -242,6 +289,7 @@ async function walkNodeInOrder(
         visitedFiles,
         allProps,
         allRawDeps,
+        mergedUrls,
       );
     }
   }
