@@ -392,7 +392,7 @@ Will then output:
       "registryUrls": ["https://ghcr.io"]
     },
     {
-      "manager": "renovate-config-presets",
+      "manager": "renovate-config",
       "datasource": null,
       "depName": "renovatebot/.github",
       "packageFile": "renovate.json",
