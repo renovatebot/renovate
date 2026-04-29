@@ -65,9 +65,9 @@ describe('util/minimum-release-age', () => {
     });
 
     it('returns pending-no-timestamp when behaviour defaults to timestamp-required', () => {
-      expect(
-        checkMinimumReleaseAge({}, { minimumReleaseAge: '3 days' }),
-      ).toBe('pending-no-timestamp');
+      expect(checkMinimumReleaseAge({}, { minimumReleaseAge: '3 days' })).toBe(
+        'pending-no-timestamp',
+      );
     });
 
     it('returns allowed-no-timestamp when timestamp is optional and missing', () => {
