@@ -1,12 +1,10 @@
-import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { getChildEnv } from '../../../util/exec/utils.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
-import { simpleGitConfig } from '../../../util/git/config.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { acquireLock } from '../../../util/mutex.ts';
@@ -444,10 +442,9 @@ export class CrateDatasource extends Datasource {
       `Cloning private cargo registry`,
     );
 
-    const git = simpleGit({
-      ...simpleGitConfig(),
-      maxConcurrentProcesses: 1,
-    }).env(getChildEnv());
+    const git = createSimpleGit({
+      config: { maxConcurrentProcesses: 1 },
+    });
 
     try {
       await git.clone(registryFetchUrl, clonePath, {

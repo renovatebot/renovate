@@ -3,7 +3,12 @@ import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
-import type { Options, TaskOptions } from 'simple-git';
+import type {
+  Options,
+  SimpleGit,
+  SimpleGitOptions,
+  TaskOptions,
+} from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import { setTimeout } from 'timers/promises';
 import upath from 'upath';
@@ -28,6 +33,7 @@ import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
+import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
@@ -79,6 +85,18 @@ const delaySeconds = 3;
 const delayFactor = 2;
 
 export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
+
+export function createSimpleGit({
+  config,
+  env,
+}: {
+  config?: Partial<SimpleGitOptions>;
+  env?: ExtraEnv;
+} = {}): SimpleGit {
+  return simpleGit({ ...simpleGitConfig(), ...config }).env(
+    getChildEnv({ env }),
+  );
+}
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
 export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
@@ -181,7 +199,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
-  const globalGit = instrumentGit(simpleGit());
+  const globalGit = instrumentGit(createSimpleGit());
   try {
     const { major, minor, patch, installed } = await globalGit.version();
     /* v8 ignore if -- TODO: add test #40625 */
@@ -254,12 +272,10 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = instrumentGit(
-    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-      ...getEnv(),
-      LANG: 'C.UTF-8',
-      LC_ALL: 'C.UTF-8',
+    createSimpleGit({
+      config: { baseDir: GlobalConfig.get('localDir') },
+      env: { LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8' },
     }),
   );
   gitInitialized = false;
