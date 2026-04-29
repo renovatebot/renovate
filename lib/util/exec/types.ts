@@ -37,6 +37,9 @@ export const toolDefinitions = [
     name: 'corepack',
   },
   {
+    name: 'deno',
+  },
+  {
     name: 'devbox',
   },
   {
