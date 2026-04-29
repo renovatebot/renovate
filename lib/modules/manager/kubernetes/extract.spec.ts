@@ -51,6 +51,7 @@ describe('modules/manager/kubernetes/extract', () => {
           datasource: 'docker',
           depName: 'k8s.gcr.io/kube-proxy-amd64',
           packageName: 'k8s.gcr.io/kube-proxy-amd64',
+          registryUrls: ['https://k8s.gcr.io'],
           replaceString: 'k8s.gcr.io/kube-proxy-amd64:v1.11.1',
         },
         {
@@ -83,6 +84,7 @@ describe('modules/manager/kubernetes/extract', () => {
           datasource: 'docker',
           depName: 'quay.io/external_storage/local-volume-provisioner',
           packageName: 'quay.io/external_storage/local-volume-provisioner',
+          registryUrls: ['https://quay.io'],
           replaceString:
             'quay.io/external_storage/local-volume-provisioner:v2.1.0',
         },
@@ -106,6 +108,7 @@ describe('modules/manager/kubernetes/extract', () => {
           datasource: 'docker',
           depName: 'ghcr.io/berriai/litellm',
           packageName: 'ghcr.io/berriai/litellm',
+          registryUrls: ['https://ghcr.io'],
           replaceString:
             'ghcr.io/berriai/litellm:litellm_stable_release_branch-v1.67.0-stable',
         },
@@ -146,6 +149,7 @@ kind: ConfigMap
             datasource: 'docker',
             depName: 'quay.io/node',
             packageName: 'my-quay-mirror.registry.com/node',
+            registryUrls: ['https://my-quay-mirror.registry.com'],
             replaceString: 'quay.io/node:0.0.1',
           },
         ],
@@ -168,6 +172,7 @@ kind: ConfigMap
             datasource: 'docker',
             depName: 'quay.io/node',
             packageName: 'quay.io/node',
+            registryUrls: ['https://quay.io'],
             replaceString: 'quay.io/node:0.0.1',
           },
         ],
@@ -191,6 +196,7 @@ kind: ConfigMap
             datasource: 'docker',
             depName: 'quay.io/node',
             packageName: 'my-quay-mirror.registry.com/node',
+            registryUrls: ['https://my-quay-mirror.registry.com'],
             replaceString: 'quay.io/node:0.0.1',
           },
         ],
@@ -257,6 +263,7 @@ kind: ConfigMap
             datasource: 'docker',
             depName: 'quay.io/test/image',
             packageName: 'quay.io/test/image',
+            registryUrls: ['https://quay.io'],
             replaceString: 'quay.io/test/image:v1.0.0',
           });
         },
@@ -302,6 +309,7 @@ kind: ConfigMap
             datasource: 'docker',
             depName: 'quay.io/test/pod-image',
             packageName: 'quay.io/test/pod-image',
+            registryUrls: ['https://quay.io'],
             replaceString: 'quay.io/test/pod-image:v1.0.0',
           },
           {
@@ -312,6 +320,7 @@ kind: ConfigMap
             datasource: 'docker',
             depName: 'quay.io/test/cronjob-image',
             packageName: 'quay.io/test/cronjob-image',
+            registryUrls: ['https://quay.io'],
             replaceString: 'quay.io/test/cronjob-image:v2.0.0',
           },
           {
@@ -375,6 +384,7 @@ kind: ConfigMap
             datasource: 'docker',
             depName: 'quay.io/test/image',
             packageName: 'quay.io/test/image',
+            registryUrls: ['https://quay.io'],
             replaceString: 'quay.io/test/image:v1.0.0',
           },
         ]);

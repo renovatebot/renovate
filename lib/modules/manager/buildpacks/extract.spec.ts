@@ -77,6 +77,7 @@ id = "not/valid"`,
           datasource: 'docker',
           depName: 'registry.corp/builder/noble',
           packageName: 'registry.corp/builder/noble',
+          registryUrls: ['https://registry.corp'],
           replaceString: 'registry.corp/builder/noble:1.1.1',
         },
         {
