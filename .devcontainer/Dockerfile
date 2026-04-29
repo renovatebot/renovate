@@ -1,1 +1,1 @@
-FROM ghcr.io/containerbase/devcontainer:14.7.3
+FROM ghcr.io/containerbase/devcontainer:14.9.5

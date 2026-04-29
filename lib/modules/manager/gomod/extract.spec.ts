@@ -69,6 +69,7 @@ describe('modules/manager/gomod/extract', () => {
             currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
           },
           {
             managerData: {
@@ -143,6 +144,7 @@ describe('modules/manager/gomod/extract', () => {
             currentValue: '1.25.5',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
           },
           {
             managerData: {
@@ -212,6 +214,7 @@ describe('modules/manager/gomod/extract', () => {
             currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
           },
           {
             managerData: {
@@ -221,6 +224,7 @@ describe('modules/manager/gomod/extract', () => {
             depType: 'toolchain',
             currentValue: '1.23.3',
             datasource: 'golang-version',
+            commitMessageTopic: 'go toolchain directive',
           },
           {
             managerData: {
@@ -422,6 +426,7 @@ describe('modules/manager/gomod/extract', () => {
           currentValue: '1.19',
           datasource: 'golang-version',
           versioning: 'go-mod-directive',
+          commitMessageTopic: 'go module directive',
         },
         {
           managerData: {
