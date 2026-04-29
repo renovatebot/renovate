@@ -945,6 +945,10 @@ Sometimes when using private registries they may omit constraints information, w
     Enabling this feature may result in many package updates being filtered out silently.
     See below for a description of how it works.
 
+<!-- prettier-ignore -->
+!!! warning
+    Enabling this feature when using [`binarySource=global`](./self-hosted-configuration.md#binarysource) can lead to situations where Renovate suggests updates that it cannot then update, as it does not have the right tool versions installed.
+
 When `constraintsFiltering=strict`, the following logic applies:
 
 - Are there `constraints` for this repository, either detected from source or from config?
