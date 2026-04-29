@@ -329,7 +329,7 @@ export class GoProxyDatasource extends Datasource {
             try {
               const goDirective = await this.retrieveGoDirectiveForModule(
                 baseUrl,
-                packageName,
+                pkg,
                 rel.version,
               );
               if (goDirective) {

@@ -776,6 +776,126 @@ describe('modules/datasource/go/releases-goproxy', () => {
         });
       });
 
+      it('handles major version updates', async () => {
+        httpMock
+          .scope(`${baseUrl}/golang.org/x/mod`)
+          .get('/@v/list')
+          .reply(
+            200,
+            codeBlock`
+            v0.32.0
+            v0.33.0
+            v0.34.0
+          `,
+          )
+          .get('/@v/v0.32.0.info')
+          .reply(200, { Version: 'v0.32.0', Time: '2026-01-09T16:07:51Z' })
+          .get('/@v/v0.32.0.mod')
+          .reply(
+            200,
+            codeBlock`
+            module golang.org/x/mod
+
+            go 1.24.0
+
+            require golang.org/x/tools v0.40.0 // tagx:ignore
+          `,
+          )
+          .get('/@v/v0.33.0.info')
+          .reply(200, { Version: 'v0.33.0', Time: '2026-02-09T16:11:19Z' })
+          .get('/@v/v0.33.0.mod')
+          .reply(
+            200,
+            codeBlock`
+            module golang.org/x/mod
+
+            go 1.24.0
+
+            require golang.org/x/tools v0.41.0 // tagx:ignore
+          `,
+          )
+          .get('/@v/v0.34.0.info')
+          .reply(200, { Version: 'v0.34.0', Time: '2026-03-10T01:41:08Z' })
+          .get('/@v/v0.34.0.mod')
+          .reply(
+            200,
+            codeBlock`
+          module golang.org/x/mod
+
+          go 1.25.0
+
+          require golang.org/x/tools v0.42.0 // tagx:ignore
+          `,
+          )
+          .get('/@latest')
+          .reply(200, { Version: 'v0.34.0' })
+          .get('/v2/@v/list')
+          .reply(
+            200,
+            codeBlock`
+          v2.0.0
+        `,
+          )
+          .get('/v2/@v/v2.0.0.info')
+          .reply(200, { Version: 'v2.0.0', Time: '2026-04-01T01:41:08Z' })
+          .get('/v2/@v/v2.0.0.mod')
+          .reply(
+            200,
+            codeBlock`
+          module golang.org/x/mod/v2
+
+          go 1.26.0
+
+          require golang.org/x/tools v0.42.0 // tagx:ignore
+          `,
+          )
+          .get('/v2/@latest')
+          .reply(200, { Version: 'v2.0.0' })
+          .get('/v3/@v/list')
+          .reply(403);
+
+        httpMock.scope('https://golang.org/x/mod').get('?go-get=1').reply(200);
+
+        const res = await datasource.getReleases({
+          packageName: 'golang.org/x/mod',
+          constraintsFiltering: 'strict',
+        });
+
+        expect(res).toEqual({
+          releases: [
+            {
+              version: 'v0.32.0',
+              releaseTimestamp: '2026-01-09T16:07:51.000Z',
+              constraints: {
+                ['%goMod']: ['1.24.0'],
+              },
+            },
+            {
+              version: 'v0.33.0',
+              releaseTimestamp: '2026-02-09T16:11:19.000Z',
+              constraints: {
+                ['%goMod']: ['1.24.0'],
+              },
+            },
+            {
+              version: 'v0.34.0',
+              releaseTimestamp: '2026-03-10T01:41:08.000Z',
+              constraints: {
+                ['%goMod']: ['1.25.0'],
+              },
+            },
+            {
+              version: 'v2.0.0',
+              releaseTimestamp: '2026-04-01T01:41:08.000Z',
+              constraints: {
+                ['%goMod']: ['1.26.0'],
+              },
+            },
+          ],
+          tags: { latest: 'v2.0.0' },
+        });
+      });
+
       it('handles HTTP errors by omitting constraints on failed HTTP requests', async () => {
         httpMock
           .scope(`${baseUrl}/golang.org/x/mod`)
