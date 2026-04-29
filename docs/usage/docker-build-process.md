@@ -45,13 +45,19 @@ flowchart TD
     ContainerbaseBase[<a href="https://github.com/containerbase/base"><code>ghcr.io/containerbase/base</code></a>]
     ContainerbaseSidecar[<a href="https://github.com/containerbase/sidecar"><code>ghcr.io/containerbase/sidecar</code></a>]
     RenovatebotBaseImage[<a href="https://github.com/renovatebot/base-image"><code>ghcr.io/renovatebot/base-image</code></a>]
-    RenovateSlim[<code>ghcr.io/renovatebot/renovate</code></a>]
-    RenovateFull[<code>ghcr.io/renovatebot/renovate:full</code></a>]
+    RenovateSlim[<code>ghcr.io/renovatebot/renovate</code><br><code>docker.io/renovate/renovate</code>]
+    RenovateFull[<code>ghcr.io/renovatebot/renovate:full</code><br><code>docker.io/renovate/renovate:full</code>]
 ```
+
+## Tool support
 
 ### Adding new tools
 
 If you, as a user, are looking to extend the tool support that Renovate has, for instance to install it via [`constraints`](./configuration-options.md#constraints), then you will need to [request a new tool](https://github.com/containerbase/base/issues/new?template=new-tool.yml).
+
+<!-- prettier-ignore -->
+!!! note
+    In the future, there will be a [clearer guide](https://github.com/containerbase/base/issues/6570) for how to contribute tool support as a user.
 
 This tool will have its support added in `containerbase/base`, to allow Containerbase's `install-tool` command-line tool to install the tool.
 
@@ -66,3 +72,14 @@ To add it to the default images, the [`renovatebot/base-image` image](https://gi
 <!-- prettier-ignore -->
 !!! note
     Installed-by-default-tools will generally only be allowed for the "full" image.
+
+## Building the Docker image locally
+
+Renovate's Docker image can be built locally like so:
+
+```sh
+pnpm build
+pnpm build:docker
+# or to customize the build
+env OWNER=jamietanna pnpm build:docker build --platform linux/amd64 --version 0.0.0-local
+```
