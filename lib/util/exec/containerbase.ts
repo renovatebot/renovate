@@ -5,6 +5,7 @@ import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import { id as composerVersioningId } from '../../modules/versioning/composer/index.ts';
 import { id as condaVersioningId } from '../../modules/versioning/conda/index.ts';
+import { id as denoVersioningId } from '../../modules/versioning/deno/index.ts';
 import { id as gradleVersioningId } from '../../modules/versioning/gradle/index.ts';
 import * as allVersioning from '../../modules/versioning/index.ts';
 import { id as mavenVersioningId } from '../../modules/versioning/maven/index.ts';
@@ -59,6 +60,11 @@ const allToolConfig: Record<ToolName, ToolConfig> = {
     datasource: 'npm',
     packageName: 'corepack',
     versioning: npmVersioningId,
+  },
+  deno: {
+    datasource: 'github-releases',
+    packageName: 'denoland/deno',
+    versioning: denoVersioningId,
   },
   devbox: {
     datasource: 'github-releases',

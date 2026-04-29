@@ -11,7 +11,7 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
   const extractor = new ModuleExtractor();
 
   it('return empty array if no module is found', () => {
-    const res = extractor.extract({});
+    const res = extractor.extract({}, [], {});
     expect(res).toBeArrayOfSize(0);
   });
 

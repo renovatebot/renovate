@@ -1034,6 +1034,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
 
       it(`logs when skipping a constraint that isn't a known tool`, async () => {
+        // @ts-expect-error -- installTools.jenkins is not valid
         const commands = partial<BranchUpgradeConfig>([
           {
             constraints: {
@@ -1089,7 +1090,11 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         });
         fs.localPathIsFile.mockResolvedValueOnce(true);
 
-        await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
+        await postUpgradeCommands.postUpgradeCommandsExecutor(
+          // @ts-expect-error -- installTools.jenkins is not valid
+          commands,
+          config,
+        );
 
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {

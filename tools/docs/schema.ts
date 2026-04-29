@@ -155,6 +155,22 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     }
   }
 
+  if (option.name === 'constraintsVersioning') {
+    temp.additionalProperties = false;
+    temp.properties = {};
+
+    for (const {
+      name,
+      description,
+    } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+      temp.properties[name] = {
+        type: 'string',
+        // prioritise contraint definitions, as they're more useful than the generated one
+        description: description ?? `A constraint for \`${name}\``,
+      };
+    }
+  }
+
   if (option.name === 'installTools') {
     temp.additionalProperties = false;
     temp.properties = {};

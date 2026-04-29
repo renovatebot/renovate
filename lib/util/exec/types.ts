@@ -12,54 +12,143 @@ export interface ConstraintDefinition {
  * TODO #41849 replace with upstream types
  */
 export const toolDefinitions = [
-  { name: 'bazelisk' },
-  { name: 'bun' },
-  { name: 'bundler' },
-  { name: 'cocoapods' },
-  { name: 'composer' },
-  { name: 'conan' },
-  { name: 'copier' },
-  { name: 'corepack' },
-  { name: 'devbox' },
-  { name: 'dotnet' },
-  { name: 'erlang' },
-  { name: 'elixir' },
-  { name: 'flux' },
-  { name: 'gleam' },
-  { name: 'golang' },
-  { name: 'gradle' },
-  { name: 'hashin' },
-  { name: 'helm' },
-  { name: 'helmfile' },
-  { name: 'java' },
-  { name: 'java-maven' },
-  { name: 'jb' },
-  { name: 'kustomize' },
-  { name: 'maven' },
-  { name: 'mise' },
-  { name: 'nix' },
-  { name: 'node' },
-  { name: 'npm' },
-  { name: 'pdm' },
-  { name: 'php' },
-  { name: 'pip-tools' },
-  { name: 'pipenv' },
-  { name: 'pnpm' },
-  { name: 'pixi' },
-  { name: 'poetry' },
-  { name: 'python' },
+  {
+    name: 'bazelisk',
+  },
+  {
+    name: 'bun',
+  },
+  {
+    name: 'bundler',
+  },
+  {
+    name: 'cocoapods',
+  },
+  {
+    name: 'composer',
+  },
+  {
+    name: 'conan',
+  },
+  {
+    name: 'copier',
+  },
+  {
+    name: 'corepack',
+  },
+  {
+    name: 'deno',
+  },
+  {
+    name: 'devbox',
+  },
+  {
+    name: 'dotnet',
+  },
+  {
+    name: 'erlang',
+  },
+  {
+    name: 'elixir',
+  },
+  {
+    name: 'flux',
+  },
+  {
+    name: 'gleam',
+  },
+  {
+    name: 'golang',
+  },
+  {
+    name: 'gradle',
+  },
+  {
+    name: 'hashin',
+  },
+  {
+    name: 'helm',
+  },
+  {
+    name: 'helmfile',
+  },
+  {
+    name: 'java',
+  },
+  {
+    name: 'java-maven',
+  },
+  {
+    name: 'jb',
+  },
+  {
+    name: 'kustomize',
+  },
+  {
+    name: 'maven',
+  },
+  {
+    name: 'mise',
+  },
+  {
+    name: 'nix',
+  },
+  {
+    name: 'node',
+  },
+  {
+    name: 'npm',
+  },
+  {
+    name: 'pdm',
+  },
+  {
+    name: 'php',
+  },
+  {
+    name: 'pip-tools',
+  },
+  {
+    name: 'pipenv',
+  },
+  {
+    name: 'pnpm',
+  },
+  {
+    name: 'pixi',
+  },
+  {
+    name: 'poetry',
+  },
+  {
+    name: 'python',
+  },
   {
     name: 'ruby',
     description: 'Also used in the `rubygems` datasource',
   },
-  { name: 'rust' },
-  { name: 'uv' },
-  { name: 'yarn' },
-  { name: 'yarn-slim' },
-  { name: 'dart' },
-  { name: 'flutter' },
-  { name: 'vendir' },
-] as const satisfies readonly ConstraintDefinition[];
+  {
+    name: 'rust',
+  },
+  {
+    name: 'uv',
+  },
+  {
+    name: 'yarn',
+  },
+  {
+    name: 'yarn-slim',
+  },
+  {
+    name: 'dart',
+  },
+  {
+    name: 'flutter',
+  },
+  {
+    name: 'vendir',
+  },
+] as const satisfies ConstraintDefinition[];
 
 /**
  * A `tool` that Containerbase supports.
@@ -123,7 +212,12 @@ export const additionalConstraintDefinitions = [
     name: 'perl',
     description: 'Used in the `cpanfile` manager to track Perl version.',
   },
-] as const satisfies readonly ConstraintDefinition[];
+  {
+    name: '%goMod',
+    description:
+      'Used in the `gomod` manager to determine the [minimum version of Go required to use this module](https://go.dev/ref/mod#go-mod-file-go).\n\nNote that this is prefixed with a `%` to explicilty note that this is not a tool that Containerbase knows.',
+  },
+] as const satisfies ConstraintDefinition[];
 
 /**
  * Additional constraints that can be specified for some Managers, but are not

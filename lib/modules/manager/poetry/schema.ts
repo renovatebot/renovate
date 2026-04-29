@@ -1,5 +1,6 @@
 import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import {
@@ -106,16 +107,17 @@ const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional(), source: z.string().optional() })
     .transform(({ version: currentValue, source }): PackageDependency => {
+      const managerData = {
+        ...(source ? { sourceName: source.toLowerCase() } : {}),
+      };
+
       if (!currentValue) {
-        return { datasource: PypiDatasource.id };
+        return { datasource: PypiDatasource.id, managerData };
       }
 
       return {
         datasource: PypiDatasource.id,
-        managerData: {
-          nestedVersion: true,
-          ...(source ? { sourceName: source.toLowerCase() } : {}),
-        },
+        managerData: { ...managerData, nestedVersion: true },
         currentValue,
       };
     })
@@ -337,35 +339,50 @@ export const PoetryPyProject = Toml.pipe(
 
       const deps: PackageDependency[] = [];
 
-      const projectDependencies = project?.dependencies;
-      if (projectDependencies) {
-        deps.push(...projectDependencies);
-      }
+      const projectDependencies = coerceArray(project?.dependencies);
+      deps.push(...projectDependencies);
 
-      const projectOptionalDependencies = project?.['optional-dependencies'];
-      if (projectOptionalDependencies) {
-        deps.push(...projectOptionalDependencies);
-      }
+      const projectOptionalDependencies = coerceArray(
+        project?.['optional-dependencies'],
+      );
+      deps.push(...projectOptionalDependencies);
 
       deps.push(...dependencyGroups);
+
+      const projectDepsByName: Record<string, PackageDependency> = {};
+      for (const dep of [
+        ...projectDependencies,
+        ...dependencyGroups,
+        ...projectOptionalDependencies,
+      ]) {
+        projectDepsByName[dep.depName!] = dep;
+      }
 
       if (buildSystem?.requires) {
         deps.push(...buildSystem.requires);
       }
 
-      const poetryDependencies = tool?.poetry?.dependencies;
-      if (poetryDependencies) {
-        deps.push(...poetryDependencies);
-      }
+      const poetryDependencies = coerceArray(tool?.poetry?.dependencies);
 
-      const poetryDevDependencies = tool?.poetry?.['dev-dependencies'];
-      if (poetryDevDependencies) {
-        deps.push(...poetryDevDependencies);
-      }
+      const poetryDevDependencies = coerceArray(
+        tool?.poetry?.['dev-dependencies'],
+      );
 
-      const poetryGroupDependencies = tool?.poetry?.group;
-      if (poetryGroupDependencies) {
-        deps.push(...poetryGroupDependencies);
+      const poetryGroupDependencies = coerceArray(tool?.poetry?.group);
+
+      for (const poetryDep of [
+        ...poetryDependencies,
+        ...poetryDevDependencies,
+        ...poetryGroupDependencies,
+      ]) {
+        // When the same dep exists in project.dependencies or dependency-groups,
+        // Poetry just uses the Poetry dep for enrichment with source info.
+        if (poetryDep.depName && projectDepsByName[poetryDep.depName]) {
+          const dep = projectDepsByName[poetryDep.depName];
+          dep.managerData = { ...poetryDep.managerData, ...dep.managerData };
+        } else {
+          deps.push(poetryDep);
+        }
       }
 
       const packageFileVersion = tool?.poetry?.version;
