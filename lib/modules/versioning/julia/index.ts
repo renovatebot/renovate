@@ -113,17 +113,16 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  let newJulia = newSemver
-    ? npm2julia(newSemver)
-    : /* v8 ignore next: should never happen */ null;
-  /* v8 ignore if */
-  if (!newJulia) {
+  /* v8 ignore start: defensive — npm should always return a value for inputs julia2npm produces */
+  if (!newSemver) {
     logger.info(
-      { currentValue, newSemver },
-      'Could not get julia version from semver',
+      { currentValue, rangeStrategy, newVersion },
+      'Could not derive julia version range',
     );
     return currentValue;
   }
+  /* v8 ignore stop */
+  let newJulia = npm2julia(newSemver);
   // Preserve precision (number of components) when current uses `^` or `~`.
   if (
     (currentValue.startsWith('~') || currentValue.startsWith('^')) &&
