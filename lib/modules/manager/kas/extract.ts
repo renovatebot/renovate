@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { parseSingleYamlDocument } from '../../../util/yaml.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -43,11 +44,11 @@ export function getLockFilePath(filePath: string): string | null {
 }
 
 export function isLockFilePath(filePath: string): boolean {
-  return /\.lock\.(yml|yaml|json)$/i.test(filePath);
+  return regEx(/\.lock\.(yml|yaml|json)$/i).test(filePath);
 }
 
 export function isYamlFilePath(filePath: string): boolean {
-  return /\.(yml|yaml)$/i.test(filePath);
+  return regEx(/\.(yml|yaml)$/i).test(filePath);
 }
 
 export function getProjectParser(filePath: string): typeof KasProjectYaml {
