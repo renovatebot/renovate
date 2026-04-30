@@ -1,3 +1,4 @@
+import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
 import { getOptions } from '../../lib/config/options/index.ts';
 import type {
   RenovateOptions,
@@ -277,6 +278,28 @@ function createSchemaForChildConfigs(
             toRequiredPropertiesRule(prop, option),
           );
         }
+      }
+    }
+  }
+
+  // then make sure we set anything that's possible to be under packageRules
+  const parent = 'packageRules';
+  for (const option of options) {
+    // as long as it's not already got an entry
+    if (
+      isUndefined(option.parents) &&
+      isNullOrUndefined(
+        properties[parent].items.allOf[0].properties[option.name],
+      )
+    ) {
+      properties[parent].items.allOf[0].properties[option.name] = {
+        $ref: `#/definitions/${option.name}`,
+      };
+
+      for (const prop of option.requiredIf ?? []) {
+        properties[parent].items.allOf.push(
+          toRequiredPropertiesRule(prop, option),
+        );
       }
     }
   }
