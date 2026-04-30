@@ -1815,10 +1815,7 @@ async function tryPrAutomerge(
         commitHeadline = automergeCommitMessage;
       } else {
         commitHeadline = automergeCommitMessage.slice(0, newlineIndex);
-        commitBody = automergeCommitMessage
-          .slice(newlineIndex + 1)
-          .replace(/^\n/, '')
-          .trim();
+        commitBody = automergeCommitMessage.slice(newlineIndex + 1).trim();
       }
 
       // Add PR number to the commit headline to match the default GitHub behavior
