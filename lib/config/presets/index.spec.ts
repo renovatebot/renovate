@@ -640,6 +640,7 @@ describe('config/presets/index', () => {
           'helpers:forgejoDigestChangelogs',
           'helpers:giteaDigestChangelogs',
           'helpers:githubDigestChangelogs',
+          'helpers:gitlabDigestChangelogs',
           'helpers:goXPackagesChangelogLink',
           'helpers:goXPackagesNameLink',
         ],
