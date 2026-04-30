@@ -88,5 +88,16 @@ describe('modules/datasource/julia-general-metadata/index', () => {
         ],
       });
     });
+
+    it('omits releaseTimestamp when registered cannot be parsed', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/versions.json')
+        .reply(200, {
+          '1.0.0': { registered: 'not-a-real-date', has_artifacts: false },
+        });
+      const res = await getPkgReleases({ datasource, packageName: 'Example' });
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
   });
 });
