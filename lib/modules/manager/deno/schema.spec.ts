@@ -309,6 +309,23 @@ describe('modules/manager/deno/schema', () => {
   });
 
   describe('DenoDependency', () => {
+    // https://github.com/renovatebot/renovate/discussions/43015
+    it('parses npm package names containing dots', () => {
+      expect(
+        DenoDependency.parse({
+          depValue: 'npm:discord.js@14.26.3',
+          depType: 'imports',
+        }),
+      ).toEqual({
+        currentRawValue: 'npm:discord.js@14.26.3',
+        currentValue: '14.26.3',
+        datasource: 'npm',
+        depName: 'discord.js',
+        depType: 'imports',
+        versioning: 'deno',
+      });
+    });
+
     it('invalid npm package names', () => {
       expect(
         DenoDependency.parse({
