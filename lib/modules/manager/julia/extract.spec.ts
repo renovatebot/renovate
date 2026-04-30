@@ -33,7 +33,7 @@ describe('modules/manager/julia/extract', () => {
       ]);
     });
 
-    it('extracts compat entries and the package version', () => {
+    it('extracts compat entries with abbreviated UUIDs and the package version', () => {
       const res = extractPackageFile(projectToml, 'Project.toml');
       expect(res).toEqual({
         packageFileVersion: '0.1.0',
@@ -44,6 +44,7 @@ describe('modules/manager/julia/extract', () => {
             currentValue: '0.5',
             datasource: 'julia-general-metadata',
             versioning: 'julia',
+            commitMessageTopic: 'Example [7876af07]',
           },
           {
             depName: 'JSON',
@@ -51,9 +52,47 @@ describe('modules/manager/julia/extract', () => {
             currentValue: '0.21, 1',
             datasource: 'julia-general-metadata',
             versioning: 'julia',
+            commitMessageTopic: 'JSON [682c06a0]',
           },
         ],
       });
+    });
+
+    it('falls back to [extras] when a compat entry is not in [deps]', () => {
+      const content = `
+[deps]
+Example = "7876af07-990d-54b4-ab0e-23690620f79a"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+Example = "0.5"
+Test = "1"
+`;
+      const res = extractPackageFile(content, 'Project.toml');
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'Example',
+          commitMessageTopic: 'Example [7876af07]',
+        }),
+        expect.objectContaining({
+          depName: 'Test',
+          commitMessageTopic: 'Test [8dfed614]',
+        }),
+      ]);
+    });
+
+    it('omits commitMessageTopic when no UUID can be found', () => {
+      const content = `[compat]\nExample = "0.5"\n`;
+      const res = extractPackageFile(content, 'Project.toml');
+      expect(res?.deps?.[0]).not.toHaveProperty('commitMessageTopic');
+    });
+
+    it('omits commitMessageTopic when [deps] entry is malformed', () => {
+      const content = `[deps]\nExample = "not-a-uuid"\n[compat]\nExample = "0.5"\n`;
+      const res = extractPackageFile(content, 'Project.toml');
+      expect(res?.deps?.[0]).not.toHaveProperty('commitMessageTopic');
     });
 
     it('omits packageFileVersion when none is declared', () => {
