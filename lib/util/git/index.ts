@@ -811,6 +811,7 @@ export async function isBranchModified(
     const commits = await git.log({
       from: `origin/${baseBranch}`,
       to: `origin/${branchName}`,
+      symmetric: false, // means <from>..<to> instead of <from>...<to>
       format: {
         author_email: '%ae',
         committer_email: '%ce',

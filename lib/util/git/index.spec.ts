@@ -446,6 +446,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await git.isBranchModified('renovate/future_branch', defaultBranch),
       ).toBeTrue();
     });
+
+    it('should not be affected by new commits on the base branch', async () => {
+      // Add a commit to the base branch from a different author,
+      // causing the branches to diverge
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
+      await local.addConfig('user.email', 'other-dev@example.com');
+      await fs.writeFile(tmpDir.path + '/diverge_file', 'diverge');
+      await local.add(['diverge_file']);
+      await local.commit('diverge commit');
+      await local.push('origin', defaultBranch);
+      // Re-init so Renovate picks up the new origin state
+      await git.initRepo({ url: origin.path });
+      git.setGitAuthor('Jest <Jest@example.com>');
+      await git.syncGit();
+
+      expect(
+        await git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).toBeFalse();
+    });
   });
 
   describe('getBranchCommit(branchName)', () => {
