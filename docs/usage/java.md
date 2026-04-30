@@ -148,6 +148,12 @@ module.exports = {
 
 There are multiple ways to configure Renovate to access Artifact Registry.
 
+<!-- prettier-ignore -->
+!!! note
+    When using the `artifactregistry://` protocol, Renovate automatically enriches release timestamps by querying the [Artifact Registry Files API](https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.files/get).
+    This means `releaseTimestamp` will be populated for packages fetched from Google Artifact Registry, enabling features like age-based update policies.
+    The same credentials used to fetch the artifact are reused for the API call; failures are handled gracefully and do not affect the dependency lookup.
+
 #### Using Application Default Credentials / Workload Identity (Self-Hosted only)
 
 Configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) or [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_ provide a username, password or token.
