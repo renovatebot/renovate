@@ -1,11 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { vi } from 'vitest';
-
-vi.mock('../../../util/fs/index.ts', () => ({
-  writeLocalFile: vi.fn(),
-}));
-
 import { updateDependency } from './update.ts';
+
+vi.mock('../../../util/fs/index.ts');
 
 const kasFileYamlBranch = codeBlock`
   header:
