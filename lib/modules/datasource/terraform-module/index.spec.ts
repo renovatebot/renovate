@@ -335,11 +335,11 @@ describe('modules/datasource/terraform-module/index', () => {
         releases: [
           {
             releaseTimestamp: '2018-08-21T22:26:36.000Z',
-            version: 'v0.3.8',
+            version: '0.3.8',
           },
           {
             releaseTimestamp: '2018-09-20T11:25:22.000Z',
-            version: 'v0.4.0',
+            version: '0.4.0',
           },
         ],
       });
