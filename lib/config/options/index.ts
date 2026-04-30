@@ -5,7 +5,19 @@ import { getCustomManagers } from '../../modules/manager/custom/index.ts';
 import { getManagers } from '../../modules/manager/index.ts';
 import { getVersioningList } from '../../modules/versioning/index.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
-import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
+import {
+  type AllowedParents,
+  type RenovateOptions,
+  UpdateTypesOptions,
+} from '../types.ts';
+
+const sharedParents: AllowedParents[] = [
+  '.',
+  'packageRules',
+  ...AllManagersListLiteral,
+  'vulnerabilityAlerts',
+  ...UpdateTypesOptions,
+];
 
 const options: Readonly<RenovateOptions>[] = [
   {
@@ -137,6 +149,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     experimental: true,
+    parents: sharedParents,
   },
   {
     name: 'bumpType',
@@ -172,6 +185,7 @@ const options: Readonly<RenovateOptions>[] = [
       executionMode: 'update',
       installTools: {},
     },
+    parents: sharedParents,
   },
   {
     name: 'commands',
@@ -339,6 +353,7 @@ const options: Readonly<RenovateOptions>[] = [
       type: 'string',
       format: 'uri',
     },
+    parents: sharedParents,
   },
   {
     name: 'secrets',
@@ -383,6 +398,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     allowString: true,
     cli: false,
+    parents: sharedParents,
   },
   {
     name: 'ignorePresets',
@@ -525,6 +541,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'forceCli',
@@ -549,6 +566,7 @@ const options: Readonly<RenovateOptions>[] = [
       'gitlab',
       'scm-manager',
     ],
+    parents: sharedParents,
   },
   {
     name: 'dryRun',
@@ -858,6 +876,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Controls if updates need manual approval from the Dependency Dashboard issue before PRs are created.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'dependencyDashboardAutoclose',
@@ -958,6 +977,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'repository',
     type: 'object',
     default: null,
+    parents: sharedParents,
   },
   // Scheduling
   {
@@ -965,6 +985,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Must conform to [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format.',
     type: 'string',
+    parents: sharedParents,
   },
   {
     name: 'schedule',
@@ -975,6 +996,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: true,
     env: false,
     default: ['at any time'],
+    parents: sharedParents,
   },
   {
     name: 'automergeSchedule',
@@ -985,6 +1007,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: true,
     env: false,
     default: ['at any time'],
+    parents: sharedParents,
   },
   {
     name: 'updateNotScheduled',
@@ -993,6 +1016,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'branch',
     type: 'boolean',
     default: true,
+    parents: sharedParents,
   },
   // Bot administration
   {
@@ -1106,6 +1130,7 @@ const options: Readonly<RenovateOptions>[] = [
       'String copy of `.npmrc` file. Use `\\n` instead of line breaks.',
     stage: 'branch',
     type: 'string',
+    parents: sharedParents,
   },
   {
     name: 'npmrcMerge',
@@ -1114,18 +1139,21 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'branch',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'npmToken',
     description: 'npm token used to authenticate with the default registry.',
     stage: 'branch',
     type: 'string',
+    parents: sharedParents,
   },
   {
     name: 'skipArtifactsUpdate',
     description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'skipInstalls',
@@ -1250,6 +1278,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     stage: 'repository',
+    parents: sharedParents,
   },
   {
     name: 'gitTimeout',
@@ -1267,6 +1296,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     mergeable: false,
     stage: 'repository',
+    parents: sharedParents,
   },
   {
     name: 'includePaths',
@@ -1275,6 +1305,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'repository',
     default: [],
+    parents: sharedParents,
   },
   {
     name: 'ignorePaths',
@@ -1285,6 +1316,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'repository',
     default: ['**/node_modules/**', '**/bower_components/**'],
+    parents: sharedParents,
   },
   {
     name: 'excludeCommitPaths',
@@ -1365,6 +1397,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'branch',
     cli: false,
     env: false,
+    parents: ['.', 'packageRules'],
   },
   {
     name: 'extractVersion',
@@ -1374,6 +1407,7 @@ const options: Readonly<RenovateOptions>[] = [
     format: 'regex',
     cli: false,
     env: false,
+    parents: sharedParents,
   },
   {
     name: 'versionCompatibility',
@@ -1383,6 +1417,7 @@ const options: Readonly<RenovateOptions>[] = [
     format: 'regex',
     cli: false,
     env: false,
+    parents: sharedParents,
   },
   {
     name: 'versioning',
@@ -1391,6 +1426,7 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: getVersioningList(),
     cli: false,
     env: false,
+    parents: sharedParents,
   },
   {
     name: 'azureWorkItemId',
@@ -1399,6 +1435,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'integer',
     default: 0,
     supportedPlatforms: ['azure'],
+    parents: sharedParents,
   },
   {
     name: 'autoApprove',
@@ -1406,6 +1443,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure', 'gerrit', 'gitlab'],
+    parents: sharedParents,
   },
   // depType
   {
@@ -1415,6 +1453,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'package',
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'updateInternalDeps',
@@ -1585,7 +1624,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'sourceUrl',
     description: 'The source URL of the package.',
     type: 'string',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
   },
@@ -1594,7 +1633,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'The source directory in which the package is present at its source.',
     type: 'string',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
   },
@@ -1631,6 +1670,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Control whether replacement regular expressions are global matches or only the first match.',
     type: 'boolean',
     default: true,
+    parents: sharedParents,
   },
   {
     name: 'replacementName',
@@ -1638,7 +1678,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The name of the new dependency that replaces the old deprecated dependency.',
     type: 'string',
     stage: 'package',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
   },
@@ -1648,7 +1688,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default: '{{{packageName}}}',
     stage: 'package',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
   },
@@ -1658,7 +1698,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The version of the new dependency that replaces the old deprecated dependency.',
     type: 'string',
     stage: 'package',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
   },
@@ -1668,7 +1708,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Template field for the version of the new dependency that replaces the old deprecated dependency.',
     type: 'string',
     stage: 'package',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
   },
@@ -1750,7 +1790,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'A version range or regex pattern capturing allowed versions for dependencies.',
     type: 'string',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     stage: 'package',
     cli: false,
     env: false,
@@ -1761,7 +1801,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Set a custom URL for the changelog. Renovate will put this URL in the PR body text.',
     type: 'string',
     stage: 'pr',
-    parents: ['packageRules'],
+    parents: sharedParents,
     cli: false,
     env: false,
   },
@@ -1770,6 +1810,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Whether to add digests to Dockerfile source images.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'separateMajorMinor',
@@ -1777,6 +1818,7 @@ const options: Readonly<RenovateOptions>[] = [
       'If set to `false`, Renovate will upgrade dependencies to their latest release only. Renovate will not separate major or minor branches.',
     type: 'boolean',
     default: true,
+    parents: sharedParents,
   },
   {
     name: 'separateMultipleMajor',
@@ -1785,6 +1827,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'package',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'separateMultipleMinor',
@@ -1794,6 +1837,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     experimental: true,
+    parents: sharedParents,
   },
   {
     name: 'separateMinorPatch',
@@ -1801,6 +1845,7 @@ const options: Readonly<RenovateOptions>[] = [
       'If set to `true`, Renovate will separate `minor` and `patch` updates into separate branches.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'ignoreUnstable',
@@ -1808,6 +1853,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'package',
     type: 'boolean',
     default: true,
+    parents: sharedParents,
   },
   {
     name: 'ignoreDeprecated',
@@ -1825,6 +1871,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     advancedUse: true,
+    parents: sharedParents,
   },
   {
     name: 'maxMajorIncrement',
@@ -1842,6 +1889,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'package',
     type: 'boolean',
     default: true,
+    parents: sharedParents,
   },
   {
     name: 'rangeStrategy',
@@ -1859,6 +1907,7 @@ const options: Readonly<RenovateOptions>[] = [
     ],
     cli: false,
     env: false,
+    parents: sharedParents,
   },
   {
     name: 'branchPrefix',
@@ -1866,6 +1915,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'branch',
     type: 'string',
     default: `renovate/`,
+    parents: sharedParents,
   },
   {
     name: 'branchPrefixOld',
@@ -1873,6 +1923,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'branch',
     type: 'string',
     default: `renovate/`,
+    parents: sharedParents,
   },
   {
     name: 'bumpVersion',
@@ -1890,6 +1941,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: {},
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'minor',
@@ -1899,6 +1951,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: {},
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'patch',
@@ -1908,6 +1961,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: {},
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'pin',
@@ -1926,6 +1980,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'digest',
@@ -1940,6 +1995,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'pinDigest',
@@ -1958,6 +2014,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'rollback',
@@ -1971,6 +2028,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'replacement',
@@ -1988,6 +2046,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   // Semantic commit / Semantic release
   {
@@ -1996,18 +2055,21 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
     default: 'auto',
+    parents: sharedParents,
   },
   {
     name: 'semanticCommitType',
     description: 'Commit type to use if Semantic Commits is enabled.',
     type: 'string',
     default: 'chore',
+    parents: sharedParents,
   },
   {
     name: 'semanticCommitScope',
     description: 'Commit scope to use if Semantic Commits are enabled.',
     type: 'string',
     default: 'deps',
+    parents: sharedParents,
   },
   {
     name: 'commitMessageLowerCase',
@@ -2015,6 +2077,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     allowedValues: ['auto', 'never'],
     default: 'auto',
+    parents: sharedParents,
   },
   // PR Behavior
   {
@@ -2030,6 +2093,7 @@ const options: Readonly<RenovateOptions>[] = [
       'github',
       'gitlab',
     ],
+    parents: sharedParents,
   },
   {
     name: 'rollbackPrs',
@@ -2037,6 +2101,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Create PRs to roll back versions if the current version is not found in the registry.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'recreateWhen',
@@ -2044,6 +2109,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default: 'auto',
     allowedValues: ['auto', 'always', 'never'],
+    parents: sharedParents,
   },
   {
     name: 'rebaseWhen',
@@ -2057,12 +2123,14 @@ const options: Readonly<RenovateOptions>[] = [
       'automerging',
     ],
     default: 'auto',
+    parents: sharedParents,
   },
   {
     name: 'rebaseLabel',
     description: 'Label to request a rebase from Renovate bot.',
     type: 'string',
     default: 'rebase',
+    parents: sharedParents,
   },
   {
     name: 'stopUpdatingLabel',
@@ -2077,12 +2145,14 @@ const options: Readonly<RenovateOptions>[] = [
       'github',
       'gitlab',
     ],
+    parents: sharedParents,
   },
   {
     name: 'minimumReleaseAge',
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+    parents: sharedParents,
   },
   {
     name: 'minimumReleaseAgeBehaviour',
@@ -2098,6 +2168,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Flags packages that have not been updated within this period as abandoned.',
     type: 'string',
     default: null,
+    parents: sharedParents,
   },
   {
     name: 'dependencyDashboardReportAbandonment',
@@ -2112,6 +2183,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   /*
    * Undocumented experimental feature
@@ -2130,6 +2202,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
     default: 'strict',
+    parents: sharedParents,
   },
   {
     name: 'processEnv',
@@ -2148,6 +2221,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     allowedValues: ['immediate', 'not-pending', 'status-success', 'approval'],
     default: 'immediate',
+    parents: sharedParents,
   },
   {
     name: 'prNotPendingHours',
@@ -2189,7 +2263,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'integer',
     allowNegative: true,
     default: 0,
-    parents: ['packageRules'],
+    parents: sharedParents,
     cli: false,
     env: false,
   },
@@ -2198,7 +2272,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Override the datasource value.',
     type: 'string',
     stage: 'package',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
     advancedUse: true,
@@ -2208,7 +2282,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Override the depName value.',
     type: 'string',
     stage: 'package',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
     advancedUse: true,
@@ -2218,7 +2292,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Override the packageName value.',
     type: 'string',
     stage: 'package',
-    parents: ['packageRules'],
+    parents: ['.', 'packageRules'],
     cli: false,
     env: false,
     advancedUse: true,
@@ -2254,6 +2328,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Whether to automerge branches/PRs automatically, without human intervention.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'automergeType',
@@ -2261,6 +2336,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     allowedValues: ['branch', 'pr', 'pr-comment'],
     default: 'pr',
+    parents: sharedParents,
   },
   {
     name: 'automergeStrategy',
@@ -2277,6 +2353,7 @@ const options: Readonly<RenovateOptions>[] = [
     ],
     default: 'auto',
     supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
+    parents: sharedParents,
   },
   {
     name: 'automergeComment',
@@ -2290,6 +2367,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Set to `true` to enable automerging without tests.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'transformTemplates',
@@ -2342,6 +2420,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Set to `true` to enable branch pruning after automerging.',
     type: 'boolean',
     default: true,
+    parents: sharedParents,
   },
   // Default templates
   {
@@ -2352,6 +2431,7 @@ const options: Readonly<RenovateOptions>[] = [
     deprecationMsg:
       'We strongly recommended that you avoid configuring this field directly. Please edit `branchPrefix`, `additionalBranchPrefix`, or `branchTopic` instead.',
     cli: false,
+    parents: sharedParents,
   },
   {
     name: 'additionalBranchPrefix',
@@ -2377,6 +2457,7 @@ const options: Readonly<RenovateOptions>[] = [
     deprecationMsg:
       'We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option. Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.',
     cli: false,
+    parents: sharedParents,
   },
   {
     name: 'commitBody',
@@ -2384,6 +2465,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Commit message body template. Will be appended to commit message, separated by two line returns.',
     type: 'string',
     cli: false,
+    parents: sharedParents,
   },
   {
     name: 'commitBodyTable',
@@ -2391,6 +2473,7 @@ const options: Readonly<RenovateOptions>[] = [
       'If enabled, append a table in the commit message body describing all updates in the commit.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'commitMessagePrefix',
@@ -2399,6 +2482,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     cli: false,
     advancedUse: true,
+    parents: sharedParents,
   },
   {
     name: 'commitMessageAction',
@@ -2407,6 +2491,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: 'Update',
     cli: false,
     advancedUse: true,
+    parents: sharedParents,
   },
   {
     name: 'commitMessageTopic',
@@ -2416,6 +2501,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: 'dependency {{depName}}',
     cli: false,
     advancedUse: true,
+    parents: sharedParents,
   },
   {
     name: 'commitMessageExtra',
@@ -2426,6 +2512,7 @@ const options: Readonly<RenovateOptions>[] = [
       'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
     advancedUse: true,
+    parents: sharedParents,
   },
   {
     name: 'commitMessageSuffix',
@@ -2452,6 +2539,7 @@ const options: Readonly<RenovateOptions>[] = [
     deprecationMsg:
       'Direct editing of `prTitle` is now deprecated. Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, as they will be passed through to `prTitle`.',
     cli: false,
+    parents: sharedParents,
   },
   {
     name: 'prTitleStrict',
@@ -2461,11 +2549,13 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
     experimental: true,
     cli: false,
+    parents: sharedParents,
   },
   {
     name: 'prHeader',
     description: 'Text added here will be placed first in the PR body.',
     type: 'string',
+    parents: sharedParents,
   },
   {
     name: 'prFooter',
@@ -2473,6 +2563,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Text added here will be placed last in the PR body, with a divider separator before it.',
     type: 'string',
     default: `This PR has been generated by [Mend Renovate](https://github.com/renovatebot/renovate).`,
+    parents: sharedParents,
   },
   {
     name: 'customizeDashboard',
@@ -2505,6 +2596,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     cli: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'hashedBranchLength',
@@ -2513,6 +2605,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'integer',
     default: null,
     cli: false,
+    parents: sharedParents,
   },
   // Dependency Groups
   {
@@ -2520,6 +2613,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Human understandable name for the dependency group.',
     type: 'string',
     default: null,
+    parents: sharedParents,
   },
   {
     name: 'groupSlug',
@@ -2529,6 +2623,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: null,
     cli: false,
     env: false,
+    parents: sharedParents,
   },
   {
     name: 'group',
@@ -2542,6 +2637,7 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
     mergeable: true,
     advancedUse: true,
+    parents: sharedParents,
   },
   // Pull Request options
   {
@@ -2549,6 +2645,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Labels to set in Pull Request.',
     type: 'array',
     subType: 'string',
+    parents: sharedParents,
   },
   {
     name: 'addLabels',
@@ -2556,6 +2653,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'assignees',
@@ -2591,6 +2689,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Assign reviewers and assignees even if the PR is to be automerged.',
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'ignoreReviewers',
@@ -2635,6 +2734,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
+    parents: sharedParents,
   },
   {
     name: 'reviewersSampleSize',
@@ -2661,7 +2761,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
-    parents: [...AllManagersListLiteral, 'customManagers'],
+    parents: [...sharedParents, 'customManagers'],
   },
   {
     name: 'postUpdateOptions',
@@ -2963,6 +3063,7 @@ const options: Readonly<RenovateOptions>[] = [
       Confidence:
         "{{#if newVersion}}![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}",
     },
+    parents: sharedParents,
   },
   {
     name: 'prBodyHeadingDefinitions',
@@ -2977,6 +3078,7 @@ const options: Readonly<RenovateOptions>[] = [
       Confidence:
         '[Confidence](https://docs.renovatebot.com/merge-confidence/)',
     },
+    parents: sharedParents,
   },
   {
     name: 'prBodyColumns',
@@ -2984,6 +3086,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: ['Package', 'Type', 'Update', 'Change', 'Pending'],
+    parents: sharedParents,
   },
   {
     name: 'prBodyNotes',
@@ -2994,6 +3097,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: [],
     allowString: true,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'suppressNotifications',
@@ -3016,6 +3120,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     mergeable: true,
+    parents: sharedParents,
   },
   {
     name: 'pruneStaleBranches',
@@ -3029,6 +3134,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: true,
     globalOnly: true,
+    parents: sharedParents,
   },
   {
     name: 'gitLabIgnoreApprovals',
@@ -3277,6 +3383,7 @@ const options: Readonly<RenovateOptions>[] = [
       'github',
       'gitlab',
     ],
+    parents: sharedParents,
   },
   {
     name: 'userStrings',
@@ -3303,12 +3410,14 @@ const options: Readonly<RenovateOptions>[] = [
     default: 'auto',
     allowedValues: ['auto', 'disabled', 'enabled'],
     supportedPlatforms: ['github'],
+    parents: sharedParents,
   },
   {
     name: 'branchNameStrict',
     description: `Whether to be strict about the use of special characters within the branch name.`,
     type: 'boolean',
     default: false,
+    parents: sharedParents,
   },
   {
     name: 'checkedBranches',
@@ -3364,6 +3473,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'integer',
     default: null,
     supportedPlatforms: ['github'],
+    parents: sharedParents,
   },
   {
     name: 'httpCacheTtlDays',
@@ -3438,6 +3548,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    parents: sharedParents,
   },
   {
     name: 'toolSettings',
