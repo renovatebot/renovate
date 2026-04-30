@@ -386,11 +386,18 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
-  static getCacheKey({ packageName }: GetReleasesConfig): string {
+  static getCacheKey({
+    packageName,
+    constraintsFiltering,
+  }: GetReleasesConfig): string {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
+    const constraintsFilteringKey =
+      constraintsFiltering && constraintsFiltering !== 'none'
+        ? `@@${constraintsFiltering}`
+        : '';
     // TODO: types (#22198)
-    return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
+    return `${packageName}@@${goproxy}@@${noproxy?.toString()}${constraintsFilteringKey}`;
   }
 
   static getVersionedCacheKey(packageName: string, version: string): string {
