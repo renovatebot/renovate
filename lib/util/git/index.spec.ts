@@ -18,7 +18,7 @@ import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
-import type { FileChange } from './types.ts';
+import type { FileChange, LongCommitSha } from './types.ts';
 
 vi.mock('./conflicts-cache.ts');
 vi.mock('./behind-base-branch-cache.ts');
@@ -1375,18 +1375,145 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('listCommitTree', () => {
-    it('creates non-branch ref', async () => {
+  describe('getCommitTreeSha', () => {
+    it('returns the tree SHA for a commit', async () => {
       const commit = git.getBranchCommit('develop')!;
-      const res = await git.listCommitTree(commit);
-      expect(res).toEqual([
-        {
+      const treeSha = await git.getCommitTreeSha(commit);
+      expect(treeSha).toBeString();
+      expect(treeSha).toHaveLength(40);
+      expect(treeSha).toMatch(regEx(/^[0-9a-f]{40}$/));
+    });
+
+    it('throws if commit output does not contain a tree SHA', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      vi.spyOn(SimpleGit.prototype, 'catFile').mockResolvedValueOnce(
+        'parent deadbeef',
+      );
+
+      await expect(git.getCommitTreeSha(commit)).rejects.toThrow(
+        `Could not extract tree SHA from commit ${commit}: parent deadbeef`,
+      );
+    });
+  });
+
+  describe('diffCommitTree', () => {
+    it('returns changed files between two commits', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const diff = await git.diffCommitTree(parentCommit, commit);
+      expect(diff.length).toBeGreaterThanOrEqual(2);
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'master_file',
           mode: '100644',
-          path: 'past_file',
-          sha: '913705ab2ca79368053a476efa48aa6912d052c5',
           type: 'blob',
-        },
-      ]);
+        }),
+      );
+      expect(diff).toContainEqual(
+        expect.objectContaining({ path: 'file_to_delete' }),
+      );
+      for (const item of diff) {
+        expect(item.sha).toMatch(regEx(/^[0-9a-f]{40}$/));
+      }
+    });
+
+    it('returns deletions with sha null', async () => {
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const parentCommit = git.getBranchCommit('develop')!;
+      // Reverse: from default branch back to develop — master_file and file_to_delete are "deleted"
+      const diff = await git.diffCommitTree(commit, parentCommit);
+      expect(diff.length).toBeGreaterThanOrEqual(2);
+      const masterFile = diff.find((d) => d.path === 'master_file');
+      expect(masterFile?.sha).toBeNull();
+      const fileToDelete = diff.find((d) => d.path === 'file_to_delete');
+      expect(fileToDelete?.sha).toBeNull();
+    });
+
+    it('returns renames as deletion and addition entries', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.addConfig('user.email', 'Jest@example.com');
+      await repo.addConfig('user.name', 'Jest');
+      const parentCommit = git.getBranchCommit(defaultBranch)!;
+
+      await repo.raw(['mv', 'master_file', 'renamed_master_file']);
+      await repo.commit('rename master file');
+
+      const commit = (await repo.revparse(['HEAD'])).trim() as LongCommitSha;
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual({
+        path: 'master_file',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'renamed_master_file',
+          mode: '100644',
+          type: 'blob',
+          sha: expect.stringMatching(/^[0-9a-f]{40}$/),
+        }),
+      );
+    });
+
+    it('parses R status lines from diff-tree output', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':100644 100644 aaa0000000000000000000000000000000000000 bbb0000000000000000000000000000000000000 R100\told.txt\tnew.txt\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual({
+        path: 'old.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+      expect(diff).toContainEqual({
+        path: 'new.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: 'bbb0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 160000 to type commit for submodules', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 160000 0000000000000000000000000000000000000000 abc0000000000000000000000000000000000000 A\tvendor/sub\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'vendor/sub',
+        mode: '160000',
+        type: 'commit',
+        sha: 'abc0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 040000 to type tree', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 040000 0000000000000000000000000000000000000000 def0000000000000000000000000000000000000 A\tsome/dir\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'some/dir',
+        mode: '040000',
+        type: 'tree',
+        sha: 'def0000000000000000000000000000000000000',
+      });
     });
   });
 

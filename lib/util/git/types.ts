@@ -107,11 +107,13 @@ export interface CommitResult {
   files: FileChange[];
 }
 
-export interface TreeItem {
+export type GitObjectType = 'blob' | 'tree' | 'commit';
+
+export interface DiffTreeItem {
   path: string;
   mode: string;
-  type: string;
-  sha: LongCommitSha;
+  type: GitObjectType;
+  sha: LongCommitSha | null;
 }
 
 /**
