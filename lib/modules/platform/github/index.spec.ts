@@ -4163,6 +4163,40 @@ describe('modules/platform/github/index', () => {
         ]);
       });
 
+      it('should pass commit message as commitHeadline and commitBody for merge commit', async () => {
+        const scope = await mockScope({
+          squashMergeAllowed: false,
+          mergeCommitAllowed: true,
+        });
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeCommitMessage: 'Update dependency foo to v1.2.3',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'MERGE',
+                commitHeadline: 'Update dependency foo to v1.2.3 (#123)',
+              },
+            },
+          },
+        ]);
+      });
+
       it('should pass multi-line commit message body for squash merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);
