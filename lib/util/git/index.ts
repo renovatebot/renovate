@@ -65,6 +65,10 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types.ts';
+import {
+  getCachedUpdateDateResult,
+  setCachedUpdateDateResult,
+} from './update-date-cache.ts';
 
 export { setNoVerify } from './config.ts';
 export { setPrivateKey } from './private-key.ts';
@@ -581,9 +585,18 @@ export async function getBranchUpdateDate(
   if (!branchSha) {
     return null;
   }
+  const updateDate = getCachedUpdateDateResult(branchName, branchSha);
+  if (updateDate !== null) {
+    logger.debug(
+      `getBranchUpdateDate(): using cached result "${updateDate.toISO()}"`,
+    );
+    return updateDate;
+  }
   await syncGit();
   try {
-    return await getCommitDate(branchSha);
+    const result = await getCommitDate(branchSha);
+    setCachedUpdateDateResult(branchName, result);
+    return result;
   } catch (err) {
     logger.debug({ err, branchName }, 'Error getting branch update date');
     return null;
