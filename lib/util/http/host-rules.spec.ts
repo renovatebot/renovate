@@ -163,9 +163,9 @@ describe('util/http/host-rules', () => {
     expect(applyHostRule(url, opts, hostRule).agent).toBeDefined();
   });
 
-  it('disables http2', () => {
+  it('disables http2', async () => {
     process.env.HTTP_PROXY = 'http://proxy';
-    bootstrap();
+    await bootstrap();
     hostRules.add({ enableHttp2: true });
 
     const opts = { ...options, token: 'xxx' };

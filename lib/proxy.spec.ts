@@ -1,11 +1,12 @@
 import { bootstrap, hasProxy } from './proxy.ts';
 
 describe('proxy', () => {
-  const httpProxy = 'http://example.org/http-proxy';
-  const httpsProxy = 'http://example.org/https-proxy';
-  const noProxy = 'http://example.org/no-proxy';
+  const httpProxy = 'http://example.org:8080';
+  const httpsProxy = 'https://example.org:8443';
+  const noProxy = 'http://noproxy.example.org';
 
   beforeEach(() => {
+    delete process.env.RENOVATE_X_GLOBAL_AGENT;
     delete process.env.HTTP_PROXY;
     delete process.env.http_proxy;
     delete process.env.HTTPS_PROXY;
@@ -14,15 +15,16 @@ describe('proxy', () => {
     delete process.env.no_proxy;
   });
 
-  it('respects HTTP_PROXY', () => {
+  it('respects HTTP_PROXY', async () => {
     process.env.HTTP_PROXY = httpProxy;
-    bootstrap();
+    await bootstrap();
     expect(hasProxy()).toBeTrue();
   });
 
-  it('copies upper case HTTP_PROXY to http_proxy', () => {
+  it('copies upper case HTTP_PROXY to http_proxy for global-agent', async () => {
     process.env.HTTP_PROXY = httpProxy;
-    bootstrap();
+    process.env.RENOVATE_X_GLOBAL_AGENT = 'true';
+    await bootstrap();
     expect(hasProxy()).toBeTrue();
     expect(process.env.HTTP_PROXY).toBeDefined();
     expect(process.env.http_proxy).toBeDefined();
@@ -33,15 +35,16 @@ describe('proxy', () => {
     expect(process.env.no_proxy).toBeUndefined();
   });
 
-  it('respects HTTPS_PROXY', () => {
+  it('respects HTTPS_PROXY', async () => {
     process.env.HTTPS_PROXY = httpsProxy;
-    bootstrap();
+    await bootstrap();
     expect(hasProxy()).toBeTrue();
   });
 
-  it('copies upper case HTTPS_PROXY to https_proxy', () => {
+  it('copies upper case HTTPS_PROXY to https_proxy for global-agent', async () => {
     process.env.HTTPS_PROXY = httpsProxy;
-    bootstrap();
+    process.env.RENOVATE_X_GLOBAL_AGENT = 'true';
+    await bootstrap();
     expect(hasProxy()).toBeTrue();
     expect(process.env.HTTPS_PROXY).toBeDefined();
     expect(process.env.https_proxy).toBeDefined();
@@ -52,9 +55,9 @@ describe('proxy', () => {
     expect(process.env.no_proxy).toBeUndefined();
   });
 
-  it('does nothing', () => {
+  it('does nothing', async () => {
     process.env.no_proxy = noProxy;
-    bootstrap();
+    await bootstrap();
     expect(hasProxy()).toBeFalse();
   });
 });
