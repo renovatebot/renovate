@@ -19,10 +19,12 @@ import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
+import * as _updateDateCache from './update-date-cache.ts';
 
 vi.mock('./conflicts-cache.ts');
 vi.mock('./behind-base-branch-cache.ts');
 vi.mock('./modified-cache.ts');
+vi.mock('./update-date-cache.ts');
 vi.mock('timers/promises');
 vi.mock('../cache/repository/index.ts');
 vi.mock('./auth.ts');
@@ -31,6 +33,7 @@ vi.unmock('./index.ts');
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
+const updateDateCache = vi.mocked(_updateDateCache);
 const auth = vi.mocked(_auth);
 // Class is no longer exported
 const SimpleGit = simpleGit().constructor as {
@@ -146,6 +149,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await local.addConfig('user.name', 'Jest');
     await local.addConfig('user.email', 'Jest@example.com');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
+    updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
@@ -449,6 +453,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const defaultDate = await git.getBranchUpdateDate(defaultBranch);
       expect(date!.toISO()).toBe(defaultDate!.toISO());
       expect(date).toBeInstanceOf(DateTime);
+      expect(updateDateCache.setCachedUpdateDateResult).toHaveBeenCalledWith(
+        'renovate/equal_branch',
+        expect.any(DateTime),
+      );
     });
 
     it('should return null when branch does not exist', async () => {
@@ -484,6 +492,16 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
       // Restore original implementation
       fromISOSpy.mockRestore();
+    });
+
+    it('returns cached result without syncing git when cache is populated', async () => {
+      const branchName = 'renovate/equal_branch';
+      const cachedDate = DateTime.fromISO('2023-05-20T14:25:30.123Z');
+      updateDateCache.getCachedUpdateDateResult.mockReturnValueOnce(cachedDate);
+      await git.checkoutBranchFromRemote(branchName, 'origin');
+      const result = await git.getBranchUpdateDate(branchName);
+      expect(result).toBe(cachedDate);
+      expect(updateDateCache.setCachedUpdateDateResult).not.toHaveBeenCalled();
     });
 
     it('works if running with a Repo Cache', async () => {
