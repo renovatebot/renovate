@@ -9,7 +9,7 @@ import {
 import { dequal } from 'dequal';
 import { logger } from '../logger/index.ts';
 import { clone } from '../util/clone.ts';
-import { regEx } from '../util/regex.ts';
+import { escapeRegExp, regEx } from '../util/regex.ts';
 import { MigrationsService } from './migrations/index.ts';
 import { getOptions } from './options/index.ts';
 import type {
@@ -22,6 +22,21 @@ import type {
 import { mergeChildConfig } from './utils.ts';
 
 const options = getOptions();
+const migratedTemplates = {
+  fromVersion: 'currentVersion',
+  newValueMajor: 'newMajor',
+  newValueMinor: 'newMinor',
+  newVersionMajor: 'newMajor',
+  newVersionMinor: 'newMinor',
+  toVersion: 'newVersion',
+} as const;
+const migratedTemplatePatterns = Object.entries(migratedTemplates).map(
+  ([from, to]) => ({
+    pattern: regEx(`\\b${escapeRegExp(from)}\\b`, 'g'),
+    replacement: to,
+  }),
+);
+
 export function fixShortHours(input: string): string {
   return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
 }
@@ -114,23 +129,16 @@ export function migrateConfig(
         }
       }
 
-      const migratedTemplates = {
-        fromVersion: 'currentVersion',
-        newValueMajor: 'newMajor',
-        newValueMinor: 'newMinor',
-        newVersionMajor: 'newMajor',
-        newVersionMinor: 'newMinor',
-        toVersion: 'newVersion',
-      };
-      // @ts-expect-error -- TODO: fix me
-      if (isString(migratedConfig[key])) {
-        for (const [from, to] of Object.entries(migratedTemplates)) {
-          // @ts-expect-error -- TODO: fix me
-          migratedConfig[key] = (migratedConfig[key] as string).replace(
-            regEx(from, 'g'),
-            to,
+      const migratedValue = Reflect.get(migratedConfig, key);
+      if (typeof migratedValue === 'string') {
+        let migratedStringValue = migratedValue;
+        for (const { pattern, replacement } of migratedTemplatePatterns) {
+          migratedStringValue = migratedStringValue.replace(
+            pattern,
+            replacement,
           );
         }
+        Reflect.set(migratedConfig, key, migratedStringValue);
       }
     }
     const languages = [
