@@ -4,7 +4,7 @@ import { Toml } from '../../../util/schema-utils/index.ts';
 export const RustToolchain = Toml.pipe(
   z.object({
     toolchain: z.object({
-      channel: z.string(),
+      channel: z.string().min(1),
     }),
   }),
 );

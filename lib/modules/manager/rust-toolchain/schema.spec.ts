@@ -67,6 +67,15 @@ channel = 123
       expect(() => RustToolchain.parse(toml)).toThrow();
     });
 
+    it('throws error for empty channel', () => {
+      const toml = `
+[toolchain]
+channel = ""
+`;
+
+      expect(() => RustToolchain.parse(toml)).toThrow();
+    });
+
     it('parses nightly channel', () => {
       const toml = `
 [toolchain]
