@@ -163,6 +163,11 @@ const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'npm',
     versioning: npmVersioningId,
   },
+  paket: {
+    datasource: 'nuget',
+    packageName: 'paket',
+    versioning: semverVersioningId,
+  },
   pdm: {
     datasource: 'github-releases',
     packageName: 'pdm-project/pdm',
