@@ -81,6 +81,7 @@ describe('modules/manager/mise/extract', () => {
       redis = "8.0.1"
       ruff = "0.11.12"
       rumdl = "0.1.58"
+      rustfs = "1.0.0-beta.1"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
@@ -298,6 +299,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'rumdl',
             packageName: 'rvben/rumdl',
+          },
+          {
+            currentValue: '1.0.0-beta.1',
+            datasource: 'github-releases',
+            depName: 'rustfs',
+            packageName: 'rustfs/rustfs',
           },
           {
             currentValue: '0.10.0',

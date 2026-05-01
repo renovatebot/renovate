@@ -452,6 +452,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
     },
   },
+  rustfs: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'rustfs/rustfs',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   shellcheck: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
