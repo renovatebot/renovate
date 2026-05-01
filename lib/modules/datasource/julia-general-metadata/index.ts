@@ -23,7 +23,7 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `registered` field in the results.';
 
-  async _getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -36,25 +36,31 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
 
     const { val: result, err } = await this.http
       .getJsonSafe(url, JuliaPackageMetadata)
-      .onError((err) => {
-        logger.debug(
-          {
-            url,
-            datasource: JuliaGeneralMetadataDatasource.id,
-            packageName,
-            err,
-          },
-          'Error fetching Julia package versions',
-        );
-      })
       .unwrap();
 
     if (err instanceof ZodError) {
-      logger.debug({ err }, 'julia-general-metadata: validation error');
+      logger.debug(
+        {
+          err,
+          url,
+          datasource: JuliaGeneralMetadataDatasource.id,
+          packageName,
+        },
+        'Failed to parse Julia package versions',
+      );
       return null;
     }
 
     if (err) {
+      logger.debug(
+        {
+          err,
+          url,
+          datasource: JuliaGeneralMetadataDatasource.id,
+          packageName,
+        },
+        'Error fetching Julia package versions',
+      );
       this.handleGenericErrors(err);
     }
 
