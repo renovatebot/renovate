@@ -2411,6 +2411,98 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('validates repositories[] object-entry config', async () => {
+      const config = {
+        repositories: [
+          'owner/repo1',
+          {
+            repository: 'owner/repo2',
+            extends: ['config:recommended'],
+            binarySource: 'global', // should not allow globalOnly options inside repository config
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+      ]);
+    });
+
+    it('validates invalid config options in repositories[] object-entry', async () => {
+      const config = {
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            foo: 'bar',
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config as any,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid configuration option: repositories[0].foo',
+        },
+      ]);
+    });
+
+    it('skips validation for repositories[] string entries', async () => {
+      const config = {
+        repositories: ['owner/repo1', 'owner/repo2'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns when repositories[] object-entry is missing repository key', async () => {
+      const config = {
+        repositories: [
+          {
+            extends: ['config:recommended'],
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config as any,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'repositories[0]: each repository object entry must have a `repository` string property',
+        },
+      ]);
+    });
+
+    it('allows manager configs inside repositories[] object-entry', async () => {
+      const config = {
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            npm: { enabled: false },
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([]);
+    });
+
     it('validates object type options', async () => {
       const config = {
         productLinks: {
