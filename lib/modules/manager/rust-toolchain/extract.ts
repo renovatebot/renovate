@@ -27,7 +27,7 @@ export function extractPackageFile(
   }
 
   // Fall back to legacy format for files without .toml extension
-  logger.debug({ packageFile }, 'TOML parsing failed, trying legacy format');
+  logger.trace({ packageFile }, 'TOML parsing failed, trying legacy format');
   return createDependency(content.trim(), packageFile);
 }
 
