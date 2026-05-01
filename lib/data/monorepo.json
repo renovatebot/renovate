@@ -131,6 +131,7 @@
     "backstage": "https://github.com/backstage/backstage",
     "baset": "https://github.com/igmat/baset",
     "brave": "https://github.com/openzipkin/brave",
+    "better-auth": "https://github.com/better-auth/better-auth",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "bull-board": "https://github.com/felixmosh/bull-board",
     "cake": "https://github.com/cake-build/cake",
