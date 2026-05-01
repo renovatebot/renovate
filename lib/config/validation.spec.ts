@@ -2418,7 +2418,7 @@ describe('config/validation', () => {
           {
             repository: 'owner/repo2',
             extends: ['config:recommended'],
-            binarySource: 'global', // should not allow globalOnly options inside repository config
+            binarySource: 'global' as const, // globalOnly options are allowed in repositories[] object-entry
           },
         ],
       };
@@ -2426,10 +2426,27 @@ describe('config/validation', () => {
         'global',
         config,
       );
-      expect(warnings).toEqual([
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns on invalid globalOnly option value in repositories[] object-entry', async () => {
+      const config = {
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            binarySource: 'invalid' as never,
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+          message:
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
         },
       ]);
     });

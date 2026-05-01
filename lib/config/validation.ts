@@ -1080,10 +1080,10 @@ async function validateGlobalConfig(
                   message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
                 });
               }
-              const { repository: _, ...repoConfig } = subval;
+              const { repository: _, ...repoEntryConfig } = subval;
               const subValidation = await validateConfig(
-                'repo',
-                repoConfig as RenovateConfig,
+                'global',
+                repoEntryConfig,
                 false,
                 `${currentPath}[${subIndex}]`,
               );
