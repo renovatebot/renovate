@@ -1,3 +1,5 @@
+### Config presets
+
 Renovate supports updating [Shareable Config Presets](../../../config-presets.md) for Renovate configuration.
 
 The preset versions are only updated if the version is already pinned.
@@ -12,7 +14,7 @@ For example, `github>user/renovate-config#1.2.3` will be updated to `github>user
 }
 ```
 
-### Unsupported Config
+#### Unsupported Config
 
 - [Local presets](../../../config-presets.md#local-presets)
 - [HTTP URLs presets](../../../config-presets.md#fetching-presets-from-an-http-server)
