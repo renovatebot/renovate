@@ -463,6 +463,35 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('warns when matchPackageNames contains an unwrapped regex', async () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            matchDatasources: ['npm'],
+            minimumReleaseAge: '3 days',
+            matchPackageNames: ['^(?!@scope/).+'],
+          },
+          {
+            matchDepNames: ['foo$'],
+            enabled: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(2);
+      expect(warnings[0].message).toContain(
+        'packageRules[0].matchPackageNames: pattern `^(?!@scope/).+` looks like a regex',
+      );
+      expect(warnings[0].message).toContain('Wrap it as `/^(?!@scope/).+/`');
+      expect(warnings[1].message).toContain(
+        'packageRules[1].matchDepNames: pattern `foo$` looks like a regex',
+      );
+    });
+
     it('included managers of the wrong type', async () => {
       const config = {
         packageRules: [
