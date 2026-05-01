@@ -96,6 +96,22 @@ describe('modules/manager/rust-toolchain/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null when [toolchain] section is absent', () => {
+      const result = extractPackageFile(
+        'channel = "1.89.1"\n',
+        'rust-toolchain.toml',
+      );
+      expect(result).toBeNull();
+    });
+
+    it('returns null when channel is absent', () => {
+      const result = extractPackageFile(
+        '[toolchain]\ncomponents = ["rustfmt"]\n',
+        'rust-toolchain.toml',
+      );
+      expect(result).toBeNull();
+    });
+
     it('can handle additional fields', () => {
       const result = extractPackageFile(
         '[toolchain]\nchannel = "1.89.1"\ncomponents = ["rustfmt", "clippy"]\ntargets = ["wasm32-unknown-unknown"]\n',
