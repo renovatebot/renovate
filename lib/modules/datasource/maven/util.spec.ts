@@ -7,11 +7,14 @@ import { Http, HttpError } from '../../../util/http/index.ts';
 import { MAVEN_REPO } from './common.ts';
 import type { MavenFetchError } from './types.ts';
 import {
+  downloadArtifactRegistryProtocol,
   downloadHttpContent,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
 } from './util.ts';
+
+vi.mock('google-auth-library');
 
 const http = new Http('test');
 
@@ -228,6 +231,130 @@ describe('modules/datasource/maven/util', () => {
         ok: false,
         err: { type: 'unsupported-host' } satisfies MavenFetchError,
       });
+    });
+  });
+
+  describe('downloadArtifactRegistryProtocol', () => {
+    const arUrl = new URL(
+      'artifactregistry://maven.pkg.dev/some-project/some-repository/org/example/package/1.0.0/package-1.0.0.pom',
+    );
+    const arApiUrl =
+      'https://artifactregistry.googleapis.com/v1/projects/some-project/locations/us/repositories/some-repository/files/org%2Fexample%2Fpackage%2F1.0.0%2Fpackage-1.0.0.pom';
+
+    it('enriches result with lastModified from Artifact Registry API', async () => {
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom content',
+            headers: {},
+            authorization: false,
+          }),
+        getJsonUnchecked: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: { updateTime: '2024-06-01T12:00:00Z' } as never,
+            headers: {},
+          }),
+      });
+
+      const res = await downloadArtifactRegistryProtocol(http, arUrl);
+      expect(res.unwrap()).toEqual({
+        ok: true,
+        val: {
+          data: 'pom content',
+          isCacheable: true,
+          lastModified: '2024-06-01T12:00:00.000Z',
+        },
+      });
+    });
+
+    it('does not overwrite lastModified if already set from Last-Modified header', async () => {
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom content',
+            headers: { 'last-modified': 'Mon, 01 Jan 2024 00:00:00 GMT' },
+            authorization: false,
+          }),
+        getJsonUnchecked: vi.fn(),
+      });
+
+      const res = await downloadArtifactRegistryProtocol(http, arUrl);
+      const { val } = res.unwrap();
+      expect(val?.lastModified).toBe('2024-01-01T00:00:00.000Z');
+      expect(http.getJsonUnchecked).not.toHaveBeenCalled();
+    });
+
+    it('falls back gracefully when Artifact Registry API call fails', async () => {
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom content',
+            headers: {},
+            authorization: false,
+          }),
+        getJsonUnchecked: () => Promise.reject(new Error('API error')),
+      });
+
+      const res = await downloadArtifactRegistryProtocol(http, arUrl);
+      expect(res.unwrap()).toEqual({
+        ok: true,
+        val: {
+          data: 'pom content',
+          isCacheable: true,
+        },
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ url: arApiUrl }),
+        'Failed to get Artifact Registry file metadata',
+      );
+    });
+
+    it('returns error when HTTP fetch fails', async () => {
+      const http = partial<Http>({
+        getText: () => Promise.reject(httpError({ code: 'ENOTFOUND' })),
+      });
+
+      const res = await downloadArtifactRegistryProtocol(http, arUrl);
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'not-found' } satisfies MavenFetchError,
+      });
+    });
+
+    it('parses location from regional hostname', async () => {
+      const regionalUrl = new URL(
+        'artifactregistry://europe-maven.pkg.dev/my-project/my-repo/com/example/artifact/1.0/artifact-1.0.pom',
+      );
+      const expectedApiUrl =
+        'https://artifactregistry.googleapis.com/v1/projects/my-project/locations/europe/repositories/my-repo/files/com%2Fexample%2Fartifact%2F1.0%2Fartifact-1.0.pom';
+
+      const getJsonUnchecked = vi.fn().mockResolvedValue({
+        statusCode: 200,
+        body: { updateTime: '2024-06-01T12:00:00Z' },
+        headers: {},
+      });
+
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom content',
+            headers: {},
+            authorization: false,
+          }),
+        getJsonUnchecked,
+      });
+
+      await downloadArtifactRegistryProtocol(http, regionalUrl);
+
+      expect(getJsonUnchecked).toHaveBeenCalledWith(
+        expectedApiUrl,
+        expect.any(Object),
+      );
     });
   });
 });

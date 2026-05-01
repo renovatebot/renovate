@@ -265,6 +265,51 @@ export async function downloadS3Protocol(
     });
 }
 
+async function getArtifactRegistryLastModified(
+  http: Http,
+  pkgUrl: URL,
+  auth: string | null,
+): Promise<string | null> {
+  // Hostname format: "maven.pkg.dev" (multi-region) or "<location>-maven.pkg.dev"
+  const hostname = pkgUrl.hostname;
+  const location = hostname.endsWith('-maven.pkg.dev')
+    ? hostname.replace(/-maven\.pkg\.dev$/, '')
+    : 'us';
+
+  // Pathname: /<project>/<repository>/<file-path...>
+  const pathParts = pkgUrl.pathname.split('/').filter(Boolean);
+  if (pathParts.length < 3) {
+    return null;
+  }
+  const [project, repository, ...fileParts] = pathParts;
+  const filePath = fileParts.join('/');
+  const encodedFilePath = filePath
+    .split('/')
+    .map(encodeURIComponent)
+    .join('%2F');
+
+  const apiUrl = `https://artifactregistry.googleapis.com/v1/projects/${project}/locations/${location}/repositories/${repository}/files/${encodedFilePath}`;
+
+  try {
+    const apiOpts: HttpOptions = {};
+    if (auth) {
+      apiOpts.headers = { authorization: `Basic ${auth}` };
+    }
+    const res = await http.getJsonUnchecked<{ updateTime?: string }>(
+      apiUrl,
+      apiOpts,
+    );
+    const updateTime = res.body.updateTime;
+    return asTimestamp(updateTime) ?? null;
+  } catch (err) {
+    logger.debug(
+      { err, url: apiUrl },
+      'Failed to get Artifact Registry file metadata',
+    );
+    return null;
+  }
+}
+
 export async function downloadArtifactRegistryProtocol(
   http: Http,
   pkgUrl: URL,
@@ -286,7 +331,21 @@ export async function downloadArtifactRegistryProtocol(
 
   const url = pkgUrl.toString().replace('artifactregistry:', 'https:');
 
-  return downloadHttpProtocol(http, url, opts);
+  const result = await downloadHttpProtocol(http, url, opts);
+
+  return result.transform(async (fetchSuccess): Promise<MavenFetchResult> => {
+    if (!fetchSuccess.lastModified) {
+      const lastModified = await getArtifactRegistryLastModified(
+        http,
+        pkgUrl,
+        auth,
+      );
+      if (lastModified) {
+        return Result.ok({ ...fetchSuccess, lastModified });
+      }
+    }
+    return Result.ok(fetchSuccess);
+  });
 }
 
 function containsPlaceholder(str: string): boolean {
