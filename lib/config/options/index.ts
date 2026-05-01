@@ -121,7 +121,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'allowedCommands',
     description:
-      'A list of regular expressions that decide which commands are allowed in post-upgrade tasks.',
+      'A list of regular expressions that decide which commands are allowed in post-upgrade tasks and update commands.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -179,7 +179,7 @@ const options: Readonly<RenovateOptions>[] = [
       'A list of post-upgrade commands that are executed before a commit is made by Renovate.',
     type: 'array',
     subType: 'string',
-    parents: ['postUpgradeTasks'],
+    parents: ['postUpgradeTasks', 'customUpdateCommands'],
     default: [],
     cli: false,
   },
@@ -188,7 +188,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'A template describing the working directory in which post-upgrade tasks should be executed.',
     type: 'string',
-    parents: ['postUpgradeTasks'],
+    parents: ['postUpgradeTasks', 'customUpdateCommands'],
     cli: false,
     env: false,
   },
@@ -206,7 +206,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Files that match the glob pattern will be committed after running a post-upgrade task.',
     type: 'array',
     subType: 'string',
-    parents: ['postUpgradeTasks'],
+    parents: ['postUpgradeTasks', 'customUpdateCommands'],
     default: ['**/*'],
     cli: false,
   },
@@ -214,7 +214,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'installTools',
     description: 'Install tools before executing commands',
     type: 'object',
-    parents: ['postUpgradeTasks'],
+    parents: ['postUpgradeTasks', 'customUpdateCommands'],
     default: {},
     additionalProperties: {
       type: 'object',
@@ -244,6 +244,16 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: ['update', 'branch'],
     default: 'update',
     cli: false,
+  },
+  {
+    name: 'customUpdateCommands',
+    description:
+      'Commands that are executed instead of the regular file update step. All file changes produced by the commands are committed. Requires `allowedCommands` to be configured.',
+    type: 'object',
+    default: {
+      commands: [],
+      fileFilters: ['**/*'],
+    },
   },
   {
     name: 'onboardingBranch',
