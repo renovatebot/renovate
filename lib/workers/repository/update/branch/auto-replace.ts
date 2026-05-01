@@ -197,28 +197,6 @@ async function checkExistingBranch(
   return existingContent;
 }
 
-/**
- * Check if an update from `current` to `newString` should be performed and return 1 if so.
- *
- * @remarks
- * Useful for counting the number of updates to do.
- *
- * @param current The current value (if undefined then no update is required)
- * @param newString The new value (if undefined then no update is required)
- *
- * @returns 1 if `current !== newString` and 0 if they are equal or at least one is undefined.
- */
-function updatedToInt(
-  current: string | undefined | null,
-  newString: string | undefined | null,
-): number {
-  if (current && newString && newString !== current) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -247,27 +225,31 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
-
-  // count how many strings need to be updated
-  const changedCount =
-    updatedToInt(depName, newName) +
-    updatedToInt(currentValue, newValue) +
-    updatedToInt(currentDigest, newDigest);
-  if (changedCount > 1) {
-    logger.debug(
-      { packageFile, depName, changedCount },
-      'Multiple changed values, might need special handling (#36461)',
-    );
+  const valueChanging =
+    isString(currentValue) && isString(newValue) && currentValue !== newValue;
+  const digestChanging =
+    isString(currentDigest) &&
+    isString(newDigest) &&
+    currentDigest !== newDigest;
+  let replaceWithoutReplaceString =
+    isString(newName) &&
+    newName !== depName &&
+    (isUndefined(upgrade.replaceString) ||
+      !upgrade.replaceString?.includes(depName!));
+  // fallback must contain the field being updated, else the replacement is
+  // a no-op for managers where value and digest live in separate tokens
+  let replaceString = upgrade.replaceString;
+  if (isUndefined(replaceString)) {
+    if (valueChanging && digestChanging) {
+      // no single fallback covers both — use the per-field path
+      replaceWithoutReplaceString = true;
+      replaceString = currentValue ?? currentDigest;
+    } else if (digestChanging) {
+      replaceString = currentDigest ?? currentValue;
+    } else {
+      replaceString = currentValue ?? currentDigest;
+    }
   }
-
-  const replaceWithoutReplaceString =
-    (isString(newName) &&
-      newName !== depName &&
-      (isUndefined(upgrade.replaceString) ||
-        !upgrade.replaceString?.includes(depName!))) ||
-    // for jsonata manager, fixes #36461
-    (isUndefined(upgrade.replaceString) && changedCount > 1);
-  const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
   if (replaceWithoutReplaceString) {
