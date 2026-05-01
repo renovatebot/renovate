@@ -3,19 +3,7 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
-import { id as composerVersioningId } from '../../modules/versioning/composer/index.ts';
-import { id as condaVersioningId } from '../../modules/versioning/conda/index.ts';
-import { id as denoVersioningId } from '../../modules/versioning/deno/index.ts';
-import { id as gradleVersioningId } from '../../modules/versioning/gradle/index.ts';
-import * as allVersioning from '../../modules/versioning/index.ts';
-import { id as mavenVersioningId } from '../../modules/versioning/maven/index.ts';
-import { id as nodeVersioningId } from '../../modules/versioning/node/index.ts';
-import { id as npmVersioningId } from '../../modules/versioning/npm/index.ts';
-import { id as pep440VersioningId } from '../../modules/versioning/pep440/index.ts';
-import { id as pythonVersioningId } from '../../modules/versioning/python/index.ts';
-import { id as rubyVersioningId } from '../../modules/versioning/ruby/index.ts';
-import { id as semverVersioningId } from '../../modules/versioning/semver/index.ts';
-import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced/index.ts';
+import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { getEnv } from '../env.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
@@ -23,226 +11,226 @@ const allToolConfig: Record<ToolName, ToolConfig> = {
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   bun: {
     datasource: 'github-releases',
     packageName: 'oven-sh/bun',
     extractVersion: '^bun-v(?<version>.*)$',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   bundler: {
     datasource: 'rubygems',
     packageName: 'bundler',
-    versioning: rubyVersioningId,
+    versioning: 'ruby',
   },
   cocoapods: {
     datasource: 'rubygems',
     packageName: 'cocoapods',
-    versioning: rubyVersioningId,
+    versioning: 'ruby',
   },
   composer: {
     datasource: 'github-releases',
     packageName: 'containerbase/composer-prebuild',
-    versioning: composerVersioningId,
+    versioning: 'composer',
   },
   conan: {
     datasource: 'pypi',
     packageName: 'conan',
-    versioning: pep440VersioningId,
+    versioning: 'pep440',
   },
   copier: {
     datasource: 'pypi',
     packageName: 'copier',
-    versioning: pep440VersioningId,
+    versioning: 'pep440',
   },
   corepack: {
     datasource: 'npm',
     packageName: 'corepack',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   deno: {
     datasource: 'github-releases',
     packageName: 'denoland/deno',
-    versioning: denoVersioningId,
+    versioning: 'deno',
   },
   devbox: {
     datasource: 'github-releases',
     packageName: 'jetify-com/devbox',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   dotnet: {
     datasource: 'dotnet-version',
     packageName: 'dotnet-sdk',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   erlang: {
     datasource: 'github-releases',
     packageName: 'containerbase/erlang-prebuild',
-    versioning: semverCoercedVersioningId,
+    versioning: 'semver-coerced',
   },
   elixir: {
     datasource: 'github-releases',
     packageName: 'elixir-lang/elixir',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   flux: {
     datasource: 'github-releases',
     packageName: 'fluxcd/flux2',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   gleam: {
     datasource: 'github-releases',
     packageName: 'gleam-lang/gleam',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   golang: {
     datasource: 'github-releases',
     packageName: 'containerbase/golang-prebuild',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   gradle: {
     datasource: 'gradle-version',
     packageName: 'gradle',
-    versioning: gradleVersioningId,
+    versioning: 'gradle',
   },
   hashin: {
     datasource: 'pypi',
     packageName: 'hashin',
-    versioning: pep440VersioningId,
+    versioning: 'pep440',
   },
   helm: {
     datasource: 'github-releases',
     packageName: 'helm/helm',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   helmfile: {
     datasource: 'github-releases',
     packageName: 'helmfile/helmfile',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   java: {
     datasource: 'java-version',
     packageName: 'java?system=true',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   /* not used in Renovate */
   'java-maven': {
     datasource: 'java-version',
     packageName: 'java?system=true',
-    versioning: mavenVersioningId,
+    versioning: 'maven',
   },
   jb: {
     datasource: 'github-releases',
     packageName: 'jsonnet-bundler/jsonnet-bundler',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   kustomize: {
     datasource: 'github-releases',
     packageName: 'kubernetes-sigs/kustomize',
     extractVersion: '^kustomize/v(?<version>.*)$',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   maven: {
     datasource: 'github-releases',
     packageName: 'containerbase/maven-prebuild',
-    versioning: mavenVersioningId,
+    versioning: 'maven',
   },
   nix: {
     datasource: 'github-releases',
     packageName: 'containerbase/nix-prebuild',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   node: {
     datasource: 'github-releases',
     packageName: 'containerbase/node-prebuild',
-    versioning: nodeVersioningId,
+    versioning: 'node',
   },
   npm: {
     datasource: 'npm',
     packageName: 'npm',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   pdm: {
     datasource: 'github-releases',
     packageName: 'pdm-project/pdm',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   php: {
     datasource: 'github-releases',
     packageName: 'containerbase/php-prebuild',
-    versioning: composerVersioningId,
+    versioning: 'composer',
   },
   'pip-tools': {
     datasource: 'pypi',
     packageName: 'pip-tools',
-    versioning: pep440VersioningId,
+    versioning: 'pep440',
   },
   pipenv: {
     datasource: 'pypi',
     packageName: 'pipenv',
-    versioning: pep440VersioningId,
+    versioning: 'pep440',
   },
   pnpm: {
     datasource: 'npm',
     packageName: 'pnpm',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   pixi: {
     datasource: 'github-releases',
     packageName: 'prefix-dev/pixi',
-    versioning: condaVersioningId,
+    versioning: 'conda',
     extractVersion: '^v(?<version>.*)$',
   },
   poetry: {
     datasource: 'pypi',
     packageName: 'poetry',
-    versioning: pep440VersioningId,
+    versioning: 'pep440',
   },
   python: {
     datasource: 'github-releases',
     packageName: 'containerbase/python-prebuild',
-    versioning: pythonVersioningId,
+    versioning: 'python',
   },
   ruby: {
     datasource: 'github-releases',
     packageName: 'containerbase/ruby-prebuild',
-    versioning: rubyVersioningId,
+    versioning: 'ruby',
   },
   rust: {
     datasource: 'docker',
     packageName: 'rust',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   uv: {
     datasource: 'pypi',
     packageName: 'uv',
-    versioning: pep440VersioningId,
+    versioning: 'pep440',
   },
   yarn: {
     datasource: 'npm',
     packageName: 'yarn',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   'yarn-slim': {
     datasource: 'npm',
     packageName: 'yarn',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   dart: {
     datasource: 'dart-version',
     packageName: 'dart',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   flutter: {
     datasource: 'github-releases',
     packageName: 'containerbase/flutter-prebuild',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   vendir: {
     datasource: 'github-releases',
     packageName: 'carvel-dev/vendir',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
 };
 
@@ -290,7 +278,7 @@ export function isDynamicInstall(
 
 function isStable(
   version: string,
-  versioningApi: allVersioning.VersioningApi,
+  versioningApi: VersioningApi,
   latest?: string,
 ): boolean {
   if (!versioningApi.isStable(version)) {
@@ -313,7 +301,9 @@ export async function resolveConstraint(
     throw new Error(`Invalid tool to install: ${toolName}`);
   }
 
-  const versioning = allVersioning.get(toolConfig.versioning);
+  const { get: getVersioning } =
+    await import('../../modules/versioning/index.ts');
+  const versioning = getVersioning(toolConfig.versioning);
   let constraint = toolConstraint.constraint;
   if (constraint) {
     if (versioning.isValid(constraint)) {
