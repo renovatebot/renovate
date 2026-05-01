@@ -28,7 +28,23 @@ export function extractPackageFile(
 
   // Fall back to legacy format for files without .toml extension
   logger.trace({ packageFile }, 'TOML parsing failed, trying legacy format');
-  return createDependency(content.trim(), packageFile);
+
+  const lines = content
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  if (lines.length === 0) {
+    logger.warn({ packageFile }, 'rust-toolchain file is empty');
+    return null;
+  }
+
+  if (lines.length > 1) {
+    logger.warn({ packageFile }, 'rust-toolchain file contains multiple lines');
+    return null;
+  }
+
+  return createDependency(lines[0], packageFile);
 }
 
 function createDependency(
