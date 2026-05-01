@@ -4,6 +4,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
@@ -362,6 +363,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'lycheeverse/lychee',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^lychee-v(?<version>\\S+)',
+    },
+  },
+  neo4j: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'org.neo4j:neo4j',
+      datasource: MavenDatasource.id,
     },
   },
   npm: {

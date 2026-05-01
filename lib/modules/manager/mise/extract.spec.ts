@@ -71,6 +71,7 @@ describe('modules/manager/mise/extract', () => {
       lefthook = "1.11.13"
       localstack = "4.3.0"
       lychee = "0.19.1"
+      neo4j = "2026.04.0"
       npm = "11.2.0"
       opentofu = "1.6.1"
       openfga = "1.14.0"
@@ -234,6 +235,12 @@ describe('modules/manager/mise/extract', () => {
             depName: 'lychee',
             extractVersion: '^lychee-v(?<version>\\S+)',
             packageName: 'lycheeverse/lychee',
+          },
+          {
+            currentValue: '2026.04.0',
+            datasource: 'maven',
+            depName: 'neo4j',
+            packageName: 'org.neo4j:neo4j',
           },
           {
             currentValue: '11.2.0',
