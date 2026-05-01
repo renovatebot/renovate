@@ -329,13 +329,18 @@ function minimumReleaseAgeExcludeIncludesDepNameAndVersion(
   depName: string | undefined,
   newVersion: string | undefined,
 ): boolean {
-  if (line.includes(`${depName}@${newVersion}`)) {
-    return true;
+  /* v8 ignore if -- should not happen, adding for type narrowing */
+  if (!depName || !newVersion) {
+    return false;
   }
 
-  if (line.includes(`|| ${newVersion}`)) {
-    return true;
+  const depIndex = line.indexOf(`${depName}@`);
+  if (depIndex === -1) {
+    return false;
   }
 
-  return false;
+  // Only search for the version within the substring that starts at this dep's entry,
+  // preventing false positives from other deps that share the same version string.
+  const fromDep = line.slice(depIndex);
+  return fromDep.includes(newVersion);
 }
