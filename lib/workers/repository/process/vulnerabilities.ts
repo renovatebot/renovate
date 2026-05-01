@@ -396,10 +396,13 @@ export class Vulnerabilities {
     packageName: string,
     affected: Osv.Affected,
   ): boolean {
+    const pkg = affected.package;
+    if (pkg?.name !== packageName) {
+      return false;
+    }
+
     return (
-      affected.package?.name === packageName &&
-      (affected.package?.ecosystem === ecosystem ||
-        affected.package?.ecosystem.startsWith(`${ecosystem}:`))
+      pkg.ecosystem === ecosystem || pkg.ecosystem.startsWith(`${ecosystem}:`)
     );
   }
 
