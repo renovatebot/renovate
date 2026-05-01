@@ -282,6 +282,9 @@ exports[`modules/manager/gitlabci/extract > extractAllPackageFiles() > extracts 
         "depName": "registry.example.com/myimage",
         "depType": "service-image",
         "packageName": "registry.example.com/myimage",
+        "registryUrls": [
+          "https://registry.example.com",
+        ],
         "replaceString": "registry.example.com/myimage:latest",
       },
       {

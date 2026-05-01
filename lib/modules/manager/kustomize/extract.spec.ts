@@ -234,6 +234,7 @@ describe('modules/manager/kustomize/extract', () => {
       const sample = {
         depName: 'redis',
         packageName: 'registry-1.docker.io/bitnamicharts/redis',
+        registryUrls: ['https://registry-1.docker.io'],
         currentValue: '18.12.1',
         datasource: DockerDatasource.id,
         pinDigests: false,
@@ -250,6 +251,7 @@ describe('modules/manager/kustomize/extract', () => {
       const sample = {
         depName: 'redis',
         packageName: 'registry-1.docker.io/bitnamicharts/redis',
+        registryUrls: ['https://registry-1.docker.io'],
         currentValue: '18.12.1',
         datasource: DockerDatasource.id,
         pinDigests: false,
@@ -330,6 +332,7 @@ describe('modules/manager/kustomize/extract', () => {
         replaceString: 'v1.0.0',
         depName: 'quay.io/repo/image',
         packageName: 'quay.io/repo/image',
+        registryUrls: ['https://quay.io'],
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -384,6 +387,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         depName: 'localhost:5000/repo/image/service',
         packageName: 'docker.io/image/service',
+        registryUrls: ['https://docker.io'],
       };
       const pkg = extractImage(
         {
@@ -552,6 +556,7 @@ describe('modules/manager/kustomize/extract', () => {
           depName: 'quay.io/test/repo',
           depType: 'Kustomization',
           packageName: 'quay.io/test/repo',
+          registryUrls: ['https://quay.io'],
           replaceString: 'v0.0.2',
         },
         {
@@ -562,6 +567,7 @@ describe('modules/manager/kustomize/extract', () => {
           depName: 'gitlab.com/org/suborg/image',
           depType: 'Kustomization',
           packageName: 'gitlab.com/org/suborg/image',
+          registryUrls: ['https://gitlab.com'],
           replaceString: 'v0.0.3',
         },
         {
@@ -572,6 +578,7 @@ describe('modules/manager/kustomize/extract', () => {
           depName: 'but.this.lives.on.local/private-registry',
           depType: 'Kustomization',
           packageName: 'but.this.lives.on.local/private-registry',
+          registryUrls: ['https://but.this.lives.on.local'],
           replaceString: 'v0.0.4',
         },
         {
@@ -833,6 +840,7 @@ describe('modules/manager/kustomize/extract', () => {
             currentValue: '18.12.1',
             datasource: DockerDatasource.id,
             packageName: 'registry-1.docker.io/bitnamicharts/redis',
+            registryUrls: ['https://registry-1.docker.io'],
             pinDigests: false,
           },
         ],

@@ -524,6 +524,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'oci_pull',
             depName: 'nginx_image',
             packageName: 'index.docker.io/library/nginx',
+            registryUrls: ['https://index.docker.io'],
             currentValue: '1.27.1',
             currentDigest:
               'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
@@ -560,6 +561,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'oci_pull',
             depName: 'nginx_image',
             packageName: 'index.docker.io/library/nginx',
+            registryUrls: ['https://index.docker.io'],
             currentDigest:
               'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
             replaceString: codeBlock`
@@ -594,6 +596,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'oci_pull',
             depName: 'nginx_image',
             packageName: 'index.docker.io/library/nginx',
+            registryUrls: ['https://index.docker.io'],
             currentValue: '1.27.1',
             replaceString: codeBlock`
               oci.pull(
@@ -626,6 +629,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'oci_pull',
             depName: 'nginx_image',
             packageName: 'index.docker.io/library/nginx',
+            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               oci.pull(
                 name = "nginx_image",
@@ -662,6 +666,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'oci_pull',
             depName: 'nginx_image',
             packageName: 'my-docker-mirror.registry.com/library/nginx',
+            registryUrls: ['https://my-docker-mirror.registry.com'],
             currentValue: '1.27.1',
             currentDigest:
               'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
@@ -703,6 +708,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'oci_pull',
             depName: 'custom_image',
             packageName: 'my-registry.com/mirror/quay.io/myorg/myapp',
+            registryUrls: ['https://my-registry.com'],
             currentValue: 'v2.0.0',
             currentDigest:
               'sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',

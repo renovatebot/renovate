@@ -60,6 +60,7 @@ describe('modules/manager/devcontainer/extract', () => {
             depName: 'devcontainer.registry.renovate.com/test/features/first',
             packageName:
               'devcontainer.registry.renovate.com/test/features/first',
+            registryUrls: ['https://devcontainer.registry.renovate.com'],
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -98,6 +99,7 @@ describe('modules/manager/devcontainer/extract', () => {
             depName: 'devcontainer.registry.renovate.com/test/features/first',
             packageName:
               'devcontainer.registry.renovate.com/test/features/first',
+            registryUrls: ['https://devcontainer.registry.renovate.com'],
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -112,6 +114,7 @@ describe('modules/manager/devcontainer/extract', () => {
             depName: 'devcontainer.registry.renovate.com/test/features/second',
             packageName:
               'devcontainer.registry.renovate.com/test/features/second',
+            registryUrls: ['https://devcontainer.registry.renovate.com'],
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -150,6 +153,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/image',
             packageName: 'devcontainer.registry.renovate.com/test/image',
+            registryUrls: ['https://devcontainer.registry.renovate.com'],
             depType: 'image',
             replaceString:
               'devcontainer.registry.renovate.com/test/image:1.2.3',
@@ -162,6 +166,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/feature',
             packageName: 'devcontainer.registry.renovate.com/test/feature',
+            registryUrls: ['https://devcontainer.registry.renovate.com'],
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -196,6 +201,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/image',
             packageName: 'devcontainer.registry.renovate.com/test/image',
+            registryUrls: ['https://devcontainer.registry.renovate.com'],
             depType: 'image',
             replaceString:
               'devcontainer.registry.renovate.com/test/image:1.2.3',
@@ -360,6 +366,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/feature',
             packageName: 'devcontainer.registry.renovate.com/test/feature',
+            registryUrls: ['https://devcontainer.registry.renovate.com'],
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -401,6 +408,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'ghcr.io/devcontainers/features/go',
             packageName: 'some-registry.io/mirror/features/go',
+            registryUrls: ['https://some-registry.io'],
             depType: 'feature',
           },
           {
@@ -413,6 +421,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'ghcr.io/devcontainers/features/node',
             packageName: 'some-registry.io/mirror/features/node',
+            registryUrls: ['https://some-registry.io'],
             depType: 'feature',
           },
           {
@@ -425,6 +434,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'ghcr.io/devcontainers/features/python',
             packageName: 'some-registry.io/mirror/features/python',
+            registryUrls: ['https://some-registry.io'],
             depType: 'feature',
           },
           {
@@ -437,6 +447,7 @@ describe('modules/manager/devcontainer/extract', () => {
             datasource: 'docker',
             depName: 'ghcr.io/devcontainers/features/ruby',
             packageName: 'some-registry.io/mirror/features/ruby',
+            registryUrls: ['https://some-registry.io'],
             depType: 'feature',
           },
           {
