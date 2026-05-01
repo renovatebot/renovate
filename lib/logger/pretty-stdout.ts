@@ -132,6 +132,7 @@ export class RenovateStream extends Writable {
     _encoding: string,
     callback: (error?: Error | null) => void,
   ): void {
-    this.destination.write(formatRecord(data, this.colorize), callback);
+    this.destination.write(formatRecord(data, this.colorize));
+    callback();
   }
 }

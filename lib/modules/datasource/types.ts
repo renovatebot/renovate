@@ -3,7 +3,10 @@ import type {
   CustomDatasourceConfig,
 } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/index.ts';
-import type { ConstraintName } from '../../util/exec/types.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+} from '../../util/exec/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 
 export interface GetDigestInputConfig {
@@ -34,6 +37,10 @@ export interface GetReleasesConfig {
   registryUrl?: string;
   currentValue?: string;
   constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   constraintsFiltering?: ConstraintsFilter;
 }
 
@@ -54,6 +61,10 @@ export interface GetPkgReleasesConfig {
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   registryStrategy?: RegistryStrategy;
 }
 

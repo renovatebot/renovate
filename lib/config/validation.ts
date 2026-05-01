@@ -789,6 +789,36 @@ export async function validateConfig(
                   }
                 }
               }
+            } else if (key === 'constraintsVersioning') {
+              for (const [k, v] of Object.entries(val)) {
+                if (!isString(v)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of additional constraint names and their versioning`,
+                  });
+                  break;
+                }
+
+                if (isToolName(k)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` is not a valid additional constraint name, as \`${k}\` is a tool name, and \`constraintsVersioning\` can only override the versioning for a non-tool constraint`,
+                  });
+                } else if (isConstraintName(k)) {
+                  const versioningName = v.split(':')[0];
+                  if (!allVersioning.getVersionings().get(versioningName)) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Configuration option \`${currentPath}.${k}=${v}\`: \`${v}\` is not a valid versioning scheme`,
+                    });
+                  }
+                } else {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a known additional constraint name`,
+                  });
+                }
+              }
             } else {
               const ignoredObjects = options
                 .filter((option) => option.freeChoice)
