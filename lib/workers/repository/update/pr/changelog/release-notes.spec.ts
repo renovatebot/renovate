@@ -171,6 +171,21 @@ const bitbucketServerProject = partial<ChangeLogProject>({
   baseUrl: 'https://bitbucket\\.domain.org/',
 });
 
+const genericProject = partial<ChangeLogProject>({
+  type: 'generic',
+  apiBaseUrl: 'https://generic.domain.org/test/',
+  changelogUrl: 'https://generic.domain.org/test/CHANGELOG.md',
+});
+
+const genericUnityProject = partial<ChangeLogProject>({
+  type: 'generic',
+  depName: 'Unity Editor',
+  packageName: 'm_EditorVersion',
+  apiBaseUrl: 'https://services.api.unity.com/unity/editor/release/v1/releases',
+  changelogUrl:
+    'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_3_11f1_500c5f352f/6000_3_11f1_500c5f352f.md',
+});
+
 const githubProject = partial<ChangeLogProject>({
   type: 'github',
   apiBaseUrl: 'https://api.github.com/',
@@ -1262,6 +1277,39 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         notesSourceUrl,
         url: `${notesSourceUrl}#169-fiery-basilisk-2018-02-02`,
       });
+    });
+
+    it('handles generic release notes link', async () => {
+      httpMock
+        .scope(genericProject.apiBaseUrl)
+        .get('/')
+        .reply(200, yargsChangelogMd);
+
+      const res = await getReleaseNotesMd(
+        {
+          ...genericProject,
+        },
+        partial<ChangeLogRelease>({
+          version: '15.3.0',
+          gitRef: '15.3.0',
+        }),
+      );
+
+      expect(res).toMatchObject({
+        notesSourceUrl: 'https://generic.domain.org/test/CHANGELOG.md',
+        url: 'https://generic.domain.org/test/CHANGELOG.md#1530-2020-03-08',
+      });
+    });
+
+    it('does not handle generic Unity release notes', async () => {
+      const res = await getReleaseNotesMd(
+        {
+          ...genericUnityProject,
+        },
+        partial<ChangeLogRelease>({}),
+      );
+
+      expect(res).toBeNull();
     });
 
     it('parses angular.js', async () => {
