@@ -2418,6 +2418,7 @@ describe('config/validation', () => {
           {
             repository: 'owner/repo2',
             extends: ['config:recommended'],
+            enabled: false, // options with parents=['.'] are allowed
             binarySource: 'global' as const, // globalOnly options are allowed
             npm: { enabled: false }, // manager configs are allowed
           },

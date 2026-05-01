@@ -287,7 +287,10 @@ export async function validateConfig(
           });
         }
       }
-      const parentName = getParentName(parentPath);
+      const parentName =
+        parentPath && repoEntryRe.test(parentPath)
+          ? '.'
+          : getParentName(parentPath);
       if (
         !isPreset &&
         optionParents[key] &&
