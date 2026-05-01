@@ -1,4 +1,4 @@
-import type { XmlDocument } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -23,6 +23,7 @@ import {
   getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
+  resolveReleaseGitRef,
 } from './util.ts';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
@@ -207,6 +208,16 @@ export class MavenDatasource extends Datasource {
 
     if (val.lastModified) {
       release.releaseTimestamp = asTimestamp(val.lastModified);
+    }
+
+    try {
+      const pom = new XmlDocument(val.data);
+      const gitRef = await resolveReleaseGitRef(this.http, registryUrl, pom);
+      if (gitRef) {
+        release.gitRef = gitRef;
+      }
+    } catch {
+      // Git ref extraction is best-effort metadata and should not fail release lookup.
     }
 
     return release;
