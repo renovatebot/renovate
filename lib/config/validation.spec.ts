@@ -2411,14 +2411,15 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('validates repositories[] object-entry config', async () => {
+    it('validates repositories[]', async () => {
       const config = {
         repositories: [
           'owner/repo1',
           {
             repository: 'owner/repo2',
             extends: ['config:recommended'],
-            binarySource: 'global' as const, // globalOnly options are allowed in repositories[] object-entry
+            binarySource: 'global' as const, // globalOnly options are allowed
+            npm: { enabled: false }, // manager configs are allowed
           },
         ],
       };
@@ -2429,63 +2430,14 @@ describe('config/validation', () => {
       expect(warnings).toEqual([]);
     });
 
-    it('warns on invalid globalOnly option value in repositories[] object-entry', async () => {
+    it('warns on repositories[] with invalid entries', async () => {
       const config = {
         repositories: [
           {
             repository: 'owner/repo1',
             binarySource: 'invalid' as never,
-          },
-        ],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toMatchObject([
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
-        },
-      ]);
-    });
-
-    it('validates invalid config options in repositories[] object-entry', async () => {
-      const config = {
-        repositories: [
-          {
-            repository: 'owner/repo1',
             foo: 'bar',
           },
-        ],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config as any,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: 'Invalid configuration option: repositories[0].foo',
-        },
-      ]);
-    });
-
-    it('skips validation for repositories[] string entries', async () => {
-      const config = {
-        repositories: ['owner/repo1', 'owner/repo2'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([]);
-    });
-
-    it('warns when repositories[] object-entry is missing repository key', async () => {
-      const config = {
-        repositories: [
           {
             extends: ['config:recommended'],
           },
@@ -2493,31 +2445,25 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
-        config as any,
+        // @ts-expect-error: contains invalid values
+        config,
       );
       expect(warnings).toEqual([
         {
           topic: 'Configuration Error',
+          message: 'Invalid configuration option: repositories[0].foo',
+        },
+        {
+          topic: 'Configuration Error',
           message:
-            'repositories[0]: each repository object entry must have a `repository` string property',
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'repositories[1]: each repository object entry must have a `repository` string property',
         },
       ]);
-    });
-
-    it('allows manager configs inside repositories[] object-entry', async () => {
-      const config = {
-        repositories: [
-          {
-            repository: 'owner/repo1',
-            npm: { enabled: false },
-          },
-        ],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([]);
     });
 
     it('validates object type options', async () => {
