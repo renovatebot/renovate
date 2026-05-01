@@ -71,6 +71,7 @@ describe('modules/manager/mise/extract', () => {
       lefthook = "1.11.13"
       localstack = "4.3.0"
       lychee = "0.19.1"
+      minio = "RELEASE.2025-10-15T17-29-55Z"
       npm = "11.2.0"
       opentofu = "1.6.1"
       openfga = "1.14.0"
@@ -234,6 +235,14 @@ describe('modules/manager/mise/extract', () => {
             depName: 'lychee',
             extractVersion: '^lychee-v(?<version>\\S+)',
             packageName: 'lycheeverse/lychee',
+          },
+          {
+            currentValue: 'RELEASE.2025-10-15T17-29-55Z',
+            datasource: 'github-releases',
+            depName: 'minio',
+            packageName: 'minio/minio',
+            versioning:
+              'regex:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T(?<build>\\d+)-(?<revision>\\d+)-\\d+Z$',
           },
           {
             currentValue: '11.2.0',

@@ -364,6 +364,18 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^lychee-v(?<version>\\S+)',
     },
   },
+  minio: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'minio/minio',
+      datasource: GithubReleasesDatasource.id,
+      // MinIO tags use the calver-ish form `RELEASE.YYYY-MM-DDTHH-MM-SSZ`,
+      // which does not parse as semver. Map year/month/day/hour/minute onto
+      // the regex versioning's numeric release components; seconds are
+      // dropped since MinIO releases more than once per minute are unlikely.
+      versioning: `${regexVersioning.id}:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T(?<build>\\d+)-(?<revision>\\d+)-\\d+Z$`,
+    },
+  },
   npm: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
