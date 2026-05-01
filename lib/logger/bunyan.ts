@@ -1,18 +1,18 @@
-import {
-  isNonEmptyStringAndNotWhitespace,
-  isString,
-  isUndefined,
-} from '@sindresorhus/is';
-
+import { isString, isUndefined } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { bunyan } from '../expose.ts';
 import cmdSerializer from './cmd-serializer.ts';
 import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
-import { RenovateStream } from './pretty-stdout.ts';
+import { RenovateStream, formatRecord } from './pretty-stdout.ts';
 import type { ProblemStream } from './problem-stream.ts';
-import type { BunyanLogLevel, BunyanLogger, BunyanStream } from './types.ts';
+import type {
+  BunyanLogLevel,
+  BunyanLogger,
+  BunyanRecord,
+  BunyanStream,
+} from './types.ts';
 import { getEnv } from './utils.ts';
 import { withSanitizer } from './with-sanitizer.ts';
 
@@ -55,29 +55,38 @@ function createLogFileStream(logFile: string): BunyanStream {
   const directoryName = upath.dirname(logFile);
   fs.ensureDirSync(directoryName);
 
-  const file: BunyanStream = {
-    name: 'logfile',
-    path: logFile,
-    level: validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug'),
-  };
+  const logFileLevel = validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug');
 
-  const logFileFormat = getEnv('LOG_FILE_FORMAT');
+  // Use synchronous file writes so that log data is not lost when
+  // process.exit() is called before async streams can drain.
+  const fd = fs.openSync(logFile, 'a');
 
-  if (
-    isNonEmptyStringAndNotWhitespace(logFileFormat) &&
-    logFileFormat === 'pretty'
-  ) {
-    const fileStream = fs.createWriteStream(logFile, {
-      flags: 'a',
-      encoding: 'utf8',
-    });
-    const prettyFile = new RenovateStream(fileStream, false);
-    file.stream = prettyFile;
-    file.type = 'raw';
-    delete file.path;
+  if (getEnv('LOG_FILE_FORMAT') === 'pretty') {
+    return {
+      name: 'logfile',
+      level: logFileLevel,
+      type: 'raw',
+      stream: {
+        writable: true,
+        write(rec: unknown): boolean {
+          fs.writeSync(fd, formatRecord(rec as BunyanRecord, false));
+          return true;
+        },
+      },
+    } as BunyanStream;
   }
 
-  return file;
+  return {
+    name: 'logfile',
+    level: logFileLevel,
+    stream: {
+      writable: true,
+      write(data: unknown): boolean {
+        fs.writeSync(fd, typeof data === 'string' ? data : String(data));
+        return true;
+      },
+    },
+  } as BunyanStream;
 }
 
 function serializedSanitizedLogger(streams: BunyanStream[]): BunyanLogger {
