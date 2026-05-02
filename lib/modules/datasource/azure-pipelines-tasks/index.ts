@@ -4,6 +4,7 @@ import { AzurePipelines } from '../../../util/azure.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/loose/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -53,7 +54,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         headers: { authorization: `Basic ${auth}` },
       };
       const results = await this.getTasks(
-        `${azureEndpoint}/_apis/distributedtask/tasks/`,
+        joinUrlParts(azureEndpoint, '_apis/distributedtask/tasks/'),
         opts,
         AzurePipelinesJSON,
       );
