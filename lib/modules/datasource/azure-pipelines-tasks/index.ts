@@ -1,5 +1,6 @@
 import type { TypeOf, ZodType } from 'zod/v3';
 import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
 import { AzurePipelines } from '../../../util/azure.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -37,12 +38,23 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const platform = GlobalConfig.get('platform');
     // Use endpoint from host rules for azure platform, check if azure pipelines is being used with a github platform, and if so use the SYSTEM_COLLECTIONURI environment variable as the endpoint
-    const azureEndpoint =
-      platform === 'azure'
-        ? GlobalConfig.get('endpoint')
-        : platform === 'github'
-          ? process.env[AzurePipelines.PredefinedVariables.systemCollectionUri]
-          : undefined;
+    let azureEndpoint: string | undefined = undefined;
+
+    if (platform === 'azure') {
+      azureEndpoint = GlobalConfig.get('endpoint');
+    } else if (platform === 'github') {
+      const azurePipelinesSystemCollectionUri =
+        process.env[
+          AzurePipelines.PredefinedVariables.systemCollectionUri
+        ]?.toString();
+      if (azurePipelinesSystemCollectionUri) {
+        logger.info(
+          `Platform is ${platform} but found to be running under Azure Pipelines due to presence of ${AzurePipelines.PredefinedVariables.systemCollectionUri} environment variable. Using it as the endpoint for azure pipelines tasks datasource.`,
+        );
+        azureEndpoint = azurePipelinesSystemCollectionUri;
+      }
+    }
+
     const { token } = hostRules.find({
       hostType: AzurePipelinesTasksDatasource.id,
       url: azureEndpoint,

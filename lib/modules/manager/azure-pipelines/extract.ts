@@ -38,13 +38,23 @@ export function extractRepository(
     repositoryUrl = `https://github.com/${repository.name}.git`;
   } else if (repository.type === 'git') {
     const platform = GlobalConfig.get('platform');
-    // Use endpoint from host rules for azure platform, check if azure pipelines is being used with a github platform, and if so use the SYSTEM_COLLECTIONURI environment variable as the endpoint
-    const azureEndpoint =
-      platform === 'azure'
-        ? GlobalConfig.get('endpoint')
-        : platform === 'github'
-          ? process.env[AzurePipelines.PredefinedVariables.systemCollectionUri]
-          : undefined;
+
+    let azureEndpoint: string | undefined = undefined;
+
+    if (platform === 'azure') {
+      azureEndpoint = GlobalConfig.get('endpoint');
+    } else if (platform === 'github') {
+      const azurePipelinesSystemCollectionUri =
+        process.env[
+          AzurePipelines.PredefinedVariables.systemCollectionUri
+        ]?.toString();
+      if (azurePipelinesSystemCollectionUri) {
+        logger.info(
+          `Platform is ${platform} but found to be running under Azure Pipelines due to presence of ${AzurePipelines.PredefinedVariables.systemCollectionUri} environment variable. Using it as the Azure DevOps endpoint for repository URL resolution.`,
+        );
+        azureEndpoint = azurePipelinesSystemCollectionUri;
+      }
+    }
 
     if (azureEndpoint) {
       // extract the project name if the repository from which the pipline is referencing templates contains the Azure DevOps project name
