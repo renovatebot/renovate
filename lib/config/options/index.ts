@@ -2080,8 +2080,10 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minimumReleaseAge',
-    description: 'Time required before a new release is considered stable.',
+    description:
+      'Time required before a new release is considered stable. Accepts a duration string (e.g. `"3 days"`) or an object with per-update-type overrides (e.g. `{"default": "3 days", "delayMinor": "6 days"}`). When using the object form, `delay<UpdateType>` keys (`delayMajor`, `delayMinor`) check the age of the first release in the version group.',
     type: 'string',
+    allowObject: true,
     default: null,
   },
   {

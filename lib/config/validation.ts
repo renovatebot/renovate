@@ -67,6 +67,7 @@ let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
+let optionAllowsObject: Set<string>;
 
 const managerList = getManagerList();
 
@@ -146,6 +147,7 @@ function initOptions(): void {
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
   optionAllowsNegativeIntegers = new Set();
+  optionAllowsObject = new Set();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -168,6 +170,10 @@ function initOptions(): void {
 
     if (option.allowNegative) {
       optionAllowsNegativeIntegers.add(option.name);
+    }
+
+    if (option.allowObject) {
+      optionAllowsObject.add(option.name);
     }
   }
 
@@ -647,10 +653,14 @@ export async function validateConfig(
           }
         } else if (type === 'string') {
           if (!isString(val)) {
-            errors.push({
-              topic: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a string`,
-            });
+            if (optionAllowsObject.has(key) && isPlainObject(val)) {
+              // Allow object values for options like minimumReleaseAge
+            } else {
+              errors.push({
+                topic: 'Configuration Error',
+                message: `Configuration option \`${currentPath}\` should be a string`,
+              });
+            }
           }
         } else if (type === 'object') {
           if (isPlainObject(val)) {
