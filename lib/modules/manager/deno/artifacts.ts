@@ -24,6 +24,19 @@ export async function updateArtifacts(
     return null;
   }
 
+  // handle the setting of frozen lock file gracefully
+  // NOTE: Historical reasons, yarn seems to force an update of the lock file.
+  // https://github.com/renovatebot/renovate/pull/9515
+  // https://github.com/renovatebot/renovate/discussions/9481#discussioncomment-593028
+  // but should respect the setting here
+  const frozenLockfile = updatedDeps.find(
+    (dep) => dep.managerData?.frozenLockfile,
+  );
+  if (frozenLockfile) {
+    logger.debug('Lock file should be frozen. Skipping artifact update.');
+    return null;
+  }
+
   // falling back for lockFileMaintenance
   const lockFileName = updatedDeps[0]?.lockFiles?.[0] ?? config.lockFiles?.[0];
 
@@ -90,6 +103,8 @@ export async function updateArtifacts(
 
     // "deno install" don't execute lifecycle scripts of package.json by default
     // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
+    // TODO: appending `--lockfile-only` is better
+    // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
     await exec('deno install', execOptions);
 
     const newLockFileContent = await readLocalFile(lockFileName);
