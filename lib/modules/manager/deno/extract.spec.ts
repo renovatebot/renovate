@@ -22,13 +22,18 @@ describe('modules/manager/deno/extract', () => {
     it('found lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
       fs.localPathIsFile.mockResolvedValue(true);
-      const result = await getLockFiles('deno.lock', 'deno.json');
+      const result = await getLockFiles(
+        {
+          path: 'deno.lock',
+        },
+        'deno.json',
+      );
       expect(result).toEqual(['deno.lock']);
     });
 
     it('not found lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('package-lock.json');
-      const result = await getLockFiles(false, 'deno.json');
+      const result = await getLockFiles({}, 'deno.json');
       expect(result).toEqual([]);
     });
   });

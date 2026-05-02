@@ -105,21 +105,32 @@ describe('modules/manager/deno/schema', () => {
 
   describe('Lock', () => {
     it('parses lock as string', () => {
-      expect(Lock.parse('deno.lock')).toEqual('deno.lock');
+      expect(Lock.parse('deno.lock')).toEqual({
+        path: 'deno.lock',
+      });
     });
 
     it('parses lock as object', () => {
-      expect(Lock.parse({ path: 'genuine-deno.lock' })).toEqual(
-        'genuine-deno.lock',
-      );
+      expect(Lock.parse({ path: 'genuine-deno.lock' })).toEqual({
+        path: 'genuine-deno.lock',
+      });
+    });
+
+    it('parses lock as object with frozen', () => {
+      expect(Lock.parse({ path: 'genuine-deno.lock', frozen: true })).toEqual({
+        path: 'genuine-deno.lock',
+        frozen: true,
+      });
     });
 
     it('parses lock as boolean true', () => {
-      expect(Lock.parse(true)).toEqual('deno.lock');
+      expect(Lock.parse(true)).toEqual({
+        path: 'deno.lock',
+      });
     });
 
     it('parses lock as boolean false', () => {
-      expect(Lock.parse(false)).toEqual(false);
+      expect(Lock.parse(false)).toEqual({});
     });
   });
 
@@ -594,7 +605,9 @@ describe('modules/manager/deno/schema', () => {
         fileName: 'deno.json',
       });
 
-      expect(result.content.lock).toBe('genuine-deno.lock');
+      expect(result.content.lock).toEqual({
+        path: 'genuine-deno.lock',
+      });
     });
 
     it('parses deno.json with importMap', () => {
@@ -606,6 +619,23 @@ describe('modules/manager/deno/schema', () => {
       });
 
       expect(result.content.importMap).toBe('./import_map.json');
+    });
+
+    it('parses deno.json with lock frozen', () => {
+      const result = DenoExtract.parse({
+        content: JSON.stringify({
+          lock: {
+            path: 'deno.lock',
+            frozen: true,
+          },
+        }),
+        fileName: 'deno.json',
+      });
+
+      expect(result.content.lock).toEqual({
+        path: 'deno.lock',
+        frozen: true,
+      });
     });
   });
 
