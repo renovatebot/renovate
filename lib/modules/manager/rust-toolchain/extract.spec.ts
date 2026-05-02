@@ -112,6 +112,14 @@ describe('modules/manager/rust-toolchain/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null for unparseable channel value', () => {
+      const result = extractPackageFile(
+        '[toolchain]\nchannel = "not-a-rust-channel"',
+        'rust-toolchain.toml',
+      );
+      expect(result).toBeNull();
+    });
+
     it('can handle additional fields', () => {
       const result = extractPackageFile(
         '[toolchain]\nchannel = "1.89.1"\ncomponents = ["rustfmt", "clippy"]\ntargets = ["wasm32-unknown-unknown"]\n',
