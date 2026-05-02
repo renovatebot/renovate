@@ -35,9 +35,14 @@ Follow these steps to see which version the Mend Renovate app used for a specifi
 1. You should see something like this:
 
    ```
+   INFO: Renovate started
+   {
+     "renovateVersion": "43.159.2"
+   }
+   ...
    INFO: Repository started
    {
-     "renovateVersion": "39.11.5"
+     "renovateVersion": "43.159.2"
    }
    ```
 
