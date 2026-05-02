@@ -220,6 +220,72 @@ describe('modules/manager/azure-pipelines/extract', () => {
         packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
       });
     });
+
+    it('should return null when platform is github, SYSTEM_COLLECTIONURI is set, but project not in name or currentRepository', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          '',
+        ),
+      ).toBeNull();
+    });
+
+    it('should return null when platform is github, SYSTEM_COLLECTIONURI is set, but currentRepository is undefined', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          undefined,
+        ),
+      ).toBeNull();
+    });
+
+    it('should extract Azure repository information when platform is github and SYSTEM_COLLECTIONURI has a trailing slash', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org/';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'project/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          'otherProject/otherRepo',
+        ),
+      ).toMatchObject({
+        depName: 'project/repo',
+        packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
+      });
+    });
+
+    it('should return null for git repo type if platform is not azure or github', () => {
+      GlobalConfig.set({ platform: 'gitlab' });
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'project/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          'project/otherRepo',
+        ),
+      ).toBeNull();
+    });
   });
 
   describe('extractContainer()', () => {
