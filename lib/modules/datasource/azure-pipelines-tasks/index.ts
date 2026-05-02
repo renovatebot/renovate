@@ -1,5 +1,6 @@
 import type { TypeOf, ZodType } from 'zod/v3';
 import { GlobalConfig } from '../../../config/global.ts';
+import { AzurePipelines } from '../../../util/azure.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
@@ -34,19 +35,25 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const platform = GlobalConfig.get('platform');
-    const endpoint = GlobalConfig.get('endpoint');
+    // Use endpoint from host rules for azure platform, check if azure pipelines is being used with a github platform, and if so use the SYSTEM_COLLECTIONURI environment variable as the endpoint
+    const azureEndpoint =
+      platform === 'azure'
+        ? GlobalConfig.get('endpoint')
+        : platform === 'github'
+          ? process.env[AzurePipelines.PredefinedVariables.systemCollectionUri]
+          : undefined;
     const { token } = hostRules.find({
       hostType: AzurePipelinesTasksDatasource.id,
-      url: endpoint,
+      url: azureEndpoint,
     });
 
-    if (platform === 'azure' && endpoint && token) {
+    if (azureEndpoint && token) {
       const auth = Buffer.from(`renovate:${token}`).toString('base64');
       const opts: HttpOptions = {
         headers: { authorization: `Basic ${auth}` },
       };
       const results = await this.getTasks(
-        `${endpoint}/_apis/distributedtask/tasks/`,
+        `${azureEndpoint}/_apis/distributedtask/tasks/`,
         opts,
         AzurePipelinesJSON,
       );
