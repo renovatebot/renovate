@@ -256,6 +256,68 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
     });
   });
 
+  it('handles trailing slash on endpoint when platform is azure', async () => {
+    GlobalConfig.set({
+      platform: 'azure',
+      endpoint: 'https://dev.azure.com/hymans/',
+    });
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'dev.azure.com',
+      token: '123test',
+    });
+    httpMock
+      .scope('https://dev.azure.com')
+      .get('/hymans/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'AzurePowerShell',
+      }),
+    ).toEqual({
+      releases: [
+        {
+          changelogContent:
+            'Added support for Az Module and cross platform agents.',
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
+  });
+
+  it('handles trailing slash on SYSTEM_COLLECTIONURI when platform is github', async () => {
+    GlobalConfig.set({ platform: 'github' });
+    process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/hymans/';
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'dev.azure.com',
+      token: '123test',
+    });
+    httpMock
+      .scope('https://dev.azure.com')
+      .get('/hymans/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'AzurePowerShell',
+      }),
+    ).toEqual({
+      releases: [
+        {
+          changelogContent:
+            'Added support for Az Module and cross platform agents.',
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
+  });
+
   it('falls back to GitHub-hosted lists when platform is github but SYSTEM_COLLECTIONURI is not set', async () => {
     GlobalConfig.set({ platform: 'github' });
 
