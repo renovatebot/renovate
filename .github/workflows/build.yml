@@ -843,7 +843,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@8d20bcac0e14cff8bfd51d99b79d6f6295cda984 # v4.6.9
+        uses: containerbase/internal-tools@824692b2f746d57d7aa1cf7dbdc3a3e6757d0d64 # v4.6.10
         with:
           command: docker-config
 
