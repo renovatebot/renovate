@@ -1,8 +1,11 @@
 import type { TypeOf, ZodType } from 'zod/v3';
 import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { AzurePipelines } from '../../../util/azure.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/loose/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -34,19 +37,36 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const platform = GlobalConfig.get('platform');
-    const endpoint = GlobalConfig.get('endpoint');
+    // Use endpoint from host rules for azure platform, check if azure pipelines is being used with a github platform, and if so use the SYSTEM_COLLECTIONURI environment variable as the endpoint
+    let azureEndpoint: string | undefined = undefined;
+
+    if (platform === 'azure') {
+      azureEndpoint = GlobalConfig.get('endpoint');
+    } else if (platform === 'github') {
+      const azurePipelinesSystemCollectionUri =
+        process.env[
+          AzurePipelines.PredefinedVariables.systemCollectionUri
+        ]?.toString();
+      if (azurePipelinesSystemCollectionUri) {
+        logger.info(
+          `Platform is ${platform} but found to be running under Azure Pipelines due to presence of ${AzurePipelines.PredefinedVariables.systemCollectionUri} environment variable. Using it as the endpoint for azure pipelines tasks datasource.`,
+        );
+        azureEndpoint = azurePipelinesSystemCollectionUri;
+      }
+    }
+
     const { token } = hostRules.find({
       hostType: AzurePipelinesTasksDatasource.id,
-      url: endpoint,
+      url: azureEndpoint,
     });
 
-    if (platform === 'azure' && endpoint && token) {
+    if (azureEndpoint && token) {
       const auth = Buffer.from(`renovate:${token}`).toString('base64');
       const opts: HttpOptions = {
         headers: { authorization: `Basic ${auth}` },
       };
       const results = await this.getTasks(
-        `${endpoint}/_apis/distributedtask/tasks/`,
+        joinUrlParts(azureEndpoint, '_apis/distributedtask/tasks/'),
         opts,
         AzurePipelinesJSON,
       );

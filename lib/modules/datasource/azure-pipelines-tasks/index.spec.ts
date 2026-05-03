@@ -16,6 +16,11 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
     hostRules.clear();
+    delete process.env.SYSTEM_COLLECTIONURI;
+  });
+
+  afterEach(() => {
+    delete process.env.SYSTEM_COLLECTIONURI;
   });
 
   it('returns null for unknown task', async () => {
@@ -216,6 +221,117 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
         },
       ],
     });
+  });
+
+  it('returns organization task when platform is github and SYSTEM_COLLECTIONURI is set', async () => {
+    GlobalConfig.set({ platform: 'github' });
+    process.env.SYSTEM_COLLECTIONURI = 'https://my.custom.domain';
+
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
+    });
+
+    httpMock
+      .scope('https://my.custom.domain')
+      .get('/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'AzurePowerShell',
+      }),
+    ).toEqual({
+      releases: [
+        {
+          changelogContent:
+            'Added support for Az Module and cross platform agents.',
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
+  });
+
+  it('handles trailing slash on endpoint when platform is azure', async () => {
+    GlobalConfig.set({
+      platform: 'azure',
+      endpoint: 'https://dev.azure.com/hymans/',
+    });
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'dev.azure.com',
+      token: '123test',
+    });
+    httpMock
+      .scope('https://dev.azure.com')
+      .get('/hymans/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'AzurePowerShell',
+      }),
+    ).toEqual({
+      releases: [
+        {
+          changelogContent:
+            'Added support for Az Module and cross platform agents.',
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
+  });
+
+  it('handles trailing slash on SYSTEM_COLLECTIONURI when platform is github', async () => {
+    GlobalConfig.set({ platform: 'github' });
+    process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/hymans/';
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'dev.azure.com',
+      token: '123test',
+    });
+    httpMock
+      .scope('https://dev.azure.com')
+      .get('/hymans/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'AzurePowerShell',
+      }),
+    ).toEqual({
+      releases: [
+        {
+          changelogContent:
+            'Added support for Az Module and cross platform agents.',
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
+  });
+
+  it('falls back to GitHub-hosted lists when platform is github but SYSTEM_COLLECTIONURI is not set', async () => {
+    GlobalConfig.set({ platform: 'github' });
+
+    httpMock
+      .scope(gitHubHost)
+      .get(builtinTasksPath)
+      .reply(200, { automatedanalysis: ['0.171.0', '0.198.0'] });
+
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'AutomatedAnalysis',
+      }),
+    ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 
   describe('compare semver', () => {
