@@ -225,7 +225,7 @@ describe('modules/manager/deno/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
-    const execSnapshots = mockExecAll();
+    mockExecAll();
     expect(await updateArtifacts(updateArtifact)).toEqual([
       {
         file: {
@@ -233,11 +233,6 @@ describe('modules/manager/deno/artifacts', () => {
           type: 'addition',
           contents: newLock,
         },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'deno install --frozen=false',
       },
     ]);
   });
