@@ -663,13 +663,14 @@ describe('modules/manager/poetry/extract', () => {
   it('enriches pep621/pep735 dependencies with poetry managerData', async () => {
     const content = codeBlock`
         [project]
-        dependencies = ["click"]
+        dependencies = ["click", "pytest-cov==5.0.0"]
         [project.optional-dependencies]
         other = ["zoom==1.0.0"]
         [dependency-groups]
         typing = ["mypy==1.13.0", "types-requests"]
         [tool.poetry.dependencies]
         click = { version="==1.0.0", source = "artifactory" }
+        pytest-cov = { version = "==5.0.0" }
         zoom = { source = "artifactory" }
         [tool.poetry.group.typing.dependencies]
         types-requests = { source = "artifactory" }
@@ -685,6 +686,16 @@ describe('modules/manager/poetry/extract', () => {
         currentValue: '==1.0.0',
         depName: 'click',
         managerData: { nestedVersion: true, sourceName: 'artifactory' },
+      },
+      {
+        currentValue: '==5.0.0',
+        currentVersion: '5.0.0',
+        datasource: 'pypi',
+        depName: 'pytest-cov',
+        depType: 'project.dependencies',
+        managerData: {},
+        packageName: 'pytest-cov',
+        skipReason: 'invalid-dependency-specification',
       },
       {
         packageName: 'mypy',
