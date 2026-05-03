@@ -336,5 +336,118 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');
     });
+
+    describe('maxMajorIncrement', () => {
+      const majorReleases: Release[] = [
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '3.0.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '4.0.0',
+          releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+        },
+      ];
+
+      it('marks releases exceeding maxMajorIncrement as pending', async () => {
+        config.currentVersion = '1.0.0';
+        config.maxMajorIncrement = 1;
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'major',
+          clone(majorReleases),
+        );
+        expect(res.release?.version).toBe('2.0.0');
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases.map((r) => r.version)).toEqual([
+          '3.0.0',
+          '4.0.0',
+        ]);
+      });
+
+      it('sets pendingChecks when all releases exceed maxMajorIncrement', async () => {
+        config.currentVersion = '1.0.0';
+        config.maxMajorIncrement = 0;
+        config.internalChecksFilter = 'strict';
+        // maxMajorIncrement=0 means disabled, so all pass
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'major',
+          clone(majorReleases),
+        );
+        expect(res.release?.version).toBe('4.0.0');
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+      });
+
+      it('sets pendingChecks=true when all releases exceed maxMajorIncrement with strict filter', async () => {
+        config.currentVersion = '2.0.0';
+        config.maxMajorIncrement = 1;
+        config.internalChecksFilter = 'strict';
+        const releasesAboveLimit: Release[] = [
+          {
+            version: '4.0.0',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+        ];
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'major',
+          clone(releasesAboveLimit),
+        );
+        expect(res.release?.version).toBe('4.0.0');
+        expect(res.pendingChecks).toBeTrue();
+        expect(res.pendingReleases).toHaveLength(0);
+      });
+
+      it('sets pendingChecks=true when all releases exceed maxMajorIncrement with flexible filter', async () => {
+        config.currentVersion = '2.0.0';
+        config.maxMajorIncrement = 1;
+        config.internalChecksFilter = 'flexible';
+        const releasesAboveLimit: Release[] = [
+          {
+            version: '4.0.0',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+        ];
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'major',
+          clone(releasesAboveLimit),
+        );
+        expect(res.release?.version).toBe('4.0.0');
+        expect(res.pendingChecks).toBeTrue();
+        expect(res.pendingReleases).toHaveLength(0);
+      });
+
+      it('sets pendingChecks=true when all releases exceed maxMajorIncrement with none filter', async () => {
+        config.currentVersion = '2.0.0';
+        config.maxMajorIncrement = 1;
+        config.internalChecksFilter = 'none';
+        const releasesAboveLimit: Release[] = [
+          {
+            version: '4.0.0',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+        ];
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'major',
+          clone(releasesAboveLimit),
+        );
+        expect(res.release?.version).toBe('4.0.0');
+        expect(res.pendingChecks).toBeTrue();
+        expect(res.pendingReleases).toHaveLength(0);
+      });
+    });
   });
 });
