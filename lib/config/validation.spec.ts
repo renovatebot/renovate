@@ -2411,6 +2411,62 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('validates repositories[]', async () => {
+      const config = {
+        repositories: [
+          'owner/repo1',
+          {
+            repository: 'owner/repo2',
+            extends: ['config:recommended'],
+            enabled: false, // options with parents=['.'] are allowed
+            binarySource: 'global' as const, // globalOnly options are allowed
+            npm: { enabled: false }, // manager configs are allowed
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns on repositories[] with invalid entries', async () => {
+      const config = {
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            binarySource: 'invalid' as never,
+            foo: 'bar',
+          },
+          {
+            extends: ['config:recommended'],
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid configuration option: repositories[0].foo',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'repositories[1]: each repository object entry must have a `repository` string property',
+        },
+      ]);
+    });
+
     it('validates object type options', async () => {
       const config = {
         productLinks: {
