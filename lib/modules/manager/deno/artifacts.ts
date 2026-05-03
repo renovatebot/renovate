@@ -32,7 +32,7 @@ export async function updateArtifacts(
   const frozenLockfile = updatedDeps.find(
     (dep) => dep.managerData?.frozenLockfile,
   );
-  if (frozenLockfile) {
+  if (frozenLockfile && !isLockFileMaintenance) {
     logger.debug('Lock file should be frozen. Skipping artifact update.');
     return null;
   }
