@@ -580,6 +580,14 @@ describe('modules/manager/poetry/extract', () => {
       expect(res).toEqual({
         deps: [
           {
+            currentValue: '==2.0.0',
+            currentVersion: '2.0.0',
+            datasource: 'pypi',
+            depName: 'poetry-core',
+            depType: 'build-system.requires',
+            packageName: 'poetry-core',
+          },
+          {
             currentValue: '==4.11.2',
             currentVersion: '4.11.2',
             datasource: 'pypi',
@@ -597,14 +605,6 @@ describe('modules/manager/poetry/extract', () => {
               depGroup: 'decouple',
             },
             packageName: 'python-decouple',
-          },
-          {
-            currentValue: '==2.0.0',
-            currentVersion: '2.0.0',
-            datasource: 'pypi',
-            depName: 'poetry-core',
-            depType: 'build-system.requires',
-            packageName: 'poetry-core',
           },
         ],
         extractedConstraints: {},
@@ -669,7 +669,7 @@ describe('modules/manager/poetry/extract', () => {
         [dependency-groups]
         typing = ["mypy==1.13.0", "types-requests"]
         [tool.poetry.dependencies]
-        click = { source = "artifactory" }
+        click = { version="==1.0.0", source = "artifactory" }
         zoom = { source = "artifactory" }
         [tool.poetry.group.typing.dependencies]
         types-requests = { source = "artifactory" }
@@ -682,18 +682,9 @@ describe('modules/manager/poetry/extract', () => {
         packageName: 'click',
         datasource: 'pypi',
         depType: 'project.dependencies',
-        skipReason: 'unspecified-version',
-        depName: 'click',
-        managerData: { sourceName: 'artifactory' },
-      },
-      {
-        packageName: 'zoom',
-        datasource: 'pypi',
-        depType: 'project.optional-dependencies',
         currentValue: '==1.0.0',
-        currentVersion: '1.0.0',
-        depName: 'zoom',
-        managerData: { depGroup: 'other', sourceName: 'artifactory' },
+        depName: 'click',
+        managerData: { nestedVersion: true, sourceName: 'artifactory' },
       },
       {
         packageName: 'mypy',
@@ -711,6 +702,15 @@ describe('modules/manager/poetry/extract', () => {
         skipReason: 'unspecified-version',
         depName: 'types-requests',
         managerData: { depGroup: 'typing', sourceName: 'artifactory' },
+      },
+      {
+        packageName: 'zoom',
+        datasource: 'pypi',
+        depType: 'project.optional-dependencies',
+        currentValue: '==1.0.0',
+        currentVersion: '1.0.0',
+        depName: 'zoom',
+        managerData: { depGroup: 'other', sourceName: 'artifactory' },
       },
     ]);
   });
