@@ -103,9 +103,15 @@ export async function updateArtifacts(
 
     // "deno install" don't execute lifecycle scripts of package.json by default
     // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
-    // TODO: appending `--lockfile-only` is better
+    // TODO: appending `--lockfile-only` is better to reduce disk usage
     // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
-    await exec('deno install', execOptions);
+    let command = 'deno install';
+    if (isLockFileMaintenance) {
+      // force update lockfile
+      // https://github.com/denoland/deno/blob/7eda90e61d107a2f48ef6eab954cda143707e01c/tests/specs/lockfile/frozen_lockfile/no_lockfile_run.out
+      command += ' --frozen=false';
+    }
+    await exec(command, execOptions);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
