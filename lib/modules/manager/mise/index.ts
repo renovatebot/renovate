@@ -6,6 +6,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
@@ -35,6 +36,7 @@ const backendDatasources = {
     GithubReleasesDatasource.id,
     GithubTagsDatasource.id,
     JavaVersionDatasource.id,
+    MavenDatasource.id,
     NodeVersionDatasource.id,
     RubyVersionDatasource.id,
   ],
