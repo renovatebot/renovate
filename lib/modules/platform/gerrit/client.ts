@@ -25,7 +25,7 @@ import {
 
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching
-  private gerritHttp = new GerritHttp({ memCache: false });
+  private gerritHttp = new GerritHttp('gerrit', { memCache: false });
   private gerritVersion = MIN_GERRIT_VERSION;
 
   setGerritVersion(version: string): void {
