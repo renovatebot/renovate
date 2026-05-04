@@ -40,7 +40,6 @@ jobs:
         with:
           # don't run `mise install`, but do install a version of `mise` itself
           install: false
-          # explicitly always use the latest tool version
 
       - name: Update static data
         run: pnpm run update-static-data
