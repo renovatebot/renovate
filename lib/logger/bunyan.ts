@@ -29,7 +29,7 @@ export function createDefaultStreams(
 
   // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
-    const prettyStdOut = new RenovateStream(process.stdout);
+    const prettyStdOut = new RenovateStream();
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
