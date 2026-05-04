@@ -68,9 +68,8 @@ function createLogFileStream(logFile: string): BunyanStream {
       type: 'raw',
       stream: {
         writable: true,
-        write(rec: unknown): boolean {
+        write: (rec: unknown) => {
           fs.writeSync(fd, formatRecord(rec as BunyanRecord, false));
-          return true;
         },
       },
     } as BunyanStream;
@@ -81,9 +80,8 @@ function createLogFileStream(logFile: string): BunyanStream {
     level: logFileLevel,
     stream: {
       writable: true,
-      write(data: unknown): boolean {
-        fs.writeSync(fd, typeof data === 'string' ? data : String(data));
-        return true;
+      write: (data: string) => {
+        fs.writeSync(fd, data);
       },
     },
   } as BunyanStream;

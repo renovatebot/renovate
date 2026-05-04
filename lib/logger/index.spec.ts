@@ -306,23 +306,6 @@ describe('logger/index', () => {
 
       expect(fs.readFileSync('file.log', 'utf8')).toContain('json message');
     });
-
-    it('writes non-string json data synchronously to log file', () => {
-      const streams = createDefaultStreams(
-        'info',
-        new ProblemStream(),
-        'file.log',
-      );
-
-      const logFileStream = streams[2];
-      const stream = logFileStream.stream as {
-        write: (...args: unknown[]) => void;
-      };
-
-      stream.write(Buffer.from('{"level":30,"msg":"buffer message"}\n'));
-
-      expect(fs.readFileSync('file.log', 'utf8')).toContain('buffer message');
-    });
   });
 
   it('sets level', () => {
