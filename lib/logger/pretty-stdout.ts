@@ -117,7 +117,7 @@ export function formatRecord(rec: BunyanRecord, colorize = true): string {
   return util.format('%s: %s%s\n%s', level, msg, meta, details);
 }
 
-export class RenovateStream extends Writable {
+export class PrettyStdoutStream extends Writable {
   constructor() {
     super({ objectMode: true });
   }

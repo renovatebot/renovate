@@ -171,13 +171,13 @@ describe('logger/pretty-stdout', () => {
     });
   });
 
-  describe('RenovateStream', () => {
+  describe('PrettyStdoutStream', () => {
     it('writes formatted data to stdout', () => {
       const stdoutSpy = vi
         .spyOn(process.stdout, 'write')
         .mockImplementation(() => true);
 
-      const stream = new prettyStdout.RenovateStream();
+      const stream = new prettyStdout.PrettyStdoutStream();
       const rec: BunyanRecord = {
         level: 10,
         msg: 'test message',

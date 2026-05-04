@@ -5,7 +5,7 @@ import { bunyan } from '../expose.ts';
 import cmdSerializer from './cmd-serializer.ts';
 import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
-import { RenovateStream, formatRecord } from './pretty-stdout.ts';
+import { PrettyStdoutStream, formatRecord } from './pretty-stdout.ts';
 import type { ProblemStream } from './problem-stream.ts';
 import type {
   BunyanLogLevel,
@@ -29,7 +29,7 @@ export function createDefaultStreams(
 
   // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
-    const prettyStdOut = new RenovateStream();
+    const prettyStdOut = new PrettyStdoutStream();
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
