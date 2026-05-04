@@ -11,7 +11,6 @@ import {
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
-import * as packageCache from '../../util/cache/package/index.ts';
 import { clone } from '../../util/clone.ts';
 import { regEx } from '../../util/regex.ts';
 import * as template from '../../util/template/index.ts';
@@ -21,14 +20,7 @@ import * as migration from '../migration.ts';
 import type { AllConfig, RenovateConfig } from '../types.ts';
 import { mergeChildConfig } from '../utils.ts';
 import { removedPresets } from './common.ts';
-import * as forgejo from './forgejo/index.ts';
-import * as gitea from './gitea/index.ts';
-import * as github from './github/index.ts';
-import * as gitlab from './gitlab/index.ts';
-import * as http from './http/index.ts';
 import * as internal from './internal/index.ts';
-import * as local from './local/index.ts';
-import * as npm from './npm/index.ts';
 import { parsePreset } from './parse.ts';
 import type { Preset, PresetApi } from './types.ts';
 import {
@@ -40,14 +32,14 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util.ts';
 
-const presetSources: Record<string, PresetApi> = {
-  forgejo,
-  gitea,
-  github,
-  gitlab,
-  http,
-  local,
-  npm,
+const presetSourceLoaders: Record<string, () => Promise<PresetApi>> = {
+  forgejo: () => import('./forgejo/index.ts'),
+  gitea: () => import('./gitea/index.ts'),
+  github: () => import('./github/index.ts'),
+  gitlab: () => import('./gitlab/index.ts'),
+  http: () => import('./http/index.ts'),
+  local: () => import('./local/index.ts'),
+  npm: () => import('./npm/index.ts'),
 };
 
 const presetCacheNamespace = 'preset';
@@ -136,20 +128,25 @@ export async function getPreset(
       false,
     );
 
-    if (presetCachePersistence) {
+    const packageCache = presetCachePersistence
+      ? await import('../../util/cache/package/index.ts')
+      : undefined;
+
+    if (packageCache) {
       presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
     } else {
       presetConfig = memCache.get(cacheKey);
     }
 
     if (isNullOrUndefined(presetConfig)) {
-      presetConfig = await presetSources[presetSource].getPreset({
+      const source = await presetSourceLoaders[presetSource]();
+      presetConfig = await source.getPreset({
         repo,
         presetPath,
         presetName,
         tag,
       });
-      if (presetCachePersistence) {
+      if (packageCache) {
         await packageCache.set(
           presetCacheNamespace,
           cacheKey,
