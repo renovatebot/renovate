@@ -714,6 +714,13 @@ export async function checkoutBranchFromRemote(
 }
 
 /**
+ * Returns the remote-tracking ref path for a virtual branch.
+ */
+export function virtualBranchRef(branchName: string): string {
+  return `refs/remotes/origin/${branchName}`;
+}
+
+/**
  * Delete a virtual branch and its associated remote-tracking ref.
  *
  * @param branchName Virtual branch name to delete
@@ -724,10 +731,9 @@ export async function deleteVirtualBranch(branchName: string): Promise<void> {
 
   // Delete remote-tracking ref that was created during init
   // Note: git update-ref -d succeeds even if ref doesn't exist
-  await git.raw(['update-ref', '-d', `refs/remotes/origin/${branchName}`]);
-  logger.debug(
-    `Deleted remote-tracking ref: refs/remotes/origin/${branchName}`,
-  );
+  const ref = virtualBranchRef(branchName);
+  await git.raw(['update-ref', '-d', ref]);
+  logger.debug(`Deleted remote-tracking ref: ${ref}`);
 }
 
 /**
@@ -738,11 +744,11 @@ export async function deleteVirtualBranch(branchName: string): Promise<void> {
  * @param branchName Virtual branch name to set
  * @param commitSha The commit SHA the virtual branch points to.
  */
-export async function setVirtualBranch(
+async function setVirtualBranch(
   branchName: string,
   commitSha: LongCommitSha,
 ): Promise<void> {
-  await git.raw(['update-ref', `refs/remotes/origin/${branchName}`, commitSha]);
+  await git.raw(['update-ref', virtualBranchRef(branchName), commitSha]);
   config.branchCommits[branchName] = commitSha;
 }
 
@@ -1429,7 +1435,7 @@ export async function fetchBranch(
   await syncGit();
   logger.debug(`Fetching branch ${branchName}`);
   try {
-    const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+    const ref = `refs/heads/${branchName}:${virtualBranchRef(branchName)}`;
     await gitRetry(() => git.pull(['origin', ref, '--force']));
     const commit = (await git.revparse([branchName])).trim() as LongCommitSha;
     config.branchCommits[branchName] = commit;
