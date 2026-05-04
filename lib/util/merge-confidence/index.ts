@@ -1,6 +1,11 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig, UpdateType } from '../../config/types.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import {
+  ATTR_RENOVATE_DATASOURCE,
+  ATTR_RENOVATE_PACKAGE_NAME,
+} from '../../instrumentation/types.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as packageCache from '../cache/package/index.ts';
@@ -95,24 +100,40 @@ export async function getMergeConfidenceLevel(
   newVersion: string,
   updateType: UpdateType,
 ): Promise<MergeConfidence | undefined> {
-  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
-    return undefined;
-  }
+  return await instrument(
+    'getMergeConfidenceLevel',
+    async () => {
+      if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
+        return undefined;
+      }
 
-  if (!supportedDatasources.includes(datasource)) {
-    return undefined;
-  }
+      if (!supportedDatasources.includes(datasource)) {
+        return undefined;
+      }
 
-  if (!(currentVersion && newVersion && updateType)) {
-    return 'neutral';
-  }
+      if (!(currentVersion && newVersion && updateType)) {
+        return 'neutral';
+      }
 
-  const mappedConfidence = updateTypeConfidenceMapping[updateType];
-  if (mappedConfidence) {
-    return mappedConfidence;
-  }
+      const mappedConfidence = updateTypeConfidenceMapping[updateType];
+      if (mappedConfidence) {
+        return mappedConfidence;
+      }
 
-  return await queryApi(datasource, packageName, currentVersion, newVersion);
+      return await queryApi(
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+      );
+    },
+    {
+      attributes: {
+        [ATTR_RENOVATE_DATASOURCE]: datasource,
+        [ATTR_RENOVATE_PACKAGE_NAME]: packageName,
+      },
+    },
+  );
 }
 
 /**

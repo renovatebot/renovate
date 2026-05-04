@@ -544,6 +544,7 @@ export async function initRepo({
         ...(!config.ignorePrAuthor && { user: renovateUsername }),
       },
       readOnly: true,
+      count: 1, // bypass graphql check
     });
 
     if (res?.errors) {
@@ -1803,7 +1804,8 @@ async function tryPrAutomerge(
   try {
     const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
     const variables = { pullRequestId: prNodeId, mergeMethod };
-    const queryOptions = { variables };
+    // set count to one bypass graphql check
+    const queryOptions = { variables, count: 1 };
 
     const res = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
