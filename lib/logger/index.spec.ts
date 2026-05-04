@@ -1,11 +1,9 @@
 import type { WriteStream } from 'node:fs';
-import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import { partial } from '~test/util.ts';
 import { add } from '../util/host-rules.ts';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
-import { createDefaultStreams } from './bunyan.ts';
 import {
   addMeta,
   addStream,
@@ -21,6 +19,7 @@ import {
   setMeta,
   withMeta,
 } from './index.ts';
+import { createDefaultStreams } from './pino.ts';
 import { ProblemStream } from './problem-stream.ts';
 import type { RenovateLogger } from './renovate-logger.ts';
 
@@ -31,13 +30,21 @@ vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => 'initial_context'),
 }));
 
-const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
+// Capture stream to intercept logged output for assertions
+let capturedLogs: Record<string, any>[] = [];
+const captureStream = {
+  write(data: string): void {
+    capturedLogs.push(JSON.parse(data));
+  },
+};
 
 // init logger
 await init();
+addStream({ level: 'trace', stream: captureStream });
 
 describe('logger/index', () => {
   beforeEach(() => {
+    capturedLogs = [];
     delete process.env.LOG_FILE_LEVEL;
   });
 
@@ -48,7 +55,8 @@ describe('logger/index', () => {
   it('uses an auto-generated log context', () => {
     logger.debug('');
 
-    expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith({ logContext }, '');
+    expect(capturedLogs).toHaveLength(1);
+    expect(capturedLogs[0]).toMatchObject({ logContext, msg: '' });
   });
 
   it('sets and gets context', () => {
@@ -59,7 +67,8 @@ describe('logger/index', () => {
     logger.debug(msg);
 
     expect(getContext()).toBe(logContext);
-    expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith({ logContext }, msg);
+    expect(capturedLogs).toHaveLength(1);
+    expect(capturedLogs[0]).toMatchObject({ logContext, msg });
   });
 
   it('supports logging with metadata', () => {
@@ -86,16 +95,14 @@ describe('logger/index', () => {
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith(
-        {
-          logContext,
-          // `foo` key was rewritten
-          bar: 'bar',
-          baz: 'baz',
-        },
-        'message',
-      );
-      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+      expect(capturedLogs).toHaveLength(1);
+      expect(capturedLogs[0]).toMatchObject({
+        logContext,
+        // `foo` key was rewritten
+        bar: 'bar',
+        baz: 'baz',
+        msg: 'message',
+      });
     });
 
     it('adds meta', () => {
@@ -104,16 +111,14 @@ describe('logger/index', () => {
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith(
-        {
-          logContext,
-          foo: 'foo',
-          bar: 'bar',
-          baz: 'baz',
-        },
-        'message',
-      );
-      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+      expect(capturedLogs).toHaveLength(1);
+      expect(capturedLogs[0]).toMatchObject({
+        logContext,
+        foo: 'foo',
+        bar: 'bar',
+        baz: 'baz',
+        msg: 'message',
+      });
     });
 
     it('removes meta', () => {
@@ -124,30 +129,28 @@ describe('logger/index', () => {
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith(
-        {
-          logContext,
-          foo: 'foo',
-          bar: 'bar',
-          baz: 'baz',
-        },
-        'message',
-      );
-      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+      expect(capturedLogs).toHaveLength(1);
+      expect(capturedLogs[0]).toMatchObject({
+        logContext,
+        foo: 'foo',
+        bar: 'bar',
+        baz: 'baz',
+        msg: 'message',
+      });
 
+      capturedLogs = [];
       removeMeta(['bar']);
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenLastCalledWith(
-        {
-          logContext,
-          foo: 'foo',
-          baz: 'baz',
-        },
-        'message',
-      );
-      expect(bunyanDebugSpy).toHaveBeenCalledTimes(2);
+      expect(capturedLogs).toHaveLength(1);
+      expect(capturedLogs[0]).toMatchObject({
+        logContext,
+        foo: 'foo',
+        baz: 'baz',
+        msg: 'message',
+      });
+      expect(capturedLogs[0]).not.toHaveProperty('bar');
     });
 
     it('withMeta adds and removes metadata correctly', () => {
@@ -155,28 +158,26 @@ describe('logger/index', () => {
 
       withMeta({ bar: 'bar' }, () => {
         logger.debug({ baz: 'baz' }, 'message');
-        expect(bunyanDebugSpy).toHaveBeenNthCalledWith(
-          1,
-          {
-            logContext,
-            foo: 'foo',
-            bar: 'bar',
-            baz: 'baz',
-          },
-          'message',
-        );
-      });
-
-      logger.debug({ baz: 'baz' }, 'message');
-      expect(bunyanDebugSpy).toHaveBeenNthCalledWith(
-        2,
-        {
+        expect(capturedLogs).toHaveLength(1);
+        expect(capturedLogs[0]).toMatchObject({
           logContext,
           foo: 'foo',
+          bar: 'bar',
           baz: 'baz',
-        },
-        'message',
-      );
+          msg: 'message',
+        });
+      });
+
+      capturedLogs = [];
+      logger.debug({ baz: 'baz' }, 'message');
+      expect(capturedLogs).toHaveLength(1);
+      expect(capturedLogs[0]).toMatchObject({
+        logContext,
+        foo: 'foo',
+        baz: 'baz',
+        msg: 'message',
+      });
+      expect(capturedLogs[0]).not.toHaveProperty('bar');
     });
 
     it('withMeta handles cleanup when callback throws', () => {
@@ -189,16 +190,15 @@ describe('logger/index', () => {
         }),
       ).toThrow('test error');
 
+      capturedLogs = [];
       logger.debug({ baz: 'baz' }, 'message');
-      expect(bunyanDebugSpy).toHaveBeenNthCalledWith(
-        2,
-        {
-          logContext,
-          foo: 'foo',
-          baz: 'baz',
-        },
-        'message',
-      );
+      expect(capturedLogs).toHaveLength(1);
+      expect(capturedLogs[0]).toMatchObject({
+        logContext,
+        foo: 'foo',
+        baz: 'baz',
+        msg: 'message',
+      });
     });
   });
 
@@ -208,13 +208,15 @@ describe('logger/index', () => {
     });
 
     it('creates log file stream', () => {
-      expect(
-        createDefaultStreams('info', new ProblemStream(), 'file.log'),
-      ).toMatchObject([
-        { name: 'stdout', type: 'raw' },
-        { name: 'problems', type: 'raw' },
-        { name: 'logfile' },
-      ]);
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+      expect(streams).toHaveLength(3);
+      expect(streams[0]).toMatchObject({ level: 'info' });
+      expect(streams[1]).toMatchObject({ level: 'warn' });
+      expect(streams[2]).toMatchObject({ level: 'debug' });
     });
 
     it.each([
@@ -248,26 +250,41 @@ describe('logger/index', () => {
     it.each([
       {
         logFileFormat: 'json',
-        expectedType: undefined,
+        expectsWrite: (
+          stream: { write: (d: string) => void },
+          filePath: string,
+        ) => {
+          stream.write('{"level":30,"msg":"format message"}\n');
+          expect(fs.readFileSync(filePath, 'utf8')).toContain('format message');
+        },
       },
       {
         logFileFormat: 'pretty',
-        expectedType: 'raw',
+        expectsWrite: (
+          stream: { write: (d: string) => void },
+          filePath: string,
+        ) => {
+          stream.write('{"level":30,"msg":"format message"}\n');
+          expect(fs.readFileSync(filePath, 'utf8')).toContain('format message');
+        },
       },
     ])(
       'handles log file stream $logFileFormat format',
-      ({ logFileFormat, expectedType }) => {
+      ({ logFileFormat, expectsWrite }) => {
         process.env.LOG_FILE_FORMAT = logFileFormat;
 
         const streams = createDefaultStreams(
           'info',
           new ProblemStream(),
-          'file.log',
+          `${logFileFormat}-format.log`,
         );
 
         const logFileStream = streams[2];
-
-        expect(logFileStream.type).toBe(expectedType);
+        expect(logFileStream.stream).toBeDefined();
+        expectsWrite(
+          logFileStream.stream as { write: (d: string) => void },
+          `${logFileFormat}-format.log`,
+        );
       },
     );
 
@@ -285,7 +302,7 @@ describe('logger/index', () => {
         write: (...args: unknown[]) => void;
       };
 
-      stream.write({ level: 30, msg: 'test message' });
+      stream.write('{"level":30,"msg":"test message"}\n');
 
       expect(fs.readFileSync('file.log', 'utf8')).toContain('test message');
     });
@@ -353,7 +370,7 @@ describe('logger/index', () => {
         name: 'logfile',
         level: 'error',
       }),
-    ).toThrow("Missing 'stream' or 'path' for bunyan stream");
+    ).toThrow("Missing 'stream' or 'path' for log stream");
   });
 
   it("doesn't support rotating files", () => {

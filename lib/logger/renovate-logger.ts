@@ -1,18 +1,14 @@
 import { isString } from '@sindresorhus/is';
+import fs from 'fs-extra';
+import type pino from 'pino';
 import { LOGGER_NOT_INITIALIZED } from '../constants/error-messages.ts';
 import { once, reset as onceReset } from './once.ts';
+import { addStreamEntry, setStreamLevel } from './pino.ts';
 import { getRemappedLevel } from './remap.ts';
-import type {
-  BunyanLogLevel,
-  BunyanLogger,
-  BunyanSerializers,
-  BunyanStream,
-  Logger,
-} from './types.ts';
-import { getMessage, toMeta } from './utils.ts';
-import { withSanitizer } from './with-sanitizer.ts';
+import type { LogLevel, LogStream, Logger, PinoLogger } from './types.ts';
+import { getMessage, sanitizeValue, toMeta } from './utils.ts';
 
-const loggerLevels: BunyanLogLevel[] = [
+const loggerLevels: LogLevel[] = [
   'trace',
   'debug',
   'info',
@@ -27,7 +23,7 @@ export class RenovateLogger implements Logger {
   private readonly queue: (() => void)[] = [];
   readonly logger: Logger = { once: { reset: onceReset } } as any;
   readonly once = this.logger.once;
-  private bunyanLogger: BunyanLogger | undefined;
+  private _pinoLogger: PinoLogger | undefined;
   private uninitializedWarningFired: boolean;
   private context: string;
   private meta: Record<string, unknown>;
@@ -35,9 +31,9 @@ export class RenovateLogger implements Logger {
   constructor(
     context: string,
     meta: Record<string, unknown>,
-    bunyanLogger?: BunyanLogger,
+    pinoLogger?: PinoLogger,
   ) {
-    this.bunyanLogger = bunyanLogger;
+    this._pinoLogger = pinoLogger;
     this.context = context;
     this.meta = meta;
     for (const level of loggerLevels) {
@@ -83,12 +79,31 @@ export class RenovateLogger implements Logger {
     this.log('fatal', p1, p2);
   }
 
-  addSerializers(serializers: BunyanSerializers): void {
-    this.ensureLogger().addSerializers(serializers);
+  addSerializers(serializers: Record<string, pino.SerializerFn>): void {
+    const current = this.ensureLogger();
+    this._pinoLogger = current.child({}, { serializers });
   }
 
-  addStream(stream: BunyanStream): void {
-    this.ensureLogger().addStream(withSanitizer(stream));
+  addStream(stream: LogStream): void {
+    if (stream.type === 'rotating-file') {
+      throw new Error("Rotating files aren't supported");
+    }
+
+    if (stream.stream) {
+      addStreamEntry({ stream: stream.stream, level: stream.level });
+      return;
+    }
+
+    if (stream.path) {
+      const fileStream = fs.createWriteStream(stream.path, {
+        flags: 'a',
+        encoding: 'utf8',
+      });
+      addStreamEntry({ stream: fileStream, level: stream.level });
+      return;
+    }
+
+    throw new Error("Missing 'stream' or 'path' for log stream");
   }
 
   childLogger(): RenovateLogger {
@@ -99,8 +114,8 @@ export class RenovateLogger implements Logger {
     );
   }
 
-  levels(name: 'stdout' | 'logfile', level: BunyanLogLevel): void {
-    this.ensureLogger().levels(name, level);
+  levels(name: 'stdout' | 'logfile', level: LogLevel): void {
+    setStreamLevel(name, level);
   }
 
   get logContext(): string {
@@ -114,9 +129,9 @@ export class RenovateLogger implements Logger {
   /**
    * For internal initialization only
    */
-  set bunyan(bunyanLogger: BunyanLogger) {
-    this.bunyanLogger = bunyanLogger;
-    // flush any logs that were queued before bunyan logger was initialized
+  set pinoLogger(pinoLogger: PinoLogger) {
+    this._pinoLogger = pinoLogger;
+    // flush any logs that were queued before pino logger was initialized
     for (const logFn of this.queue) {
       logFn();
     }
@@ -139,21 +154,24 @@ export class RenovateLogger implements Logger {
     }
   }
 
-  private ensureLogger(): BunyanLogger {
-    if (!this.bunyanLogger) {
+  private ensureLogger(): PinoLogger {
+    if (!this._pinoLogger) {
       throw new Error(LOGGER_NOT_INITIALIZED);
     }
-    return this.bunyanLogger;
+    return this._pinoLogger;
   }
 
-  private logFactory(_level: BunyanLogLevel): LoggerFunction {
+  private logFactory(_level: LogLevel): LoggerFunction {
     return (p1: string | Record<string, any>, p2?: string): void => {
-      const meta: Record<string, unknown> = {
+      const meta: Record<string, unknown> = sanitizeValue({
         logContext: this.context,
         ...this.meta,
         ...toMeta(p1),
-      };
-      const msg = getMessage(p1, p2);
+      });
+      const rawMsg = getMessage(p1, p2);
+      const msg = isString(rawMsg)
+        ? (sanitizeValue(rawMsg) as string)
+        : undefined;
       let level = _level;
 
       if (isString(msg)) {
@@ -170,7 +188,7 @@ export class RenovateLogger implements Logger {
     };
   }
 
-  private logOnceFn(level: BunyanLogLevel): LoggerFunction {
+  private logOnceFn(level: LogLevel): LoggerFunction {
     const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
       once(
         () => {
@@ -190,15 +208,15 @@ export class RenovateLogger implements Logger {
   }
 
   private log(
-    level: BunyanLogLevel,
+    level: LogLevel,
     p1: string | Record<string, any>,
     p2?: string,
   ): void {
-    if (!this.bunyanLogger) {
-      // defer logging until bunyan logger is initialized, to avoid losing logs during initialization
+    if (!this._pinoLogger) {
+      // defer logging until pino logger is initialized, to avoid losing logs during initialization
       this.queue.push(() => this.log(level, p1, p2));
       if (!this.uninitializedWarningFired) {
-        // oxlint-disable-next-line no-console -- intentional: display warning when bunyan isn't initialized
+        // oxlint-disable-next-line no-console -- intentional: display warning when pino isn't initialized
         console.warn(
           `⚠️ NOTE ⚠️: Renovate's logger has not yet been initialized. If you see no other output, this is a bug`,
         );

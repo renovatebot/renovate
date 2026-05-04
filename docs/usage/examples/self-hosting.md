@@ -401,7 +401,7 @@ Debug logging is usually needed for any debugging, while JSON format will mean t
 
 When you use `LOG_LEVEL=debug` and `LOG_FORMAT=json`, Renovate uses numbers in the `level` field.
 
-The logging level output is controlled by the Bunyan logging library.
+The logging level output is controlled by the [pino](https://github.com/pinojs/pino) logging library.
 
 | Level | Meaning |
 | ----: | ------- |

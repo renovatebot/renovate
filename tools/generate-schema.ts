@@ -1,5 +1,5 @@
-import { ERROR } from 'bunyan';
 import { getProblems, init, logger } from '../lib/logger/index.ts';
+import { ERROR } from '../lib/logger/types.ts';
 import { generateSchema } from './docs/schema.ts';
 
 await init();

@@ -1,6 +1,6 @@
 import { LOGGER_NOT_INITIALIZED } from '../constants/error-messages.ts';
 import { RenovateLogger } from './renovate-logger.ts';
-import type { BunyanLogger } from './types.ts';
+import type { PinoLogger } from './types.ts';
 
 describe('logger/renovate-logger', () => {
   it('throws', () => {
@@ -19,11 +19,11 @@ describe('logger/renovate-logger', () => {
     const logger = new RenovateLogger('test', {});
     logger.info('test');
     expect(fakeLogger.info).toHaveBeenCalledTimes(0);
-    logger.bunyan = fakeLogger as unknown as BunyanLogger;
+    logger.pinoLogger = fakeLogger as unknown as PinoLogger;
     expect(fakeLogger.info).toHaveBeenCalledTimes(1);
   });
 
-  describe('before bunyan is initialized', () => {
+  describe('before pino is initialized', () => {
     it('should log to console', () => {
       const consoleSpy = vi.spyOn(console, 'warn');
       const logger = new RenovateLogger('test', {});

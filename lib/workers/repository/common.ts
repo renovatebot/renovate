@@ -1,5 +1,13 @@
-import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger/index.ts';
+import {
+  DEBUG,
+  ERROR,
+  FATAL,
+  INFO,
+  TRACE,
+  WARN,
+  nameFromLevel,
+} from '../../logger/types.ts';
 import { emojify } from '../../util/emoji.ts';
 
 export function extractRepoProblems(

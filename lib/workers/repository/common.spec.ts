@@ -1,4 +1,4 @@
-import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN } from 'bunyan';
+import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN } from '../../logger/types.ts';
 import { formatProblemLevel } from './common.ts';
 
 describe('workers/repository/common', () => {

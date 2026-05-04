@@ -1,7 +1,7 @@
 import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
 import type { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import type { RenovateSplit } from '../config/types.ts';
-import type { BunyanRecord } from '../logger/types.ts';
+import type { LogRecord } from '../logger/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import type { GitOperationType } from '../util/git/types.ts';
@@ -45,12 +45,12 @@ export interface SpanParameters {
 }
 
 export interface Report {
-  problems: BunyanRecord[];
+  problems: LogRecord[];
   repositories: Record<string, RepoReport>;
 }
 
 interface RepoReport {
-  problems: BunyanRecord[];
+  problems: LogRecord[];
   branches: Partial<BranchCache>[];
   packageFiles: Record<string, PackageFile[]>;
   libYearsWithStatus?: LibYearsWithStatus;
