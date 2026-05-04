@@ -6,7 +6,7 @@ export const JuliaPackageMetadata = z
   .record(
     z.string(),
     z.object({
-      registered: MaybeTimestamp,
+      registered: MaybeTimestamp.optional(),
       yanked: z.boolean().optional(),
     }),
   )

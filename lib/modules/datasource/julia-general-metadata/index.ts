@@ -71,7 +71,7 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
-        key: config.packageName,
+        key: `getReleases:${config.packageName}`,
         fallback: true,
       },
       () => this._getReleases(config),

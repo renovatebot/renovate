@@ -99,5 +99,23 @@ describe('modules/datasource/julia-general-metadata/index', () => {
       const res = await getPkgReleases({ datasource, packageName: 'Example' });
       expect(res?.releases).toEqual([{ version: '1.0.0' }]);
     });
+
+    it('keeps remaining versions usable when one is missing the registered field', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/versions.json')
+        .reply(200, {
+          '1.0.0': { has_artifacts: false },
+          '1.1.0': { registered: '2024-01-01T00:00:00', has_artifacts: false },
+        });
+      const res = await getPkgReleases({ datasource, packageName: 'Example' });
+      expect(res?.releases).toEqual([
+        { version: '1.0.0' },
+        {
+          version: '1.1.0',
+          releaseTimestamp: '2024-01-01T00:00:00.000Z',
+        },
+      ]);
+    });
   });
 });
