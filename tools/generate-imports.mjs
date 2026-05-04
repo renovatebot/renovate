@@ -148,12 +148,81 @@ async function generateManagerList() {
     .sort()
     .map((fname) => `"${fname}"`);
 
+  // get custom managers list
+  const customManagers = (
+    await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory())
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
   const content = `
 export const AllManagersListLiteral = [${managers.join(',')}] as const;
 export type ManagerName = typeof AllManagersListLiteral[number];
+export const CustomManagersListLiteral = [${customManagers.join(',')}] as const;
+export type CustomManagerName = typeof CustomManagersListLiteral[number];
 `;
 
   await updateFile(`lib/manager-list.generated.ts`, content);
+}
+
+async function generateManagerDefaultConfigs() {
+  const { default: managers } = await import('../lib/modules/manager/api.ts');
+  const { default: customManagers } =
+    await import('../lib/modules/manager/custom/api.ts');
+
+  const allManagers = new Map([
+    ...managers.entries(),
+    ...customManagers.entries(),
+  ]);
+  /** @type {Record<string, Record<string, unknown>>} */
+  const managerDefaultConfigs = {};
+  for (const [name, manager] of allManagers) {
+    if (manager.defaultConfig) {
+      managerDefaultConfigs[name] = manager.defaultConfig;
+    }
+  }
+
+  const content = `
+export const managerDefaultConfigs: Record<string, Record<string, unknown>> = ${JSON.stringify(managerDefaultConfigs, null, 2)};
+`;
+
+  await updateFile('lib/manager-default-configs.generated.ts', content);
+}
+
+async function generateVersioningList() {
+  const versionings = (
+    await fs.readdir('lib/modules/versioning', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory())
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
+  const content = `
+export const AllVersioningsListLiteral = [${versionings.join(',')}] as const;
+export type VersioningName = typeof AllVersioningsListLiteral[number];
+`;
+
+  await updateFile(`lib/versioning-list.generated.ts`, content);
+}
+
+async function generateDatasourceList() {
+  const datasources = (
+    await fs.readdir('lib/modules/datasource', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory() && !file.name.startsWith('__'))
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
+  const content = `
+export const AllDatasourcesListLiteral = [${datasources.join(',')}] as const;
+export type DatasourceName = typeof AllDatasourcesListLiteral[number];
+`;
+
+  await updateFile(`lib/datasource-list.generated.ts`, content);
 }
 
 async function generateHash() {
@@ -206,6 +275,9 @@ await (async () => {
     // data-files
     await generateData();
     await generateManagerList();
+    await generateManagerDefaultConfigs();
+    await generateVersioningList();
+    await generateDatasourceList();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))
