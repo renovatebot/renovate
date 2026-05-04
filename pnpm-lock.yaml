@@ -2,6 +2,7 @@ lockfileVersion: '9.0'
 
 settings:
   autoInstallPeers: true
+  dedupePeers: true
   excludeLinksFromLockfile: false
 
 overrides:
@@ -111,8 +112,8 @@ importers:
         specifier: 4.2.2
         version: 4.2.2
       '@renovatebot/pgp':
-        specifier: 1.3.7
-        version: 1.3.7
+        specifier: 1.3.8
+        version: 1.3.8
       '@renovatebot/ruby-semver':
         specifier: 4.1.2
         version: 4.1.2
@@ -285,8 +286,8 @@ importers:
         specifier: 7.0.4
         version: 7.0.4
       p-queue:
-        specifier: 9.1.2
-        version: 9.1.2
+        specifier: 9.2.0
+        version: 9.2.0
       p-throttle:
         specifier: 8.1.0
         version: 8.1.0
@@ -297,8 +298,8 @@ importers:
         specifier: 3.8.1
         version: 3.8.1
       protobufjs:
-        specifier: 8.0.1
-        version: 8.0.1
+        specifier: 8.0.2
+        version: 8.0.2
       punycode:
         specifier: 2.3.1
         version: 2.3.1
@@ -373,11 +374,11 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(commander@14.0.3)
       '@containerbase/istanbul-reports-html':
-        specifier: 2.0.0
-        version: 2.0.0
+        specifier: 2.0.1
+        version: 2.0.1
       '@containerbase/semantic-release-pnpm':
-        specifier: 1.3.35
-        version: 1.3.35(semantic-release@25.0.3(typescript@6.0.3))
+        specifier: 1.4.1
+        version: 1.4.1(semantic-release@25.0.3)
       '@hyrious/marshal':
         specifier: 0.3.3
         version: 0.3.3
@@ -389,7 +390,7 @@ importers:
         version: 0.3.1(@types/node@24.12.2)(typescript@6.0.3)
       '@semantic-release/exec':
         specifier: 7.1.0
-        version: 7.1.0(semantic-release@25.0.3(typescript@6.0.3))
+        version: 7.1.0(semantic-release@25.0.3)
       '@smithy/util-stream':
         specifier: 4.5.25
         version: 4.5.25
@@ -557,10 +558,10 @@ importers:
         version: 18.0.0
       oxlint:
         specifier: 1.57.0
-        version: 1.57.0(oxlint-tsgolint@0.21.1)
+        version: 1.57.0(oxlint-tsgolint@0.22.1)
       oxlint-tsgolint:
-        specifier: 0.21.1
-        version: 0.21.1
+        specifier: 0.22.1
+        version: 0.22.1
       rimraf:
         specifier: 6.1.3
         version: 6.1.3
@@ -590,7 +591,7 @@ importers:
         version: 8.0.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.12.2)(esbuild@0.28.0)(yaml@2.8.3)
       vitest:
         specifier: 4.1.5
-        version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.12.2)(esbuild@0.28.0)(yaml@2.8.3))
+        version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5)
       vitest-mock-extended:
         specifier: 4.0.0
         version: 4.0.0(typescript@6.0.3)(vitest@4.1.5)
@@ -997,12 +998,12 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@containerbase/istanbul-reports-html@2.0.0':
-    resolution: {integrity: sha512-MQBSZFYWfMiHNIYYgkskt1ZlWodQSOjeDhGXY/EpisK7L0H1rZKf3dKlez9tRqxnc/I5VJz1zZg5xdpahNBraQ==}
-    engines: {node: ^22.11.0 || >=24.0.0, pnpm: ^10.0.0}
+  '@containerbase/istanbul-reports-html@2.0.1':
+    resolution: {integrity: sha512-GDBk5jTFGg/jY8xkRZfivYX0dPgx5Qr2n4pOfTah5Snc4kCnA41U5mQ1zKtconEBQpAJmp9OS4eEBdk/Pe4PBw==}
+    engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
-  '@containerbase/semantic-release-pnpm@1.3.35':
-    resolution: {integrity: sha512-gkS3bAFs449YJnVNarhqpO830JIOZOTwofwb5rJS8W5cqGwwMH98HkW/CPhKSwkFl3YDFOKP/TMIAku8LVAhlw==}
+  '@containerbase/semantic-release-pnpm@1.4.1':
+    resolution: {integrity: sha512-IwHJlU6OGLyREdz19ltv8+ULQanpkCvVHrKWX/jt2ad5Jg9f4RgOQ5MuI015Dr4rJwm77ewFbfkKnKRwKhbIVA==}
     engines: {node: ^22.11.0 || ^24}
     peerDependencies:
       semantic-release: ^24.0.0 || ^25.0.0
@@ -1606,33 +1607,33 @@ packages:
   '@oxc-project/types@0.127.0':
     resolution: {integrity: sha512-aIYXQBo4lCbO4z0R3FHeucQHpF46l2LbMdxRvqvuRuW2OxdnSkcng5B8+K12spgLDj93rtN3+J2Vac/TIO+ciQ==}
 
-  '@oxlint-tsgolint/darwin-arm64@0.21.1':
-    resolution: {integrity: sha512-7TLjyWe4wG9saJc992VWmaHq2hwKfOEEVTjheReXJXaDhavMZI4X9a6nKhbEng4IVkYtzjD2jw16vw2WFXLYLw==}
+  '@oxlint-tsgolint/darwin-arm64@0.22.1':
+    resolution: {integrity: sha512-4150Lpgc1YM09GcjA6GSrra1JoPjC7aOpfywLjWEY4vW0Sd1qKzqHF1WRaiw0/qUZ40OATYdv3aRd7ipPkWQbw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@oxlint-tsgolint/darwin-x64@0.21.1':
-    resolution: {integrity: sha512-7wf9Wf75nTzA7zpL9myhFe2RKvfuqGUOADNvUooCjEWvh7hmPz3lSEqTMh5Z/VQhzsG04mM9ACyghxhRzq7zFw==}
+  '@oxlint-tsgolint/darwin-x64@0.22.1':
+    resolution: {integrity: sha512-vFWcPWYOgZs4HWcgS1EjUZg33NLcNfEYU49KGImmCfZWkflENrmBYV4HN/C0YeAPum6ZZ/goPSvQrB/cOD+NfA==}
     cpu: [x64]
     os: [darwin]
 
-  '@oxlint-tsgolint/linux-arm64@0.21.1':
-    resolution: {integrity: sha512-IPuQN/Vd0Rjklg/cCGBbQyUuRBp2f6LQXpZYwk5ivOR6V/+CgiYsv8pn/PVY7gjeyoNvPQrXB7xMjHUO2YZbdw==}
+  '@oxlint-tsgolint/linux-arm64@0.22.1':
+    resolution: {integrity: sha512-6LiUpP0Zir3+29FvBm7Y28q/dBjSHqTZ5MhG1Ckw4fGhI4cAvbcwXaKvbjx1TP7rRmBNOoq/M5xdpHjTb+GAew==}
     cpu: [arm64]
     os: [linux]
 
-  '@oxlint-tsgolint/linux-x64@0.21.1':
-    resolution: {integrity: sha512-d1niGuTbh2qiv7dR7tqkbOcM5cIR63of0lMBFdEQavL1KrJV8zuRdwdi68K7MNGdgoR+J5A9ajpGGvsHwp1bPg==}
+  '@oxlint-tsgolint/linux-x64@0.22.1':
+    resolution: {integrity: sha512-fuX1hEQfpHauUbXADsfqVhRzrUrGabzGXbj5wsp2vKhV5uk/Rze8Mba9GdjFGECzvXudMGqHqxB4r6jGRdhxVA==}
     cpu: [x64]
     os: [linux]
 
-  '@oxlint-tsgolint/win32-arm64@0.21.1':
-    resolution: {integrity: sha512-ICu9y2JLnFPvFqstnWPPNqBM8LK8BWw2OTeaR0UgEMm4hOSbrZAKv1/hwZYyiLqnCNjBL87AGSQIgTHCYlsipw==}
+  '@oxlint-tsgolint/win32-arm64@0.22.1':
+    resolution: {integrity: sha512-8SZidAj+jrbZf9ZjBEYW0tiNZ+KasqB2zgW26qdiPpQSF/DzURnPmXz651IeA9YsmbVdHGIooEHUmev6QJdquA==}
     cpu: [arm64]
     os: [win32]
 
-  '@oxlint-tsgolint/win32-x64@0.21.1':
-    resolution: {integrity: sha512-cTEFCFjCj6iXfrSHcvajSPNqhEA4TxSzU3gFxbdGSAUTNXGToU99IbdhWAPSbhcucoym0XE4Zl7E41NiSkNTug==}
+  '@oxlint-tsgolint/win32-x64@0.22.1':
+    resolution: {integrity: sha512-QweSk9H5lFh5Y+WUf2Kq/OAN88V6+62ZwGhP38gqdRotI90luXSMkruFTj7Q2rYrzH4ZVNaSqx7NY8JpSfIzqg==}
     cpu: [x64]
     os: [win32]
 
@@ -1830,36 +1831,6 @@ packages:
     resolution: {integrity: sha512-nRqvPYO8xUVdgy/KhJuaCrWlVT/4uZr97Mpbuizsa6CmvtCQf3NuYnVvOOrpYiKUJcZYtEvm84OooJ8+lJytMQ==}
     engines: {node: '>=14.6'}
 
-  '@protobufjs/aspromise@1.1.2':
-    resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
-
-  '@protobufjs/base64@1.1.2':
-    resolution: {integrity: sha512-AZkcAA5vnN/v4PDqKyMR5lx7hZttPDgClv83E//FMNhR2TMcLUhfRUBHCmSl0oi9zMgDDqRUJkSxO3wm85+XLg==}
-
-  '@protobufjs/codegen@2.0.4':
-    resolution: {integrity: sha512-YyFaikqM5sH0ziFZCN3xDC7zeGaB/d0IUb9CATugHWbd1FRFwWwt4ld4OYMPWu5a3Xe01mGAULCdqhMlPl29Jg==}
-
-  '@protobufjs/eventemitter@1.1.0':
-    resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==}
-
-  '@protobufjs/fetch@1.1.0':
-    resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
-
-  '@protobufjs/float@1.0.2':
-    resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
-
-  '@protobufjs/inquire@1.1.0':
-    resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}
-
-  '@protobufjs/path@1.1.2':
-    resolution: {integrity: sha512-6JOcJ5Tm08dOHAbdR3GrvP+yUUfkjG5ePsHYczMFLq3ZmMkAD98cDgcT2iA1lJ9NVwFd4tH/iSSoe44YWkltEA==}
-
-  '@protobufjs/pool@1.1.0':
-    resolution: {integrity: sha512-0kELaGSIDBKvcgS4zkjz1PeddatrjYcmMWOlAuAPwAeccUrPHdUqo/J6LiymHHEiJT5NrF1UVwxY14f+fy4WQw==}
-
-  '@protobufjs/utf8@1.1.0':
-    resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
-
   '@qnighy/marshal@0.1.3':
     resolution: {integrity: sha512-uaDZTJYtD2UgQTGemmgWeth+e2WapZm+GkAq8UU8AJ55PKRFaf1GkH7X/uzA+Ygu8iInzIlM2FGyCUnruyMKMg==}
 
@@ -1898,8 +1869,8 @@ packages:
     resolution: {integrity: sha512-dSbrkSS9/NfNwhOgQ0rpKA9KNiKSFhgK707Wi+oX8SZLqvu8dvsVuzORbKOYq5eX4nSiwrHApWisecw0cZhjVQ==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: ^10.0.0}
 
-  '@renovatebot/pgp@1.3.7':
-    resolution: {integrity: sha512-n8b49uvyqN8ph3gvfjIJBpg6/hMkLXuNMqbco7h9PdJA9ocVP1BUX3/5jRn+rpNtn2+xSfbMI6NHL16XMSZGDQ==}
+  '@renovatebot/pgp@1.3.8':
+    resolution: {integrity: sha512-V7wjcnzZ0PBKsvPuPpz+PJ0bJl/notJpgNVX8mPt3MKbtd+qAiNZQdTMkwVXt2ZOVncDRDtDX+/oYRRzDZjV9g==}
     engines: {node: ^22.11.0 || >=24.10.0, pnpm: ^10.0.0}
 
   '@renovatebot/ruby-semver@4.1.2':
@@ -4773,8 +4744,8 @@ packages:
   outvariant@1.4.3:
     resolution: {integrity: sha512-+Sl2UErvtsoajRDKCE5/dBz4DIvHXQQnAxtQTF04OJxY0+DyZXSo5P5Bb7XYWOh81syohlYL24hbDwxedPUJCA==}
 
-  oxlint-tsgolint@0.21.1:
-    resolution: {integrity: sha512-O2hxiT14C2HJkwzBU6CQBFPoagSd/IcV+Tt3e3UUaXFwbW4BO5DSDPSSboc3UM5MIDY+MLyepvtQwBQafNxWdw==}
+  oxlint-tsgolint@0.22.1:
+    resolution: {integrity: sha512-YUSGSLUnoolsu8gxISEDio3q1rtsCozwfOzASUn3DT2mR2EeQ93uEEnen7s+6LpF+lyTQFln1pQfqwBh/fsVEg==}
     hasBin: true
 
   oxlint@1.57.0:
@@ -4859,8 +4830,8 @@ packages:
     resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
     engines: {node: '>=18'}
 
-  p-queue@9.1.2:
-    resolution: {integrity: sha512-ktsDOALzTYTWWF1PbkNVg2rOt+HaOaMWJMUnt7T3qf5tvZ1L8dBW3tObzprBcXNMKkwj+yFSLqHso0x+UFcJXw==}
+  p-queue@9.2.0:
+    resolution: {integrity: sha512-dWgLE8AH0HjQ9fe74pUkKkvzzYT18Inp4zra3lKHnnwqGvcfcUBrvF2EAVX+envufDNBOzpPq/IBUONDbI7+3g==}
     engines: {node: '>=20'}
 
   p-reduce@3.0.0:
@@ -5046,8 +5017,8 @@ packages:
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
 
-  protobufjs@8.0.1:
-    resolution: {integrity: sha512-NWWCCscLjs+cOKF/s/XVNFRW7Yih0fdH+9brffR5NZCy8k42yRdl5KlWKMVXuI1vfCoy4o1z80XR/W/QUb3V3w==}
+  protobufjs@8.0.2:
+    resolution: {integrity: sha512-TNF0rhMsp+g21us9R2aj3iA7JY9pG7G/3zyRiULl6NS+AurvgQ7iWA203QcykDGSosHxMsV+K6GTR15RBWw1bA==}
     engines: {node: '>=12.0.0'}
 
   protocols@2.0.2:
@@ -7036,11 +7007,11 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@containerbase/istanbul-reports-html@2.0.0':
+  '@containerbase/istanbul-reports-html@2.0.1':
     dependencies:
       istanbul-reports: 3.2.0
 
-  '@containerbase/semantic-release-pnpm@1.3.35(semantic-release@25.0.3(typescript@6.0.3))':
+  '@containerbase/semantic-release-pnpm@1.4.1(semantic-release@25.0.3)':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
@@ -7537,7 +7508,7 @@ snapshots:
       '@opentelemetry/sdk-logs': 0.215.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-metrics': 2.7.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.7.0(@opentelemetry/api@1.9.1)
-      protobufjs: 8.0.1
+      protobufjs: 8.0.2
 
   '@opentelemetry/redis-common@0.38.3': {}
 
@@ -7609,22 +7580,22 @@ snapshots:
 
   '@oxc-project/types@0.127.0': {}
 
-  '@oxlint-tsgolint/darwin-arm64@0.21.1':
+  '@oxlint-tsgolint/darwin-arm64@0.22.1':
     optional: true
 
-  '@oxlint-tsgolint/darwin-x64@0.21.1':
+  '@oxlint-tsgolint/darwin-x64@0.22.1':
     optional: true
 
-  '@oxlint-tsgolint/linux-arm64@0.21.1':
+  '@oxlint-tsgolint/linux-arm64@0.22.1':
     optional: true
 
-  '@oxlint-tsgolint/linux-x64@0.21.1':
+  '@oxlint-tsgolint/linux-x64@0.22.1':
     optional: true
 
-  '@oxlint-tsgolint/win32-arm64@0.21.1':
+  '@oxlint-tsgolint/win32-arm64@0.22.1':
     optional: true
 
-  '@oxlint-tsgolint/win32-x64@0.21.1':
+  '@oxlint-tsgolint/win32-x64@0.22.1':
     optional: true
 
   '@oxlint/binding-android-arm-eabi@1.57.0':
@@ -7764,29 +7735,6 @@ snapshots:
       write-file-atomic: 5.0.1
       write-yaml-file: 4.2.0
 
-  '@protobufjs/aspromise@1.1.2': {}
-
-  '@protobufjs/base64@1.1.2': {}
-
-  '@protobufjs/codegen@2.0.4': {}
-
-  '@protobufjs/eventemitter@1.1.0': {}
-
-  '@protobufjs/fetch@1.1.0':
-    dependencies:
-      '@protobufjs/aspromise': 1.1.2
-      '@protobufjs/inquire': 1.1.0
-
-  '@protobufjs/float@1.0.2': {}
-
-  '@protobufjs/inquire@1.1.0': {}
-
-  '@protobufjs/path@1.1.2': {}
-
-  '@protobufjs/pool@1.1.0': {}
-
-  '@protobufjs/utf8@1.1.0': {}
-
   '@qnighy/marshal@0.1.3':
     dependencies:
       '@babel/runtime-corejs3': 7.29.2
@@ -7834,7 +7782,7 @@ snapshots:
 
   '@renovatebot/pep440@4.2.2': {}
 
-  '@renovatebot/pgp@1.3.7': {}
+  '@renovatebot/pgp@1.3.8': {}
 
   '@renovatebot/ruby-semver@4.1.2': {}
 
@@ -7943,7 +7891,7 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
-  '@semantic-release/commit-analyzer@13.0.1(semantic-release@25.0.3(typescript@6.0.3))':
+  '@semantic-release/commit-analyzer@13.0.1(semantic-release@25.0.3)':
     dependencies:
       conventional-changelog-angular: 8.3.1
       conventional-changelog-writer: 8.4.0
@@ -7959,7 +7907,7 @@ snapshots:
 
   '@semantic-release/error@4.0.0': {}
 
-  '@semantic-release/exec@7.1.0(semantic-release@25.0.3(typescript@6.0.3))':
+  '@semantic-release/exec@7.1.0(semantic-release@25.0.3)':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 3.1.0
@@ -7971,7 +7919,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@semantic-release/github@12.0.6(semantic-release@25.0.3(typescript@6.0.3))':
+  '@semantic-release/github@12.0.6(semantic-release@25.0.3)':
     dependencies:
       '@octokit/core': 7.0.6
       '@octokit/plugin-paginate-rest': 14.0.0(@octokit/core@7.0.6)
@@ -7994,7 +7942,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@semantic-release/npm@13.1.5(semantic-release@25.0.3(typescript@6.0.3))':
+  '@semantic-release/npm@13.1.5(semantic-release@25.0.3)':
     dependencies:
       '@actions/core': 3.0.0
       '@semantic-release/error': 4.0.0
@@ -8013,7 +7961,7 @@ snapshots:
       semver: 7.7.4
       tempy: 3.2.0
 
-  '@semantic-release/release-notes-generator@14.1.0(semantic-release@25.0.3(typescript@6.0.3))':
+  '@semantic-release/release-notes-generator@14.1.0(semantic-release@25.0.3)':
     dependencies:
       conventional-changelog-angular: 8.3.1
       conventional-changelog-writer: 8.4.0
@@ -8618,7 +8566,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.12.2)(esbuild@0.28.0)(yaml@2.8.3))
+      vitest: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5)
 
   '@vitest/expect@4.1.5':
     dependencies:
@@ -8629,7 +8577,7 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.5(vite@8.0.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.12.2)(esbuild@0.28.0)(yaml@2.8.3))':
+  '@vitest/mocker@4.1.5(vite@8.0.5)':
     dependencies:
       '@vitest/spy': 4.1.5
       estree-walker: 3.0.3
@@ -10978,16 +10926,16 @@ snapshots:
 
   outvariant@1.4.3: {}
 
-  oxlint-tsgolint@0.21.1:
+  oxlint-tsgolint@0.22.1:
     optionalDependencies:
-      '@oxlint-tsgolint/darwin-arm64': 0.21.1
-      '@oxlint-tsgolint/darwin-x64': 0.21.1
-      '@oxlint-tsgolint/linux-arm64': 0.21.1
-      '@oxlint-tsgolint/linux-x64': 0.21.1
-      '@oxlint-tsgolint/win32-arm64': 0.21.1
-      '@oxlint-tsgolint/win32-x64': 0.21.1
+      '@oxlint-tsgolint/darwin-arm64': 0.22.1
+      '@oxlint-tsgolint/darwin-x64': 0.22.1
+      '@oxlint-tsgolint/linux-arm64': 0.22.1
+      '@oxlint-tsgolint/linux-x64': 0.22.1
+      '@oxlint-tsgolint/win32-arm64': 0.22.1
+      '@oxlint-tsgolint/win32-x64': 0.22.1
 
-  oxlint@1.57.0(oxlint-tsgolint@0.21.1):
+  oxlint@1.57.0(oxlint-tsgolint@0.22.1):
     optionalDependencies:
       '@oxlint/binding-android-arm-eabi': 1.57.0
       '@oxlint/binding-android-arm64': 1.57.0
@@ -11008,7 +10956,7 @@ snapshots:
       '@oxlint/binding-win32-arm64-msvc': 1.57.0
       '@oxlint/binding-win32-ia32-msvc': 1.57.0
       '@oxlint/binding-win32-x64-msvc': 1.57.0
-      oxlint-tsgolint: 0.21.1
+      oxlint-tsgolint: 0.22.1
 
   p-all@5.0.1:
     dependencies:
@@ -11068,7 +11016,7 @@ snapshots:
 
   p-map@7.0.4: {}
 
-  p-queue@9.1.2:
+  p-queue@9.2.0:
     dependencies:
       eventemitter3: 5.0.4
       p-timeout: 7.0.1
@@ -11244,18 +11192,8 @@ snapshots:
 
   proto-list@1.2.4: {}
 
-  protobufjs@8.0.1:
+  protobufjs@8.0.2:
     dependencies:
-      '@protobufjs/aspromise': 1.1.2
-      '@protobufjs/base64': 1.1.2
-      '@protobufjs/codegen': 2.0.4
-      '@protobufjs/eventemitter': 1.1.0
-      '@protobufjs/fetch': 1.1.0
-      '@protobufjs/float': 1.0.2
-      '@protobufjs/inquire': 1.1.0
-      '@protobufjs/path': 1.1.2
-      '@protobufjs/pool': 1.1.0
-      '@protobufjs/utf8': 1.1.0
       '@types/node': 24.12.2
       long: 5.3.2
 
@@ -11537,11 +11475,11 @@ snapshots:
 
   semantic-release@25.0.3(typescript@6.0.3):
     dependencies:
-      '@semantic-release/commit-analyzer': 13.0.1(semantic-release@25.0.3(typescript@6.0.3))
+      '@semantic-release/commit-analyzer': 13.0.1(semantic-release@25.0.3)
       '@semantic-release/error': 4.0.0
-      '@semantic-release/github': 12.0.6(semantic-release@25.0.3(typescript@6.0.3))
-      '@semantic-release/npm': 13.1.5(semantic-release@25.0.3(typescript@6.0.3))
-      '@semantic-release/release-notes-generator': 14.1.0(semantic-release@25.0.3(typescript@6.0.3))
+      '@semantic-release/github': 12.0.6(semantic-release@25.0.3)
+      '@semantic-release/npm': 13.1.5(semantic-release@25.0.3)
+      '@semantic-release/release-notes-generator': 14.1.0(semantic-release@25.0.3)
       aggregate-error: 5.0.0
       cosmiconfig: 9.0.1(typescript@6.0.3)
       debug: 4.4.3
@@ -12150,12 +12088,12 @@ snapshots:
     dependencies:
       ts-essentials: 10.1.1(typescript@6.0.3)
       typescript: 6.0.3
-      vitest: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.12.2)(esbuild@0.28.0)(yaml@2.8.3))
+      vitest: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5)
 
-  vitest@4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.12.2)(esbuild@0.28.0)(yaml@2.8.3)):
+  vitest@4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.2)(@vitest/coverage-v8@4.1.5)(vite@8.0.5):
     dependencies:
       '@vitest/expect': 4.1.5
-      '@vitest/mocker': 4.1.5(vite@8.0.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.12.2)(esbuild@0.28.0)(yaml@2.8.3))
+      '@vitest/mocker': 4.1.5(vite@8.0.5)
       '@vitest/pretty-format': 4.1.5
       '@vitest/runner': 4.1.5
       '@vitest/snapshot': 4.1.5

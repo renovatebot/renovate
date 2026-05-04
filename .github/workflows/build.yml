@@ -843,7 +843,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@8d20bcac0e14cff8bfd51d99b79d6f6295cda984 # v4.6.9
+        uses: containerbase/internal-tools@23f34c79d4850ff1ffb4634462479831fb522c80 # v4.6.15
         with:
           command: docker-config
 
@@ -975,7 +975,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@03ea5433c137af7c0495bc0cad1af10403fc800c # v3.0.2
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
@@ -995,7 +995,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@03ea5433c137af7c0495bc0cad1af10403fc800c # v3.0.2
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
