@@ -241,6 +241,39 @@ describe('modules/datasource/maven/util', () => {
     const arApiUrl =
       'https://artifactregistry.googleapis.com/v1/projects/some-project/locations/us/repositories/some-repository/files/org%2Fexample%2Fpackage%2F1.0.0%2Fpackage-1.0.0.pom';
 
+    it('uses RENOVATE_ARTIFACT_REGISTRY_URL env var as base URL for API calls', async () => {
+      process.env.RENOVATE_ARTIFACT_REGISTRY_URL =
+        'https://custom-artifact-registry.example.com';
+      const customApiUrl =
+        'https://custom-artifact-registry.example.com/v1/projects/some-project/locations/us/repositories/some-repository/files/org%2Fexample%2Fpackage%2F1.0.0%2Fpackage-1.0.0.pom';
+
+      const getJsonUnchecked = vi.fn().mockResolvedValue({
+        statusCode: 200,
+        body: { updateTime: '2024-06-01T12:00:00Z' },
+        headers: {},
+      });
+
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom content',
+            headers: {},
+            authorization: false,
+          }),
+        getJsonUnchecked,
+      });
+
+      await downloadArtifactRegistryProtocol(http, arUrl);
+
+      expect(getJsonUnchecked).toHaveBeenCalledWith(
+        customApiUrl,
+        expect.any(Object),
+      );
+
+      delete process.env.RENOVATE_ARTIFACT_REGISTRY_URL;
+    });
+
     it('enriches result with lastModified from Artifact Registry API', async () => {
       const http = partial<Http>({
         getText: () =>
