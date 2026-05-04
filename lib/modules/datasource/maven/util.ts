@@ -18,7 +18,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { MAVEN_REPO } from './common.ts';
-import { CachedMavenXml } from './schema.ts';
+import { ArtifactRegistryFileMetadata, CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
   MavenDependency,
@@ -300,9 +300,10 @@ async function getArtifactRegistryLastModified(
     if (auth) {
       apiOpts.headers = { authorization: `Basic ${auth}` };
     }
-    const res = await http.getJsonUnchecked<{ updateTime?: string }>(
+    const res = await http.getJson(
       apiUrl,
       apiOpts,
+      ArtifactRegistryFileMetadata,
     );
     const updateTime = res.body.updateTime;
     return asTimestamp(updateTime) ?? null;

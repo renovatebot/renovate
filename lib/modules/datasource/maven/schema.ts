@@ -192,3 +192,7 @@ export function trimMavenXml(input: string): string {
 }
 
 export const CachedMavenXml = z.string().transform(trimMavenXml);
+
+export const ArtifactRegistryFileMetadata = z.object({
+  updateTime: z.string().optional(),
+});

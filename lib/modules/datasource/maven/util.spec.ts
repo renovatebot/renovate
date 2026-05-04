@@ -247,7 +247,7 @@ describe('modules/datasource/maven/util', () => {
       const customApiUrl =
         'https://custom-artifact-registry.example.com/v1/projects/some-project/locations/us/repositories/some-repository/files/org%2Fexample%2Fpackage%2F1.0.0%2Fpackage-1.0.0.pom';
 
-      const getJsonUnchecked = vi.fn().mockResolvedValue({
+      const getJson = vi.fn().mockResolvedValue({
         statusCode: 200,
         body: { updateTime: '2024-06-01T12:00:00Z' },
         headers: {},
@@ -261,13 +261,14 @@ describe('modules/datasource/maven/util', () => {
             headers: {},
             authorization: false,
           }),
-        getJsonUnchecked,
+        getJson,
       });
 
       await downloadArtifactRegistryProtocol(http, arUrl);
 
-      expect(getJsonUnchecked).toHaveBeenCalledWith(
+      expect(getJson).toHaveBeenCalledWith(
         customApiUrl,
+        expect.any(Object),
         expect.any(Object),
       );
 
@@ -283,7 +284,7 @@ describe('modules/datasource/maven/util', () => {
             headers: {},
             authorization: false,
           }),
-        getJsonUnchecked: () =>
+        getJson: () =>
           Promise.resolve({
             statusCode: 200,
             body: { updateTime: '2024-06-01T12:00:00Z' } as never,
@@ -311,13 +312,13 @@ describe('modules/datasource/maven/util', () => {
             headers: { 'last-modified': 'Mon, 01 Jan 2024 00:00:00 GMT' },
             authorization: false,
           }),
-        getJsonUnchecked: vi.fn(),
+        getJson: vi.fn(),
       });
 
       const res = await downloadArtifactRegistryProtocol(http, arUrl);
       const { val } = res.unwrap();
       expect(val?.lastModified).toBe('2024-01-01T00:00:00.000Z');
-      expect(http.getJsonUnchecked).not.toHaveBeenCalled();
+      expect(http.getJson).not.toHaveBeenCalled();
     });
 
     it('falls back gracefully when Artifact Registry API call fails', async () => {
@@ -329,7 +330,7 @@ describe('modules/datasource/maven/util', () => {
             headers: {},
             authorization: false,
           }),
-        getJsonUnchecked: () => Promise.reject(new Error('API error')),
+        getJson: () => Promise.reject(new Error('API error')),
       });
 
       const res = await downloadArtifactRegistryProtocol(http, arUrl);
@@ -365,7 +366,7 @@ describe('modules/datasource/maven/util', () => {
       const expectedApiUrl =
         'https://artifactregistry.googleapis.com/v1/projects/my-project/locations/europe/repositories/my-repo/files/com%2Fexample%2Fartifact%2F1.0%2Fartifact-1.0.pom';
 
-      const getJsonUnchecked = vi.fn().mockResolvedValue({
+      const getJson = vi.fn().mockResolvedValue({
         statusCode: 200,
         body: { updateTime: '2024-06-01T12:00:00Z' },
         headers: {},
@@ -379,13 +380,14 @@ describe('modules/datasource/maven/util', () => {
             headers: {},
             authorization: false,
           }),
-        getJsonUnchecked,
+        getJson,
       });
 
       await downloadArtifactRegistryProtocol(http, regionalUrl);
 
-      expect(getJsonUnchecked).toHaveBeenCalledWith(
+      expect(getJson).toHaveBeenCalledWith(
         expectedApiUrl,
+        expect.any(Object),
         expect.any(Object),
       );
     });
