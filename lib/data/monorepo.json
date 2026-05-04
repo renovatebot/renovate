@@ -151,6 +151,7 @@
       "https://github.com/Microsoft/ClearScript"
     ],
     "commitlint": "https://github.com/conventional-changelog/commitlint",
+    "confect": "https://github.com/rjdellecese/confect",
     "conform": "https://github.com/edmundhung/conform",
     "contentful-rich-text": "https://github.com/contentful/rich-text",
     "cspell": "https://github.com/streetsidesoftware/cspell",
