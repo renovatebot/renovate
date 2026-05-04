@@ -1,17 +1,14 @@
 import { isNonEmptyString } from '@sindresorhus/is';
+import { braceExpand } from 'minimatch';
 import type { PlatformId } from '../constants/index.ts';
 import { regEx } from '../util/regex.ts';
 
-const configFileNames = [
-  'renovate.json',
-  'renovate.json5',
-  '.github/renovate.json',
-  '.github/renovate.json5',
-  '.gitlab/renovate.json',
-  '.gitlab/renovate.json5',
+const configFilePatterns = [
+  'renovate.json{,5}',
+  '.github/renovate.json{,5}',
+  '.gitlab/renovate.json{,5}',
   '.renovaterc',
-  '.renovaterc.json',
-  '.renovaterc.json5',
+  '.renovaterc.json{,5}',
   'package.json',
 ];
 
@@ -22,11 +19,14 @@ export function setUserConfigFileNames(fileNames: string[]): void {
 }
 
 export function getConfigFileNames(platform?: PlatformId): string[] {
-  let filteredConfigFileNames = [...configFileNames];
+  let filteredConfigFileNames = configFilePatterns.flatMap((p) =>
+    braceExpand(p),
+  );
+  console.log({ filteredConfigFileNames });
 
   if (isNonEmptyString(platform)) {
     const platfromRe = regEx('\\.(?<platform>.*)\\/renovate\\.json[5]?$');
-    filteredConfigFileNames = configFileNames.filter((filename) => {
+    filteredConfigFileNames = configFilePatterns.filter((filename) => {
       const matchResult = platfromRe.exec(filename);
       if (!matchResult) {
         return true;
