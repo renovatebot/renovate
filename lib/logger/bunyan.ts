@@ -57,8 +57,7 @@ function createLogFileStream(logFile: string): BunyanStream {
 
   const logFileLevel = validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug');
 
-  // Use synchronous file writes so that log data is not lost when
-  // process.exit() is called before async streams can drain.
+  // Sync writes avoid data loss when process.exit() is called before async streams drain.
   const fd = fs.openSync(logFile, 'a');
 
   if (getEnv('LOG_FILE_FORMAT') === 'pretty') {
