@@ -219,21 +219,13 @@ describe('util/cache/package/impl/sqlite', () => {
     it('resolves when close throws', async () => {
       await withSqliteDir(async (cacheDir) => {
         const sqlite = await PackageCacheSqlite.create(cacheDir);
-        insertRawCacheEntry(sqlite, 'bar', Buffer.from('value'));
-        const iterator = sqlite.client
-          .prepare('SELECT * FROM package_cache')
-          .iterate();
-
-        try {
-          iterator.next();
-
-          // not sure how to test it with node:sqlite as it's using different defines
-          // https://github.com/nodejs/node/blob/main/deps/sqlite/sqlite.gyp
-          // https://github.com/WiseLibs/better-sqlite3/blob/master/deps/download.sh
-          vi.spyOn(sqlite.client, 'close').mockImplementationOnce(() => {
+        const closeSpy = vi
+          .spyOn(sqlite.client, 'close')
+          .mockImplementationOnce(() => {
             throw new Error('close failed');
           });
 
+        try {
           await expect(sqlite.destroy()).resolves.toBeUndefined();
 
           expect(logger.warn).toHaveBeenCalledWith(
@@ -242,7 +234,7 @@ describe('util/cache/package/impl/sqlite', () => {
           );
         } finally {
           expect(sqlite.client.isOpen).toBe(true);
-          iterator.return?.();
+          closeSpy.mockRestore();
           sqlite.client.close();
         }
       });
