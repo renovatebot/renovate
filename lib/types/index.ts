@@ -1,5 +1,8 @@
 export type {
-  MergeStrategy,
+  AutomergeStrategy,
+  RangeStrategy,
+} from '../config/allowed-values.generated.ts';
+export type {
   RenovateSplit,
   UpdateType,
   ValidationMessage,
@@ -21,9 +24,6 @@ export type { CommitMessageJSON } from './commit-message-json.ts';
 export type { CombinedHostRule, HostRule } from './host-rules.ts';
 export type { PrState } from './pr-state.ts';
 export type { SkipReason, StageName } from './skip-reason.ts';
-export type { RangeStrategy } from './versioning.ts';
-
-export type AutoMergeType = 'branch' | 'pr' | 'pr-comment';
 
 type Val = NonNullable<unknown>;
 

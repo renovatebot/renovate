@@ -1849,6 +1849,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: 'auto',
     allowedValues: [
       'auto',
+      'future',
       'pin',
       'bump',
       'replace',

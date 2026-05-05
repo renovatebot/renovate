@@ -225,6 +225,57 @@ export type DatasourceName = typeof AllDatasourcesListLiteral[number];
   await updateFile(`lib/datasource-list.generated.ts`, content);
 }
 
+async function generateAllowedValues() {
+  const { getOptions } = await import('../lib/config/options/index.ts');
+  const options = getOptions();
+
+  // These options have existing types derived from a different source of truth,
+  // or their allowedValues do not fully represent the usable type (e.g. internal values).
+  const exclude = new Set(['versioning', 'platform']);
+
+  /** @param {string} name */
+  function toPascalCase(name) {
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  /**
+   * For array options, the type represents a single element, so the name
+   * should be singular (e.g. `PostUpdateOption` not `PostUpdateOptions`).
+   * @param {string} name
+   */
+  function singularize(name) {
+    if (name.endsWith('s') && !name.endsWith('ss')) {
+      return name.slice(0, -1);
+    }
+    return name;
+  }
+
+  const lines = [];
+
+  for (const option of options) {
+    if (!option.allowedValues?.length) {
+      continue;
+    }
+    if (exclude.has(option.name)) {
+      continue;
+    }
+
+    const baseName = toPascalCase(option.name);
+    const typeName = option.type === 'array' ? singularize(baseName) : baseName;
+    const literalName = `${typeName}Literal`;
+    const values = option.allowedValues
+      .map((v) => JSON.stringify(v))
+      .join(', ');
+
+    lines.push(`export const ${literalName} = [${values}] as const;`);
+    lines.push(`export type ${typeName} = (typeof ${literalName})[number];`);
+    lines.push('');
+  }
+
+  const content = lines.join('\n');
+  await updateFile('lib/config/allowed-values.generated.ts', content);
+}
+
 async function generateHash() {
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
@@ -278,6 +329,7 @@ await (async () => {
     await generateManagerDefaultConfigs();
     await generateVersioningList();
     await generateDatasourceList();
+    await generateAllowedValues();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))

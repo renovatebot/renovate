@@ -1,3 +1,4 @@
+import type { VulnerabilityFixStrategy } from '../../../../config/allowed-values.generated.ts';
 import type {
   RenovateConfig,
   ValidationMessage,
@@ -49,7 +50,7 @@ export interface LookupUpdateConfig
   replacementVersionTemplate?: string;
   extractVersion?: string;
   vulnerabilityFixVersion?: string;
-  vulnerabilityFixStrategy?: string;
+  vulnerabilityFixStrategy?: VulnerabilityFixStrategy;
   abandonmentThreshold?: string;
 }
 
@@ -73,7 +74,7 @@ export interface UpdateResult {
   currentVersionAgeInDays?: number;
   currentVersionTimestamp?: string;
   vulnerabilityFixVersion?: string;
-  vulnerabilityFixStrategy?: string;
+  vulnerabilityFixStrategy?: VulnerabilityFixStrategy;
   mostRecentTimestamp?: Timestamp | null;
   isAbandoned?: boolean;
 }

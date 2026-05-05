@@ -1,6 +1,7 @@
 import { isArray, isNonEmptyArray, isObject, isString } from '@sindresorhus/is';
 import { clone } from '../util/clone.ts';
 import { toMs } from '../util/pretty-time.ts';
+import type { MatchUpdateType } from './allowed-values.generated.ts';
 import { getOptions } from './options/index.ts';
 import type { PackageRule, RenovateConfig, UpdateType } from './types.ts';
 
@@ -69,7 +70,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
             }
           });
           newRule.matchUpdateTypes = rule.matchUpdateTypes ?? [];
-          newRule.matchUpdateTypes.push(key);
+          newRule.matchUpdateTypes.push(key as MatchUpdateType);
           newRule = { ...newRule, ...val };
           newRules.push(newRule);
         }

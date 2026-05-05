@@ -1,7 +1,7 @@
 import { major as getMajor, minor as getMinor } from 'semver';
 import semver from 'semver-stable';
 import { logger } from '../../../logger/index.ts';
-import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as npm } from '../npm/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';

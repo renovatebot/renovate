@@ -1,3 +1,5 @@
+import type { ArtifactAuth } from '../config/allowed-values.generated.ts';
+
 export interface HostRule {
   authType?: string;
   token?: string;
@@ -15,7 +17,7 @@ export interface HostRule {
   maxRetryAfter?: number;
 
   keepAlive?: boolean;
-  artifactAuth?: string[] | null;
+  artifactAuth?: ArtifactAuth[] | null;
   httpsCertificateAuthority?: string;
   httpsPrivateKey?: string;
   httpsCertificate?: string;

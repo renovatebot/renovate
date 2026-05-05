@@ -1,4 +1,4 @@
-import type { MergeStrategy } from '../../../config/types.ts';
+import type { AutomergeStrategy } from '../../../config/allowed-values.generated.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
 import { invalidatePrCache } from './index.ts';
@@ -30,7 +30,7 @@ describe('modules/platform/scm-manager/utils', () => {
         strategy: string | undefined;
         method: string | null;
       }) => {
-        expect(getMergeMethod(strategy as MergeStrategy)).toEqual(method);
+        expect(getMergeMethod(strategy as AutomergeStrategy)).toEqual(method);
       },
     );
   });

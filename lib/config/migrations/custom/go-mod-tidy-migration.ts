@@ -1,3 +1,4 @@
+import type { PostUpdateOption } from '../../allowed-values.generated.ts';
 import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class GoModTidyMigration extends AbstractMigration {
@@ -8,7 +9,9 @@ export class GoModTidyMigration extends AbstractMigration {
     const postUpdateOptions = this.get('postUpdateOptions');
 
     if (value) {
-      const newPostUpdateOptions = Array.isArray(postUpdateOptions)
+      const newPostUpdateOptions: PostUpdateOption[] = Array.isArray(
+        postUpdateOptions,
+      )
         ? postUpdateOptions.concat(['gomodTidy'])
         : ['gomodTidy'];
       this.setHard('postUpdateOptions', newPostUpdateOptions);

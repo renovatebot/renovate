@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { parseRange } from './range.ts';

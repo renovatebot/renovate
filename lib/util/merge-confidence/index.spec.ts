@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import type { MergeConfidenceDatasource } from '../../config/allowed-values.generated.ts';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
@@ -16,7 +17,7 @@ import {
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
   const defaultApiBaseUrl = 'https://developer.mend.io/';
-  const userSupportedDatasources = ['go'];
+  const userSupportedDatasources: MergeConfidenceDatasource[] = ['go'];
 
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {

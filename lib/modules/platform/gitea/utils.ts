@@ -1,5 +1,5 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import type { MergeStrategy } from '../../../config/types.ts';
+import type { AutomergeStrategy } from '../../../config/allowed-values.generated.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_BLOCKED,
@@ -69,7 +69,7 @@ export function getRepoUrl(
 }
 
 export function getMergeMethod(
-  strategy: MergeStrategy | undefined,
+  strategy: AutomergeStrategy | undefined,
 ): PRMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':

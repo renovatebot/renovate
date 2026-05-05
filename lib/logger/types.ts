@@ -1,5 +1,6 @@
 import type { Stream } from 'node:stream';
-import type { LogLevel, LogLevelString } from 'bunyan';
+import type { LogLevel } from 'bunyan';
+import type { NewLogLevel } from '../config/allowed-values.generated.ts';
 
 export type {
   LogLevelString as BunyanLogLevel,
@@ -51,5 +52,5 @@ export type BunyanLogger = ReturnType<typeof import('bunyan').createLogger>;
 
 export interface LogLevelRemap {
   matchMessage: string;
-  newLogLevel: LogLevelString;
+  newLogLevel: NewLogLevel;
 }

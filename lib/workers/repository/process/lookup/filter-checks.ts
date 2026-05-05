@@ -1,6 +1,6 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
+import type { MinimumReleaseAgeBehaviour } from '../../../../config/allowed-values.generated.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { MinimumReleaseAgeBehaviour } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';

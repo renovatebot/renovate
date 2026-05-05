@@ -1,4 +1,4 @@
-import type { MergeStrategy } from '../../../config/types.ts';
+import type { AutomergeStrategy } from '../../../config/allowed-values.generated.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { Pr } from '../types.ts';
@@ -9,16 +9,17 @@ import type {
   PrResponse,
 } from './types.ts';
 
-const bitbucketMergeStrategies = new Map<MergeStrategy, BitbucketMergeStrategy>(
-  [
-    ['squash', 'squash'],
-    ['merge-commit', 'merge_commit'],
-    ['fast-forward', 'fast_forward'],
-  ],
-);
+const bitbucketMergeStrategies = new Map<
+  AutomergeStrategy,
+  BitbucketMergeStrategy
+>([
+  ['squash', 'squash'],
+  ['merge-commit', 'merge_commit'],
+  ['fast-forward', 'fast_forward'],
+]);
 
 export function mergeBodyTransformer(
-  mergeStrategy: MergeStrategy | undefined,
+  mergeStrategy: AutomergeStrategy | undefined,
 ): MergeRequestBody {
   const body: MergeRequestBody = {
     close_source_branch: true,

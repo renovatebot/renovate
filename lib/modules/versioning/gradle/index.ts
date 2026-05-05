@@ -1,4 +1,4 @@
-import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import mavenVersion from '../maven/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';

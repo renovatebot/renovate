@@ -1,6 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 

@@ -1,4 +1,4 @@
-import type { MatchStringsStrategy } from '../../../../config/types.ts';
+import type { MatchStringsStrategy } from '../../../../config/allowed-values.generated.ts';
 
 export interface ExtractionTemplate {
   groups: Record<string, string>;

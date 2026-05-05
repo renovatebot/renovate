@@ -1,5 +1,10 @@
 import type { DateTime } from 'luxon';
-import type { MergeStrategy } from '../../config/types.ts';
+import type {
+  AutodiscoverRepoOrder,
+  AutodiscoverRepoSort,
+  AutomergeStrategy,
+  GitUrl,
+} from '../../config/allowed-values.generated.ts';
 import type { BranchStatus, HostRule } from '../../types/index.ts';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
 import type { GithubVulnerabilityAlert } from './github/schema.ts';
@@ -30,7 +35,7 @@ export interface RepoResult {
   repoFingerprint: string;
 }
 
-export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
+export type GitUrlOption = GitUrl;
 
 export interface RepoParams {
   repository: string;
@@ -90,7 +95,7 @@ export interface Issue {
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
-  automergeStrategy?: MergeStrategy;
+  automergeStrategy?: AutomergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   bbAutoResolvePrTasks?: boolean;
@@ -172,7 +177,7 @@ export interface FindPRConfig {
 export interface MergePRConfig {
   branchName?: string;
   id: number;
-  strategy?: MergeStrategy;
+  strategy?: AutomergeStrategy;
 }
 export interface EnsureCommentConfig {
   number: number;
@@ -196,17 +201,9 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
-export type RepoSortMethod =
-  | 'alpha'
-  | 'created'
-  | 'created_at'
-  | 'updated'
-  | 'updated_at'
-  | 'size'
-  | 'id'
-  | null;
+export type RepoSortMethod = AutodiscoverRepoSort | null;
 
-export type SortMethod = 'asc' | 'desc' | null;
+export type SortMethod = AutodiscoverRepoOrder | null;
 export interface AutodiscoverConfig {
   topics?: string[];
   sort?: RepoSortMethod;

@@ -1,4 +1,4 @@
-import type { PlatformCommitOptions } from '../../config/types.ts';
+import type { PlatformCommit } from '../../config/allowed-values.generated.ts';
 import type { GitOptions } from '../../types/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
 
@@ -8,8 +8,6 @@ export interface GitAuthor {
   name?: string | null;
   address?: string;
 }
-
-export type GitNoVerifyOption = 'commit' | 'push';
 
 /**
  * We want to make sure this is a long sha of 40 characters and not just any string
@@ -85,7 +83,7 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string | string[];
   force?: boolean;
-  platformCommit?: PlatformCommitOptions;
+  platformCommit?: PlatformCommit;
   /** Only needed by Gerrit platform */
   prTitle?: string;
   /** Only needed by Gerrit platform */

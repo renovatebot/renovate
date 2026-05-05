@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import { getExcludedVersions, getFilteredRange } from '../common.ts';
 import { api as npm } from '../npm/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';

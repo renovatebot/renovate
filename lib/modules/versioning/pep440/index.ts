@@ -1,5 +1,5 @@
 import * as pep440 from '@renovatebot/pep440';
-import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import type { VersioningApi } from '../types.ts';
 import { getNewValue, getPinnedValue, isLessThanRange } from './range.ts';
 

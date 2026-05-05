@@ -7,7 +7,7 @@ import {
   GitPullRequestMergeStrategy,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { MergeStrategy } from '../../../config/types.ts';
+import type { AutomergeStrategy } from '../../../config/allowed-values.generated.ts';
 import { logger } from '../../../logger/index.ts';
 import type { GitOptions } from '../../../types/git.ts';
 import type { HostRule, PrState } from '../../../types/index.ts';
@@ -187,7 +187,7 @@ export function getRepoByName(
 }
 
 export function mapMergeStrategy(
-  mergeStrategy?: MergeStrategy,
+  mergeStrategy?: AutomergeStrategy,
 ): GitPullRequestMergeStrategy {
   switch (mergeStrategy) {
     case 'rebase':

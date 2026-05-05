@@ -2,23 +2,51 @@ import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
-import type {
-  AutoMergeType,
-  HostRule,
-  Nullish,
-  RangeStrategy,
-  SkipReason,
-} from '../types/index.ts';
+import type { HostRule, Nullish, SkipReason } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
 import type {
   AdditionalConstraintName,
   ConstraintName,
   ToolName,
 } from '../util/exec/types.ts';
-import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type {
+  AllowedUnsafeExecution,
+  AutodiscoverRepoOrder,
+  AutodiscoverRepoSort,
+  AutomergeStrategy,
+  AutomergeType,
+  BinarySource,
+  BumpType,
+  CommitMessageLowerCase,
+  ConstraintsFiltering,
+  DependencyDashboardOSVVulnerabilitySummary,
+  DryRun,
+  ExecutionMode,
+  FetchChangeLogs,
+  ForkProcessing,
+  GitNoVerify,
+  InternalChecksFilter,
+  MatchConfidence,
+  MatchUpdateType,
+  MergeConfidenceDatasource,
+  MinimumReleaseAgeBehaviour,
+  Mode,
+  OnboardingNoDeps,
+  PlatformCommit,
+  PostUpdateOption,
+  PrCreation,
+  RangeStrategy,
+  RebaseWhen,
+  RecreateWhen,
+  ReportType,
+  RepositoryCache,
+  RequireConfig,
+  SemanticCommits,
+  SuppressNotification,
+  UseBaseBranchConfig,
+} from './allowed-values.generated.ts';
 
 export type RenovateConfigStage =
   | 'global'
@@ -35,20 +63,12 @@ export type RenovateSplit =
   | 'lookup'
   | 'update';
 
-export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
-export type DryRunConfig = 'extract' | 'lookup' | 'full';
-export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
 }
-
-export type RecreateWhen = 'auto' | 'never' | 'always';
-export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
-
-export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
 
 // TODO: Proper typings
 /**
@@ -70,8 +90,8 @@ export interface RenovateSharedConfig {
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
   automergeSchedule?: string[];
-  automergeStrategy?: MergeStrategy;
-  automergeType?: AutoMergeType;
+  automergeStrategy?: AutomergeStrategy;
+  automergeType?: AutomergeType;
   azureWorkItemId?: number;
   branchName?: string;
   branchNameStrict?: boolean;
@@ -83,7 +103,7 @@ export interface RenovateSharedConfig {
   commitMessage?: string;
   commitMessageAction?: string;
   commitMessageExtra?: string;
-  commitMessageLowerCase?: 'auto' | 'never';
+  commitMessageLowerCase?: CommitMessageLowerCase;
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
   confidential?: boolean;
@@ -110,7 +130,7 @@ export interface RenovateSharedConfig {
   ignoreUnstable?: boolean;
   includePaths?: string[];
   internalChecksAsSuccess?: boolean;
-  internalChecksFilter?: 'strict' | 'flexible' | 'none';
+  internalChecksFilter?: InternalChecksFilter;
   keepUpdatedLabel?: string;
   labels?: string[];
   manager?: string;
@@ -122,13 +142,13 @@ export interface RenovateSharedConfig {
 
   pinDigests?: boolean;
   platformAutomerge?: boolean;
-  platformCommit?: PlatformCommitOptions;
+  platformCommit?: PlatformCommit;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prBodyHeadingDefinitions?: Record<string, string>;
   prBodyNotes?: string[];
-  prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
+  prCreation?: PrCreation;
   prFooter?: string;
   prHeader?: string;
   prPriority?: number;
@@ -138,25 +158,25 @@ export interface RenovateSharedConfig {
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
-  rebaseWhen?: string;
+  rebaseWhen?: RebaseWhen;
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
   repository?: string;
-  repositoryCache?: RepositoryCacheConfig;
+  repositoryCache?: RepositoryCache;
   repositoryCacheType?: RepositoryCacheType;
   respectLatest?: boolean;
   rollbackPrs?: boolean;
   schedule?: string[];
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
-  semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  semanticCommits?: SemanticCommits;
   separateMajorMinor?: boolean;
   separateMinorPatch?: boolean;
   separateMultipleMajor?: boolean;
   separateMultipleMinor?: boolean;
   skipArtifactsUpdate?: boolean;
   stopUpdatingLabel?: string;
-  suppressNotifications?: string[];
+  suppressNotifications?: SuppressNotification[];
   timezone?: string;
   unicodeEmoji?: boolean;
   updateNotScheduled?: boolean;
@@ -176,9 +196,9 @@ export interface GlobalInheritableConfig {
   onboardingCommitMessage?: string;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
-  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
+  onboardingNoDeps?: OnboardingNoDeps;
   onboardingPrTitle?: string;
-  requireConfig?: RequiredConfig;
+  requireConfig?: RequireConfig;
 }
 
 // Config options used only within the global worker
@@ -197,11 +217,11 @@ export interface GlobalOnlyConfigLegacy {
   dockerCliOptions?: string;
   endpoint?: string;
   forceCli?: boolean;
-  gitNoVerify?: GitNoVerifyOption[];
+  gitNoVerify?: GitNoVerify[];
   gitPrivateKey?: string;
   gitPrivateKeyPassphrase?: string;
   globalExtends?: string[];
-  mergeConfidenceDatasources?: string[];
+  mergeConfidenceDatasources?: MergeConfidenceDatasource[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   processEnv?: Record<string, string>;
@@ -243,7 +263,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   dockerCliOptions?: string;
   dockerSidecarImage?: string;
   dockerUser?: string;
-  dryRun?: DryRunConfig;
+  dryRun?: DryRun;
   encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
@@ -257,8 +277,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;
-  autodiscoverRepoSort?: RepoSortMethod;
-  autodiscoverRepoOrder?: SortMethod;
+  autodiscoverRepoSort?: AutodiscoverRepoSort;
+  autodiscoverRepoOrder?: AutodiscoverRepoOrder;
   userAgent?: string;
   dockerMaxPages?: number;
   s3Endpoint?: string;
@@ -285,7 +305,7 @@ export interface LegacyAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
-  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
+  onboardingNoDeps?: OnboardingNoDeps;
   onboardingRebaseCheckbox?: boolean;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
@@ -296,14 +316,12 @@ export interface LegacyAdminConfig {
 
   prCommitsPerRunLimit?: number;
 
-  requireConfig?: RequiredConfig;
+  requireConfig?: RequireConfig;
 
   useCloudMetadataServices?: boolean;
 
   writeDiscoveredRepos?: string;
 }
-
-export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
@@ -323,12 +341,6 @@ export type RenovateRepository =
   | (RenovateConfig & {
       repository: string;
     });
-
-export type UseBaseBranchConfigType = 'merge' | 'none';
-export type ConstraintsFilter = 'strict' | 'none';
-export type MinimumReleaseAgeBehaviour =
-  | 'timestamp-required'
-  | 'timestamp-optional';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -375,11 +387,11 @@ export interface RenovateConfig
   s3PathStyle?: boolean;
   reportFormatting?: boolean;
   reportPath?: string;
-  reportType?: 'logging' | 'file' | 's3' | null;
+  reportType?: ReportType | null;
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];
-  useBaseBranchConfig?: UseBaseBranchConfigType;
+  useBaseBranchConfig?: UseBaseBranchConfig;
   baseBranch?: string;
   defaultBranch?: string;
   branchList?: string[];
@@ -389,7 +401,7 @@ export interface RenovateConfig
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;
-  forkProcessing?: 'auto' | 'enabled' | 'disabled';
+  forkProcessing?: ForkProcessing;
   forkToken?: string;
 
   gitAuthor?: string;
@@ -413,12 +425,12 @@ export interface RenovateConfig
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
-  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  dependencyDashboardOSVVulnerabilitySummary?: DependencyDashboardOSVVulnerabilitySummary;
   dependencyDashboardReportAbandonment?: boolean;
-  mode?: 'silent' | 'full';
+  mode?: Mode;
   packageFile?: string;
   packageRules?: PackageRule[];
-  postUpdateOptions?: string[];
+  postUpdateOptions?: PostUpdateOption[];
   branchConcurrentLimit?: number | null;
   parentOrg?: string;
   prConcurrentLimit?: number;
@@ -453,7 +465,7 @@ export interface RenovateConfig
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
-  fetchChangeLogs?: FetchChangeLogsOptions;
+  fetchChangeLogs?: FetchChangeLogs;
   secrets?: Record<string, string>;
   variables?: Record<string, string>;
 
@@ -464,7 +476,7 @@ export interface RenovateConfig
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   skipInstalls?: boolean | null;
 
-  constraintsFiltering?: ConstraintsFilter;
+  constraintsFiltering?: ConstraintsFiltering;
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
@@ -552,24 +564,6 @@ export const UpdateTypesOptions = [
 
 export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
 
-export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
-
-export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
-
-export type MergeStrategy =
-  | 'auto'
-  | 'fast-forward'
-  | 'merge-commit'
-  | 'rebase'
-  | 'rebase-merge'
-  | 'squash';
-
-// This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution =
-  | 'bazelModDeps'
-  | 'goGenerate'
-  | 'gradleWrapper';
-
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig, RenovateInternalConfig, UpdateConfig {
@@ -577,7 +571,7 @@ export interface PackageRule
   description?: string | string[];
   matchBaseBranches?: string[];
   matchCategories?: string[];
-  matchConfidence?: MergeConfidence[];
+  matchConfidence?: MatchConfidence[];
   matchCurrentAge?: string;
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
@@ -591,7 +585,7 @@ export interface PackageRule
   matchRepositories?: string[];
   matchSourceUrls?: string[];
   matchRegistryUrls?: string[];
-  matchUpdateTypes?: UpdateType[];
+  matchUpdateTypes?: MatchUpdateType[];
   matchJsonata?: string[];
   overrideDatasource?: string;
   overrideDepName?: string;
@@ -820,7 +814,7 @@ export interface ValidationResult {
 }
 
 export interface BumpVersionConfig {
-  bumpType?: string;
+  bumpType?: BumpType;
   filePatterns: string[];
   matchStrings: string[];
   name?: string;

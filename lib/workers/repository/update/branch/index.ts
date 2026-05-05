@@ -1,8 +1,8 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import type { MinimumReleaseAgeBehaviour } from '../../../../config/allowed-values.generated.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import {
-  type MinimumReleaseAgeBehaviour,
   type RenovateConfig,
   type UpdateType,
 } from '../../../../config/types.ts';

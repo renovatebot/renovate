@@ -1,6 +1,6 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
-import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import { api as npm } from '../npm/index.ts';
 import { api as pep440 } from '../pep440/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
