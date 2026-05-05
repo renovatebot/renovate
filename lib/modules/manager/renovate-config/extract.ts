@@ -80,31 +80,27 @@ export function extractPackageFile(
     }
   }
 
-  if (config.data.packageRules) {
-    for (const packageRule of config.data.packageRules) {
-      if (packageRule.constraints) {
-        for (const [constraint, value] of Object.entries(
-          packageRule.constraints,
-        )) {
-          if (isToolName(constraint)) {
-            const toolConfig = getToolConfig(constraint);
-            deps.push({
-              ...toolConfig,
-              depName: constraint,
-              currentValue: value,
-              depType: 'tool-constraint',
-              commitMessageTopic: '{{{depName}}} tool constraint',
-            });
-          } else {
-            deps.push({
-              depName: constraint,
-              currentValue: value,
-              skipReason: 'unsupported',
-              depType: 'constraint',
-              commitMessageTopic: '{{{depName}}} constraint',
-            });
-          }
-        }
+  for (const packageRule of config.data.packageRules ?? []) {
+    for (const [constraint, value] of Object.entries(
+      packageRule.constraints ?? {},
+    )) {
+      if (isToolName(constraint)) {
+        const toolConfig = getToolConfig(constraint);
+        deps.push({
+          ...toolConfig,
+          depName: constraint,
+          currentValue: value,
+          depType: 'tool-constraint',
+          commitMessageTopic: '{{{depName}}} tool constraint',
+        });
+      } else {
+        deps.push({
+          depName: constraint,
+          currentValue: value,
+          skipReason: 'unsupported',
+          depType: 'constraint',
+          commitMessageTopic: '{{{depName}}} constraint',
+        });
       }
     }
   }
