@@ -2431,7 +2431,7 @@ describe('config/validation', () => {
       expect(warnings).toEqual([]);
     });
 
-    it('warns on repositories[] with invalid entries', async () => {
+    it('errors on repositories[] with invalid entries', async () => {
       const config = {
         repositories: [
           {
@@ -2444,12 +2444,12 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
         config,
       );
-      expect(warnings).toEqual([
+      expect(errors).toEqual([
         {
           topic: 'Configuration Error',
           message: 'Invalid configuration option: repositories[0].foo',
@@ -2457,12 +2457,14 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+            'repositories[1]: each repository object entry must have a `repository` string property',
         },
+      ]);
+      expect(warnings).toEqual([
         {
           topic: 'Configuration Error',
           message:
-            'repositories[1]: each repository object entry must have a `repository` string property',
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
         },
       ]);
     });

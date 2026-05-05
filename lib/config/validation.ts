@@ -1095,7 +1095,7 @@ async function validateGlobalConfig(
           for (const [subIndex, subval] of val.entries()) {
             if (isPlainObject(subval)) {
               if (!isNonEmptyString(subval.repository)) {
-                warnings.push({
+                errors.push({
                   topic: 'Configuration Error',
                   message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
                 });
@@ -1107,11 +1107,8 @@ async function validateGlobalConfig(
                 false,
                 `${currentPath}[${subIndex}]`,
               );
-              for (const warning of subValidation.warnings.concat(
-                subValidation.errors,
-              )) {
-                warnings.push(warning);
-              }
+              warnings.push(...subValidation.warnings);
+              errors.push(...subValidation.errors);
             }
           }
         }
