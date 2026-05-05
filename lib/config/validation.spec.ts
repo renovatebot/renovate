@@ -722,7 +722,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Invalid customType: unknown. Key is not a custom manager",
+            "message": "Invalid value \`unknown\` for \`customManagers[0].customType\`. The allowed values are jsonata, regex.",
             "topic": "Configuration Error",
           },
         ]
@@ -2162,7 +2162,7 @@ describe('config/validation', () => {
       expect(warnings).toEqual([
         {
           message:
-            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+            'Invalid value `invalid` for `binarySource`. The allowed values are global, docker, install, hermit.',
           topic: 'Configuration Error',
         },
       ]);
@@ -2180,7 +2180,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+              'Invalid value `invalid` for `binarySource`. The allowed values are global, docker, install, hermit.',
             topic: 'Configuration Error',
           },
         ]);
@@ -2247,7 +2247,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset.',
+              'Invalid value `invalid` for `repositoryCache`. The allowed values are disabled, enabled, reset.',
             topic: 'Configuration Error',
           },
         ]);
@@ -2405,7 +2405,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
+            'Invalid value `invalid` for `gitNoVerify`. The allowed values are commit, push.',
           topic: 'Configuration Error',
         },
       ]);
@@ -2673,6 +2673,64 @@ describe('config/validation', () => {
         },
       ]);
       expect(warnings).toHaveLength(2);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('errors on invalid postUpdateOptions values', async () => {
+      const config = {
+        postUpdateOptions: ['goModTidy', 'gomodTidy', 'notAnOption'],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message: expect.stringContaining(
+            'Invalid value `goModTidy` for `postUpdateOptions`',
+          ),
+          topic: 'Configuration Error',
+        },
+        {
+          message: expect.stringContaining(
+            'Invalid value `notAnOption` for `postUpdateOptions`',
+          ),
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('allows versioning with regex: prefix', async () => {
+      const config = {
+        versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)?$',
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('errors on invalid versioning value', async () => {
+      const config = {
+        versioning: 'invalid-versioning',
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message: expect.stringContaining(
+            'Invalid value `invalid-versioning` for `versioning`',
+          ),
+          topic: 'Configuration Error',
+        },
+      ]);
       expect(errors).toHaveLength(1);
     });
   });

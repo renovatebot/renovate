@@ -41,7 +41,6 @@ import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
@@ -73,6 +72,7 @@ let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
+let optionAllowedValues: Record<string, string[]>;
 
 const managerList: readonly string[] = AllManagersListLiteral;
 
@@ -157,6 +157,7 @@ function initOptions(): void {
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
   optionAllowsNegativeIntegers = new Set();
+  optionAllowedValues = {};
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -179,6 +180,10 @@ function initOptions(): void {
 
     if (option.allowNegative) {
       optionAllowsNegativeIntegers.add(option.name);
+    }
+
+    if (option.allowedValues) {
+      optionAllowedValues[option.name] = option.allowedValues;
     }
   }
 
@@ -598,11 +603,6 @@ export async function validateConfig(
                       topic: 'Configuration Error',
                       message: `Each Custom Manager must contain a non-empty customType string`,
                     });
-                  } else {
-                    errors.push({
-                      topic: 'Configuration Error',
-                      message: `Invalid customType: ${customManager.customType}. Key is not a custom manager`,
-                    });
                   }
                 }
               }
@@ -650,6 +650,17 @@ export async function validateConfig(
                 message: `${currentPath}: ${key} should be inside a \`packageRule\` only`,
               });
             }
+            const allowedValues = optionAllowedValues[key];
+            if (allowedValues) {
+              for (const subval of val) {
+                if (!allowedValues.includes(subval as string)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid value \`${subval as string}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+                  });
+                }
+              }
+            }
           } else {
             errors.push({
               topic: 'Configuration Error',
@@ -657,7 +668,19 @@ export async function validateConfig(
             });
           }
         } else if (type === 'string') {
-          if (!isString(val)) {
+          if (isString(val)) {
+            const allowedValues = optionAllowedValues[key];
+            if (allowedValues && !allowedValues.includes(val)) {
+              // versioning supports 'name:config' format (e.g. 'regex:<pattern>')
+              const valToCheck = key === 'versioning' ? val.split(':')[0] : val;
+              if (!allowedValues.includes(valToCheck)) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+                });
+              }
+            }
+          } else {
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a string`,
@@ -983,46 +1006,14 @@ async function validateGlobalConfig(
               },
             ).join(', ')}.`,
           });
-        } else if (
-          key === 'repositoryCache' &&
-          !['enabled', 'disabled', 'reset'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
-          });
-        } else if (
-          key === 'dryRun' &&
-          !['extract', 'lookup', 'full'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
-          });
-        } else if (
-          key === 'binarySource' &&
-          !['docker', 'global', 'install', 'hermit'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
-          });
-        } else if (
-          key === 'requireConfig' &&
-          !['required', 'optional', 'ignored'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
-          });
-        } else if (
-          key === 'gitUrl' &&
-          !['default', 'ssh', 'endpoint'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
-          });
+        } else {
+          const allowedValues = optionAllowedValues[key];
+          if (allowedValues && !allowedValues.includes(val)) {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+            });
+          }
         }
 
         if (
@@ -1063,22 +1054,9 @@ async function validateGlobalConfig(
             }),
           );
         }
-        if (key === 'gitNoVerify') {
-          const allowedValues = ['commit', 'push'];
+        const allowedValues = optionAllowedValues[key];
+        if (allowedValues) {
           for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
-        if (key === 'mergeConfidenceDatasources') {
-          const allowedValues = supportedDatasources;
-          for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',
