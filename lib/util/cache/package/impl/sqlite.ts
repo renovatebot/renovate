@@ -1,4 +1,4 @@
-import { DatabaseSync, type StatementSync } from 'node:sqlite';
+import type { DatabaseSync, StatementSync } from 'node:sqlite';
 import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
 import fs from 'fs-extra';
@@ -32,6 +32,7 @@ export class PackageCacheSqlite extends PackageCacheBase {
   private static readonly busyTimeoutMs = 100;
 
   static async create(cacheDir: string): Promise<PackageCacheSqlite> {
+    const { DatabaseSync: Sqlite } = await import('node:sqlite');
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
@@ -42,7 +43,7 @@ export class PackageCacheSqlite extends PackageCacheBase {
       logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
     }
 
-    const client = new DatabaseSync(sqliteFile, {
+    const client = new Sqlite(sqliteFile, {
       timeout: PackageCacheSqlite.busyTimeoutMs,
     });
     return new PackageCacheSqlite(client);
@@ -73,9 +74,6 @@ export class PackageCacheSqlite extends PackageCacheBase {
         `,
     );
     client.exec('CREATE INDEX IF NOT EXISTS expiry ON package_cache (expiry)');
-    client.exec(
-      'CREATE INDEX IF NOT EXISTS namespace_key ON package_cache (namespace, key)',
-    );
 
     this.upsertStatement = client.prepare(`
       INSERT INTO package_cache (namespace, key, data, expiry)
