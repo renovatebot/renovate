@@ -391,5 +391,81 @@ describe('modules/datasource/maven/util', () => {
         expect.any(Object),
       );
     });
+
+    it('does not call gcs ar backend if package url is invalid', async () => {
+      const invalidPackageUrl = new URL(
+        'artifactregistry://europe-maven.pkg.dev/my-project/my-repo',
+      );
+
+      const getJson = vi.fn();
+
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom content',
+            headers: {},
+            authorization: false,
+          }),
+        getJson,
+      });
+
+      const res = await downloadArtifactRegistryProtocol(
+        http,
+        invalidPackageUrl,
+      );
+
+      expect(getJson).to.have.callCount(0);
+
+      expect(res.unwrap()).toEqual({
+        ok: true,
+        val: {
+          data: 'pom content',
+          isCacheable: true,
+        },
+      });
+    });
+
+    it('does not use timestamp from gcs if it is not in a valid format', async () => {
+      const regionalUrl = new URL(
+        'artifactregistry://europe-maven.pkg.dev/my-project/my-repo/com/example/artifact/1.0/artifact-1.0.pom',
+      );
+
+      const expectedApiUrl =
+        'https://artifactregistry.googleapis.com/v1/projects/my-project/locations/europe/repositories/my-repo/files/com%2Fexample%2Fartifact%2F1.0%2Fartifact-1.0.pom';
+
+      const getJson = vi.fn().mockResolvedValue({
+        statusCode: 200,
+        body: { updateTime: 'Not a Data or Time' },
+        headers: {},
+      });
+
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom content',
+            headers: {},
+            authorization: false,
+          }),
+        getJson,
+      });
+
+      const res = await downloadArtifactRegistryProtocol(http, regionalUrl);
+
+      expect(getJson).toHaveBeenCalledWith(
+        expectedApiUrl,
+        expect.any(Object),
+        expect.any(Object),
+      );
+
+      expect(res.unwrap()).toEqual({
+        ok: true,
+        val: {
+          data: 'pom content',
+          isCacheable: true,
+        },
+      });
+    });
   });
 });
