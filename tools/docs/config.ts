@@ -7,6 +7,13 @@ import {
   allManagersList,
   getManagers,
 } from '../../lib/modules/manager/index.ts';
+import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
+import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
+import {
+  additionalConstraintDefinitions,
+  toolDefinitions,
+  toolNames,
+} from '../../lib/util/exec/types.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { formatCell, replaceContent } from './utils.ts';
@@ -274,6 +281,47 @@ function generateConfigFileNames(): string {
   return output.trimEnd();
 }
 
+function generateToolsForConstraints(): string {
+  let output = '| Tool | Additional Information | Versioning | Datasource |\n';
+  output += '| --- | --- | --- | --- |\n';
+  for (const toolDef of toolDefinitions) {
+    const toolConfig = getToolConfig(toolDef.name);
+    if (!toolConfig) {
+      continue;
+    }
+    const def: ConstraintDefinition = toolDef;
+    // Newlines in the Markdown-rendered table will break table rendering
+    const desc = def.description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${toolDef.name}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
+  }
+
+  return output;
+}
+
+function generateAdditionalConstraints(): string {
+  let output = '| Constraint | Additional Information |\n';
+  output += '| --- | --- |\n';
+  for (const {
+    name,
+    description,
+  } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+    // Newlines in the Markdown-rendered table will break table rendering
+    const desc = description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${name}\` | ${desc} |\n`;
+  }
+
+  return output;
+}
+
+function generateToolsForInstallTools(): string {
+  let output = '';
+  for (const tool of [...toolNames]) {
+    output += `- \`${tool}\`\n`;
+  }
+
+  return output;
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -352,6 +400,27 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     content = replaceContent(content, generateConfigFileNames(), {
       replaceStart: '<!-- config-filenames-begin -->',
       replaceStop: '<!-- config-filenames-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateToolsForConstraints(), {
+      replaceStart: '<!-- constraints-tools-begin -->',
+      replaceStop: '<!-- constraints-tools-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateAdditionalConstraints(), {
+      replaceStart: '<!-- additional-constraints-begin -->',
+      replaceStop: '<!-- additional-constraints-end -->',
+    });
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateToolsForInstallTools(), {
+      replaceStart: '<!-- installTools-tools-begin -->',
+      replaceStop: '<!-- installTools-tools-end -->',
     });
   }
 

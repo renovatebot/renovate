@@ -30,6 +30,10 @@ For more details, see [Private packages, looking up changelogs](../getting-start
 
 ### [`fetchChangeLogs`](../configuration-options.md#fetchchangelogs)
 
+Top-level configuration that controls when to fetch changelogs for addition to pull-request and branch commit-messages.
+If you want more finely-grained control over changelog fetching (disabling for specific packages, source repositories, etc),
+use [packageRules](../configuration-options.md#packagerules) to override the `fetchChangeLogs` value for matching packages.
+
 Set to `off` if changelog fetching is causing a problem.
 
 Set to `branch` if you have an advanced use case where you're embedding changelogs in the Git commit itself, we don't recommend this due to its potential size.
@@ -40,7 +44,7 @@ This doesn't help with _fetching_ the changelogs, but if you configure it then R
 
 ## Platforms that Renovate can fetch changelogs from
 
-See the list of platforms in the [`fetchChangelogs` config option docs](../configuration-options.md#fetchchangelogs).
+See the list of platforms in the [`fetchChangeLogs` config option docs](../configuration-options.md#fetchchangelogs).
 
 ### Running Renovate on a non-GitHub platform
 

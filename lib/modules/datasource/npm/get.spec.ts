@@ -4,6 +4,7 @@ import * as _packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
+import { defaultRegistryUrl } from './common.ts';
 import { getDependency } from './get.ts';
 import { resolveRegistryUrl, setNpmrc } from './npmrc.ts';
 
@@ -139,12 +140,12 @@ describe('modules/datasource/npm/get', () => {
     expect.assertions(1);
     const npmrc = ``;
     hostRules.add({
-      matchHost: 'https://registry.npmjs.org',
+      matchHost: defaultRegistryUrl,
       token: 'XXX',
     });
 
     httpMock
-      .scope('https://registry.npmjs.org', {
+      .scope(defaultRegistryUrl, {
         reqheaders: {
           authorization: 'Bearer XXX',
         },
@@ -160,13 +161,13 @@ describe('modules/datasource/npm/get', () => {
     expect.assertions(1);
     const npmrc = ``;
     hostRules.add({
-      matchHost: 'https://registry.npmjs.org',
+      matchHost: defaultRegistryUrl,
       token: 'abc',
       authType: 'Basic',
     });
 
     httpMock
-      .scope('https://registry.npmjs.org', {
+      .scope(defaultRegistryUrl, {
         reqheaders: {
           authorization: 'Basic abc',
         },
@@ -232,7 +233,7 @@ describe('modules/datasource/npm/get', () => {
 
     setNpmrc();
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     registryUrl = resolveRegistryUrl('npm-parse-error');
@@ -240,16 +241,13 @@ describe('modules/datasource/npm/get', () => {
       getDependency(http, registryUrl, 'npm-parse-error'),
     ).rejects.toThrow(ExternalHostError);
 
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/npm-error-402')
-      .reply(402);
+    httpMock.scope(defaultRegistryUrl).get('/npm-error-402').reply(402);
     expect(await getDependency(http, registryUrl, 'npm-error-402')).toBeNull();
   });
 
   it('throw ExternalHostError when error happens on registry.npmjs.org', async () => {
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     const registryUrl = resolveRegistryUrl('npm-parse-error');
@@ -260,7 +258,7 @@ describe('modules/datasource/npm/get', () => {
 
   it('redact body for ExternalHostError when error happens on registry.npmjs.org', async () => {
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     const registryUrl = resolveRegistryUrl('npm-parse-error');
@@ -288,11 +286,11 @@ describe('modules/datasource/npm/get', () => {
 
   it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules disables abortOnError', async () => {
     hostRules.add({
-      matchHost: 'https://registry.npmjs.org',
+      matchHost: defaultRegistryUrl,
       abortOnError: false,
     });
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     const registryUrl = resolveRegistryUrl('npm-parse-error');
@@ -302,12 +300,13 @@ describe('modules/datasource/npm/get', () => {
   });
 
   it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules without protocol disables abortOnError', async () => {
+    const host = new URL(defaultRegistryUrl).host;
     hostRules.add({
-      matchHost: 'registry.npmjs.org',
+      matchHost: host,
       abortOnError: false,
     });
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     const registryUrl = resolveRegistryUrl('npm-parse-error');

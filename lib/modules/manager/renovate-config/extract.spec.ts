@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import { extractPackageFile } from './index.ts';
 
-describe('modules/manager/renovate-config-presets/extract', () => {
+describe('modules/manager/renovate-config/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty file', () => {
       expect(extractPackageFile('', 'renovate.json')).toBeNull();

@@ -19,10 +19,12 @@ import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
+import * as _updateDateCache from './update-date-cache.ts';
 
 vi.mock('./conflicts-cache.ts');
 vi.mock('./behind-base-branch-cache.ts');
 vi.mock('./modified-cache.ts');
+vi.mock('./update-date-cache.ts');
 vi.mock('timers/promises');
 vi.mock('../cache/repository/index.ts');
 vi.mock('./auth.ts');
@@ -31,6 +33,7 @@ vi.unmock('./index.ts');
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
+const updateDateCache = vi.mocked(_updateDateCache);
 const auth = vi.mocked(_auth);
 // Class is no longer exported
 const SimpleGit = simpleGit().constructor as {
@@ -146,6 +149,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await local.addConfig('user.name', 'Jest');
     await local.addConfig('user.email', 'Jest@example.com');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
+    updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
@@ -449,6 +453,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const defaultDate = await git.getBranchUpdateDate(defaultBranch);
       expect(date!.toISO()).toBe(defaultDate!.toISO());
       expect(date).toBeInstanceOf(DateTime);
+      expect(updateDateCache.setCachedUpdateDateResult).toHaveBeenCalledWith(
+        'renovate/equal_branch',
+        expect.any(DateTime),
+      );
     });
 
     it('should return null when branch does not exist', async () => {
@@ -484,6 +492,16 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
       // Restore original implementation
       fromISOSpy.mockRestore();
+    });
+
+    it('returns cached result without syncing git when cache is populated', async () => {
+      const branchName = 'renovate/equal_branch';
+      const cachedDate = DateTime.fromISO('2023-05-20T14:25:30.123Z');
+      updateDateCache.getCachedUpdateDateResult.mockReturnValueOnce(cachedDate);
+      await git.checkoutBranchFromRemote(branchName, 'origin');
+      const result = await git.getBranchUpdateDate(branchName);
+      expect(result).toBe(cachedDate);
+      expect(updateDateCache.setCachedUpdateDateResult).not.toHaveBeenCalled();
     });
 
     it('works if running with a Repo Cache', async () => {
@@ -591,6 +609,32 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
+    it('should merge a local-only branch without fetching from origin', async () => {
+      // Create a local-only branch (never pushed to origin)
+      await git.prepareCommit({
+        branchName: 'renovate/local_only_branch',
+        message: 'local only commit',
+        files: [
+          { type: 'addition', path: 'local_only_file', contents: 'local' },
+        ],
+      });
+      // Reset working tree back to default branch so the file is not present yet
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+      await git.mergeToLocal('renovate/local_only_branch', {
+        localBranch: true,
+      });
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(pushSpy).not.toHaveBeenCalled();
+    });
+
     it('should throw', async () => {
       await expect(git.mergeToLocal('not_found')).rejects.toThrow();
     });
@@ -625,6 +669,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
         'renovate/something',
         '--no-verify',
       ]);
+    });
+
+    it('should only delete local branch when localBranch option is set', async () => {
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      await git.deleteBranch('renovate/past_branch', { localBranch: true });
+      expect(rawSpy).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['push', '--delete']),
+      );
     });
   });
 

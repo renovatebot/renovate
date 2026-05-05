@@ -17,7 +17,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
+  logger.trace(`renovate-config.extractPackageFile(${packageFile})`);
   const config = RenovateJson.safeParse(content);
   if (!config.success) {
     logger.debug({ packageFile, err: config.error }, 'Invalid Renovate Config');

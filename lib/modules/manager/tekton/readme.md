@@ -1,4 +1,4 @@
-[Tekton](https://tekton.dev/) is an open-source cloud-native Continuous Integration and Continuous Delivery/Deployment solution.
+[Tekton](https://tekton.dev/) is an Open Source cloud-native Continuous Integration and Continuous Delivery/Deployment solution.
 
 Tekton uses Tasks to capture specific commands to be executed, and Pipelines to combine different Tasks, to achieve a goal, like building a container image.
 Tasks and Pipelines are defined as Kubernetes custom resources.
