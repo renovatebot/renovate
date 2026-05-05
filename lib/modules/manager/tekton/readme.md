@@ -60,6 +60,7 @@ You can define Tekton Tasks within these Tekton resources:
 1. TaskRun
 1. Pipeline
 1. PipelineRun
+1. StepAction
 
 Renovate's Tekton manager supports all the image attributes for the Tekton resources mentioned above.
 
