@@ -10,10 +10,12 @@ import is, {
 } from '@sindresorhus/is';
 import type { PlatformId } from '../constants/index.ts';
 import { logger } from '../logger/index.ts';
+import {
+  AllManagersListLiteral,
+  CustomManagersListLiteral,
+} from '../manager-list.generated.ts';
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import { allManagersList, getManagerList } from '../modules/manager/index.ts';
-import * as allVersioning from '../modules/versioning/index.ts';
 import type { HostRule } from '../types/index.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
@@ -26,6 +28,10 @@ import {
 } from '../util/string-match.ts';
 import * as template from '../util/template/index.ts';
 import { parseUrl } from '../util/url.ts';
+import {
+  AllVersioningsListLiteral,
+  type VersioningName,
+} from '../versioning-list.generated.ts';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -68,7 +74,12 @@ let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
 
-const managerList = getManagerList();
+const managerList: readonly string[] = AllManagersListLiteral;
+
+const allManagersList: readonly string[] = [
+  ...AllManagersListLiteral,
+  ...CustomManagersListLiteral,
+];
 
 const topLevelObjects = [...managerList, 'env'];
 
@@ -763,6 +774,8 @@ export async function validateConfig(
                 }
               }
             } else if (key === 'constraints') {
+              const { get: getVersioning } =
+                await import('../modules/versioning/index.ts');
               for (const [k, v] of Object.entries(val)) {
                 if (!isString(v)) {
                   errors.push({
@@ -780,7 +793,7 @@ export async function validateConfig(
                 } else if (isToolName(k)) {
                   // TODO: #31831
                   const versioningId = getToolConfig(k).versioning;
-                  const versioning = allVersioning.get(versioningId);
+                  const versioning = getVersioning(versioningId);
                   if (!versioning.isValid(v)) {
                     warnings.push({
                       topic: 'Configuration Error',
@@ -806,7 +819,11 @@ export async function validateConfig(
                   });
                 } else if (isConstraintName(k)) {
                   const versioningName = v.split(':')[0];
-                  if (!allVersioning.getVersionings().get(versioningName)) {
+                  if (
+                    !AllVersioningsListLiteral.includes(
+                      versioningName as VersioningName,
+                    )
+                  ) {
                     errors.push({
                       topic: 'Configuration Error',
                       message: `Configuration option \`${currentPath}.${k}=${v}\`: \`${v}\` is not a valid versioning scheme`,
