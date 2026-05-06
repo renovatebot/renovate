@@ -260,7 +260,7 @@
     "strip-json-comments": "5.0.3",
     "toml-eslint-parser": "1.0.3",
     "tslib": "2.8.1",
-    "upath": "2.0.1",
+    "upath": "3.0.7",
     "url-join": "5.0.0",
     "validate-npm-package-name": "7.0.2",
     "xmldoc": "2.0.3",

@@ -349,8 +349,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       upath:
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 3.0.7
+        version: 3.0.7
       url-join:
         specifier: 5.0.0
         version: 5.0.0
@@ -5766,6 +5766,10 @@ packages:
   upath@2.0.1:
     resolution: {integrity: sha512-1uEe95xksV1O0CYKXo8vQvN1JEbtJp7lb7C5U9HMsIp6IVwntkH/oNUzyVNQSd4S1sYk2FpSSW44FqMc8qee5w==}
     engines: {node: '>=4'}
+
+  upath@3.0.7:
+    resolution: {integrity: sha512-VjBBquch25nUGMuVBpOb2Cj3gc8Kb7lJBqbsXR/0anZ/5uJsL14Kpth9JKfnBsckxCfgIp6hPvcvvmZ97R9X7g==}
+    engines: {node: '>=20'}
 
   update-browserslist-db@1.2.3:
     resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
@@ -12034,6 +12038,8 @@ snapshots:
       rolldown: 1.0.0-rc.17
 
   upath@2.0.1: {}
+
+  upath@3.0.7: {}
 
   update-browserslist-db@1.2.3(browserslist@4.28.1):
     dependencies:
