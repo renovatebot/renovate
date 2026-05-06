@@ -4,7 +4,7 @@ export type {
   UpdateType,
   ValidationMessage,
 } from '../config/types.ts';
-export type { BunyanRecord } from '../logger/types.ts';
+export type { LogRecord } from '../logger/types.ts';
 export type {
   BranchCache,
   BranchUpgradeCache,

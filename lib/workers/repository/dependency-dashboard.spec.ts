@@ -1,4 +1,3 @@
-import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
@@ -8,6 +7,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { logger, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import { ERROR, WARN } from '../../logger/types.ts';
 import type {
   PackageDependency,
   PackageFile,

@@ -2,7 +2,7 @@ import * as util from 'node:util';
 import { codeBlock } from 'common-tags';
 import { partial } from '~test/util.ts';
 import * as prettyStdout from './pretty-stdout.ts';
-import type { BunyanRecord } from './types.ts';
+import type { LogRecord } from './types.ts';
 
 describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {
@@ -11,18 +11,18 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns empty string if empty rec', () => {
-      expect(prettyStdout.getMeta(partial<BunyanRecord>())).toBeEmptyString();
+      expect(prettyStdout.getMeta(partial<LogRecord>())).toBeEmptyString();
     });
 
     it('returns empty string if no meta fields', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         foo: 'bar',
       });
       expect(prettyStdout.getMeta(rec)).toBeEmptyString();
     });
 
     it('supports single meta', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         foo: 'bar',
         repository: 'a/b',
       });
@@ -32,7 +32,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('supports multi meta', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         foo: 'bar',
         branch: 'c',
         repository: 'a/b',
@@ -44,7 +44,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns plain text when colorize is false', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         foo: 'bar',
         repository: 'a/b',
         module: 'test',
@@ -59,13 +59,11 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns empty string if empty rec', () => {
-      expect(
-        prettyStdout.getDetails(partial<BunyanRecord>()),
-      ).toBeEmptyString();
+      expect(prettyStdout.getDetails(partial<LogRecord>())).toBeEmptyString();
     });
 
     it('returns empty string if all are meta fields', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         branch: 'bar',
         v: 0,
       });
@@ -73,7 +71,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('supports a config', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         v: 0,
         config: {
           a: 'b',
@@ -86,7 +84,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('formats err.stack as readable multi-line output', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         v: 0,
         err: {
           message: 'something broke',
@@ -106,7 +104,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('formats err.stack without other err fields', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         v: 0,
         err: {
           stack: 'Error: oops\n    at bar (file.js:2:2)',
@@ -134,7 +132,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('formats record', () => {
-      const rec: BunyanRecord = {
+      const rec: LogRecord = {
         level: 10,
         msg: 'test message',
         v: 0,
@@ -153,7 +151,7 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('formats record without colors', () => {
-      const rec = partial<BunyanRecord>({
+      const rec = partial<LogRecord>({
         level: 10,
         msg: 'test message',
         v: 0,
@@ -178,13 +176,13 @@ describe('logger/pretty-stdout', () => {
         .mockImplementation(() => true);
 
       const stream = new prettyStdout.PrettyStdoutStream();
-      const rec: BunyanRecord = {
+      const rec: LogRecord = {
         level: 10,
         msg: 'test message',
         v: 0,
       };
 
-      stream.write(rec);
+      stream.write(JSON.stringify(rec));
       expect(stdoutSpy).toHaveBeenCalledOnce();
       expect(stdoutSpy.mock.calls[0][0]).toContain('test message');
     });

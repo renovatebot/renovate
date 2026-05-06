@@ -8,7 +8,6 @@ import {
   isNonEmptyStringAndNotWhitespace,
   isString,
 } from '@sindresorhus/is';
-import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
@@ -30,6 +29,7 @@ import {
 } from '../../instrumentation/reporting.ts';
 import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
 import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
+import { ERROR } from '../../logger/types.ts';
 import { getEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import * as queue from '../../util/http/queue.ts';

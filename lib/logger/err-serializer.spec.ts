@@ -98,7 +98,7 @@ describe('logger/err-serializer', () => {
       delete err.timings;
       delete err.stack;
 
-      // sanitize like Bunyan
+      // sanitize like pino
       expect(sanitizeValue(err)).toMatchSnapshot({
         name: 'HTTPError',
         options: {

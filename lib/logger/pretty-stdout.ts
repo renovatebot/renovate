@@ -1,14 +1,13 @@
 // Code originally derived from https://github.com/hadfieldn/node-bunyan-prettystream but since heavily edited
 // Neither fork nor original repo appear to be maintained
 
-import { Writable } from 'node:stream';
 import * as util from 'node:util';
 import { isNonEmptyObject, isPlainObject, isString } from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { regEx } from '../util/regex.ts';
-import type { BunyanRecord } from './types.ts';
+import type { LogRecord } from './types.ts';
 
-const bunyanFields = [
+const pinoFields = [
   'name',
   'hostname',
   'pid',
@@ -51,7 +50,7 @@ export function indent(str: string, leading = false): string {
   return prefix + str.split(regEx(/\r?\n/)).join('\n       ');
 }
 
-export function getMeta(rec: BunyanRecord, colorize = true): string {
+export function getMeta(rec: LogRecord, colorize = true): string {
   if (!rec) {
     return '';
   }
@@ -67,7 +66,7 @@ export function getMeta(rec: BunyanRecord, colorize = true): string {
   return colorize ? util.styleText('gray', res) : res;
 }
 
-export function getDetails(rec: BunyanRecord): string {
+export function getDetails(rec: LogRecord): string {
   if (!rec) {
     return '';
   }
@@ -76,7 +75,7 @@ export function getDetails(rec: BunyanRecord): string {
   Object.keys(recFiltered).forEach((key) => {
     if (
       key === 'logContext' ||
-      bunyanFields.includes(key) ||
+      pinoFields.includes(key) ||
       metaFields.includes(key)
     ) {
       delete recFiltered[key];
@@ -109,25 +108,16 @@ export function getDetails(rec: BunyanRecord): string {
     .join(',\n')}\n`;
 }
 
-export function formatRecord(rec: BunyanRecord, colorize = true): string {
+export function formatRecord(rec: LogRecord, colorize = true): string {
   const level = colorize ? colorizedLevels[rec.level] : levels[rec.level];
-  const msg = `${indent(rec.msg)}`;
+  const msg = indent(rec.msg);
   const meta = getMeta(rec, colorize);
   const details = getDetails(rec);
   return util.format('%s: %s%s\n%s', level, msg, meta, details);
 }
 
-export class PrettyStdoutStream extends Writable {
-  constructor() {
-    super({ objectMode: true });
-  }
-
-  override _write(
-    data: BunyanRecord,
-    _encoding: string,
-    callback: (error?: Error | null) => void,
-  ): void {
-    process.stdout.write(formatRecord(data));
-    callback();
+export class PrettyStdoutStream {
+  write(data: string): void {
+    process.stdout.write(formatRecord(JSON.parse(data) as LogRecord));
   }
 }

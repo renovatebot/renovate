@@ -1,8 +1,8 @@
-import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import { ERROR, WARN } from '../../logger/types.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import * as secrets from '../../util/sanitize.ts';

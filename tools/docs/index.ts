@@ -1,7 +1,7 @@
-import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import * as tar from 'tar';
 import { getProblems, logger } from '../../lib/logger/index.ts';
+import { ERROR } from '../../lib/logger/types.ts';
 import { generateConfig } from './config.ts';
 import { generateDatasources } from './datasources.ts';
 import { generateEnvOptions } from './env-options.ts';

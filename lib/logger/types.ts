@@ -1,14 +1,26 @@
-import type { Stream } from 'node:stream';
-import type { LogLevel, LogLevelString } from 'bunyan';
+import type pino from 'pino';
 
-export type {
-  LogLevelString as BunyanLogLevel,
-  Serializers as BunyanSerializers,
-  Stream as BunyanStream,
-} from 'bunyan';
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+
+// Same values as pino
+export const TRACE = 10;
+export const DEBUG = 20;
+export const INFO = 30;
+export const WARN = 40;
+export const ERROR = 50;
+export const FATAL = 60;
+
+export const nameFromLevel: Record<number, string> = {
+  10: 'trace',
+  20: 'debug',
+  30: 'info',
+  40: 'warn',
+  50: 'error',
+  60: 'fatal',
+};
 
 export interface LogError {
-  level: LogLevel;
+  level: number;
   meta: any;
   msg?: string;
 }
@@ -32,24 +44,23 @@ export interface Logger {
   };
 }
 
-export interface BunyanRecord extends Record<string, any> {
+export interface LogRecord extends Record<string, any> {
   level: number;
   msg: string;
   module?: string;
 }
 
-export type BunyanNodeStream = (NodeJS.WritableStream | Stream) & {
-  writable?: boolean;
-  write: (
-    chunk: BunyanRecord,
-    enc: BufferEncoding,
-    cb: (err?: Error | null) => void,
-  ) => void;
-};
+export interface LogStream {
+  level: LogLevel;
+  stream?: { write(msg: string): void };
+  path?: string;
+  name?: string;
+  type?: string;
+}
 
-export type BunyanLogger = ReturnType<typeof import('bunyan').createLogger>;
+export type PinoLogger = pino.Logger;
 
 export interface LogLevelRemap {
   matchMessage: string;
-  newLogLevel: LogLevelString;
+  newLogLevel: LogLevel;
 }

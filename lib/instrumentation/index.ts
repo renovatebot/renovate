@@ -6,8 +6,8 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
 import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
 import {
   detectResources,
@@ -126,7 +126,7 @@ export function init(): void {
       },
       /* v8 ignore stop -- not easily testable */
     }),
-    new BunyanInstrumentation(),
+    new PinoInstrumentation(),
     new RedisInstrumentation(),
   ];
   registerInstrumentations({

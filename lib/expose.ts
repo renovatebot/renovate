@@ -33,11 +33,3 @@ export async function sqlite(): Promise<typeof import('better-sqlite3')> {
   // return default because it's cjs
   return (await import('better-sqlite3')).default;
 }
-
-/**
- * return's bunyan
- */
-export function bunyan(): typeof import('bunyan') {
-  // use `require` to allow opentelemetry instrumentation
-  return require('bunyan');
-}

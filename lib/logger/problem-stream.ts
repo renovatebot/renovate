@@ -1,32 +1,19 @@
-// Do not static import `bunyan` here!
-import { Stream } from 'node:stream';
-import type { BunyanRecord } from './types.ts';
+import type { LogRecord } from './types.ts';
 
 export const excludeProps = ['pid', 'time', 'v', 'hostname'];
 
-export class ProblemStream extends Stream {
-  private _problems: BunyanRecord[] = [];
+export class ProblemStream {
+  private _problems: LogRecord[] = [];
 
-  readable: boolean;
-
-  writable: boolean;
-
-  constructor() {
-    super();
-    this.readable = false;
-    this.writable = true;
-  }
-
-  write(data: BunyanRecord): boolean {
-    const problem = { ...data };
+  write(data: string): void {
+    const problem: LogRecord = JSON.parse(data);
     for (const prop of excludeProps) {
       delete problem[prop];
     }
     this._problems.push(problem);
-    return true;
   }
 
-  getProblems(): BunyanRecord[] {
+  getProblems(): LogRecord[] {
     return this._problems;
   }
 
