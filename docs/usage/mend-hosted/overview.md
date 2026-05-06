@@ -72,12 +72,3 @@ The resources, scheduling and concurrency of Renovate jobs is determined by the 
 | Mend.io Helpdesk Support      | ❌ Not included               | ❌ Not included                     | ✅ Included                    |
 
 <sup>1</sup> Bitbucket repositories running Mend Renovate Enterprise are scheduled to run every 4 hours, to avoid hitting rate limits on GitHub APIs.
-
-## IP Addresses used
-
-If you are looking at restricting access to your source code via IP allowlisting, you will need to know which public IPs Mend's Developer Platform accesses from.
-
-These can be found documented [on the Mend docs site](https://docs.mend.io/platform/latest/ip-addresses-used-by-mend-io) under the `developer-platform` section.
-
-- the `us` grouping is for [`developer.mend.io`](https://developer.mend.io/)
-- the `eu` grouping is for [`developer-eu.mend.io/`](https://developer-eu.mend.io/)
