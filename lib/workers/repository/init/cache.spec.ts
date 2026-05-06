@@ -1,6 +1,6 @@
 import { partial } from '~test/util.ts';
-import type { RepositoryCache } from '../../../config/allowed-values.generated.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { RepositoryCacheConfig } from '../../../config/types.ts';
 import type { WorkerPlatformConfig } from './apis.ts';
 import { initializeCaches } from './cache.ts';
 
@@ -11,7 +11,7 @@ describe('workers/repository/init/cache', () => {
     beforeEach(() => {
       config = {
         repository: '',
-        repositoryCache: partial<RepositoryCache>(),
+        repositoryCache: partial<RepositoryCacheConfig>(),
         repositoryCacheType: 'local',
         repoFingerprint: '0123456789abcdef',
         defaultBranch: 'main',

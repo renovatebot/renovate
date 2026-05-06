@@ -1,5 +1,5 @@
 import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
-import type { ConstraintsFiltering } from '../../../config/allowed-values.generated.ts';
+import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -275,7 +275,7 @@ export class GoProxyDatasource extends Datasource {
   async getVersionsWithInfo(
     baseUrl: string,
     packageName: string,
-    constraintsFiltering: ConstraintsFiltering | undefined,
+    constraintsFiltering: ConstraintsFilter | undefined,
   ): Promise<ReleaseResult> {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';

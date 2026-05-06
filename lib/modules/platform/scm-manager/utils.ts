@@ -1,4 +1,4 @@
-import type { AutomergeStrategy } from '../../../config/allowed-values.generated.ts';
+import type { MergeStrategy } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -96,7 +96,7 @@ export function getRepoUrl(
 }
 
 export function getMergeMethod(
-  strategy: AutomergeStrategy | undefined,
+  strategy: MergeStrategy | undefined,
 ): PrMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':

@@ -2,10 +2,13 @@ import type { DateTime } from 'luxon';
 import type {
   AutodiscoverRepoOrder,
   AutodiscoverRepoSort,
-  AutomergeStrategy,
   GitUrl,
 } from '../../config/allowed-values.generated.ts';
-import type { BranchStatus, HostRule } from '../../types/index.ts';
+import type {
+  BranchStatus,
+  HostRule,
+  MergeStrategy,
+} from '../../types/index.ts';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
 import type { GithubVulnerabilityAlert } from './github/schema.ts';
 export type VulnerabilityAlert = GithubVulnerabilityAlert;
@@ -95,7 +98,7 @@ export interface Issue {
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
-  automergeStrategy?: AutomergeStrategy;
+  automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   bbAutoResolvePrTasks?: boolean;
@@ -177,7 +180,7 @@ export interface FindPRConfig {
 export interface MergePRConfig {
   branchName?: string;
   id: number;
-  strategy?: AutomergeStrategy;
+  strategy?: MergeStrategy;
 }
 export interface EnsureCommentConfig {
   number: number;

@@ -1,5 +1,7 @@
-import type { ConstraintsFiltering } from '../../config/allowed-values.generated.ts';
-import type { CustomDatasourceConfig } from '../../config/types.ts';
+import type {
+  ConstraintsFilter,
+  CustomDatasourceConfig,
+} from '../../config/types.ts';
 import type { ModuleApi } from '../../types/index.ts';
 import type {
   AdditionalConstraintName,
@@ -39,7 +41,7 @@ export interface GetReleasesConfig {
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
-  constraintsFiltering?: ConstraintsFiltering;
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface GetPkgReleasesConfig {
@@ -58,7 +60,7 @@ export interface GetPkgReleasesConfig {
   constraints?: Partial<Record<ConstraintName, string>>;
   replacementName?: string;
   replacementVersion?: string;
-  constraintsFiltering?: ConstraintsFiltering;
+  constraintsFiltering?: ConstraintsFilter;
   /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */

@@ -1,4 +1,4 @@
-import type { RangeStrategy } from '../../../types/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
 import {
   TYPE_QUALIFIER,
   autoExtendMavenRange,

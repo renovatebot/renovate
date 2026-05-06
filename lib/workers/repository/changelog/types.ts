@@ -1,9 +1,9 @@
-import type { FetchChangeLogs } from '../../../config/allowed-values.generated.ts';
+import type { FetchChangeLogsOptions } from '../../../config/types.ts';
 import type { Extends } from '../../../types/index.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 
 export type SupportedChangelogStages = Extends<
-  FetchChangeLogs,
+  FetchChangeLogsOptions,
   'branch' | 'pr'
 >;
 

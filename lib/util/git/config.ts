@@ -1,19 +1,19 @@
 import { isArray, isNumber, isString } from '@sindresorhus/is';
 import type { SimpleGitOptions } from 'simple-git';
-import type { GitNoVerify } from '../../config/allowed-values.generated.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { getEnv } from '../env.ts';
+import type { GitNoVerifyOption } from './types.ts';
 
-let noVerify: GitNoVerify[] = ['push', 'commit'];
+let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
 
-export function setNoVerify(value: GitNoVerify[]): void {
+export function setNoVerify(value: GitNoVerifyOption[]): void {
   if (!isArray(value, isString)) {
     throw new Error('config error: gitNoVerify should be an array of strings');
   }
   noVerify = value;
 }
 
-export function getNoVerify(): GitNoVerify[] {
+export function getNoVerify(): GitNoVerifyOption[] {
   return noVerify;
 }
 

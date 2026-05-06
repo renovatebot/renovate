@@ -1,5 +1,5 @@
 import * as semver from 'semver';
-import type { RangeStrategy } from '../../../types/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
 import { api as looseAPI } from '../loose/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {

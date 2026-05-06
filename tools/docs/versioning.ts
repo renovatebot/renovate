@@ -3,7 +3,7 @@ import {
   type VersioningApi,
   getVersioningList,
 } from '../../lib/modules/versioning/index.ts';
-import type { RangeStrategy } from '../../lib/types/index.ts';
+import type { RangeStrategy } from '../../lib/types/versioning.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import {
   type OpenItems,

@@ -1,7 +1,7 @@
 import type { MockInstance } from 'vitest';
-import type { RequireConfig } from '../../../../config/allowed-values.generated.ts';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
+import type { RequiredConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as env from './env.ts';
 import type { ParseConfigOptions } from './types.ts';
@@ -464,7 +464,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean true', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'true' as RequireConfig,
+        RENOVATE_REQUIRE_CONFIG: 'true' as RequiredConfig,
       };
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('required');
@@ -472,7 +472,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean false', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'false' as RequireConfig,
+        RENOVATE_REQUIRE_CONFIG: 'false' as RequiredConfig,
       };
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('optional');

@@ -1,4 +1,4 @@
-import type { RangeStrategy } from '../../../types/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as npm } from '../npm/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';

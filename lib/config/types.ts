@@ -2,21 +2,26 @@ import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import type { HostRule, Nullish, SkipReason } from '../types/index.ts';
+import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
+import type {
+  AutoMergeType,
+  HostRule,
+  Nullish,
+  RangeStrategy,
+  SkipReason,
+} from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
 import type {
   AdditionalConstraintName,
   ConstraintName,
   ToolName,
 } from '../util/exec/types.ts';
+import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
 import type {
   AllowedUnsafeExecution,
-  AutodiscoverRepoOrder,
-  AutodiscoverRepoSort,
   AutomergeStrategy,
-  AutomergeType,
   BinarySource,
   BumpType,
   CommitMessageLowerCase,
@@ -26,9 +31,8 @@ import type {
   ExecutionMode,
   FetchChangeLogs,
   ForkProcessing,
-  GitNoVerify,
   InternalChecksFilter,
-  MatchConfidence,
+  MatchStringsStrategy,
   MatchUpdateType,
   MergeConfidenceDatasource,
   MinimumReleaseAgeBehaviour,
@@ -37,7 +41,6 @@ import type {
   PlatformCommit,
   PostUpdateOption,
   PrCreation,
-  RangeStrategy,
   RebaseWhen,
   RecreateWhen,
   ReportType,
@@ -63,12 +66,18 @@ export type RenovateSplit =
   | 'lookup'
   | 'update';
 
+export type RepositoryCacheConfig = RepositoryCache;
 export type RepositoryCacheType = 'local' | (string & {});
+export type DryRunConfig = DryRun;
+export type RequiredConfig = RequireConfig;
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
 }
+
+export type PlatformCommitOptions = PlatformCommit;
+export type { BinarySource, RecreateWhen };
 
 // TODO: Proper typings
 /**
@@ -90,8 +99,8 @@ export interface RenovateSharedConfig {
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
   automergeSchedule?: string[];
-  automergeStrategy?: AutomergeStrategy;
-  automergeType?: AutomergeType;
+  automergeStrategy?: MergeStrategy;
+  automergeType?: AutoMergeType;
   azureWorkItemId?: number;
   branchName?: string;
   branchNameStrict?: boolean;
@@ -142,7 +151,7 @@ export interface RenovateSharedConfig {
 
   pinDigests?: boolean;
   platformAutomerge?: boolean;
-  platformCommit?: PlatformCommit;
+  platformCommit?: PlatformCommitOptions;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
@@ -162,7 +171,7 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
   repository?: string;
-  repositoryCache?: RepositoryCache;
+  repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;
   respectLatest?: boolean;
   rollbackPrs?: boolean;
@@ -198,7 +207,7 @@ export interface GlobalInheritableConfig {
   onboardingConfigFileName?: string;
   onboardingNoDeps?: OnboardingNoDeps;
   onboardingPrTitle?: string;
-  requireConfig?: RequireConfig;
+  requireConfig?: RequiredConfig;
 }
 
 // Config options used only within the global worker
@@ -217,7 +226,7 @@ export interface GlobalOnlyConfigLegacy {
   dockerCliOptions?: string;
   endpoint?: string;
   forceCli?: boolean;
-  gitNoVerify?: GitNoVerify[];
+  gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   gitPrivateKeyPassphrase?: string;
   globalExtends?: string[];
@@ -263,7 +272,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   dockerCliOptions?: string;
   dockerSidecarImage?: string;
   dockerUser?: string;
-  dryRun?: DryRun;
+  dryRun?: DryRunConfig;
   encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
@@ -277,8 +286,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;
-  autodiscoverRepoSort?: AutodiscoverRepoSort;
-  autodiscoverRepoOrder?: AutodiscoverRepoOrder;
+  autodiscoverRepoSort?: RepoSortMethod;
+  autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
   dockerMaxPages?: number;
   s3Endpoint?: string;
@@ -316,12 +325,14 @@ export interface LegacyAdminConfig {
 
   prCommitsPerRunLimit?: number;
 
-  requireConfig?: RequireConfig;
+  requireConfig?: RequiredConfig;
 
   useCloudMetadataServices?: boolean;
 
   writeDiscoveredRepos?: string;
 }
+
+export type { ExecutionMode };
 
 export interface PostUpgradeTasks {
   commands?: string[];
@@ -341,6 +352,10 @@ export type RenovateRepository =
   | (RenovateConfig & {
       repository: string;
     });
+
+export type UseBaseBranchConfigType = UseBaseBranchConfig;
+export type ConstraintsFilter = ConstraintsFiltering;
+export type { MinimumReleaseAgeBehaviour };
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -391,7 +406,7 @@ export interface RenovateConfig
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];
-  useBaseBranchConfig?: UseBaseBranchConfig;
+  useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
   branchList?: string[];
@@ -465,7 +480,7 @@ export interface RenovateConfig
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
-  fetchChangeLogs?: FetchChangeLogs;
+  fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
   variables?: Record<string, string>;
 
@@ -476,7 +491,7 @@ export interface RenovateConfig
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   skipInstalls?: boolean | null;
 
-  constraintsFiltering?: ConstraintsFiltering;
+  constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
@@ -536,18 +551,7 @@ export interface AssigneesAndReviewersConfig {
   filterUnavailableUsers?: boolean;
 }
 
-export type UpdateType =
-  | 'major'
-  | 'minor'
-  | 'patch'
-  | 'pin'
-  | 'digest'
-  | 'pinDigest'
-  | 'lockFileMaintenance'
-  | 'lockfileUpdate'
-  | 'rollback'
-  | 'bump'
-  | 'replacement';
+export type UpdateType = MatchUpdateType;
 
 // These are the update types which can have configuration
 export const UpdateTypesOptions = [
@@ -555,14 +559,22 @@ export const UpdateTypesOptions = [
   'minor',
   'patch',
   'pin',
-  'digest',
   'pinDigest',
+  'digest',
   'lockFileMaintenance',
   'rollback',
   'replacement',
-] as const;
+] as const satisfies readonly Exclude<MatchUpdateType, 'bump'>[];
 
 export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
+
+export type FetchChangeLogsOptions = FetchChangeLogs;
+
+export type { MatchStringsStrategy };
+
+export type MergeStrategy = AutomergeStrategy;
+
+export type { AllowedUnsafeExecution };
 
 // TODO: Proper typings
 export interface PackageRule
@@ -571,7 +583,7 @@ export interface PackageRule
   description?: string | string[];
   matchBaseBranches?: string[];
   matchCategories?: string[];
-  matchConfidence?: MatchConfidence[];
+  matchConfidence?: MergeConfidence[];
   matchCurrentAge?: string;
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
@@ -585,7 +597,7 @@ export interface PackageRule
   matchRepositories?: string[];
   matchSourceUrls?: string[];
   matchRegistryUrls?: string[];
-  matchUpdateTypes?: MatchUpdateType[];
+  matchUpdateTypes?: UpdateType[];
   matchJsonata?: string[];
   overrideDatasource?: string;
   overrideDepName?: string;

@@ -1,4 +1,4 @@
-import type { RangeStrategy } from '../../../types/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
 import { coerceString } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {

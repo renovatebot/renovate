@@ -1,9 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  ReplacementApproach,
-} from '../../config/allowed-values.generated.ts';
-import type {
   ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -246,7 +243,7 @@ export interface Upgrade<
   registryUrls?: string[] | null;
   currentVersion?: string;
   replaceString?: string;
-  replacementApproach?: ReplacementApproach;
+  replacementApproach?: 'replace' | 'alias';
 }
 
 export interface ArtifactNotice {
