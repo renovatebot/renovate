@@ -10,9 +10,9 @@ import type {
 export const id = 'local';
 export const experimental = true;
 
-export function initPlatform(_params: PlatformParams): Promise<PlatformResult> {
+export function initPlatform(params: PlatformParams): Promise<PlatformResult> {
   return Promise.resolve({
-    dryRun: 'lookup',
+    dryRun: params.dryRun ?? 'lookup',
     endpoint: 'local',
     persistRepoData: true,
     requireConfig: 'optional',
