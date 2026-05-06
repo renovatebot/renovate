@@ -38,7 +38,7 @@ Details of the Mend Renovate Cloud versions are shown in the table below.
 |                               | Mend Renovate Community Cloud (Free) | Mend Renovate Enterprise Cloud |
 | ----------------------------- | ------------------------------------ | ------------------------------ |
 | Concurrent jobs per Org       | 1                                    | 16                             |
-| Job scheduling (active repos) | Every 4 hours                        | Hourly (\*1)                   |
+| Job scheduling (active repos) | Every 4 hours                        | Hourly<sup>1</sup>             |
 | Job runner CPUs               | 1 CPU                                | 2 CPU                          |
 | Job runner Memory             | 3GB                                  | 8Gb                            |
 | Job runner Disk space         | 15Gb                                 | 40Gb                           |
@@ -46,7 +46,7 @@ Details of the Mend Renovate Cloud versions are shown in the table below.
 | Merge Confidence Workflows    | Not included                         | Included                       |
 | Mend.io Helpdesk Support      | Not included                         | Included                       |
 
-(1) Bitbucket repositories running Mend Renovate Enterprise are scheduled to run every 4 hours, to avoid hitting rate limits on GitHub APIs.
+<sup>1</sup> Bitbucket repositories running Mend Renovate Enterprise are scheduled to run every 4 hours, to avoid hitting rate limits on GitHub APIs.
 
 **Mend Renovate Community Cloud (Free)** - Available for free for all repositories.
 
