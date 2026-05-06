@@ -11,6 +11,7 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { setCustomEnv } from '../env.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
@@ -1495,44 +1496,73 @@ describe('util/git/index', { timeout: 10000 }, () => {
       // allowUnsafeConfigEnvCount is enabled in the simple-git config.
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
-      process.env.GIT_CONFIG_COUNT = '3';
-      process.env.GIT_CONFIG_KEY_0 =
-        'url.https://ssh:token@example.com/.insteadOf';
-      process.env.GIT_CONFIG_VALUE_0 = 'ssh://git@example.com/';
-      process.env.GIT_CONFIG_KEY_1 =
-        'url.https://git:token@example.com/.insteadOf';
-      process.env.GIT_CONFIG_VALUE_1 = 'git@example.com:';
-      process.env.GIT_CONFIG_KEY_2 = 'url.https://token@example.com/.insteadOf';
-      process.env.GIT_CONFIG_VALUE_2 = 'https://example.com/';
+      setCustomEnv({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+        GIT_CONFIG_KEY_1: 'url.https://git:token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_1: 'git@example.com:',
+        GIT_CONFIG_KEY_2: 'url.https://token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_2: 'https://example.com/',
+      });
 
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
       await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+          GIT_CONFIG_KEY_1: 'url.https://git:token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_1: 'git@example.com:',
+          GIT_CONFIG_KEY_2: 'url.https://token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_2: 'https://example.com/',
+          LC_ALL: 'C.UTF-8',
+        }),
+      );
     });
 
     it('should work when GIT_SSH_COMMAND is set in the environment', async () => {
       // The git-refs datasource sets process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes'
       // at module load time to prevent interactive SSH prompts. This ends up in the env
-      // passed to simple-git via getEnv(). simple-git 3.36.0 blocks git operations when
+      // passed to simple-git via getChildEnv(). simple-git 3.36.0 blocks git operations when
       // GIT_SSH_COMMAND is present unless allowUnsafeSshCommand is enabled.
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
-      process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
+      setCustomEnv({ GIT_SSH_COMMAND: 'ssh -o BatchMode=yes' });
 
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
       await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        }),
+      );
     });
 
     it('should work when PAGER is set in the environment', async () => {
       // Users often have PAGER=less (or similar) in their environment, set via their
       // shell profile or git config. This ends up in the env passed to simple-git via
-      // getEnv(). simple-git 3.36.0 blocks git operations when PAGER is present unless
+      // getChildEnv(). simple-git 3.36.0 blocks git operations when PAGER is present unless
       // allowUnsafePager is enabled.
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
-      process.env.PAGER = 'less';
+      setCustomEnv({ PAGER: 'less' });
 
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
       await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          PAGER: 'less',
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        }),
+      );
     });
   });
 
