@@ -107,4 +107,4 @@ This means those values aren't _raw_ percentages.
 
 ## Questions and feedback
 
-You are invited to [start a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you'd like to discuss.
+If you have any feedback about Merge Confidence, please [add it to our feedback megathread](https://github.com/renovatebot/renovate/discussions/43119).
