@@ -265,7 +265,7 @@
     "validate-npm-package-name": "7.0.2",
     "xmldoc": "2.0.3",
     "yaml": "2.8.3",
-    "zod": "4.3.6"
+    "zod": "4.4.1"
   },
   "optionalDependencies": {
     "better-sqlite3": "12.9.0",
