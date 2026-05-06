@@ -118,8 +118,8 @@ importers:
         specifier: 4.1.2
         version: 4.1.2
       '@sindresorhus/is':
-        specifier: 7.2.0
-        version: 7.2.0
+        specifier: 8.0.0
+        version: 8.0.0
       '@yarnpkg/core':
         specifier: 4.7.0
         version: 4.7.0(typanion@3.14.0)
@@ -2032,6 +2032,10 @@ packages:
   '@sindresorhus/is@7.2.0':
     resolution: {integrity: sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw==}
     engines: {node: '>=18'}
+
+  '@sindresorhus/is@8.0.0':
+    resolution: {integrity: sha512-YvOsokBE5NsyHuXMnwEVB7lgFk6lX8F4OXCruYVgFII0hUHof0RGUvhMoabVt9hRqbg+qVzayzEG24RCcxcYeA==}
+    engines: {node: '>=22'}
 
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
@@ -7832,6 +7836,8 @@ snapshots:
   '@sindresorhus/is@4.6.0': {}
 
   '@sindresorhus/is@7.2.0': {}
+
+  '@sindresorhus/is@8.0.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
