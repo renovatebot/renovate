@@ -405,6 +405,29 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
+    it('validates invalid statusCheckWhen', async () => {
+      const config = {
+        statusCheckWhen: {
+          randomKey: 'always',
+          mergeConfidence: 'invalid',
+          artifactError: 'always',
+        },
+      };
+      // @ts-expect-error invalid options
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `statusCheckWhen.mergeConfidence` configuration: value must be one of "always", "never", or "failed".',
+        },
+        {
+          message:
+            'Invalid `statusCheckWhen.statusCheckWhen.randomKey` configuration: key is not allowed.',
+        },
+      ]);
+      expect(errors).toHaveLength(2);
+    });
+
     it('catches invalid customDatasources record type', async () => {
       const config = {
         customDatasources: {
