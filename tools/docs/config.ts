@@ -309,6 +309,28 @@ function generateCacheNamespacesList(): string {
   return list;
 }
 
+function generateStatusCheckWhenTable(): string {
+  const option = options.find((o) => o.name === 'statusCheckWhen');
+  const defaults = (option?.default ?? {}) as Record<string, string>;
+
+  const reasoning: Record<string, string> = {
+    artifactError: 'Legacy behavior — only reports artifact failures',
+    configValidation: 'Always reports validation pass/fail',
+    mergeConfidence: 'Always reports confidence level',
+    minimumReleaseAge: 'Always reports stability status',
+  };
+
+  const keys = Object.keys(defaults).sort();
+
+  let table = '\n| Key | Default | Reasoning |\n';
+  table += '| :-- | :-- | :-- |\n';
+  for (const key of keys) {
+    table += `| \`${key}\` | \`${defaults[key]}\` | ${reasoning[key] ?? ''} |\n`;
+  }
+
+  return table;
+}
+
 function generateConfigFileNames(): string {
   // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
   const filenames = getConfigFileNames();
@@ -487,6 +509,13 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       generateToolsForInstallTools(),
       '<!-- installTools-tools-begin -->',
     );
+  }
+
+  if (!bot) {
+    content = replaceContent(content, generateStatusCheckWhenTable(), {
+      replaceStart: '<!-- status-check-when-defaults-begin -->',
+      replaceStop: '<!-- status-check-when-defaults-end -->',
+    });
   }
 
   await updateFile(`${dist}/${configFile}`, content);
