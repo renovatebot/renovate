@@ -65,6 +65,10 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types.ts';
+import {
+  getCachedUpdateDateResult,
+  setCachedUpdateDateResult,
+} from './update-date-cache.ts';
 
 export { setNoVerify } from './config.ts';
 export { setPrivateKey } from './private-key.ts';
@@ -581,9 +585,18 @@ export async function getBranchUpdateDate(
   if (!branchSha) {
     return null;
   }
+  const updateDate = getCachedUpdateDateResult(branchName, branchSha);
+  if (updateDate !== null) {
+    logger.debug(
+      `getBranchUpdateDate(): using cached result "${updateDate.toISO()}"`,
+    );
+    return updateDate;
+  }
   await syncGit();
   try {
-    return await getCommitDate(branchSha);
+    const result = await getCommitDate(branchSha);
+    setCachedUpdateDateResult(branchName, result);
+    return result;
   } catch (err) {
     logger.debug({ err, branchName }, 'Error getting branch update date');
     return null;
@@ -949,24 +962,29 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(branchName: string): Promise<void> {
+export async function deleteBranch(
+  branchName: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   await syncGit();
-  try {
-    const deleteCommand = ['push', '--delete', 'origin', branchName];
+  if (!options?.localBranch) {
+    try {
+      const deleteCommand = ['push', '--delete', 'origin', branchName];
 
-    if (getNoVerify().includes('push')) {
-      deleteCommand.push('--no-verify');
-    }
+      if (getNoVerify().includes('push')) {
+        deleteCommand.push('--no-verify');
+      }
 
-    await gitRetry(() => git.raw(deleteCommand));
-    logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
-    if (errChecked) {
-      throw errChecked;
+      await gitRetry(() => git.raw(deleteCommand));
+      logger.debug(`Deleted remote branch: ${branchName}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore if -- TODO: add test #40625 */
+      if (errChecked) {
+        throw errChecked;
+      }
+      logger.debug(`No remote branch to delete with name: ${branchName}`);
     }
-    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);
@@ -983,7 +1001,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+export async function mergeToLocal(
+  refSpecToMerge: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -997,8 +1018,12 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await fetchRevSpec(refSpecToMerge);
-    await gitRetry(() => git.merge(['FETCH_HEAD']));
+    if (options?.localBranch) {
+      await git.merge([refSpecToMerge]);
+    } else {
+      await fetchRevSpec(refSpecToMerge);
+      await gitRetry(() => git.merge(['FETCH_HEAD']));
+    }
   } catch (err) {
     logger.debug(
       {

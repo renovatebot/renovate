@@ -1,5 +1,7 @@
 import { logger } from '~test/util.ts';
 import { defaultVersioning } from '../versioning/index.ts';
+import ruby from '../versioning/ruby/index.ts';
+import semverCoerced from '../versioning/semver-coerced/index.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
@@ -12,7 +14,7 @@ import {
 } from './common.ts';
 import { CustomDatasource } from './custom/index.ts';
 import { NpmDatasource } from './npm/index.ts';
-import type { ReleaseResult } from './types.ts';
+import type { GetPkgReleasesConfig, ReleaseResult } from './types.ts';
 
 describe('modules/datasource/common', () => {
   describe('getDatasourceFor', () => {
@@ -279,6 +281,82 @@ describe('modules/datasource/common', () => {
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it('should handle config with a range constraint, and a release with an exact version', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '>=3.8' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it('should handle config with an exact version, and a release with a range constraint', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '3.8.1' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it(`should allow constraintsVersioning to override the datasource's default versioning`, () => {
+      const config: GetPkgReleasesConfig = {
+        datasource: 'rubygems',
+        packageName: 'rails',
+        versioning: 'ruby',
+        constraintsFiltering: 'strict' as const,
+        constraints: {
+          // anything between 1.3.0 and less than 2.0.0
+          rubygems: '^1.3',
+        },
+        constraintsVersioning: {
+          // instead of using ruby version, which doesn't support this syntax
+          rubygems: 'semver-coerced',
+        },
+      };
+
+      // make sure that it's currently an invalid constraint for ruby
+      expect(config.constraints?.rubygems).toBeDefined();
+      expect(ruby.isValid(config.constraints!.rubygems!)).toBeFalse();
+      // but that it works when using semver-coerced
+      expect(semverCoerced.isValid(config.constraints!.rubygems!)).toBeTrue();
+
+      const releaseResult = {
+        releases: [
+          // slightly modified from upstream
+          { version: '0.9.1', constraints: { rubygems: ['1.0.0'] } },
+          { version: '3.1.3', constraints: { rubygems: ['1.2.3'] } },
+
+          // using upstraem data
+          { version: '4.1.2', constraints: { rubygems: ['>= 1.8.11'] } },
+          { version: '8.1.3', constraints: { rubygems: ['>= 1.8.11'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '4.1.2' }, { version: '8.1.3' }],
       });
     });
   });

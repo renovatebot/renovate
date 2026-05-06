@@ -900,4 +900,67 @@ describe('modules/manager/github-actions/integration', () => {
       },
     ]);
   });
+
+  it('proposes minor and major updates for semver tag', async () => {
+    const workflow = codeBlock`
+      on: push
+      jobs:
+        build:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+            - uses: codecov/codecov-action@v5.5.3
+    `;
+
+    const extracted = extractPackageFile(
+      workflow,
+      '.github/workflows/ci-another.yml',
+      {},
+    );
+    expect(extracted).not.toBeNull();
+
+    const dep = extracted!.deps.find(
+      (d) => d.depName === 'codecov/codecov-action',
+    );
+    expect(dep).toBeDefined();
+
+    getGithubTags.mockResolvedValueOnce({
+      releases: [
+        { version: 'v6.0.0' },
+        { version: 'v6' },
+        { version: 'v5.5.4' },
+        { version: 'v5' },
+        { version: 'v5.5.3' },
+      ],
+    });
+
+    const { updates } = await Result.wrap(
+      lookup.lookupUpdates(makeConfig(dep!)),
+    ).unwrapOrThrow();
+
+    expect(updates).toEqual([
+      {
+        bucket: 'non-major',
+        hasAttestation: undefined,
+        isBreaking: false,
+        newMajor: 5,
+        newMinor: 5,
+        newPatch: 4,
+        newValue: 'v5.5.4',
+        newVersion: 'v5.5.4',
+        updateType: 'patch',
+      },
+      {
+        bucket: 'major',
+        hasAttestation: undefined,
+        isBreaking: false,
+        newMajor: 6,
+        newMinor: 0,
+        newPatch: 0,
+        newValue: 'v6.0.0',
+        newVersion: 'v6.0.0',
+        updateType: 'major',
+      },
+    ]);
+  });
 });
