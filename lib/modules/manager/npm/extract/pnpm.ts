@@ -120,7 +120,8 @@ export async function detectPnpmWorkspaces(
     // check if package matches workspace filter
     if (!packagePathCache.has(workspaceYamlPath)) {
       const filters = await extractPnpmFilters(workspaceYamlPath);
-      const localDir = GlobalConfig.get('localDir');
+      // TODO: types (#22198)
+      const localDir = GlobalConfig.get('localDir')!;
       const packages = await findPackages(
         upath.dirname(upath.join(localDir, workspaceYamlPath)),
         {
