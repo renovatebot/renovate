@@ -1502,8 +1502,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       process.env.GIT_CONFIG_KEY_1 =
         'url.https://git:token@example.com/.insteadOf';
       process.env.GIT_CONFIG_VALUE_1 = 'git@example.com:';
-      process.env.GIT_CONFIG_KEY_2 =
-        'url.https://token@example.com/.insteadOf';
+      process.env.GIT_CONFIG_KEY_2 = 'url.https://token@example.com/.insteadOf';
       process.env.GIT_CONFIG_VALUE_2 = 'https://example.com/';
 
       await git.initRepo({ url: origin.path });
