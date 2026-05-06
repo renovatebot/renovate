@@ -258,7 +258,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env(
       getChildEnv({
         env: {
-          // TODO: Do we really need so test these?
+          // TODO: Do we really need to set these?
           LANG: 'C.UTF-8',
           LC_ALL: 'C.UTF-8',
         },
