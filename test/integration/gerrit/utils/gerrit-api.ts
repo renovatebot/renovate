@@ -63,10 +63,21 @@ export async function configureAdminSelfApproval(): Promise<void> {
 export async function getOpenChanges(project: string): Promise<GerritChange[]> {
   const query = encodeURIComponent(`project:${project} status:open owner:self`);
   const res = await gerritFetch(
-    `/a/changes/?q=${query}&o=LABELS&o=SUBMITTABLE&o=CURRENT_REVISION&o=CURRENT_COMMIT`,
+    `/a/changes/?q=${query}&o=LABELS&o=SUBMITTABLE&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=MESSAGES`,
   );
   const text = await res.text();
   return parseGerritJson(text) as GerritChange[];
+}
+
+const TAG_PULL_REQUEST_BODY = 'pull-request';
+
+export function getPrBodies(changes: GerritChange[]): string[] {
+  return changes.flatMap(
+    (change) =>
+      change.messages
+        ?.filter((m) => m.tag === TAG_PULL_REQUEST_BODY)
+        .map((m) => m.message) ?? [],
+  );
 }
 
 export async function pushFilesToGerrit(

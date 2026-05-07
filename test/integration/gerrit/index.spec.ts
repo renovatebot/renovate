@@ -2,6 +2,7 @@ import {
   configureAdminSelfApproval,
   createProject,
   getOpenChanges,
+  getPrBodies,
   pushFilesToGerrit,
 } from './utils/gerrit-api.ts';
 import {
@@ -66,11 +67,14 @@ describe('integration/gerrit/index', () => {
 
   it('is idempotent on a second run', async () => {
     const before = await getOpenChanges(REPO_NAME);
+    const prBodiesBefore = getPrBodies(before);
 
     await renovate([REPO_NAME]);
 
     const after = await getOpenChanges(REPO_NAME);
+    const prBodiesAfter = getPrBodies(after);
 
     expect(after).toHaveLength(before.length);
+    expect(prBodiesAfter).toStrictEqual(prBodiesBefore);
   });
 });

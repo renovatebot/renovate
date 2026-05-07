@@ -1,3 +1,5 @@
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { execaNode } from 'execa';
 import type { AllConfig } from '../../../../lib/config/types.ts';
@@ -26,7 +28,11 @@ export async function renovate(
     ...overrides,
   };
 
+  // Run Renovate in a clean temp directory to avoid loading config.js from the repo
+  const cwd = await mkdtemp(`${tmpdir()}/renovate-integration-`);
+
   await execaNode(renovateEntrypoint, {
+    cwd,
     env: {
       RENOVATE_CONFIG: JSON.stringify(config),
       LOG_LEVEL: 'warn',
