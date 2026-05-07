@@ -1,25 +1,15 @@
 import { z } from 'zod/v3';
 
-type TfLiteral =
-  | string
-  | number
-  | boolean
-  | null
-  | { [k: string]: TfLiteral }
-  | TfLiteral[];
+const tfPrimitive = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+type TfPrimitive = z.infer<typeof tfPrimitive>;
+
+type TfLiteral = TfPrimitive | { [k: string]: TfLiteral } | TfLiteral[];
 
 const tfLiteral: z.ZodType<TfLiteral> = z.lazy(() =>
-  z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-    z.null(),
-    z.array(oneOrMany(tfLiteral)),
-    z.record(tfLiteral),
-  ]),
+  z.union([tfPrimitive, z.record(tfLiteral), z.array(tfLiteral)]),
 );
 
-const NORMALISE_KEYS = new Set([
+const NORMALIZE_KEYS = new Set([
   'metadata',
   'spec',
   'template',
@@ -29,21 +19,22 @@ const NORMALISE_KEYS = new Set([
   'selector',
 ]);
 
-function normalise(node: TfLiteral): TfLiteral {
+function normalize(node: TfLiteral): TfLiteral {
   if (Array.isArray(node)) {
     // Recursively flatten nested arrays
-    const flatten = (arr: TfLiteral[]): TfLiteral[] =>
-      arr.flatMap((item) =>
-        Array.isArray(item) ? flatten(item) : [normalise(item)],
+    function flatten(arr: TfLiteral[]): TfLiteral[] {
+      return arr.flatMap((item) =>
+        Array.isArray(item) ? flatten(item) : [normalize(item)],
       );
+    }
     return flatten(node);
   }
 
   if (node && typeof node === 'object') {
     const out: Record<string, TfLiteral> = {};
     for (const [k, v] of Object.entries(node)) {
-      let val = normalise(v);
-      if (NORMALISE_KEYS.has(k)) {
+      let val = normalize(v);
+      if (NORMALIZE_KEYS.has(k)) {
         val = Array.isArray(val) ? val : [val];
       }
       out[k] = val;
@@ -54,16 +45,17 @@ function normalise(node: TfLiteral): TfLiteral {
   return node;
 }
 
-const oneOrMany = <T extends z.ZodTypeAny>(
+function oneOrMany<T extends z.ZodTypeAny>(
   schema: T,
 ): z.ZodEffects<
   z.ZodUnion<[T, z.ZodArray<T>]>,
   z.infer<T>[],
   z.infer<T> | z.infer<T>[]
-> =>
-  z
+> {
+  return z
     .union([schema, z.array(schema)])
     .transform((v) => (Array.isArray(v) ? v : [v]));
+}
 
 const TerraformRequiredProvider = z.object({
   source: z.string().optional(),
@@ -126,7 +118,7 @@ const GenericResourceInstance = z.record(tfLiteral);
 const GenericResourceSchema = z.record(oneOrMany(GenericResourceInstance));
 
 const KubernetesInstance = tfLiteral.transform((orig) => {
-  const n = normalise(orig);
+  const n = normalize(orig);
   return Array.isArray(n) ? n : [n];
 });
 
@@ -167,16 +159,14 @@ const TerraformResources = z
   .catchall(GenericResourceSchema)
   .optional();
 
-export const TerraformDefinitionFileJSON = z
-  .object({
-    terraform: oneOrMany(TerraformBlock).optional(),
+export const TerraformDefinitionFileJSON = z.object({
+  terraform: oneOrMany(TerraformBlock).optional(),
 
-    module: z.record(oneOrMany(TerraformModule)).optional(),
+  module: z.record(oneOrMany(TerraformModule)).optional(),
 
-    resource: TerraformResources.optional(),
+  resource: TerraformResources.optional(),
 
-    data: z.record(tfLiteral).optional(),
+  data: z.record(tfLiteral).optional(),
 
-    provider: z.record(oneOrMany(TerraformProvider)).optional(),
-  })
-  .strict();
+  provider: z.record(oneOrMany(TerraformProvider)).optional(),
+});

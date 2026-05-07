@@ -7,14 +7,12 @@ const resourcesTF = Fixtures.get('resources.tf');
 const lockedVersion = Fixtures.get('lockedVersion.tf');
 
 describe('modules/manager/terraform/hcl/index', () => {
-  describe('null for invalid name', () => {
-    it('should return null', async () => {
+  describe('parseHCL() for .tf', () => {
+    it('should return null for invalid name', async () => {
       const res = await parseHCL(modulesTF, 'file');
       expect(res).toBeNil();
     });
-  });
 
-  describe('parseHCL() for .tf', () => {
     it('should return flat modules', async () => {
       const res = await parseHCL(modulesTF, 'file.tf');
       expect(res?.module).toBeDefined();

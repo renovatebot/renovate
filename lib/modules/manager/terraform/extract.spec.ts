@@ -850,7 +850,7 @@ describe('modules/manager/terraform/extract', () => {
       expect(await extractPackageFile(src, '1.tf.json', {})).toBeNull();
     });
 
-    it('extracts  modules', async () => {
+    it('extracts modules', async () => {
       const res = await extractPackageFile(modulesJSON, 'modules.tf.json', {});
       expect(res?.deps).toHaveLength(11);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
