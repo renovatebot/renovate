@@ -88,7 +88,8 @@ export default async function extractPackageFile(
   packageFile: string,
   _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
-  const localDir = GlobalConfig.get('localDir');
+  // TODO: types (#22198)
+  const localDir = GlobalConfig.get('localDir')!;
   const git = simpleGit(localDir, simpleGitConfig());
   const gitModulesPath = upath.join(localDir, packageFile);
 

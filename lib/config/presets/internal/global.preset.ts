@@ -7,6 +7,8 @@ export const presets: Record<string, GlobalPreset> = {
       'GO*',
       'GRADLE_OPTS',
       'RUSTC_BOOTSTRAP',
+      'PNPM_WORKERS',
+      'PNPM_MAX_WORKERS',
     ],
     description:
       'Hopefully safe environment variables to allow users to configure.',
