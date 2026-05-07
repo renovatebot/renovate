@@ -7,12 +7,13 @@ const githubApi = new githubHttp.GithubHttp();
 
 export async function getAppDetails(token: string): Promise<UserDetails> {
   try {
+    // set count to one bypass graphql check
     const appData = await githubApi.requestGraphql<{
       viewer: {
         login: string;
         databaseId: number;
       };
-    }>('query { viewer { login databaseId }}', { token });
+    }>('query { viewer { login databaseId }}', { token, count: 1 });
     if (!appData?.data) {
       throw new Error("Init: Can't get App details");
     }

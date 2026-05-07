@@ -38,6 +38,9 @@ const basicEnvVars = [
   'COREPACK_NPM_USERNAME',
   'COREPACK_NPM_PASSWORD',
   'COREPACK_ROOT',
+  // pnpm specific variables
+  'PNPM_WORKERS',
+  'PNPM_MAX_WORKERS',
 ];
 
 export function getChildProcessEnv(
