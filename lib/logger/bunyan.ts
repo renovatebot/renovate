@@ -1,17 +1,18 @@
-import {
-  isNonEmptyStringAndNotWhitespace,
-  isString,
-  isUndefined,
-} from '@sindresorhus/is';
-import * as bunyan from 'bunyan';
+import { isString, isUndefined } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { bunyan } from '../expose.ts';
 import cmdSerializer from './cmd-serializer.ts';
 import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
-import { RenovateStream } from './pretty-stdout.ts';
+import { PrettyStdoutStream, formatRecord } from './pretty-stdout.ts';
 import type { ProblemStream } from './problem-stream.ts';
-import type { BunyanLogLevel, BunyanLogger, BunyanStream } from './types.ts';
+import type {
+  BunyanLogLevel,
+  BunyanLogger,
+  BunyanRecord,
+  BunyanStream,
+} from './types.ts';
 import { getEnv } from './utils.ts';
 import { withSanitizer } from './with-sanitizer.ts';
 
@@ -28,9 +29,7 @@ export function createDefaultStreams(
 
   // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
-    // TODO: typings (#9615)
-    const prettyStdOut = new RenovateStream() as any;
-    prettyStdOut.pipe(process.stdout);
+    const prettyStdOut = new PrettyStdoutStream();
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
@@ -56,26 +55,39 @@ function createLogFileStream(logFile: string): BunyanStream {
   const directoryName = upath.dirname(logFile);
   fs.ensureDirSync(directoryName);
 
-  const file: BunyanStream = {
-    name: 'logfile',
-    path: logFile,
-    level: validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug'),
-  };
+  const logFileLevel = validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug');
 
-  const logFileFormat = getEnv('LOG_FILE_FORMAT');
+  // Sync writes avoid data loss when process.exit() is called before async streams drain.
+  const fd = fs.openSync(logFile, 'a');
 
-  if (
-    isNonEmptyStringAndNotWhitespace(logFileFormat) &&
-    logFileFormat === 'pretty'
-  ) {
-    file.type = 'raw';
+  if (getEnv('LOG_FILE_FORMAT') === 'pretty') {
+    return {
+      name: 'logfile',
+      level: logFileLevel,
+      type: 'raw',
+      stream: {
+        writable: true,
+        write: (rec: unknown) => {
+          fs.writeSync(fd, formatRecord(rec as BunyanRecord, false));
+        },
+      },
+    } as BunyanStream;
   }
 
-  return file;
+  return {
+    name: 'logfile',
+    level: logFileLevel,
+    stream: {
+      writable: true,
+      write: (data: string) => {
+        fs.writeSync(fd, data);
+      },
+    },
+  } as BunyanStream;
 }
 
 function serializedSanitizedLogger(streams: BunyanStream[]): BunyanLogger {
-  return bunyan.createLogger({
+  return bunyan().createLogger({
     name: 'renovate',
     serializers: {
       body: configSerializer,
@@ -132,7 +144,7 @@ export function validateLogLevel(
     return (logLevelToCheck as BunyanLogLevel) ?? defaultLevel;
   }
 
-  const logger = bunyan.createLogger({
+  const logger = bunyan().createLogger({
     name: 'renovate',
     streams: [
       {

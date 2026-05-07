@@ -8,7 +8,11 @@ import * as _packageCache from '../../util/cache/package/index.ts';
 import { setCustomEnv } from '../../util/env.ts';
 import { GlobalConfig } from '../global.ts';
 import type { AllConfig } from '../types.ts';
+import * as _forgejo from './forgejo/index.ts';
+import * as _gitea from './gitea/index.ts';
 import * as _github from './github/index.ts';
+import * as _gitlab from './gitlab/index.ts';
+import * as _http from './http/index.ts';
 import * as presets from './index.ts';
 import * as _local from './local/index.ts';
 import * as _npm from './npm/index.ts';
@@ -19,14 +23,22 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util.ts';
 
+vi.mock('./forgejo/index.ts');
+vi.mock('./gitea/index.ts');
+vi.mock('./http/index.ts');
 vi.mock('./npm/index.ts');
 vi.mock('./github/index.ts');
+vi.mock('./gitlab/index.ts');
 vi.mock('./local/index.ts');
 vi.mock('../../util/cache/package/index.ts', () => mockDeep());
 
+const forgejo = vi.mocked(_forgejo);
+const gitea = vi.mocked(_gitea);
+const http = vi.mocked(_http);
 const npm = vi.mocked(_npm);
 const local = vi.mocked(_local);
 const gitHub = vi.mocked(_github);
+const gitLab = vi.mocked(_gitlab);
 const packageCache = vi.mocked(_packageCache);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
@@ -434,6 +446,34 @@ describe('config/presets/index', () => {
       });
     });
 
+    it('resolves http presets', async () => {
+      config.extends = ['https://example.com/preset.json'];
+      http.getPreset.mockResolvedValueOnce({ labels: ['http'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['http'] });
+    });
+
+    it('resolves forgejo presets', async () => {
+      config.extends = ['forgejo>user/repo'];
+      forgejo.getPreset.mockResolvedValueOnce({ labels: ['forgejo'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['forgejo'] });
+    });
+
+    it('resolves gitea presets', async () => {
+      config.extends = ['gitea>user/repo'];
+      gitea.getPreset.mockResolvedValueOnce({ labels: ['gitea'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['gitea'] });
+    });
+
+    it('resolves gitlab presets', async () => {
+      config.extends = ['gitlab>user/repo'];
+      gitLab.getPreset.mockResolvedValueOnce({ labels: ['gitlab'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['gitlab'] });
+    });
+
     it('gets preset value from cache when it has been seen', async () => {
       config.extends = ['github>username/preset-repo'];
       config.packageRules = [
@@ -637,7 +677,10 @@ describe('config/presets/index', () => {
           'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
+          'helpers:forgejoDigestChangelogs',
+          'helpers:giteaDigestChangelogs',
           'helpers:githubDigestChangelogs',
+          'helpers:gitlabDigestChangelogs',
           'helpers:goXPackagesChangelogLink',
           'helpers:goXPackagesNameLink',
         ],

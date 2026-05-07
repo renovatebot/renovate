@@ -79,6 +79,15 @@ function checkResult(res: ExecaSyncReturnValue<string>): void {
   } else if (res.exitCode) {
     logger.error(`Error occured:\n${res.stderr || res.stdout}`);
     process.exit(res.exitCode);
+  } else if (res.timedOut) {
+    logger.error({ res }, 'Process timed out');
+    process.exit(-1);
+  } else if (res.killed) {
+    logger.error({ res }, 'Process was killed');
+    process.exit(-1);
+  } else if (res.failed) {
+    logger.error({ res }, 'Process call failed');
+    process.exit(-1);
   } else {
     logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
   }

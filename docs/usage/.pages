@@ -33,6 +33,7 @@ nav:
       - 'Semantic Commit Messages': 'semantic-commits.md'
       - 'Noise Reduction': 'noise-reduction.md'
       - 'Upgrade best practices': 'upgrade-best-practices.md'
+      - "How does Renovate's Docker image get built?": 'docker-build-process.md'
   - Included Presets:
       - 'Abandonment Presets': 'presets-abandonments.md'
       - 'Custom Manager Presets': 'presets-customManagers.md'
@@ -51,6 +52,7 @@ nav:
       - 'Security Presets': 'presets-security.md'
       - 'Workaround Presets': 'presets-workarounds.md'
   - All Other:
+      - 'Community Tools': 'community-tools.md'
       - ... | user-stories
       - 'Security and Permissions': 'security-and-permissions.md'
       - 'Merge Confidence': 'merge-confidence.md'

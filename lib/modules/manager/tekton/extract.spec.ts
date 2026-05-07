@@ -9,7 +9,7 @@ describe('modules/manager/tekton/extract', () => {
         'test-file.yaml',
       );
       expect(result).toMatchSnapshot();
-      expect(result?.deps).toHaveLength(39);
+      expect(result?.deps).toHaveLength(40);
     });
 
     it('extracts deps from a file in annotations', () => {

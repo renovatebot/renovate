@@ -124,6 +124,599 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
     });
+
+    describe('malicious packages', () => {
+      it('are marked for dependencies with a MAL- advisory ID against their current version with malicious-version-in-use', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+          pip: [
+            {
+              deps: [
+                {
+                  depName: 'num2words',
+                  currentValue: '0.5.15',
+                  datasource: 'pypi',
+                  updates: [],
+                  packageName: 'num2words',
+                },
+              ],
+              packageFile: 'go.mod',
+            },
+          ],
+        };
+
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['0.30.4', '1.14.1'],
+                database_specific: {
+                  cwes: [
+                    {
+                      cweId: 'CWE-506',
+                      description:
+                        'The product contains code that appears to be malicious in nature.',
+                      name: 'Embedded Malicious Code',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ]);
+
+        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because this isn't literally MAL-2025-6794, we don't apply it
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            affected: [
+              {
+                database_specific: {
+                  source:
+                    'https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2025/07/GHSA-jxr6-qrxx-2ph2/GHSA-jxr6-qrxx-2ph2.json',
+                },
+                package: {
+                  ecosystem: 'PyPI',
+                  name: 'num2words',
+                  purl: 'pkg:pypi/num2words',
+                },
+                ranges: [
+                  {
+                    events: [
+                      {
+                        introduced: '0.5.15',
+                      },
+                      {
+                        last_affected: '0.5.16',
+                      },
+                    ],
+                    type: 'ECOSYSTEM',
+                  },
+                ],
+              },
+            ],
+            aliases: ['MAL-2025-6794', 'PYSEC-2025-72'],
+            id: 'GHSA-jxr6-qrxx-2ph2',
+            modified: '2025-08-06T04:27:26.046626Z',
+            published: '2025-07-31T19:33:29Z',
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+          'malicious-version-in-use',
+        );
+        expect(packageFiles.npm[0].deps[0].skipStage).toEqual('lookup');
+        // and it does not apply to the dependency that doesn't match
+        expect(packageFiles.pip[0].deps[0].skipReason).toBeUndefined();
+        expect(packageFiles.pip[0].deps[0].skipStage).toBeUndefined();
+
+        // validation to make sure that these were both valid advisories
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Vulnerability MAL-2026-2307 affects axios 1.14.1',
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Vulnerability GHSA-jxr6-qrxx-2ph2 affects num2words 0.5.15',
+        );
+      });
+
+      it('are logged', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+          pip: [
+            {
+              deps: [
+                {
+                  depName: 'num2words',
+                  currentValue: '0.5.15',
+                  datasource: 'pypi',
+                  updates: [],
+                  packageName: 'num2words',
+                },
+              ],
+              packageFile: 'go.mod',
+            },
+          ],
+        };
+
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['0.30.4', '1.14.1'],
+                database_specific: {
+                  cwes: [
+                    {
+                      cweId: 'CWE-506',
+                      description:
+                        'The product contains code that appears to be malicious in nature.',
+                      name: 'Embedded Malicious Code',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ]);
+
+        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because this isn't literally MAL-2025-6794, we don't apply it
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            affected: [
+              {
+                database_specific: {
+                  source:
+                    'https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2025/07/GHSA-jxr6-qrxx-2ph2/GHSA-jxr6-qrxx-2ph2.json',
+                },
+                package: {
+                  ecosystem: 'PyPI',
+                  name: 'num2words',
+                  purl: 'pkg:pypi/num2words',
+                },
+                ranges: [
+                  {
+                    events: [
+                      {
+                        introduced: '0.5.15',
+                      },
+                      {
+                        last_affected: '0.5.16',
+                      },
+                    ],
+                    type: 'ECOSYSTEM',
+                  },
+                ],
+              },
+            ],
+            aliases: ['MAL-2025-6794', 'PYSEC-2025-72'],
+            id: 'GHSA-jxr6-qrxx-2ph2',
+            modified: '2025-08-06T04:27:26.046626Z',
+            published: '2025-07-31T19:33:29Z',
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            packageFile: 'package.json',
+            depName: 'axios',
+            packageName: 'axios',
+            manager: 'npm',
+            datasource: 'npm',
+            currentVersion: '1.14.1',
+          },
+          'Marking axios as skipReason=malicious-version-in-use, as it is affected by MAL-2026-2307',
+        );
+      });
+
+      it('are not counted if the affected versions do not match', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.0',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.0',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['0.30.4', '1.14.1'],
+                database_specific: {
+                  cwes: [
+                    {
+                      cweId: 'CWE-506',
+                      description:
+                        'The product contains code that appears to be malicious in nature.',
+                      name: 'Embedded Malicious Code',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
+      });
+
+      it('handles a MAL- advisory with no affected field', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['1.14.1'],
+              },
+            ],
+          },
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-9999',
+            aliases: [],
+          },
+        ]);
+
+        await expect(
+          vulnerabilities.appendVulnerabilityPackageRules(config, packageFiles),
+        ).resolves.not.toThrow();
+      });
+
+      it('handles a malicious dependency where updates is undefined', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['1.14.1'],
+              },
+            ],
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+          'malicious-version-in-use',
+        );
+      });
+
+      describe('when a malicious dependency update is proposed', () => {
+        it('applies to dependency updates, and sets malicious-update-proposed', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newVersion: '1.14.1',
+                      },
+                    ],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+          getVulnerabilitiesMock.mockResolvedValueOnce([
+            {
+              modified: '2026-04-07T14:41:20Z',
+              published: '2026-03-31T03:15:49Z',
+              schema_version: '1.7.4',
+              id: 'MAL-2026-2307',
+              aliases: ['GHSA-fw8c-xr5c-95f9'],
+              affected: [
+                {
+                  package: {
+                    ecosystem: 'npm',
+                    name: 'axios',
+                  },
+                  versions: ['0.30.4', '1.14.1'],
+                  database_specific: {
+                    cwes: [
+                      {
+                        cweId: 'CWE-506',
+                        description:
+                          'The product contains code that appears to be malicious in nature.',
+                        name: 'Embedded Malicious Code',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ]);
+
+          await vulnerabilities.appendVulnerabilityPackageRules(
+            config,
+            packageFiles,
+          );
+
+          expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+            'malicious-update-proposed',
+          );
+          expect(packageFiles.npm[0].deps[0].skipStage).toEqual('lookup');
+        });
+
+        it('logs', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newVersion: '1.14.1',
+                      },
+                    ],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+          getVulnerabilitiesMock.mockResolvedValueOnce([
+            {
+              modified: '2026-04-07T14:41:20Z',
+              published: '2026-03-31T03:15:49Z',
+              schema_version: '1.7.4',
+              id: 'MAL-2026-2307',
+              aliases: ['GHSA-fw8c-xr5c-95f9'],
+              affected: [
+                {
+                  package: {
+                    ecosystem: 'npm',
+                    name: 'axios',
+                  },
+                  versions: ['0.30.4', '1.14.1'],
+                  database_specific: {
+                    cwes: [
+                      {
+                        cweId: 'CWE-506',
+                        description:
+                          'The product contains code that appears to be malicious in nature.',
+                        name: 'Embedded Malicious Code',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ]);
+
+          await vulnerabilities.appendVulnerabilityPackageRules(
+            config,
+            packageFiles,
+          );
+
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            {
+              packageFile: 'package.json',
+              depName: 'axios',
+              packageName: 'axios',
+              manager: 'npm',
+              datasource: 'npm',
+              currentVersion: '1.14.0',
+              newVersion: '1.14.1',
+            },
+            "Marking axios's update to 1.14.1 as skipReason=malicious-update-proposed, as it is affected by MAL-2026-2307",
+          );
+        });
+
+        it('falls back to update.newValue when newVersion is missing, and skips updates that are not malicious', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newValue: '1.14.2',
+                      },
+                      {
+                        newValue: '1.14.1',
+                      },
+                    ],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+          getVulnerabilitiesMock.mockResolvedValueOnce([
+            {
+              modified: '2026-04-07T14:41:20Z',
+              published: '2026-03-31T03:15:49Z',
+              schema_version: '1.7.4',
+              id: 'MAL-2026-2307',
+              aliases: ['GHSA-fw8c-xr5c-95f9'],
+              affected: [
+                {
+                  package: {
+                    ecosystem: 'npm',
+                    name: 'axios',
+                  },
+                  versions: ['1.14.1'],
+                },
+              ],
+            },
+          ]);
+
+          await vulnerabilities.appendVulnerabilityPackageRules(
+            config,
+            packageFiles,
+          );
+
+          expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+            'malicious-update-proposed',
+          );
+          expect(packageFiles.npm[0].deps[0].skipStage).toEqual('lookup');
+        });
+      });
+    });
   });
 
   describe('appendVulnerabilityPackageRules()', () => {
@@ -1134,6 +1727,58 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchPackageNames: ['com.guicedee.services:log4j-core'],
           matchCurrentVersion: '1.0.10.1',
           allowedVersions: '(1.2.1.2-jre17,)',
+        },
+      ]);
+    });
+
+    it('returns packageRule for deps-edn package using OSV Maven ecosystem', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        'deps-edn': [
+          {
+            deps: [
+              {
+                depName: 'org.clojure/clojure',
+                packageName: 'org.clojure:clojure',
+                currentValue: '1.10.0',
+                datasource: 'clojure',
+              },
+            ],
+            packageFile: 'deps.edn',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jfh8-c2jp-clj1',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'org.clojure:clojure',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/org.clojure/clojure',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.11.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['clojure'],
+          matchPackageNames: ['org.clojure:clojure'],
+          matchCurrentVersion: '1.10.0',
+          allowedVersions: '[1.11.0,)',
         },
       ]);
     });

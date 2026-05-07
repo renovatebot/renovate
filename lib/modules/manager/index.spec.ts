@@ -260,4 +260,26 @@ describe('modules/manager/index', () => {
       expect(manager.isKnownManager('custom.unknown')).toBeFalse();
     });
   });
+
+  describe('getPrettyDepType', () => {
+    it('when no manager found, returns undefined', () => {
+      expect(
+        manager.getPrettyDepType('invalid-manager', 'unused'),
+      ).toBeUndefined();
+    });
+
+    it('when manager found, but no prettyDepType found, returns undefined', () => {
+      expect(manager.getPrettyDepType('npm', 'foo-bar-baz')).toBeUndefined();
+    });
+
+    it('when manager found, but no prettyDepType found, returns undefined', () => {
+      expect(manager.getPrettyDepType('regex', 'foo-bar-baz')).toBeUndefined();
+    });
+
+    it('when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType', () => {
+      expect(manager.getPrettyDepType('npm', 'dependencies')).toEqual(
+        'dependency',
+      );
+    });
+  });
 });

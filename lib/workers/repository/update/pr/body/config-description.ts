@@ -7,12 +7,22 @@ import type { BranchConfig } from '../../../../types.ts';
 export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
+
+  if (config.timezone) {
+    prBody += `(in timezone ${config.timezone})`;
+  } else {
+    prBody += `(UTC)`;
+  }
+  prBody += '\n\n'; // to ensure that Markdown renderers will note that the Schedule is a different element to the list
+
   prBody +=
-    'Branch creation - ' + scheduleToString(config.schedule, config.timezone);
+    '- Branch creation\n' +
+    scheduleToString(config.schedule, config.timezone) +
+    '\n';
   prBody +=
-    ', Automerge - ' +
+    '- Automerge\n' +
     scheduleToString(config.automergeSchedule, config.timezone) +
-    '.';
+    '\n';
 
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
@@ -52,41 +62,38 @@ function scheduleToString(
   schedule: string[] | undefined,
   timezone: string | undefined,
 ): string {
-  let scheduleString = '';
+  const scheduleLines = [];
   if (schedule && schedule[0] !== 'at any time') {
-    scheduleString =
-      getReadableCronSchedule(schedule) ?? `"${String(schedule)}"`;
-    if (timezone) {
-      scheduleString += ` in timezone ${timezone}`;
+    const r = getReadableCronSchedule(schedule);
+    if (r) {
+      scheduleLines.push(...r);
     } else {
-      scheduleString += ` (UTC)`;
+      scheduleLines.push(`"${String(schedule)}"`);
     }
   } else {
-    scheduleString += 'At any time (no schedule defined)';
+    scheduleLines.push('At any time (no schedule defined)');
   }
-  return scheduleString;
+  return '  - ' + scheduleLines.join('\n  - ');
 }
 
 /**
  * Return human-readable cron schedule summary if the schedule is a valid cron
  * else return null
  */
-function getReadableCronSchedule(scheduleText: string[]): string | null {
+function getReadableCronSchedule(scheduleText: string[]): string[] | null {
   // assuming if one schedule is cron the others in the array will be cron too
   try {
     new CronPattern(scheduleText[0]); // validate cron
-    return scheduleText
-      .map(
-        (cron) =>
-          capitalize(
-            cronstrue
-              .toString(cron, {
-                throwExceptionOnParseError: false,
-              })
-              .replace('Every minute, ', ''),
-          ) + ` ( ${cron} )`,
-      )
-      .join(', ');
+    return scheduleText.map(
+      (cron) =>
+        capitalize(
+          cronstrue
+            .toString(cron, {
+              throwExceptionOnParseError: false,
+            })
+            .replace('Every minute, ', ''),
+        ) + ` (\`${cron}\`)`,
+    );
   } catch {
     return null;
   }

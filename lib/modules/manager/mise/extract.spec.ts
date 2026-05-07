@@ -58,6 +58,7 @@ describe('modules/manager/mise/extract', () => {
       buf = "1.27.0"
       caddy = "2.10.2"
       ccache = "4.11.3"
+      clang-format = "20.1.0"
       committed = "1.1.7"
       conan = "2.24.0"
       consul = "1.14.3"
@@ -70,7 +71,9 @@ describe('modules/manager/mise/extract', () => {
       lefthook = "1.11.13"
       localstack = "4.3.0"
       lychee = "0.19.1"
+      npm = "11.2.0"
       opentofu = "1.6.1"
+      openfga = "1.14.0"
       packer = "1.15.0"
       pipx = "1.7.1"
       pkl = "0.28.2"
@@ -86,6 +89,7 @@ describe('modules/manager/mise/extract', () => {
       swiftformat = "0.58.0"
       swiftlint = "0.55.1"
       taplo = "0.10.0"
+      tart = "2.31.0"
       terragrunt = "0.72.6"
       tilt = "0.34.0"
       tusd = "2.8.0"
@@ -141,6 +145,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'ccache',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'ccache/ccache',
+          },
+          {
+            currentValue: '20.1.0',
+            datasource: 'github-releases',
+            depName: 'clang-format',
+            extractVersion: '^llvmorg-(?<version>\\S+)',
+            packageName: 'llvm/llvm-project',
           },
           {
             currentValue: '1.1.7',
@@ -225,11 +236,24 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'lycheeverse/lychee',
           },
           {
+            currentValue: '11.2.0',
+            datasource: 'npm',
+            depName: 'npm',
+            packageName: 'npm',
+          },
+          {
             currentValue: '1.6.1',
             datasource: 'github-releases',
             depName: 'opentofu',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '1.14.0',
+            datasource: 'github-releases',
+            depName: 'openfga',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'openfga/openfga',
           },
           {
             currentValue: '1.15.0',
@@ -327,6 +351,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'taplo',
             packageName: 'tamasfe/taplo',
+          },
+          {
+            currentValue: '2.31.0',
+            datasource: 'github-releases',
+            depName: 'tart',
+            packageName: 'cirruslabs/tart',
           },
           {
             currentValue: '0.72.6',
@@ -1052,5 +1082,77 @@ describe('modules/manager/mise/extract', () => {
         expect(result?.deps[0]).not.toHaveProperty('versioning');
       },
     );
+
+    it('resolves tools from the mise registry data file via aqua backend', () => {
+      const content = codeBlock`
+      [tools]
+      zola = "0.19.2"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'zola',
+            currentValue: '0.19.2',
+            datasource: 'github-tags',
+            packageName: 'getzola/zola',
+          },
+        ],
+      });
+    });
+
+    it('resolves tools from the mise registry data file via cargo backend', () => {
+      const content = codeBlock`
+      [tools]
+      magika = "0.3.1"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'magika',
+            currentValue: '0.3.1',
+            datasource: 'crate',
+            packageName: 'magika-cli',
+          },
+        ],
+      });
+    });
+
+    it('resolves tools from the mise registry data file via github backend', () => {
+      const content = codeBlock`
+      [tools]
+      allurectl = "2.14.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'allurectl',
+            currentValue: '2.14.0',
+            datasource: 'github-releases',
+            packageName: 'allure-framework/allurectl',
+          },
+        ],
+      });
+    });
+
+    it('resolves a tool from the mise registry, prioritising the github backend over others', () => {
+      const content = codeBlock`
+      [tools]
+      bitwarden-secrets-manager = "1.2.3"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'bitwarden-secrets-manager',
+            currentValue: '1.2.3',
+            datasource: 'github-releases',
+            packageName: 'bitwarden/sdk',
+          },
+        ],
+      });
+    });
   });
 });

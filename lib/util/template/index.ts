@@ -317,7 +317,9 @@ export function compile<T>(
     : data;
 
   logger.trace({ template, filteredInput }, 'Compiling template');
-  const result = handlebars.compile(template)(filteredInput);
+  const result = handlebars.compile(template, { noEscape: true })(
+    filteredInput,
+  );
 
   if (warnVariables.size > 0) {
     logger.info(

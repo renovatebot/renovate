@@ -842,7 +842,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
     .replace(regEx(/\]\(\.\.\/issues\//g), '](#')
     // Strip unicode null characters as GitLab markdown does not permit them
-    .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
+    // oxlint-disable-next-line no-control-regex
+    .replace(regEx(/\u0000/g), '');
   return smartTruncate(desc, maxBodyLength());
 }
 
