@@ -62,24 +62,38 @@ const TerraformRequiredProvider = z.object({
   version: z.string().optional(),
 });
 
+export type TerraformRequiredProvider = z.infer<
+  typeof TerraformRequiredProvider
+>;
+
 const TerraformRequiredProviderBlock = z.record(
   z.union([TerraformRequiredProvider, z.string()]),
 );
+
+export type TerraformRequiredProviderBlock = z.infer<
+  typeof TerraformRequiredProviderBlock
+>;
 
 const TerraformBlock = z.object({
   required_providers: oneOrMany(TerraformRequiredProviderBlock).optional(),
   required_version: z.string().optional(),
 });
 
+export type TerraformBlock = z.infer<typeof TerraformBlock>;
+
 const TerraformModule = z.object({
   source: z.string().optional(),
   version: z.string().optional(),
 });
 
+export type TerraformModule = z.infer<typeof TerraformModule>;
+
 const TerraformProvider = z.object({
   alias: z.string().optional(),
   version: z.string().optional(),
 });
+
+export type TerraformProvider = z.infer<typeof TerraformProvider>;
 
 const TerraformHelmRelease = z.object({
   version: z.string().optional(),
@@ -87,9 +101,13 @@ const TerraformHelmRelease = z.object({
   chart: z.string().optional(),
 });
 
+export type TerraformHelmRelease = z.infer<typeof TerraformHelmRelease>;
+
 const TerraformWorkspace = z.object({
   terraform_version: z.string().optional(),
 });
+
+export type TerraformWorkspace = z.infer<typeof TerraformWorkspace>;
 
 const TerraformWorkspaceArray = oneOrMany(TerraformWorkspace);
 
@@ -156,8 +174,9 @@ const TerraformResources = z
       .optional(),
     tfe_workspace: z.record(TerraformWorkspaceArray).optional(),
   })
-  .catchall(GenericResourceSchema)
-  .optional();
+  .catchall(GenericResourceSchema);
+
+export type TerraformResources = z.infer<typeof TerraformResources>;
 
 export const TerraformDefinitionFileJSON = z.object({
   terraform: oneOrMany(TerraformBlock).optional(),
@@ -170,3 +189,7 @@ export const TerraformDefinitionFileJSON = z.object({
 
   provider: z.record(oneOrMany(TerraformProvider)).optional(),
 });
+
+export type TerraformDefinitionFile = z.infer<
+  typeof TerraformDefinitionFileJSON
+>;

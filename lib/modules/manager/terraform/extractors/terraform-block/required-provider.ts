@@ -4,7 +4,7 @@ import { TerraformProviderExtractor } from '../../base.ts';
 import type {
   TerraformDefinitionFile,
   TerraformRequiredProvider,
-} from '../../hcl/types.ts';
+} from '../../hcl/schema.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 
 export class RequiredProviderExtractor extends TerraformProviderExtractor {
