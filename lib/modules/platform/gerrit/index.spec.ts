@@ -347,7 +347,7 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.abandonChange).toHaveBeenCalledExactlyOnceWith(123456);
     });
 
-    it('updatePr() - body set => add as message', async () => {
+    it('updatePr() - body set => add as message if needed', async () => {
       const change = partial<GerritChange>({});
       clientMock.getChange.mockResolvedValueOnce(change);
       await gerrit.updatePr({
@@ -355,7 +355,9 @@ describe('modules/platform/gerrit/index', () => {
         prTitle: change.subject,
         prBody: 'NEW PR-Body',
       });
-      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
+      expect(
+        clientMock.addMessageIfNotAlreadyExists,
+      ).toHaveBeenCalledExactlyOnceWith(
         123456,
         'NEW PR-Body',
         TAG_PULL_REQUEST_BODY,

@@ -114,7 +114,8 @@ export async function ensureCacheDir(name: string): Promise<string> {
  * without risk of that information leaking to other repositories/users.
  */
 export function privateCacheDir(): string {
-  const cacheDir = GlobalConfig.get('cacheDir');
+  // TODO: types (#22198)
+  const cacheDir = GlobalConfig.get('cacheDir')!;
   return upath.join(cacheDir, '__renovate-private-cache');
 }
 
@@ -216,7 +217,8 @@ export async function findUpLocal(
   fileName: string | string[],
   cwd: string,
 ): Promise<string | null> {
-  const localDir = GlobalConfig.get('localDir');
+  // TODO: types (#22198)
+  const localDir = GlobalConfig.get('localDir')!;
   const absoluteCwd = upath.join(localDir, cwd);
   const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
   const res = await findUp(fileName, {

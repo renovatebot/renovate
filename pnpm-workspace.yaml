@@ -36,6 +36,7 @@ strictPeerDependencies: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@renovatebot/detect-tools'
+  - '@renovatebot/good-enough-parser'
   - '@renovatebot/osv-offline'
   - '@renovatebot/pep440'
   - '@renovatebot/pgp'
