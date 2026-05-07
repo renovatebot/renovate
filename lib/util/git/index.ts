@@ -275,6 +275,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   git = instrumentGit(
     createSimpleGit({
       config: { baseDir: GlobalConfig.get('localDir') },
+      // TODO: Do we really need to set these?
       env: { LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8' },
     }),
   );
@@ -569,7 +570,8 @@ export const syncGit = withInstrumenting(
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
-    const localDir = GlobalConfig.get('localDir');
+    // TODO: types (#22198)
+    const localDir = GlobalConfig.get('localDir')!;
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(

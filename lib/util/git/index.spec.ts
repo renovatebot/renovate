@@ -11,6 +11,7 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { setCustomEnv } from '../env.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
@@ -130,6 +131,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   beforeEach(async () => {
     process.env = { ...OLD_ENV };
+    setCustomEnv({});
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
@@ -159,6 +161,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   afterAll(async () => {
+    setCustomEnv({});
     process.env = OLD_ENV;
     await base?.cleanup();
   });
@@ -1486,6 +1489,104 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
       expect(hooksPath).toBe('/dev/null');
       delete process.env.RENOVATE_X_CLEAR_HOOKS;
+    });
+
+    it('should not inherit unsafe git environment variables from process.env', async () => {
+      process.env.GIT_CONFIG_COUNT = '1';
+      process.env.GIT_CONFIG_KEY_0 = 'core.hooksPath';
+      process.env.GIT_CONFIG_VALUE_0 = '/tmp/hooks';
+      process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
+      process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
+      process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
+      process.env.PAGER = 'less';
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledTimes(1);
+      const [gitEnv] = envSpy.mock.calls[0];
+      expect(gitEnv).toEqual(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        }),
+      );
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_COUNT');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_KEY_0');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_VALUE_0');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_GLOBAL');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_SYSTEM');
+      expect(gitEnv).not.toHaveProperty('GIT_SSH_COMMAND');
+      expect(gitEnv).not.toHaveProperty('PAGER');
+    });
+
+    it('should work when GIT_CONFIG_COUNT authentication environment variables are configured', async () => {
+      // Self-hosted users can opt into passing GIT_CONFIG_COUNT + GIT_CONFIG_KEY_n
+      // + GIT_CONFIG_VALUE_n via customEnvVariables.
+      // simple-git >=3.36.0 blocks git operations when these vars are present unless
+      // allowUnsafeConfigEnvCount is enabled in the simple-git config.
+      setCustomEnv({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+        GIT_CONFIG_KEY_1: 'url.https://git:token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_1: 'git@example.com:',
+        GIT_CONFIG_KEY_2: 'url.https://token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_2: 'https://example.com/',
+      });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+          GIT_CONFIG_KEY_1: 'url.https://git:token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_1: 'git@example.com:',
+          GIT_CONFIG_KEY_2: 'url.https://token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_2: 'https://example.com/',
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        }),
+      );
+    });
+
+    it('should work when GIT_SSH_COMMAND is explicitly configured', async () => {
+      // Self-hosted users can opt into passing GIT_SSH_COMMAND via customEnvVariables.
+      // simple-git >=3.36.0 blocks git operations when GIT_SSH_COMMAND is present
+      // unless allowUnsafeSshCommand is enabled.
+      setCustomEnv({ GIT_SSH_COMMAND: 'ssh -o BatchMode=yes' });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        }),
+      );
+    });
+
+    it('should work when PAGER is explicitly configured', async () => {
+      // Self-hosted users can opt into passing PAGER via customEnvVariables.
+      // simple-git >=3.36.0 blocks git operations when PAGER is present unless
+      // allowUnsafePager is enabled.
+      setCustomEnv({ PAGER: 'less' });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          PAGER: 'less',
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        }),
+      );
     });
   });
 

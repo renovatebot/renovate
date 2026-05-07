@@ -10,7 +10,8 @@ export default async function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
-  const localDir = GlobalConfig.get('localDir');
+  // TODO: types (#22198)
+  const localDir = GlobalConfig.get('localDir')!;
   const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
     'git-tags',
     'git-refs',
@@ -21,7 +22,8 @@ export default async function updateDependency({
     env: gitSubmoduleAuthEnvironmentVariables,
   });
   const submoduleGit = createSimpleGit({
-    config: { baseDir: upath.join(localDir, upgrade.depName) },
+    // TODO: types (#22198)
+    config: { baseDir: upath.join(localDir, upgrade.depName!) },
     env: gitSubmoduleAuthEnvironmentVariables,
   });
 
