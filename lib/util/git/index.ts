@@ -94,7 +94,20 @@ export function createSimpleGit({
   env?: ExtraEnv;
 } = {}): SimpleGit {
   return simpleGit({ ...simpleGitConfig(), ...config }).env(
-    getChildEnv({ env }),
+    getChildEnv({
+      env: {
+        ...env,
+        // To ensure the simple-git parsers match correctly, we need
+        // to set the `LANG` and `LC_ALL` environment variables to
+        // the `C.UTF-8` locale. See the docs for more details:
+        // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
+        //
+        // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
+        // https://github.com/renovatebot/renovate/pull/18963
+        LANG: 'C.UTF-8',
+        LC_ALL: 'C.UTF-8',
+      },
+    }),
   );
 }
 
