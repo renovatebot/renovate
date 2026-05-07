@@ -181,7 +181,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
-  const globalGit = instrumentGit(simpleGit());
+  const globalGit = instrumentGit(simpleGit().env(getChildEnv()));
   try {
     const { major, minor, patch, installed } = await globalGit.version();
     /* v8 ignore if -- TODO: add test #40625 */
@@ -254,13 +254,16 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = instrumentGit(
-    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-      ...getEnv(),
-      LANG: 'C.UTF-8',
-      LC_ALL: 'C.UTF-8',
-    }),
+    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env(
+      getChildEnv({
+        env: {
+          // TODO: Do we really need to set these?
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        },
+      }),
+    ),
   );
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -553,7 +556,8 @@ export const syncGit = withInstrumenting(
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
-    const localDir = GlobalConfig.get('localDir');
+    // TODO: types (#22198)
+    const localDir = GlobalConfig.get('localDir')!;
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(

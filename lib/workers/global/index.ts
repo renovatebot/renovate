@@ -72,7 +72,8 @@ export async function getRepositoryConfig(
   repoConfig.localDir =
     platform === 'local'
       ? process.cwd()
-      : upath.join(repoConfig.baseDir, `./repos/${platform}/${repoName}`);
+      : // TODO: types (#22198)
+        upath.join(repoConfig.baseDir!, `./repos/${platform}/${repoName}`);
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
   return configParser.filterConfig(repoConfig, 'repository');

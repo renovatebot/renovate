@@ -11,14 +11,16 @@ export default async function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
-  const localDir = GlobalConfig.get('localDir');
+  // TODO: types (#22198)
+  const localDir = GlobalConfig.get('localDir')!;
   const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
     'git-tags',
     'git-refs',
   ]);
   const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
   const git = simpleGit(localDir).env(gitEnv);
-  const submoduleGit = simpleGit(upath.join(localDir, upgrade.depName)).env(
+  // TODO: types (#22198)
+  const submoduleGit = simpleGit(upath.join(localDir, upgrade.depName!)).env(
     gitEnv,
   );
 
