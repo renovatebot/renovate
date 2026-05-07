@@ -286,6 +286,9 @@ if (end) {
   - For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
 - Prefer `vi.spyOn` for mocking single functions, or mock entire modules
   - Avoid overwriting functions, for example: (`func = vi.fn();`)
+- Use plain `vi.mock('./module.ts')` when only a few exports are touched, and stub them explicitly
+- Use `vi.mock('./module.ts', () => mockDeep())` only when the module is pulled in transitively and hand-stubbing every export is impractical
+  - `mockDeep` returns a mock for any property access, so typos in mocked names won't fail the test
 - Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
 - Avoid `toMatchSnapshot`, only use it for:
