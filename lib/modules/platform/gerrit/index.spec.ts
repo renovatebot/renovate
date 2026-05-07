@@ -452,6 +452,32 @@ describe('modules/platform/gerrit/index', () => {
       );
     });
 
+    it('updatePr() - unchanged prBody hash => skip message and cache update', async () => {
+      const change = makeChange();
+      const pr = mapGerritChangeToPr(change, { prBody: 'same body' })!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await gerrit.updatePr({
+        number: 123456,
+        prTitle: change.subject,
+        prBody: 'same body',
+      });
+      expect(clientMock.addMessage).not.toHaveBeenCalled();
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
+    });
+
+    it('updatePr() - prBody with only debug metadata change => skip message', async () => {
+      const change = makeChange();
+      const pr = mapGerritChangeToPr(change, { prBody: 'same body' })!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await gerrit.updatePr({
+        number: 123456,
+        prTitle: change.subject,
+        prBody: 'same body\n<!--renovate-debug:changed-metadata-->',
+      });
+      expect(clientMock.addMessage).not.toHaveBeenCalled();
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
+    });
+
     it.each([
       {
         desc: 'addLabels only',

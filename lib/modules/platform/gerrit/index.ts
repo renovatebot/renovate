@@ -275,15 +275,16 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   const pr = clone(cached);
   let updated = false;
 
-  // prConfig.prBody will only be set if the body has changed
-  if (prConfig.prBody) {
+  // Only add message if the body has really changed
+  const newBodyHash = prConfig.prBody ? hashBody(prConfig.prBody) : undefined;
+  if (newBodyHash && newBodyHash !== pr.bodyStruct?.hash) {
     await client.addMessage(
       prConfig.number,
-      prConfig.prBody,
+      prConfig.prBody!,
       TAG_PULL_REQUEST_BODY,
     );
     pr.bodyStruct = {
-      hash: hashBody(prConfig.prBody),
+      hash: newBodyHash,
     };
     pr.updatedAt = new Date().toISOString();
     updated = true;
