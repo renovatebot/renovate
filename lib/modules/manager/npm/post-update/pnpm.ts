@@ -1,4 +1,4 @@
-import { isNumber, isNumericString } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -16,7 +16,9 @@ import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
+  writeLocalFile,
 } from '../../../../util/fs/index.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
@@ -166,7 +168,49 @@ export async function generateLockFile(
       }
     }
 
-    await exec(commands, execOptions);
+    // Temporarily inject minimumReleaseAge into pnpm-workspace.yaml if configured
+    let originalWorkspaceContent: string | null = null;
+    if (isNonEmptyString(config.minimumReleaseAge)) {
+      const ms = toMs(config.minimumReleaseAge);
+      if (ms === null) {
+        logger.debug(
+          { minimumReleaseAge: config.minimumReleaseAge },
+          'Invalid minimumReleaseAge, skipping injection into pnpm-workspace.yaml',
+        );
+      } else {
+        const minimumReleaseAgeMinutes = Math.ceil(ms / 60000);
+        const existingContent = await readLocalFile(
+          pnpmWorkspaceFilePath,
+          'utf8',
+        );
+        if (existingContent) {
+          const parsed = parseSingleYaml<PnpmWorkspaceFile>(existingContent);
+          if (!parsed.minimumReleaseAge) {
+            originalWorkspaceContent = existingContent;
+            const injectedContent =
+              existingContent.trimEnd() +
+              `\nminimumReleaseAge: ${minimumReleaseAgeMinutes}\n`;
+            await writeLocalFile(pnpmWorkspaceFilePath, injectedContent);
+            logger.debug(
+              {
+                minimumReleaseAge: config.minimumReleaseAge,
+                minimumReleaseAgeMinutes,
+              },
+              'Injected minimumReleaseAge into pnpm-workspace.yaml',
+            );
+          }
+        }
+      }
+    }
+
+    try {
+      await exec(commands, execOptions);
+    } finally {
+      if (originalWorkspaceContent !== null) {
+        await writeLocalFile(pnpmWorkspaceFilePath, originalWorkspaceContent);
+        logger.debug('Restored original pnpm-workspace.yaml');
+      }
+    }
     lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) {
     // v8 ignore if -- TODO: add test #40625
