@@ -14,18 +14,16 @@ describe('modules/platform/local/index', () => {
     });
 
     it('preserves an explicit dryRun override', async () => {
-      expect(
-        await platform.initPlatform({
+      await expect(
+        platform.initPlatform({
           dryRun: 'extract',
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "dryRun": "extract",
-          "endpoint": "local",
-          "persistRepoData": true,
-          "requireConfig": "optional",
-        }
-      `);
+      ).resolves.toEqual({
+        dryRun: 'extract',
+        endpoint: 'local',
+        persistRepoData: true,
+        requireConfig: 'optional',
+      });
     });
   });
 
