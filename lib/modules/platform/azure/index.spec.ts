@@ -2110,11 +2110,10 @@ describe('modules/platform/azure/index', () => {
 
   it('findIssue returns null if not found', async () => {
     await initRepo({ repository: 'some/repo' });
-    azureApi.workItemTrackingApi.mockImplementationOnce(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
-        }) as any,
+    azureApi.workItemTrackingApi.mockResolvedValueOnce(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+      }),
     );
     const res = await azure.findIssue('Nonexistent');
     expect(res).toBeNull();
@@ -2166,12 +2165,11 @@ describe('modules/platform/azure/index', () => {
       id: 123,
     });
 
-    azureApi.workItemTrackingApi.mockImplementationOnce(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
-          createWorkItem: createWorkItemMock,
-        }) as any,
+    azureApi.workItemTrackingApi.mockResolvedValueOnce(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+        createWorkItem: createWorkItemMock,
+      }),
     );
     const result = await azure.ensureIssue({
       title: 'Test Issue',
@@ -2207,26 +2205,25 @@ describe('modules/platform/azure/index', () => {
     const updateWorkItemMock = vi.fn();
     const createWorkItemMock = vi.fn();
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Active',
-                'System.Description': 'fake',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-          createWorkItem: createWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
     );
 
     const result = await azure.ensureIssue({
@@ -2264,26 +2261,25 @@ describe('modules/platform/azure/index', () => {
     const updateWorkItemMock = vi.fn();
     const createWorkItemMock = vi.fn();
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Active',
-                'System.Description': 'fake body',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake body',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-          createWorkItem: createWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
     );
 
     const result = await azure.ensureIssue({
@@ -2301,26 +2297,25 @@ describe('modules/platform/azure/index', () => {
     const updateWorkItemMock = vi.fn();
     const createWorkItemMock = vi.fn();
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Closed',
-                'System.Description': 'fake body',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Closed',
+              'System.Description': 'fake body',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-          createWorkItem: createWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
     );
 
     const result = await azure.ensureIssue({
@@ -2339,26 +2334,25 @@ describe('modules/platform/azure/index', () => {
       .mockRejectedValue(new Error('Test error'));
     const createWorkItemMock = vi.fn();
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Closed',
-                'System.Description': 'fake body',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Closed',
+              'System.Description': 'fake body',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-          createWorkItem: createWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
     );
 
     const result = await azure.ensureIssue({
@@ -2374,26 +2368,25 @@ describe('modules/platform/azure/index', () => {
     const updateWorkItemMock = vi.fn();
     const createWorkItemMock = vi.fn();
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Closed',
-                'System.Description': 'fake',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Closed',
+              'System.Description': 'fake',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-          createWorkItem: createWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
     );
 
     await azure.ensureIssue({
@@ -2436,35 +2429,34 @@ describe('modules/platform/azure/index', () => {
     const updateWorkItemMock = vi.fn();
     const createWorkItemMock = vi.fn();
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }, { id: 456 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Active',
-                'System.Description': 'fake',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }, { id: 456 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
             },
-            {
-              id: 456,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'New',
-                'System.Description': 'another fake',
-              },
+          },
+          {
+            id: 456,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'New',
+              'System.Description': 'another fake',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-          createWorkItem: createWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
     );
 
     await azure.ensureIssue({
@@ -2501,25 +2493,24 @@ describe('modules/platform/azure/index', () => {
 
     const updateWorkItemMock = vi.fn();
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Active',
-                'System.Description': 'fake',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+      }),
     );
 
     await azure.ensureIssueClosing('Test Issue');
@@ -2544,25 +2535,24 @@ describe('modules/platform/azure/index', () => {
       .fn()
       .mockRejectedValue(new Error('Test error'));
 
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [{ id: 123 }],
-          }),
-          getWorkItems: vi.fn().mockResolvedValue([
-            {
-              id: 123,
-              fields: {
-                'System.Title': 'Test Issue',
-                'System.WorkItemType': 'Issue',
-                'System.State': 'Active',
-                'System.Description': 'fake',
-              },
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
             },
-          ]),
-          updateWorkItem: updateWorkItemMock,
-        }) as any,
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+      }),
     );
 
     await azure.ensureIssueClosing('Test Issue');
@@ -2582,13 +2572,12 @@ describe('modules/platform/azure/index', () => {
 
   it('getIssueList handles empty wiql result', async () => {
     await initRepo({ repository: 'some/repo' });
-    azureApi.workItemTrackingApi.mockImplementation(
-      () =>
-        ({
-          queryByWiql: vi.fn().mockResolvedValue({
-            workItems: [],
-          }),
-        }) as any,
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [],
+        }),
+      }),
     );
 
     const result = await azure.getIssueList();

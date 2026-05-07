@@ -171,9 +171,9 @@ describe('modules/platform/azure/issue', () => {
         {
           id: 3,
           fields: {
-            'System.Title': 'Resolved Issue',
-            'System.State': 'Resolved',
-            'System.Description': 'Resolved description',
+            'System.Title': 'Closed Issue',
+            'System.State': 'Closed',
+            'System.Description': 'Closed description',
           },
         },
       ];
@@ -192,7 +192,7 @@ describe('modules/platform/azure/issue', () => {
 
       expect(result[0].state).toBe('open'); // Active
       expect(result[1].state).toBe('open'); // To Do
-      expect(result[2].state).toBe('closed'); // Resolved
+      expect(result[2].state).toBe('closed'); // Closed
     });
   });
 

@@ -31,7 +31,7 @@ export class IssueService {
       const azureApiWit = await azureApi.workItemTrackingApi();
 
       let wiql = `
-        SELECT [System.Id], [System.Title], [System.State], [System.CreatedDate]
+        SELECT [System.Id], [System.Title], [System.State], [System.CreatedDate], [System.ChangedDate]
         FROM WorkItems
         WHERE [System.WorkItemType] = 'Issue'
           AND [System.TeamProject] = '${this.config.project}'
@@ -60,12 +60,7 @@ export class IssueService {
       return workItems.map((wi: WorkItem) => ({
         number: wi.id!,
         title: wi.fields!['System.Title'],
-        state:
-          wi.fields!['System.State'] === 'New' ||
-          wi.fields!['System.State'] === 'Active' ||
-          wi.fields!['System.State'] === 'To Do'
-            ? 'open'
-            : 'closed',
+        state: wi.fields!['System.State'] === 'Closed' ? 'closed' : 'open',
         body: wi.fields!['System.Description'],
       }));
     } catch (err) {
