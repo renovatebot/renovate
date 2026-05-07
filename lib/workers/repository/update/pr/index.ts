@@ -430,9 +430,11 @@ export async function ensurePr(
       const updatePrConfig: UpdatePrConfig = {
         number: existingPr.number,
         prTitle,
-        prBody,
         platformPrOptions: getPlatformPrOptions(config),
       };
+      if (existingPrBodyHash !== newPrBodyHash || labelsNeedUpdate) {
+        updatePrConfig.prBody = prBody;
+      }
       // PR must need updating
       if (existingPr?.targetBranch !== config.baseBranch) {
         logger.debug(
@@ -484,7 +486,11 @@ export async function ensurePr(
           },
           'PR title changed',
         );
-      } else if (!config.committedFiles && !config.rebaseRequested) {
+      } else if (
+        existingPrBodyHash !== newPrBodyHash &&
+        !config.committedFiles &&
+        !config.rebaseRequested
+      ) {
         logger.debug(
           {
             prTitle,

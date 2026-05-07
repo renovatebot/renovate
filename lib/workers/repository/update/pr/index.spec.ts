@@ -322,7 +322,9 @@ describe('workers/repository/update/pr/index', () => {
             },
           },
         });
-        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.updatePr).toHaveBeenCalledWith(
+          expect.objectContaining({ prBody: expect.any(String) }),
+        );
         expect(platform.createPr).not.toHaveBeenCalled();
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -422,7 +424,9 @@ describe('workers/repository/update/pr/index', () => {
         const res = await ensurePr(config);
 
         expect(res).toEqual({ type: 'with-pr', pr }); // we redo the prTitle as per config
-        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.updatePr).toHaveBeenCalledWith(
+          expect.not.objectContaining({ prBody: expect.anything() }),
+        );
         expect(platform.createPr).not.toHaveBeenCalled();
 
         expect(logger.logger.info).toHaveBeenCalledWith(
@@ -442,13 +446,19 @@ describe('workers/repository/update/pr/index', () => {
         const res = await ensurePr(config);
 
         expect(res).toEqual({ type: 'with-pr', pr }); // we redo the prBody as per config
-        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.updatePr).toHaveBeenCalledWith(
+          expect.objectContaining({ prBody: body }),
+        );
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
 
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: changedPr.number, prTitle },
           `PR updated`,
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { prTitle },
+          'PR body changed',
         );
       });
 
@@ -457,7 +467,9 @@ describe('workers/repository/update/pr/index', () => {
 
         const res = await ensurePr({ ...config, baseBranch: 'new_base' }); // user changed base branch in config
 
-        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.updatePr).toHaveBeenCalledWith(
+          expect.not.objectContaining({ prBody: expect.anything() }),
+        );
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
 
