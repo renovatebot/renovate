@@ -14,6 +14,7 @@ import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
 import { getEnv } from './util/env.ts';
+import { add as addHostRule } from './util/host-rules.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
@@ -35,6 +36,12 @@ async function partiallyGlobalInitialize(): Promise<void> {
   // NOTE that this doesn't allow command-line arguments
   const globalConfig = await parseConfigs(getEnv(), []);
   GlobalConfig.set(globalConfig);
+
+  if (globalConfig.hostRules) {
+    for (const hostRule of globalConfig.hostRules) {
+      addHostRule(hostRule);
+    }
+  }
 }
 
 async function validate(
@@ -44,6 +51,11 @@ async function validate(
   strict: boolean,
   isPreset = false,
 ): Promise<void> {
+  if (config.hostRules) {
+    for (const hostRule of config.hostRules) {
+      addHostRule(hostRule);
+    }
+  }
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(

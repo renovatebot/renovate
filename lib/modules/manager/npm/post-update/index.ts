@@ -21,6 +21,7 @@ import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import { scm } from '../../../platform/scm.ts';
 import type {
   ArtifactError,
+  ArtifactNotice,
   PackageFile,
   PostUpdateConfig,
   Upgrade,
@@ -398,13 +399,14 @@ export async function getAdditionalFiles(
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
+  const artifactNotices: ArtifactNotice[] = [];
   const updatedArtifacts: FileChange[] = [];
   if (!packageFiles.npm?.length) {
-    return { artifactErrors, updatedArtifacts };
+    return { artifactErrors, artifactNotices, updatedArtifacts };
   }
   if (config.skipArtifactsUpdate) {
     logger.debug('Skipping lock file generation');
-    return { artifactErrors, updatedArtifacts };
+    return { artifactErrors, artifactNotices, updatedArtifacts };
   }
   logger.debug('Getting updated lock files');
   if (
@@ -413,7 +415,7 @@ export async function getAdditionalFiles(
     (await scm.branchExists(config.branchName))
   ) {
     logger.debug('Skipping lockFileMaintenance update');
-    return { artifactErrors, updatedArtifacts };
+    return { artifactErrors, artifactNotices, updatedArtifacts };
   }
   const dirs = determineLockFileDirs(config, packageFiles);
   logger.trace({ dirs }, 'lock file dirs');
@@ -460,6 +462,7 @@ export async function getAdditionalFiles(
       fileName,
       config,
       upgrades,
+      npmrcContent,
     );
     if (res.error) {
       /* v8 ignore next -- needs test */
@@ -487,6 +490,12 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else if (res.lockFile) {
+      if (res.beforeFallback) {
+        const message =
+          'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.';
+        logger.warn({ npmLock }, message);
+        artifactNotices.push({ file: npmLock, message });
+      }
       const existingContent = await getFile(
         npmLock,
         config.reuseExistingBranch ? config.branchName : config.baseBranch,
@@ -665,5 +674,5 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(lockFileDir, npmrcContent);
   }
 
-  return { artifactErrors, updatedArtifacts };
+  return { artifactErrors, artifactNotices, updatedArtifacts };
 }

@@ -843,7 +843,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@23331ae190e7b51e605abcc307203ea16199b0ed # v4.6.14
+        uses: containerbase/internal-tools@23f34c79d4850ff1ffb4634462479831fb522c80 # v4.6.15
         with:
           command: docker-config
 
@@ -856,7 +856,7 @@ jobs:
       - name: Install newer npm
         run: npm install -g npm
 
-      - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Docker registry login
         run: |
