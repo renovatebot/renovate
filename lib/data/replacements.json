@@ -4,6 +4,7 @@
     "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
       "replacements:actions-attest-build-provenance-to-actions-attest",
+      "replacements:action-surefire-report-to-scalablecapital",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
@@ -73,6 +74,17 @@
         "matchDatasources": ["github-tags"],
         "matchPackageNames": ["actions/attest-build-provenance"],
         "replacementName": "actions/attest"
+      }
+    ]
+  },
+  "action-surefire-report-to-scalablecapital": {
+    "description": "`ScaCap/action-surefire-report` moved to `ScalableCapital/action-surefire-report`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["ScaCap/action-surefire-report"],
+        "replacementName": "ScalableCapital/action-surefire-report",
+        "replacementVersion": "v2"
       }
     ]
   },
