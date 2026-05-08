@@ -3160,6 +3160,46 @@ describe('modules/platform/github/index', () => {
         github.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
     });
+
+    it('should retry on 404 and succeed', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .post('/repos/some/repo/issues/42/assignees')
+        .reply(404)
+        .post('/repos/some/repo/issues/42/assignees')
+        .reply(200, {
+          number: 42,
+          state: 'open',
+          title: 'title-42',
+          body: 'body-42',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+      await expect(
+        github.addAssignees(42, ['someuser', 'someotheruser']),
+      ).toResolve();
+    });
+
+    it('should throw after 3 consecutive 404 responses', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/issues/42/assignees').times(3).reply(404);
+      await github.initRepo({ repository: 'some/repo' });
+      await expect(
+        github.addAssignees(42, ['someuser', 'someotheruser']),
+      ).rejects.toThrow();
+    });
+
+    it('should throw immediately on non-404 errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/issues/42/assignees').reply(422);
+      await github.initRepo({ repository: 'some/repo' });
+      await expect(
+        github.addAssignees(42, ['someuser', 'someotheruser']),
+      ).rejects.toThrow();
+    });
   });
 
   describe('addReviewers(issueNo, reviewers)', () => {

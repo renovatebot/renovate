@@ -1548,12 +1548,30 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  const { body: updatedIssue } = await githubApi.postJson(
-    `repos/${repository}/issues/${issueNo}/assignees`,
-    { body: { assignees } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(updatedIssue);
+  const url = `repos/${repository}/issues/${issueNo}/assignees`;
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { body: updatedIssue } = await githubApi.postJson(
+        url,
+        { body: { assignees } },
+        Issue,
+      );
+      GithubIssueCache.updateIssue(updatedIssue);
+      return;
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+      lastErr = err;
+      logger.debug(
+        { attempt: attempt + 1 },
+        `Retrying addAssignees for #${issueNo} after 404`,
+      );
+      await setTimeout(1000);
+    }
+  }
+  throw lastErr!;
 }
 
 export async function addReviewers(
