@@ -364,8 +364,8 @@ importers:
         specifier: 2.8.3
         version: 2.8.3
       zod:
-        specifier: 4.4.1
-        version: 4.4.1
+        specifier: 4.4.2
+        version: 4.4.2
     devDependencies:
       '@biomejs/biome':
         specifier: 2.4.13
@@ -5956,8 +5956,8 @@ packages:
     resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
     engines: {node: '>=18'}
 
-  zod@4.4.1:
-    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
+  zod@4.4.2:
+    resolution: {integrity: sha512-IynmDyxsEsb9RKzO3J9+4SxXnl2FTFSzNBaKKaMV6tsSk0rw9gYw9gs+JFCq/qk2LCZ78KDwyj+Z289TijSkUw==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -7715,7 +7715,7 @@ snapshots:
       fs-extra: 11.3.4
       toml-eslint-parser: 1.0.3
       upath: 3.0.7
-      zod: 4.4.1
+      zod: 4.4.2
 
   '@renovatebot/good-enough-parser@2.0.1':
     dependencies:
@@ -12165,6 +12165,6 @@ snapshots:
 
   yoctocolors@2.1.2: {}
 
-  zod@4.4.1: {}
+  zod@4.4.2: {}
 
   zwitch@2.0.4: {}
