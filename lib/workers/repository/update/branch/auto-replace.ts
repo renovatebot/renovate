@@ -243,9 +243,9 @@ export async function doAutoReplace(
     if (valueChanging && digestChanging) {
       // no single fallback covers both — use the per-field path
       replaceWithoutReplaceString = true;
-      replaceString = currentValue ?? currentDigest;
+      replaceString = currentValue;
     } else if (digestChanging) {
-      replaceString = currentDigest ?? currentValue;
+      replaceString = currentDigest;
     } else {
       replaceString = currentValue ?? currentDigest;
     }
