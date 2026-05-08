@@ -5,7 +5,7 @@ import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { getOptions } from './index.ts';
 
-vi.unmock('../../modules/platform');
+vi.unmock('../../modules/platform/index.ts');
 
 async function collectTsFiles(dir: string): Promise<string[]> {
   const results: string[] = [];
@@ -70,19 +70,19 @@ describe('config/options/index', () => {
 
   describe('every option with allowedValues and a default must have the default in allowedValues', () => {
     const opts = getOptions();
-    for (const option of opts) {
-      if (option.allowedValues && !isNullOrUndefined(option.default)) {
-        it(`${option.name}: \`${option.default}\` is in ${JSON.stringify(option.allowedValues)}`, () => {
-          expect(option.allowedValues).toBeDefined();
+    for (const option of opts.filter(
+      (o) => o.allowedValues && !isNullOrUndefined(o.default),
+    )) {
+      it(`${option.name}: \`${option.default}\` is in ${JSON.stringify(option.allowedValues)}`, () => {
+        expect(option.allowedValues).toBeDefined();
 
-          const defaults = Array.isArray(option.default)
-            ? option.default
-            : [option.default];
-          for (const defVal of defaults) {
-            expect(option.allowedValues).toContain(defVal);
-          }
-        });
-      }
+        const defaults = Array.isArray(option.default)
+          ? option.default
+          : [option.default];
+        for (const defVal of defaults) {
+          expect(option.allowedValues).toContain(defVal);
+        }
+      });
     }
   });
 
@@ -158,20 +158,19 @@ describe('config/options/index', () => {
     const opts = getOptions();
     const optionNames = new Set(opts.map((o) => o.name));
 
-    for (const option of opts) {
-      if (option.requiredIf) {
-        for (const req of option.requiredIf) {
-          for (const prop of req.siblingProperties) {
-            it(`${option.name}'s reference to ${prop.property} is valid`, () => {
-              expect(optionNames).toContain(prop.property);
-            });
+    for (const option of opts.filter((o) => o.requiredIf)) {
+      for (const req of option.requiredIf!) {
+        for (const prop of req.siblingProperties) {
+          it(`${option.name}'s reference to ${prop.property} is valid`, () => {
+            expect(optionNames).toContain(prop.property);
+          });
 
-            const foundOption = opts.filter((o) => o.name === prop.property);
-            if (foundOption?.length && foundOption[0].allowedValues) {
-              it(`${option.name}'s value for ${prop.property} is valid, according to allowedValues`, () => {
-                expect(foundOption[0].allowedValues).toContain(prop.value);
-              });
-            }
+          const foundOption = opts.filter((o) => o.name === prop.property);
+          // oxlint-disable-next-line vitest/no-conditional-tests -- TODO: fix me
+          if (foundOption?.length && foundOption[0].allowedValues) {
+            it(`${option.name}'s value for ${prop.property} is valid, according to allowedValues`, () => {
+              expect(foundOption[0].allowedValues).toContain(prop.value);
+            });
           }
         }
       }

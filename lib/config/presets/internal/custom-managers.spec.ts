@@ -293,11 +293,13 @@ describe('config/presets/internal/custom-managers', () => {
       it.each`
         path                                  | expected
         ${'bitbucket-pipelines.yml'}          | ${true}
-        ${'bitbucket-pipelines.yaml'}         | ${true}
+        ${'bitbucket-pipelines.yaml'}         | ${false}
         ${'foo/bitbucket-pipelines.yml'}      | ${true}
-        ${'foo/bitbucket-pipelines.yaml'}     | ${true}
+        ${'foo/bitbucket-pipelines.yaml'}     | ${false}
         ${'foo/bar/bitbucket-pipelines.yml'}  | ${true}
-        ${'foo/bar/bitbucket-pipelines.yaml'} | ${true}
+        ${'foo/bar/bitbucket-pipelines.yaml'} | ${false}
+        ${'.bitbucket/shared-pipelines.yml'}  | ${true}
+        ${'.bitbucket/shared-pipeline.yaml'}  | ${false}
         ${'bitbucket-pipelines'}              | ${false}
       `('$path', ({ path, expected }) => {
         expect(
@@ -606,13 +608,19 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                        | expected
-        ${'.gitlab-ci.yaml'}        | ${true}
-        ${'.gitlab-ci.yml'}         | ${true}
-        ${'foo.yaml'}               | ${false}
-        ${'foo.yml'}                | ${false}
-        ${'.gitlab/ci.yml'}         | ${false}
-        ${'includes/gitlab-ci.yml'} | ${false}
+        path                             | expected
+        ${'.gitlab-ci.yaml'}             | ${true}
+        ${'.gitlab-ci.yml'}              | ${true}
+        ${'foo.gitlab-ci.yaml'}          | ${true}
+        ${'foo.gitlab-ci.yml'}           | ${true}
+        ${'includes/.gitlab-ci.yaml'}    | ${true}
+        ${'includes/.gitlab-ci.yml'}     | ${true}
+        ${'includes/foo.gitlab-ci.yaml'} | ${true}
+        ${'includes/foo.gitlab-ci.yml'}  | ${true}
+        ${'foo.yaml'}                    | ${false}
+        ${'foo.yml'}                     | ${false}
+        ${'.gitlab/ci.yml'}              | ${false}
+        ${'includes/gitlab-ci.yml'}      | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),
@@ -844,7 +852,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `tsconfig/node` version in tsconfig.json', () => {
-    const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
+    const customManager = presets.tsconfigNodeVersions.customManagers![0];
 
     it(`find in tsconfig.json extends string`, async () => {
       const fileContent = codeBlock`
@@ -858,7 +866,31 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager!,
+        customManager,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    it(`find in tsconfig.json extends string with short reference`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": "@tsconfig/node20",
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        presets.tsconfigNodeVersions.customManagers![1],
       );
 
       expect(res?.deps).toMatchObject([
@@ -885,7 +917,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager!,
+        customManager,
       );
 
       expect(res?.deps).toMatchObject([
@@ -907,7 +939,7 @@ describe('config/presets/internal/custom-managers', () => {
         ${'tsconfig.yml'}           | ${false}
       `('$path', ({ path, expected }) => {
         expect(
-          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+          matchRegexOrGlobList(path, customManager.managerFilePatterns),
         ).toBe(expected);
       });
     });

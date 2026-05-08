@@ -214,6 +214,54 @@ describe('modules/manager/bun/extract', () => {
         },
       ]);
     });
+
+    it('processes workspace package files when workspaces is an object with packages property', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+
+      vi.mocked(fs.readLocalFile)
+        // First call: main package file (with workspaces as object)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'my-monorepo',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: {
+              packages: ['packages/*'],
+            },
+          }),
+        )
+        // Second call: workspace package file
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: { dep2: '2.0.0' },
+          }),
+        );
+
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const matchedFiles = [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ];
+
+      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['bun.lock'],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          packageFileVersion: '1.0.0',
+          lockFiles: ['bun.lock'],
+        },
+      ]);
+    });
   });
 
   it('extracts .npmrc from sibling or parent directory', async () => {

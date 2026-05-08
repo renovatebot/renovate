@@ -31,7 +31,7 @@ export async function generateTemplates(dist: string): Promise<void> {
   );
 
   let exposedConfigOptionsText =
-    'The following configuration options are passed through for templating: \n';
+    'The following configuration options are passed through for templating: \n\n';
   exposedConfigOptionsText += exposedConfigOptions
     .map((field) => getOptionLink(field, optionParentMap, optionGlobalOnly))
     .join('\n');

@@ -123,21 +123,18 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 
 function addPullRequestNoteIfAttestationHasBeenLost(
   upgrade: BranchUpgradeConfig,
+  currentReleaseHasAttestation: boolean | undefined,
 ): void {
   const { packageName, depName, currentVersion, newVersion } = upgrade;
   const name = packageName ?? depName;
 
-  const currentRelease = upgrade.releases?.find(
-    (release) => release.version === currentVersion,
-  );
   const newRelease = upgrade.releases?.find(
     (release) => release.version === newVersion,
   );
 
   if (
-    currentRelease &&
     newRelease &&
-    currentRelease.attestation === true &&
+    currentReleaseHasAttestation === true &&
     newRelease.attestation !== true
   ) {
     upgrade.prBodyNotes ??= [];
@@ -168,6 +165,7 @@ export async function ensurePr(
     internalChecksAsSuccess,
     prTitle = '',
     upgrades,
+    hasAttestation: currentReleaseHasAttestation,
   } = config;
   const getBranchStatus = memoize(() =>
     resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests),
@@ -186,7 +184,9 @@ export async function ensurePr(
     } else if (prCache) {
       logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
-      if (validatePrCache(prCache, prBodyFingerprint)) {
+      // skip cache when autoApprove is set, since new commits may have
+      // reset platform approvals (e.g. GitLab's "Remove all approvals" setting)
+      if (validatePrCache(prCache, prBodyFingerprint) && !config.autoApprove) {
         return { type: 'with-pr', pr: existingPr };
       }
     } else if (config.repositoryCache === 'enabled') {
@@ -287,10 +287,11 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchChangeLogs === 'pr') {
-    // fetch changelogs when not already done;
-    await embedChangelogs(upgrades);
-  }
+  // fetch changelogs for matching upgrades.
+  await embedChangelogs({
+    upgrades: upgrades,
+    stage: 'pr',
+  });
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
@@ -338,7 +339,10 @@ export async function ensurePr(
       }
     }
 
-    addPullRequestNoteIfAttestationHasBeenLost(upgrade);
+    addPullRequestNoteIfAttestationHasBeenLost(
+      upgrade,
+      currentReleaseHasAttestation,
+    );
 
     config.upgrades.push(upgrade);
   }
@@ -412,7 +416,8 @@ export async function ensurePr(
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash &&
-        !labelsNeedUpdate
+        !labelsNeedUpdate &&
+        !config.autoApprove
       ) {
         // adds or-cache for existing PRs
         setPrCache(branchName, prBodyFingerprint, false);

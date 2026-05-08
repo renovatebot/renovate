@@ -1,6 +1,8 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util.ts';
@@ -47,6 +49,31 @@ export function getLockedVersion(
     return foundLock.version;
   }
   return undefined;
+}
+
+export function applyOciDependency(
+  dep: PackageDependency,
+  source: string,
+  registryAliases?: Record<string, string>,
+): void {
+  const url = parseUrl(source);
+  if (!url) {
+    dep.skipReason = 'invalid-url';
+    return;
+  }
+
+  // Strip optional `//subfolder` sub-path (e.g. `example.com/repo//modules/vpc`)
+  const imageRef = (url.host + url.pathname).replace(regEx(/\/\/.+$/), '');
+
+  const parsed = getDep(imageRef, false, registryAliases);
+  dep.packageName = parsed.packageName;
+  dep.datasource = parsed.datasource;
+  dep.currentValue = url.searchParams.get('tag') ?? undefined;
+  dep.currentDigest = url.searchParams.get('digest') ?? undefined;
+
+  if (!dep.currentValue && !dep.currentDigest) {
+    dep.skipReason = 'unspecified-version';
+  }
 }
 
 export async function extractLocksForPackageFile(
