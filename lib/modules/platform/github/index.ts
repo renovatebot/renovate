@@ -1559,7 +1559,7 @@ export async function addAssignees(
       GithubIssueCache.updateIssue(updatedIssue);
       return;
     } catch (err) {
-      if (err.statusCode !== 404 || attempt === 2) {
+      if (err.statusCode !== 404) {
         throw err;
       }
       lastErr = err;
@@ -1570,8 +1570,7 @@ export async function addAssignees(
       await setTimeout(1000);
     }
   }
-  /* v8 ignore next */
-  throw lastErr ?? new Error('Failed to add assignees');
+  throw lastErr!;
 }
 
 export async function addReviewers(
