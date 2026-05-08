@@ -62,6 +62,7 @@ function readManifest(
     resources: parseYaml(content, {
       customSchema: FluxResource,
       failureBehaviour: 'filter',
+      removeTemplates: true,
     }),
   };
 }
