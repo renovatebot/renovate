@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import * as manager from '../../modules/manager/index.ts';
@@ -6,6 +6,23 @@ import * as platform from '../../modules/platform/index.ts';
 import { getOptions } from './index.ts';
 
 vi.unmock('../../modules/platform');
+
+async function collectTsFiles(dir: string): Promise<string[]> {
+  const results: string[] = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...(await collectTsFiles(fullPath)));
+    } else if (
+      entry.name.endsWith('.ts') &&
+      !entry.name.includes('.spec.') &&
+      !entry.name.includes('.test.')
+    ) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
@@ -82,41 +99,28 @@ describe('config/options/index', () => {
     }
   });
 
-  describe('template.compile usage must have supportsTemplating', () => {
+  describe('template.compile usage must have supportsTemplating', async () => {
     const allOptions = getOptions();
     const supportsTemplating = new Set(
       allOptions.filter((o) => o.supportsTemplating).map((o) => o.name),
     );
-    function collectTsFiles(dir: string): string[] {
-      const results: string[] = [];
-      for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        const fullPath = join(dir, entry.name);
-        if (entry.isDirectory()) {
-          results.push(...collectTsFiles(fullPath));
-        } else if (
-          entry.name.endsWith('.ts') &&
-          !entry.name.includes('.spec.') &&
-          !entry.name.includes('.test.')
-        ) {
-          results.push(fullPath);
-        }
-      }
-      return results;
-    }
 
     // Scan source files for template.compile(config.xxx, ...) patterns
     const sourceDir = join(__dirname, '..', '..');
-    const sourceFiles = collectTsFiles(join(sourceDir, 'workers')).concat(
-      collectTsFiles(join(sourceDir, 'modules', 'datasource', 'custom')),
-      collectTsFiles(join(sourceDir, 'modules', 'manager', 'custom')),
-    );
+    const sourceFiles = (
+      await Promise.all([
+        collectTsFiles(join(sourceDir, 'workers')),
+        collectTsFiles(join(sourceDir, 'modules', 'datasource', 'custom')),
+        collectTsFiles(join(sourceDir, 'modules', 'manager', 'custom')),
+      ])
+    ).flat();
 
     const directPattern =
       /template\.compile\(\s*(?:config|update|upgrade|upg)\.(\w+)/g;
     const detectedOptions = new Set<string>();
 
     for (const file of sourceFiles) {
-      const content = readFileSync(file, 'utf-8');
+      const content = await readFile(file, 'utf-8');
       let match;
       while ((match = directPattern.exec(content)) !== null) {
         const name = match[1];
