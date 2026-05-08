@@ -365,6 +365,7 @@
     Thanks, the Renovate team
   close: true
   close-reason: 'not planned'
+  lock: true
 
 'auto:inactivity-pr-close':
   comment: >

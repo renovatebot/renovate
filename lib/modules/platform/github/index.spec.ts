@@ -3132,6 +3132,99 @@ describe('modules/platform/github/index', () => {
         });
       await expect(github.ensureIssueClosing('title-2')).toResolve();
     });
+
+    it('swallows 410 Gone when the issue was deleted on the platform', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .patch('/repos/undefined/issues/2')
+        .reply(410, { message: 'This issue was deleted' });
+      await expect(github.ensureIssueClosing('title-2')).toResolve();
+    });
+
+    it('swallows 404 Not Found when the issue was deleted on the platform', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 3,
+                    state: 'open',
+                    title: 'title-3',
+                    body: 'body-3',
+                    updatedAt: '2022-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .patch('/repos/undefined/issues/3')
+        .reply(404, { message: 'Not Found' });
+      await expect(github.ensureIssueClosing('title-3')).toResolve();
+    });
+
+    it('rethrows non-deletion errors', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 4,
+                    state: 'open',
+                    title: 'title-4',
+                    body: 'body-4',
+                    updatedAt: '2022-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .patch('/repos/undefined/issues/4')
+        .reply(500, { message: 'Internal Server Error' });
+      await expect(github.ensureIssueClosing('title-4')).toReject();
+    });
   });
 
   describe('deleteLabel(issueNo, label)', () => {
