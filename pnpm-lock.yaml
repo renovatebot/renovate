@@ -109,8 +109,8 @@ importers:
         specifier: 2.5.0
         version: 2.5.0
       '@renovatebot/pep440':
-        specifier: 4.2.4
-        version: 4.2.4
+        specifier: 5.0.0
+        version: 5.0.0
       '@renovatebot/pgp':
         specifier: 1.3.9
         version: 1.3.9
@@ -1902,9 +1902,9 @@ packages:
     resolution: {integrity: sha512-hLDDcYjthtVtYQYdvL7hPPEfVuvntnH+KhMqrgS4OciG6yPa8v7iT38yKusSIKD7cN+XpXQWsQqyjmghEQ20ZQ==}
     engines: {node: '>=22.12.0'}
 
-  '@renovatebot/pep440@4.2.4':
-    resolution: {integrity: sha512-r+Pwj9ud/5QOOHoSsD7mWzU0Qkj105UPOyPwihGAtbNCl9pqnWkEDNRM5an63QvsFsS9tt+X3o+npT3AKBiTVg==}
-    engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: '>=10.0.0'}
+  '@renovatebot/pep440@5.0.0':
+    resolution: {integrity: sha512-91cFM32/pnOAvC7W1W1kPPI9QM2y6OrYCeomz7pop4A+3Ksh2XnZXGznUMlzR7YbOQlg7X/MNlF27s9Yt9hhTA==}
+    engines: {node: ^22.11.0 || >=24.10.0, pnpm: '>=10.0.0'}
 
   '@renovatebot/pgp@1.3.9':
     resolution: {integrity: sha512-8LH70gI9PAR8SgnblrTPVNkeIrhHOSgEBui+8SoZIIhxGNQ5pyj55LvvPjfnGfZxlu4S84Bt3pqHX5rKlsWwmA==}
@@ -7748,7 +7748,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@renovatebot/pep440@4.2.4': {}
+  '@renovatebot/pep440@5.0.0': {}
 
   '@renovatebot/pgp@1.3.9': {}
 
