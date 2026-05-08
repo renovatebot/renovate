@@ -1497,7 +1497,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
       process.env.GIT_CONFIG_VALUE_0 = '/tmp/hooks';
       process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
       process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
-      process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
       process.env.PAGER = 'less';
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
@@ -1509,6 +1508,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         expect.objectContaining({
           LANG: 'C.UTF-8',
           LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
         }),
       );
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_COUNT');
@@ -1516,7 +1516,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_VALUE_0');
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_GLOBAL');
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_SYSTEM');
-      expect(gitEnv).not.toHaveProperty('GIT_SSH_COMMAND');
       expect(gitEnv).not.toHaveProperty('PAGER');
     });
 
@@ -1549,24 +1548,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
           GIT_CONFIG_VALUE_2: 'https://example.com/',
           LANG: 'C.UTF-8',
           LC_ALL: 'C.UTF-8',
-        }),
-      );
-    });
-
-    it('should work when GIT_SSH_COMMAND is explicitly configured', async () => {
-      // Self-hosted users can opt into passing GIT_SSH_COMMAND via customEnvVariables.
-      // simple-git >=3.36.0 blocks git operations when GIT_SSH_COMMAND is present
-      // unless allowUnsafeSshCommand is enabled.
-      setCustomEnv({ GIT_SSH_COMMAND: 'ssh -o BatchMode=yes' });
-
-      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
-      await git.initRepo({ url: origin.path });
-      await expect(git.syncGit()).resolves.toBeUndefined();
-      expect(envSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
           GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-          LANG: 'C.UTF-8',
-          LC_ALL: 'C.UTF-8',
         }),
       );
     });
@@ -1585,6 +1567,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
           PAGER: 'less',
           LANG: 'C.UTF-8',
           LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
         }),
       );
     });

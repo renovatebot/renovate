@@ -106,6 +106,8 @@ export function createSimpleGit({
         // https://github.com/renovatebot/renovate/pull/18963
         LANG: 'C.UTF-8',
         LC_ALL: 'C.UTF-8',
+        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
       },
     }),
   );
