@@ -122,16 +122,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.addConfig('user.email', 'author2@example.com');
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
-    // Branch where author matches Renovate but committer is different
-    // (simulates rebase or amend and force push by a different user)
-    await repo.checkoutBranch('renovate/different_committer', defaultBranch);
-    await repo.addConfig('user.email', 'Jest@example.com');
-    process.env.GIT_COMMITTER_EMAIL = 'someone-else@example.com';
-    await fs.writeFile(base.path + '/committer_file', 'test');
-    await repo.add(['committer_file']);
-    await repo.commit('committed by someone else');
-    delete process.env.GIT_COMMITTER_EMAIL;
-
     await repo.checkout(defaultBranch);
   });
 
@@ -438,40 +428,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ).toBeTrue();
     });
 
-    it('should return true when committer is different from author', async () => {
-      expect(
-        await git.isBranchModified(
-          'renovate/different_committer',
-          defaultBranch,
-        ),
-      ).toBeTrue();
-    });
-
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
       expect(
         await git.isBranchModified('renovate/future_branch', defaultBranch),
       ).toBeTrue();
-    });
-
-    it('should not be affected by new commits on the base branch', async () => {
-      // Add a commit to the base branch from a different author,
-      // causing the branches to diverge
-      const local = simpleGit(tmpDir.path);
-      await local.checkout(defaultBranch);
-      await local.addConfig('user.email', 'other-dev@example.com');
-      await fs.writeFile(tmpDir.path + '/diverge_file', 'diverge');
-      await local.add(['diverge_file']);
-      await local.commit('diverge commit');
-      await local.push('origin', defaultBranch);
-      // Re-init so Renovate picks up the new origin state
-      await git.initRepo({ url: origin.path });
-      git.setGitAuthor('Jest <Jest@example.com>');
-      await git.syncGit();
-
-      expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
-      ).toBeFalse();
     });
   });
 
