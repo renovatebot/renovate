@@ -349,6 +349,39 @@ describe('modules/platform/github/index', () => {
       expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
     });
 
+    it('should use public email from user profile when available', async () => {
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
+    it('should fall back to user/emails when there is no public email', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+          name: 'Example User',
+          email: null,
+        })
+        .get('/user/emails')
+        .reply(200, [{ email: 'user@differentdomain.com' }]);
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@differentdomain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
       process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
       httpMock
