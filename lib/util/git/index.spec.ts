@@ -1166,6 +1166,20 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
+  describe('getGitAuthor()', () => {
+    it('returns author name and email when set', () => {
+      expect(git.getGitAuthor()).toEqual({
+        name: 'Jest',
+        email: 'Jest@example.com',
+      });
+    });
+
+    it('returns null when not set', async () => {
+      await git.initRepo({ url: origin.path });
+      expect(git.getGitAuthor()).toBeNull();
+    });
+  });
+
   describe('isBranchConflicted', () => {
     beforeAll(async () => {
       const repo = simpleGit(base.path);
