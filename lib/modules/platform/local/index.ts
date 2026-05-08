@@ -11,8 +11,9 @@ export const id = 'local';
 export const experimental = true;
 
 export function initPlatform(params: PlatformParams): Promise<PlatformResult> {
+  const dryRun = params.dryRun === 'extract' ? 'extract' : 'lookup';
   return Promise.resolve({
-    dryRun: params.dryRun ?? 'lookup',
+    dryRun,
     endpoint: 'local',
     persistRepoData: true,
     requireConfig: 'optional',
