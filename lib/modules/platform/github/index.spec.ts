@@ -473,6 +473,32 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
+      httpMock
+        .scope('https://octocorp.ghe.com', {
+          reqheaders: {
+            authorization: 'Bearer ghs_123test',
+          },
+        })
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://octocorp.ghe.com',
+          token: 'x-access-token:ghs_123test',
+        }),
+      ).toEqual({
+        endpoint: 'https://octocorp.ghe.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
     it('should support custom endpoint', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')

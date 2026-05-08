@@ -129,8 +129,9 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  platformConfig.isGhe =
-    new URL(platformConfig.endpoint).host !== 'api.github.com';
+  const host = new URL(platformConfig.endpoint).host;
+  platformConfig.isGhe = host !== 'api.github.com';
+  platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -199,10 +200,14 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      // v8 ignore next -- TODO: add test #40625
-      const ghHostname = platformConfig.isGhe
-        ? new URL(platformConfig.endpoint).hostname
-        : 'github.com';
+      let ghHostname: string;
+      if (platformConfig.isGheCloud) {
+        ghHostname = 'ghe.com';
+      } else if (platformConfig.isGhe) {
+        ghHostname = new URL(platformConfig.endpoint).hostname;
+      } else {
+        ghHostname = 'github.com';
+      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
