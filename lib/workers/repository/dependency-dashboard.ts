@@ -711,9 +711,9 @@ export function getAbandonedPackagesMd(
 
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
   abandonedMd +=
-    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
+    '> Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release.\n';
   abandonedMd +=
-    'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
+    '> Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n';
 
   abandonedMd += '| Datasource | Package | Last Updated |\n';
   abandonedMd += '|------------|------|-------------|\n';
