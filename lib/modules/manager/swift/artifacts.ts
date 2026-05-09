@@ -2,6 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
 import { scm } from '../../platform/scm.ts';
@@ -28,8 +29,7 @@ function normalizeUrl(url: string): string {
       // Normalize to host/full_name form to allow cross-protocol matching
       // e.g. https://github.com/owner/repo, git@github.com:owner/repo.git
       //   -> github.com/owner/repo
-      const fullName = parsed.full_name.replace(regEx(/\/$/), '');
-      return `${parsed.resource}/${fullName}`.toLowerCase();
+      return `${parsed.resource}/${trimTrailingSlash(parsed.full_name)}`.toLowerCase();
     }
   } catch {
     // Fall through to basic normalization
