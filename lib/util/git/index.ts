@@ -288,11 +288,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   git = instrumentGit(
-    createSimpleGit({
-      config: { baseDir: GlobalConfig.get('localDir') },
-      // TODO: Do we really need to set these?
-      env: { LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8' },
-    }),
+    createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
   gitInitialized = false;
   submodulesInitizialized = false;
