@@ -72,5 +72,58 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     return null;
   }
 
-  return { deps };
+  const packageFile: PackageFileContent = {
+    deps,
+  };
+
+  const goDirective = packageFile.deps.find(
+    (dep) =>
+      dep.depName === 'go' &&
+      dep.depType === 'golang' &&
+      dep.datasource === 'golang-version',
+  );
+  if (goDirective?.currentValue) {
+    packageFile.extractedConstraints ??= {};
+    const range = convertGoDirectiveToSemVerRange(goDirective.currentValue);
+    if (range.version) {
+      packageFile.extractedConstraints['%goMod'] = range.version;
+
+      packageFile.constraintsVersioning ??= {};
+      packageFile.constraintsVersioning['%goMod'] = range.versioning;
+    }
+  }
+
+  const toolchainDirective = packageFile.deps.find(
+    (dep) =>
+      dep.depName === 'go' &&
+      dep.depType === 'toolchain' &&
+      dep.datasource === 'golang-version',
+  );
+  if (toolchainDirective?.currentValue) {
+    packageFile.extractedConstraints ??= {};
+    packageFile.extractedConstraints.golang = toolchainDirective.currentValue;
+  }
+
+  return packageFile;
+}
+
+function convertGoDirectiveToSemVerRange(goDirective: string | undefined):
+  | {
+      version: string;
+      versioning: string;
+    }
+  | {
+      version: undefined;
+    } {
+  if (!goDirective) {
+    return {
+      version: undefined,
+    };
+  }
+
+  const parts = goDirective.split('.');
+  return {
+    version: `~${parts[0]}.${parts[1]}.x`,
+    versioning: 'semver-coerced',
+  };
 }

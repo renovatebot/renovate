@@ -90,7 +90,11 @@ describe('workers/repository/update/branch/lock-files/index', () => {
     it('returns no error and empty lockfiles if skipArtifactsUpdate is true', async () => {
       config.skipArtifactsUpdate = true;
       const res = await getAdditionalFiles(config, { npm: [{}] });
-      expect(res).toEqual({ artifactErrors: [], updatedArtifacts: [] });
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        updatedArtifacts: [],
+      });
     });
 
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
@@ -98,7 +102,11 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       config.reuseExistingBranch = true;
       git.branchExists.mockReturnValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
-      expect(res).toEqual({ artifactErrors: [], updatedArtifacts: [] });
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        updatedArtifacts: [],
+      });
     });
   });
 });

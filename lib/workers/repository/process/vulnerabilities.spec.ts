@@ -1731,6 +1731,58 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('returns packageRule for deps-edn package using OSV Maven ecosystem', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        'deps-edn': [
+          {
+            deps: [
+              {
+                depName: 'org.clojure/clojure',
+                packageName: 'org.clojure:clojure',
+                currentValue: '1.10.0',
+                datasource: 'clojure',
+              },
+            ],
+            packageFile: 'deps.edn',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jfh8-c2jp-clj1',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'org.clojure:clojure',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/org.clojure/clojure',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.11.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['clojure'],
+          matchPackageNames: ['org.clojure:clojure'],
+          matchCurrentVersion: '1.10.0',
+          allowedVersions: '[1.11.0,)',
+        },
+      ]);
+    });
+
     it('returns packageRule based on last_affected version', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [

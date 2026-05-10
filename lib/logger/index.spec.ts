@@ -203,6 +203,10 @@ describe('logger/index', () => {
   });
 
   describe('createDefaultStreams', () => {
+    beforeEach(() => {
+      delete process.env.LOG_FILE_FORMAT;
+    });
+
     it('creates log file stream', () => {
       expect(
         createDefaultStreams('info', new ProblemStream(), 'file.log'),
@@ -266,6 +270,42 @@ describe('logger/index', () => {
         expect(logFileStream.type).toBe(expectedType);
       },
     );
+
+    it('writes pretty formatted data synchronously to log file', () => {
+      process.env.LOG_FILE_FORMAT = 'pretty';
+
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+
+      const logFileStream = streams[2];
+      const stream = logFileStream.stream as {
+        write: (...args: unknown[]) => void;
+      };
+
+      stream.write({ level: 30, msg: 'test message' });
+
+      expect(fs.readFileSync('file.log', 'utf8')).toContain('test message');
+    });
+
+    it('writes json data synchronously to log file', () => {
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+
+      const logFileStream = streams[2];
+      const stream = logFileStream.stream as {
+        write: (...args: unknown[]) => void;
+      };
+
+      stream.write('{"level":30,"msg":"json message"}\n');
+
+      expect(fs.readFileSync('file.log', 'utf8')).toContain('json message');
+    });
   });
 
   it('sets level', () => {

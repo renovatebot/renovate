@@ -46,6 +46,20 @@ To protect against this, it's recommended to ensure that your package manager co
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
 
+#### npm
+
+When `minimumReleaseAge` is configured, Renovate passes `--before=<date>` to npm commands during lock file generation.
+This ensures that npm only resolves package versions that were available before the cooldown threshold, protecting against newly published (and potentially malicious) transitive dependencies.
+
+The `--before` date is calculated as `now - minimumReleaseAge`.
+If a `before=<date>` or `min-release-age=<days>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
+
+If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
+In this case, Renovate automatically retries without `--before` and logs a warning.
+This ensures existing lock files are never broken by the `--before` flag.
+
+After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
+
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 <!-- prettier-ignore -->
@@ -208,6 +222,7 @@ The below is a non-exhaustive list of public registries which support release ti
 | `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
 | `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
 | `terraform-module`   | `https://registry.terraform.io`                    | ✅        |                                                                  |
+| `terraform-module`   | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
 | `terraform-provider` | `https://registry.terraform.io`                    | ✅        |                                                                  |
 | `terraform-provider` | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
 | `github-tags`        | `https://github.com`                               | ✅        |                                                                  |
@@ -391,7 +406,7 @@ Will then output:
       "registryUrls": ["https://ghcr.io"]
     },
     {
-      "manager": "renovate-config-presets",
+      "manager": "renovate-config",
       "datasource": null,
       "depName": "renovatebot/.github",
       "packageFile": "renovate.json",

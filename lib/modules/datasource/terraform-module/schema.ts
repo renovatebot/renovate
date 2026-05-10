@@ -1,5 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { z } from 'zod/v3';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
@@ -68,6 +69,32 @@ export const TerraformModuleV2Response = z
 
 export type TerraformModuleV2Response = z.infer<
   typeof TerraformModuleV2Response
+>;
+
+const OpenTofuModuleVersion = z
+  .object({
+    id: z.string(),
+    published: MaybeTimestamp,
+  })
+  .transform(
+    (version): Release => ({
+      version: version.id.replace(regEx(/^v/), ''),
+      releaseTimestamp: version.published,
+    }),
+  );
+
+export const OpenTofuModuleDocsResponse = z
+  .object({
+    versions: LooseArray(OpenTofuModuleVersion).catch([]),
+  })
+  .transform(
+    (response): ReleaseResult => ({
+      releases: response.versions,
+    }),
+  );
+
+export type OpenTofuModuleDocsResponse = z.infer<
+  typeof OpenTofuModuleDocsResponse
 >;
 
 export const TerraformModuleVersion = z
