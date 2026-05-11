@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../../../../config/global.ts';
 import { logger } from '../../../../../../logger/index.ts';
 import * as hostRules from '../../../../../../util/host-rules.ts';
+import { parseUrl } from '../../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { ChangeLogSource } from '../source.ts';
 import type { ChangeLogError } from '../types.ts';
@@ -41,7 +42,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     error?: ChangeLogError;
   } {
     const sourceUrl = config.sourceUrl!;
-    const { host } = new URL(sourceUrl);
+    const { host } = parseUrl(sourceUrl)!;
     const manager = config.manager;
     const packageName = config.packageName;
 

@@ -2,6 +2,7 @@ import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as template from '../../../../util/template/index.ts';
+import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { ValidMatchFields } from '../utils.ts';
 import { validMatchFields } from '../utils.ts';
@@ -21,8 +22,12 @@ function updateDependency(
     case 'registryUrl':
       // check if URL is valid and pack inside an array
       try {
-        const url = new URL(value).toString();
-        dependency.registryUrls = [url];
+        const url = parseUrl(value)?.toString();
+        if (url) {
+          dependency.registryUrls = [url];
+        } else {
+          logger.warn({ value }, 'Invalid regex manager registryUrl');
+        }
       } catch {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }

@@ -12,6 +12,7 @@ import { ensureCacheDir } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
 import type {
   CommandType,
@@ -355,8 +356,11 @@ function getRegistryCredEnvVars(
 function cleanUrl(url: string): URL | null {
   try {
     // Strip everything but protocol, host, and port
-    const urlObj = new URL(url);
-    return new URL(urlObj.origin);
+    const urlObj = parseUrl(url);
+    if (!urlObj) {
+      return null;
+    }
+    return parseUrl(urlObj.origin);
   } catch {
     return null;
   }

@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
@@ -33,7 +34,7 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   const endpoint = GlobalConfig.get('endpoint');
   const registryUrls = ['https://github.com'];
   if (endpoint && GlobalConfig.get('platform') === 'github') {
-    const parsedEndpoint = new URL(endpoint);
+    const parsedEndpoint = parseUrl(endpoint)!;
 
     if (
       parsedEndpoint.host !== 'github.com' &&

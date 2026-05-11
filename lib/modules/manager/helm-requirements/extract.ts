@@ -1,5 +1,6 @@
 import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type {
@@ -69,17 +70,12 @@ export function extractPackageFile(
 
       res.skipReason = 'placeholder-url';
     } else {
-      try {
-        const url = new URL(dep.repository);
-        if (url.protocol === 'file:') {
-          res.skipReason = 'local-dependency';
-        }
-      } catch (err) {
-        logger.debug(
-          { err, packageFile, url: dep.repository },
-          'Error parsing url',
-        );
+      const url = parseUrl(dep.repository);
+      if (!url) {
+        logger.debug({ packageFile, url: dep.repository }, 'Error parsing url');
         res.skipReason = 'invalid-url';
+      } else if (url.protocol === 'file:') {
+        res.skipReason = 'local-dependency';
       }
     }
     return res;

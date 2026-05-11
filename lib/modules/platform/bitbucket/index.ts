@@ -18,6 +18,7 @@ import * as promises from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -285,7 +286,7 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = new URL(defaults.endpoint);
+  const { hostname } = parseUrl(defaults.endpoint)!;
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`

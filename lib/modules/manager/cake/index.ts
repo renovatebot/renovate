@@ -1,7 +1,7 @@
 import moo from 'moo';
 import type { Category } from '../../../constants/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import { isHttpUrl } from '../../../util/url.ts';
+import { isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type { NugetPackageDependency, Registry } from '../nuget/types.ts';
 import { applyRegistries, getConfiguredRegistries } from '../nuget/util.ts';
@@ -41,7 +41,10 @@ function parseDependencyLine(line: string): NugetPackageDependency | null {
     const isEmptyHost = url.startsWith('?');
     url = isEmptyHost ? `http://localhost/${url}` : url;
 
-    const parsedUrl = new URL(url);
+    const parsedUrl = parseUrl(url);
+    if (!parsedUrl) {
+      return null;
+    }
     const { origin, pathname, searchParams } = parsedUrl;
 
     const registryUrl = `${origin}${pathname}`;

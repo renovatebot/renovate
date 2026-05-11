@@ -171,7 +171,7 @@ export async function getAuthHeaders(
       return opts.headers ?? null;
     }
 
-    const authUrl = new URL(`${authenticateHeader.params.realm}`);
+    const authUrl = parseUrl(`${authenticateHeader.params.realm}`)!;
 
     // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
     if (

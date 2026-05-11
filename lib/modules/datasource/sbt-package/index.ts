@@ -7,7 +7,11 @@ import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url.ts';
+import {
+  ensureTrailingSlash,
+  parseUrl,
+  trimTrailingSlash,
+} from '../../../util/url.ts';
 import * as ivyVersioning from '../../versioning/ivy/index.ts';
 import { compare } from '../../versioning/maven/compare.ts';
 import { MAVEN_REPO } from '../maven/common.ts';
@@ -106,7 +110,7 @@ export class SbtPackageDatasource extends MavenDatasource {
 
       dependencyUrl = trimTrailingSlash(packageRootUrl);
 
-      const rootPath = new URL(packageRootUrl).pathname;
+      const rootPath = parseUrl(packageRootUrl)!.pathname;
       const artifactSubdirs = extractPageLinks(packageRootContent, (href) => {
         const path = href.replace(rootPath, '');
 
@@ -160,7 +164,7 @@ export class SbtPackageDatasource extends MavenDatasource {
         continue;
       }
 
-      const rootPath = new URL(pkgUrl).pathname;
+      const rootPath = parseUrl(pkgUrl)!.pathname;
       const versions = extractPageLinks(packageContent, (href) => {
         const path = href.replace(rootPath, '');
         if (path.startsWith('.')) {

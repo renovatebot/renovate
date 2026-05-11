@@ -47,7 +47,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
@@ -130,7 +130,7 @@ export function isGHApp(): boolean {
 
 export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
-    new URL(platformConfig.endpoint).host !== 'api.github.com';
+    parseUrl(platformConfig.endpoint)!.host !== 'api.github.com';
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -201,7 +201,7 @@ export async function initPlatform({
       platformConfig.userDetails ??= await getAppDetails(token);
       // v8 ignore next -- TODO: add test #40625
       const ghHostname = platformConfig.isGhe
-        ? new URL(platformConfig.endpoint).hostname
+        ? parseUrl(platformConfig.endpoint)!.hostname
         : 'github.com';
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
@@ -722,7 +722,7 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = new URL(platformConfig.endpoint);
+  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');

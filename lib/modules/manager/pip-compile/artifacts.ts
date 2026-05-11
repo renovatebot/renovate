@@ -10,6 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common.ts';
 import type {
   PackageFileContent,
@@ -30,26 +31,25 @@ import { inferCommandExecDir } from './utils.ts';
 function haveCredentialsInPipEnvironmentVariables(): boolean {
   const env = getEnv();
   if (env.PIP_INDEX_URL) {
-    try {
-      const indexUrl = new URL(env.PIP_INDEX_URL);
-      if (!!indexUrl.username || !!indexUrl.password) {
-        return true;
-      }
-    } catch {
+    const indexUrl = parseUrl(env.PIP_INDEX_URL);
+    if (!indexUrl) {
       // Assume that an invalid URL contains credentials, just in case
+      return true;
+    }
+    if (!!indexUrl.username || !!indexUrl.password) {
       return true;
     }
   }
 
-  try {
-    if (env.PIP_EXTRA_INDEX_URL) {
-      return env.PIP_EXTRA_INDEX_URL.split(' ')
-        .map((urlString) => new URL(urlString))
-        .some((url) => !!url.username || !!url.password);
-    }
-  } catch {
-    // Assume that an invalid URL contains credentials, just in case
-    return true;
+  if (env.PIP_EXTRA_INDEX_URL) {
+    return env.PIP_EXTRA_INDEX_URL.split(' ').some((urlString) => {
+      const url = parseUrl(urlString);
+      if (!url) {
+        // Assume that an invalid URL contains credentials, just in case
+        return true;
+      }
+      return !!url.username || !!url.password;
+    });
   }
 
   return false;

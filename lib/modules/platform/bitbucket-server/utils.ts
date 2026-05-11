@@ -83,7 +83,7 @@ function generateUrlFromEndpoint(
   opts: HostRule,
   repository: string,
 ): string {
-  const url = new URL(defaultEndpoint);
+  const url = parseUrl(defaultEndpoint)!;
   const authString =
     opts.username && opts.password
       ? `${opts.username}:${opts.password}`

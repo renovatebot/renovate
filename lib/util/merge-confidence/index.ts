@@ -13,7 +13,7 @@ import * as hostRules from '../host-rules.ts';
 import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
 import { Http } from '../http/index.ts';
 import { regEx } from '../regex.ts';
-import { ensureTrailingSlash, joinUrlParts } from '../url.ts';
+import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../url.ts';
 import { MERGE_CONFIDENCE } from './common.ts';
 import type { MergeConfidence } from './types.ts';
 
@@ -247,7 +247,10 @@ function getApiBaseUrl(mergeConfidenceEndpoint: string | undefined): string {
   const baseFromEnv = mergeConfidenceEndpoint ?? defaultBaseUrl;
 
   try {
-    const parsedBaseUrl = new URL(baseFromEnv).toString();
+    const parsedBaseUrl = parseUrl(baseFromEnv)?.toString();
+    if (!parsedBaseUrl) {
+      throw new Error('invalid URL');
+    }
     logger.trace(
       { baseUrl: parsedBaseUrl },
       'using merge confidence API base found in environment variables',
