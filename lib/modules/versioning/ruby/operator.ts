@@ -17,12 +17,12 @@ const isSingleOperator = (operator: string): boolean =>
 
 export {
   EQUAL,
-  NOT_EQUAL,
   GT,
-  LT,
   GTE,
+  LT,
   LTE,
+  NOT_EQUAL,
   PGTE,
-  isValidOperator,
   isSingleOperator,
+  isValidOperator,
 };

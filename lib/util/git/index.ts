@@ -65,6 +65,10 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types.ts';
+import {
+  getCachedUpdateDateResult,
+  setCachedUpdateDateResult,
+} from './update-date-cache.ts';
 
 export { setNoVerify } from './config.ts';
 export { setPrivateKey } from './private-key.ts';
@@ -177,7 +181,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
-  const globalGit = instrumentGit(simpleGit());
+  const globalGit = instrumentGit(simpleGit().env(getChildEnv()));
   try {
     const { major, minor, patch, installed } = await globalGit.version();
     /* v8 ignore if -- TODO: add test #40625 */
@@ -208,7 +212,9 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
   logger.debug(`fetchBranchCommits(): url=${url}`);
   const opts = ['ls-remote', '--heads', url];
-  if (config.extraCloneOpts) {
+  const localDir = GlobalConfig.get('localDir')!;
+  const repoExists = await fs.pathExists(upath.join(localDir, '.git/HEAD'));
+  if (config.extraCloneOpts && !repoExists) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       // TODO: types (#22198)
       opts.unshift(e[0], `${e[1]!}`),
@@ -248,13 +254,16 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = instrumentGit(
-    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-      ...getEnv(),
-      LANG: 'C.UTF-8',
-      LC_ALL: 'C.UTF-8',
-    }),
+    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env(
+      getChildEnv({
+        env: {
+          // TODO: Do we really need to set these?
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+        },
+      }),
+    ),
   );
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -402,7 +411,6 @@ export const syncGit = withInstrumenting(
   { name: 'syncGit' },
   async function (): Promise<void> {
     if (gitInitialized) {
-      /* v8 ignore if -- TODO: add test #40625 */
       if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
         await git.raw(['config', 'core.hooksPath', '/dev/null']);
       }
@@ -548,7 +556,8 @@ export const syncGit = withInstrumenting(
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
-    const localDir = GlobalConfig.get('localDir');
+    // TODO: types (#22198)
+    const localDir = GlobalConfig.get('localDir')!;
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(
@@ -580,8 +589,18 @@ export async function getBranchUpdateDate(
   if (!branchSha) {
     return null;
   }
+  const updateDate = getCachedUpdateDateResult(branchName, branchSha);
+  if (updateDate !== null) {
+    logger.debug(
+      `getBranchUpdateDate(): using cached result "${updateDate.toISO()}"`,
+    );
+    return updateDate;
+  }
+  await syncGit();
   try {
-    return await getCommitDate(branchSha);
+    const result = await getCommitDate(branchSha);
+    setCachedUpdateDateResult(branchName, result);
+    return result;
   } catch (err) {
     logger.debug({ err, branchName }, 'Error getting branch update date');
     return null;
@@ -598,6 +617,7 @@ export async function getCommitMessages(): Promise<string[]> {
     const res = await git.log({
       n: 20,
       format: { message: '%s' },
+      '--no-merges': null,
     });
     return res.all.map((commit) => commit.message);
   } catch /* v8 ignore next -- TODO: add test #40625 */ {
@@ -946,24 +966,29 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(branchName: string): Promise<void> {
+export async function deleteBranch(
+  branchName: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   await syncGit();
-  try {
-    const deleteCommand = ['push', '--delete', 'origin', branchName];
+  if (!options?.localBranch) {
+    try {
+      const deleteCommand = ['push', '--delete', 'origin', branchName];
 
-    if (getNoVerify().includes('push')) {
-      deleteCommand.push('--no-verify');
-    }
+      if (getNoVerify().includes('push')) {
+        deleteCommand.push('--no-verify');
+      }
 
-    await gitRetry(() => git.raw(deleteCommand));
-    logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
-    if (errChecked) {
-      throw errChecked;
+      await gitRetry(() => git.raw(deleteCommand));
+      logger.debug(`Deleted remote branch: ${branchName}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore if -- TODO: add test #40625 */
+      if (errChecked) {
+        throw errChecked;
+      }
+      logger.debug(`No remote branch to delete with name: ${branchName}`);
     }
-    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);
@@ -980,7 +1005,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+export async function mergeToLocal(
+  refSpecToMerge: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -994,8 +1022,12 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await fetchRevSpec(refSpecToMerge);
-    await gitRetry(() => git.merge(['FETCH_HEAD']));
+    if (options?.localBranch) {
+      await git.merge([refSpecToMerge]);
+    } else {
+      await fetchRevSpec(refSpecToMerge);
+      await gitRetry(() => git.merge(['FETCH_HEAD']));
+    }
   } catch (err) {
     logger.debug(
       {

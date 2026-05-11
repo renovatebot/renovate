@@ -151,6 +151,13 @@ describe('util/check-token', () => {
       expect(isGithubServerToServerToken('ghs_XXXXXX')).toBeTrue();
     });
 
+    // via https://github.blog/changelog/2026-04-24-notice-about-upcoming-new-format-for-github-app-installation-tokens/
+    it('returns true when string is a 2026-style GitHub Installation Access Token', () => {
+      expect(
+        isGithubServerToServerToken('ghs_0123456_eyJhbGciOiJSUzI1NiJ9'),
+      ).toBeTrue();
+    });
+
     it('returns false when string is a github personal access token token', () => {
       expect(isGithubServerToServerToken('ghp_XXXXXX')).toBeFalse();
     });

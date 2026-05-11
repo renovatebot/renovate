@@ -8,7 +8,11 @@ import { addMeta, logger } from '../../../../logger/index.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { exec } from '../../../../util/exec/index.ts';
-import type { ExecOptions } from '../../../../util/exec/types.ts';
+import {
+  type ExecOptions,
+  isConstraintName,
+  isToolName,
+} from '../../../../util/exec/types.ts';
 import {
   ensureLocalDir,
   localPathIsFile,
@@ -129,8 +133,6 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              // WARNING to self-hosted administrators: always run post-upgrade commands with `shell` mode on, which has the risk of arbitrary environment variable access or additional command execution
-              // It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`), as there may be special characters included in the given commands that can be leveraged here
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
                 false,
@@ -150,6 +152,20 @@ export async function postUpgradeCommandsExecutor(
               for (const [tool] of Object.entries(
                 upgrade.postUpgradeTasks?.installTools,
               )) {
+                const validTool = isToolName(tool);
+                const validConstraint = isConstraintName(tool);
+                if (!validTool) {
+                  logger.warn(
+                    {
+                      tool,
+                      validTool,
+                      validConstraint,
+                    },
+                    `Skipping ${validConstraint ? 'valid' : 'invalid'} constraint that is not a tool that Containerbase knows`,
+                  );
+                  continue;
+                }
+
                 execOpts.toolConstraints.push({
                   toolName: tool,
                   constraint: upgrade.constraints?.[tool],

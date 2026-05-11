@@ -1,21 +1,12 @@
 import type { DateTime } from 'luxon';
 import type { MergeStrategy } from '../../config/types.ts';
-import type {
-  BranchStatus,
-  HostRule,
-  VulnerabilityAlert,
-} from '../../types/index.ts';
+import type { BranchStatus, HostRule } from '../../types/index.ts';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
-
-type VulnerabilityKey = string;
-type VulnerabilityRangeKey = string;
-type VulnerabilityPatch = string;
-export type AggregatedVulnerabilities = Record<
-  VulnerabilityKey,
-  Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
->;
+import type { GithubVulnerabilityAlert } from './github/schema.ts';
+export type VulnerabilityAlert = GithubVulnerabilityAlert;
 
 export interface PlatformParams {
+  dryRun?: string;
   endpoint?: string;
   token?: string;
   username?: string;
@@ -162,12 +153,14 @@ export interface EnsureIssueConfig {
   shouldReOpen?: boolean;
   confidential?: boolean;
 }
-export interface BranchStatusConfig {
-  branchName: string;
+export interface StatusCheckConfig {
   context: string;
   description: string;
   state: BranchStatus;
   url?: string;
+}
+export interface BranchStatusConfig extends StatusCheckConfig {
+  branchName: string;
 }
 export interface FindPRConfig {
   branchName: string;

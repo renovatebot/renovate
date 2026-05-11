@@ -1,3 +1,46 @@
 packages: []
 
+savePrefix: ''
+# updates are handled by Renovate itself
+updateNotifier: false
+# https://pnpm.io/cli/run
+shellEmulator: true
+
+allowBuilds:
+  core-js-pure: false
+  esbuild: false
+  protobufjs: false
+  unrs-resolver: false
+  re2: true
+
+dedupePeers: true
+
+overrides:
+  '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
+  '@yarnpkg/core@4.5.0>tar': $tar
+  esbuild: $esbuild
+  vite: $vite
+
+ignoredOptionalDependencies:
+  - dtrace-provider
+  - moment
+  - mv
+  - safe-json-stringify
+
 strictPeerDependencies: true
+
+# in line with https://github.com/renovatebot/.github/blob/main/default.json,
+# all non-Renovate or non-Containerbase packages should only be installed after
+# 7 days
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@renovatebot/detect-tools'
+  - '@renovatebot/good-enough-parser'
+  - '@renovatebot/osv-offline'
+  - '@renovatebot/osv-offline-db'
+  - '@renovatebot/pep440'
+  - '@renovatebot/pgp'
+  - '@renovatebot/ruby-semver'
+  - '@containerbase/eslint-plugin'
+  - '@containerbase/istanbul-reports-html'
+  - '@containerbase/semantic-release-pnpm'

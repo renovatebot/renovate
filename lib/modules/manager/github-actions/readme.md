@@ -39,6 +39,9 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 }
 ```
 
+Actions pinned to a bare SHA without a version comment are disabled by default, because Renovate cannot determine which branch or tag the SHA belongs to.
+To enable updates, add a tag or branch name as a version comment, as shown above.
+
 ### Non-semver refs (branches and feature tags)
 
 Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
@@ -103,11 +106,18 @@ If you find a use case which you think Renovate could/should automatically detec
 
 Renovate also supports some commonly used community actions:
 
+- `aquasecurity/setup-trivy`
+- `aquasecurity/trivy-action`
 - `astral-sh/setup-uv`
-- `pnpm/action-setup`
-- `pdm-project/setup-pdm`
-- `jaxxstorm/action-install-gh-release`
-- `sigoden/install-binary`
-- `prefix-dev/setup-pixi`
-- `pypa/hatch@install`
+- `denoland/setup-deno`
 - `golangci/golangci-lint-action`
+- `jakebailey/pyright-action`
+- `jaxxstorm/action-install-gh-release`
+- `oven-sh/setup-bun`
+- `pdm-project/setup-pdm`
+- `pnpm/action-setup`
+- `prefix-dev/setup-pixi`
+- `pypa/hatch`
+- `ruby/setup-ruby`
+- `sigoden/install-binary`
+- `zizmorcore/zizmor-action`

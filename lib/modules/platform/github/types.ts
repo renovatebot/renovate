@@ -7,6 +7,14 @@ import type { Pr, PrBodyStruct } from '../types.ts';
 export type CombinedBranchState = 'failure' | 'pending' | 'success';
 export type BranchState = 'failure' | 'pending' | 'success' | 'error';
 
+type VulnerabilityKey = string;
+type VulnerabilityRangeKey = string;
+type VulnerabilityPatch = string;
+export type AggregatedVulnerabilities = Record<
+  VulnerabilityKey,
+  Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
+>;
+
 export interface GhBranchStatus {
   context: string;
   state: BranchState;
@@ -81,6 +89,7 @@ export interface PlatformConfig {
   hostType: string;
   endpoint: string;
   isGhe?: boolean;
+  isGheCloud?: boolean;
   gheVersion?: string | null;
   isGHApp?: boolean;
   existingRepos?: string[];
