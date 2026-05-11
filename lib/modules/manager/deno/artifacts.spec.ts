@@ -1,19 +1,15 @@
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
-import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/fs/index.ts');
-
-const hostRules = vi.mocked(_hostRules);
 
 const updateArtifact: UpdateArtifact = {
   config: {
@@ -26,8 +22,7 @@ const updateArtifact: UpdateArtifact = {
 
 describe('modules/manager/deno/artifacts', () => {
   beforeEach(() => {
-    hostRules.getAll.mockReturnValue([]);
-    hostRules.findAll.mockReturnValue([]);
+    hostRules.clear();
   });
 
   describe('updateArtifacts()', () => {
@@ -298,16 +293,11 @@ describe('modules/manager/deno/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
-      const customHostRules = [
-        {
-          token: 'some-token',
-          hostType: 'npm',
-          matchHost: 'https://private-registry.example',
-          resolvedHost: 'private-registry.example',
-        },
-      ];
-      hostRules.findAll.mockReturnValue(customHostRules);
-      hostRules.getAll.mockReturnValue(customHostRules);
+      hostRules.add({
+        token: 'some-token',
+        hostType: 'npm',
+        matchHost: 'https://private-registry.example',
+      });
       const execSnapshots = mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
