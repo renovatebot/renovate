@@ -382,6 +382,25 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('should fall back gracefully when user/emails returns an error (no user:email scope)', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+          name: 'Example User',
+          email: null,
+        })
+        .get('/user/emails')
+        .reply(403);
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: undefined,
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
       process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
       httpMock
