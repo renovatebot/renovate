@@ -38,21 +38,6 @@ export function fixShortHours(input: string): string {
   return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
 }
 
-function getMigratedValue<Key extends keyof MigratedRenovateConfig>(
-  config: MigratedRenovateConfig,
-  key: Key,
-): MigratedRenovateConfig[Key] {
-  return config[key];
-}
-
-function setMigratedValue<Key extends keyof MigratedRenovateConfig>(
-  config: MigratedRenovateConfig,
-  key: Key,
-  value: MigratedRenovateConfig[Key],
-): void {
-  config[key] = value;
-}
-
 function replaceStandaloneTemplateIdentifier(
   input: string,
   from: string,
@@ -80,55 +65,56 @@ export function migrateConfig(
     const newConfig = MigrationsService.run(config, parentKey);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
 
-    for (const [rawKey, val] of Object.entries(newConfig)) {
-      const key = rawKey as keyof MigratedRenovateConfig;
+    for (const [key, val] of Object.entries(newConfig)) {
       if (isString(val) && val.includes('{{baseDir}}')) {
-        setMigratedValue(
-          migratedConfig,
-          key,
-          val.replace(regEx(/{{baseDir}}/g), '{{packageFileDir}}'),
+        // @ts-expect-error -- TODO: fix me
+        migratedConfig[key] = val.replace(
+          regEx(/{{baseDir}}/g),
+          '{{packageFileDir}}',
         );
       } else if (isString(val) && val.includes('{{lookupName}}')) {
-        setMigratedValue(
-          migratedConfig,
-          key,
-          val.replace(regEx(/{{lookupName}}/g), '{{packageName}}'),
+        // @ts-expect-error -- TODO: fix me
+        migratedConfig[key] = val.replace(
+          regEx(/{{lookupName}}/g),
+          '{{packageName}}',
         );
       } else if (isString(val) && val.includes('{{depNameShort}}')) {
-        setMigratedValue(
-          migratedConfig,
-          key,
-          val.replace(regEx(/{{depNameShort}}/g), '{{depName}}'),
+        // @ts-expect-error -- TODO: fix me
+        migratedConfig[key] = val.replace(
+          regEx(/{{depNameShort}}/g),
+          '{{depName}}',
         );
       } else if (isString(val) && val.startsWith('{{semanticPrefix}}')) {
-        setMigratedValue(
-          migratedConfig,
-          key,
-          val.replace(
-            '{{semanticPrefix}}',
-            '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}',
-          ),
+        // @ts-expect-error -- TODO: fix me
+        migratedConfig[key] = val.replace(
+          '{{semanticPrefix}}',
+          '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}',
         );
       } else if (optionTypes[key] === 'object' && isBoolean(val)) {
-        setMigratedValue(migratedConfig, key, { enabled: val });
+        // @ts-expect-error -- TODO: fix me
+        migratedConfig[key] = { enabled: val };
       } else if (optionTypes[key] === 'boolean') {
         if (val === 'true') {
-          setMigratedValue(migratedConfig, key, true);
+          // @ts-expect-error -- TODO: fix me
+          migratedConfig[key] = true;
         } else if (val === 'false') {
-          setMigratedValue(migratedConfig, key, false);
+          // @ts-expect-error -- TODO: fix me
+          migratedConfig[key] = false;
         }
       } else if (
         optionTypes[key] === 'string' &&
         isArray(val) &&
         val.length === 1
       ) {
-        setMigratedValue(migratedConfig, key, String(val[0]));
+        // @ts-expect-error -- TODO: fix me
+        migratedConfig[key] = String(val[0]);
       } else if (isArray(val)) {
         // v8 ignore else -- TODO: add test #40625
-        const currentValue = getMigratedValue(migratedConfig, key);
-        if (isArray(currentValue)) {
+        // @ts-expect-error -- TODO: fix me
+        if (isArray(migratedConfig?.[key])) {
           const newArray = [];
-          for (const item of currentValue) {
+          // @ts-expect-error -- TODO: fix me
+          for (const item of migratedConfig[key]) {
             if (isObject(item) && !isArray(item)) {
               const arrMigrate = migrateConfig(item as RenovateConfig);
               newArray.push(arrMigrate.migratedConfig);
@@ -136,19 +122,22 @@ export function migrateConfig(
               newArray.push(item);
             }
           }
-          setMigratedValue(migratedConfig, key, newArray);
+          // @ts-expect-error -- TODO: fix me
+          migratedConfig[key] = newArray;
         }
       } else if (isObject(val)) {
         const subMigrate = migrateConfig(
-          getMigratedValue(migratedConfig, key) as RenovateConfig,
+          // @ts-expect-error -- TODO: fix me
+          migratedConfig[key] as RenovateConfig,
           key,
         );
         if (subMigrate.isMigrated) {
-          setMigratedValue(migratedConfig, key, subMigrate.migratedConfig);
+          // @ts-expect-error -- TODO: fix me
+          migratedConfig[key] = subMigrate.migratedConfig;
         }
       }
 
-      const migratedValue = getMigratedValue(migratedConfig, key);
+      const migratedValue = (migratedConfig as Record<string, unknown>)[key];
       if (isString(migratedValue)) {
         let migratedStringValue = migratedValue;
         for (const [from, to] of Object.entries(migratedTemplates)) {
@@ -158,7 +147,7 @@ export function migrateConfig(
             to,
           );
         }
-        setMigratedValue(migratedConfig, key, migratedStringValue);
+        (migratedConfig as Record<string, unknown>)[key] = migratedStringValue;
       }
     }
     const languages = [
