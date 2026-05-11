@@ -390,38 +390,43 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   let content = configOptionsRaw.join('\n');
 
   if (!bot) {
-    content = replaceContent(content, generateLockFileTable(), {
-      replaceStart: '<!-- lock-file-maintenance-table-start -->',
-      replaceStop: '<!-- lock-file-maintenance-table-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateLockFileTable(),
+      '<!-- lock-file-maintenance-table-start -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateConfigFileNames(), {
-      replaceStart: '<!-- config-filenames-begin -->',
-      replaceStop: '<!-- config-filenames-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateConfigFileNames(),
+      '<!-- config-filenames-begin -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateToolsForConstraints(), {
-      replaceStart: '<!-- constraints-tools-begin -->',
-      replaceStop: '<!-- constraints-tools-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateToolsForConstraints(),
+      '<!-- constraints-tools-begin -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateAdditionalConstraints(), {
-      replaceStart: '<!-- additional-constraints-begin -->',
-      replaceStop: '<!-- additional-constraints-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateAdditionalConstraints(),
+      '<!-- additional-constraints-begin -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateToolsForInstallTools(), {
-      replaceStart: '<!-- installTools-tools-begin -->',
-      replaceStop: '<!-- installTools-tools-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateToolsForInstallTools(),
+      '<!-- installTools-tools-begin -->',
+    );
   }
 
   await updateFile(`${dist}/${configFile}`, content);
