@@ -215,10 +215,9 @@ export async function initPlatform({
         token,
       );
       // v8 ignore next -- TODO: coverage error #40625
-      platformConfig.userEmail = await getUserEmail(
-        platformConfig.endpoint,
-        token,
-      );
+      platformConfig.userEmail =
+        platformConfig.userDetails.email ??
+        (await getUserEmail(platformConfig.endpoint, token));
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
