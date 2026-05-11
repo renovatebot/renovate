@@ -51,7 +51,11 @@ export function getHttpUrl(url: string, token?: string): string {
       break;
   }
 
-  return parseUrl(parsedUrl.toString(protocol))!.href;
+  const httpUrl = parseUrl(parsedUrl.toString(protocol));
+  if (!httpUrl) {
+    throw new Error(`Failed to parse git URL: ${parsedUrl.toString(protocol)}`);
+  }
+  return httpUrl.href;
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {

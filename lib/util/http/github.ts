@@ -338,6 +338,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
     if (!opts.token) {
+      // create a mutable copy of `url`
       const authUrl = parseUrl(url.toString())!;
 
       if (opts.repository) {
@@ -421,7 +422,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         const queue = [...range(2, lastPage)].map(
           (pageNumber) => (): Promise<HttpResponse<T>> => {
             // copy before modifying searchParams
-            const nextUrl = parseUrl(firstPageUrl.toString())!;
+            const nextUrl = parseUrl(firstPageUrl.toString()) ?? firstPageUrl;
             nextUrl.searchParams.set('page', String(pageNumber));
             return super.requestJsonUnsafe<T>(method, {
               ...opts,

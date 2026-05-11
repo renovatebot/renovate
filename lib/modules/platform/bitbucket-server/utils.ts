@@ -83,7 +83,10 @@ function generateUrlFromEndpoint(
   opts: HostRule,
   repository: string,
 ): string {
-  const url = parseUrl(defaultEndpoint)!;
+  const url = parseUrl(defaultEndpoint);
+  if (!url) {
+    throw new Error(`Invalid Bitbucket Server endpoint: ${defaultEndpoint}`);
+  }
   const authString =
     opts.username && opts.password
       ? `${opts.username}:${opts.password}`
@@ -101,7 +104,7 @@ function generateUrlFromEndpoint(
 }
 
 function injectAuth(url: string, opts: HostRule): string {
-  const repoUrl = parseUrl(url)!;
+  const repoUrl = parseUrl(url);
   if (!repoUrl) {
     logger.debug(`Invalid url: ${url}`);
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);

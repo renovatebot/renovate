@@ -286,7 +286,11 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = parseUrl(defaults.endpoint)!;
+  const parsedEndpoint = parseUrl(defaults.endpoint);
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid Bitbucket endpoint: ${defaults.endpoint}`);
+  }
+  const { hostname } = parsedEndpoint;
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`

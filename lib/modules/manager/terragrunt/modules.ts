@@ -72,7 +72,13 @@ export function analyseTerragruntModule(
     dep.datasource = GithubTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     const { url, tag } = gitTagsRefMatch.groups;
-    const { hostname, host, pathname, protocol } = parseUrl(url)!;
+    const parsedUrl = parseUrl(url);
+    if (!parsedUrl) {
+      logger.debug({ url }, 'Terragrunt module has invalid URL, skipping');
+      dep.skipReason = 'invalid-url';
+      return;
+    }
+    const { hostname, host, pathname, protocol } = parsedUrl;
     const containsSubDirectory = pathname.includes('//');
     if (containsSubDirectory) {
       logger.debug('Terragrunt module contains subdirectory');

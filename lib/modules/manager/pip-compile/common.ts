@@ -360,6 +360,7 @@ function cleanUrl(url: string): URL | null {
     if (!urlObj) {
       return null;
     }
+    // origin of a valid URL is always parseable
     return parseUrl(urlObj.origin);
   } catch {
     return null;

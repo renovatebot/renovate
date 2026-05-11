@@ -739,7 +739,11 @@ export class DockerDatasource extends Datasource {
         // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
         if (linkHeader?.next?.last) {
           // parse the current URL, strip any old "last" param, then set the new one
-          const parsed: URL = parseUrl(url)!;
+          const parsed = parseUrl(url);
+          if (!parsed) {
+            url = null;
+            break;
+          }
           parsed.searchParams.delete('last');
           parsed.searchParams.set('last', linkHeader.next.last);
           url = parsed.href;

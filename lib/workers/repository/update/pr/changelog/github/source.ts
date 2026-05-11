@@ -42,7 +42,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     error?: ChangeLogError;
   } {
     const sourceUrl = config.sourceUrl!;
-    const { host } = parseUrl(sourceUrl)!;
+    const host = parseUrl(sourceUrl)?.host;
     const manager = config.manager;
     const packageName = config.packageName;
 

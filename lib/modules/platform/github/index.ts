@@ -129,7 +129,11 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  const host = parseUrl(platformConfig.endpoint)!.host;
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
+  const host = parsedEndpoint.host;
   platformConfig.isGhe = host !== 'api.github.com';
   platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
@@ -204,7 +208,13 @@ export async function initPlatform({
       if (platformConfig.isGheCloud) {
         ghHostname = 'ghe.com';
       } else if (platformConfig.isGhe) {
-        ghHostname = parseUrl(platformConfig.endpoint)!.hostname;
+        const parsedEndpoint = parseUrl(platformConfig.endpoint);
+        if (!parsedEndpoint) {
+          throw new Error(
+            `Invalid GitHub endpoint: ${platformConfig.endpoint}`,
+          );
+        }
+        ghHostname = parsedEndpoint.hostname;
       } else {
         ghHostname = 'github.com';
       }
@@ -727,7 +737,10 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');

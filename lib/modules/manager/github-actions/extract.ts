@@ -34,7 +34,11 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   const endpoint = GlobalConfig.get('endpoint');
   const registryUrls = ['https://github.com'];
   if (endpoint && GlobalConfig.get('platform') === 'github') {
-    const parsedEndpoint = parseUrl(endpoint)!;
+    const parsedEndpoint = parseUrl(endpoint);
+    if (!parsedEndpoint) {
+      logger.warn({ endpoint }, 'Failed to parse endpoint url');
+      return {};
+    }
 
     if (
       parsedEndpoint.host !== 'github.com' &&
