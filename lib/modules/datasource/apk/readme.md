@@ -62,4 +62,4 @@ The datasource still only receives one directory `registryUrl` per lookup. Besid
 
 1. **Several custom managers** with different `managerFilePatterns` / `matchFilePatterns` and a fixed `registryUrlTemplate` each (e.g. one for `docker/alpine-3.18/**`, another for `docker/alpine-3.19/**`).
 
-2. **`packageRules`** with `matchFileNames` / `matchPaths` and `registryUrls` to override the directory URL for specific paths or packages.
+1. **`packageRules`** with `matchFileNames` / `matchPaths` and `registryUrls` to override the directory URL for specific paths or packages.

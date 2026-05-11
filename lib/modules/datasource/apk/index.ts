@@ -54,16 +54,11 @@ export class ApkDatasource extends Datasource {
   }
 
   /**
-   * Parses an extracted APKINDEX file (line-by-line). Exposed for tests.
-   */
-  private async parseApkIndexFile(path: string): Promise<ApkPackage[]> {
-    return parseApkIndexFile(path);
-  }
-
-  /**
    * Gets all available packages from an APK repository
    */
-  private async _getPackages(registryUrl: string): Promise<ApkPackage[]> {
+  private async getPackagesUncached(
+    registryUrl: string,
+  ): Promise<ApkPackage[]> {
     logger.debug(`Fetching APK packages from ${registryUrl}`);
 
     const indexUrl = joinUrlParts(registryUrl, 'APKINDEX.tar.gz');
@@ -93,7 +88,7 @@ export class ApkDatasource extends Datasource {
 
       let packages: ApkPackage[] = [];
       try {
-        packages = await this.parseApkIndexFile(extractedFile);
+        packages = await parseApkIndexFile(extractedFile);
       } catch (err) {
         logger.warn({ err }, 'Error parsing APK index file');
         return [];
@@ -131,7 +126,7 @@ export class ApkDatasource extends Datasource {
         ttlMinutes: 60,
         fallback: true,
       },
-      () => this._getPackages(registryUrl),
+      () => this.getPackagesUncached(registryUrl),
     );
   }
 

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import readline from 'readline';
 import { logger } from '../../../logger/index.ts';
 import * as fs from '../../../util/fs/index.ts';
@@ -38,7 +39,7 @@ function flushApkPackage(packageInfo: Partial<ApkPackage>): ApkPackage | null {
   if (packageInfo.name && packageInfo.version) {
     return packageInfo as ApkPackage;
   }
-  if (Object.keys(packageInfo).length) {
+  if (is.nonEmptyObject(packageInfo)) {
     logger.warn(
       { packageInfo },
       'Skipping package entry due to missing required fields',
@@ -84,50 +85,4 @@ export async function parseApkIndexFile(
 
   logger.debug(`Parsed ${packages.length} packages from APK index`);
   return packages;
-}
-
-/**
- * Parses an APK index file content and extracts package information
- *
- * @param indexContent - The extracted text content from APKINDEX.tar.gz file
- *                       (tar.gz extraction is handled upstream)
- * @returns Array of parsed APK package objects
- */
-export function parseApkIndex(indexContent: string): ApkPackage[] {
-  logger.debug('Parsing APK index content');
-
-  const packages: ApkPackage[] = [];
-
-  try {
-    logger.debug(`APK index content length: ${indexContent.length}`);
-    logger.trace(
-      `APK index content preview: ${indexContent.substring(0, 200)}`,
-    );
-
-    let packageInfo: Partial<ApkPackage> = {};
-    const lines = indexContent.split(/\r?\n/);
-
-    for (const line of lines) {
-      if (line === '') {
-        const pkg = flushApkPackage(packageInfo);
-        if (pkg) {
-          packages.push(pkg);
-        }
-        packageInfo = {};
-      } else {
-        applyApkIndexLine(line, packageInfo);
-      }
-    }
-
-    const last = flushApkPackage(packageInfo);
-    if (last) {
-      packages.push(last);
-    }
-
-    logger.debug(`Parsed ${packages.length} packages from APK index`);
-    return packages;
-  } catch (err) {
-    logger.warn({ err }, 'Error parsing APK index');
-    return [];
-  }
 }

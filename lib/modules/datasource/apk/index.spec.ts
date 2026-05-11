@@ -11,6 +11,7 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
 import { ApkDatasource } from './index.ts';
+import * as parser from './parser.ts';
 
 const gzip = promisify(zlib.gzip);
 
@@ -462,8 +463,9 @@ describe('modules/datasource/apk/index', () => {
         .get('/os/x86_64/APKINDEX.tar.gz')
         .reply(200, tarGzBuffer);
 
-      const parseSpy = vi.spyOn(apkDatasource as any, 'parseApkIndexFile');
-      parseSpy.mockRejectedValue(new Error('Parse failed'));
+      const parseSpy = vi
+        .spyOn(parser, 'parseApkIndexFile')
+        .mockRejectedValue(new Error('Parse failed'));
 
       const result = await apkDatasource.getReleases({
         packageName: 'bash',

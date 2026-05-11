@@ -3,11 +3,23 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memFs from '../../../util/fs/index.ts';
-import { parseApkIndex, parseApkIndexFile } from './parser.ts';
+import { parseApkIndexFile } from './parser.ts';
 
 describe('modules/datasource/apk/parser', () => {
-  describe('parseApkIndex', () => {
-    it('should parse valid APK index content', () => {
+  describe('parseApkIndexFile', () => {
+    let cacheDir: DirectoryResult | null;
+
+    beforeEach(async () => {
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cacheDir: cacheDir.path });
+    });
+
+    afterEach(async () => {
+      await cacheDir?.cleanup();
+      cacheDir = null;
+    });
+
+    it('should parse valid APK index content', async () => {
       const indexContent = codeBlock`
         P:bash
         V:5.2.15-r0
@@ -20,7 +32,9 @@ describe('modules/datasource/apk/parser', () => {
         t:1700000001
       `;
 
-      const result = parseApkIndex(indexContent);
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const result = await parseApkIndexFile('APKINDEX');
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
@@ -37,7 +51,7 @@ describe('modules/datasource/apk/parser', () => {
       });
     });
 
-    it('should handle lines without colons', () => {
+    it('should handle lines without colons', async () => {
       const indexContent = codeBlock`
         P:bash
         V:5.2.15-r0
@@ -51,14 +65,16 @@ describe('modules/datasource/apk/parser', () => {
         V:1.24.0-r0
       `;
 
-      const result = parseApkIndex(indexContent);
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const result = await parseApkIndexFile('APKINDEX');
 
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('bash');
       expect(result[1].name).toBe('nginx');
     });
 
-    it('should skip packages missing required fields', () => {
+    it('should skip packages missing required fields', async () => {
       const indexContent = codeBlock`
         P:bash
         V:5.2.15-r0
@@ -78,7 +94,9 @@ describe('modules/datasource/apk/parser', () => {
         t:1700000001
       `;
 
-      const result = parseApkIndex(indexContent);
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const result = await parseApkIndexFile('APKINDEX');
 
       expect(result).toHaveLength(3);
       expect(result[0].name).toBe('bash');
@@ -86,27 +104,23 @@ describe('modules/datasource/apk/parser', () => {
       expect(result[2].name).toBe('nginx');
     });
 
-    it('should handle parsing errors gracefully', () => {
-      const indexContent = null as any;
+    it('should handle empty content', async () => {
+      await memFs.outputCacheFile('APKINDEX', '');
 
-      const result = parseApkIndex(indexContent);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle empty content', () => {
-      const result = parseApkIndex('');
+      const result = await parseApkIndexFile('APKINDEX');
 
       expect(result).toEqual([]);
     });
 
-    it('should handle content with only whitespace', () => {
-      const result = parseApkIndex('   \n\n  \t  \n  ');
+    it('should handle content with only whitespace', async () => {
+      await memFs.outputCacheFile('APKINDEX', '   \n\n  \t  \n  ');
+
+      const result = await parseApkIndexFile('APKINDEX');
 
       expect(result).toEqual([]);
     });
 
-    it('should handle packages with only name and version', () => {
+    it('should handle packages with only name and version', async () => {
       const indexContent = codeBlock`
         P:minimal-package
         V:1.0.0
@@ -115,7 +129,9 @@ describe('modules/datasource/apk/parser', () => {
         V:2.0.0
       `;
 
-      const result = parseApkIndex(indexContent);
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const result = await parseApkIndexFile('APKINDEX');
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
@@ -128,7 +144,7 @@ describe('modules/datasource/apk/parser', () => {
       });
     });
 
-    it('should handle packages with different field orders', () => {
+    it('should handle packages with different field orders', async () => {
       const indexContent = codeBlock`
         t:1700000000
         U:https://alpinelinux.org/packages/bash
@@ -141,7 +157,9 @@ describe('modules/datasource/apk/parser', () => {
         U:https://alpinelinux.org/packages/nginx
       `;
 
-      const result = parseApkIndex(indexContent);
+      await memFs.outputCacheFile('APKINDEX', indexContent);
+
+      const result = await parseApkIndexFile('APKINDEX');
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
@@ -156,39 +174,6 @@ describe('modules/datasource/apk/parser', () => {
         url: 'https://alpinelinux.org/packages/nginx',
         buildDate: 1700000001,
       });
-    });
-  });
-
-  describe('parseApkIndexFile', () => {
-    let cacheDir: DirectoryResult | null;
-
-    beforeEach(async () => {
-      cacheDir = await dir({ unsafeCleanup: true });
-      GlobalConfig.set({ cacheDir: cacheDir.path });
-    });
-
-    afterEach(async () => {
-      await cacheDir?.cleanup();
-      cacheDir = null;
-    });
-
-    it('should match parseApkIndex for the same content', async () => {
-      const indexContent = codeBlock`
-        P:bash
-        V:5.2.15-r0
-        U:https://alpinelinux.org/packages/bash
-        t:1700000000
-
-        P:nginx
-        V:1.24.0-r0
-      `;
-
-      await memFs.outputCacheFile('APKINDEX', indexContent);
-
-      const fromFile = await parseApkIndexFile('APKINDEX');
-      const fromString = parseApkIndex(indexContent);
-
-      expect(fromFile).toEqual(fromString);
     });
 
     it('should not push when a blank line ends an incomplete package', async () => {
