@@ -197,17 +197,26 @@ export interface ResolveConfigPresetsResult {
   visitedPresets: {
     /** which internal/shared presets were merged into the final config */
     merged: string[];
+    /** which internal/shared presets were not merged into the final config */
+    unmerged: string[];
   };
 }
 
+/**
+ * @param [mergeInternalPresets=true] when resolving the config presets, whether to merge Renovate internal presets into the resulting configuration.
+ *   When set to `false`, this will resolve these internal presets (recursively), but not merge them.
+ *   This is primarily intended to be used by "shallow config" resolution (for logging purposes).
+ */
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
+  mergeInternalPresets = true,
 ): Promise<ResolveConfigPresetsResult> {
   const allVisitedPresets = {
     merged: new Set<string>(),
+    unmerged: new Set<string>(),
   };
 
   let ignorePresets = clone(_ignorePresets);
@@ -215,9 +224,10 @@ export async function resolveConfigPresets(
     ignorePresets = inputConfig.ignorePresets ?? [];
   }
   logger.trace(
-    { config: inputConfig, existingPresets },
+    { config: inputConfig, existingPresets, mergeInternalPresets },
     'resolveConfigPresets',
   );
+
   let config: AllConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
@@ -226,6 +236,17 @@ export async function resolveConfigPresets(
       template.compile(tmpl, {}),
     );
     for (const preset of inputConfig.extends) {
+      // don't attempt to merge any internal presets if we're not expecting to
+      if (!mergeInternalPresets && internal.isInternal(preset)) {
+        logger.once.trace(
+          { ignoredPreset: preset, mergeInternalPresets },
+          'Not merging preset',
+        );
+        // ... but make sure we note that we haven't resolved it
+        allVisitedPresets.unmerged.add(preset);
+        continue;
+      }
+
       if (shouldResolvePreset(preset, existingPresets, ignorePresets)) {
         logger.trace(`Resolving preset "${preset}"`);
         const fetchedPreset = await fetchPreset(
@@ -240,15 +261,22 @@ export async function resolveConfigPresets(
             baseConfig ?? inputConfig,
             ignorePresets,
             existingPresets.concat([preset]),
+            mergeInternalPresets,
           );
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
+
         config = mergeChildConfig(config, presetConfig);
         allVisitedPresets.merged.add(preset);
+
         // then also make sure we've noted any nested presets we've merged
         for (const mergedPreset of visitedPresets.merged) {
           allVisitedPresets.merged.add(mergedPreset);
+        }
+        // ... or not merged
+        for (const unmergedPreset of visitedPresets.unmerged) {
+          allVisitedPresets.unmerged.add(unmergedPreset);
         }
       }
     }
@@ -275,11 +303,17 @@ export async function resolveConfigPresets(
               baseConfig,
               ignorePresets,
               existingPresets,
+              mergeInternalPresets,
             );
           (config[key] as RenovateConfig[]).push(presetConfig);
 
+          // then also make sure we've noted any nested presets we've merged
           for (const mergedPreset of visited.merged) {
             allVisitedPresets.merged.add(mergedPreset);
+          }
+          // ... or not merged
+          for (const unmergedPreset of visited.unmerged) {
+            allVisitedPresets.unmerged.add(unmergedPreset);
           }
         } else {
           (config[key] as unknown[]).push(element);
@@ -294,11 +328,17 @@ export async function resolveConfigPresets(
           baseConfig,
           ignorePresets,
           existingPresets,
+          mergeInternalPresets,
         );
       config[key] = presetConfig as never; // type can't be narrowed
 
+      // then also make sure we've noted any nested presets we've merged
       for (const mergedPreset of visited.merged) {
         allVisitedPresets.merged.add(mergedPreset);
+      }
+      // ... or not merged
+      for (const unmergedPreset of visited.unmerged) {
+        allVisitedPresets.unmerged.add(unmergedPreset);
       }
     }
   }
@@ -312,6 +352,7 @@ export async function resolveConfigPresets(
     config,
     visitedPresets: {
       merged: Array.from(allVisitedPresets.merged),
+      unmerged: Array.from(allVisitedPresets.unmerged),
     },
   };
 }

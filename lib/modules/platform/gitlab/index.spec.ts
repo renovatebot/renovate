@@ -2404,6 +2404,162 @@ describe('modules/platform/gitlab/index', () => {
       expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400]]);
     });
 
+    it('adds the MR to a merge train when merge trains are enabled on the project', async () => {
+      await initPlatform('17.11.0-ee');
+      const scope = await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some/repo.git`,
+          merge_trains_enabled: true,
+        },
+      );
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: { status: 'running' },
+        })
+        .post(
+          '/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345',
+          { auto_merge: true },
+        )
+        .reply(201);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+          },
+        }),
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
+
+    it('falls back to /merge endpoint when merge trains enabled but GitLab < 17.11', async () => {
+      await initPlatform('17.10.0-ee');
+      const scope = await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some/repo.git`,
+          merge_trains_enabled: true,
+        },
+      );
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: { status: 'running' },
+        })
+        .put('/api/v4/projects/some%2Frepo/merge_requests/12345/merge')
+        .reply(200);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+          },
+        }),
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { version: '17.10.0' },
+        'Merge trains require GitLab 17.11.0 or later, falling back to /merge endpoint',
+      );
+    });
+
+    it('retries the merge_trains endpoint on transient failure', async () => {
+      await initPlatform('17.11.0-ee');
+      const scope = await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some/repo.git`,
+          merge_trains_enabled: true,
+        },
+      );
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: { status: 'running' },
+        })
+        .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345')
+        .reply(405, {})
+        .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345')
+        .reply(202);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+          },
+        }),
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
+
     it('should parse merge_status attribute if detailed_merge_status is not set (on < 15.6)', async () => {
       await initPlatform('13.3.6-ee');
       const reply_body = {

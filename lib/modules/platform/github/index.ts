@@ -129,8 +129,9 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  platformConfig.isGhe =
-    new URL(platformConfig.endpoint).host !== 'api.github.com';
+  const host = new URL(platformConfig.endpoint).host;
+  platformConfig.isGhe = host !== 'api.github.com';
+  platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -199,10 +200,14 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      // v8 ignore next -- TODO: add test #40625
-      const ghHostname = platformConfig.isGhe
-        ? new URL(platformConfig.endpoint).hostname
-        : 'github.com';
+      let ghHostname: string;
+      if (platformConfig.isGheCloud) {
+        ghHostname = 'ghe.com';
+      } else if (platformConfig.isGhe) {
+        ghHostname = new URL(platformConfig.endpoint).hostname;
+      } else {
+        ghHostname = 'github.com';
+      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -1379,12 +1384,24 @@ export async function findIssue(title: string): Promise<Issue | null> {
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
   const repo = config.parentRepo ?? config.repository;
-  const { body: closedIssue } = await githubApi.patchJson(
-    `repos/${repo}/issues/${issueNumber}`,
-    { body: { state: 'closed' } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(closedIssue);
+  try {
+    const { body: closedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNumber}`,
+      { body: { state: 'closed' } },
+      Issue,
+    );
+    GithubIssueCache.updateIssue(closedIssue);
+  } catch (err) {
+    const statusCode = err.response?.statusCode;
+    if (statusCode === 404 || statusCode === 410) {
+      logger.debug(
+        `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
+      );
+      GithubIssueCache.deleteIssue(issueNumber);
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function ensureIssue({
@@ -1548,12 +1565,30 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  const { body: updatedIssue } = await githubApi.postJson(
-    `repos/${repository}/issues/${issueNo}/assignees`,
-    { body: { assignees } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(updatedIssue);
+  const url = `repos/${repository}/issues/${issueNo}/assignees`;
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { body: updatedIssue } = await githubApi.postJson(
+        url,
+        { body: { assignees } },
+        Issue,
+      );
+      GithubIssueCache.updateIssue(updatedIssue);
+      return;
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+      lastErr = err;
+      logger.debug(
+        { attempt: attempt + 1 },
+        `Retrying addAssignees for #${issueNo} after 404`,
+      );
+      await setTimeout(1000);
+    }
+  }
+  throw lastErr!;
 }
 
 export async function addReviewers(
