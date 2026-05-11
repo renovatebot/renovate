@@ -34,7 +34,16 @@
     "no-restricted-imports": [
       "error",
       {
-        "paths": ["nock", "parse-link-header", "path"]
+        "paths": [
+          "nock",
+          "parse-link-header",
+          "path",
+          {
+            "name": "simple-git",
+            "importNames": ["simpleGit"],
+            "message": "Use createSimpleGit instead of simpleGit."
+          }
+        ]
       }
     ],
     "no-unused-vars": [
@@ -196,6 +205,17 @@
         "typescript/restrict-template-expressions": "off",
         "typescript/explicit-function-return-type": "off",
         "renovate/enforce-ts-extension": "off"
+      }
+    },
+    {
+      "files": ["lib/util/git/index.ts", "tools/**/*.mjs", "lib/**/*.spec.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": ["nock", "parse-link-header", "path"]
+          }
+        ]
       }
     }
   ],

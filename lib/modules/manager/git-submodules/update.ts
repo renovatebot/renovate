@@ -1,10 +1,9 @@
-import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { getChildEnv } from '../../../util/exec/utils.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
 export default async function updateDependency({
@@ -17,12 +16,16 @@ export default async function updateDependency({
     'git-tags',
     'git-refs',
   ]);
-  const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
-  const git = simpleGit(localDir).env(gitEnv);
-  // TODO: types (#22198)
-  const submoduleGit = simpleGit(upath.join(localDir, upgrade.depName!)).env(
-    gitEnv,
-  );
+
+  const git = createSimpleGit({
+    config: { baseDir: localDir },
+    env: gitSubmoduleAuthEnvironmentVariables,
+  });
+  const submoduleGit = createSimpleGit({
+    // TODO: types (#22198)
+    config: { baseDir: upath.join(localDir, upgrade.depName!) },
+    env: gitSubmoduleAuthEnvironmentVariables,
+  });
 
   try {
     await git.submoduleUpdate(['--checkout', '--init', upgrade.depName!]);

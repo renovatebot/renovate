@@ -1,9 +1,8 @@
 import type { SimpleGit } from 'simple-git';
-import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { simpleGitConfig } from '../../../util/git/config.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
 import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -17,7 +16,7 @@ async function getUrl(
   submoduleName: string,
 ): Promise<string> {
   const path = (
-    await simpleGit(simpleGitConfig()).raw([
+    await createSimpleGit().raw([
       'config',
       '--file',
       gitModulesPath,
@@ -40,7 +39,7 @@ async function getBranch(
   submoduleName: string,
 ): Promise<string | null> {
   const branchFromConfig = (
-    await simpleGit(simpleGitConfig()).raw([
+    await createSimpleGit().raw([
       'config',
       '--file',
       gitModulesPath,
@@ -90,7 +89,7 @@ export default async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   // TODO: types (#22198)
   const localDir = GlobalConfig.get('localDir')!;
-  const git = simpleGit(localDir, simpleGitConfig());
+  const git = createSimpleGit({ config: { baseDir: localDir } });
   const gitModulesPath = upath.join(localDir, packageFile);
 
   const depNames = await getModules(git, gitModulesPath);
