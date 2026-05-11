@@ -64,6 +64,10 @@ export function migrateConfig(
     }
     const newConfig = MigrationsService.run(config, parentKey);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
+    const migratedConfigRecord = migratedConfig as unknown as Record<
+      string,
+      unknown
+    >;
 
     for (const [key, val] of Object.entries(newConfig)) {
       if (isString(val) && val.includes('{{baseDir}}')) {
@@ -137,7 +141,7 @@ export function migrateConfig(
         }
       }
 
-      const migratedValue = (migratedConfig as Record<string, unknown>)[key];
+      const migratedValue = migratedConfigRecord[key];
       if (isString(migratedValue)) {
         let migratedStringValue = migratedValue;
         for (const [from, to] of Object.entries(migratedTemplates)) {
@@ -147,7 +151,7 @@ export function migrateConfig(
             to,
           );
         }
-        (migratedConfig as Record<string, unknown>)[key] = migratedStringValue;
+        migratedConfigRecord[key] = migratedStringValue;
       }
     }
     const languages = [
