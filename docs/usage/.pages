@@ -33,6 +33,7 @@ nav:
       - 'Semantic Commit Messages': 'semantic-commits.md'
       - 'Noise Reduction': 'noise-reduction.md'
       - 'Upgrade best practices': 'upgrade-best-practices.md'
+      - 'Environment variable handling': 'environment-variable-handling.md'
       - "How does Renovate's Docker image get built?": 'docker-build-process.md'
   - Included Presets:
       - 'Abandonment Presets': 'presets-abandonments.md'
