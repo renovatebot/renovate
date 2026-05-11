@@ -67,6 +67,15 @@ describe('modules/platform/github/index', () => {
       );
     });
 
+    it('should throw if endpoint is invalid URL', async () => {
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://[invalid',
+          token: 'abc',
+        }),
+      ).rejects.toThrow('Invalid GitHub endpoint: https://[invalid/');
+    });
+
     it('should throw if using fine-grained token with GHE <3.10', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')

@@ -329,6 +329,18 @@ describe('modules/platform/bitbucket-server/utils', () => {
         ),
       ).toBe(httpLink('https://some.external.url/', 'SOME', 'repo'));
     });
+
+    it('throws on invalid endpoint URL', () => {
+      expect(() =>
+        getRepoGitUrl(
+          'SOME/repo',
+          'not-a-valid-url',
+          'endpoint',
+          infoMock('https://stash.renovatebot.com/vcs/', 'SOME', 'repo'),
+          {},
+        ),
+      ).toThrow('Invalid Bitbucket Server endpoint: not-a-valid-url');
+    });
   });
 
   describe('getExtraCloneOpts', () => {
