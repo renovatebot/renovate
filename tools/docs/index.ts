@@ -5,6 +5,7 @@ import { getProblems, logger } from '../../lib/logger/index.ts';
 import { generateConfig } from './config.ts';
 import { generateDatasources } from './datasources.ts';
 import { generateEnvOptions } from './env-options.ts';
+import { generateEnvVars } from './env-vars.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
 import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
@@ -74,6 +75,10 @@ export async function generateDocs(
     // env-options
     logger.info('* env-options');
     await generateEnvOptions(dist);
+
+    // environment-variable-handling
+    logger.info('* environment-variable-handling');
+    await generateEnvVars(dist);
 
     // json-schema
     logger.info('* json-schema');
