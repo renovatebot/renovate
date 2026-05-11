@@ -1,38 +1,50 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
+const Ecosystem = z.enum([
+  'actions',
+  'composer',
+  'go',
+  'maven',
+  'npm',
+  'nuget',
+  'pip',
+  'rubygems',
+  'rust',
+]);
+export type Ecosystem = z.infer<typeof Ecosystem>;
+
 const Package = z.object({
-  ecosystem: z
-    .union([
-      z.literal('maven'),
-      z.literal('npm'),
-      z.literal('nuget'),
-      z.literal('pip'),
-      z.literal('rubygems'),
-      z.literal('rust'),
-      z.literal('composer'),
-      z.literal('go'),
-    ])
-    .catch((ctx) => {
-      logger.debug(
-        { ecosystem: ctx.input },
-        'Skipping vulnerability alert with unsupported ecosystem',
-      );
-      return undefined as any;
-    }),
+  ecosystem: Ecosystem.catch((ctx) => {
+    logger.debug(
+      { ecosystem: ctx.input },
+      'Skipping vulnerability alert with unsupported ecosystem',
+    );
+    return undefined as any;
+  }),
   name: z.string(),
 });
+
+const Severity = z.enum(['low', 'medium', 'high', 'critical']);
 
 const SecurityVulnerability = z
   .object({
     first_patched_version: z.object({ identifier: z.string() }).nullish(),
     package: Package,
+    severity: Severity,
     vulnerable_version_range: z.string(),
   })
   .nullable();
 
+const CvssSeverity = z.object({
+  vector_string: z.string().nullable(),
+  score: z.number().nullable(),
+});
+
 const SecurityAdvisory = z.object({
+  ghsa_id: z.string(),
+  summary: z.string(),
   description: z.string(),
   identifiers: z.array(
     z.object({
@@ -41,9 +53,17 @@ const SecurityAdvisory = z.object({
     }),
   ),
   references: z.array(z.object({ url: z.string() })).optional(),
+  severity: Severity,
+  cvss_severities: z
+    .object({
+      cvss_v3: CvssSeverity.nullish(),
+      cvss_v4: CvssSeverity.nullish(),
+    })
+    .nullish(),
 });
+export type SecurityAdvisory = z.infer<typeof SecurityAdvisory>;
 
-export const GithubVulnerabilityAlert = LooseArray(
+export const GithubVulnerabilityAlerts = LooseArray(
   z.object({
     dismissed_reason: z.string().nullish(),
     security_advisory: SecurityAdvisory,
@@ -53,7 +73,6 @@ export const GithubVulnerabilityAlert = LooseArray(
     }),
   }),
   {
-    /* v8 ignore next */
     onError: ({ error }) => {
       logger.debug(
         { error },
@@ -64,7 +83,10 @@ export const GithubVulnerabilityAlert = LooseArray(
 ).transform((alerts) =>
   alerts.filter((alert) => alert.security_vulnerability?.package?.ecosystem),
 );
-export type GithubVulnerabilityAlert = z.infer<typeof GithubVulnerabilityAlert>;
+export type GithubVulnerabilityAlerts = z.infer<
+  typeof GithubVulnerabilityAlerts
+>;
+export type GithubVulnerabilityAlert = GithubVulnerabilityAlerts[number];
 
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
 const GithubResponseMetadata = z.object({

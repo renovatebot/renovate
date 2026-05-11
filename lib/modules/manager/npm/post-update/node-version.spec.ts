@@ -1,10 +1,10 @@
+import { fs } from '~test/util.ts';
 import { Lazy } from '../../../../util/lazy.ts';
 import {
   getNodeConstraint,
   getNodeToolConstraint,
   getNodeUpdate,
 } from './node-version.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 

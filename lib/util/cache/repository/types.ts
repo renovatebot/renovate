@@ -26,7 +26,7 @@ export interface BranchUpgradeCache {
   fixedVersion?: string;
   currentVersion?: string;
   packageName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   sourceUrl?: string;
@@ -80,6 +80,11 @@ export interface BranchCache {
    */
   branchFingerprint?: string; // Defunct
   commitFingerprint?: string; // Actively used
+  /**
+   * The branch's most recent commit timestamp (ISO string)
+   * Used for commitHourlyLimit tracking
+   */
+  commitTimestamp?: string;
   /**
    * Branch name
    */

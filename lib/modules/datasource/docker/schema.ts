@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { Json, LooseArray } from '../../../util/schema-utils/index.ts';
 
@@ -157,12 +157,19 @@ export const Manifest = ManifestObject.passthrough()
 export type Manifest = z.infer<typeof Manifest>;
 export const ManifestJson = Json.pipe(Manifest);
 
+export const DockerHubTagImage = z.object({
+  architecture: z.string().nullable().catch(null),
+  digest: z.string().nullable().catch(null),
+});
+export type DockerHubTagImage = z.infer<typeof DockerHubTagImage>;
+
 export const DockerHubTag = z.object({
   id: z.number(),
   last_updated: z.string().datetime(),
   name: z.string(),
   tag_last_pushed: z.string().datetime().nullable().catch(null),
   digest: z.string().nullable().catch(null),
+  images: z.array(DockerHubTagImage).catch([]),
 });
 export type DockerHubTag = z.infer<typeof DockerHubTag>;
 

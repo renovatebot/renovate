@@ -1,6 +1,6 @@
-import { setTimeout } from 'timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -19,9 +19,10 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages.ts';
+import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -39,8 +40,8 @@ import type {
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
-import * as githubHttp from '../../../util/http/github.ts';
 import type { GithubHttpOptions } from '../../../util/http/github.ts';
+import * as githubHttp from '../../../util/http/github.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -48,8 +49,8 @@ import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
-  AggregatedVulnerabilities,
   AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
@@ -69,7 +70,6 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
-import { normalizeNamePerEcosystem } from '../utils/github-alerts.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
@@ -84,9 +84,10 @@ import { getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
-  GithubVulnerabilityAlert,
+  GithubVulnerabilityAlerts,
 } from './schema.ts';
 import type {
+  AggregatedVulnerabilities,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
@@ -99,6 +100,7 @@ import type {
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
+import { warnIfDefaultGitAuthorEmail } from './utils.ts';
 
 export const id = 'github';
 
@@ -127,8 +129,9 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  platformConfig.isGhe =
-    new URL(platformConfig.endpoint).host !== 'api.github.com';
+  const host = new URL(platformConfig.endpoint).host;
+  platformConfig.isGhe = host !== 'api.github.com';
+  platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -197,19 +200,24 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      const ghHostname = platformConfig.isGhe
-        ? new URL(platformConfig.endpoint).hostname
-        : 'github.com';
+      let ghHostname: string;
+      if (platformConfig.isGheCloud) {
+        ghHostname = 'ghe.com';
+      } else if (platformConfig.isGhe) {
+        ghHostname = new URL(platformConfig.endpoint).hostname;
+      } else {
+        ghHostname = 'github.com';
+      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
         platformConfig.endpoint,
         token,
       );
-      platformConfig.userEmail ??= await getUserEmail(
-        platformConfig.endpoint,
-        token,
-      );
+      // v8 ignore next -- TODO: coverage error #40625
+      platformConfig.userEmail =
+        platformConfig.userDetails.email ??
+        (await getUserEmail(platformConfig.endpoint, token));
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
@@ -222,6 +230,9 @@ export async function initPlatform({
     renovateUsername,
     token,
   };
+
+  warnIfDefaultGitAuthorEmail(platformResult.gitAuthor, platformConfig.isGhe);
+
   if (
     getEnv().RENOVATE_X_GITHUB_HOST_RULES &&
     platformResult.endpoint === 'https://api.github.com/'
@@ -305,6 +316,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     repo.topics?.some((topic) => config?.topics?.includes(topic)),
   );
 
+  // v8 ignore else -- TODO: add test #40625
   if (topicRepositories.length < nonArchivedRepositories.length) {
     logger.debug(
       `Filtered out ${
@@ -363,6 +375,7 @@ export async function getRawFile(
   // only use cache for the same org
   const httpOptions: GithubHttpOptions = {};
   const isSameOrg = repo?.split('/')?.[0] === config.repositoryOwner;
+  // v8 ignore else -- TODO: add test #40625
   if (isSameOrg) {
     httpOptions.cacheProvider = repoCacheProvider;
   }
@@ -535,6 +548,7 @@ export async function initRepo({
         ...(!config.ignorePrAuthor && { user: renovateUsername }),
       },
       readOnly: true,
+      count: 1, // bypass graphql check
     });
 
     if (res?.errors) {
@@ -857,6 +871,7 @@ function handleBranchProtectionError(
 
 function cachePr(pr?: GhPr | null): void {
   config.prList ??= [];
+  // v8 ignore else -- TODO: add test #40625
   if (pr) {
     updatePrCache(pr);
     for (let idx = 0; idx < config.prList.length; idx += 1) {
@@ -919,7 +934,9 @@ export async function getPrList(): Promise<GhPr[]> {
     }
 
     // TODO: check null `repo` (#22198)
-    const prCache = await getPrCache(githubApi, repo!, username);
+    const prCache = await instrument('getPrCache', () =>
+      getPrCache(githubApi, repo!, username),
+    );
     config.prList = Object.values(prCache).sort(
       ({ number: a }, { number: b }) => b - a,
     );
@@ -1067,6 +1084,7 @@ export async function tryReuseAutoclosedPr(
     const result = coerceRestPr(ghPr);
 
     const localSha = git.getBranchCommit(branchName);
+    // v8 ignore else -- TODO: add test #40625
     if (localSha && localSha !== sha) {
       await git.forcePushToRemote(branchName, 'origin');
       result.sha = localSha;
@@ -1124,6 +1142,7 @@ export async function getBranchStatus(
       (status) =>
         status.state !== 'success' || !status.context?.startsWith('renovate/'),
     );
+    // v8 ignore else -- TODO: add test #40625
     if (!commitStatus.statuses.length) {
       logger.debug(
         'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
@@ -1274,6 +1293,7 @@ export async function setBranchStatus({
       description,
       context,
     };
+    // v8 ignore else -- TODO: add test #40625
     if (targetUrl) {
       options.target_url = targetUrl;
     }
@@ -1314,6 +1334,7 @@ export async function getIssueList(): Promise<Issue[]> {
     return [];
   }
   let issueList = GithubIssueCache.getIssues();
+  // v8 ignore else -- TODO: add test #40625
   if (!issueList) {
     logger.debug('Retrieving issueList');
     issueList = await getIssues();
@@ -1362,12 +1383,24 @@ export async function findIssue(title: string): Promise<Issue | null> {
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
   const repo = config.parentRepo ?? config.repository;
-  const { body: closedIssue } = await githubApi.patchJson(
-    `repos/${repo}/issues/${issueNumber}`,
-    { body: { state: 'closed' } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(closedIssue);
+  try {
+    const { body: closedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNumber}`,
+      { body: { state: 'closed' } },
+      Issue,
+    );
+    GithubIssueCache.updateIssue(closedIssue);
+  } catch (err) {
+    const statusCode = err.response?.statusCode;
+    if (statusCode === 404 || statusCode === 410) {
+      logger.debug(
+        `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
+      );
+      GithubIssueCache.deleteIssue(issueNumber);
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function ensureIssue({
@@ -1531,12 +1564,30 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  const { body: updatedIssue } = await githubApi.postJson(
-    `repos/${repository}/issues/${issueNo}/assignees`,
-    { body: { assignees } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(updatedIssue);
+  const url = `repos/${repository}/issues/${issueNo}/assignees`;
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { body: updatedIssue } = await githubApi.postJson(
+        url,
+        { body: { assignees } },
+        Issue,
+      );
+      GithubIssueCache.updateIssue(updatedIssue);
+      return;
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+      lastErr = err;
+      logger.debug(
+        { attempt: attempt + 1 },
+        `Retrying addAssignees for #${issueNo} after 404`,
+      );
+      await setTimeout(1000);
+    }
+  }
+  throw lastErr!;
 }
 
 export async function addReviewers(
@@ -1682,6 +1733,7 @@ export async function ensureComment({
       logger.debug(`Ensuring content-only comment in #${number}`);
       body = `${sanitizedContent}`;
       comments.forEach((comment) => {
+        // v8 ignore else -- TODO: add test #40625
         if (comment.body === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -1701,7 +1753,7 @@ export async function ensureComment({
         'Comment updated',
       );
     } else {
-      logger.debug('Comment is already update-to-date');
+      logger.debug('Comment is already up-to-date');
     }
     return true;
   } catch (err) /* v8 ignore next */ {
@@ -1729,6 +1781,7 @@ export async function ensureCommentRemoval(
   const comments = await getComments(issueNo);
   let commentId: number | null | undefined = null;
 
+  // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
     const byTopic = (comment: Comment): boolean =>
       comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -1740,6 +1793,7 @@ export async function ensureCommentRemoval(
   }
 
   try {
+    // v8 ignore else -- TODO: add test #40625
     if (commentId) {
       logger.debug(`Removing comment from issueNo: ${issueNo}`);
       await deleteComment(commentId);
@@ -1784,7 +1838,8 @@ async function tryPrAutomerge(
   try {
     const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
     const variables = { pullRequestId: prNodeId, mergeMethod };
-    const queryOptions = { variables };
+    // set count to one bypass graphql check
+    const queryOptions = { variables, count: 1 };
 
     const res = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
@@ -1873,6 +1928,7 @@ export async function updatePr({
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
+  // v8 ignore else -- TODO: add test #40625
   if (body) {
     patchBody.body = body;
   }
@@ -1953,6 +2009,7 @@ export async function mergePr({
   let automergeResult: HttpResponse<unknown>;
   const mergeStrategy = mapMergeStartegy(strategy) ?? config.mergeMethod;
 
+  // v8 ignore else -- TODO: add test #40625
   if (mergeStrategy) {
     // This path is taken if we have auto-detected the allowed merge types from the repo or
     // automergeStrategy is configured by user
@@ -2066,13 +2123,13 @@ export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
 }
 
-export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
   /* v8 ignore next */
   if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
   }
-  let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
+  let vulnerabilityAlerts: GithubVulnerabilityAlerts | undefined;
   try {
     vulnerabilityAlerts = (
       await githubApi.getJson(
@@ -2082,7 +2139,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
-        GithubVulnerabilityAlert,
+        GithubVulnerabilityAlerts,
       )
     ).body;
   } catch (err) /* v8 ignore next */ {
@@ -2102,6 +2159,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         'GitHub vulnerability details',
       );
       for (const alert of vulnerabilityAlerts) {
+        // v8 ignore if -- TODO: can never happen but makes typescript happy #40625
         if (alert.security_vulnerability === null) {
           // As described in the documentation, there are cases in which
           // GitHub API responds with `"securityVulnerability": null`.
@@ -2115,7 +2173,8 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         } = alert.security_vulnerability;
         const patch = firstPatchedVersion?.identifier;
 
-        const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
+        const normalizedName =
+          ecosystem === 'pip' ? normalizePythonDepName(name) : name;
         alert.security_vulnerability.package.name = normalizedName;
         const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;

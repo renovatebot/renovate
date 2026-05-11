@@ -38,21 +38,23 @@ This follows the same workflow that Renovate's `asdf` manager uses.
 
 ### Short names support
 
-Renovate uses [mise registry](https://mise.jdx.dev/registry.html) to understand tools short names.
+Renovate uses the [mise registry](https://mise.jdx.dev/registry.html) to resolve tool short names to their appropriate datasource.
 
-Support for new tool short names needs to be _manually_ added to Renovate's logic.
+Where possible, Renovate will automagically support tools from the mise registry (via `mise registry --json`).
+
+This means that any tool in the mise registry that has a supported backend (e.g. `aqua`, `github`, `cargo`) should be automatically supported by Renovate.
 
 #### Adding new tool support
 
-There are 2 ways to integrate versioning for a new tool:
+If a tool you need is not yet in the mise registry, add it upstream to [mise](https://mise.jdx.dev/registry.html).
+Once Renovate syncs its registry data, the tool will be supported automatically, as long as it is in a backend that Renovate supports.
 
-- Renovate's `mise` manager: ensure upstream `mise` supports the tool, then add support to the `mise` manager in Renovate
-- Renovate's `asdf` manager: improve the `asdf` manager in Renovate, which automatically extends support to `mise`
-
-If `mise` adds support for more tools via its own [core tools](https://mise.jdx.dev/core-tools.html), you can create a PR to extend Renovate's `mise` manager to add support for the new core tools.
+For tools that need a custom datasource mapping (e.g. core tools like `node`, `python`), you can create a PR to extend Renovate's `mise` manager directly.
 
 If you want to add support for other tools' short names to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
 Even if the tool does not use the `asdf` backend in the registry, the short names added to the `asdf` manager will still be used in the `mise` manager.
+
+This may no longer be necessary now we automagically add support via the tools that the mise registry advertises.
 
 ### Backends support
 
@@ -62,6 +64,8 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`asdf`](https://mise.jdx.dev/dev-tools/backends/asdf.html)
 - [`aqua`](https://mise.jdx.dev/dev-tools/backends/aqua.html)
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
+- [`gem`](https://mise.jdx.dev/dev-tools/backends/gem.html)
+- [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
@@ -100,9 +104,13 @@ Renovate's `mise` manager does not support the following tool syntax:
   The `tag_regex` option is used as `extractVersion`, but the regex engines are not the same between mise and Renovate.
   If the version is not updated or updated incorrectly, override `extractVersion` manually in the Renovate config.
 
-### Supported default registry tool short names
+- Some of `github` backend tools with [`version_prefix`](https://mise.jdx.dev/dev-tools/backends/github.html) option.
+  The `version_prefix` option is converted to `extractVersion` by escaping special regex characters.
+  If the version is not updated or updated incorrectly, override `extractVersion` manually in the Renovate config.
 
-Renovate's `mise` manager can only version these tool short names:
+- Renovate will prefer the `github:` backend over other backends, if using the tool definition from the mise registry
+
+### Supported default registry tool short names
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->

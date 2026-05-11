@@ -9,10 +9,16 @@ import is, {
   isUndefined,
 } from '@sindresorhus/is';
 import type { PlatformId } from '../constants/index.ts';
+import { logger } from '../logger/index.ts';
+import {
+  AllManagersListLiteral,
+  CustomManagersListLiteral,
+} from '../manager-list.generated.ts';
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import { allManagersList, getManagerList } from '../modules/manager/index.ts';
 import type { HostRule } from '../types/index.ts';
+import { getToolConfig } from '../util/exec/containerbase.ts';
+import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -23,6 +29,10 @@ import {
 import * as template from '../util/template/index.ts';
 import { parseUrl } from '../util/url.ts';
 import {
+  AllVersioningsListLiteral,
+  type VersioningName,
+} from '../versioning-list.generated.ts';
+import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule.ts';
@@ -31,7 +41,8 @@ import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.ts';
+import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
+import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
@@ -63,7 +74,12 @@ let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
 
-const managerList = getManagerList();
+const managerList: readonly string[] = AllManagersListLiteral;
+
+const allManagersList: readonly string[] = [
+  ...AllManagersListLiteral,
+  ...CustomManagersListLiteral,
+];
 
 const topLevelObjects = [...managerList, 'env'];
 
@@ -237,6 +253,20 @@ export async function validateConfig(
         });
       }
     }
+    if (key === 'registryUrls' && !parentPath && isNonEmptyArray(val)) {
+      warnings.push({
+        topic: 'Configuration Warning',
+        message:
+          'Setting `registryUrls` at the top level of your config will apply it to all managers and datasources, which can cause the wrong registry URL to be used for some packages. Use `registryUrls` inside `packageRules` to target specific managers or packages.',
+      });
+    }
+    if (key === 'defaultRegistryUrls' && !parentPath && isNonEmptyArray(val)) {
+      warnings.push({
+        topic: 'Configuration Warning',
+        message:
+          'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers and datasources, which can cause the wrong registry URL to be used for some packages. Use `defaultRegistryUrls` inside `packageRules` to target specific managers or packages.',
+      });
+    }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
       !(is as any).function(val) // Ignore all functions
@@ -281,6 +311,8 @@ export async function validateConfig(
           message,
         });
       }
+
+      // v8 ignore else -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
       if (!optionTypes[key]) {
         errors.push({
           topic: 'Configuration Error',
@@ -383,9 +415,17 @@ export async function validateConfig(
                       });
                     }
                   }
+                  try {
+                    parsePreset(subval);
+                  } catch {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `${currentPath}: preset "${subval}" is not valid`,
+                    });
+                  }
                 } else {
                   errors.push({
-                    topic: 'Configuration Warning',
+                    topic: 'Configuration Error',
                     message: `${currentPath}: preset value is not a string`,
                   });
                 }
@@ -405,6 +445,7 @@ export async function validateConfig(
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrls',
+              'matchRegistryUrls',
               'matchUpdateTypes',
               'matchConfidence',
               'matchCurrentAge',
@@ -622,11 +663,7 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
-        } else if (
-          type === 'object' &&
-          currentPath !== 'compatibility' &&
-          key !== 'constraints'
-        ) {
+        } else if (type === 'object') {
           if (isPlainObject(val)) {
             if (key === 'registryAliases') {
               const res = validatePlainObject(val);
@@ -727,6 +764,78 @@ export async function validateConfig(
                   }
                 }
               }
+            } else if (key === 'installTools') {
+              for (const toolName of Object.keys(val)) {
+                if (!isToolName(toolName)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${toolName}\` configuration: not a valid tool name.`,
+                  });
+                }
+              }
+            } else if (key === 'constraints') {
+              const { get: getVersioning } =
+                await import('../modules/versioning/index.ts');
+              for (const [k, v] of Object.entries(val)) {
+                if (!isString(v)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of constraints and their value`,
+                  });
+                  break;
+                }
+
+                if (!isConstraintName(k)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a supported constraint name`,
+                  });
+                } else if (isToolName(k)) {
+                  // TODO: #31831
+                  const versioningId = getToolConfig(k).versioning;
+                  const versioning = getVersioning(versioningId);
+                  if (!versioning.isValid(v)) {
+                    warnings.push({
+                      topic: 'Configuration Error',
+                      message: `Configuration option \`${currentPath}.${k}=${v}\` is not a valid tool version constraint, according to \`${versioningId}\` versioning`,
+                    });
+                  }
+                }
+              }
+            } else if (key === 'constraintsVersioning') {
+              for (const [k, v] of Object.entries(val)) {
+                if (!isString(v)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of additional constraint names and their versioning`,
+                  });
+                  break;
+                }
+
+                if (isToolName(k)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` is not a valid additional constraint name, as \`${k}\` is a tool name, and \`constraintsVersioning\` can only override the versioning for a non-tool constraint`,
+                  });
+                } else if (isConstraintName(k)) {
+                  const versioningName = v.split(':')[0];
+                  if (
+                    !AllVersioningsListLiteral.includes(
+                      versioningName as VersioningName,
+                    )
+                  ) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Configuration option \`${currentPath}.${k}=${v}\`: \`${v}\` is not a valid versioning scheme`,
+                    });
+                  }
+                } else {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a known additional constraint name`,
+                  });
+                }
+              }
             } else {
               const ignoredObjects = options
                 .filter((option) => option.freeChoice)
@@ -748,6 +857,12 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a json object`,
             });
           }
+        } else {
+          // v8 ignore next -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
+          logger.debug(
+            {},
+            `Unhandled validation for ${type} at \`${currentPath}\``,
+          );
         }
       }
     }

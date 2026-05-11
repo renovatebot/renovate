@@ -1,26 +1,34 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, logger, partial, platform, scm } from '~test/util.ts';
 import * as decrypt from '../../../config/decrypt.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
 import * as _migrate from '../../../config/migration.ts';
 import type { AllConfig } from '../../../config/types.ts';
+import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import { initRepoCache } from '../../../util/cache/repository/init.ts';
 import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
 import { getUserEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import * as queue from '../../../util/http/queue.ts';
+import * as throttle from '../../../util/http/throttle.ts';
 import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
 import { OnboardingState } from '../onboarding/common.ts';
 import {
+  applyHostRules,
+  applyNpmrc,
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
   resolveStaticRepoConfig,
   setNpmTokenInNpmrc,
 } from './merge.ts';
-import { fs, logger, partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
+import type { RepositoryWorkerConfig } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
@@ -44,6 +52,7 @@ function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
 
 beforeEach(() => {
   memCache.init();
+  GlobalConfig.reset();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -55,6 +64,7 @@ vi.mock('../../../config/migrate-validate.ts');
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    hostRules.clear();
   });
 
   describe('detectRepoFileConfig()', () => {
@@ -387,6 +397,7 @@ describe('workers/repository/init/merge', () => {
         warnings: [],
         errors: [],
       });
+      GlobalConfig.set({ requireConfig: 'ignored' });
       expect(
         await mergeRenovateConfig({
           ...config,
@@ -470,6 +481,160 @@ describe('workers/repository/init/merge', () => {
         var: 'value',
       });
     });
+
+    it('applies repositoryEntryConfig between global and repo file config', async () => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+      const npmrcValue = '//registry.npmjs.org/:_authToken=preset-token\n';
+
+      const globalPresetRule = {
+        matchPackageNames: ['globalPresetDep'],
+        enabled: false,
+      };
+      const ignoredByGlobalRule = {
+        matchPackageNames: ['ignoredByGlobalDep'],
+        enabled: false,
+      };
+      const ignoredByEntryRule = {
+        matchPackageNames: ['ignoredByEntryDep'],
+        enabled: false,
+      };
+      const ignoredByRepoRule = {
+        matchPackageNames: ['ignoredByRepoDep'],
+        enabled: false,
+      };
+      const repoEntryPresetRule = {
+        matchPackageNames: ['repoEntryPresetDep'],
+        enabled: false,
+      };
+      const repoFilePresetRule = {
+        matchPackageNames: ['repoFilePresetDep'],
+        enabled: false,
+      };
+      const globalRule = {
+        matchPackageNames: ['globalDep'],
+        enabled: false,
+      };
+      const repoEntryRule = {
+        matchPackageNames: ['repoEntryDep'],
+        enabled: false,
+      };
+      const repoFileRule = {
+        matchPackageNames: ['repoFileDep'],
+        enabled: false,
+      };
+
+      memCache.set('preset:local>globalPreset', {
+        packageRules: [globalPresetRule],
+        hostRules: [
+          {
+            matchHost: 'https://npm.example.com',
+            token: '{{ secrets.HOST_TOKEN }}',
+          },
+        ],
+        npmrc: npmrcValue,
+      });
+      memCache.set('preset:local>ignoredByGlobal', {
+        packageRules: [ignoredByGlobalRule],
+      });
+      memCache.set('preset:local>ignoredByEntry', {
+        packageRules: [ignoredByEntryRule],
+      });
+      memCache.set('preset:local>ignoredByRepo', {
+        packageRules: [ignoredByRepoRule],
+      });
+      memCache.set('preset:local>repoEntryPreset', {
+        packageRules: [repoEntryPresetRule],
+      });
+      memCache.set('preset:local>repoFilePreset', {
+        packageRules: [repoFilePresetRule],
+      });
+
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({
+          extends: ['local>repoFilePreset'],
+          ignorePresets: ['local>ignoredByRepo'],
+          packageRules: [repoFileRule],
+        }),
+      );
+
+      const inputConfig: RepositoryWorkerConfig = {
+        ...config,
+        extends: [
+          'local>globalPreset',
+          'local>ignoredByGlobal',
+          'local>ignoredByEntry',
+          'local>ignoredByRepo',
+        ],
+        ignorePresets: ['local>ignoredByGlobal'],
+        packageRules: [globalRule],
+        secrets: { HOST_TOKEN: 'resolved-secret-token' },
+        repositoryEntryConfig: {
+          extends: ['local>repoEntryPreset'],
+          ignorePresets: ['local>ignoredByEntry'],
+          packageRules: [repoEntryRule],
+        },
+      };
+
+      const res = await mergeRenovateConfig(inputConfig);
+
+      expect(res.packageRules).toMatchObject([
+        globalRule,
+        globalPresetRule,
+        // ignoredByGlobalRule should not be here
+        // ignoredByEntryRule should not be here
+        // ignoredByRepoRule should not be here
+        repoEntryPresetRule,
+        repoEntryRule,
+        repoFilePresetRule,
+        repoFileRule,
+      ]);
+
+      expect(hostRules.find({ url: 'https://npm.example.com' })).toMatchObject({
+        token: 'resolved-secret-token',
+      });
+
+      expect(setNpmrcSpy).toHaveBeenCalledWith(npmrcValue);
+    });
+
+    it('supports repositoryEntryConfig without extends or ignorePresets', async () => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+
+      const repoEntryRule = {
+        matchPackageNames: ['repoEntryDep'],
+        enabled: false,
+      };
+
+      scm.getFileList.mockResolvedValue([]);
+      fs.readLocalFile.mockResolvedValue(null);
+
+      const inputConfig: RepositoryWorkerConfig = {
+        ...config,
+        extends: undefined,
+        ignorePresets: undefined,
+        repositoryEntryConfig: {
+          packageRules: [repoEntryRule],
+        },
+      };
+
+      const res = await mergeRenovateConfig(inputConfig);
+
+      expect(res.packageRules).toMatchObject([repoEntryRule]);
+    });
   });
 
   describe('setNpmTokenInNpmrc', () => {
@@ -500,6 +665,88 @@ describe('workers/repository/init/merge', () => {
       };
       setNpmTokenInNpmrc(config);
       expect(config).toMatchObject({ npmrc: 'something_auth=token\n' });
+    });
+  });
+
+  describe('applyNpmrc', () => {
+    it('does nothing if npmrc is missing after token migration', () => {
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+
+      applyNpmrc({});
+
+      expect(setNpmrcSpy).not.toHaveBeenCalled();
+    });
+
+    it('migrates npmToken and sets npmrc', () => {
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+      const config = {
+        npmToken: 'token',
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+      };
+
+      applyNpmrc(config);
+
+      expect(config.npmToken).toBeUndefined();
+      expect(config.npmrc).toBe('something_authToken=token');
+      expect(setNpmrcSpy).toHaveBeenCalledExactlyOnceWith(
+        'something_authToken=token',
+      );
+    });
+  });
+
+  describe('applyHostRules', () => {
+    it('does nothing when hostRules is not configured', () => {
+      const addSpy = vi.spyOn(hostRules, 'add');
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+
+      applyHostRules({});
+
+      expect(addSpy).not.toHaveBeenCalled();
+      expect(clearQueueSpy).not.toHaveBeenCalled();
+      expect(clearThrottleSpy).not.toHaveBeenCalled();
+    });
+
+    it('adds hostRules and clears queue and throttle', () => {
+      const addSpy = vi
+        .spyOn(hostRules, 'add')
+        .mockImplementation(() => undefined);
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+      const config = {
+        hostRules: [{ matchHost: 'registry.npmjs.org' }],
+      };
+
+      applyHostRules(config);
+
+      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+        matchHost: 'registry.npmjs.org',
+      });
+      expect(clearQueueSpy).toHaveBeenCalledOnce();
+      expect(clearThrottleSpy).toHaveBeenCalledOnce();
+      expect(config.hostRules).toBeUndefined();
+    });
+
+    it('warns on invalid hostRule and continues applying others', () => {
+      const addSpy = vi
+        .spyOn(hostRules, 'add')
+        .mockImplementationOnce(() => {
+          throw new Error('invalid host rule');
+        })
+        .mockImplementation(() => undefined);
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+      const config = {
+        hostRules: [{ matchHost: 'one.example' }, { matchHost: 'two.example' }],
+      };
+
+      applyHostRules(config);
+
+      expect(addSpy).toHaveBeenCalledTimes(2);
+      expect(logger.logger.warn).toHaveBeenCalledOnce();
+      expect(clearQueueSpy).toHaveBeenCalledOnce();
+      expect(clearThrottleSpy).toHaveBeenCalledOnce();
+      expect(config.hostRules).toBeUndefined();
     });
   });
 

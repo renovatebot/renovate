@@ -1,5 +1,7 @@
 import type { RequestError, Response } from 'got';
 import { DateTime } from 'luxon';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { InheritConfig } from '../../../../config/inherit.ts';
@@ -11,8 +13,6 @@ import * as memCache from '../../../../util/cache/memory/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { OnboardingState } from '../common.ts';
 import { ensureOnboardingPr } from './index.ts';
-import { partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
@@ -21,7 +21,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     let branches: BranchConfig[];
 
     const bodyStruct = {
-      hash: '6aa71f8cb7b1503b883485c8f5bd564b31923b9c7fa765abe2a7338af40e03b1',
+      hash: '3864212140a13f6ddfaf19c2c812187369a6b00e680a0ac443b4d23539317c41',
     };
 
     beforeEach(() => {
@@ -36,7 +36,12 @@ describe('workers/repository/onboarding/pr/index', () => {
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>());
-      GlobalConfig.reset();
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate', // default value
+        requireConfig: config.requireConfig,
+      });
+      InheritConfig.reset();
     });
 
     it('returns if onboarded', async () => {
@@ -209,7 +214,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
         const hash =
-          '30029ee05ed80b34d2f743afda6e78fe20247a1eedaa9ce6a8070045c229ebfa'; // no rebase checkbox PR hash
+          '1280e47eeebf596351163aef6d1367d083276b37bcc97fb3b05c4b4312ef357a'; // no rebase checkbox PR hash
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         platform.getBranchPr.mockResolvedValue(
@@ -461,6 +466,11 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('creates PR (no require config)', async () => {
       config.requireConfig = 'optional';
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate',
+        requireConfig: 'optional',
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
@@ -471,8 +481,40 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
+    describe('the created PR references onboardingConfigFileName', () => {
+      it('when set', async () => {
+        GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
+        await ensureOnboardingPr(config, packageFiles, branches);
+        expect(platform.createPr.mock.calls[0][0].prBody).toContain(
+          `Add your custom config to \`.github/renovate.json\` in this branch`,
+        );
+        expect(platform.createPr.mock.calls[0][0].prBody).not.toContain(
+          '`renovate.json`',
+        );
+      });
+
+      it('when not set, falls back to "renovate.json"', async () => {
+        GlobalConfig.set({ onboardingConfigFileName: undefined });
+        await ensureOnboardingPr(config, packageFiles, branches);
+        expect(platform.createPr.mock.calls[0][0].prBody).toContain(
+          `Add your custom config to \`renovate.json\` in this branch`,
+        );
+      });
+
+      it('when set, but not a valid filename, falls back to "renovate.json"', async () => {
+        GlobalConfig.set({ onboardingConfigFileName: 'foo.bar' });
+        await ensureOnboardingPr(config, packageFiles, branches);
+        expect(platform.createPr.mock.calls[0][0].prBody).toContain(
+          `Add your custom config to \`renovate.json\` in this branch`,
+        );
+      });
+    });
+
     it('dryrun of creates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: config.onboardingBranch,
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -484,7 +526,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('dryrun of updates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: config.onboardingBranch,
+      });
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',

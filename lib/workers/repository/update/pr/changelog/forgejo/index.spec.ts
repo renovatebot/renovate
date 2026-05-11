@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
 import * as hostRules from '../../../../../../util/host-rules.ts';
 import { toBase64 } from '../../../../../../util/string.ts';
@@ -6,8 +8,6 @@ import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { ForgejoChangeLogSource } from '../forgejo/source.ts';
 import { getChangeLogJSON } from '../index.ts';
 import { getReleaseNotesMd } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',

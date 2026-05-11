@@ -33,11 +33,11 @@ class Unity3dVersioningApi extends GenericVersioningApi {
     const { major, minor, patch, releaseStream, build } = matches.groups;
 
     const release = [
-      parseInt(major),
-      parseInt(minor),
-      parseInt(patch),
+      parseInt(major, 10),
+      parseInt(minor, 10),
+      parseInt(patch, 10),
       Unity3dVersioningApi.ReleaseStreamType.indexOf(releaseStream),
-      parseInt(build),
+      parseInt(build, 10),
     ];
     const isStable =
       Unity3dVersioningApi.stableVersions.includes(releaseStream);

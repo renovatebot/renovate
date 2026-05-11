@@ -1,5 +1,5 @@
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const genericCaseFileContent = Fixtures.get('generic-case.main.kts');
 const customRepositoriesFileContent = Fixtures.get(

@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractLockFileVersions, parseLockFile } from './locked-version.ts';
 import { fs } from '~test/util.ts';
+import { extractLockFileVersions, parseLockFile } from './locked-version.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

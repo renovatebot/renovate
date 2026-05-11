@@ -1,4 +1,3 @@
-import tsconfigPaths from 'vite-tsconfig-paths';
 import type { ViteUserConfig } from 'vitest/config';
 import {
   coverageConfigDefaults,
@@ -6,11 +5,11 @@ import {
   defineConfig,
   mergeConfig,
 } from 'vitest/config';
-import { testShards } from './tools/test/shards.js';
+import { testShards } from './tools/test/shards.ts';
 import {
   getCoverageIgnorePatterns,
   normalizePattern,
-} from './tools/test/utils.js';
+} from './tools/test/utils.ts';
 
 const ci = !!process.env.CI;
 
@@ -74,7 +73,7 @@ function configureShardingOrFallbackTo(
 export default defineConfig(() =>
   mergeConfig(
     {
-      plugins: [tsconfigPaths()],
+      resolve: { tsconfigPaths: true },
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
@@ -105,12 +104,12 @@ export default defineConfig(() =>
             '+(config.js)',
             '__mocks__/**',
             // fully ignored files
+            '*.config.{mts,mjs}',
             '*.json',
             'lib/config-validator.ts',
             'lib/constants/category.ts',
             'lib/modules/datasource/hex/v2/package.ts',
             'lib/modules/datasource/hex/v2/signed.ts',
-            'lib/util/cache/package/redis.ts',
             'lib/util/http/legacy.ts',
             'lib/workers/repository/cache.ts',
           ],

@@ -73,7 +73,7 @@ export class DockerHubCache {
 
     if (earliestDate && latestDate) {
       for (const [key, item] of Object.entries(this.cache.items)) {
-        const id = parseInt(key);
+        const id = parseInt(key, 10);
 
         const itemDate = DateTime.fromISO(item.last_updated);
 
@@ -110,5 +110,19 @@ export class DockerHubCache {
 
   getItems(): DockerHubTag[] {
     return Object.values(this.cache.items);
+  }
+
+  getDigestForTag(tagName: string): string | null {
+    return (
+      this.getItems().find((item) => item.name === tagName)?.digest ?? null
+    );
+  }
+
+  getArchDigestForTag(tagName: string, architecture: string): string | null {
+    const tag = this.getItems().find((item) => item.name === tagName);
+    return (
+      tag?.images.find((img) => img.architecture === architecture)?.digest ??
+      null
+    );
   }
 }

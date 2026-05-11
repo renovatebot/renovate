@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { getDefaultVersioning } from '../../datasource/common.ts';
+import * as allVersioning from '../../versioning/index.ts';
+import { extractPackageFile } from './index.ts';
 
 const gomod1 = Fixtures.get('1/go-mod');
 const gomod2 = Fixtures.get('2/go-mod');
@@ -69,6 +71,7 @@ describe('modules/manager/gomod/extract', () => {
             currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
           },
           {
             managerData: {
@@ -121,6 +124,68 @@ describe('modules/manager/gomod/extract', () => {
             datasource: 'go',
           },
         ],
+        extractedConstraints: {
+          '%goMod': '~1.23.x',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
+      });
+    });
+
+    it('extracts replace directives from non-public module path', () => {
+      const goMod = codeBlock`
+        module github.com/JamieTanna-Mend-testing/tka-9783-golang-pro-main
+        go 1.25.5
+        require pro-lib v0.0.0-00010101000000-000000000000
+        replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.0-20260219031232-e6910bd8fb97
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            managerData: {
+              lineNumber: 1,
+            },
+            depName: 'go',
+            depType: 'golang',
+            currentValue: '1.25.5',
+            datasource: 'golang-version',
+            versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
+          },
+          {
+            managerData: {
+              lineNumber: 2,
+            },
+            depName: 'pro-lib',
+            depType: 'require',
+            currentValue: 'v0.0.0-00010101000000-000000000000',
+            currentDigest: '000000000000',
+            datasource: 'go',
+            digestOneAndOnly: true,
+            versioning: 'loose',
+            skipReason: 'invalid-version',
+          },
+          {
+            managerData: {
+              lineNumber: 3,
+            },
+            depName: 'github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns',
+            depType: 'replace',
+            currentValue: 'v0.0.0-20260219031232-e6910bd8fb97',
+            currentDigest: 'e6910bd8fb97',
+            datasource: 'go',
+            digestOneAndOnly: true,
+            versioning: 'loose',
+          },
+        ],
+        extractedConstraints: {
+          '%goMod': '~1.25.x',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
       });
     });
 
@@ -163,6 +228,7 @@ describe('modules/manager/gomod/extract', () => {
             currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
           },
           {
             managerData: {
@@ -172,6 +238,7 @@ describe('modules/manager/gomod/extract', () => {
             depType: 'toolchain',
             currentValue: '1.23.3',
             datasource: 'golang-version',
+            commitMessageTopic: 'go toolchain directive',
           },
           {
             managerData: {
@@ -183,6 +250,13 @@ describe('modules/manager/gomod/extract', () => {
             datasource: 'go',
           },
         ],
+        extractedConstraints: {
+          '%goMod': '~1.23.x',
+          golang: '1.23.3',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
       });
     });
 
@@ -347,5 +421,185 @@ describe('modules/manager/gomod/extract', () => {
       `;
     const res = extractPackageFile(goMod);
     expect(res).toBeNull();
+  });
+
+  it('marks placeholder pseudo versions with skipReason invalid-version', () => {
+    const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+        go 1.19
+        require (
+          github.com/foo/bar v1.2.3
+          github.com/baz/qux v0.0.0-00010101000000-000000000000
+          github.com/example/local v0.0.0-00010101000000-000000000000 // indirect
+          github.com/non/placeholder v1.2.4-0.20230101120000-abcdef123456
+          monorepo v0.0.0-00010101000000-000000000000
+        )
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          managerData: {
+            lineNumber: 1,
+          },
+          depName: 'go',
+          depType: 'golang',
+          currentValue: '1.19',
+          datasource: 'golang-version',
+          versioning: 'go-mod-directive',
+          commitMessageTopic: 'go module directive',
+        },
+        {
+          managerData: {
+            lineNumber: 3,
+            multiLine: true,
+          },
+          depName: 'github.com/foo/bar',
+          depType: 'require',
+          currentValue: 'v1.2.3',
+          datasource: 'go',
+        },
+        {
+          managerData: {
+            lineNumber: 4,
+            multiLine: true,
+          },
+          depName: 'github.com/baz/qux',
+          depType: 'require',
+          currentValue: 'v0.0.0-00010101000000-000000000000',
+          datasource: 'go',
+          skipReason: 'invalid-version',
+          currentDigest: '000000000000',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+        },
+        {
+          managerData: {
+            lineNumber: 5,
+            multiLine: true,
+          },
+          depName: 'github.com/example/local',
+          depType: 'indirect',
+          currentValue: 'v0.0.0-00010101000000-000000000000',
+          datasource: 'go',
+          skipReason: 'invalid-version',
+          enabled: false,
+          currentDigest: '000000000000',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+        },
+        {
+          managerData: {
+            lineNumber: 6,
+            multiLine: true,
+          },
+          depName: 'github.com/non/placeholder',
+          depType: 'require',
+          currentValue: 'v1.2.4-0.20230101120000-abcdef123456',
+          datasource: 'go',
+          currentDigest: 'abcdef123456',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+        },
+        {
+          managerData: {
+            lineNumber: 7,
+            multiLine: true,
+          },
+          depName: 'monorepo',
+          depType: 'require',
+          currentValue: 'v0.0.0-00010101000000-000000000000',
+          datasource: 'go',
+          currentDigest: '000000000000',
+          digestOneAndOnly: true,
+          versioning: 'loose',
+          skipReason: 'invalid-version',
+        },
+      ],
+      extractedConstraints: {
+        '%goMod': '~1.19.x',
+      },
+      constraintsVersioning: {
+        '%goMod': 'semver-coerced',
+      },
+    });
+  });
+
+  it.each(['1.19', '1.19.0', '1.19.5'])(
+    'extracts `go` directive %s as a `%goMod` extracted constraint as a SemVer-minor compatible range',
+    (goDirective) => {
+      const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+        go ${goDirective}
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            managerData: {
+              lineNumber: 1,
+            },
+            depName: 'go',
+            depType: 'golang',
+            currentValue: goDirective,
+            datasource: 'golang-version',
+            versioning: 'go-mod-directive',
+            commitMessageTopic: 'go module directive',
+          },
+        ],
+        extractedConstraints: {
+          // NOTE that this is extracted as a range for the whole SemVer minor version
+          '%goMod': '~1.19.x',
+        },
+        constraintsVersioning: {
+          '%goMod': 'semver-coerced',
+        },
+      });
+    },
+  );
+
+  describe('the extracted version can be used as a SemVer constraint', () => {
+    const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+        go 1.19
+      `;
+    const res = extractPackageFile(goMod);
+
+    const datasourceVersioningName = getDefaultVersioning(
+      res!.deps[0].datasource,
+    );
+    // NOTE that this is not the `go-mod-directive` versioning, as that comes from `constraintsVersioning`
+    expect(datasourceVersioningName).toEqual('semver');
+
+    expect(res!.constraintsVersioning).toBeDefined();
+    const versioningName = res!.constraintsVersioning!['%goMod'];
+    expect(versioningName).toBeDefined();
+
+    const versioning = allVersioning.get(versioningName);
+    expect(versioning).toBeDefined();
+
+    const constraint = res!.extractedConstraints!['%goMod']!;
+    it(`${constraint} is a valid constraint`, () => {
+      expect(versioning.isValid(constraint)).toBeTrue();
+    });
+
+    it('matches version 1.19, even though it is not valid SemVer', () => {
+      expect(versioning.matches('1.19', constraint)).toBeTrue();
+    });
+
+    it('matches the current SemVer minor', () => {
+      expect(versioning.matches('1.19.0', constraint)).toBeTrue();
+      expect(versioning.matches('1.19.10', constraint)).toBeTrue();
+    });
+
+    it('does not match the next SemVer minor', () => {
+      expect(versioning.matches('1.20.0', constraint)).toBeFalse();
+      expect(versioning.matches('1.20.10', constraint)).toBeFalse();
+    });
+
+    it('does not match the previous SemVer minor', () => {
+      expect(versioning.matches('1.18.0', constraint)).toBeFalse();
+      expect(versioning.matches('1.18.5', constraint)).toBeFalse();
+    });
   });
 });

@@ -1,3 +1,4 @@
+import { hostRules, partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
@@ -12,7 +13,6 @@ import type {
 } from './types.ts';
 import * as utils from './utils.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
-import { hostRules, partial } from '~test/util.ts';
 
 vi.mock('../../../util/host-rules.ts');
 
@@ -24,26 +24,84 @@ describe('modules/platform/gerrit/utils', () => {
   });
 
   describe('getGerritRepoUrl()', () => {
-    it('create a git url with username/password', () => {
-      hostRules.find.mockReturnValue({
-        username: 'abc',
-        password: '123',
+    describe('no gitUrl provided', () => {
+      it('create a git url with username/password', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, undefined);
+        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
-      const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl);
-      expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
-    });
 
-    it('create a git url without username/password', () => {
-      hostRules.find.mockReturnValue({});
-      expect(() => utils.getGerritRepoUrl('web/apps', baseUrl)).toThrow(
-        'Init: You must configure a Gerrit Server username/password',
-      );
-    });
+      it('create a git url without username/password', () => {
+        hostRules.find.mockReturnValue({});
+        expect(() =>
+          utils.getGerritRepoUrl('web/apps', baseUrl, undefined),
+        ).toThrow('Init: You must configure a Gerrit Server username/password');
+      });
 
-    it('throws on invalid endpoint', () => {
-      expect(() => utils.getGerritRepoUrl('web/apps', '...')).toThrow(
-        Error(CONFIG_GIT_URL_UNAVAILABLE),
-      );
+      it('throws on invalid endpoint', () => {
+        expect(() =>
+          utils.getGerritRepoUrl('web/apps', '...', undefined),
+        ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
+      });
+    });
+    describe('default gitUrl', () => {
+      it('create a git url with username/password', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'default');
+        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
+      });
+    });
+    describe('endpoint gitUrl', () => {
+      it('create a git url with username/password', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'endpoint');
+        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
+      });
+    });
+    describe('ssh gitUrl', () => {
+      it('create a simple url', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'ssh');
+        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+      });
+
+      it('create a url with trailing slash', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          'https://gerrit.example.com/',
+          'ssh',
+        );
+        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+      });
+
+      it('create a url when base has context', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          'https://gerrit.example.com/context',
+          'ssh',
+        );
+        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+      });
     });
   });
 
@@ -360,5 +418,13 @@ describe('modules/platform/gerrit/utils', () => {
         );
       },
     );
+  });
+
+  describe('convertGerritDateToISO()', () => {
+    it('converts Gerrit date format to ISO format', () => {
+      expect(
+        utils.convertGerritDateToISO('2023-05-20 14:25:30.123456789'),
+      ).toBe('2023-05-20T14:25:30.123456789');
+    });
   });
 });

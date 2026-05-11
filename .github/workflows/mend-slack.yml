@@ -22,15 +22,15 @@ jobs:
 
           if [ $diff -lt 86400 ]; then
             hours=$((diff / 3600))
-            echo "::set-output name=ago::$hours hours ago"
+            echo "ago=$hours hours ago" >> "$GITHUB_OUTPUT"
           else
             days=$((diff / 86400))
-            echo "::set-output name=ago::$days days ago"
+            echo "ago=$days days ago" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
         with:
           method: chat.postMessage
           payload: |

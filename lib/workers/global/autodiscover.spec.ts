@@ -6,8 +6,8 @@ import { autodiscoverRepositories } from './autodiscover.ts';
 
 vi.mock('../../modules/platform/github/index.ts');
 vi.mock('../../util/host-rules.ts');
-vi.unmock('../../modules/platform');
-vi.unmock('../../modules/platform/scm');
+vi.unmock('../../modules/platform/index.ts');
+vi.unmock('../../modules/platform/scm.ts');
 
 // imports are readonly
 const hostRules = vi.mocked(_hostRules);

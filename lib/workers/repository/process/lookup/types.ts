@@ -24,16 +24,15 @@ export interface FilterConfig {
 
 export interface RollbackConfig {
   currentValue?: string;
+  packageName: string;
   depName?: string;
   packageFile?: string;
   versioning?: string;
+  datasource: string;
 }
 
 export interface LookupUpdateConfig
-  extends RollbackConfig,
-    FilterConfig,
-    RangeConfig,
-    RenovateConfig {
+  extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
   currentVersion?: string;
 
   digestOneAndOnly?: boolean;

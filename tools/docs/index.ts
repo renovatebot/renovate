@@ -4,10 +4,11 @@ import * as tar from 'tar';
 import { getProblems, logger } from '../../lib/logger/index.ts';
 import { generateConfig } from './config.ts';
 import { generateDatasources } from './datasources.ts';
+import { generateEnvOptions } from './env-options.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
+import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
 import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins.ts';
-import { generateManagers } from './manager.ts';
 import { generatePlatforms } from './platforms.ts';
 import { generatePresets } from './presets.ts';
 import { generateSchema } from './schema.ts';
@@ -69,6 +70,10 @@ export async function generateDocs(
     // self-hosted-configuration
     logger.info('* self-hosted-configuration');
     await generateConfig(dist, true);
+
+    // env-options
+    logger.info('* env-options');
+    await generateEnvOptions(dist);
 
     // json-schema
     logger.info('* json-schema');

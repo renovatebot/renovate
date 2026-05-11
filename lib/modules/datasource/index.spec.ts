@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
@@ -23,7 +24,6 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types.ts';
-import { logger } from '~test/util.ts';
 
 const datasource = 'dummy';
 const packageName = 'package';
@@ -939,7 +939,11 @@ describe('modules/datasource/index', () => {
             constraintsFiltering: 'strict',
           });
           expect(res).toMatchObject({
-            releases: [{ version: '0.0.3' }, { version: '0.0.4' }],
+            releases: [
+              { version: '0.0.2' },
+              { version: '0.0.3' },
+              { version: '0.0.4' },
+            ],
           });
         });
       });

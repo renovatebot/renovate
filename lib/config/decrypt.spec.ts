@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import {
   decryptConfig,
   getAzureCollection,
@@ -5,7 +6,6 @@ import {
 } from './decrypt.ts';
 import { GlobalConfig } from './global.ts';
 import type { RenovateConfig } from './types.ts';
-import { logger } from '~test/util.ts';
 
 const repository = 'abc/def';
 

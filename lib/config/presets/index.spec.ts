@@ -1,4 +1,6 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
@@ -6,7 +8,11 @@ import * as _packageCache from '../../util/cache/package/index.ts';
 import { setCustomEnv } from '../../util/env.ts';
 import { GlobalConfig } from '../global.ts';
 import type { AllConfig } from '../types.ts';
+import * as _forgejo from './forgejo/index.ts';
+import * as _gitea from './gitea/index.ts';
 import * as _github from './github/index.ts';
+import * as _gitlab from './gitlab/index.ts';
+import * as _http from './http/index.ts';
 import * as presets from './index.ts';
 import * as _local from './local/index.ts';
 import * as _npm from './npm/index.ts';
@@ -16,17 +22,23 @@ import {
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger } from '~test/util.ts';
 
+vi.mock('./forgejo/index.ts');
+vi.mock('./gitea/index.ts');
+vi.mock('./http/index.ts');
 vi.mock('./npm/index.ts');
 vi.mock('./github/index.ts');
+vi.mock('./gitlab/index.ts');
 vi.mock('./local/index.ts');
 vi.mock('../../util/cache/package/index.ts', () => mockDeep());
 
+const forgejo = vi.mocked(_forgejo);
+const gitea = vi.mocked(_gitea);
+const http = vi.mocked(_http);
 const npm = vi.mocked(_npm);
 const local = vi.mocked(_local);
 const gitHub = vi.mocked(_github);
+const gitLab = vi.mocked(_gitlab);
 const packageCache = vi.mocked(_packageCache);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
@@ -274,16 +286,17 @@ describe('config/presets/index', () => {
           {
             groupName: 'eslint',
             matchPackageNames: [
-              '@types/eslint',
-              'babel-eslint',
+              '*/eslint-plugin',
               '@babel/eslint-parser',
               '@eslint/**',
               '@eslint-community/**',
               '@stylistic/eslint-plugin**',
+              '@types/eslint',
               '@types/eslint__**',
               '@typescript-eslint/**',
-              'typescript-eslint',
+              'babel-eslint',
               'eslint**',
+              'typescript-eslint',
             ],
           },
         ],
@@ -295,7 +308,7 @@ describe('config/presets/index', () => {
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(10);
+      expect(res.matchPackageNames).toHaveLength(11);
     });
 
     it('resolves linters', async () => {
@@ -303,7 +316,7 @@ describe('config/presets/index', () => {
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(21);
+      expect(res.matchPackageNames).toHaveLength(22);
     });
 
     it('resolves nested groups', async () => {
@@ -312,7 +325,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(21);
+      expect(rule.matchPackageNames).toHaveLength(22);
     });
 
     it('migrates automerge in presets', async () => {
@@ -431,6 +444,34 @@ describe('config/presets/index', () => {
         endpoint: 'https://dummy.example.com/api/v4',
         labels: ['self-hosted resolved'],
       });
+    });
+
+    it('resolves http presets', async () => {
+      config.extends = ['https://example.com/preset.json'];
+      http.getPreset.mockResolvedValueOnce({ labels: ['http'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['http'] });
+    });
+
+    it('resolves forgejo presets', async () => {
+      config.extends = ['forgejo>user/repo'];
+      forgejo.getPreset.mockResolvedValueOnce({ labels: ['forgejo'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['forgejo'] });
+    });
+
+    it('resolves gitea presets', async () => {
+      config.extends = ['gitea>user/repo'];
+      gitea.getPreset.mockResolvedValueOnce({ labels: ['gitea'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['gitea'] });
+    });
+
+    it('resolves gitlab presets', async () => {
+      config.extends = ['gitlab>user/repo'];
+      gitLab.getPreset.mockResolvedValueOnce({ labels: ['gitlab'] });
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({ labels: ['gitlab'] });
     });
 
     it('gets preset value from cache when it has been seen', async () => {
@@ -567,6 +608,565 @@ describe('config/presets/index', () => {
         PLATFORM_RATE_LIMIT_EXCEEDED,
       );
     });
+
+    describe('when using mergeInternalPresets=true', () => {
+      describe('when resolving an internal preset', () => {
+        it('merges `extends`', async () => {
+          config.extends = ['security:openssf-scorecard'];
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(res).toEqual({
+            description: ['Show OpenSSF badge on pull requests.'],
+            packageRules: [
+              {
+                matchSourceUrls: ['https://github.com/**'],
+                prBodyColumns: [
+                  'Package',
+                  'Type',
+                  'Update',
+                  'Change',
+                  'Pending',
+                  'OpenSSF',
+                ],
+                prBodyDefinitions: {
+                  OpenSSF:
+                    '[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/{{sourceRepo}}/badge)](https://securityscorecards.dev/viewer/?uri=github.com/{{sourceRepo}})',
+                },
+              },
+              {
+                groupName: 'eslint',
+                matchPackageNames: [
+                  '*/eslint-plugin',
+                  '@babel/eslint-parser',
+                  '@eslint/**',
+                  '@eslint-community/**',
+                  '@stylistic/eslint-plugin**',
+                  '@types/eslint',
+                  '@types/eslint__**',
+                  '@typescript-eslint/**',
+                  'babel-eslint',
+                  'eslint**',
+                  'typescript-eslint',
+                ],
+              },
+            ],
+          });
+        });
+
+        it('does not return any unmerged presets', async () => {
+          config.extends = ['security:openssf-scorecard'];
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(unmerged).toBeEmptyArray();
+        });
+      });
+
+      // NOTE that this is a **??**
+      describe('when resolving an internal preset which includes many other internal presets', () => {
+        it('merges `extends`, recursively', async () => {
+          config.extends = [':assignAndReview(jamietanna)'];
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(res).toEqual({
+            assignees: ['jamietanna'],
+            description: [
+              'Assign PRs to `jamietanna`.',
+              'Add `jamietanna` as reviewer for PRs.',
+            ],
+            reviewers: ['jamietanna'],
+          });
+        });
+
+        it('does not return any unmerged presets', async () => {
+          config.extends = [':assignAndReview(jamietanna)'];
+
+          const {
+            visitedPresets: { merged, unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(merged).toEqual([
+            ':assignAndReview(jamietanna)',
+            ':assignee(jamietanna)',
+            ':reviewer(jamietanna)',
+          ]);
+          expect(unmerged).toEqual([]);
+        });
+      });
+
+      describe('when resolving an external preset which references an internal preset', () => {
+        it('merges internal `extends`', async () => {
+          config.extends = ['local>username/preset-repo'];
+          local.getPreset.mockResolvedValueOnce({
+            extends: ['security:openssf-scorecard'],
+            labels: ['self-hosted resolved'],
+          });
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(res).toEqual({
+            description: ['Show OpenSSF badge on pull requests.'],
+            labels: ['self-hosted resolved'],
+            packageRules: [
+              {
+                matchSourceUrls: ['https://github.com/**'],
+                prBodyColumns: [
+                  'Package',
+                  'Type',
+                  'Update',
+                  'Change',
+                  'Pending',
+                  'OpenSSF',
+                ],
+                prBodyDefinitions: {
+                  OpenSSF:
+                    '[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/{{sourceRepo}}/badge)](https://securityscorecards.dev/viewer/?uri=github.com/{{sourceRepo}})',
+                },
+              },
+            ],
+          });
+        });
+
+        it('does not return any unmerged presets', async () => {
+          config.extends = ['local>username/preset-repo'];
+          local.getPreset.mockResolvedValueOnce({
+            extends: ['security:openssf-scorecard'],
+            labels: ['self-hosted resolved'],
+          });
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(unmerged).toBeEmptyArray();
+        });
+      });
+
+      describe('when resolving mixed internal and external presets', () => {
+        it('merges internal `extends`', async () => {
+          config.extends = [
+            'security:openssf-scorecard',
+            'local>username/preset-repo',
+          ];
+          local.getPreset.mockResolvedValueOnce({
+            labels: ['self-hosted resolved'],
+          });
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(res).toEqual({
+            description: ['Show OpenSSF badge on pull requests.'],
+            labels: ['self-hosted resolved'],
+            packageRules: [
+              {
+                matchSourceUrls: ['https://github.com/**'],
+                prBodyColumns: [
+                  'Package',
+                  'Type',
+                  'Update',
+                  'Change',
+                  'Pending',
+                  'OpenSSF',
+                ],
+                prBodyDefinitions: {
+                  OpenSSF:
+                    '[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/{{sourceRepo}}/badge)](https://securityscorecards.dev/viewer/?uri=github.com/{{sourceRepo}})',
+                },
+              },
+              {
+                groupName: 'eslint',
+                matchPackageNames: [
+                  '*/eslint-plugin',
+                  '@babel/eslint-parser',
+                  '@eslint/**',
+                  '@eslint-community/**',
+                  '@stylistic/eslint-plugin**',
+                  '@types/eslint',
+                  '@types/eslint__**',
+                  '@typescript-eslint/**',
+                  'babel-eslint',
+                  'eslint**',
+                  'typescript-eslint',
+                ],
+              },
+            ],
+          });
+        });
+
+        it('does not return any unmerged presets', async () => {
+          config.extends = [
+            'security:openssf-scorecard',
+            'local>username/preset-repo',
+          ];
+          local.getPreset.mockResolvedValueOnce({
+            labels: ['self-hosted resolved'],
+          });
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
+
+          expect(unmerged).toBeEmptyArray();
+        });
+      });
+    });
+
+    describe('when using mergeInternalPresets=false', () => {
+      describe('when resolving an internal preset', () => {
+        it('does not merge `extends`', async () => {
+          config.extends = ['security:openssf-scorecard'];
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(res).toEqual({
+            packageRules: [
+              {
+                groupName: 'eslint',
+              },
+            ],
+          });
+        });
+
+        it('returns the presets in the unmerged array', async () => {
+          config.extends = ['security:openssf-scorecard'];
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(unmerged).toEqual([
+            'security:openssf-scorecard',
+            'packages:eslint',
+          ]);
+        });
+      });
+
+      describe('when resolving an internal, parameterised preset', () => {
+        it('does not merge `extends`', async () => {
+          config.extends = [':assignee(renovate-tests)'];
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(res).toEqual({});
+        });
+
+        it('returns the preset in the unmerged array', async () => {
+          config.extends = [':assignee(renovate-tests)'];
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(unmerged).toEqual([':assignee(renovate-tests)']);
+        });
+      });
+
+      describe('when resolving an internal preset which includes many other internal presets', () => {
+        it('does not merge `extends`', async () => {
+          config.extends = ['config:recommended'];
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(res).toEqual({});
+        });
+
+        it('returns the unmerged internal presets', async () => {
+          config.extends = ['config:recommended'];
+
+          const {
+            visitedPresets: { merged, unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(merged).toEqual([]);
+          expect(unmerged).toEqual(['config:recommended']);
+        });
+      });
+
+      describe('when resolving an external preset which references an internal preset', () => {
+        it('does not merge `extends`', async () => {
+          config.extends = ['local>username/preset-repo'];
+          local.getPreset.mockResolvedValueOnce({
+            extends: ['security:openssf-scorecard'],
+            labels: ['self-hosted resolved'],
+          });
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(res).toEqual({
+            labels: ['self-hosted resolved'],
+          });
+        });
+
+        it('returns the unmerged internal presets', async () => {
+          config.extends = ['local>username/preset-repo'];
+          local.getPreset.mockResolvedValueOnce({
+            extends: ['security:openssf-scorecard'],
+            labels: ['self-hosted resolved'],
+          });
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(unmerged).toEqual(['security:openssf-scorecard']);
+        });
+      });
+
+      describe('when resolving mixed internal and external presets', () => {
+        it('does not expand internal `extends`', async () => {
+          config.extends = [
+            'security:openssf-scorecard',
+            'local>username/preset-repo',
+          ];
+          local.getPreset.mockResolvedValueOnce({
+            labels: ['self-hosted resolved'],
+          });
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const { config: res } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(res).toEqual({
+            labels: ['self-hosted resolved'],
+            packageRules: [
+              {
+                groupName: 'eslint',
+              },
+            ],
+          });
+        });
+
+        it('returns the unmerged internal presets', async () => {
+          config.extends = [
+            'security:openssf-scorecard',
+            'local>username/preset-repo',
+          ];
+          local.getPreset.mockResolvedValueOnce({
+            labels: ['self-hosted resolved'],
+          });
+          config.packageRules = [
+            {
+              extends: ['packages:eslint'],
+              groupName: 'eslint',
+            },
+          ];
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(unmerged).toEqual([
+            'security:openssf-scorecard',
+            'packages:eslint',
+          ]);
+        });
+      });
+
+      describe('when resolving an internal preset inside a nested object config value', () => {
+        it('returns the unmerged internal presets from a datasource', async () => {
+          config.extends = ['local>username/preset-repo'];
+          local.getPreset.mockResolvedValueOnce({
+            artifactory: {
+              extends: ['security:openssf-scorecard'],
+              enabled: true,
+            },
+          });
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(unmerged).toEqual(['security:openssf-scorecard']);
+        });
+      });
+
+      describe('when duplicate internal presets are found', () => {
+        it('they are de-duplicated when returned as unmerged', async () => {
+          config.extends = [
+            'security:openssf-scorecard',
+            'local>username/preset-repo',
+          ];
+          local.getPreset.mockResolvedValueOnce({
+            extends: ['security:openssf-scorecard'],
+          });
+          config.packageRules = [
+            {
+              extends: ['security:openssf-scorecard'],
+            },
+          ];
+
+          const {
+            visitedPresets: { unmerged },
+          } = await presets.resolveConfigPresets(
+            config,
+            undefined,
+            undefined,
+            undefined,
+            false,
+          );
+
+          expect(unmerged).toEqual(['security:openssf-scorecard']);
+        });
+      });
+    });
   });
 
   describe('replaceArgs', () => {
@@ -617,6 +1217,13 @@ describe('config/presets/index', () => {
   });
 
   describe('getPreset', () => {
+    it('does not use cache for internal presets', async () => {
+      const memCacheGetSpy = vi.spyOn(memCache, 'get');
+      expect(await presets.getPreset(':dependencyDashboard', {})).toBeDefined();
+      expect(memCacheGetSpy).not.toHaveBeenCalled();
+      expect(packageCache.get).not.toHaveBeenCalled();
+    });
+
     it('handles removed presets with a migration', async () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({
@@ -629,7 +1236,10 @@ describe('config/presets/index', () => {
           'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
+          'helpers:forgejoDigestChangelogs',
+          'helpers:giteaDigestChangelogs',
           'helpers:githubDigestChangelogs',
+          'helpers:gitlabDigestChangelogs',
           'helpers:goXPackagesChangelogLink',
           'helpers:goXPackagesNameLink',
         ],

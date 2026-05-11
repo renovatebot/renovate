@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils/index.ts';
 import { CondaDatasource } from '../../datasource/conda//index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -38,11 +38,15 @@ const PypiDependency = z
     z.object({ version: z.string() }),
   ])
   .transform(({ version }) => {
-    return {
+    const dep: PixiPackageDependency = {
       currentValue: version,
       versioning: pep440VersionID,
       datasource: PypiDatasource.id,
-    } satisfies PixiPackageDependency;
+    };
+    if (version.startsWith('==')) {
+      dep.currentVersion = version.replace(/^==\s*/, '');
+    }
+    return dep;
   });
 
 const PypiGitDependency = z

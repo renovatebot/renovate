@@ -8,7 +8,7 @@ import {
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
+import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { BackendToolingConfig } from './backends.ts';
 import {
@@ -16,6 +16,7 @@ import {
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -24,7 +25,11 @@ import {
 } from './backends.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
-import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
+import {
+  asdfTooling,
+  getOrderedMiseRegistryBackends,
+  miseTooling,
+} from './upgradeable-tooling.ts';
 import { parseTomlFile } from './utils.ts';
 
 // Tool names can have options in the tool name
@@ -110,11 +115,46 @@ function getToolConfig(
   toolName: string,
   version: string,
   toolOptions: MiseToolOptions,
-): ToolingConfig | BackendToolingConfig | null {
+): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
-    case '':
+    case '': {
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
-      return getRegistryToolConfig(toolName, version);
+      const staticResult = getRegistryToolConfig(toolName, version);
+      if (staticResult) {
+        return staticResult;
+      }
+
+      // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
+      const backends = getOrderedMiseRegistryBackends(toolName);
+
+      // prioritise the github backend as the best source for data
+      if (backends.github) {
+        const result = getToolConfig(
+          'github',
+          backends.github,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+
+      for (const [backendType, backendName] of Object.entries(backends)) {
+        const result = getToolConfig(
+          backendType,
+          backendName,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+      return null;
+    }
     // We can specify core, asdf, vfox, aqua backends for tools in the default registry
     // e.g. 'core:rust', 'asdf:rust', 'vfox:clang', 'aqua:act'
     case 'core':
@@ -134,6 +174,8 @@ function getToolConfig(
       return createDotnetToolConfig(toolName);
     case 'gem':
       return createGemToolConfig(toolName);
+    case 'github':
+      return createGithubToolConfig(toolName, version, toolOptions);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':
@@ -157,7 +199,7 @@ function getToolConfig(
 function getRegistryToolConfig(
   short: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   // Try to get the config from miseTooling first, then asdfTooling
   return (
     getConfigFromTooling(miseTooling, short, version) ??
@@ -169,7 +211,7 @@ function getConfigFromTooling(
   toolingSource: Record<string, ToolingDefinition>,
   name: string,
   version: string,
-): ToolingConfig | null {
+): StaticTooling | null {
   const toolDefinition = toolingSource[name];
   if (!toolDefinition) {
     return null;
@@ -185,7 +227,7 @@ function getConfigFromTooling(
 function createDependency(
   name: string,
   version: string | null,
-  config: ToolingConfig | BackendToolingConfig | null,
+  config: StaticTooling | BackendToolingConfig | null,
 ): PackageDependency {
   if (version === null) {
     return {

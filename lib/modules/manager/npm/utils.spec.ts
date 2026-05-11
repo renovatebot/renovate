@@ -1,15 +1,15 @@
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('~test/fixtures.js')>(
-      '~test/fixtures.js',
+    await vi.importActual<typeof import('~test/fixtures.ts')>(
+      '~test/fixtures.ts',
     )
   ).fsExtra(),
 );
 
+import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { LockFile } from './types.ts';
 import { composeLockFile, loadPackageJson, parseLockFile } from './utils.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 describe('modules/manager/npm/utils', () => {
   describe('parseLockFile', () => {

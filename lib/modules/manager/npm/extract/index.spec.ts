@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { ExtractConfig } from '../../types.ts';
 import { extractAllPackageFiles } from '../index.ts';
 import * as npmExtract from './index.ts';
 import { postExtract } from './post/index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 
@@ -27,7 +27,9 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
@@ -1243,6 +1245,32 @@ describe('modules/manager/npm/extract/index', () => {
           skipInstalls: true,
         },
       ]);
+    });
+
+    it('warns for invalid pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        **:
+      `);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        {
+          packageFile: 'pnpm-workspace.yaml',
+          err: expect.any(Error),
+        },
+        'Failed to parse pnpm-workspace.yaml file',
+      );
+    });
+
+    it('parses empty pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('extracts pnpm workspace yaml files', async () => {

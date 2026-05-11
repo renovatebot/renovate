@@ -1,4 +1,5 @@
 import { logger } from '../../../../logger/index.ts';
+import type { ConstraintName } from '../../../../util/exec/types.ts';
 import { DotnetVersionDatasource } from '../../../datasource/dotnet-version/index.ts';
 import { NugetDatasource } from '../../../datasource/nuget/index.ts';
 import type { PackageDependency, PackageFileContent } from '../../types.ts';
@@ -13,7 +14,7 @@ export function extractMsbuildGlobalManifest(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: GlobalJson;
-  let extractedConstraints: Record<string, string> | undefined;
+  let extractedConstraints: Partial<Record<ConstraintName, string>> | undefined;
   try {
     manifest = GlobalJson.parse(content);
   } catch {

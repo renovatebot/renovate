@@ -36,7 +36,9 @@ import * as queue from '../../util/http/queue.ts';
 import * as throttle from '../../util/http/throttle.ts';
 import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
+import { coerceString } from '../../util/string.ts';
 import * as repositoryWorker from '../repository/index.ts';
+import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
 import { parseConfigs } from './config/parse/index.ts';
 import { globalFinalize, globalInitialize } from './initialize.ts';
@@ -45,12 +47,23 @@ import { isLimitReached } from './limits.ts';
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
   repository: RenovateRepository,
-): Promise<RenovateConfig> {
-  const repoConfig = configParser.mergeChildConfig(
-    globalConfig,
-    isString(repository) ? { repository } : repository,
-  );
-  const repoParts = repoConfig.repository.split('/');
+): Promise<RepositoryWorkerConfig> {
+  const repoIsString = isString(repository);
+  const repoName = repoIsString ? repository : repository.repository;
+
+  const repoConfig: RepositoryWorkerConfig = {
+    ...globalConfig,
+    repository: repoName,
+  };
+
+  if (!repoIsString) {
+    const { repository: _repository, ...repositoryEntryConfig } = repository;
+    // mergeRenovateConfig later resolves this repositories[] object-entry
+    // config in the correct order
+    repoConfig.repositoryEntryConfig = repositoryEntryConfig;
+  }
+
+  const repoParts = repoName.split('/');
   repoParts.pop();
   repoConfig.parentOrg = repoParts.join('/');
   repoConfig.topLevelOrg = repoParts.shift();
@@ -59,10 +72,8 @@ export async function getRepositoryConfig(
   repoConfig.localDir =
     platform === 'local'
       ? process.cwd()
-      : upath.join(
-          repoConfig.baseDir,
-          `./repos/${platform}/${repoConfig.repository}`,
-        );
+      : // TODO: types (#22198)
+        upath.join(repoConfig.baseDir!, `./repos/${platform}/${repoName}`);
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
   return configParser.filterConfig(repoConfig, 'repository');
@@ -107,6 +118,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 }
 
 export async function start(): Promise<number> {
+  logger.info({ renovateVersion: pkg.version }, 'Renovate started');
   // istanbul ignore next
   if (regexEngineStatus.type === 'available') {
     logger.debug('Using RE2 regex engine');
@@ -256,7 +268,7 @@ function repositoryToOwnerAndRepo(fullName: string): {
   repo: string;
 } {
   const parts = fullName.split('/');
-  const repo = parts.pop() ?? '';
+  const repo = coerceString(parts.pop());
   const owner = parts.join('/');
   return { owner, repo };
 }

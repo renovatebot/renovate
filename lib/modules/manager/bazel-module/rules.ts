@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import parseGithubUrl from 'github-url-from-git';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
 import { clone } from '../../../util/clone.ts';
@@ -52,6 +52,7 @@ export function bazelModulePackageDepToPackageDependency(
   bmpd: BazelModulePackageDep,
 ): PackageDependency {
   const copy: BazelModulePackageDep = clone(bmpd);
+  // v8 ignore else -- TODO: add test #40625
   if (isOverride(copy)) {
     const partial = copy as Partial<OverridePackageDep>;
     delete partial.bazelDepSkipReason;
@@ -132,6 +133,7 @@ const SingleVersionOverrideToPackageDep = RuleFragment.extend({
       override.currentValue = version.value;
     }
     // If a registry is specified, then merge it into the bazel_dep
+    // v8 ignore else -- TODO: add test #40625
     if (registry) {
       const merge = base as MergePackageDep;
       merge.bazelDepMergeFields = ['registryUrls'];

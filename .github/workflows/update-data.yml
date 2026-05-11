@@ -12,6 +12,7 @@ permissions: {}
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate'
     permissions:
       contents: write
       pull-requests: write
@@ -21,18 +22,24 @@ jobs:
           show-progress: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
           standalone: true
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          # don't run `mise install`, but do install a version of `mise` itself
+          install: false
 
       - name: Update static data
         run: pnpm run update-static-data
@@ -41,11 +48,11 @@ jobs:
         run: pnpm prettier-fix
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
           branch: 'chore/update-static-data'
-          commit-message: 'fix(data): automatic update of static data'
+          commit-message: 'feat(data): automatic update of static data'
           committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
-          title: 'fix(data): automatic update of static data'
+          title: 'feat(data): automatic update of static data'
           assignees: viceice,secustor,jamietanna

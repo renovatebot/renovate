@@ -5,13 +5,14 @@ This readme explains what each file is used for.
 
 ## Summary
 
-| File                  | What is the file about?                   |
-| --------------------- | ----------------------------------------- |
-| `monorepo.json`       | Group related packages into a single PR.  |
-| `replacements.json`   | Rename old packages to new replacement.   |
-| `changelog-urls.json` | Tell Renovate where to find changelogs.   |
-| `source-urls.json`    | Tell Renovate the source URL of packages. |
-| `node-schedule.json`  | Node.js versioning schedule.              |
+| File                  | What is the file about?                             |
+| --------------------- | --------------------------------------------------- |
+| `monorepo.json`       | Group related packages into a single PR.            |
+| `replacements.json`   | Rename old packages to new replacement.             |
+| `changelog-urls.json` | Tell Renovate where to find changelogs.             |
+| `source-urls.json`    | Tell Renovate the source URL of packages.           |
+| `node-schedule.json`  | Node.js versioning schedule.                        |
+| `mise-registry.json`  | Mise tool registry: short names mapped to backends. |
 
 ## Group related packages (`monorepo.json`)
 
@@ -42,11 +43,11 @@ The `replacements.json` file has all the replacement presets.
 
 When a package gets renamed, you need to tell Renovate:
 
-- the datasource of the package -> `matchDatasources`
-- the old package name -> `matchPackageNames`
-- the new package name -> `replacementName`
-- the last version available for the old package name -> `matchCurrentVersion`
-- the first version available for the new package name -> `replacementVersion`
+- the datasource of the package → `matchDatasources`
+- the old package name → `matchPackageNames`
+- the new package name → `replacementName`
+- the last version available for the old package name → `matchCurrentVersion`
+- the first version available for the new package name → `replacementVersion`
 
 You can omit `replacementVersion` if the current version is the same as the new version.
 
@@ -77,7 +78,7 @@ If this does not happen, for whatever reason, Renovate can not show the changelo
 
 You can use these config options to let Renovate find the correct changelog:
 
-- [`changelogUrl`](https://docs.renovatebot.com/configuration-options/#changelogurl)
+- [`changelogUrl`](https://docs.renovatebot.com/configuration-options/#packageruleschangelogurl)
 
 Read the [Renovate docs, key concepts page for changelogs](https://docs.renovatebot.com/key-concepts/changelogs/) to learn more about how Renovate fetches and displays changelogs.
 
@@ -105,7 +106,7 @@ To check if Renovate can find the source URLs for your package:
 1. Read the Renovate docs for the datasource.
 1. Look for a table in the docs that shows if the datasource returns source URLs.
 
-If Renovate does not find the right source URls automatically: use the [`sourceUrl` config option](https://docs.renovatebot.com/configuration-options/#sourceurl).
+If Renovate does not find the right source URls automatically: use the [`sourceUrl` config option](https://docs.renovatebot.com/configuration-options/#packagerulessourceurl).
 
 To locate the source repository, Renovate requires:
 
@@ -121,3 +122,13 @@ This will be added to the `orb` group in the `source-urls.json` file since the p
 
 This file is automatically updated by a scheduled workflow.
 It can be manually updated by running `pnpm update-static-data:node-schedule`.
+
+## Mise tool registry (`mise-registry.json`)
+
+This file is automatically updated by a scheduled workflow.
+It can be manually updated by running `pnpm update-static-data:mise-registry`.
+
+It maps `mise` tool short names (e.g. `zola`) to their available backends (e.g. `["aqua:getzola/zola", "asdf:salasrod/asdf-zola"]`).
+The data is generated from `mise registry --json` using the [mise CLI](https://mise.jdx.dev).
+
+This enables Renovate to automatically support all tools in the [mise registry](https://github.com/jdx/mise/tree/main/registry) without manual updates.

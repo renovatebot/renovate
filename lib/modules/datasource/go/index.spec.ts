@@ -1,8 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
-import * as _hostRules from '../../../util/host-rules.ts';
-import { GoDatasource } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import type { ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
+import { GoDatasource } from './index.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 const hostRules = vi.mocked(_hostRules);
@@ -235,6 +237,107 @@ describe('modules/datasource/go/index', () => {
           'v1.2.3',
         );
         expect(res).toBeNull();
+      });
+    });
+  });
+
+  describe('using getPkgReleases', () => {
+    beforeEach(() => {
+      hostRules.find.mockReturnValue({});
+      hostRules.hosts.mockReturnValue([]);
+    });
+
+    afterEach(() => {
+      delete process.env.GOPROXY;
+    });
+
+    describe('constraints', () => {
+      // TODO deprecated #42600
+      it('are respected based on an exact match on the `go` constraint', async () => {
+        const expected: ReleaseResult = {
+          releases: [
+            // Go 1.24
+            {
+              version: 'v0.32.0',
+              constraints: {
+                go: ['1.24.0'],
+              },
+            },
+            {
+              version: 'v0.33.0',
+              constraints: {
+                go: ['1.24.2'],
+              },
+            },
+            // Go 1.25
+            {
+              version: 'v0.34.0',
+              constraints: {
+                go: ['1.25.0'],
+              },
+            },
+          ],
+        };
+
+        getReleasesProxyMock.mockResolvedValue(expected);
+        getReleasesDirectMock.mockResolvedValue(null);
+
+        const res = await getPkgReleases({
+          datasource: GoDatasource.id,
+          packageName: 'golang.org/x/mod',
+
+          constraints: { go: '1.24.0' },
+          constraintsFiltering: 'strict',
+        });
+
+        expect(res).toBeDefined();
+        expect(res?.releases).toHaveLength(1);
+        expect(res?.releases[0].version).toEqual('v0.32.0');
+      });
+
+      it('are respected based on a SemVer-style range based on the `%goMod` constraint', async () => {
+        const expected: ReleaseResult = {
+          releases: [
+            // Go 1.24
+            {
+              version: 'v0.32.0',
+              constraints: {
+                '%goMod': ['1.24.0'],
+              },
+            },
+            {
+              version: 'v0.33.0',
+              constraints: {
+                '%goMod': ['1.24.1'],
+              },
+            },
+            // Go 1.25
+            {
+              version: 'v0.34.0',
+              constraints: {
+                '%goMod': ['1.25.0'],
+              },
+            },
+          ],
+        };
+
+        getReleasesProxyMock.mockResolvedValue(expected);
+        getReleasesDirectMock.mockResolvedValue(null);
+
+        const res = await getPkgReleases({
+          datasource: GoDatasource.id,
+          packageName: 'golang.org/x/mod',
+          constraints: { '%goMod': '~1.24.x' },
+          constraintsFiltering: 'strict',
+          constraintsVersioning: {
+            '%goMod': 'semver-coerced',
+          },
+        });
+
+        expect(res).toBeDefined();
+        expect(res?.releases).toHaveLength(2);
+        expect(res?.releases[0].version).toEqual('v0.32.0');
+        expect(res?.releases[1].version).toEqual('v0.33.0');
       });
     });
   });

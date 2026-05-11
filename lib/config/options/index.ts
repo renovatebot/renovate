@@ -1,10 +1,9 @@
 import { isArray, isObject } from '@sindresorhus/is';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
+import { managerDefaultConfigs } from '../../manager-default-configs.generated.ts';
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
-import { getCustomManagers } from '../../modules/manager/custom/index.ts';
-import { getManagers } from '../../modules/manager/index.ts';
-import { getPlatformList } from '../../modules/platform/index.ts';
-import { getVersioningList } from '../../modules/versioning/index.ts';
-import { supportedDatasources } from '../presets/internal/merge-confidence.ts';
+import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
+import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
 const options: Readonly<RenovateOptions>[] = [
@@ -144,6 +143,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
     parents: ['bumpVersions'],
+    allowedValues: ['major', 'minor', 'patch', 'sync'],
   },
   {
     name: 'filePatterns',
@@ -169,6 +169,7 @@ const options: Readonly<RenovateOptions>[] = [
       commands: [],
       fileFilters: [],
       executionMode: 'update',
+      installTools: {},
     },
   },
   {
@@ -206,6 +207,21 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     parents: ['postUpgradeTasks'],
     default: ['**/*'],
+    cli: false,
+  },
+  {
+    name: 'installTools',
+    description: 'Install tools before executing commands',
+    type: 'object',
+    parents: ['postUpgradeTasks'],
+    default: {},
+    additionalProperties: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+    mergeable: false,
+    freeChoice: true,
     cli: false,
   },
   {
@@ -464,6 +480,14 @@ const options: Readonly<RenovateOptions>[] = [
     default: 'local',
   },
   {
+    name: 'repositoryCacheForceLocal',
+    description:
+      'If set to `true`, Renovate will persist repository cache locally after uploading to S3.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'reportType',
     description: 'Set how, or if, reports should be generated.',
     globalOnly: true,
@@ -480,6 +504,16 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default: null,
     experimental: true,
+  },
+  {
+    name: 'reportFormatting',
+    description:
+      'If set to `true`, Renovate will format the report JSON with Prettier before writing.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    cli: false,
   },
   {
     name: 'force',
@@ -506,7 +540,14 @@ const options: Readonly<RenovateOptions>[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+      'scm-manager',
+    ],
   },
   {
     name: 'dryRun',
@@ -618,7 +659,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.1.11',
+    default: 'ghcr.io/renovatebot/base-image:13.45.13',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1019,7 +1060,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'platform',
     description: 'Platform type of repository.',
     type: 'string',
-    allowedValues: getPlatformList(),
+    allowedValues: [...PLATFORM_HOST_TYPES],
     default: 'github',
     globalOnly: true,
   },
@@ -1042,7 +1083,12 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Username for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'scm-manager',
+    ],
     globalOnly: true,
   },
   {
@@ -1086,6 +1132,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
     default: null,
+    supportedManagers: ['npm'],
   },
   {
     name: 'autodiscover',
@@ -1340,7 +1387,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'versioning',
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',
-    allowedValues: getVersioningList(),
+    allowedValues: [...AllVersioningsListLiteral],
     cli: false,
     env: false,
   },
@@ -1558,6 +1605,20 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     allowString: true,
     stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchRegistryUrls',
+    description:
+      'A list of URLs (or URL patterns) to match against registryUrls.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    patternMatch: true,
     parents: ['packageRules'],
     mergeable: true,
     cli: false,
@@ -2094,6 +2155,12 @@ const options: Readonly<RenovateOptions>[] = [
     default: 25,
   },
   {
+    name: 'commitHourlyLimit',
+    description: 'Rate limit commits to maximum x per hour. 0 means no limit.',
+    type: 'integer',
+    default: 0,
+  },
+  {
     name: 'prHourlyLimit',
     description:
       'Rate limit PRs to maximum x created per hour. 0 means no limit.',
@@ -2404,7 +2471,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Text added here will be placed last in the PR body, with a divider separator before it.',
     type: 'string',
-    default: `This PR has been generated by [Renovate Bot](https://github.com/renovatebot/renovate).`,
+    default: `This PR has been generated by [Mend Renovate](https://github.com/renovatebot/renovate).`,
   },
   {
     name: 'customizeDashboard',
@@ -3116,6 +3183,7 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: ['off', 'branch', 'pr'],
     default: 'pr',
     cli: false,
+    parents: ['.', 'packageRules'],
   },
   {
     name: 'cloneSubmodules',
@@ -3148,7 +3216,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    allowedValues: ['goGenerate', 'gradleWrapper'],
+    allowedValues: ['bazelModDeps', 'goGenerate', 'gradleWrapper'],
     stage: 'repository',
     globalOnly: true,
   },
@@ -3176,7 +3244,14 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['bitbucket-server', 'forgejo', 'gitea', 'gitlab'],
+    supportedPlatforms: [
+      'bitbucket-server',
+      'forgejo',
+      'gerrit',
+      'gitea',
+      'gitlab',
+      'scm-manager',
+    ],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -3298,6 +3373,17 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'prCacheSyncMaxPages',
+    description:
+      'Maximum number of pages to fetch when syncing the pull request cache.',
+    type: 'integer',
+    default: 100,
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+    experimentalIssues: [41485],
+  },
+  {
     name: 'dockerMaxPages',
     description:
       'By default, Renovate fetches up to 20 pages of Docker tags from registries. But you can set your own limit with this config option.',
@@ -3352,6 +3438,61 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
     globalOnly: true,
   },
+  {
+    name: 'toolSettings',
+    description:
+      'Tool specific configuration. Global self-hosted configuration takes precedence.',
+    type: 'object',
+    default: {
+      jvmMaxMemory: 512,
+      jvmMemory: 512,
+    },
+    cli: false,
+  },
+  {
+    name: 'jvmMaxMemory',
+    description:
+      'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'jvmMemory',
+    description:
+      'Initial JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['gradle-wrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'nodeMaxMemory',
+    description:
+      'Maximum memory in MiB for Node child processes invoked by Renovate. If unset, the Node process will automagically determine the memory limit to use. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.nodeMaxMemory`',
+    type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['npm'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'constraintsVersioning',
+    description:
+      'Override the versioning scheme used when filtering releases by specific constraint names. Does not apply to tools.',
+    type: 'object',
+    default: {},
+    mergeable: true,
+    cli: false,
+    env: false,
+    freeChoice: true,
+    additionalProperties: {
+      type: 'string',
+    },
+  },
 ];
 
 export function getOptions(): Readonly<RenovateOptions>[] {
@@ -3359,22 +3500,18 @@ export function getOptions(): Readonly<RenovateOptions>[] {
 }
 
 function loadManagerOptions(): void {
-  const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
-  for (const [name, config] of allManagers.entries()) {
-    // v8 ignore else -- TODO: add test #40625
-    if (config.defaultConfig) {
-      const managerConfig: Readonly<RenovateOptions> = {
-        name,
-        description: `Configuration object for the ${name} manager`,
-        stage: 'package',
-        type: 'object',
-        default: config.defaultConfig,
-        mergeable: true,
-        cli: false,
-        autogenerated: true,
-      };
-      options.push(managerConfig);
-    }
+  for (const [name, defaultConfig] of Object.entries(managerDefaultConfigs)) {
+    const managerConfig: Readonly<RenovateOptions> = {
+      name,
+      description: `Configuration object for the ${name} manager`,
+      stage: 'package',
+      type: 'object',
+      default: defaultConfig,
+      mergeable: true,
+      cli: false,
+      autogenerated: true,
+    };
+    options.push(managerConfig);
   }
 }
 

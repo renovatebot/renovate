@@ -1,31 +1,31 @@
 import type { SimpleGit } from 'simple-git';
-import { simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Upgrade } from '../types.ts';
 import { updateDependency } from './index.ts';
-import { fs } from '~test/util.ts';
+
 vi.mock('../../../util/fs/index.ts');
 
-vi.mock('simple-git');
-const simpleGitFactoryMock = vi.mocked(simpleGit);
+const createSimpleGit = vi.mocked(git.createSimpleGit);
 const gitMock = mock<SimpleGit>();
+const baseDir = `${import.meta.dirname}/__fixtures__`;
 
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
-    GlobalConfig.set({ localDir: `${import.meta.dirname}/__fixtures__` });
+    GlobalConfig.set({ localDir: baseDir });
     // clear host rules
     hostRules.clear();
     // clear environment variables
     process.env = {};
 
-    simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockReturnValue(gitMock);
+    createSimpleGit.mockReturnValue(gitMock);
   });
 
   describe('updateDependency', () => {
@@ -51,6 +51,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBeNull();
@@ -62,6 +63,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
@@ -78,6 +80,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
@@ -90,9 +93,15 @@ describe('modules/manager/git-submodules/update', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       };
-      expect(gitMock.env).toHaveBeenCalledTimes(2);
-      expect(gitMock.env).toHaveBeenNthCalledWith(1, variables);
-      expect(gitMock.env).toHaveBeenNthCalledWith(2, variables);
+      expect(createSimpleGit).toHaveBeenCalledTimes(2);
+      expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
+        config: { baseDir },
+        env: variables,
+      });
+      expect(createSimpleGit).toHaveBeenNthCalledWith(2, {
+        config: { baseDir: upath.join(baseDir, 'renovate') },
+        env: variables,
+      });
     });
 
     it('update gitmodule branch value if value changed', async () => {
@@ -112,6 +121,7 @@ describe('modules/manager/git-submodules/update', () => {
       };
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe(updatedGitModules);
@@ -134,6 +144,7 @@ describe('modules/manager/git-submodules/update', () => {
       };
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
@@ -158,6 +169,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
@@ -182,9 +194,15 @@ describe('modules/manager/git-submodules/update', () => {
         GIT_CONFIG_VALUE_4: 'git@gittags.com:',
         GIT_CONFIG_VALUE_5: 'https://gittags.com/',
       };
-      expect(gitMock.env).toHaveBeenCalledTimes(2);
-      expect(gitMock.env).toHaveBeenNthCalledWith(1, variables);
-      expect(gitMock.env).toHaveBeenNthCalledWith(2, variables);
+      expect(createSimpleGit).toHaveBeenCalledTimes(2);
+      expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
+        config: { baseDir },
+        env: variables,
+      });
+      expect(createSimpleGit).toHaveBeenNthCalledWith(2, {
+        config: { baseDir: upath.join(baseDir, 'renovate') },
+        env: variables,
+      });
     });
   });
 });

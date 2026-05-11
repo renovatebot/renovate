@@ -1,5 +1,4 @@
-import { isTruthy } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
+import { isTruthy, isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
@@ -32,7 +31,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
-import { configureScm } from './scm.ts';
+import { configureScm, pushForReview } from './scm.ts';
 import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
@@ -44,6 +43,7 @@ import {
 } from './utils.ts';
 
 export const id = 'gerrit';
+export const experimental = true;
 
 const defaults: {
   endpoint?: string;
@@ -146,7 +146,7 @@ export async function initRepo({
     labels: projectInfo.labels ?? {},
   };
   const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl);
+  const url = getGerritRepoUrl(repository, baseUrl, gitUrl);
   configureScm(repository, config.gerritUsername!);
   await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
@@ -202,14 +202,17 @@ export async function getPr(number: number): Promise<Pr | null> {
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
-  // prConfig.prBody will only be set if the body has changed
   if (prConfig.prBody) {
-    await client.addMessage(
+    await client.addMessageIfNotAlreadyExists(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
     );
   }
+  await client.setHashtags(prConfig.number, {
+    add: prConfig.addLabels,
+    remove: prConfig.removeLabels,
+  });
   if (prConfig.targetBranch) {
     await client.moveChange(prConfig.number, prConfig.targetBranch);
   }
@@ -224,6 +227,24 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       prConfig.labels?.toString() ?? ''
     })`,
   );
+
+  logger.debug(
+    `Pushing commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+  );
+  const pushResult = await pushForReview({
+    sourceRef: prConfig.sourceBranch,
+    targetBranch: prConfig.targetBranch,
+    files: [],
+    autoApprove: prConfig.platformPrOptions?.autoApprove,
+    labels: prConfig.labels ?? undefined,
+  });
+
+  if (!pushResult) {
+    throw new Error(
+      `Failed to push commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+    );
+  }
+
   const change = (
     await client.findChanges(config.repository!, {
       branchName: prConfig.sourceBranch,
@@ -233,16 +254,9 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
-  if (change === undefined) {
+  if (isUndefined(change)) {
     throw new Error(
-      `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
-    );
-  }
-  const created = DateTime.fromISO(change.created.replace(' ', 'T'), {});
-  const fiveMinutesAgo = DateTime.utc().minus({ minutes: 5 });
-  if (created < fiveMinutesAgo) {
-    throw new Error(
-      `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
+      `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
   }
   await client.addMessage(
@@ -328,6 +342,7 @@ export async function getBranchStatus(
     if (hasBlockingLabels) {
       return 'red';
     }
+    // v8 ignore else -- TODO: add test #40625
     if (change.submittable) {
       return 'green';
     }
@@ -355,13 +370,16 @@ export async function getBranchStatusCheck(
         requestDetails: ['LABELS'],
       })
     ).pop();
+    // v8 ignore else -- TODO: add test #40625
     if (change) {
       const label = change.labels![context];
+      // v8 ignore else -- TODO: add test #40625
       if (label) {
         // Check for rejected or blocking first, as a label could have both rejected and approved
         if (label.rejected || label.blocking) {
           return 'red';
         }
+        // v8 ignore else -- TODO: add test #40625
         if (label.approved) {
           return 'green';
         }
@@ -411,6 +429,7 @@ export async function getRawFile(
     logger.debug('No repo so cannot getRawFile');
     return null;
   }
+  // v8 ignore next -- TODO: add test #40625
   const branch =
     branchOrTag ??
     (repo === config.repository ? (config.head ?? 'HEAD') : 'HEAD');
@@ -441,7 +460,9 @@ export async function addAssignees(
   number: number,
   assignees: string[],
 ): Promise<void> {
+  // v8 ignore else -- TODO: add test #40625
   if (assignees.length) {
+    // v8 ignore else -- TODO: add test #40625
     if (assignees.length > 1) {
       logger.debug(
         `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`,
@@ -506,7 +527,7 @@ export async function deleteLabel(
   number: number,
   label: string,
 ): Promise<void> {
-  await client.deleteHashtag(number, label);
+  await client.setHashtags(number, { remove: [label] });
 }
 
 export function ensureCommentRemoval(

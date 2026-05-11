@@ -1,14 +1,13 @@
 import type { SimpleGit } from 'simple-git';
-import { simpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import * as git from '../../../util/git/index.ts';
 import { add, clear } from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitRefsDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
-vi.mock('simple-git');
-const simpleGitFactoryMock = vi.mocked(simpleGit);
+const createSimpleGit = vi.mocked(git.createSimpleGit);
 
 const packageName = 'https://github.com/example/example.git';
 
@@ -32,8 +31,7 @@ describe('modules/datasource/git-refs/index', () => {
       listRemote: vi.fn(),
     });
 
-    simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockReturnValue(gitMock);
+    createSimpleGit.mockReturnValue(gitMock);
   });
 
   describe('getReleases', () => {
@@ -98,7 +96,9 @@ describe('modules/datasource/git-refs/index', () => {
         { packageName: 'a tag to look up' },
         'v1.0.4',
       );
-      expect(digest).toBe('2b52829c7c1bd65b3501c450849c53b90b11fa0e');
+      // For annotated tags, we return the dereferenced commit hash (^{})
+      // to match what `git submodule status` returns
+      expect(digest).toBe('3ed9e7d7094fd4ee7751c24a3e6b706060f461ff');
     });
 
     it('ignores refs/for/', async () => {
@@ -129,7 +129,7 @@ describe('modules/datasource/git-refs/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({});
+      expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({ env: {} });
     });
 
     it('calls simpleGit with git envs if hostrules exist', async () => {
@@ -146,14 +146,16 @@ describe('modules/datasource/git-refs/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+        env: {
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
+          GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
+          GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+          GIT_CONFIG_VALUE_1: 'git@github.com:',
+          GIT_CONFIG_VALUE_2: 'https://github.com/',
+        },
       });
     });
 
@@ -171,14 +173,18 @@ describe('modules/datasource/git-refs/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@git.example.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
-        GIT_CONFIG_VALUE_1: 'git@git.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://git.example.com/',
+      expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+        env: {
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0:
+            'url.https://ssh:token123@git.example.com/.insteadOf',
+          GIT_CONFIG_KEY_1:
+            'url.https://git:token123@git.example.com/.insteadOf',
+          GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+          GIT_CONFIG_VALUE_1: 'git@git.example.com:',
+          GIT_CONFIG_VALUE_2: 'https://git.example.com/',
+        },
       });
     });
   });

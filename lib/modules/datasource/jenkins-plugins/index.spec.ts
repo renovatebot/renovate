@@ -1,12 +1,12 @@
+import * as httpMock from '~test/http-mock.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
-import * as versioning from '../../versioning/docker/index.ts';
+import * as versioning from '../../versioning/maven/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { JenkinsPluginsDatasource } from './index.ts';
 import type {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
 } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const jenkinsPluginsInfo: JenkinsPluginsInfoResponse = {
   plugins: {

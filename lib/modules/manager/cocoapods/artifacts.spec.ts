@@ -1,5 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -7,8 +9,6 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
@@ -202,7 +202,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Podfile.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Podfile.lock', stderr: 'not found' } },
     ]);
     expect(execSnapshots).toBeEmpty();
   });
@@ -223,7 +223,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Podfile.lock', stderr: 'exec exception' } },
+      { artifactError: { fileName: 'Podfile.lock', stderr: 'exec exception' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });

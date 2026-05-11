@@ -1,6 +1,6 @@
+import { Fixtures } from '~test/fixtures.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
@@ -19,6 +19,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/011.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -39,6 +40,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(res).toBeJsonString();
@@ -63,6 +65,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(res).toBeJsonString();
@@ -86,6 +89,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(res).toBeJsonString();
@@ -109,6 +113,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(res).toMatchSnapshot();
@@ -123,6 +128,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
@@ -137,6 +143,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01GlobContent,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
@@ -152,6 +159,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).resolutions['**/@angular/cli']).toBe(
@@ -168,6 +176,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/012.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -182,6 +191,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/013.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -195,6 +205,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(input01Content);
@@ -208,6 +219,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -222,6 +234,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/014.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01PMContent,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -235,6 +248,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: null as never,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -249,6 +263,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBeUndefined();
@@ -265,6 +280,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBe(
@@ -281,6 +297,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01GlobContent,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).resolutions.config).toBeUndefined();
@@ -296,6 +313,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/patch1o.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: readFixture('inputs/patch1.json'),
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -310,6 +328,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/patch2o.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: readFixture('inputs/patch2.json'),
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -333,6 +352,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       }`;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -361,6 +381,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       }`;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -389,6 +410,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       }`;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -416,6 +438,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       }`;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -441,6 +464,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
 
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(expected);
