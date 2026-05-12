@@ -16,7 +16,7 @@ function getOptionLink(
   const page = optionGlobalOnly.has(name)
     ? 'self-hosted-configuration.md'
     : 'configuration-options.md';
-  return ` - [${name}](${page}#${anchor})`;
+  return ` - [\`${name}\`](${page}#${anchor})`;
 }
 
 export async function generateTemplates(dist: string): Promise<void> {
@@ -33,6 +33,7 @@ export async function generateTemplates(dist: string): Promise<void> {
   let exposedConfigOptionsText =
     'The following configuration options are passed through for templating: \n\n';
   exposedConfigOptionsText += exposedConfigOptions
+    .sort()
     .map((field) => getOptionLink(field, optionParentMap, optionGlobalOnly))
     .join('\n');
 
@@ -44,9 +45,10 @@ export async function generateTemplates(dist: string): Promise<void> {
   runtimeText += '\n\n';
 
   let supportsTemplatingText =
-    'The following configuration options accept Handlebars template syntax in their values:\n';
+    'The following configuration options accept Handlebars template syntax in their values:\n\n';
   supportsTemplatingText += options
     .filter((o) => o.supportsTemplating)
+    .sort((a, b) => a.name.localeCompare(b.name))
     .map((o) => getOptionLink(o.name, optionParentMap, optionGlobalOnly))
     .join('\n');
 
