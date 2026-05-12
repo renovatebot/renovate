@@ -19,19 +19,16 @@ function updateDependency(
   value: string,
 ): void {
   switch (field) {
-    case 'registryUrl':
+    case 'registryUrl': {
       // check if URL is valid and pack inside an array
-      try {
-        const url = parseUrl(value)?.toString();
-        if (url) {
-          dependency.registryUrls = [url];
-        } else {
-          logger.warn({ value }, 'Invalid regex manager registryUrl');
-        }
-      } catch {
+      const url = parseUrl(value)?.toString();
+      if (url) {
+        dependency.registryUrls = [url];
+      } else {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }
       break;
+    }
     case 'datasource':
       dependency.datasource = migrateDatasource(value);
       break;

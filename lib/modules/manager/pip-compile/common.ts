@@ -354,17 +354,13 @@ function getRegistryCredEnvVars(
 }
 
 function cleanUrl(url: string): URL | null {
-  try {
-    // Strip everything but protocol, host, and port
-    const urlObj = parseUrl(url);
-    if (!urlObj) {
-      return null;
-    }
-    // origin of a valid URL is always parseable
-    return parseUrl(urlObj.origin);
-  } catch {
+  // Strip everything but protocol, host, and port
+  const urlObj = parseUrl(url);
+  if (!urlObj) {
     return null;
   }
+  // origin of a valid URL is always parseable
+  return parseUrl(urlObj.origin);
 }
 
 export function getRegistryCredVarsFromPackageFiles(

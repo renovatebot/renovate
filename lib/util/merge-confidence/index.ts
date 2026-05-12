@@ -246,23 +246,19 @@ function getApiBaseUrl(mergeConfidenceEndpoint: string | undefined): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
   const baseFromEnv = mergeConfidenceEndpoint ?? defaultBaseUrl;
 
-  try {
-    const parsedBaseUrl = parseUrl(baseFromEnv)?.toString();
-    if (!parsedBaseUrl) {
-      throw new Error('invalid URL');
-    }
-    logger.trace(
-      { baseUrl: parsedBaseUrl },
-      'using merge confidence API base found in environment variables',
-    );
-    return ensureTrailingSlash(parsedBaseUrl);
-  } catch (err) {
+  const parsedBaseUrl = parseUrl(baseFromEnv)?.toString();
+  if (!parsedBaseUrl) {
     logger.warn(
-      { err, baseFromEnv },
+      { baseFromEnv },
       'invalid merge confidence API base URL found in environment variables - using default value instead',
     );
     return defaultBaseUrl;
   }
+  logger.trace(
+    { baseUrl: parsedBaseUrl },
+    'using merge confidence API base found in environment variables',
+  );
+  return ensureTrailingSlash(parsedBaseUrl);
 }
 
 export function getApiToken(): string | undefined {

@@ -14,7 +14,7 @@ export function parseRepository(
 
   const url = parseUrl(repositoryURL);
   if (!url) {
-    logger.debug('Error parsing url');
+    logger.debug({ repositoryURL }, 'Error parsing url');
     res.skipReason = 'invalid-url';
     return res;
   }

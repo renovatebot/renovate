@@ -18,7 +18,7 @@ export default {
         if (
           node.callee.type === 'Identifier' &&
           node.callee.name === 'URL' &&
-          // only consider newURL(arg) and not newURL(arg, base) as parseUrl does not allow this
+          // only consider new URL(arg) and not new URL(arg, base) as parseUrl does not allow this
           node.arguments.length === 1
         ) {
           context.report({ node, messageId: 'noNewUrl' });
