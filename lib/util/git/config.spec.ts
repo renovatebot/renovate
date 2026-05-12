@@ -10,6 +10,11 @@ describe('util/git/config', () => {
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },
       config: ['core.quotePath=false'],
+      unsafe: {
+        allowUnsafeSshCommand: true,
+        allowUnsafeConfigEnvCount: true,
+        allowUnsafePager: true,
+      },
     });
   });
 
@@ -21,6 +26,11 @@ describe('util/git/config', () => {
         block: 50000,
       },
       config: ['core.quotePath=false'],
+      unsafe: {
+        allowUnsafeSshCommand: true,
+        allowUnsafeConfigEnvCount: true,
+        allowUnsafePager: true,
+      },
     });
   });
 
