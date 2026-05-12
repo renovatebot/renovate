@@ -133,9 +133,7 @@ export async function updateArtifacts({
           const content = await readLocalFile(path, 'utf8');
           if (content) {
             const packageFile = extractRequirementsFileFlags(content);
-            if (packageFile) {
-              packageFiles.push(packageFile);
-            }
+            packageFiles.push(packageFile);
           }
         }
       }
