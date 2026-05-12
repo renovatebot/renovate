@@ -740,7 +740,7 @@ export class DockerDatasource extends Datasource {
         if (linkHeader?.next?.last) {
           // parse the current URL, strip any old "last" param, then set the new one
           const parsed = parseUrl(url);
-          // istanbul ignore if: url is always a valid HTTP URL as `ensurePathPrefix`
+          // v8 ignore if: url is always a valid HTTP URL as `ensurePathPrefix`
           if (!parsed) {
             url = null;
             break;

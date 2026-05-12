@@ -209,7 +209,7 @@ export async function initPlatform({
         ghHostname = 'ghe.com';
       } else if (platformConfig.isGhe) {
         const parsedEndpoint = parseUrl(platformConfig.endpoint);
-        // istanbul ignore if: endpoint is validated before initPlatform, this is here for defensive purposes
+        // v8 ignore if: endpoint is validated before initPlatform, this is here for defensive purposes
         if (!parsedEndpoint) {
           throw new Error(
             `Invalid GitHub endpoint: ${platformConfig.endpoint}`,
@@ -739,7 +739,7 @@ export async function initRepo({
   }
 
   const parsedEndpoint = parseUrl(platformConfig.endpoint);
-  // istanbul ignore if: endpoint is validated during initPlatform
+  // v8 ignore if: endpoint is validated during initPlatform
   if (!parsedEndpoint) {
     throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
   }

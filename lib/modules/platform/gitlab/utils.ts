@@ -90,7 +90,6 @@ export function getRepoUrl(
       );
     }
 
-    // TODO: null check (#22198)
     const parsedEndpoint = parseUrl(defaults.endpoint);
     if (!parsedEndpoint) {
       throw new Error(`Invalid GitLab endpoint: ${defaults.endpoint}`);

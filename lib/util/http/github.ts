@@ -422,7 +422,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         const queue = [...range(2, lastPage)].map(
           (pageNumber) => (): Promise<HttpResponse<T>> => {
             // copy before modifying searchParams
-            const nextUrl = parseUrl(firstPageUrl.toString()) ?? firstPageUrl;
+            const nextUrl = parseUrl(firstPageUrl.toString())!;
             nextUrl.searchParams.set('page', String(pageNumber));
             return super.requestJsonUnsafe<T>(method, {
               ...opts,
