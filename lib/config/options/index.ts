@@ -152,6 +152,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     parents: ['bumpVersions'],
+    supportsTemplating: true,
   },
   {
     name: 'name',
@@ -181,6 +182,7 @@ const options: Readonly<RenovateOptions>[] = [
     parents: ['postUpgradeTasks'],
     default: [],
     cli: false,
+    supportsTemplating: true,
   },
   {
     name: 'workingDirTemplate',
@@ -1594,6 +1596,7 @@ const options: Readonly<RenovateOptions>[] = [
     parents: ['packageRules'],
     cli: false,
     env: false,
+    supportsTemplating: true,
   },
   {
     name: 'sourceDirectory',
@@ -2225,6 +2228,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     advancedUse: true,
+    supportsTemplating: true,
   },
   {
     name: 'overridePackageName',
@@ -2235,6 +2239,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     advancedUse: true,
+    supportsTemplating: true,
   },
   {
     name: 'bbAutoResolvePrTasks',

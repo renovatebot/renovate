@@ -105,18 +105,19 @@ describe('config/options/index', () => {
       allOptions.filter((o) => o.supportsTemplating).map((o) => o.name),
     );
 
-    // Scan source files for template.compile(config.xxx, ...) patterns
+    // Scan source files for template.compile(config.xxx, ...) and compile(config.xxx, ...) patterns
     const sourceDir = join(__dirname, '..', '..');
     const sourceFiles = (
       await Promise.all([
         collectTsFiles(join(sourceDir, 'workers')),
         collectTsFiles(join(sourceDir, 'modules', 'datasource', 'custom')),
         collectTsFiles(join(sourceDir, 'modules', 'manager', 'custom')),
+        collectTsFiles(join(sourceDir, 'util', 'package-rules')),
       ])
     ).flat();
 
     const directPattern =
-      /template\.compile\(\s*(?:config|update|upgrade|upg)\.(\w+)/g;
+      /(?<![.\w])(?:template\.)?compile\(\s*(?:config|update|upgrade|upg|toApply)\??\.(\w+)/g;
     const detectedOptions = new Set<string>();
 
     for (const file of sourceFiles) {
@@ -142,6 +143,8 @@ describe('config/options/index', () => {
       'labels', // labels.map(label => template.compile(label, ...))
       'addLabels', // same pattern as labels
       'prBodyNotes', // prBodyNotes.map(note => template.compile(note, ...))
+      'commands', // postUpgradeTasks.commands iterated and compiled
+      'filePatterns', // bumpVersions.filePatterns iterated and compiled
     ];
     for (const name of indirectlyCompiled) {
       detectedOptions.add(name);
