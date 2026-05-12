@@ -250,7 +250,7 @@ describe('modules/manager/deno/artifacts', () => {
     await updateArtifacts(updateArtifact);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'deno install',
+        cmd: 'deno install --frozen=false',
       },
     ]);
   });
