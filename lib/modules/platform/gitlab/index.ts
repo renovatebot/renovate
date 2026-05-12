@@ -119,7 +119,7 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitLab personal access token');
   }
   if (!endpoint) {
-    logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
+    logger.debug(`Using default GitLab endpoint:  ${defaults.endpoint}`);
   } else if (parseUrl(endpoint) === null) {
     throw new Error(`Invalid GitLab endpoint URL: ${endpoint}`);
   } else {
