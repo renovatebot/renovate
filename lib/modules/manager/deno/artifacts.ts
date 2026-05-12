@@ -91,13 +91,11 @@ export async function updateArtifacts(
 
     // "deno install" don't execute lifecycle scripts of package.json by default
     // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
-    let command = 'deno install';
-    // TODO: appending `--lockfile-only` is better to reduce disk usage
-    // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
     // deno.json(c) could have the `lock.frozen` field
     // we should always override the `frozen` flag due to if it would be specified true
-    const args = ' --frozen=false';
-    command += args;
+    const command = 'deno install --frozen=false';
+    // TODO: appending `--lockfile-only` is better to reduce disk usage
+    // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
     await exec(command, execOptions);
 
     const newLockFileContent = await readLocalFile(lockFileName);
