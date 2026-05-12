@@ -914,6 +914,48 @@ describe('modules/manager/maven/extract', () => {
       ]);
     });
 
+    it('should extract from pom.template.xml file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(Fixtures.get('pom.template.xml'));
+      const res = await extractAllPackageFiles({}, ['pom.template.xml']);
+      expect(res).toMatchObject([
+        {
+          packageFile: 'pom.template.xml',
+          deps: [
+            {
+              datasource: 'maven',
+              depName: 'org.springframework.boot:spring-boot-starter-web',
+              currentValue: '3.2.0',
+              depType: 'compile',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+            {
+              datasource: 'maven',
+              depName: 'org.junit.jupiter:junit-jupiter',
+              currentValue: '5.10.1',
+              depType: 'test',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+            {
+              datasource: 'maven',
+              depName: 'org.example:templated-dep',
+              currentValue: '${templateVersion}',
+              depType: 'compile',
+              skipReason: 'version-placeholder',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+            {
+              datasource: 'maven',
+              depName: 'org.scala-lang:scala-library',
+              currentValue: '{{scala_version}}',
+              depType: 'compile',
+              skipReason: 'version-placeholder',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should return empty array if extensions file is invalid or empty', async () => {
       fs.readLocalFile
         .mockResolvedValueOnce('')
