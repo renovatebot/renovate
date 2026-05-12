@@ -44,8 +44,8 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '15-xlarge' },
           { version: '15-large' },
           { version: '15' },
-          { version: '26-xlarge', isStable: false },
-          { version: '26', isStable: false },
+          { version: '26-xlarge' },
+          { version: '26' },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
