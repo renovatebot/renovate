@@ -118,7 +118,20 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   ) {
     temp.additionalProperties = option.additionalProperties;
   }
-  if (option.default === null) {
+  if (option.type === 'string' && option.allowObject === true) {
+    delete temp.type;
+    const schemas: Record<string, unknown>[] = [
+      { type: 'string' },
+      {
+        type: 'object',
+        additionalProperties: { type: 'string' },
+      },
+    ];
+    if (option.default === null) {
+      schemas.push({ type: 'null' });
+    }
+    temp.oneOf = schemas;
+  } else if (option.default === null) {
     temp.type = [option.type, 'null'];
   }
   if (

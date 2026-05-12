@@ -29,6 +29,52 @@ The following configuration options can be used to enable and tune the functiona
 - [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour)
 - [`internalChecksFilter`](../configuration-options.md#internalchecksfilter)
 
+## Per-update-type overrides
+
+`minimumReleaseAge` supports an object form that allows you to specify different minimum ages for different update types.
+This is especially useful for deferring adoption of new _minor_ or _major_ versions.
+
+When using the object form with `delayMinor` or `delayMajor` keys, Renovate checks the age of the **first release in the version group** (e.g., `x.y.0` for minor) rather than each individual release.
+Once the version group is considered mature, Renovate will suggest upgrading to the **latest patch** within that version.
+
+### Example
+
+Given the following releases:
+
+| Version | Release date |
+| ------- | ------------ |
+| 1.0.0   | July 1st     |
+| 1.1.0   | August 1st   |
+| 1.1.1   | August 2nd   |
+| 1.1.3   | August 8th   |
+
+And the following configuration:
+
+```json
+{
+  "minimumReleaseAge": {
+    "default": "3 days",
+    "delayMinor": "7 days"
+  }
+}
+```
+
+- **Run on August 2nd:** Renovate will keep the repo on `1.0.0`, because the minor version `1.1` was introduced on August 1st (only 1 day ago), which does not meet the 7-day threshold.
+- **Run on August 9th:** Renovate will suggest upgrading to `1.1.3`, because the minor version `1.1` was introduced on August 1st (8 days ago), which meets the 7-day threshold, and `1.1.3` is the latest patch in that minor line.
+
+### Combining with `default`
+
+When both `default` and a type-specific key are set, **both** checks must pass for a release to be suggested.
+This means the version group must be old enough _and_ the individual release must be old enough.
+
+### Behavior with missing timestamps
+
+Per-update-type overrides respect the [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour) setting.
+If the first release in a version group does not have a `releaseTimestamp`:
+
+- With `minimumReleaseAgeBehaviour=timestamp-required` (default): the version group is treated as not yet mature and updates are marked as pending.
+- With `minimumReleaseAgeBehaviour=timestamp-optional`: the version group is allowed regardless of missing timestamp.
+
 ## FAQs
 
 ### My package manager has support for minimum release age, how does Renovate work with that? Do I need to set it in both?
