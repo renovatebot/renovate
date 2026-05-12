@@ -52,6 +52,7 @@ export function getHttpUrl(url: string, token?: string): string {
   }
 
   const httpUrl = parseUrl(parsedUrl.toString(protocol));
+  // istanbul ignore if: git-url-parse always produces a parseable URL string
   if (!httpUrl) {
     throw new Error(`Failed to parse git URL: ${parsedUrl.toString(protocol)}`);
   }

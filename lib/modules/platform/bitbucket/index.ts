@@ -287,6 +287,7 @@ export async function initRepo({
   }
 
   const parsedEndpoint = parseUrl(defaults.endpoint);
+  // istanbul ignore if: endpoint is a constant
   if (!parsedEndpoint) {
     throw new Error(`Invalid Bitbucket endpoint: ${defaults.endpoint}`);
   }
