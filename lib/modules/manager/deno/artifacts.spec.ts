@@ -7,11 +7,10 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
-import type { DenoManagerData } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const updateArtifact: UpdateArtifact<DenoManagerData> = {
+const updateArtifact: UpdateArtifact = {
   config: {
     constraints: { deno: '2.4.5' },
   },
@@ -55,14 +54,6 @@ describe('modules/manager/deno/artifacts', () => {
           },
         },
       ]);
-    });
-
-    // https://github.com/renovatebot/renovate/discussions/43055
-    it('skips if lock file is frozen', async () => {
-      updateArtifact.updatedDeps = [
-        { lockFiles: ['deno.lock'], managerData: { frozenLockfile: true } },
-      ];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
     it('returns null if lock content unchanged', async () => {

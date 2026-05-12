@@ -224,21 +224,13 @@ export const Lint = z
   .pipe(z.array(DenoDependency));
 
 export const Lock = z.union([
-  z.string().transform((path) => ({
-    path,
-  })),
-  z.boolean().transform((enabled) => ({
-    ...(enabled && { path: 'deno.lock' }),
-  })),
+  z.string().transform((path) => path),
+  z.boolean().transform((enabled) => enabled && 'deno.lock'),
   z
     .object({
       path: z.string().optional(),
-      frozen: z.boolean().optional(),
     })
-    .transform((lock) => ({
-      path: lock.path,
-      ...(lock.frozen ? { frozen: true } : {}),
-    })),
+    .transform((obj) => obj.path),
 ]);
 
 export const Workspace = z.union([
@@ -250,8 +242,6 @@ export const Workspace = z.union([
     .transform((workspace) => workspace.members),
 ]);
 
-// schema
-// https://github.com/denoland/deno/blob/ec581581a5bc0ab34f361ec4aa68c61605e42345/cli/schemas/config-file.v1.json
 const DenoPackageFile = z
   .object({
     lock: z.optional(Lock),
@@ -286,7 +276,6 @@ const DenoPackageFile = z
       importMap,
       managerData: {
         workspaces: workspace,
-        ...(lock && 'frozen' in lock && { frozenLockfile: true }),
       },
       dependencies: [
         ...imports,

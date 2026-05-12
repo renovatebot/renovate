@@ -7,11 +7,6 @@ export interface DenoManagerData extends Record<string, any> {
    * The file that refers to this import map, typically deno.json or deno.jsonc
    */
   importMapReferrer?: string;
-  /**
-   * Whether the lockfile is frozen. It need to skip updates to the lockfile on
-   * updating artifact step if it set to `true`.
-   */
-  frozenLockfile?: boolean;
 }
 
 export interface LockFile {
