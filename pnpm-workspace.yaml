@@ -44,3 +44,5 @@ minimumReleaseAgeExclude:
   - '@containerbase/eslint-plugin'
   - '@containerbase/istanbul-reports-html'
   - '@containerbase/semantic-release-pnpm'
+  # Renovate security update: simple-git@3.36.0
+  - simple-git@3.36.0
