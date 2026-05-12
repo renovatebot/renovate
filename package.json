@@ -181,7 +181,7 @@
     "@renovatebot/good-enough-parser": "2.0.1",
     "@renovatebot/osv-offline": "3.0.0",
     "@renovatebot/pep440": "5.0.0",
-    "@renovatebot/pgp": "1.3.9",
+    "@renovatebot/pgp": "1.3.10",
     "@renovatebot/ruby-semver": "5.0.0",
     "@sindresorhus/is": "8.0.0",
     "@yarnpkg/core": "4.7.0",
