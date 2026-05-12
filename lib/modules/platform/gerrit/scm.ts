@@ -1,5 +1,5 @@
+import { randomUUID } from 'node:crypto';
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { randomUUID } from 'crypto';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';

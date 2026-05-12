@@ -21,7 +21,7 @@ const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
 const depNames = ['dep1', 'dep2', 'dep3'];
-const depNamesWithSdks = [...depNames, ...['dart', 'flutter']];
+const depNamesWithSdks = [...depNames, 'dart', 'flutter'];
 const depNamesWithSpace = depNames.join(' ');
 
 const datasource = vi.mocked(_datasource);

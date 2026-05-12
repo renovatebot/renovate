@@ -594,7 +594,7 @@ describe('modules/manager/maven/extract', () => {
       ]);
       for (const packageFile of res) {
         for (const dep of packageFile.deps) {
-          const depUrls = new Set([...dep.registryUrls!]);
+          const depUrls = new Set(dep.registryUrls);
           expect(depUrls).toStrictEqual(unorderedUrls);
         }
       }

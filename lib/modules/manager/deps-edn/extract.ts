@@ -232,7 +232,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       }
     }
   }
-  const mavenRegistries: string[] = [...Object.values(registryMap)];
+  const mavenRegistries: string[] = Object.values(registryMap);
 
   deps.push(...extractSection(data.deps, metadata, mavenRegistries));
 

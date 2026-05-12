@@ -1,6 +1,6 @@
+import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,

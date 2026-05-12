@@ -108,9 +108,7 @@ const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional(), source: z.string().optional() })
     .transform(({ version: currentValue, source }): PackageDependency => {
-      const managerData = {
-        ...(source ? { sourceName: source.toLowerCase() } : {}),
-      };
+      const managerData = source ? { sourceName: source.toLowerCase() } : {};
 
       if (!currentValue) {
         return { datasource: PypiDatasource.id, managerData };
