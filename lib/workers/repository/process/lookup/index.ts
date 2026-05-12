@@ -214,6 +214,7 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioningApi.isVersion(release.version),
       );
+      const allReleaseVersions = new Set(allVersions.map((r) => r.version));
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -508,6 +509,7 @@ export async function lookupUpdates(
           config.lockedVersion ?? currentVersion!,
           bucket,
           release,
+          allReleaseVersions,
         );
 
         // #29034

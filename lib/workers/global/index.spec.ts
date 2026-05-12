@@ -75,52 +75,26 @@ describe('workers/global/index', () => {
       expect(repoConfig.repository).toBe('a/b');
     });
 
-    it('should resolve repository-level presets before merging with global config', async () => {
-      const globalConfigWithPackageRules: RenovateConfig = {
-        baseDir: '/tmp/base',
-        packageRules: [
-          {
-            description: 'global rule',
-            matchManagers: ['npm'],
-            enabled: false,
-          },
-        ],
-      };
-      const repository = {
+    it('stores repositoryEntryConfig for repositories[] object entries', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(globalConfig, {
         repository: 'test/repo',
-        // :approveMajorUpdates has packageRules with dependencyDashboardApproval
-        extends: [':approveMajorUpdates'],
-        packageRules: [
-          {
-            description: 'repo rule',
-            matchPackageNames: ['lodash'],
-            enabled: true,
-          },
-        ],
-      };
-      const repoConfig = await globalWorker.getRepositoryConfig(
-        globalConfigWithPackageRules,
-        repository,
-      );
+        extends: [':automergeAll'],
+        packageRules: [{ matchPackageNames: ['lodash'], enabled: false }],
+      });
+      expect(repoConfig.repositoryEntryConfig).toEqual({
+        extends: [':automergeAll'],
+        packageRules: [{ matchPackageNames: ['lodash'], enabled: false }],
+      });
+      expect(repoConfig.repository).toBe('test/repo');
+    });
 
-      // Verify packageRules exist and have the correct merge order:
-      // 1. Global config packageRules
-      // 2. Preset packageRules (from :approveMajorUpdates)
-      // 3. Repository packageRules
-      expect(repoConfig.packageRules).toMatchObject([
-        {
-          description: 'global rule',
-          matchManagers: ['npm'],
-        },
-        {
-          dependencyDashboardApproval: true,
-          matchUpdateTypes: ['major'],
-        },
-        {
-          description: 'repo rule',
-          matchPackageNames: ['lodash'],
-        },
-      ]);
+    it('does not store repositoryEntryConfig for repositories[] string entries', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        globalConfig,
+        'test/repo',
+      );
+      expect(repoConfig.repositoryEntryConfig).toBeUndefined();
+      expect(repoConfig.repository).toBe('test/repo');
     });
   });
 
@@ -227,6 +201,19 @@ describe('workers/global/index', () => {
       },
     ]);
     await expect(globalWorker.start()).resolves.toBe(0);
+  });
+
+  it('does not log info message when log level is not info', async () => {
+    logger.logLevel.mockImplementation(() => 'debug');
+    parseConfigs.mockResolvedValueOnce({
+      baseDir: '/tmp/base',
+      cacheDir: '/tmp/cache',
+      repositories: [],
+    });
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(logger.logger.info).not.toHaveBeenCalledExactlyOnceWith(
+      expect.stringContaining('Set LOG_LEVEL=debug'),
+    );
   });
 
   describe('processes platforms', () => {

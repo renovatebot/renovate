@@ -3,6 +3,10 @@ import type {
   CustomDatasourceConfig,
 } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/index.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+} from '../../util/exec/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 
 export interface GetDigestInputConfig {
@@ -32,6 +36,12 @@ export interface GetReleasesConfig {
   packageName: string;
   registryUrl?: string;
   currentValue?: string;
+  constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface GetPkgReleasesConfig {
@@ -47,10 +57,14 @@ export interface GetPkgReleasesConfig {
   extractVersion?: string;
   versionCompatibility?: string;
   currentCompatibility?: string;
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   registryStrategy?: RegistryStrategy;
 }
 
@@ -67,7 +81,7 @@ export interface Release {
   /** The original value to which `extractVersion` was applied */
   versionOrig?: string;
   newDigest?: string | null;
-  constraints?: Record<string, string[]>;
+  constraints?: Partial<Record<ConstraintName, string[]>>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
@@ -78,11 +92,17 @@ export interface Release {
   attestation?: boolean;
 }
 
+export interface ReleaseTags {
+  /** The latest release, according to the datasource **/
+  latest?: string;
+  [key: string]: string | undefined;
+}
+
 export interface ReleaseResult {
   deprecationMessage?: string;
   isPrivate?: boolean;
   releases: Release[];
-  tags?: Record<string, string> | undefined;
+  tags?: ReleaseTags | undefined;
   changelogContent?: string;
   // URL metadata
   changelogUrl?: string;

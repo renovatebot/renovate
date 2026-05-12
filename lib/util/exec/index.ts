@@ -29,7 +29,8 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
 }
 
 function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
-  const defaultCwd = GlobalConfig.get('localDir');
+  // TODO: types (#22198)
+  const defaultCwd = GlobalConfig.get('localDir')!;
   const paramCwd = cwdFile
     ? upath.join(defaultCwd, upath.dirname(cwdFile))
     : cwd;

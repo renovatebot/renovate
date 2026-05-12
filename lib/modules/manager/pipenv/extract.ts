@@ -3,6 +3,7 @@ import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { isArray, isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getParentDir, localPathExists } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -162,7 +163,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints: Record<string, any> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
 
   const pipfileDir = getParentDir(ensureLocalPath(packageFile));
 

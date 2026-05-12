@@ -332,5 +332,12 @@
     "eol_server": "2031-05-29",
     "eol_esm": "2036-04-23",
     "eol_legacy": "2038-04-27"
+  },
+  "v26.10": {
+    "codename": "Stonking Stingray",
+    "series": "stonking",
+    "created": "2026-04-24",
+    "release": "2026-10-15",
+    "eol": "2027-07-15"
   }
 }

@@ -3,7 +3,12 @@ import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
-import type { Options, TaskOptions } from 'simple-git';
+import type {
+  Options,
+  SimpleGit,
+  SimpleGitOptions,
+  TaskOptions,
+} from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import { setTimeout } from 'timers/promises';
 import upath from 'upath';
@@ -28,6 +33,7 @@ import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
+import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
@@ -65,6 +71,10 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types.ts';
+import {
+  getCachedUpdateDateResult,
+  setCachedUpdateDateResult,
+} from './update-date-cache.ts';
 
 export { setNoVerify } from './config.ts';
 export { setPrivateKey } from './private-key.ts';
@@ -75,6 +85,33 @@ const delaySeconds = 3;
 const delayFactor = 2;
 
 export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
+
+export function createSimpleGit({
+  config,
+  env,
+}: {
+  config?: Partial<SimpleGitOptions>;
+  env?: ExtraEnv;
+} = {}): SimpleGit {
+  return simpleGit({ ...simpleGitConfig(), ...config }).env(
+    getChildEnv({
+      env: {
+        ...env,
+        // To ensure the simple-git parsers match correctly, we need
+        // to set the `LANG` and `LC_ALL` environment variables to
+        // the `C.UTF-8` locale. See the docs for more details:
+        // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
+        //
+        // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
+        // https://github.com/renovatebot/renovate/pull/18963
+        LANG: 'C.UTF-8',
+        LC_ALL: 'C.UTF-8',
+        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+      },
+    }),
+  );
+}
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
 export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
@@ -177,7 +214,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
-  const globalGit = instrumentGit(simpleGit());
+  const globalGit = instrumentGit(createSimpleGit());
   try {
     const { major, minor, patch, installed } = await globalGit.version();
     /* v8 ignore if -- TODO: add test #40625 */
@@ -208,7 +245,9 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
   logger.debug(`fetchBranchCommits(): url=${url}`);
   const opts = ['ls-remote', '--heads', url];
-  if (config.extraCloneOpts) {
+  const localDir = GlobalConfig.get('localDir')!;
+  const repoExists = await fs.pathExists(upath.join(localDir, '.git/HEAD'));
+  if (config.extraCloneOpts && !repoExists) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       // TODO: types (#22198)
       opts.unshift(e[0], `${e[1]!}`),
@@ -248,13 +287,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = instrumentGit(
-    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-      ...getEnv(),
-      LANG: 'C.UTF-8',
-      LC_ALL: 'C.UTF-8',
-    }),
+    createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -402,7 +436,6 @@ export const syncGit = withInstrumenting(
   { name: 'syncGit' },
   async function (): Promise<void> {
     if (gitInitialized) {
-      /* v8 ignore if -- TODO: add test #40625 */
       if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
         await git.raw(['config', 'core.hooksPath', '/dev/null']);
       }
@@ -548,7 +581,8 @@ export const syncGit = withInstrumenting(
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
-    const localDir = GlobalConfig.get('localDir');
+    // TODO: types (#22198)
+    const localDir = GlobalConfig.get('localDir')!;
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(
@@ -580,8 +614,18 @@ export async function getBranchUpdateDate(
   if (!branchSha) {
     return null;
   }
+  const updateDate = getCachedUpdateDateResult(branchName, branchSha);
+  if (updateDate !== null) {
+    logger.debug(
+      `getBranchUpdateDate(): using cached result "${updateDate.toISO()}"`,
+    );
+    return updateDate;
+  }
+  await syncGit();
   try {
-    return await getCommitDate(branchSha);
+    const result = await getCommitDate(branchSha);
+    setCachedUpdateDateResult(branchName, result);
+    return result;
   } catch (err) {
     logger.debug({ err, branchName }, 'Error getting branch update date');
     return null;
@@ -947,24 +991,29 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(branchName: string): Promise<void> {
+export async function deleteBranch(
+  branchName: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   await syncGit();
-  try {
-    const deleteCommand = ['push', '--delete', 'origin', branchName];
+  if (!options?.localBranch) {
+    try {
+      const deleteCommand = ['push', '--delete', 'origin', branchName];
 
-    if (getNoVerify().includes('push')) {
-      deleteCommand.push('--no-verify');
-    }
+      if (getNoVerify().includes('push')) {
+        deleteCommand.push('--no-verify');
+      }
 
-    await gitRetry(() => git.raw(deleteCommand));
-    logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
-    if (errChecked) {
-      throw errChecked;
+      await gitRetry(() => git.raw(deleteCommand));
+      logger.debug(`Deleted remote branch: ${branchName}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore if -- TODO: add test #40625 */
+      if (errChecked) {
+        throw errChecked;
+      }
+      logger.debug(`No remote branch to delete with name: ${branchName}`);
     }
-    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);
@@ -981,7 +1030,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+export async function mergeToLocal(
+  refSpecToMerge: string,
+  options?: { localBranch?: boolean },
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -995,8 +1047,12 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await fetchRevSpec(refSpecToMerge);
-    await gitRetry(() => git.merge(['FETCH_HEAD']));
+    if (options?.localBranch) {
+      await git.merge([refSpecToMerge]);
+    } else {
+      await fetchRevSpec(refSpecToMerge);
+      await gitRetry(() => git.merge(['FETCH_HEAD']));
+    }
   } catch (err) {
     logger.debug(
       {

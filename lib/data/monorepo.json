@@ -75,7 +75,10 @@
     ],
     "aspnet aspnetwebstack": "https://github.com/aspnet/AspNetWebStack",
     "aspnet extensions": "https://github.com/aspnet/Extensions",
-    "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
+    "aspnet-api-versioning": [
+      "https://github.com/Microsoft/aspnet-api-versioning",
+      "https://github.com/dotnet/aspnet-api-versioning"
+    ],
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
     "aspnet-security-oauth-providers": "https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers",
     "astro": "https://github.com/withastro/astro",
@@ -127,6 +130,7 @@
     "babel": "https://github.com/babel/babel",
     "backstage": "https://github.com/backstage/backstage",
     "baset": "https://github.com/igmat/baset",
+    "better-auth": "https://github.com/better-auth/better-auth",
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "bull-board": "https://github.com/felixmosh/bull-board",
@@ -147,6 +151,8 @@
       "https://github.com/Microsoft/ClearScript"
     ],
     "commitlint": "https://github.com/conventional-changelog/commitlint",
+    "confect": "https://github.com/rjdellecese/confect",
+    "conform": "https://github.com/edmundhung/conform",
     "contentful-rich-text": "https://github.com/contentful/rich-text",
     "cspell": "https://github.com/streetsidesoftware/cspell",
     "datadog-browser-sdk": "https://github.com/DataDog/browser-sdk",
