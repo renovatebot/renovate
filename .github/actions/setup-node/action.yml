@@ -67,7 +67,7 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+      uses: pnpm/action-setup@739bfe42ca9233c5e6aca07c1a25a9d34aca49b0 # v6.0.7
       with:
         standalone: true
 
