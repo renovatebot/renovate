@@ -16,7 +16,7 @@ function getOptionLink(
   const page = optionGlobalOnly.has(name)
     ? 'self-hosted-configuration.md'
     : 'configuration-options.md';
-  return ` - [${name}](${page}#${anchor})`;
+  return ` - [\`${name}\`](${page}#${anchor})`;
 }
 
 export async function generateTemplates(dist: string): Promise<void> {
