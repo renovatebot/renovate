@@ -44,7 +44,7 @@ export async function generateTemplates(dist: string): Promise<void> {
   runtimeText += '\n\n';
 
   let supportsTemplatingText =
-    'The following configuration options accept Handlebars template syntax in their values:\n';
+    'The following configuration options accept Handlebars template syntax in their values:\n\n';
   supportsTemplatingText += options
     .filter((o) => o.supportsTemplating)
     .map((o) => getOptionLink(o.name, optionParentMap, optionGlobalOnly))
