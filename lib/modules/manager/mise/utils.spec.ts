@@ -35,7 +35,9 @@ describe('modules/manager/mise/utils', () => {
       node = '16'
     `;
       const actual = parseTomlFile(content, miseFilename);
-      expect(actual).toBeNull();
+      expect(actual).toMatchObject({
+        tools: {},
+      });
     });
   });
 });
