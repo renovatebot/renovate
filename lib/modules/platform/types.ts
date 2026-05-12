@@ -97,6 +97,8 @@ export interface Issue {
   number?: number;
   state?: string;
   title?: string;
+  createdAt?: string;
+  lastModified?: string;
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
