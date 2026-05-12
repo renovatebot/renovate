@@ -139,15 +139,11 @@ function parseUrl(
     return null;
   }
 
-  // Convert SCP-style SSH URLs (git@host:path) and ssh:// URLs to HTTPS
-  // so that new URL() and detectPlatform() can handle them
-  let normalizedUrl = url;
-  if (regEx(/^git@[^:]+:/).test(url) || url.startsWith('ssh://')) {
-    try {
-      normalizedUrl = getHttpUrl(url);
-    } catch {
-      return null;
-    }
+  let normalizedUrl: string;
+  try {
+    normalizedUrl = getHttpUrl(url);
+  } catch {
+    return null;
   }
 
   try {
