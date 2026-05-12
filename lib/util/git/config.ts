@@ -18,18 +18,23 @@ export function getNoVerify(): GitNoVerifyOption[] {
 }
 
 export function simpleGitConfig(): Partial<SimpleGitOptions> {
+  const unsafe: SimpleGitOptions['unsafe'] = {
+    allowUnsafeSshCommand: true, // For custom `GIT_SSH_COMMAND`.
+    allowUnsafeConfigEnvCount: true, // For custom `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_*` and `GIT_CONFIG_VALUE_*`.
+    allowUnsafePager: true,
+  };
+  if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
+    unsafe.allowUnsafeHooksPath = true;
+  }
   const config: Partial<SimpleGitOptions> = {
     completion: {
       onClose: true,
       onExit: false,
     },
     config: ['core.quotePath=false'],
+    unsafe,
   };
-  if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
-    config.unsafe = {
-      allowUnsafeHooksPath: true,
-    };
-  }
+
   // https://github.com/steveukx/git-js/pull/591
   const gitTimeout = GlobalConfig.get('gitTimeout');
   if (isNumber(gitTimeout) && gitTimeout > 0) {
