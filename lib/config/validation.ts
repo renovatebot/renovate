@@ -285,10 +285,8 @@ export async function validateConfig(
       }
       if (optionSupportsTemplating.has(key) && val) {
         try {
-          // TODO: validate string #22198
-          let res = template.compile((val as string).toString(), config, false);
-          res = template.compile(res, config, false);
-          template.compile(res, config, false);
+          // TODO: types (#22198)
+          template.validate((val as string).toString());
         } catch {
           errors.push({
             topic: 'Configuration Error',
