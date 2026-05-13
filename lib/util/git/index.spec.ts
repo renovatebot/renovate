@@ -1614,10 +1614,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
       );
     });
 
-    it('should not inherit GIT_SSH_COMMAND from process.env when no customEnvVariables are set', async () => {
-      // If the host process happens to have GIT_SSH_COMMAND set,
-      // Renovate should still use its own default BatchMode value
-      // rather than inheriting the host's value.
+    it('should allow process.env GIT_SSH_COMMAND to override the default', async () => {
+      // GIT_SSH_COMMAND is declared in extraEnv, so the key is inherited
+      // from process.env via parentEnv (higher priority than extraEnv).
       process.env.GIT_SSH_COMMAND = 'ssh -o SomeHostOption=yes';
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
@@ -1625,7 +1624,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await expect(git.syncGit()).resolves.toBeUndefined();
       expect(envSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+          GIT_SSH_COMMAND: 'ssh -o SomeHostOption=yes',
         }),
       );
     });

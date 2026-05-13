@@ -32,7 +32,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
-import { getCustomEnv, getEnv } from '../env.ts';
+import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
@@ -93,9 +93,14 @@ export function createSimpleGit({
   config?: Partial<SimpleGitOptions>;
   env?: ExtraEnv;
 } = {}): SimpleGit {
-  const customEnv = getCustomEnv();
   return simpleGit({ ...simpleGitConfig(), ...config }).env(
     getChildEnv({
+      extraEnv: {
+        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+        // Set as extraEnv (lowest priority) so that process.env and
+        // customEnvVariables can override it.
+        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+      },
       env: {
         ...env,
         // To ensure the simple-git parsers match correctly, we need
@@ -107,13 +112,6 @@ export function createSimpleGit({
         // https://github.com/renovatebot/renovate/pull/18963
         LANG: 'C.UTF-8',
         LC_ALL: 'C.UTF-8',
-        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
-        // Only set the default when the user has not configured a custom
-        // GIT_SSH_COMMAND via customEnvVariables, so self-hosted users can
-        // override SSH behaviour (e.g. with a specific identity file).
-        ...(!customEnv.GIT_SSH_COMMAND && {
-          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-        }),
       },
     }),
   );
