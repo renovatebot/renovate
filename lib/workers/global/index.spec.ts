@@ -122,6 +122,18 @@ describe('workers/global/index', () => {
       expect(repoConfig.repositoryEntryConfig).toBeUndefined();
     });
 
+    it('GlobalConfig.set picks up per-repo onboarding override', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        { ...globalConfig, onboarding: true },
+        {
+          repository: 'test/repo',
+          onboarding: false,
+        },
+      );
+      GlobalConfig.set(repoConfig);
+      expect(GlobalConfig.get('onboarding')).toBe(false);
+    });
+
     it('does not store repositoryEntryConfig for repositories[] string entries', async () => {
       const repoConfig = await globalWorker.getRepositoryConfig(
         globalConfig,
