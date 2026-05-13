@@ -29,7 +29,7 @@ async function decompress<T>(input: Buffer): Promise<T> {
 }
 
 export class PackageCacheSqlite extends PackageCacheBase {
-  private static readonly busyTimeoutMs = 100;
+  private static readonly busyTimeoutMs = 5000;
 
   static async create(cacheDir: string): Promise<PackageCacheSqlite> {
     const { DatabaseSync: Sqlite } = await import('node:sqlite');
