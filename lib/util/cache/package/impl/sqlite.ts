@@ -4,7 +4,9 @@ import zlib, { constants } from 'node:zlib';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
+import { getEnv } from '../../../env.ts';
 import { ensureDir } from '../../../fs/index.ts';
+import { parseInteger } from '../../../number.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
@@ -29,8 +31,6 @@ async function decompress<T>(input: Buffer): Promise<T> {
 }
 
 export class PackageCacheSqlite extends PackageCacheBase {
-  private static readonly busyTimeoutMs = 5000;
-
   static async create(cacheDir: string): Promise<PackageCacheSqlite> {
     const { DatabaseSync: Sqlite } = await import('node:sqlite');
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
@@ -43,9 +43,10 @@ export class PackageCacheSqlite extends PackageCacheBase {
       logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
     }
 
-    const client = new Sqlite(sqliteFile, {
-      timeout: PackageCacheSqlite.busyTimeoutMs,
-    });
+    const { RENOVATE_X_SQLITE_BUSY_TIMEOUT } = getEnv();
+    const timeout = parseInteger(RENOVATE_X_SQLITE_BUSY_TIMEOUT, 5000);
+
+    const client = new Sqlite(sqliteFile, { timeout });
     return new PackageCacheSqlite(client);
   }
 
