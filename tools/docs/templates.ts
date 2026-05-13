@@ -53,12 +53,11 @@ export async function generateTemplates(dist: string): Promise<void> {
     .join('\n');
 
   let templateContent = await readFile('docs/usage/templates.md');
-  templateContent = replaceContent(templateContent, supportsTemplatingText, {
-    replaceStart:
-      '<!-- Automatically insert options that support templating here -->',
-    replaceStop:
-      '<!-- Automatically insert options that support templating end -->',
-  });
+  templateContent = replaceContent(
+    templateContent,
+    supportsTemplatingText,
+    '<!-- Automatically insert options that support templating here -->',
+  );
   templateContent = replaceContent(templateContent, exposedConfigOptionsText);
   templateContent = replaceContent(templateContent, runtimeText);
   await updateFile(`${dist}/templates.md`, templateContent);
