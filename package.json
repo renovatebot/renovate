@@ -156,6 +156,7 @@
     "@aws-sdk/client-rds": "3.1036.0",
     "@aws-sdk/client-s3": "3.1036.0",
     "@aws-sdk/credential-providers": "3.1036.0",
+    "@azure/identity": "4.13.1",
     "@baszalmstra/rattler": "0.2.1",
     "@breejs/later": "4.2.0",
     "@cdktf/hcl2json": "0.21.0",
