@@ -1618,25 +1618,16 @@ describe('util/git/index', { timeout: 10000 }, () => {
       // If the host process happens to have GIT_SSH_COMMAND set,
       // Renovate should still use its own default BatchMode value
       // rather than inheriting the host's value.
-      const original = process.env.GIT_SSH_COMMAND;
       process.env.GIT_SSH_COMMAND = 'ssh -o SomeHostOption=yes';
 
-      try {
-        const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
-        await git.initRepo({ url: origin.path });
-        await expect(git.syncGit()).resolves.toBeUndefined();
-        expect(envSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-          }),
-        );
-      } finally {
-        if (original === undefined) {
-          delete process.env.GIT_SSH_COMMAND;
-        } else {
-          process.env.GIT_SSH_COMMAND = original;
-        }
-      }
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+        }),
+      );
     });
   });
 
