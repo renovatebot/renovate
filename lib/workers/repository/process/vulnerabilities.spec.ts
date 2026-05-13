@@ -1114,6 +1114,10 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'go',
+          versioning: 'semver',
+        },
         'Setting allowed version >= 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
       );
       expect(config.packageRules).toHaveLength(1);
@@ -1123,6 +1127,77 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchPackageNames: ['stdlib'],
           matchCurrentVersion: '1.7.5',
           allowedVersions: '>= 1.7.6',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName:
+                  'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                currentValue: '3.4.0',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'pom.xml',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-x44p-gvrj-pj2r',
+          modified: '',
+          aliases: ['CVE-2025-14763'],
+          affected: [
+            {
+              package: {
+                ecosystem: 'Maven',
+                name: 'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                purl: 'pkg:maven/software.amazon.encryption.s3/amazon-s3-encryption-client-java',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '4.0.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-x44p-gvrj-pj2r affects software.amazon.encryption.s3:amazon-s3-encryption-client-java 3.4.0',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'maven',
+          versioning: 'maven',
+        },
+        'Setting allowed version [4.0.0,) to fix vulnerability GHSA-x44p-gvrj-pj2r in software.amazon.encryption.s3:amazon-s3-encryption-client-java 3.4.0',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['maven'],
+          matchPackageNames: [
+            'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+          ],
+          matchCurrentVersion: '3.4.0',
+          allowedVersions: '[4.0.0,)',
+          versioning: 'maven',
           isVulnerabilityAlert: true,
         },
       ]);
