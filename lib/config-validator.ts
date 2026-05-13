@@ -259,10 +259,11 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
         // ignore
       }
     }
-    if (returnVal !== 0) {
-      process.exit(returnVal);
+    if (returnVal === 0) {
+      logger.info('Config validated successfully');
     }
-    logger.info('Config validated successfully');
+    // Use exitCode (not process.exit) so async log streams can flush
+    process.exitCode = returnVal;
   });
 
   await program.parseAsync();
