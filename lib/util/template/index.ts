@@ -360,6 +360,11 @@ export function safeCompile<T>(
   }
 }
 
+/**
+ * Validate that the template is a valid Handlebars template string.
+ *
+ * NOTE: Does not validate that fields are set to valid field names.
+ */
 export function validate(template: string): void {
   handlebars.parse(template);
 }
