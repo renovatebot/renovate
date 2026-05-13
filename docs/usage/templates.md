@@ -18,7 +18,6 @@ Some are configuration options passed through, while others are generated as par
 ## Options that support templating
 
 <!-- Automatically insert options that support templating here -->
-<!-- Automatically insert options that support templating end -->
 
 ## Exposed config options
 
