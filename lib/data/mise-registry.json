@@ -283,7 +283,6 @@
     "asdf": "mathew-fleisch/asdf-bashbot"
   },
   "bashly": {
-    "asdf": "mise-plugins/mise-bashly",
     "gem": "bashly"
   },
   "bat": {
@@ -643,6 +642,9 @@
   "code": {
     "aqua": "just-every/code",
     "npm": "@just-every/code"
+  },
+  "code-review-graph": {
+    "pipx": "code-review-graph"
   },
   "codebuff": {
     "npm": "codebuff"
@@ -2787,7 +2789,7 @@
     "asdf": "johnlayton/asdf-rclone"
   },
   "rebar": {
-    "asdf": "mise-plugins/mise-rebar"
+    "github": "erlang/rebar3"
   },
   "reckoner": {
     "asdf": "FairwindsOps/asdf-reckoner",
@@ -3675,6 +3677,10 @@
   },
   "wash": {
     "aqua": "wasmCloud/wasmCloud/wash"
+  },
+  "wasm-tools": {
+    "aqua": "bytecodealliance/wasm-tools",
+    "cargo": "wasm-tools"
   },
   "wasm4": {
     "aqua": "aduros/wasm4",

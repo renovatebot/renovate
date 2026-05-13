@@ -130,6 +130,7 @@
     "babel": "https://github.com/babel/babel",
     "backstage": "https://github.com/backstage/backstage",
     "baset": "https://github.com/igmat/baset",
+    "better-auth": "https://github.com/better-auth/better-auth",
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "bull-board": "https://github.com/felixmosh/bull-board",
@@ -468,6 +469,7 @@
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
+    "junior": "https://github.com/getsentry/junior",
     "junit-framework": [
       "https://github.com/junit-team/junit5",
       "https://github.com/junit-team/junit-framework"

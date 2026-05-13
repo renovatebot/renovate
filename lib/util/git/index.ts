@@ -3,7 +3,12 @@ import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
-import type { Options, TaskOptions } from 'simple-git';
+import type {
+  Options,
+  SimpleGit,
+  SimpleGitOptions,
+  TaskOptions,
+} from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import { setTimeout } from 'timers/promises';
 import upath from 'upath';
@@ -28,6 +33,7 @@ import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
+import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
@@ -79,6 +85,33 @@ const delaySeconds = 3;
 const delayFactor = 2;
 
 export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
+
+export function createSimpleGit({
+  config,
+  env,
+}: {
+  config?: Partial<SimpleGitOptions>;
+  env?: ExtraEnv;
+} = {}): SimpleGit {
+  return simpleGit({ ...simpleGitConfig(), ...config }).env(
+    getChildEnv({
+      env: {
+        ...env,
+        // To ensure the simple-git parsers match correctly, we need
+        // to set the `LANG` and `LC_ALL` environment variables to
+        // the `C.UTF-8` locale. See the docs for more details:
+        // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
+        //
+        // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
+        // https://github.com/renovatebot/renovate/pull/18963
+        LANG: 'C.UTF-8',
+        LC_ALL: 'C.UTF-8',
+        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+      },
+    }),
+  );
+}
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
 export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
@@ -181,7 +214,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
-  const globalGit = instrumentGit(simpleGit());
+  const globalGit = instrumentGit(createSimpleGit());
   try {
     const { major, minor, patch, installed } = await globalGit.version();
     /* v8 ignore if -- TODO: add test #40625 */
@@ -254,13 +287,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = instrumentGit(
-    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-      ...getEnv(),
-      LANG: 'C.UTF-8',
-      LC_ALL: 'C.UTF-8',
-    }),
+    createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -553,7 +581,8 @@ export const syncGit = withInstrumenting(
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
-    const localDir = GlobalConfig.get('localDir');
+    // TODO: types (#22198)
+    const localDir = GlobalConfig.get('localDir')!;
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(
