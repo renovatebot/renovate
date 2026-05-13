@@ -1188,6 +1188,70 @@ describe('modules/manager/ant/extract', () => {
       ]);
     });
 
+    it('skips property file references with unresolved placeholders in path', async () => {
+      fs.readLocalFile.mockImplementation((file: string) => {
+        if (file === 'build.xml') {
+          return Promise.resolve(codeBlock`
+            <project>
+              <property file="\${included.basedir}/../\${user.name}.properties"/>
+              <artifact:dependencies>
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(fs.readLocalFile).toHaveBeenCalledWith('build.xml', 'utf8');
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('skips import file references with unresolved placeholders in path', async () => {
+      fs.readLocalFile.mockImplementation((file: string) => {
+        if (file === 'build.xml') {
+          return Promise.resolve(codeBlock`
+            <project>
+              <import file="\${user.name}/build.xml"/>
+              <artifact:dependencies>
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(fs.readLocalFile).toHaveBeenCalledWith('build.xml', 'utf8');
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+            }),
+          ],
+        },
+      ]);
+    });
+
     it('handles chain referencing undefined property', async () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`
         <project>
