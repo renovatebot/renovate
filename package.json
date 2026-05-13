@@ -181,7 +181,7 @@
     "@renovatebot/good-enough-parser": "2.0.1",
     "@renovatebot/osv-offline": "3.0.0",
     "@renovatebot/pep440": "5.0.0",
-    "@renovatebot/pgp": "1.3.9",
+    "@renovatebot/pgp": "1.3.11",
     "@renovatebot/ruby-semver": "5.0.0",
     "@sindresorhus/is": "8.0.0",
     "@yarnpkg/core": "4.7.0",
@@ -272,7 +272,7 @@
     "re2": "1.24.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.13",
+    "@biomejs/biome": "2.4.14",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/istanbul-reports-html": "2.0.2",
     "@containerbase/semantic-release-pnpm": "1.4.1",
@@ -324,7 +324,7 @@
     "emojibase-data": "17.0.0",
     "esbuild": "0.28.0",
     "expect-more-jest": "5.5.0",
-    "graphql": "16.13.2",
+    "graphql": "16.14.0",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
     "lint-staged": "16.4.0",
@@ -338,7 +338,7 @@
     "oxlint-tsgolint": "0.22.1",
     "rimraf": "6.1.3",
     "semantic-release": "25.0.3",
-    "tar": "7.5.13",
+    "tar": "7.5.14",
     "tmp-promise": "3.0.3",
     "tsdown": "0.21.10",
     "type-fest": "5.6.0",
@@ -348,7 +348,7 @@
     "vitest": "4.1.5",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@10.33.3",
   "files": [
     "dist",
     "renovate-schema.json"

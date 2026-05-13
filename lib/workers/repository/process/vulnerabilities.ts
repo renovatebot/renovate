@@ -567,7 +567,15 @@ export class Vulnerabilities {
       return null;
     }
 
+    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
+    const versioning = getDefaultVersioning(datasource);
+
     logger.debug(
+      {
+        datasource,
+        versioning,
+      },
+
       `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
     );
 
@@ -580,6 +588,7 @@ export class Vulnerabilities {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
       matchCurrentVersion: depVersion,
+      versioning,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
       vulnerabilitySeverity: severityDetails.severityLevel,
