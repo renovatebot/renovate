@@ -25,7 +25,7 @@ export type MiseTool = z.infer<typeof MiseTool>;
 
 export const MiseFile = Toml.pipe(
   z.object({
-    tools: z.record(MiseTool),
+    tools: z.record(MiseTool).default({}),
   }),
 );
 export type MiseFile = z.infer<typeof MiseFile>;

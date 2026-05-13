@@ -349,6 +349,58 @@ describe('modules/platform/github/index', () => {
       expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
     });
 
+    it('should use public email from user profile when available', async () => {
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
+    it('should fall back to user/emails when there is no public email', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+          name: 'Example User',
+          email: null,
+        })
+        .get('/user/emails')
+        .reply(200, [{ email: 'user@differentdomain.com' }]);
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@differentdomain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
+    it('should fall back gracefully when user/emails returns an error (no user:email scope)', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+          name: 'Example User',
+          email: null,
+        })
+        .get('/user/emails')
+        .reply(403);
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: undefined,
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
       process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
       httpMock
@@ -468,6 +520,32 @@ describe('modules/platform/github/index', () => {
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor:
           'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
+    it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
+      httpMock
+        .scope('https://octocorp.ghe.com', {
+          reqheaders: {
+            authorization: 'Bearer ghs_123test',
+          },
+        })
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://octocorp.ghe.com',
+          token: 'x-access-token:ghs_123test',
+        }),
+      ).toEqual({
+        endpoint: 'https://octocorp.ghe.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
