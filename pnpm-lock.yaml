@@ -107,8 +107,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       '@renovatebot/osv-offline':
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 3.0.1
+        version: 3.0.1
       '@renovatebot/pep440':
         specifier: 5.0.0
         version: 5.0.0
@@ -1847,12 +1847,12 @@ packages:
     resolution: {integrity: sha512-FBLawccaWOPwqXgMSB3FTp1VTfGJWSTTXY2Q3kWPoLYOpKYBr3V37vtqFLjb5wUFkrXN2Sj+S840JXKfHwy8Rg==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline-db@3.0.0':
-    resolution: {integrity: sha512-xkM+WBtBCE0B18vz5xUrfA09Xf6hAv6P+/A4LCRNjpfo809pUjUBg+BjJrp06ddJ4LtT1DkZcn7Mu/5qzqND8g==}
+  '@renovatebot/osv-offline-db@3.0.1':
+    resolution: {integrity: sha512-k52Un4c/XlT9LFq3KqlZdayJNzwza4v9sLxaEFodFc21r5G8Bmx2mpP5MMDSLZDV8VW3jJqmwhPl9HkP88c9Cw==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline@3.0.0':
-    resolution: {integrity: sha512-sUxrl3HeyjOL9F3q801jQwIKSw58HcGbIOxvEkhR3GqBlvPHDw65N6OXWGxYi58jl4ltklWkA4x8QCm69ArFog==}
+  '@renovatebot/osv-offline@3.0.1':
+    resolution: {integrity: sha512-ljE81LXlDMwZ6zj/Czzzd3bmOPhlr8iIbAQGkHY4T3SIb4D+rYdxo2YyGamtt1r/5YJtqcHG0le7038I53Ip8g==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/pep440@5.0.0':
@@ -3496,8 +3496,8 @@ packages:
     resolution: {integrity: sha512-QLV1qeYSo5l13mQzWgP/y0LbMr5Plr5fJilgAIwgnwseproEbtNym8xpLsDzeZ6MWXgNE6kdWGBjdh3zT/Qerg==}
     engines: {node: '>=20'}
 
-  got@15.0.3:
-    resolution: {integrity: sha512-630of5aMTYM6g6epok5nuqvctP8InJISvt39iNt7y0r27rcGCdiPv9Cc6EbwfnkyT1g/shBoVhvDjtXZUbn/Rw==}
+  got@15.0.4:
+    resolution: {integrity: sha512-yzTQs1oldWpv9cNKn8sMe0ou0sskuPEFetIcfM2W06A4j7CLRcd8njJFfaMORFGJ06YV8pbd+u4IvOvkNMKs1w==}
     engines: {node: '>=22'}
 
   graceful-fs@4.2.10:
@@ -7545,19 +7545,19 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.3
 
-  '@renovatebot/osv-offline-db@3.0.0':
+  '@renovatebot/osv-offline-db@3.0.1':
     dependencies:
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
-  '@renovatebot/osv-offline@3.0.0':
+  '@renovatebot/osv-offline@3.0.1':
     dependencies:
-      '@renovatebot/osv-offline-db': 3.0.0
+      '@renovatebot/osv-offline-db': 3.0.1
       adm-zip: 0.5.17
       debug: 4.4.3
       fs-extra: 11.3.4
-      got: 15.0.3
+      got: 15.0.4
       luxon: 3.7.2
     transitivePeerDependencies:
       - supports-color
@@ -9387,7 +9387,7 @@ snapshots:
       responselike: 4.0.2
       type-fest: 4.41.0
 
-  got@15.0.3:
+  got@15.0.4:
     dependencies:
       '@sindresorhus/is': 8.0.0
       byte-counter: 0.1.0
