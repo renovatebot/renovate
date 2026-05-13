@@ -257,6 +257,7 @@ function toRequiredPropertiesRule(
       properties,
       required,
     },
+    // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema if/then/else pattern
     then: {
       required: [option.name],
     },

@@ -29,9 +29,7 @@ export const JsrPackageMetadata = z
   .transform(({ versions, latest }): Release[] => {
     return Object.entries(versions).map(([version, val]) => ({
       version,
-      ...{
-        releaseTimestamp: val.createdAt ?? MINIMUM_RELEASE_TIMESTAMP,
-      },
+      releaseTimestamp: val.createdAt ?? MINIMUM_RELEASE_TIMESTAMP,
       ...(val.yanked && { isDeprecated: true }),
       ...(latest === version && { isLatest: true }),
     }));

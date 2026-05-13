@@ -36,7 +36,7 @@ export function commitFilesToBranch(
     logger.debug(`No files to commit`);
     return Promise.resolve(null);
   }
-  const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
+  const fileLength = new Set(updatedFiles.map((file) => file.path)).size;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (
