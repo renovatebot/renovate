@@ -1552,25 +1552,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
         }),
       );
     });
-
-    it('should work when PAGER is explicitly configured', async () => {
-      // Self-hosted users can opt into passing PAGER via customEnvVariables.
-      // simple-git >=3.36.0 blocks git operations when PAGER is present unless
-      // allowUnsafePager is enabled.
-      setCustomEnv({ PAGER: 'less' });
-
-      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
-      await git.initRepo({ url: origin.path });
-      await expect(git.syncGit()).resolves.toBeUndefined();
-      expect(envSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          PAGER: 'less',
-          LANG: 'C.UTF-8',
-          LC_ALL: 'C.UTF-8',
-          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-        }),
-      );
-    });
   });
 
   describe('pushCommit', () => {

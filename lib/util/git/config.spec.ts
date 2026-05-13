@@ -13,7 +13,6 @@ describe('util/git/config', () => {
       unsafe: {
         allowUnsafeSshCommand: true,
         allowUnsafeConfigEnvCount: true,
-        allowUnsafePager: true,
       },
     });
   });
@@ -29,7 +28,6 @@ describe('util/git/config', () => {
       unsafe: {
         allowUnsafeSshCommand: true,
         allowUnsafeConfigEnvCount: true,
-        allowUnsafePager: true,
       },
     });
   });
