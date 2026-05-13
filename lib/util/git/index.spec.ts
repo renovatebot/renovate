@@ -1571,6 +1571,38 @@ describe('util/git/index', { timeout: 10000 }, () => {
         }),
       );
     });
+
+    it('should allow customEnvVariables to override GIT_SSH_COMMAND', async () => {
+      const customSshCommand =
+        'ssh -i /path/to/deploy-key -o StrictHostKeyChecking=no';
+      setCustomEnv({ GIT_SSH_COMMAND: customSshCommand });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: customSshCommand,
+        }),
+      );
+    });
+
+    it('should allow process.env GIT_SSH_COMMAND to override the default', async () => {
+      // GIT_SSH_COMMAND is declared in extraEnv, so the key is inherited
+      // from process.env via parentEnv (higher priority than extraEnv).
+      process.env.GIT_SSH_COMMAND = 'ssh -o SomeHostOption=yes';
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_SSH_COMMAND: 'ssh -o SomeHostOption=yes',
+        }),
+      );
+    });
   });
 
   describe('pushCommit', () => {

@@ -95,6 +95,12 @@ export function createSimpleGit({
 } = {}): SimpleGit {
   return simpleGit({ ...simpleGitConfig(), ...config }).env(
     getChildEnv({
+      extraEnv: {
+        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+        // Set as extraEnv (lowest priority) so that process.env and
+        // customEnvVariables can override it.
+        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+      },
       env: {
         ...env,
         // To ensure the simple-git parsers match correctly, we need
@@ -106,8 +112,6 @@ export function createSimpleGit({
         // https://github.com/renovatebot/renovate/pull/18963
         LANG: 'C.UTF-8',
         LC_ALL: 'C.UTF-8',
-        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
-        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
       },
     }),
   );
