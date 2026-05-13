@@ -135,6 +135,55 @@ function mockPrimaryDbResponse(primaryDbGzip: Buffer): void {
     });
 }
 
+function parseRegistryUrlForTest(
+  datasource: RpmDatasource,
+  url: string,
+): { metadataSource: string; registryUrl: string } {
+  return (
+    datasource as unknown as {
+      parseRegistryUrl: (url: string) => {
+        metadataSource: string;
+        registryUrl: string;
+      };
+    }
+  ).parseRegistryUrl(url);
+}
+
+function getAutoReleasesForTest(
+  datasource: RpmDatasource,
+  metadata: { repomdUrl: string },
+  packageName: string,
+  url: string,
+): Promise<unknown> {
+  return (
+    datasource as unknown as {
+      getAutoReleases: (
+        metadata: { repomdUrl: string },
+        packageName: string,
+        url: string,
+      ) => Promise<unknown>;
+    }
+  ).getAutoReleases(metadata, packageName, url);
+}
+
+function mockPrimaryDbProviderFailure(
+  datasource: RpmDatasource,
+  err: unknown,
+): void {
+  vi.spyOn(
+    (
+      datasource as unknown as {
+        providers: {
+          primary_db: {
+            getReleases: () => Promise<unknown>;
+          };
+        };
+      }
+    ).providers.primary_db,
+    'getReleases',
+  ).mockRejectedValue(err);
+}
+
 describe('modules/datasource/rpm/index', () => {
   let cacheDirResult: DirectoryResult | null;
   let rpmDatasource: RpmDatasource;
@@ -354,6 +403,17 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
+    });
+
+    it('throws when only primary_db metadata is present', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+
+      await expect(
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
+      ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
     });
   });
 
@@ -1053,6 +1113,35 @@ describe('modules/datasource/rpm/index', () => {
       ).rejects.toThrow('Invalid rpmMetadataSource in RPM registry URL:');
     });
 
+    it('strips explicit auto rpmMetadataSource from registryUrl', async () => {
+      mockRepomdResponse();
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+        `),
+      );
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=auto`,
+          packageName: 'example-package',
+        }),
+      ).resolves.toEqual({
+        releases: [{ version: '1.0-2.azl3' }],
+      });
+    });
+
+    it('keeps invalid registryUrl unchanged when parsing metadata source', () => {
+      expect(parseRegistryUrlForTest(rpmDatasource, 'not a url')).toEqual({
+        metadataSource: 'auto',
+        registryUrl: 'not a url',
+      });
+    });
+
     it('falls back to primary.xml.gz when primary_db is absent', async () => {
       mockRepomdResponse();
       mockPrimaryXmlResponse(
@@ -1101,6 +1190,31 @@ describe('modules/datasource/rpm/index', () => {
       });
 
       expect(releases).toEqual({
+        releases: [{ version: '2.0-1.azl3' }],
+      });
+    });
+
+    it('falls back to primary.xml.gz when primary_db rejects with a non-Error', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+      });
+      mockPrimaryDbProviderFailure(rpmDatasource, 'not-a-sqlite-error');
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="2.0" rel="1.azl3"/>
+          </package>
+        `),
+      );
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl,
+          packageName: 'example-package',
+        }),
+      ).resolves.toEqual({
         releases: [{ version: '2.0-1.azl3' }],
       });
     });
@@ -1262,6 +1376,17 @@ describe('modules/datasource/rpm/index', () => {
           packageName: 'example-package',
         }),
       ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
+    });
+
+    it('returns null when repository metadata has no usable source', async () => {
+      await expect(
+        getAutoReleasesForTest(
+          rpmDatasource,
+          { repomdUrl: `${registryUrl}repomd.xml` },
+          'example-package',
+          registryUrl,
+        ),
+      ).resolves.toBeNull();
     });
   });
 });
