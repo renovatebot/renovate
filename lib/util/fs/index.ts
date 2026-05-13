@@ -89,6 +89,15 @@ export async function renameLocalFile(
   await fs.move(fromPath, toPath);
 }
 
+export async function renameCacheFile(
+  fromFile: string,
+  toFile: string,
+): Promise<void> {
+  const fromPath = ensureCachePath(fromFile);
+  const toPath = ensureCachePath(toFile);
+  await fs.rename(fromPath, toPath);
+}
+
 export async function ensureDir(dirName: string): Promise<void> {
   // v8 ignore else -- TODO: add test #40625
   if (isNonEmptyString(dirName)) {
