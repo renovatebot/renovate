@@ -4,6 +4,7 @@ import * as _packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { defaultRegistryUrl } from './common.ts';
 import { getDependency } from './get.ts';
 import { resolveRegistryUrl, setNpmrc } from './npmrc.ts';
@@ -300,7 +301,7 @@ describe('modules/datasource/npm/get', () => {
   });
 
   it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules without protocol disables abortOnError', async () => {
-    const host = new URL(defaultRegistryUrl).host;
+    const host = parseUrl(defaultRegistryUrl)!.host;
     hostRules.add({
       matchHost: host,
       abortOnError: false,

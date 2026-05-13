@@ -47,7 +47,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
@@ -129,7 +129,11 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  const host = new URL(platformConfig.endpoint).host;
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
+  const host = parsedEndpoint.host;
   platformConfig.isGhe = host !== 'api.github.com';
   platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
@@ -204,7 +208,14 @@ export async function initPlatform({
       if (platformConfig.isGheCloud) {
         ghHostname = 'ghe.com';
       } else if (platformConfig.isGhe) {
-        ghHostname = new URL(platformConfig.endpoint).hostname;
+        const parsedEndpoint = parseUrl(platformConfig.endpoint);
+        // v8 ignore if: endpoint is validated before initPlatform, this is here for defensive purposes
+        if (!parsedEndpoint) {
+          throw new Error(
+            `Invalid GitHub endpoint: ${platformConfig.endpoint}`,
+          );
+        }
+        ghHostname = parsedEndpoint.hostname;
       } else {
         ghHostname = 'github.com';
       }
@@ -726,7 +737,11 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = new URL(platformConfig.endpoint);
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  // v8 ignore if: endpoint is validated during initPlatform
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
