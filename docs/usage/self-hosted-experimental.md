@@ -127,16 +127,16 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
-## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
-
-If set, Renovate will use SQLite as the backend for the package cache.
-Don't combine with `redisUrl`, Redis would be preferred over SQlite.
-
 ## `RENOVATE_X_SQLITE_BUSY_TIMEOUT`
 
 Set the SQLite busy timeout in milliseconds. Defaults to `5000`.
 
 Only applies when `RENOVATE_X_SQLITE_PACKAGE_CACHE` is set.
+
+## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
+
+If set, Renovate will use SQLite as the backend for the package cache.
+Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 ## `RENOVATE_X_STATIC_REPO_CONFIG_FILE`
 
