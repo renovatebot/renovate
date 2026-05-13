@@ -318,7 +318,7 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepositoryEntry = AllConfig & {
+export type RenovateRepositoryEntry = (RenovateConfig & RepoGlobalConfig) & {
   repository: string;
 };
 
