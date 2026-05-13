@@ -359,3 +359,7 @@ export function safeCompile<T>(
     return '';
   }
 }
+
+export function validate(template: string): void {
+  handlebars.parse(template);
+}
