@@ -1571,6 +1571,73 @@ describe('util/git/index', { timeout: 10000 }, () => {
         }),
       );
     });
+
+    it('should allow customEnvVariables to override GIT_SSH_COMMAND', async () => {
+      // Self-hosted users may inject a custom GIT_SSH_COMMAND via
+      // customEnvVariables to configure SSH authentication (e.g. a
+      // specific identity file). The default 'ssh -o BatchMode=yes'
+      // should be used as a fallback, not as a forced override.
+      const customSshCommand =
+        'ssh -i /path/to/deploy-key -o StrictHostKeyChecking=no';
+      setCustomEnv({ GIT_SSH_COMMAND: customSshCommand });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: customSshCommand,
+        }),
+      );
+    });
+
+    it('should allow customEnvVariables to override GIT_SSH_COMMAND alongside other custom vars', async () => {
+      const customSshCommand =
+        'ssh -i /path/to/deploy-key -o StrictHostKeyChecking=no';
+      setCustomEnv({
+        GIT_SSH_COMMAND: customSshCommand,
+        CUSTOM_TOKEN: 'abc123',
+      });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: customSshCommand,
+          CUSTOM_TOKEN: 'abc123',
+        }),
+      );
+    });
+
+    it('should not inherit GIT_SSH_COMMAND from process.env when no customEnvVariables are set', async () => {
+      // If the host process happens to have GIT_SSH_COMMAND set,
+      // Renovate should still use its own default BatchMode value
+      // rather than inheriting the host's value.
+      const original = process.env.GIT_SSH_COMMAND;
+      process.env.GIT_SSH_COMMAND = 'ssh -o SomeHostOption=yes';
+
+      try {
+        const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+        await git.initRepo({ url: origin.path });
+        await expect(git.syncGit()).resolves.toBeUndefined();
+        expect(envSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+          }),
+        );
+      } finally {
+        if (original === undefined) {
+          delete process.env.GIT_SSH_COMMAND;
+        } else {
+          process.env.GIT_SSH_COMMAND = original;
+        }
+      }
+    });
   });
 
   describe('pushCommit', () => {
