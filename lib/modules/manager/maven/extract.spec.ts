@@ -915,7 +915,46 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('should extract from pom.template.xml file', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(Fixtures.get('pom.template.xml'));
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://maven.apache.org/POM/4.0.0">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>org.example</groupId>
+        <artifactId>template-project</artifactId>
+        <version>1.0.0</version>
+
+        <properties>
+          <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+          <manifold.version>2021.1.12</manifold.version>
+          <scala.version>{{scala_version}}</scala.version>
+          <scala.binary.version>{{scala_binary_version}}</scala.binary.version>
+        </properties>
+
+        <dependencies>
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>3.2.0</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>templated-dep</artifactId>
+            <version>\${templateVersion}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>\${scala.version}</version>
+          </dependency>
+        </dependencies>
+      </project>
+    `);
       const res = await extractAllPackageFiles({}, ['pom.template.xml']);
       expect(res).toMatchObject([
         {
