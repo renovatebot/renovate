@@ -1132,6 +1132,92 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('creates vulnerability alert for go toolchain directive using stdlib', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'toolchain',
+                currentValue: '1.23.6',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GO-2025-3563',
+          modified: '',
+          aliases: ['CVE-2025-22871'],
+          affected: [
+            {
+              package: {
+                name: 'stdlib',
+                ecosystem: 'Go',
+                purl: 'pkg:golang/stdlib',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '1.23.0' }, { fixed: '1.23.8' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GO-2025-3563 affects go 1.23.6',
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['golang-version'],
+          matchPackageNames: ['go'],
+          matchCurrentVersion: '1.23.6',
+          allowedVersions: '>= 1.23.8',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('skips vulnerability lookup for go module directive', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'golang',
+                currentValue: '1.23.5',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(0);
+    });
+
     it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         gomod: [
