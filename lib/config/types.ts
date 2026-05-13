@@ -318,11 +318,11 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (RenovateConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = (RenovateConfig & RepoGlobalConfig) & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
