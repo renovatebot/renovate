@@ -4,6 +4,7 @@ import {
   ATTR_VCS_REPOSITORY_NAME,
 } from '@opentelemetry/semantic-conventions/incubating';
 import {
+  isNonEmptyObject,
   isNonEmptyString,
   isNonEmptyStringAndNotWhitespace,
   isString,
@@ -78,7 +79,7 @@ export async function getRepositoryConfig(
       }
     }
 
-    if (Object.keys(repositoryEntryConfig).length) {
+    if (isNonEmptyObject(repositoryEntryConfig)) {
       // mergeRenovateConfig later resolves this repositories[] object-entry
       // config in the correct order
       repoConfig.repositoryEntryConfig = repositoryEntryConfig;
