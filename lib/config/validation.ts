@@ -285,6 +285,7 @@ export async function validateConfig(
       }
       if (optionSupportsTemplating.has(key) && val) {
         try {
+          // TODO: types (#22198)
           template.validate((val as string).toString());
         } catch {
           errors.push({
