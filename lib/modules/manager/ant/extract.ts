@@ -14,6 +14,7 @@ import type {
 } from '../types.ts';
 import {
   applyProps,
+  containsPlaceholder,
   findAttrValuePosition,
   parsePropertiesFile,
   resolveChainedProps,
@@ -246,27 +247,39 @@ async function walkNodeInOrder(
       // Handle property file reference
       const file = child.attr.file;
       if (file) {
-        const propFilePath = file.startsWith('/')
-          ? file
-          : upath.join(baseDir, file);
+        if (containsPlaceholder(file)) {
+          logger.debug(
+            `ant manager: skipping properties file with unresolved placeholders in path: ${file}`,
+          );
+        } else {
+          const propFilePath = file.startsWith('/')
+            ? file
+            : upath.join(baseDir, file);
 
-        if (!visitedFiles.has(propFilePath)) {
-          visitedFiles.add(propFilePath);
-          const propContent = await readLocalFile(propFilePath, 'utf8');
-          if (propContent) {
-            parsePropertiesFile(propContent, propFilePath, allProps);
-          } else {
-            logger.debug(
-              `ant manager: could not read properties file ${propFilePath}`,
-            );
+          if (!visitedFiles.has(propFilePath)) {
+            visitedFiles.add(propFilePath);
+            const propContent = await readLocalFile(propFilePath, 'utf8');
+            if (propContent) {
+              parsePropertiesFile(propContent, propFilePath, allProps);
+            } else {
+              logger.debug(
+                `ant manager: could not read properties file ${propFilePath}`,
+              );
+            }
           }
         }
       }
     } else if (child.name === 'import' && child.attr.file) {
-      const importedFile = upath.normalize(
-        upath.join(baseDir, child.attr.file),
-      );
-      await walkXmlFile(importedFile, visitedFiles, allProps, allRawDeps);
+      if (containsPlaceholder(child.attr.file)) {
+        logger.debug(
+          `ant manager: skipping import file with unresolved placeholders in path: ${child.attr.file}`,
+        );
+      } else {
+        const importedFile = upath.normalize(
+          upath.join(baseDir, child.attr.file),
+        );
+        await walkXmlFile(importedFile, visitedFiles, allProps, allRawDeps);
+      }
     } else if (child.name === 'dependency') {
       const rawDep = collectDependency(
         child,
