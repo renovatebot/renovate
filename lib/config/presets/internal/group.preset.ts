@@ -811,6 +811,17 @@ const staticGroups = {
       },
     ],
   },
+  stylelint: {
+    description: 'Group stylelint packages together.',
+    packageRules: [
+      {
+        extends: ['packages:stylelint'],
+        groupName: 'stylelint packages',
+        groupSlug: 'stylelint',
+        separateMajorMinor: false,
+      },
+    ],
+  },
   symfony: {
     description: 'Group PHP Symfony packages together.',
     packageRules: [
