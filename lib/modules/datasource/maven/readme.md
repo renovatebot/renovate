@@ -20,6 +20,10 @@ If you continue to experience rate limiting issues after implementing persistent
 - Reduce the frequency of Renovate runs
 - Consider using a Maven repository proxy with its own caching layer
 
+<!-- prettier-ignore -->
+!!! note
+    Dependencies that appear to be Gradle plugins (where the artifactId ends with `.gradle.plugin`) will **not** be looked up in Maven Central.
+
 #### Making your changelogs fetchable
 
 In case you are publishing artifacts and you want to ensure that your changelogs are fetchable by `Renovate`, you need to configure the [scm section](https://maven.apache.org/scm/git.html) on their `pom.xml` file.
