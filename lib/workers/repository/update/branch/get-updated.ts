@@ -602,17 +602,16 @@ async function checkForPendingVersions(
       dep.currentVersion ??
       dep.currentValue;
     if (!resolvedVersion) {
-      logger.error(
+      logger.warn(
         {
           packageFile: packageFileName,
           manager,
           branchName: config.branchName,
           depName,
-          newVersion: resolvedVersion,
         },
-        `No new version found for '${depName}' after updating '${packageFileName}'`,
+        `Could not determine resolved version for '${depName}' after updating '${packageFileName}'; skipping pending-version check`,
       );
-      throw new Error(WORKER_FILE_UPDATE_FAILED);
+      continue;
     }
 
     if (resolvedVersion && upgradeInfo.pendingVersions.has(resolvedVersion)) {
