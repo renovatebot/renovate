@@ -340,7 +340,7 @@
     "semantic-release": "25.0.3",
     "tar": "7.5.14",
     "tmp-promise": "3.0.3",
-    "tsdown": "0.21.10",
+    "tsdown": "0.22.0",
     "type-fest": "5.6.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
