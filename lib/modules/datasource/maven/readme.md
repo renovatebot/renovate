@@ -22,7 +22,7 @@ If you continue to experience rate limiting issues after implementing persistent
 
 <!-- prettier-ignore -->
 !!! note
-    Dependencies that appear to be Gradle plugins (where the artifactId ends with `.gradle.plugin`) will **not** be looked up in Maven Central.
+    Dependencies that appear to be Gradle plugins (where the groupId or artifactId ends with `.gradle.plugin`) will **not** be looked up in Maven Central.
 
 #### Making your changelogs fetchable
 
