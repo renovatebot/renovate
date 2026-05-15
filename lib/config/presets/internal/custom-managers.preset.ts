@@ -43,6 +43,21 @@ export const presets: Record<string, Preset> = {
     ],
     description: 'Update `_VERSION` variables in Bitbucket Pipelines',
   },
+  devEnginesPackageManager: {
+    customManagers: [
+      {
+        customType: 'jsonata',
+        datasourceTemplate: 'npm',
+        fileFormat: 'json',
+        managerFilePatterns: ['**/package.json'],
+        matchStrings: [
+          '{ "depName": devEngines.packageManager.name, "currentValue": devEngines.packageManager.version }',
+        ],
+      },
+    ],
+    description:
+      'Update `devEngines.packageManager.version` in `package.json` files (e.g. `npm`, `pnpm`, `yarn`).',
+  },
   dockerfileVersions: {
     customManagers: [
       {

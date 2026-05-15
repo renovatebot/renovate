@@ -309,6 +309,56 @@ describe('config/presets/internal/custom-managers', () => {
     });
   });
 
+  describe('Update `devEngines.packageManager.version` in package.json', () => {
+    const customManager = presets.devEnginesPackageManager.customManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        {
+          "name": "example",
+          "devEngines": {
+            "packageManager": {
+              "name": "pnpm",
+              "version": "9.0.0",
+              "onFail": "error"
+            }
+          }
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'jsonata',
+        fileContent,
+        'package.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '9.0.0',
+          datasource: 'npm',
+          depName: 'pnpm',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                      | expected
+        ${'package.json'}         | ${true}
+        ${'foo/package.json'}     | ${true}
+        ${'foo/bar/package.json'} | ${true}
+        ${'package.json5'}        | ${false}
+        ${'package.jsonc'}        | ${false}
+        ${'package.json.bak'}     | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
+    });
+  });
+
   describe('Update `_VERSION` variables in Dockerfiles', () => {
     const customManager = presets.dockerfileVersions.customManagers?.[0];
 
