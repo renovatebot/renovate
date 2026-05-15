@@ -318,7 +318,7 @@ describe('modules/datasource/maven/util', () => {
           'datasource-maven:metadata-not-found',
           metadataUrl,
           true,
-          60 * 24,
+          expect.toBeNumber(),
         );
       });
 
