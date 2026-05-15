@@ -95,6 +95,12 @@ const METADATA_NOT_FOUND_NAMESPACE =
   'datasource-maven:metadata-not-found' as const;
 const METADATA_NOT_FOUND_TTL_MINUTES = 60 * 12; // 12 hours
 
+/** introduces jitter to make sure that a given repo's cache expiring doesn't lead to many requests leading to high traffic and/or rate limits */
+function getMetadataNotFoundTtl(): number {
+  const jitter = Math.floor(Math.random() * 60 * 2); // 0–120 minutes
+  return METADATA_NOT_FOUND_TTL_MINUTES + jitter;
+}
+
 function isMetadataUrl(url: string): boolean {
   return url.endsWith('/maven-metadata.xml');
 }
@@ -156,7 +162,7 @@ export async function downloadHttpProtocol(
             METADATA_NOT_FOUND_NAMESPACE,
             failedUrl,
             true,
-            METADATA_NOT_FOUND_TTL_MINUTES,
+            getMetadataNotFoundTtl(),
           );
         }
         return Result.err({ type: 'not-found' });
