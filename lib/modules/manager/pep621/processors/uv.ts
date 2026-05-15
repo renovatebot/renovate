@@ -134,35 +134,35 @@ export class UvProcessor extends BasePyProjectProcessor {
       packageFile,
       this.lockfileName,
     );
-    if (lockFileName) {
-      const lockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (lockFileContent) {
-        const { val: lockFileMapping, err } = Result.parse(
-          lockFileContent,
-          UvLockfile,
-        ).unwrap();
+    if (!lockFileName) {
+      logger.debug({ packageFile }, `No uv lock file found`);
+      return Promise.resolve(deps);
+    }
+    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (lockFileContent) {
+      const { val: lockFileMapping, err } = Result.parse(
+        lockFileContent,
+        UvLockfile,
+      ).unwrap();
 
-        if (err) {
-          logger.debug({ packageFile, err }, `Error parsing uv lock file`);
-        } else {
-          for (const dep of deps) {
-            const packageName = dep.packageName;
-            if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName].version;
-            }
+      if (err) {
+        logger.debug({ packageFile, err }, `Error parsing uv lock file`);
+      } else {
+        for (const dep of deps) {
+          const packageName = dep.packageName;
+          if (packageName && packageName in lockFileMapping) {
+            dep.lockedVersion = lockFileMapping[packageName].version;
           }
+        }
 
-          for (const [name, { version, virtual }] of Object.entries(
-            lockFileMapping,
-          )) {
-            if (!virtual && !deps.find((dep) => dep.packageName === name)) {
-              deps.push(indirectDep(name, version));
-            }
+        for (const [name, { version, virtual }] of Object.entries(
+          lockFileMapping,
+        )) {
+          if (!virtual && !deps.find((dep) => dep.packageName === name)) {
+            deps.push(indirectDep(name, version));
           }
         }
       }
-    } else {
-      logger.debug({ packageFile }, `No uv lock file found`);
     }
 
     return Promise.resolve(deps);
