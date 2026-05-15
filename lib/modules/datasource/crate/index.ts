@@ -379,7 +379,7 @@ export class CrateDatasource extends Datasource {
       const lockKey = registryFetchUrl;
 
       const executionTimeout = GlobalConfig.get('executionTimeout') * 60 * 1000;
-      const gitTimeout = GlobalConfig.get('gitTimeout') ?? executionTimeout;
+      const gitTimeout = GlobalConfig.get('gitTimeout') || executionTimeout;
       const releaseLock = await acquireLock(
         lockKey,
         'crate-registry',

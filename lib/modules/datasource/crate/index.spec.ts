@@ -354,6 +354,23 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('clones other private registry with explicit gitTimeout', async () => {
+      const { mockClone } = setupGitMocks();
+      GlobalConfig.set({
+        ...adminConfig,
+        allowCustomCrateRegistries: true,
+        gitTimeout: 30000,
+      });
+      const url = 'https://github.com/mcorbin/testregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalled();
+      expect(res).not.toBeNull();
+    });
+
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
