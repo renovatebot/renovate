@@ -134,9 +134,7 @@ export class UvProcessor extends BasePyProjectProcessor {
       packageFile,
       this.lockfileName,
     );
-    if (lockFileName === null) {
-      logger.debug({ packageFile }, `No uv lock file found`);
-    } else {
+    if (lockFileName) {
       const lockFileContent = await readLocalFile(lockFileName, 'utf8');
       if (lockFileContent) {
         const { val: lockFileMapping, err } = Result.parse(
@@ -163,6 +161,8 @@ export class UvProcessor extends BasePyProjectProcessor {
           }
         }
       }
+    } else {
+      logger.debug({ packageFile }, `No uv lock file found`);
     }
 
     return Promise.resolve(deps);
