@@ -22,7 +22,7 @@ import {
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -47,10 +47,10 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
-  AggregatedVulnerabilities,
   AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
@@ -70,7 +70,6 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
-import { normalizeNamePerEcosystem } from '../utils/github-alerts.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
@@ -85,9 +84,10 @@ import { getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
-  GithubVulnerabilityAlert,
+  GithubVulnerabilityAlerts,
 } from './schema.ts';
 import type {
+  AggregatedVulnerabilities,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
@@ -129,8 +129,13 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  platformConfig.isGhe =
-    new URL(platformConfig.endpoint).host !== 'api.github.com';
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
+  const host = parsedEndpoint.host;
+  platformConfig.isGhe = host !== 'api.github.com';
+  platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -199,10 +204,21 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      // v8 ignore next -- TODO: add test #40625
-      const ghHostname = platformConfig.isGhe
-        ? new URL(platformConfig.endpoint).hostname
-        : 'github.com';
+      let ghHostname: string;
+      if (platformConfig.isGheCloud) {
+        ghHostname = 'ghe.com';
+      } else if (platformConfig.isGhe) {
+        const parsedEndpoint = parseUrl(platformConfig.endpoint);
+        // v8 ignore if: endpoint is validated before initPlatform, this is here for defensive purposes
+        if (!parsedEndpoint) {
+          throw new Error(
+            `Invalid GitHub endpoint: ${platformConfig.endpoint}`,
+          );
+        }
+        ghHostname = parsedEndpoint.hostname;
+      } else {
+        ghHostname = 'github.com';
+      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -210,10 +226,9 @@ export async function initPlatform({
         token,
       );
       // v8 ignore next -- TODO: coverage error #40625
-      platformConfig.userEmail = await getUserEmail(
-        platformConfig.endpoint,
-        token,
-      );
+      platformConfig.userEmail =
+        platformConfig.userDetails.email ??
+        (await getUserEmail(platformConfig.endpoint, token));
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
@@ -544,6 +559,7 @@ export async function initRepo({
         ...(!config.ignorePrAuthor && { user: renovateUsername }),
       },
       readOnly: true,
+      count: 1, // bypass graphql check
     });
 
     if (res?.errors) {
@@ -721,7 +737,11 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = new URL(platformConfig.endpoint);
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  // v8 ignore if: endpoint is validated during initPlatform
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
@@ -1378,12 +1398,24 @@ export async function findIssue(title: string): Promise<Issue | null> {
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
   const repo = config.parentRepo ?? config.repository;
-  const { body: closedIssue } = await githubApi.patchJson(
-    `repos/${repo}/issues/${issueNumber}`,
-    { body: { state: 'closed' } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(closedIssue);
+  try {
+    const { body: closedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNumber}`,
+      { body: { state: 'closed' } },
+      Issue,
+    );
+    GithubIssueCache.updateIssue(closedIssue);
+  } catch (err) {
+    const statusCode = err.response?.statusCode;
+    if (statusCode === 404 || statusCode === 410) {
+      logger.debug(
+        `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
+      );
+      GithubIssueCache.deleteIssue(issueNumber);
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function ensureIssue({
@@ -1547,12 +1579,30 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  const { body: updatedIssue } = await githubApi.postJson(
-    `repos/${repository}/issues/${issueNo}/assignees`,
-    { body: { assignees } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(updatedIssue);
+  const url = `repos/${repository}/issues/${issueNo}/assignees`;
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { body: updatedIssue } = await githubApi.postJson(
+        url,
+        { body: { assignees } },
+        Issue,
+      );
+      GithubIssueCache.updateIssue(updatedIssue);
+      return;
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+      lastErr = err;
+      logger.debug(
+        { attempt: attempt + 1 },
+        `Retrying addAssignees for #${issueNo} after 404`,
+      );
+      await setTimeout(1000);
+    }
+  }
+  throw lastErr!;
 }
 
 export async function addReviewers(
@@ -1802,8 +1852,34 @@ async function tryPrAutomerge(
 
   try {
     const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
-    const variables = { pullRequestId: prNodeId, mergeMethod };
-    const queryOptions = { variables };
+
+    let commitHeadline: string | undefined;
+    let commitBody: string | undefined;
+    // For SQUASH and MERGE methods, pass the commit message explicitly to avoid
+    // GitHub using the PR description as the commit body when "Use PR title and
+    // body as commit message" is enabled in repository settings.
+    const automergeCommitMessage = platformPrOptions?.automergeCommitMessage;
+    if (mergeMethod !== 'REBASE' && automergeCommitMessage) {
+      const newlineIndex = automergeCommitMessage.indexOf('\n');
+      if (newlineIndex === -1) {
+        commitHeadline = automergeCommitMessage;
+      } else {
+        commitHeadline = automergeCommitMessage.slice(0, newlineIndex);
+        commitBody = automergeCommitMessage.slice(newlineIndex + 1).trim();
+      }
+
+      // Add PR number to the commit headline to match the default GitHub behavior
+      commitHeadline = `${commitHeadline} (#${prNumber})`;
+    }
+
+    const variables = {
+      pullRequestId: prNodeId,
+      mergeMethod,
+      commitHeadline,
+      commitBody,
+    };
+    // set count to one bypass graphql check
+    const queryOptions = { variables, count: 1 };
 
     const res = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
@@ -2087,13 +2163,13 @@ export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
 }
 
-export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
   /* v8 ignore next */
   if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
   }
-  let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
+  let vulnerabilityAlerts: GithubVulnerabilityAlerts | undefined;
   try {
     vulnerabilityAlerts = (
       await githubApi.getJson(
@@ -2103,7 +2179,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
-        GithubVulnerabilityAlert,
+        GithubVulnerabilityAlerts,
       )
     ).body;
   } catch (err) /* v8 ignore next */ {
@@ -2137,7 +2213,8 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         } = alert.security_vulnerability;
         const patch = firstPatchedVersion?.identifier;
 
-        const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
+        const normalizedName =
+          ecosystem === 'pip' ? normalizePythonDepName(name) : name;
         alert.security_vulnerability.package.name = normalizedName;
         const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;

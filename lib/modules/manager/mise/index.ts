@@ -54,6 +54,22 @@ const backendDatasources = {
   vfox: [],
 };
 
+/**
+ * Backends that are definitely supported out-of-the-box with Renovate.
+ */
+export const supportedBackendDatasources = new Set(
+  Object.keys(backendDatasources).filter((key) => key !== 'vfox'),
+);
+
+/**
+ * Backends that may require some additional work for users to configure Renovate to update them.
+ */
+export const maybeSupportedBackendDatasources = new Set<string>(
+  Object.keys(backendDatasources).filter(
+    (key) => key === 'vfox' || key === 'aqua',
+  ),
+);
+
 export const supportedDatasources = deduplicateArray(
   Object.values(backendDatasources).flat(),
 ).sort();

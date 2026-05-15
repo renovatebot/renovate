@@ -68,6 +68,11 @@ export function regEx(
   }
 }
 
+/**
+ * Escapes any RegExp syntax characters in the input string, returning a new string that can be safely interpolated into a RegExp as a literal string to match.
+ *
+ * @deprecated use `RegExp.escape` instead
+ */
 export function escapeRegExp(input: string): string {
   return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string
 }

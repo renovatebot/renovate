@@ -2,8 +2,11 @@
 import 'source-map-support/register.js';
 import './punycode.cjs';
 
+import { styleText } from 'node:util';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, CommanderError } from 'commander';
 import { dequal } from 'dequal';
+import { diffLines } from 'diff';
 import fs from 'fs-extra';
 import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
@@ -14,6 +17,8 @@ import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
 import { getEnv } from './util/env.ts';
+import { add as addHostRule } from './util/host-rules.ts';
+import { regEx } from './util/regex.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
@@ -35,6 +40,12 @@ async function partiallyGlobalInitialize(): Promise<void> {
   // NOTE that this doesn't allow command-line arguments
   const globalConfig = await parseConfigs(getEnv(), []);
   GlobalConfig.set(globalConfig);
+
+  if (globalConfig.hostRules) {
+    for (const hostRule of globalConfig.hostRules) {
+      addHostRule(hostRule);
+    }
+  }
 }
 
 async function validate(
@@ -44,6 +55,11 @@ async function validate(
   strict: boolean,
   isPreset = false,
 ): Promise<void> {
+  if (config.hostRules) {
+    for (const hostRule of config.hostRules) {
+      addHostRule(hostRule);
+    }
+  }
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
@@ -53,6 +69,27 @@ async function validate(
       },
       'Config migration necessary',
     );
+    const changedObjects = diffLines(
+      JSON.stringify(config, null, 2),
+      JSON.stringify(migratedConfig, null, 2),
+      { ignoreWhitespace: false, newlineIsToken: false },
+    );
+    const added = styleText('green', '+ ');
+    const removed = styleText('red', '- ');
+    const msg = changedObjects
+      .flatMap((part) =>
+        part.value
+          .split('\n')
+          .filter(isNonEmptyStringAndNotWhitespace)
+          .map((line) =>
+            line.replace(
+              regEx(/^(?<ws> *)/),
+              `${part.added ? added : part.removed ? removed : '  '}$<ws>`,
+            ),
+          ),
+      )
+      .join('\n');
+    logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {
       returnVal = 1;
     }
@@ -222,10 +259,11 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
         // ignore
       }
     }
-    if (returnVal !== 0) {
-      process.exit(returnVal);
+    if (returnVal === 0) {
+      logger.info('Config validated successfully');
     }
-    logger.info('Config validated successfully');
+    // Use exitCode (not process.exit) so async log streams can flush
+    process.exitCode = returnVal;
   });
 
   await program.parseAsync();

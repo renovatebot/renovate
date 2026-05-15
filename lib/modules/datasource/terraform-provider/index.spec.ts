@@ -4,7 +4,6 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { getPkgReleases } from '../index.ts';
 import { TerraformProviderDatasource } from './index.ts';
 
-const azurermData = Fixtures.get('azurerm-provider.json');
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
 const hashicorpGoogleBetaReleases = Fixtures.get(
   'releaseBackendIndexGoogleBeta.json',
@@ -23,30 +22,25 @@ type MockVariant = 'empty' | '404' | 'error';
 function mockDefaultRegistryLookup(variant: MockVariant): void {
   const primaryScope = httpMock
     .scope(primaryUrl)
-    .get('/v1/providers/hashicorp/azurerm');
-  const primarySd = httpMock
-    .scope(primaryUrl)
-    .get('/.well-known/terraform.json');
+    .get('/v2/providers/hashicorp/azurerm')
+    .query({ include: 'provider-versions' });
   const secondaryScope = httpMock
     .scope(secondaryUrl)
     .get('/terraform-provider-azurerm/index.json');
 
   if (variant === 'empty') {
     primaryScope.reply(200, {});
-    primarySd.reply(200, serviceDiscoveryResult);
     secondaryScope.reply(200, {});
     return;
   }
 
   if (variant === '404') {
     primaryScope.reply(404);
-    primarySd.reply(200, serviceDiscoveryResult);
     secondaryScope.reply(404);
     return;
   }
 
   primaryScope.replyWithError('');
-  primarySd.reply(200, serviceDiscoveryResult);
   secondaryScope.replyWithError('');
 }
 
@@ -93,10 +87,31 @@ describe('modules/datasource/terraform-provider/index', () => {
     it('processes real data', async () => {
       httpMock
         .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, azurermData)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
+        .get('/v2/providers/hashicorp/azurerm')
+        .query({ include: 'provider-versions' })
+        .reply(200, {
+          data: {
+            attributes: {
+              source: 'https://github.com/hashicorp/terraform-provider-azurerm',
+            },
+          },
+          included: [
+            {
+              type: 'provider-versions',
+              attributes: {
+                version: '2.52.0',
+                'published-at': '2019-11-19T08:22:56Z',
+              },
+            },
+            {
+              type: 'provider-versions',
+              attributes: {
+                version: '2.53.0',
+                'published-at': '2019-11-26T08:22:56Z',
+              },
+            },
+          ],
+        });
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
         packageName: 'azurerm',
@@ -106,6 +121,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         registryUrl: 'https://registry.terraform.io',
         releases: [
           {
+            releaseTimestamp: '2019-11-19T08:22:56.000Z',
             version: '2.52.0',
           },
           {
@@ -113,31 +129,6 @@ describe('modules/datasource/terraform-provider/index', () => {
             version: '2.53.0',
           },
         ],
-        sourceUrl:
-          'https://github.com/terraform-providers/terraform-provider-azurerm',
-      });
-    });
-
-    it('does not set releaseTimestamp when latest version is not in releases', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, {
-          source: 'https://github.com/hashicorp/terraform-provider-azurerm',
-          versions: ['2.52.0'],
-          version: '9.9.9',
-          published_at: '2019-11-26T08:22:56Z',
-        })
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      const res = await getPkgReleases({
-        datasource: TerraformProviderDatasource.id,
-        packageName: 'azurerm',
-      });
-      expect(res).toEqual({
-        homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
-        registryUrl: 'https://registry.terraform.io',
-        releases: [{ version: '2.52.0' }],
         sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
       });
     });
@@ -193,12 +184,11 @@ describe('modules/datasource/terraform-provider/index', () => {
     it('processes data with alternative backend', async () => {
       httpMock
         .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/google-beta')
+        .get('/v2/providers/hashicorp/google-beta')
+        .query({ include: 'provider-versions' })
         .reply(404, {
           errors: ['Not Found'],
-        })
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
+        });
       httpMock
         .scope(secondaryUrl)
         .get('/terraform-provider-google-beta/index.json')
@@ -223,6 +213,59 @@ describe('modules/datasource/terraform-provider/index', () => {
         ],
         sourceUrl:
           'https://github.com/terraform-providers/terraform-provider-google-beta',
+      });
+    });
+
+    it('processes real data from OpenTofu registry docs API', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/providers/hashicorp/azurerm/index.json')
+        .reply(200, {
+          versions: [
+            { id: 'v2.53.0', published: '2019-11-26T08:22:56Z' },
+            { id: 'v2.52.0', published: '2019-11-19T08:22:56Z' },
+          ],
+        });
+
+      const res = await getPkgReleases({
+        datasource: TerraformProviderDatasource.id,
+        packageName: 'hashicorp/azurerm',
+        registryUrls: ['https://registry.opentofu.org'],
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
+        registryUrl: 'https://registry.opentofu.org',
+        sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
+        releases: [
+          {
+            releaseTimestamp: '2019-11-19T08:22:56.000Z',
+            version: '2.52.0',
+          },
+          {
+            releaseTimestamp: '2019-11-26T08:22:56.000Z',
+            version: '2.53.0',
+          },
+        ],
+      });
+    });
+
+    it('returns an empty release list for OpenTofu registry without versions', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/providers/hashicorp/azurerm/index.json')
+        .reply(200, {});
+
+      expect(
+        await getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          packageName: 'hashicorp/azurerm',
+          registryUrls: ['https://registry.opentofu.org'],
+        }),
+      ).toEqual({
+        homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
+        sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
+        releases: [],
       });
     });
   });

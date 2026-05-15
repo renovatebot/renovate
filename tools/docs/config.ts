@@ -1,13 +1,20 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
   allManagersList,
   getManagers,
 } from '../../lib/modules/manager/index.ts';
+import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
+import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
+import {
+  additionalConstraintDefinitions,
+  toolDefinitions,
+  toolNames,
+} from '../../lib/util/exec/types.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
-import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { formatCell, replaceContent } from './utils.ts';
 
@@ -201,6 +208,14 @@ function genExperimentalMsg(el: Record<string, any>): string {
   return warning + '\n';
 }
 
+function genTemplatingMsg(): string {
+  return (
+    '\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate\'s template syntax"\n' +
+    indent`${2}See [templates](templates.md) for available variables and helpers.` +
+    '\n'
+  );
+}
+
 function genDeprecationMsg(el: Record<string, any>): string {
   let warning =
     '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
@@ -223,7 +238,7 @@ function indexMarkdown(lines: string[]): Record<string, [number, number]> {
         indexed[optionName] = [start, i - 1];
       }
       start = i;
-      optionName = line.split(' ')[1];
+      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
     }
   }
   indexed[optionName] = [start, lines.length - 1];
@@ -274,6 +289,47 @@ function generateConfigFileNames(): string {
   return output.trimEnd();
 }
 
+function generateToolsForConstraints(): string {
+  let output = '| Tool | Additional Information | Versioning | Datasource |\n';
+  output += '| --- | --- | --- | --- |\n';
+  for (const toolDef of toolDefinitions) {
+    const toolConfig = getToolConfig(toolDef.name);
+    if (!toolConfig) {
+      continue;
+    }
+    const def: ConstraintDefinition = toolDef;
+    // Newlines in the Markdown-rendered table will break table rendering
+    const desc = def.description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${toolDef.name}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
+  }
+
+  return output;
+}
+
+function generateAdditionalConstraints(): string {
+  let output = '| Constraint | Additional Information |\n';
+  output += '| --- | --- |\n';
+  for (const {
+    name,
+    description,
+  } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+    // Newlines in the Markdown-rendered table will break table rendering
+    const desc = description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${name}\` | ${desc} |\n`;
+  }
+
+  return output;
+}
+
+function generateToolsForInstallTools(): string {
+  let output = '';
+  for (const tool of [...toolNames]) {
+    output += `- \`${tool}\`\n`;
+  }
+
+  return output;
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -320,17 +376,21 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       for (const key of lookupKeys) {
         const [headerIndex, footerIndex] = indexed[key];
-
-        configOptionsRaw[headerIndex] +=
+        let sectionContent =
           `\n${option.description}\n\n` +
           genTable(Object.entries(el), option.type, option.default);
 
-        if (el.advancedUse) {
-          configOptionsRaw[headerIndex] += generateAdvancedUse();
+        if (el.supportsTemplating) {
+          sectionContent += genTemplatingMsg();
         }
+
+        configOptionsRaw[headerIndex] += sectionContent;
 
         if (el.experimental) {
           configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+        }
+        if (el.advancedUse) {
+          configOptionsRaw[headerIndex] += generateAdvancedUse();
         }
 
         if (is.nonEmptyString(el.deprecationMsg)) {
@@ -342,17 +402,43 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   let content = configOptionsRaw.join('\n');
 
   if (!bot) {
-    content = replaceContent(content, generateLockFileTable(), {
-      replaceStart: '<!-- lock-file-maintenance-table-start -->',
-      replaceStop: '<!-- lock-file-maintenance-table-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateLockFileTable(),
+      '<!-- lock-file-maintenance-table-start -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateConfigFileNames(), {
-      replaceStart: '<!-- config-filenames-begin -->',
-      replaceStop: '<!-- config-filenames-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateConfigFileNames(),
+      '<!-- config-filenames-begin -->',
+    );
+  }
+
+  if (!bot) {
+    content = replaceContent(
+      content,
+      generateToolsForConstraints(),
+      '<!-- constraints-tools-begin -->',
+    );
+  }
+
+  if (!bot) {
+    content = replaceContent(
+      content,
+      generateAdditionalConstraints(),
+      '<!-- additional-constraints-begin -->',
+    );
+  }
+
+  if (!bot) {
+    content = replaceContent(
+      content,
+      generateToolsForInstallTools(),
+      '<!-- installTools-tools-begin -->',
+    );
   }
 
   await updateFile(`${dist}/${configFile}`, content);

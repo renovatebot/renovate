@@ -111,7 +111,8 @@ To learn how to configure Renovate CE or Renovate EE, read the documentation on 
 
 #### Mend Remediate
 
-[Mend Remediate](https://www.whitesourcesoftware.com/wp-content/media/2021/04/whitesource-remediation-solution.pdf) is an extension of WSOP available for Mend commercial customers, with full enterprise support.
+[Mend Remediate](https://docs.mend.io/integrations/latest/mend-remediate-and-renovate) is part of Mend's [Classic Repository Integrations](https://docs.mend.io/integrations/latest/mend-classic-repository-integrations) product which is for Mend commercial customers, with full enterprise support.
+
 It is integrated with Mend's vulnerability detection capabilities and additionally supports the capability of "horizontal" scalability - the ability to configure many Renovate "worker" containers which share a common job queue in order to not conflict with each other.
 
 Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
@@ -234,3 +235,7 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 ### Self-hosting examples
 
 For more examples on running Renovate self-hosted, read our [Self-hosted examples](../examples/self-hosting.md) page.
+
+### Community tools
+
+There are also some [community-maintained tools](../community-tools.md) which may help running Renovate.

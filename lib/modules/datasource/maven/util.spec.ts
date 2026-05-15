@@ -4,9 +4,11 @@ import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { MAVEN_REPO } from './common.ts';
 import type { MavenFetchError } from './types.ts';
 import {
+  downloadHttpContent,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
@@ -51,7 +53,7 @@ describe('modules/datasource/maven/util', () => {
     it('returns error for unsupported protocols', async () => {
       const res = await downloadMavenXml(
         http,
-        new URL('unsupported://server.com/'),
+        parseUrl('unsupported://server.com/')!,
       );
       expect(res.unwrap()).toEqual({
         ok: false,
@@ -68,7 +70,10 @@ describe('modules/datasource/maven/util', () => {
             headers: {},
           }),
       });
-      const res = await downloadMavenXml(http, new URL('https://example.com/'));
+      const res = await downloadMavenXml(
+        http,
+        parseUrl('https://example.com/')!,
+      );
       expect(res.unwrap()).toEqual({
         ok: false,
         err: { type: 'xml-parse-error', err: expect.any(Error) },
@@ -76,9 +81,26 @@ describe('modules/datasource/maven/util', () => {
     });
   });
 
+  describe('downloadHttpContent', () => {
+    it('returns the downloaded text body', async () => {
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'pom text',
+            headers: {},
+          }),
+      });
+
+      await expect(
+        downloadHttpContent(http, 'https://example.com/'),
+      ).resolves.toBe('pom text');
+    });
+  });
+
   describe('downloadS3Protocol', () => {
     it('returns error for non-S3 URLs', async () => {
-      const res = await downloadS3Protocol(new URL('http://not-s3.com/'));
+      const res = await downloadS3Protocol(parseUrl('http://not-s3.com/')!);
       expect(res.unwrap()).toEqual({
         ok: false,
         err: { type: 'invalid-url' } satisfies MavenFetchError,
