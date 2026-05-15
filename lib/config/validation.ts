@@ -674,7 +674,7 @@ export async function validateConfig(
               const allowedEnvVars =
                 configType === 'global'
                   ? (config.allowedEnv ?? [])
-                  : GlobalConfig.get('allowedEnv', []);
+                  : GlobalConfig.get('allowedEnv');
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!isString(envVarValue)) {
                   errors.push({
@@ -868,7 +868,7 @@ export async function validateConfig(
       const allowedHeaders =
         configType === 'global'
           ? (config.allowedHeaders ?? [])
-          : GlobalConfig.get('allowedHeaders', []);
+          : GlobalConfig.get('allowedHeaders');
       for (const rule of val as HostRule[]) {
         if (isNonEmptyString(rule.matchHost)) {
           if (rule.matchHost.includes('://')) {
