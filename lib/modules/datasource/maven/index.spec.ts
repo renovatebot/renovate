@@ -491,6 +491,8 @@ describe('modules/datasource/maven/index', () => {
 
   it('supports artifactregistry urls with auth', async () => {
     const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
+    const arApiBase =
+      'https://artifactregistry.googleapis.com/v1/projects/some-project/locations/us/repositories/some-repository';
     hostRules.clear();
 
     httpMock
@@ -510,6 +512,17 @@ describe('modules/datasource/maven/index', () => {
         'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
       )
       .reply(200, Fixtures.get('pom.xml'));
+
+    // Artifact Registry API calls for lastModified enrichment
+    httpMock
+      .scope(arApiBase)
+      .get('/files/org%2Fexample%2Fpackage%2Fmaven-metadata.xml')
+      .reply(200, { updateTime: '2024-01-01T00:00:00Z' });
+
+    httpMock
+      .scope(arApiBase)
+      .get('/files/org%2Fexample%2Fpackage%2F2.0.0%2Fpackage-2.0.0.pom')
+      .reply(200, { updateTime: '2024-01-01T00:00:00Z' });
 
     googleAuth.mockImplementation(
       // TODO: fix typing
@@ -552,6 +565,8 @@ describe('modules/datasource/maven/index', () => {
 
   it('supports artifactregistry urls without auth', async () => {
     const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
+    const arApiBase =
+      'https://artifactregistry.googleapis.com/v1/projects/some-project/locations/us/repositories/some-repository';
     hostRules.clear();
 
     httpMock
@@ -563,6 +578,17 @@ describe('modules/datasource/maven/index', () => {
       .scope(baseUrlARHttps)
       .get(pomfilePath)
       .reply(200, Fixtures.get('pom.xml'));
+
+    // Artifact Registry API calls for lastModified enrichment (no auth)
+    httpMock
+      .scope(arApiBase)
+      .get('/files/org%2Fexample%2Fpackage%2Fmaven-metadata.xml')
+      .reply(200, { updateTime: '2024-01-01T00:00:00Z' });
+
+    httpMock
+      .scope(arApiBase)
+      .get('/files/org%2Fexample%2Fpackage%2F2.0.0%2Fpackage-2.0.0.pom')
+      .reply(200, { updateTime: '2024-01-01T00:00:00Z' });
 
     googleAuth.mockImplementation(
       // TODO: fix typing
