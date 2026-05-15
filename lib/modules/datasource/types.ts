@@ -128,7 +128,13 @@ export interface PostprocessReleaseConfig {
 
 export type PostprocessReleaseResult = Release | 'reject';
 
-export type RegistryStrategy = 'first' | 'hunt' | 'merge';
+export type RegistryStrategy =
+  /** only the first registryUrl will be tried and others ignored */
+  | 'first'
+  /** registryUrls will be tried in order until one returns a result */
+  | 'hunt'
+  /** all registryUrls will be tried and the results merged if more than one returns a result */
+  | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
@@ -140,9 +146,8 @@ export interface DatasourceApi extends ModuleApi {
 
   /**
    * Strategy to use when multiple registryUrls are available to the datasource.
-   * - `first`: only the first registryUrl will be tried and others ignored
-   * - `hunt`: registryUrls will be tried in order until one returns a result
-   * - `merge`: all registryUrls will be tried and the results merged if more than one returns a result
+   *
+   * @see RegistryStrategy
    */
   registryStrategy?: RegistryStrategy | undefined;
 
