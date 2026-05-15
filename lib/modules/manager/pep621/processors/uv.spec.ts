@@ -12,7 +12,11 @@ import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
-import type { PackageDependency, UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import type {
+  PackageDependency,
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+} from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
