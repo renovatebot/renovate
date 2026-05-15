@@ -181,43 +181,6 @@ export interface GlobalInheritableConfig {
   requireConfig?: RequiredConfig;
 }
 
-// Config options used only within the global worker
-// The below should contain config options where stage=global
-/** @deprecated use `RepoGlobalConfig` instead **/
-export interface GlobalOnlyConfigLegacy {
-  autodiscover?: boolean;
-  autodiscoverFilter?: string[] | string;
-  autodiscoverNamespaces?: string[];
-  autodiscoverProjects?: string[];
-  autodiscoverTopics?: string[];
-  baseDir?: string;
-  cacheDir?: string;
-  containerbaseDir?: string;
-  detectHostRulesFromEnv?: boolean;
-  dockerCliOptions?: string;
-  endpoint?: string;
-  forceCli?: boolean;
-  gitNoVerify?: GitNoVerifyOption[];
-  gitPrivateKey?: string;
-  gitPrivateKeyPassphrase?: string;
-  globalExtends?: string[];
-  mergeConfidenceDatasources?: string[];
-  mergeConfidenceEndpoint?: string;
-  platform?: PlatformId;
-  processEnv?: Record<string, string>;
-  prCommitsPerRunLimit?: number;
-  privateKey?: string;
-  privateKeyOld?: string;
-  privateKeyPath?: string;
-  privateKeyPathOld?: string;
-  redisPrefix?: string;
-  redisUrl?: string;
-  repositories?: RenovateRepository[];
-  useCloudMetadataServices?: boolean;
-  deleteConfigFile?: boolean;
-  deleteAdditionalConfigFile?: boolean;
-}
-
 /**
  * Any global-only configuration set by self-hosted administrators.
  *
@@ -270,6 +233,32 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
   toolSettings?: ToolSettingsOptions;
+  autodiscover?: boolean;
+  autodiscoverFilter?: string[] | string;
+  autodiscoverNamespaces?: string[];
+  autodiscoverProjects?: string[];
+  autodiscoverTopics?: string[];
+  baseDir?: string;
+  detectHostRulesFromEnv?: boolean;
+  forceCli?: boolean;
+  gitNoVerify?: GitNoVerifyOption[];
+  gitPrivateKey?: string;
+  gitPrivateKeyPassphrase?: string;
+  globalExtends?: string[];
+  mergeConfidenceDatasources?: string[];
+  mergeConfidenceEndpoint?: string;
+  processEnv?: Record<string, string>;
+  prCommitsPerRunLimit?: number;
+  privateKey?: string;
+  privateKeyOld?: string;
+  privateKeyPath?: string;
+  privateKeyPathOld?: string;
+  redisPrefix?: string;
+  redisUrl?: string;
+  repositories?: RenovateRepository[];
+  useCloudMetadataServices?: boolean;
+  deleteConfigFile?: boolean;
+  deleteAdditionalConfigFile?: boolean;
 }
 
 /**
@@ -504,8 +493,7 @@ export interface CustomDatasourceConfig {
  * The superset of all configuration that a self-hosted administrator can set, alongside all repository-level configuration.
  *
  */
-export interface AllConfig
-  extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
+export interface AllConfig extends RenovateConfig, RepoGlobalConfig {
   password?: string;
   token?: string;
   username?: string;
