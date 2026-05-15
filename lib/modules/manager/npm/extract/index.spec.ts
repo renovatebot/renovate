@@ -1024,6 +1024,26 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.managerData?.hasPackageManager).toBe(false);
     });
 
+    it('sets hasPackageManager for devEngines.packageManager array items with stray keys (mirrors single-object semantics)', async () => {
+      // `isNonEmptyObject` is true for any object with at least one key, so
+      // a single `{ foo: 'bar' }` already returns true. The array branch
+      // mirrors that semantic — the actual extract step still filters items
+      // lacking `name`/`version`.
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [{ foo: 'bar' }],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(true);
+      expect(res?.deps).toEqual([]);
+    });
+
     it('does not set hasPackageManager when devEngines.packageManager is an empty array', async () => {
       const pJson = {
         name: 'demo',
