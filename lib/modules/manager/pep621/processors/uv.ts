@@ -150,12 +150,14 @@ export class UvProcessor extends BasePyProjectProcessor {
           for (const dep of deps) {
             const packageName = dep.packageName;
             if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName];
+              dep.lockedVersion = lockFileMapping[packageName].version;
             }
           }
 
-          for (const [name, version] of Object.entries(lockFileMapping)) {
-            if (!deps.find((dep) => dep.packageName === name)) {
+          for (const [name, { version, virtual }] of Object.entries(
+            lockFileMapping,
+          )) {
+            if (!virtual && !deps.find((dep) => dep.packageName === name)) {
               deps.push(indirectDep(name, version));
             }
           }
