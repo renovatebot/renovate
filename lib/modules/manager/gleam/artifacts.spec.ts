@@ -11,6 +11,7 @@ vi.mock('../../../util/fs/index.ts');
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
+  binarySource: 'global',
 };
 
 describe('modules/manager/gleam/artifacts', () => {
