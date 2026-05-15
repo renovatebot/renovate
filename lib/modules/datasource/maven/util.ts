@@ -74,6 +74,23 @@ const cacheProvider = new PackageHttpCacheProvider({
   writeSchema: CachedMavenXml,
 });
 
+// Release POMs and timestamped snapshot POMs are immutable once published, so we can cache them much longer than mutable metadata files.
+const pomCacheProvider = new PackageHttpCacheProvider({
+  namespace: 'datasource-maven:pom-cache-provider',
+  softTtlMinutes: 60 * 24 * 28, // 28 days before we'll give it another check, just in case it's updated
+  checkAuthorizationHeader: true,
+  checkCacheControlHeader: false,
+  writeSchema: CachedMavenXml,
+});
+
+function selectCacheProvider(url: string): PackageHttpCacheProvider {
+  // Non-timestamped -SNAPSHOT.pom files are mutable; everything else ending in .pom (release POMs and timestamped snapshot POMs) is immutable.
+  if (url.endsWith('.pom') && !url.endsWith('-SNAPSHOT.pom')) {
+    return pomCacheProvider;
+  }
+  return cacheProvider;
+}
+
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
@@ -81,7 +98,7 @@ export async function downloadHttpProtocol(
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
   const fetchResult = await Result.wrap<HttpResponse, Error>(
-    http.getText(url, { ...opts, cacheProvider }),
+    http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = { data: res.body };
