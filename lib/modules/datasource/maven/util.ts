@@ -93,7 +93,7 @@ function selectCacheProvider(url: string): PackageHttpCacheProvider {
 
 const METADATA_NOT_FOUND_NAMESPACE =
   'datasource-maven:metadata-not-found' as const;
-const METADATA_NOT_FOUND_TTL_MINUTES = 60 * 24; // 24 hours
+const METADATA_NOT_FOUND_TTL_MINUTES = 60 * 12; // 12 hours
 
 function isMetadataUrl(url: string): boolean {
   return url.endsWith('/maven-metadata.xml');
