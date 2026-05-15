@@ -1538,6 +1538,12 @@ You can control if Renovate should try to access these services with the `useClo
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
 Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
 
+Takes precedence over `userAgentPrefix` and `userAgentSuffix`.
+
+## `userAgentPrefix`
+
+## `userAgentSuffix`
+
 ## `username`
 
 The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.

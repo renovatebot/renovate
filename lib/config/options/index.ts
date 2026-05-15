@@ -112,9 +112,25 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'userAgent',
     description:
-      'If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.',
+      'If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests. Takes precedence over `userAgentPrefix` and `userAgentSuffix`.',
     type: 'string',
     default: null,
+    globalOnly: true,
+  },
+  {
+    name: 'userAgentPrefix',
+    description:
+      'Overrides the `Renovate` prefix in the default `user-agent` header sent with HTTP requests. The version number is always kept in place.',
+    type: 'string',
+    default: 'Renovate',
+    globalOnly: true,
+  },
+  {
+    name: 'userAgentSuffix',
+    description:
+      'Overrides the ` (https://github.com/renovatebot/renovate)` suffix in the default `user-agent` header sent with HTTP requests. The version number is always kept in place.',
+    type: 'string',
+    default: ' (https://github.com/renovatebot/renovate)',
     globalOnly: true,
   },
   {

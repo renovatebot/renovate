@@ -64,11 +64,20 @@ export interface InternalHttpOptions extends HttpOptions {
 
 export function applyDefaultHeaders(options: OptionsInit): void {
   const renovateVersion = pkg.version;
+  const userAgent = GlobalConfig.get('userAgent');
+  let userAgentHeader: string;
+  if (userAgent) {
+    userAgentHeader = userAgent;
+  } else {
+    const prefix = GlobalConfig.get('userAgentPrefix') ?? 'Renovate';
+    const suffix =
+      GlobalConfig.get('userAgentSuffix') ??
+      ' (https://github.com/renovatebot/renovate)';
+    userAgentHeader = `${prefix}/${renovateVersion}${suffix}`;
+  }
   options.headers = {
     ...options.headers,
-    'user-agent':
-      GlobalConfig.get('userAgent') ??
-      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+    'user-agent': userAgentHeader,
   };
 }
 
