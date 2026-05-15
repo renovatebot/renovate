@@ -150,7 +150,7 @@ export function extractPackageJson(
       const depType = `devEngines.${subKey}`;
       for (let i = 0; i < items.length; i += 1) {
         const item = items[i];
-        if (!item.name || !item.version) {
+        if (!item?.name || !item.version) {
           continue;
         }
         const dep: PackageDependency = {

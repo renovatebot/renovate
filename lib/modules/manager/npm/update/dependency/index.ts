@@ -165,8 +165,8 @@ function updateDevEnginesDependency({
     if (oldVersion === newValue) {
       return fileContent;
     }
-    const searchString = `"${oldVersion}"`;
-    const newString = `"${newValue}"`;
+    const searchString = JSON.stringify(oldVersion);
+    const newString = JSON.stringify(newValue);
     const anchor = '"devEngines"';
     let searchIndex = fileContent.indexOf(anchor);
     /* v8 ignore next 3 -- defensive: extract verified devEngines presence */

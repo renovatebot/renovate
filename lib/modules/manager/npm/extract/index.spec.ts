@@ -1046,6 +1046,32 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.deps).toEqual([]);
     });
 
+    it('skips malformed and version-less devEngines array items', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [
+            null,
+            { name: 'pnpm', version: '9.0.0' },
+            { name: 'yarn' },
+          ],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '9.0.0',
+          depName: 'pnpm',
+          depType: 'devEngines.packageManager',
+          managerData: { devEnginesIndex: 1 },
+        },
+      ]);
+    });
+
     it('skips devEngines items without version', async () => {
       const pJson = {
         name: 'demo',
