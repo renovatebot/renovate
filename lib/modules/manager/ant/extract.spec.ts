@@ -5,6 +5,10 @@ import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/ant/extract', () => {
+  beforeEach(() => {
+    fs.isValidLocalPath.mockReturnValue(true);
+  });
+
   describe('extractPackageFile', () => {
     it('extracts inline version dependencies from build.xml', () => {
       expect(
@@ -1195,6 +1199,110 @@ describe('modules/manager/ant/extract', () => {
             <project>
               <property file="\${included.basedir}/../\${user.name}.properties"/>
               <artifact:dependencies>
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(fs.readLocalFile).toHaveBeenCalledWith('build.xml', 'utf8');
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('skips property file references that resolve outside the repository', async () => {
+      fs.isValidLocalPath.mockImplementation(
+        (file: string) => !file.includes('..'),
+      );
+      fs.readLocalFile.mockImplementation((file: string) => {
+        if (file === 'build.xml') {
+          return Promise.resolve(codeBlock`
+            <project>
+              <property file="/../../../some.properties"/>
+              <artifact:dependencies>
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(fs.readLocalFile).toHaveBeenCalledWith('build.xml', 'utf8');
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('skips import file references that resolve outside the repository', async () => {
+      fs.isValidLocalPath.mockImplementation(
+        (file: string) => !file.includes('..'),
+      );
+      fs.readLocalFile.mockImplementation((file: string) => {
+        if (file === 'build.xml') {
+          return Promise.resolve(codeBlock`
+            <project>
+              <import file="../../../outside/build.xml"/>
+              <artifact:dependencies>
+                <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+              </artifact:dependencies>
+            </project>
+          `);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['build.xml']);
+
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(fs.readLocalFile).toHaveBeenCalledWith('build.xml', 'utf8');
+      expect(result).toEqual([
+        {
+          packageFile: 'build.xml',
+          deps: [
+            expect.objectContaining({
+              depName: 'junit:junit',
+              currentValue: '4.13.2',
+            }),
+          ],
+        },
+      ]);
+    });
+
+    it('skips settingsFile references that resolve outside the repository', async () => {
+      fs.isValidLocalPath.mockImplementation(
+        (file: string) => !file.includes('..'),
+      );
+      fs.readLocalFile.mockImplementation((file: string) => {
+        if (file === 'build.xml') {
+          return Promise.resolve(codeBlock`
+            <project>
+              <artifact:dependencies settingsFile="/../../etc/settings.xml">
                 <dependency groupId="junit" artifactId="junit" version="4.13.2" />
               </artifact:dependencies>
             </project>
