@@ -59,8 +59,7 @@ export async function detectNodeCompatWorkspaces({
     filters = managerData?.workspaces;
   }
 
-  // SAFETY: localDir should always be defined
-  const localDir = GlobalConfig.get('localDir')!;
+  const localDir = GlobalConfig.get('localDir');
   const packages = await findPackages(
     upath.dirname(ensureLocalPath(packageFile)),
     {

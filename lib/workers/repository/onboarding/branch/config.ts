@@ -76,8 +76,7 @@ async function searchDefaultOnboardingPreset(
 
     const orgName = repoPathParts[0];
 
-    // TODO: types (#22198)
-    const platform = GlobalConfig.get('platform')!;
+    const platform = GlobalConfig.get('platform');
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';

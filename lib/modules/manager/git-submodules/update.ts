@@ -11,7 +11,7 @@ export default async function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
   // TODO: types (#22198)
-  const localDir = GlobalConfig.get('localDir')!;
+  const localDir = GlobalConfig.get('localDir');
   const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
     'git-tags',
     'git-refs',
