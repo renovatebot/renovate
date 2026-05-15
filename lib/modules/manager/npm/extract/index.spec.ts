@@ -1009,6 +1009,36 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.managerData?.hasPackageManager).toBe(true);
     });
 
+    it('does not set hasPackageManager when devEngines.packageManager array has only invalid items', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [null, {}],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(false);
+    });
+
+    it('does not set hasPackageManager when devEngines.packageManager is an empty array', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(false);
+    });
+
     it('extracts devEngines.packageManager array form', async () => {
       const pJson = {
         devEngines: {
