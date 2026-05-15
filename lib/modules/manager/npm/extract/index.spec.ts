@@ -1309,7 +1309,7 @@ describe('modules/manager/npm/extract/index', () => {
           datasource: 'npm',
           depName: 'yarn',
           depType: 'devEngines.packageManager',
-          packageName: '@yarnpkg/cli',
+          packageName: '@yarnpkg/cli-dist',
           managerData: { devEnginesIndex: 1 },
         },
       ]);
