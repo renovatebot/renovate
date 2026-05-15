@@ -25,12 +25,14 @@ describe('workers/global/config/parse/file', () => {
 
   describe('.getConfig()', () => {
     it.each([
-      ['custom js config file', 'config.js'],
-      ['custom js config file', 'config.cjs'],
-      ['custom js config file', 'config.mjs'],
-      ['custom ts config file', 'config.ts'],
-      ['custom ts config file', 'config.mts'],
-      ['custom ts config file', 'config.cts'],
+      ['custom js config file (esm)', 'config.js'],
+      ['custom js config file (cjs)', 'config-cjs.js'],
+      ['custom cjs config file', 'config.cjs'],
+      ['custom mjs config file', 'config.mjs'],
+      ['custom ts config file (esm)', 'config.ts'],
+      ['custom ts config file (cjs)', 'config-cjs.ts'],
+      ['custom mts config file', 'config.mts'],
+      ['custom cts config file', 'config.cts'],
       ['custom js config file exporting a Promise', 'config-promise.js'],
       ['custom js config file exporting a function', 'config-function.js'],
       // The next two are different syntactic ways of expressing the same thing
