@@ -25,6 +25,7 @@ export type NpmPackage = PackageJson & {
     overrides?: PackageJson.Dependency;
   };
   devEngines?: {
+    runtime?: DevEngineItem | DevEngineItem[];
     packageManager?: DevEngineItem | DevEngineItem[];
   };
 };

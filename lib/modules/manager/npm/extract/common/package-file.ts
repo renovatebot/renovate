@@ -140,6 +140,37 @@ export function extractPackageJson(
     }
   }
 
+  if (packageJson.devEngines) {
+    for (const subKey of ['runtime', 'packageManager'] as const) {
+      const value = packageJson.devEngines[subKey];
+      if (!value) {
+        continue;
+      }
+      const items = Array.isArray(value) ? value : [value];
+      const depType = `devEngines.${subKey}`;
+      for (let i = 0; i < items.length; i += 1) {
+        const item = items[i];
+        if (!item.name || !item.version) {
+          continue;
+        }
+        const dep: PackageDependency = {
+          depType,
+          depName: item.name,
+          ...extractDependency(depType, item.name, item.version),
+        };
+        setNodeCommitTopic(dep);
+        dep.prettyDepType = depType;
+        if (Array.isArray(value)) {
+          dep.managerData = {
+            ...(dep.managerData ?? {}),
+            devEnginesIndex: i,
+          };
+        }
+        deps.push(dep);
+      }
+    }
+  }
+
   const extractedConstraints = getExtractedConstraints(deps);
 
   return {
