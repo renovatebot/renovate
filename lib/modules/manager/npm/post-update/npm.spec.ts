@@ -16,7 +16,7 @@ process.env.CONTAINERBASE = 'true';
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
@@ -497,6 +497,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         toolSettings: {
           nodeMaxMemory: 3456,
         },
+        binarySource: 'global',
       });
 
       const execSnapshots = mockExecAll();
