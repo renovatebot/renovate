@@ -28,6 +28,9 @@ describe('workers/global/config/parse/file', () => {
       ['custom js config file', 'config.js'],
       ['custom js config file', 'config.cjs'],
       ['custom js config file', 'config.mjs'],
+      ['custom ts config file', 'config.ts'],
+      ['custom ts config file', 'config.mts'],
+      ['custom ts config file', 'config.cts'],
       ['custom js config file exporting a Promise', 'config-promise.js'],
       ['custom js config file exporting a function', 'config-function.js'],
       // The next two are different syntactic ways of expressing the same thing
@@ -97,6 +100,7 @@ describe('workers/global/config/parse/file', () => {
       ],
       ['config.invalid.json5', `"invalid":`],
       ['config.invalid.yaml', `clearly: "invalid" "yaml"`],
+      ['config.invalid.ts', `export default {{{`],
     ])(
       'fatal error and exit if error in parsing %s',
       async (fileName, fileContent) => {

@@ -58,6 +58,9 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         await readSystemFile(file, 'utf8'),
         file,
       ) as RenovateConfig;
+    case '.cts':
+    case '.mts':
+    case '.ts':
     case '.cjs':
     case '.mjs':
     case '.js': {
