@@ -5,7 +5,6 @@
  * backwards-incompatible changes in non-major releases
  */
 
-/* v8 ignore next -- BTW don't forget to update `self-hosted-configuration.md` */
 export const packageCacheNamespaces = [
   '_test-namespace',
   'changelog-bitbucket-notes@v2',
@@ -108,7 +107,7 @@ export const packageCacheNamespaces = [
   'preset',
   'terraform-provider-hash',
   'url-sha256',
-] as const; /* v8 ignore stop -- BTW don't forget to update `self-hosted-configuration.md` */
+] as const;
 
 export type PackageCacheNamespace =
   | (typeof packageCacheNamespaces)[number]
