@@ -469,5 +469,187 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(expected);
     });
+
+    it('updates devEngines.packageManager single object', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.5.0',
+      };
+      const input = JSON.stringify(
+        {
+          name: 'demo',
+          devEngines: {
+            packageManager: {
+              name: 'pnpm',
+              version: '9.0.0',
+              onFail: 'error',
+            },
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeJsonString();
+      expect(JSON.parse(res!)).toEqual({
+        name: 'demo',
+        devEngines: {
+          packageManager: {
+            name: 'pnpm',
+            version: '9.5.0',
+            onFail: 'error',
+          },
+        },
+      });
+    });
+
+    it('updates devEngines.runtime single object', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.runtime',
+        depName: 'node',
+        newValue: '22.12.0',
+      };
+      const input = JSON.stringify(
+        {
+          devEngines: {
+            runtime: { name: 'node', version: '22.11.0' },
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(res!).devEngines.runtime.version).toBe('22.12.0');
+    });
+
+    it('updates devEngines.packageManager array form by index', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+        managerData: { devEnginesIndex: 1 },
+      };
+      const input = JSON.stringify(
+        {
+          devEngines: {
+            packageManager: [
+              { name: 'pnpm', version: '9.0.0' },
+              { name: 'yarn', version: '4.5.0' },
+            ],
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(res!)).toEqual({
+        devEngines: {
+          packageManager: [
+            { name: 'pnpm', version: '9.0.0' },
+            { name: 'yarn', version: '4.6.0' },
+          ],
+        },
+      });
+    });
+
+    it('returns same content if devEngines version already matches', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.0.0',
+      };
+      const input = JSON.stringify({
+        devEngines: { packageManager: { name: 'pnpm', version: '9.0.0' } },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBe(input);
+    });
+
+    it('returns null if devEngines depName mismatch', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+      };
+      const input = JSON.stringify({
+        devEngines: { packageManager: { name: 'pnpm', version: '9.0.0' } },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null if devEngines section missing', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.5.0',
+      };
+      const res = npmUpdater.updateDependency({
+        fileContent: '{}',
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null for devEngines array form when name mismatches index', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+        managerData: { devEnginesIndex: 0 },
+      };
+      const input = JSON.stringify({
+        devEngines: {
+          packageManager: [{ name: 'pnpm', version: '9.0.0' }],
+        },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null for devEngines array form when index missing', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.5.0',
+      };
+      const input = JSON.stringify({
+        devEngines: {
+          packageManager: [{ name: 'pnpm', version: '9.0.0' }],
+        },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+    });
   });
 });
