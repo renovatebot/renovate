@@ -613,6 +613,43 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(res).toBeNull();
     });
 
+    it('skips a wrong-position match when updating devEngines.packageManager array', () => {
+      // Both items share version "9.0.0"; when updating index 1, the first
+      // string-level "9.0.0" hit belongs to index 0 and must be rejected by
+      // the dequal verification so the loop finds the correct occurrence.
+      const upgrade: Upgrade = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+        managerData: { devEnginesIndex: 1 },
+      };
+      const input = JSON.stringify(
+        {
+          devEngines: {
+            packageManager: [
+              { name: 'pnpm', version: '9.0.0' },
+              { name: 'yarn', version: '9.0.0' },
+            ],
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(res!)).toEqual({
+        devEngines: {
+          packageManager: [
+            { name: 'pnpm', version: '9.0.0' },
+            { name: 'yarn', version: '4.6.0' },
+          ],
+        },
+      });
+    });
+
     it('returns null for devEngines array form when name mismatches index', () => {
       const upgrade: Upgrade = {
         depType: 'devEngines.packageManager',
