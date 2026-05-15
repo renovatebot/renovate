@@ -995,6 +995,20 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('sets hasPackageManager when devEngines.packageManager is an array', async () => {
+      const pJson = {
+        devEngines: {
+          packageManager: [{ name: 'pnpm', version: '9.0.0' }],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(true);
+    });
+
     it('extracts devEngines.packageManager array form', async () => {
       const pJson = {
         devEngines: {

@@ -21,6 +21,14 @@ import {
 import { setNodeCommitTopic } from './node.ts';
 import { extractOverrideDepsRec } from './overrides.ts';
 
+export function hasDevEnginesPackageManager(packageJson: NpmPackage): boolean {
+  const pm = packageJson.devEngines?.packageManager;
+  if (Array.isArray(pm)) {
+    return pm.length > 0;
+  }
+  return isNonEmptyObject(pm);
+}
+
 export function extractPackageJson(
   packageJson: NpmPackage,
   packageFile: string,
@@ -181,7 +189,7 @@ export function extractPackageJson(
       packageJsonName,
       hasPackageManager:
         isNonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
-        isNonEmptyObject(packageJson.devEngines?.packageManager),
+        hasDevEnginesPackageManager(packageJson),
       workspaces: packageJson.workspaces,
     },
   };
