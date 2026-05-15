@@ -24,7 +24,7 @@ import { extractOverrideDepsRec } from './overrides.ts';
 export function hasDevEnginesPackageManager(packageJson: NpmPackage): boolean {
   const pm = packageJson.devEngines?.packageManager;
   if (Array.isArray(pm)) {
-    return pm.length > 0;
+    return pm.some((item) => isNonEmptyObject(item));
   }
   return isNonEmptyObject(pm);
 }
