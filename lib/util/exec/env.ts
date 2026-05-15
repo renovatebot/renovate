@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 
-const basicEnvVars = [
+export const basicEnvVars = [
   'CI',
   'HTTP_PROXY',
   'HTTPS_PROXY',
