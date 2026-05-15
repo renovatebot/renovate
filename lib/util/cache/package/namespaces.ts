@@ -78,6 +78,7 @@ export const packageCacheNamespaces = [
   'datasource-java-version',
   'datasource-jenkins-plugins',
   'datasource-jsr',
+  'datasource-julia-general-metadata',
   'datasource-maven:cache-provider',
   'datasource-maven:postprocess-reject',
   'datasource-nextcloud',
