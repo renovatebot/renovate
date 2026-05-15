@@ -325,6 +325,14 @@ export async function ensurePr(
               upgrade.releases.push(release);
             }
           }
+        } else if (logJSON.hasReleaseNotes) {
+          upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
+          if (logJSON.versions) {
+            for (const version of logJSON.versions) {
+              const release = { ...version };
+              upgrade.releases.push(release);
+            }
+          }
         }
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
