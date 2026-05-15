@@ -4,7 +4,7 @@ import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { getCacheType } from '../../../util/cache/package/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
@@ -91,12 +91,35 @@ function selectCacheProvider(url: string): PackageHttpCacheProvider {
   return cacheProvider;
 }
 
+const METADATA_NOT_FOUND_NAMESPACE =
+  'datasource-maven:metadata-not-found' as const;
+const METADATA_NOT_FOUND_TTL_MINUTES = 60 * 24; // 24 hours
+
+function isMetadataUrl(url: string): boolean {
+  return url.endsWith('/maven-metadata.xml');
+}
+
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
   opts: HttpOptions = {},
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
+
+  if (isMetadataUrl(url)) {
+    const cacheHasNotFoundResponse = await packageCache.get<true>(
+      METADATA_NOT_FOUND_NAMESPACE,
+      url,
+    );
+    if (cacheHasNotFoundResponse) {
+      logger.trace(
+        { url },
+        'Returning cached 404 response for the metadata-metadata URL request',
+      );
+      return Result.err({ type: 'not-found' });
+    }
+  }
+
   const fetchResult = await Result.wrap<HttpResponse, Error>(
     http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
@@ -114,7 +137,7 @@ export async function downloadHttpProtocol(
 
       return result;
     })
-    .catch((err): MavenFetchResult => {
+    .catch(async (err): Promise<MavenFetchResult> => {
       /* v8 ignore next: never happens, needs for type narrowing */
       if (!(err instanceof HttpError)) {
         return Result.err({ type: 'unknown', err });
@@ -128,6 +151,14 @@ export async function downloadHttpProtocol(
 
       if (isNotFoundError(err)) {
         logger.trace({ failedUrl }, `Url not found`);
+        if (isMetadataUrl(failedUrl)) {
+          await packageCache.set(
+            METADATA_NOT_FOUND_NAMESPACE,
+            failedUrl,
+            true,
+            METADATA_NOT_FOUND_TTL_MINUTES,
+          );
+        }
         return Result.err({ type: 'not-found' });
       }
 
@@ -148,7 +179,7 @@ export async function downloadHttpProtocol(
         if (getHost(url) === getHost(MAVEN_REPO)) {
           const statusCode = err?.response?.statusCode;
           if (statusCode === 429) {
-            if (getCacheType() === 'redis') {
+            if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
                 { failedUrl },
                 'Maven Central rate limiting detected despite Redis caching.',
