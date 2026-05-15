@@ -1,6 +1,14 @@
 import type { DateTime } from 'luxon';
-import type { MergeStrategy } from '../../config/types.ts';
-import type { BranchStatus, HostRule } from '../../types/index.ts';
+import type {
+  AutodiscoverRepoOrder,
+  AutodiscoverRepoSort,
+  GitUrl,
+} from '../../config/allowed-values.generated.ts';
+import type {
+  BranchStatus,
+  HostRule,
+  MergeStrategy,
+} from '../../types/index.ts';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
 import type { GithubVulnerabilityAlert } from './github/schema.ts';
 export type VulnerabilityAlert = GithubVulnerabilityAlert;
@@ -31,7 +39,7 @@ export interface RepoResult {
   repoFingerprint: string;
 }
 
-export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
+export type GitUrlOption = GitUrl;
 
 export interface RepoParams {
   repository: string;
@@ -198,17 +206,9 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
-export type RepoSortMethod =
-  | 'alpha'
-  | 'created'
-  | 'created_at'
-  | 'updated'
-  | 'updated_at'
-  | 'size'
-  | 'id'
-  | null;
+export type RepoSortMethod = AutodiscoverRepoSort | null;
 
-export type SortMethod = 'asc' | 'desc' | null;
+export type SortMethod = AutodiscoverRepoOrder | null;
 export interface AutodiscoverConfig {
   topics?: string[];
   sort?: RepoSortMethod;

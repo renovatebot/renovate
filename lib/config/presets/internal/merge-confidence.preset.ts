@@ -1,6 +1,7 @@
+import type { MergeConfidenceDatasource } from '../../allowed-values.generated.ts';
 import type { Preset } from '../types.ts';
 
-export const supportedDatasources = [
+export const supportedDatasources: MergeConfidenceDatasource[] = [
   'go',
   'maven',
   'npm',

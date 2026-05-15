@@ -12,7 +12,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('returns null when content does not match specified file format', async () => {
     const res = await extractPackageFile('not-json', 'foo-file', {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
     } as JsonataExtractConfig);
     expect(res).toBeNull();
 
@@ -24,7 +24,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('returns null when no content', async () => {
     const res = await extractPackageFile('', 'foo-file', {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
       ],
@@ -50,7 +50,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ]
     }`;
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [
         `packages.{
             "depName": dep_name,
@@ -103,7 +103,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     some: true
     `;
     const config = {
-      fileFormat: 'yaml',
+      fileFormat: 'yaml' as const,
       matchStrings: [
         `packages.{
             "depName": dep_name,
@@ -157,7 +157,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       }]
     }`;
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [
         `packages.{
             "depName": dep_name,
@@ -239,7 +239,7 @@ describe('modules/manager/custom/jsonata/index', () => {
      ]
     }`;
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [
         `packages.{
             "depName": dep_name,
@@ -260,7 +260,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('returns null if no dependencies found', async () => {
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
       ],
@@ -280,7 +280,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('returns null if invalid template', async () => {
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [
         `{"depName": "foo", "currentValue": "1.0.0", "datasource": "npm"}`,
       ],
@@ -297,7 +297,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [
         `{"depName": "foo", "currentValue": "1.0.0", "datasource": "npm"}`,
       ],
@@ -314,7 +314,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
@@ -339,7 +339,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('extracts other matchStrings if one finds no match', async () => {
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [`packages.{ "depName": package }`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
@@ -367,7 +367,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('populates manager config and jsonata manager template fields in extract result', async () => {
     const config = {
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
@@ -389,7 +389,7 @@ describe('modules/manager/custom/jsonata/index', () => {
           datasource: 'npm',
         },
       ],
-      fileFormat: 'json',
+      fileFormat: 'json' as const,
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
@@ -412,7 +412,7 @@ describe('modules/manager/custom/jsonata/index', () => {
         some = true
     `;
     const config = {
-      fileFormat: 'toml',
+      fileFormat: 'toml' as const,
       matchStrings: [
         `packages.{
             "depName": dep_name,

@@ -1,9 +1,1 @@
-export type RangeStrategy =
-  | 'auto'
-  | 'bump'
-  | 'future'
-  | 'pin'
-  | 'replace'
-  | 'update-lockfile'
-  | 'in-range-only'
-  | 'widen';
+export type { RangeStrategy } from '../config/allowed-values.generated.ts';

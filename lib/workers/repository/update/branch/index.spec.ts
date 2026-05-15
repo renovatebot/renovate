@@ -1345,7 +1345,7 @@ describe('workers/repository/update/branch/index', () => {
       const inconfig = {
         ...config,
         automerge: true,
-        rebaseWhen: 'conflicted',
+        rebaseWhen: 'conflicted' as const,
       };
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,

@@ -36,6 +36,7 @@ import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule.ts';
+import type { MergeConfidenceDatasource } from './allowed-values.generated.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
@@ -1076,7 +1077,7 @@ async function validateGlobalConfig(
           const allowedValues = supportedDatasources;
           for (const value of val as string[]) {
             // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
+            if (!allowedValues.includes(value as MergeConfidenceDatasource)) {
               warnings.push({
                 topic: 'Configuration Error',
                 message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,

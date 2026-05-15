@@ -28,7 +28,6 @@ describe('modules/manager/terragrunt/artifacts', () => {
     'major',
     'replacement',
     'pinDigest',
-    'lockfileUpdate',
     'bump',
   ];
 

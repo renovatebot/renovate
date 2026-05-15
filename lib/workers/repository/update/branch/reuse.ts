@@ -1,3 +1,4 @@
+import type { RebaseWhen } from '../../../../config/allowed-values.generated.ts';
 import { logger } from '../../../../logger/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
@@ -124,7 +125,7 @@ async function determineRebaseWhenValue(
 ): Promise<void> {
   if (result.rebaseWhen === 'auto' || result.rebaseWhen === 'automerging') {
     let reason;
-    let newValue = 'behind-base-branch';
+    let newValue: RebaseWhen = 'behind-base-branch';
     if (result.automerge === true) {
       reason = 'automerge=true';
     } else if (keepUpdated) {
