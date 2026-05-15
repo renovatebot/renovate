@@ -225,11 +225,21 @@ export const UvLockfile = Toml.pipe(
       z.object({
         name: z.string(),
         version: z.string(),
+        source: z.record(z.string(), z.unknown()).optional(),
       }),
     ),
   }),
 ).transform(({ package: pkg }) =>
   Object.fromEntries(
-    pkg.map(({ name, version }): [string, string] => [name, version]),
+    pkg.map(
+      ({
+        name,
+        version,
+        source,
+      }): [string, { version: string; virtual: boolean }] => [
+        name,
+        { version, virtual: 'virtual' in (source ?? {}) },
+      ],
+    ),
   ),
 );
