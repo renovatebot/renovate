@@ -14,7 +14,7 @@ export async function updateBazelLockfile(
   bazeliskConstraint: string | undefined,
 ): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const allowlist = GlobalConfig.get('allowedUnsafeExecutions', []);
+    const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
 
     const command = 'bazel mod deps --lockfile_mode=update';
 

@@ -9,6 +9,7 @@ describe('modules/manager/flux/artifacts', () => {
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
+      binarySource: 'global',
     });
   });
 

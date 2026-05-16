@@ -162,6 +162,19 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('accepts templates referencing runtime-only fields', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['rabbitmq'],
+            allowedVersions: '<{{add major 1}}',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(0);
+    });
+
     it('catches invalid jsonata expressions', async () => {
       const config = {
         packageRules: [
@@ -1725,8 +1738,8 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('errors if allowedHeaders is empty or not defined', async () => {
-      GlobalConfig.set({});
+    it('errors if allowedHeaders is empty', async () => {
+      GlobalConfig.set({ allowedHeaders: [] });
 
       const config = {
         hostRules: [

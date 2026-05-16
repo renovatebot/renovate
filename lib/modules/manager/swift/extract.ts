@@ -1,6 +1,7 @@
 import { detectPlatform } from '../../../util/common.ts';
 import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -131,7 +132,7 @@ function getMatch(str: string, state: string | null): MatchResult | null {
   return result;
 }
 
-function parseUrl(
+function parseDependencyUrl(
   url: string | null,
 ): { depName: string; datasource: string; registryUrls?: string[] } | null {
   // istanbul ignore if
@@ -146,34 +147,31 @@ function parseUrl(
     return null;
   }
 
-  try {
-    const parsedUrl = new URL(normalizedUrl);
-    const { host, pathname, protocol } = parsedUrl;
-    const platform = detectPlatform(normalizedUrl);
-    if (platform === 'github' || platform === 'gitlab') {
-      const depName = pathname
-        .replace(regEx(/^\//), '')
-        .replace(regEx(/\.git$/), '')
-        .replace(regEx(/\/$/), '');
-      const datasource =
-        platform === 'github'
-          ? GithubTagsDatasource.id
-          : GitlabTagsDatasource.id;
-
-      const isGitHubPublic = host === 'github.com';
-      const isGitLabPublic = host === 'gitlab.com';
-
-      if (!isGitHubPublic && !isGitLabPublic) {
-        const baseUrl = `${protocol}//${host}`;
-        return { depName, datasource, registryUrls: [baseUrl] };
-      }
-
-      return { depName, datasource };
-    }
-    return { depName: url, datasource: GitTagsDatasource.id };
-  } catch {
+  const parsedUrl = parseUrl(normalizedUrl);
+  if (!parsedUrl) {
     return null;
   }
+  const { host, pathname, protocol } = parsedUrl;
+  const platform = detectPlatform(normalizedUrl);
+  if (platform === 'github' || platform === 'gitlab') {
+    const depName = pathname
+      .replace(regEx(/^\//), '')
+      .replace(regEx(/\.git$/), '')
+      .replace(regEx(/\/$/), '');
+    const datasource =
+      platform === 'github' ? GithubTagsDatasource.id : GitlabTagsDatasource.id;
+
+    const isGitHubPublic = host === 'github.com';
+    const isGitLabPublic = host === 'gitlab.com';
+
+    if (!isGitHubPublic && !isGitLabPublic) {
+      const baseUrl = `${protocol}//${host}`;
+      return { depName, datasource, registryUrls: [baseUrl] };
+    }
+
+    return { depName, datasource };
+  }
+  return { depName: url, datasource: GitTagsDatasource.id };
 }
 
 export function extractPackageFile(content: string): PackageFileContent | null {
@@ -198,7 +196,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     if (!packageName) {
       return;
     }
-    const parsedUrl = parseUrl(packageName);
+    const parsedUrl = parseDependencyUrl(packageName);
     if (parsedUrl && currentValue) {
       const { depName, datasource, registryUrls } = parsedUrl;
 

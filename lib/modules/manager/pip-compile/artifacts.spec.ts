@@ -58,6 +58,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
@@ -596,6 +597,15 @@ describe('modules/manager/pip-compile/artifacts', () => {
       );
     });
 
+    it('does not add --no-emit-index-url when PIP_INDEX_URL has no credentials', () => {
+      process.env.PIP_INDEX_URL = 'https://example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile requirements.in');
+    });
+
     it('returns --no-emit-index-url when credentials are found in PIP_INDEX_URL', () => {
       process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
       expect(
@@ -735,6 +745,60 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toBe(
         'pip-compile --output-file=requirements.txt requirements.in --upgrade-package=foo==1.0.2 --upgrade-package=bar==2.0.0',
       );
+    });
+
+    it('skips source file package registry extraction when source file is not pip_requirements', async () => {
+      const header = getCommandInHeader(
+        'pip-compile --output-file=requirements.txt setup.cfg',
+      );
+      fs.readLocalFile.mockResolvedValueOnce(header);
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['requirements.txt'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('new lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'setup.cfg',
+          updatedDeps: [],
+          newPackageFileContent: 'some new content',
+          config: {
+            ...config,
+            lockFiles: ['requirements.txt'],
+          },
+        }),
+      ).not.toBeNull();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'pip-compile --output-file=requirements.txt setup.cfg' },
+      ]);
+    });
+
+    it('skips source file when readLocalFile returns null', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+      fs.readLocalFile.mockResolvedValueOnce(null); // source file read returns null
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['requirements.txt'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('new lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'requirements.in',
+          updatedDeps: [],
+          newPackageFileContent: 'some new content',
+          config: {
+            ...config,
+            lockFiles: ['requirements.txt'],
+          },
+        }),
+      ).not.toBeNull();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'pip-compile requirements.in' },
+      ]);
     });
 
     it('reports errors when a lock file is unchanged', async () => {

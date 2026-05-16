@@ -95,6 +95,12 @@ export function createSimpleGit({
 } = {}): SimpleGit {
   return simpleGit({ ...simpleGitConfig(), ...config }).env(
     getChildEnv({
+      extraEnv: {
+        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+        // Set as extraEnv (lowest priority) so that process.env and
+        // customEnvVariables can override it.
+        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+      },
       env: {
         ...env,
         // To ensure the simple-git parsers match correctly, we need
@@ -106,8 +112,6 @@ export function createSimpleGit({
         // https://github.com/renovatebot/renovate/pull/18963
         LANG: 'C.UTF-8',
         LC_ALL: 'C.UTF-8',
-        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
-        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
       },
     }),
   );
@@ -245,7 +249,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
   logger.debug(`fetchBranchCommits(): url=${url}`);
   const opts = ['ls-remote', '--heads', url];
-  const localDir = GlobalConfig.get('localDir')!;
+  const localDir = GlobalConfig.get('localDir');
   const repoExists = await fs.pathExists(upath.join(localDir, '.git/HEAD'));
   if (config.extraCloneOpts && !repoExists) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
@@ -446,7 +450,7 @@ export const syncGit = withInstrumenting(
       throw new Error('Cannot sync git when platform=local');
     }
     gitInitialized = true;
-    const localDir = GlobalConfig.get('localDir')!;
+    const localDir = GlobalConfig.get('localDir');
     logger.debug(`syncGit(): Initializing git repository into ${localDir}`);
     const gitHead = upath.join(localDir, '.git/HEAD');
     let clone = true;
@@ -581,8 +585,7 @@ export const syncGit = withInstrumenting(
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
-    // TODO: types (#22198)
-    const localDir = GlobalConfig.get('localDir')!;
+    const localDir = GlobalConfig.get('localDir');
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(
@@ -1231,7 +1234,7 @@ export async function prepareCommit({
   message,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
-  const localDir = GlobalConfig.get('localDir')!;
+  const localDir = GlobalConfig.get('localDir');
   await syncGit();
   logger.debug(`Preparing files for committing to branch ${branchName}`);
   await handleCommitAuth(localDir);

@@ -28,7 +28,7 @@ describe('modules/manager/deno/artifacts', () => {
       localDirResult = await tmp.dir({ unsafeCleanup: true });
       localDir = localDirResult.path;
 
-      GlobalConfig.set({ localDir });
+      GlobalConfig.set({ localDir, binarySource: 'global' });
     });
 
     afterEach(async () => {

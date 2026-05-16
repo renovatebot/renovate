@@ -90,8 +90,11 @@ export function getRepoUrl(
       );
     }
 
-    // TODO: null check (#22198)
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
+    const parsedEndpoint = parseUrl(defaults.endpoint);
+    if (!parsedEndpoint) {
+      throw new Error(`Invalid GitLab endpoint: ${defaults.endpoint}`);
+    }
+    const { protocol, host, pathname } = parsedEndpoint;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const uri = url.format({
       /* v8 ignore start: should never happen (#40625) */

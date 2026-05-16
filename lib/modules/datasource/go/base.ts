@@ -227,7 +227,7 @@ export class BaseGoDatasource {
         return null;
       }
 
-      const endpoint = GlobalConfig.get('endpoint', '');
+      const endpoint = GlobalConfig.get('endpoint');
       const endpointPrefix = regEx(
         /https:\/\/[^/]+\/(?<prefix>.*?\/)(?:api\/v4\/?)?/,
       ).exec(endpoint)?.groups?.prefix;

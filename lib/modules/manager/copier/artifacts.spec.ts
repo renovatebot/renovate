@@ -34,6 +34,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   allowScripts: false,
+  binarySource: 'global',
 };
 
 describe('modules/manager/copier/artifacts', () => {

@@ -18,6 +18,7 @@ import * as promises from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -240,7 +241,7 @@ export async function initRepo({
   });
   config = {
     repository,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as Config;
   let info: RepoInfo;
   let mainBranch: string;
@@ -285,7 +286,12 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = new URL(defaults.endpoint);
+  const parsedEndpoint = parseUrl(defaults.endpoint);
+  // v8 ignore if: endpoint is a constant
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid Bitbucket endpoint: ${defaults.endpoint}`);
+  }
+  const { hostname } = parsedEndpoint;
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
