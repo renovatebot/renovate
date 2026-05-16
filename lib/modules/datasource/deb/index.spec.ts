@@ -1,4 +1,5 @@
-import { copyFile, readFile } from 'fs-extra';
+import { createReadStream } from 'node:fs';
+import { copyFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -6,7 +7,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import { hash, toSha256 } from '../../../util/hash.ts';
+import { hashStream, toSha256 } from '../../../util/hash.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
@@ -583,6 +584,6 @@ function getRegistryUrl(
  * @returns resolves to the SHA256 checksum
  */
 export async function computeFileChecksum(filePath: string): Promise<string> {
-  const content = await readFile(filePath);
-  return hash(content, 'sha256');
+  const content = createReadStream(filePath);
+  return hashStream(content, 'sha256');
 }

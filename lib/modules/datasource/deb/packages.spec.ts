@@ -33,6 +33,7 @@ describe('modules/datasource/deb/packages', () => {
   const fixtureInReleaseInvalid = Fixtures.get('InReleaseInvalid');
 
   const fixturePackagesArchiveXzPath = Fixtures.getPath('Packages.xz');
+  const fixturePackagesArchivePath = Fixtures.getPath('Packages.gz');
   const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
   const fixturePackagesArchiveNoCompr = Fixtures.getPath(`Packages`);
 
@@ -470,21 +471,33 @@ describe('modules/datasource/deb/packages', () => {
       ).rejects.toThrow(`SHA256 checksum validation failed`);
     });
 
-    it('should throw error when release file is fetched but package cannot be found', async () => {
-      // return InRelease content
+    it('should default to downloading Package.gz when release file is fetched but package cannot be found', async () => {
+      // return InRelease content with bogus hash and no package info to trigger fallback to download of Package.gz file
+      // based on old module behavior
       mockFetchInReleaseContent(
         'non-compliant-hash',
         ...packageArgs,
         false,
-        'xz',
+        'gz',
       );
+
+      // return package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', ...packageArgs, 'gz'))
+        .replyWithFile(200, fixturePackagesArchivePath);
 
       await expect(
         downloadAndExtractPackage(
           getComponentUrl(debBaseUrl, ...packageArgs),
           new Http('deb'),
         ),
-      ).rejects.toThrow(`No valid package file found in release files`);
+      ).resolves.toEqual(
+        expect.objectContaining({
+          extractedFile: downloadedPackageFile,
+          lastTimestamp: expect.anything(),
+        }),
+      );
     });
 
     it('should throw error for when extracting fails', async () => {
