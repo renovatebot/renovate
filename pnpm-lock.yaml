@@ -9,7 +9,7 @@ overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
   '@yarnpkg/core@4.5.0>tar': 7.5.15
   esbuild: 0.28.0
-  protobufjs@8.0.1: 8.0.3
+  protobufjs@8.0.1: 8.2.0
   vite: 8.0.11
 
 importers:
@@ -5037,10 +5037,6 @@ packages:
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
 
-  protobufjs@8.0.3:
-    resolution: {integrity: sha512-LBYnMWkKLB8fE/ljROPDbCl7mgLSlI+oBe1fAAr5MTqFg4TIi0tYrVVurJvQggOjnUYMQtEZBjrej59ojMNTHQ==}
-    engines: {node: '>=12.0.0'}
-
   protobufjs@8.2.0:
     resolution: {integrity: sha512-oI+GC9iPxrQEr6wragljFKH46/r3rNsm6eg7F2fp6kBUMnf6/mesDRdBuF4gK+OyaKJ8N4C1B9s9cCeYdqFikg==}
     engines: {node: '>=12.0.0'}
@@ -7493,7 +7489,7 @@ snapshots:
       '@opentelemetry/sdk-logs': 0.217.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-metrics': 2.7.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.7.1(@opentelemetry/api@1.9.1)
-      protobufjs: 8.0.3
+      protobufjs: 8.2.0
 
   '@opentelemetry/redis-common@0.38.3': {}
 
@@ -11115,11 +11111,6 @@ snapshots:
   propagate@2.0.1: {}
 
   proto-list@1.2.4: {}
-
-  protobufjs@8.0.3:
-    dependencies:
-      '@types/node': 24.12.3
-      long: 5.3.2
 
   protobufjs@8.2.0:
     dependencies:
