@@ -1,11 +1,12 @@
+import type { DatabaseSync, StatementSync } from 'node:sqlite';
 import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
-import type { Database, Statement } from 'better-sqlite3';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { sqlite } from '../../../../expose.ts';
 import { logger } from '../../../../logger/index.ts';
+import { getEnv } from '../../../env.ts';
 import { ensureDir } from '../../../fs/index.ts';
+import { parseInteger } from '../../../number.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
@@ -30,10 +31,8 @@ async function decompress<T>(input: Buffer): Promise<T> {
 }
 
 export class PackageCacheSqlite extends PackageCacheBase {
-  private static readonly busyTimeoutMs = 100;
-
   static async create(cacheDir: string): Promise<PackageCacheSqlite> {
-    const Sqlite = await sqlite();
+    const { DatabaseSync: Sqlite } = await import('node:sqlite');
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
@@ -44,28 +43,28 @@ export class PackageCacheSqlite extends PackageCacheBase {
       logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
     }
 
-    const client = new Sqlite(sqliteFile);
+    const { RENOVATE_X_SQLITE_BUSY_TIMEOUT } = getEnv();
+    const timeout = parseInteger(RENOVATE_X_SQLITE_BUSY_TIMEOUT, 5000);
+
+    const client = new Sqlite(sqliteFile, { timeout });
     return new PackageCacheSqlite(client);
   }
 
-  private readonly upsertStatement: Statement<unknown[]>;
-  private readonly getStatement: Statement<unknown[]>;
-  private readonly deleteExpiredRows: Statement<unknown[]>;
-  private readonly countStatement: Statement<unknown[]>;
+  private readonly upsertStatement: StatementSync;
+  private readonly getStatement: StatementSync;
+  private readonly deleteExpiredRows: StatementSync;
+  private readonly countStatement: StatementSync;
 
-  readonly client: Database;
+  readonly client: DatabaseSync;
 
-  private constructor(client: Database) {
+  private constructor(client: DatabaseSync) {
     super();
     this.client = client;
+    client.exec('PRAGMA journal_mode = WAL');
+    client.exec("PRAGMA encoding = 'UTF-8'");
 
-    client.pragma('journal_mode = WAL');
-    client.pragma("encoding = 'UTF-8'");
-    client.pragma(`busy_timeout = ${PackageCacheSqlite.busyTimeoutMs}`);
-
-    client
-      .prepare(
-        `
+    client.exec(
+      `
           CREATE TABLE IF NOT EXISTS package_cache (
             namespace TEXT NOT NULL,
             key TEXT NOT NULL,
@@ -74,11 +73,8 @@ export class PackageCacheSqlite extends PackageCacheBase {
             PRIMARY KEY (namespace, key)
           )
         `,
-      )
-      .run();
-    client
-      .prepare('CREATE INDEX IF NOT EXISTS expiry ON package_cache (expiry)')
-      .run();
+    );
+    client.exec('CREATE INDEX IF NOT EXISTS expiry ON package_cache (expiry)');
 
     this.upsertStatement = client.prepare(`
       INSERT INTO package_cache (namespace, key, data, expiry)
@@ -88,24 +84,22 @@ export class PackageCacheSqlite extends PackageCacheBase {
         expiry = unixepoch() + @ttlSeconds
     `);
 
-    this.getStatement = client
-      .prepare(
-        `
+    this.getStatement = client.prepare(
+      `
           SELECT data FROM package_cache
           WHERE
             namespace = @namespace AND key = @key AND expiry > unixepoch()
         `,
-      )
-      .pluck(true);
+    );
 
     this.deleteExpiredRows = client.prepare(`
       DELETE FROM package_cache
       WHERE expiry <= unixepoch()
     `);
 
-    this.countStatement = client
-      .prepare('SELECT COUNT(*) FROM package_cache')
-      .pluck(true);
+    this.countStatement = client.prepare(
+      'SELECT COUNT(*) as total FROM package_cache',
+    );
   }
 
   override async set(
@@ -133,7 +127,7 @@ export class PackageCacheSqlite extends PackageCacheBase {
     key: string,
   ): Promise<T | undefined> {
     try {
-      const data = this.getStatement.get({ namespace, key }) as
+      const data = this.getStatement.get({ namespace, key })?.data as
         | Buffer
         | undefined;
 
@@ -152,7 +146,8 @@ export class PackageCacheSqlite extends PackageCacheBase {
   override destroy(): Promise<void> {
     try {
       const startTime = Date.now();
-      const totalCount = this.countStatement.get() as number;
+      // `COUNT(*)` is always returning a row
+      const totalCount = this.countStatement.get()!.total as number;
       const { changes: deletedCount } = this.deleteExpiredRows.run();
       const durationMs = Date.now() - startTime;
       logger.debug(

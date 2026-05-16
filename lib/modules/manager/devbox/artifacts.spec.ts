@@ -12,6 +12,7 @@ vi.mock('../../../util/fs/index.ts');
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
+  binarySource: 'global',
 };
 
 const devboxJson = codeBlock`

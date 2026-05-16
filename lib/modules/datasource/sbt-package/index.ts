@@ -7,7 +7,11 @@ import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url.ts';
+import {
+  ensureTrailingSlash,
+  parseUrl,
+  trimTrailingSlash,
+} from '../../../util/url.ts';
 import * as ivyVersioning from '../../versioning/ivy/index.ts';
 import { compare } from '../../versioning/maven/compare.ts';
 import { MAVEN_REPO } from '../maven/common.ts';
@@ -106,7 +110,12 @@ export class SbtPackageDatasource extends MavenDatasource {
 
       dependencyUrl = trimTrailingSlash(packageRootUrl);
 
-      const rootPath = new URL(packageRootUrl).pathname;
+      const parsedPackageRootUrl = parseUrl(packageRootUrl);
+      if (!parsedPackageRootUrl) {
+        logger.warn({ packageRootUrl }, 'Failed to parse packageURL');
+        continue;
+      }
+      const rootPath = parsedPackageRootUrl.pathname;
       const artifactSubdirs = extractPageLinks(packageRootContent, (href) => {
         const path = href.replace(rootPath, '');
 
@@ -153,6 +162,12 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     const allVersions = new Set<string>();
     for (const pkgUrl of packageUrls) {
+      const parsedPkgUrl = parseUrl(pkgUrl);
+      if (!parsedPkgUrl) {
+        invalidPackageUrls.add(pkgUrl);
+        continue;
+      }
+
       const packageContent = await downloadHttpContent(this.http, pkgUrl);
       // istanbul ignore if
       if (!packageContent) {
@@ -160,7 +175,7 @@ export class SbtPackageDatasource extends MavenDatasource {
         continue;
       }
 
-      const rootPath = new URL(pkgUrl).pathname;
+      const rootPath = parsedPkgUrl.pathname;
       const versions = extractPageLinks(packageContent, (href) => {
         const path = href.replace(rootPath, '');
         if (path.startsWith('.')) {

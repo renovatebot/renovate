@@ -1,6 +1,6 @@
 packages: []
 
-savePrefix: ""
+savePrefix: ''
 # updates are handled by Renovate itself
 updateNotifier: false
 # https://pnpm.io/cli/run
@@ -11,13 +11,15 @@ allowBuilds:
   esbuild: false
   protobufjs: false
   unrs-resolver: false
-  better-sqlite3: true
   re2: true
 
+dedupePeers: true
+
 overrides:
-  "@aws-sdk/xml-builder@3.972.4>fast-xml-parser": "^5.3.6"
-  "@yarnpkg/core@4.5.0>tar": $tar
+  '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
+  '@yarnpkg/core@4.5.0>tar': $tar
   esbuild: $esbuild
+  protobufjs@8.0.1: 8.0.3
   vite: $vite
 
 ignoredOptionalDependencies:
@@ -34,7 +36,9 @@ strictPeerDependencies: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@renovatebot/detect-tools'
+  - '@renovatebot/good-enough-parser'
   - '@renovatebot/osv-offline'
+  - '@renovatebot/osv-offline-db'
   - '@renovatebot/pep440'
   - '@renovatebot/pgp'
   - '@renovatebot/ruby-semver'

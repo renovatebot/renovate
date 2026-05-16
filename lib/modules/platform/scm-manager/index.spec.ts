@@ -201,7 +201,7 @@ describe('modules/platform/scm-manager/index', () => {
           createdAt: pullRequest.creationDate,
           labels: pullRequest.labels,
           number: parseInt(pullRequest.id, 10),
-          state: pullRequest.status,
+          state: 'open',
           targetBranch: pullRequest.target,
           title: pullRequest.title,
           hasAssignees: false,
@@ -407,15 +407,14 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe('createPr', () => {
     it.each`
-      draftPr      | expectedState | expectedIsDraft
-      ${undefined} | ${'OPEN'}     | ${false}
-      ${false}     | ${'OPEN'}     | ${false}
-      ${true}      | ${'DRAFT'}    | ${true}
+      draftPr      | expectedIsDraft
+      ${undefined} | ${false}
+      ${false}     | ${false}
+      ${true}      | ${true}
     `(
       'should create PR with $draftPR and state $expectedState',
       async ({
         draftPr,
-        expectedState,
         expectedIsDraft,
       }: {
         draftPr: boolean | undefined;
@@ -469,7 +468,7 @@ describe('modules/platform/scm-manager/index', () => {
           labels: [],
           number: 1337,
           reviewers: [],
-          state: expectedState,
+          state: 'open',
         });
       },
     );

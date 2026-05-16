@@ -1,5 +1,6 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { getPkgReleases } from '../index.ts';
 import { Unity3dDatasource } from './index.ts';
 import { UnityReleasesJSON } from './schema.ts';
@@ -16,7 +17,7 @@ describe('modules/datasource/unity3d/index', () => {
     for (const stream in streams) {
       const content = fixtures[stream];
 
-      const uri = new URL(streams[stream]);
+      const uri = parseUrl(streams[stream])!;
       httpMock
         .scope(uri.origin)
         .get(`${uri.pathname}${uri.search}`)
@@ -303,12 +304,12 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('uses pagination', async () => {
-    const uriPageOne = new URL(
+    const uriPageOne = parseUrl(
       `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
-    );
-    const uriPageTwo = new URL(
+    )!;
+    const uriPageTwo = parseUrl(
       `${Unity3dDatasource.streams.lts}&limit=25&offset=25`,
-    );
+    )!;
 
     const total = 30;
 

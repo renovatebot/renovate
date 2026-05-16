@@ -4,6 +4,7 @@ import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { MAVEN_REPO } from './common.ts';
 import type { MavenFetchError } from './types.ts';
 import {
@@ -52,7 +53,7 @@ describe('modules/datasource/maven/util', () => {
     it('returns error for unsupported protocols', async () => {
       const res = await downloadMavenXml(
         http,
-        new URL('unsupported://server.com/'),
+        parseUrl('unsupported://server.com/')!,
       );
       expect(res.unwrap()).toEqual({
         ok: false,
@@ -69,7 +70,10 @@ describe('modules/datasource/maven/util', () => {
             headers: {},
           }),
       });
-      const res = await downloadMavenXml(http, new URL('https://example.com/'));
+      const res = await downloadMavenXml(
+        http,
+        parseUrl('https://example.com/')!,
+      );
       expect(res.unwrap()).toEqual({
         ok: false,
         err: { type: 'xml-parse-error', err: expect.any(Error) },
@@ -96,12 +100,68 @@ describe('modules/datasource/maven/util', () => {
 
   describe('downloadS3Protocol', () => {
     it('returns error for non-S3 URLs', async () => {
-      const res = await downloadS3Protocol(new URL('http://not-s3.com/'));
+      const res = await downloadS3Protocol(parseUrl('http://not-s3.com/')!);
       expect(res.unwrap()).toEqual({
         ok: false,
         err: { type: 'invalid-url' } satisfies MavenFetchError,
       });
     });
+  });
+
+  describe('cache provider selection', () => {
+    const mockResponse = {
+      statusCode: 200 as const,
+      body: '<xml/>',
+      headers: {},
+    };
+
+    it.each([
+      [
+        'release POM',
+        'https://repo.maven.apache.org/maven2/com/example/lib/1.0.0/lib-1.0.0.pom',
+        'datasource-maven:pom-cache-provider',
+      ],
+      [
+        'timestamped snapshot POM',
+        'https://repo.maven.apache.org/maven2/com/example/lib/1.0.0-SNAPSHOT/lib-1.0.0-20250101.120000-42.pom',
+        'datasource-maven:pom-cache-provider',
+      ],
+      [
+        'non-timestamped snapshot POM',
+        'https://repo.maven.apache.org/maven2/com/example/lib/1.0.0-SNAPSHOT/lib-1.0.0-SNAPSHOT.pom',
+        'datasource-maven:cache-provider',
+      ],
+      [
+        'release metadata',
+        'https://repo.maven.apache.org/maven2/com/example/lib/maven-metadata.xml',
+        'datasource-maven:cache-provider',
+      ],
+      [
+        'snapshot metadata',
+        'https://repo.maven.apache.org/maven2/com/example/lib/1.0.0-SNAPSHOT/maven-metadata.xml',
+        'datasource-maven:cache-provider',
+      ],
+    ])(
+      'uses correct cache provider for %s',
+      async (_label, url, expectedNamespace) => {
+        let capturedCacheProvider: Record<string, unknown> | undefined;
+        const http = partial<Http>({
+          getText: (_url, opts) => {
+            capturedCacheProvider = opts?.cacheProvider as unknown as Record<
+              string,
+              unknown
+            >;
+            return Promise.resolve(mockResponse);
+          },
+        });
+
+        await downloadHttpProtocol(http, url);
+
+        expect(capturedCacheProvider).toMatchObject({
+          namespace: expectedNamespace,
+        });
+      },
+    );
   });
 
   describe('downloadHttpProtocol', () => {
@@ -227,6 +287,69 @@ describe('modules/datasource/maven/util', () => {
       expect(res.unwrap()).toEqual({
         ok: false,
         err: { type: 'unsupported-host' } satisfies MavenFetchError,
+      });
+    });
+
+    describe('maven-metadata.xml 404 caching', () => {
+      const metadataUrl =
+        'https://repo.maven.apache.org/maven2/com/example/lib/maven-metadata.xml';
+      const nonMetadataUrl =
+        'https://repo.maven.apache.org/maven2/com/example/lib/1.0.0/lib-1.0.0.pom';
+
+      it('caches 404 for maven-metadata.xml URLs', async () => {
+        const setSpy = vi
+          .spyOn(packageCache, 'set')
+          .mockResolvedValue(undefined);
+        vi.spyOn(packageCache, 'get').mockResolvedValue(null);
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({ response: { statusCode: 404 } as never }),
+            ),
+        });
+
+        const res = await downloadHttpProtocol(http, metadataUrl);
+
+        expect(res.unwrap()).toEqual({
+          ok: false,
+          err: { type: 'not-found' } satisfies MavenFetchError,
+        });
+        expect(setSpy).toHaveBeenCalledWith(
+          'datasource-maven:metadata-not-found',
+          metadataUrl,
+          true,
+          expect.toBeNumber(),
+        );
+      });
+
+      it('does not cache 404 for non-metadata URLs', async () => {
+        const setSpy = vi
+          .spyOn(packageCache, 'set')
+          .mockResolvedValue(undefined);
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({ response: { statusCode: 404 } as never }),
+            ),
+        });
+
+        await downloadHttpProtocol(http, nonMetadataUrl);
+
+        expect(setSpy).not.toHaveBeenCalled();
+      });
+
+      it('returns cached not-found without making HTTP request', async () => {
+        vi.spyOn(packageCache, 'get').mockResolvedValue(true);
+        const getText = vi.fn();
+        const http = partial<Http>({ getText });
+
+        const res = await downloadHttpProtocol(http, metadataUrl);
+
+        expect(res.unwrap()).toEqual({
+          ok: false,
+          err: { type: 'not-found' } satisfies MavenFetchError,
+        });
+        expect(getText).not.toHaveBeenCalled();
       });
     });
   });

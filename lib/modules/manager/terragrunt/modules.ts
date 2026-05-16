@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
@@ -71,7 +72,13 @@ export function analyseTerragruntModule(
     dep.datasource = GithubTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     const { url, tag } = gitTagsRefMatch.groups;
-    const { hostname, host, pathname, protocol } = new URL(url);
+    const parsedUrl = parseUrl(url);
+    if (!parsedUrl) {
+      logger.debug({ url }, 'Terragrunt module has invalid URL, skipping');
+      dep.skipReason = 'invalid-url';
+      return;
+    }
+    const { hostname, host, pathname, protocol } = parsedUrl;
     const containsSubDirectory = pathname.includes('//');
     if (containsSubDirectory) {
       logger.debug('Terragrunt module contains subdirectory');

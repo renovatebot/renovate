@@ -28,8 +28,7 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
-    // TODO: types (#22198)
-    const platform = GlobalConfig.get('platform')!;
+    const platform = GlobalConfig.get('platform');
     logger.warn(
       { platform },
       `Configuration option 'filterUnavailableUsers' is not supported on the current platform.`,
@@ -37,8 +36,7 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
   }
 
   if (config.expandCodeOwnersGroups && !platform.expandGroupMembers) {
-    // TODO: types (#22198)
-    const platform = GlobalConfig.get('platform')!;
+    const platform = GlobalConfig.get('platform');
     logger.warn(
       { platform },
       `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.`,
