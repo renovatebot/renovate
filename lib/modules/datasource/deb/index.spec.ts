@@ -96,6 +96,10 @@ describe('modules/datasource/deb/index', () => {
         'InRelease',
       );
 
+      // as we signal error, the function will fallback to the original behavior of this data module and will try to fetch the package file directly,
+      // so it will also check whether the existing file has been modified since
+      mockModifiedPackageFile('stable', 'non-free', 'amd64', 'gz', false);
+
       const res = await getPkgReleases(cfg);
       expect(res).toEqual({
         homepage: 'http://marginalhacks.com/Hacks/album',
@@ -439,6 +443,7 @@ function mockHttpCalls(
  * @param error - Optional flag to simulate an error response (default is false).
  * @param compression - The compression type (e.g., 'gz', 'xz', etc.) for the package index file.
  * @param releaseFile - The name of the InRelease file (either 'InRelease' or 'Release, defaults to 'InRelease').
+ * @param packageFileModified - Optional flag to simulate whether the package file has been modified online (default is false).
  */
 export function mockFetchInReleaseContent(
   packageIndexHash: string,
@@ -471,6 +476,29 @@ export function mockFetchInReleaseContent(
   } else {
     mockCall.reply(200, content);
   }
+}
+
+export function mockModifiedPackageFile(
+  release: string,
+  component: string,
+  arch: string,
+  compression = 'gz',
+  modified = false,
+) {
+  const packageIndexPath =
+    compression.length > 0
+      ? `${component}/binary-${arch}/Packages.${compression}`
+      : `${component}/binary-${arch}/Packages`;
+
+  const uri = joinUrlParts(
+    getBaseSuiteUrl(getComponentUrl('', release, component, arch)),
+    packageIndexPath,
+  );
+
+  httpMock
+    .scope(debBaseUrl)
+    .head(uri)
+    .reply(modified ? 200 : 304);
 }
 
 /**

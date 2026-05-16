@@ -196,6 +196,85 @@ describe('modules/datasource/deb/packages', () => {
       ).resolves.toEqual(false);
     });
 
+    it('should download if the package file exists but is outdated and no hash is provided', async () => {
+      // write distinct cached file from fixturePackagesArchiveXzPath
+      await fs.outputCacheFile(downloadedPackageFile, 'test');
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return 200 to signal file has been modified
+      httpMock
+        .scope(debBaseUrl)
+        .head(packageUrl)
+        .reply(200, '', {
+          'Last-Modified': new Date(
+            Date.now() - 60 * 60 * 1000 * 24,
+          ).toUTCString(),
+        });
+
+      // return the package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          '', // empty hash
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(true);
+    });
+
+    it('should not download if the package file exists and is not outdated although no hash is provided', async () => {
+      // write distinct cached file from fixturePackagesArchiveXzPath
+      await fs.outputCacheFile(downloadedPackageFile, 'test');
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return 304 to signal file has not been modified
+      httpMock.scope(debBaseUrl).head(packageUrl).reply(304, '', {});
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          '', // empty hash
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(false);
+    });
+
+    it('should download if the package file exists but we cannot validate whether it has been modified', async () => {
+      // write distinct cached file from fixturePackagesArchiveXzPath
+      await fs.outputCacheFile(downloadedPackageFile, 'test');
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return 304 to signal file has not been modified
+      httpMock
+        .scope(debBaseUrl)
+        .head(packageUrl)
+        .replyWithError('not available');
+
+      // return the package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          '', // empty hash
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(true);
+    });
+
     it('should download even though the checksum is not provided', async () => {
       const fixturePackageHash = await computeFileChecksum(
         fixturePackagesArchiveXzPath,
@@ -238,7 +317,7 @@ describe('modules/datasource/deb/packages', () => {
           'required-hash-value-from-InRelease-file', // assume value from inrelease file is provided
           new Http('deb'),
         ),
-      ).rejects.toThrowError('SHA256 checksum validation failed');
+      ).rejects.toThrow('SHA256 checksum validation failed');
     });
   });
 
