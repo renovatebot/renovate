@@ -289,5 +289,68 @@ describe('modules/datasource/maven/util', () => {
         err: { type: 'unsupported-host' } satisfies MavenFetchError,
       });
     });
+
+    describe('maven-metadata.xml 404 caching', () => {
+      const metadataUrl =
+        'https://repo.maven.apache.org/maven2/com/example/lib/maven-metadata.xml';
+      const nonMetadataUrl =
+        'https://repo.maven.apache.org/maven2/com/example/lib/1.0.0/lib-1.0.0.pom';
+
+      it('caches 404 for maven-metadata.xml URLs', async () => {
+        const setSpy = vi
+          .spyOn(packageCache, 'set')
+          .mockResolvedValue(undefined);
+        vi.spyOn(packageCache, 'get').mockResolvedValue(null);
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({ response: { statusCode: 404 } as never }),
+            ),
+        });
+
+        const res = await downloadHttpProtocol(http, metadataUrl);
+
+        expect(res.unwrap()).toEqual({
+          ok: false,
+          err: { type: 'not-found' } satisfies MavenFetchError,
+        });
+        expect(setSpy).toHaveBeenCalledWith(
+          'datasource-maven:metadata-not-found',
+          metadataUrl,
+          true,
+          expect.toBeNumber(),
+        );
+      });
+
+      it('does not cache 404 for non-metadata URLs', async () => {
+        const setSpy = vi
+          .spyOn(packageCache, 'set')
+          .mockResolvedValue(undefined);
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({ response: { statusCode: 404 } as never }),
+            ),
+        });
+
+        await downloadHttpProtocol(http, nonMetadataUrl);
+
+        expect(setSpy).not.toHaveBeenCalled();
+      });
+
+      it('returns cached not-found without making HTTP request', async () => {
+        vi.spyOn(packageCache, 'get').mockResolvedValue(true);
+        const getText = vi.fn();
+        const http = partial<Http>({ getText });
+
+        const res = await downloadHttpProtocol(http, metadataUrl);
+
+        expect(res.unwrap()).toEqual({
+          ok: false,
+          err: { type: 'not-found' } satisfies MavenFetchError,
+        });
+        expect(getText).not.toHaveBeenCalled();
+      });
+    });
   });
 });
