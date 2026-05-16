@@ -50,17 +50,31 @@ export async function downloadAndExtractPackage(
     // packageReleaseInfo is set, there is a release file,
     // so we can check which package file to download and retrieve its hash value
     // NOTE: this could also be an uncompressed package file
-    packageReleaseInfo = getPackageFromReleaseFile(releaseContent, packagePath);
-  } else {
-    // if packageReleaseInfo is null, it means the release file could not be fetched,
-    // so we fall back to the original behavior of this data module
+    try {
+      packageReleaseInfo = getPackageFromReleaseFile(
+        releaseContent,
+        packagePath,
+      );
+    } catch (err) {
+      logger.debug({ baseSuiteUrl, packagePath }, err.message);
+    }
+  }
+
+  if (!packageReleaseInfo) {
+    // if packageReleaseInfo is null, it means either no release file could be fetched,
+    // or the package file information could not be found in the release file,
+    // so we fall back to the original behavior of this data module and try to download
+    // the Package.gz file without a hash value
     packageReleaseInfo = {
       hash: '',
       compression: 'gz',
       packagesFile: packagePath,
     };
 
-    logger.debug('Default to retrieving Package.gz file');
+    logger.debug(
+      { baseSuiteUrl, packagePath },
+      'Default to retrieving Package.gz file',
+    );
   }
 
   // the path to the package file to download
