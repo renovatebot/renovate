@@ -9,7 +9,7 @@ import { computeFileChecksum } from './checksum.ts';
 import { cacheSubDir } from './common.ts';
 import { getReleaseFileContent } from './release.ts';
 import { type DownloadedPackage, PackagesCompressionAlgos } from './types.ts';
-import { getBaseSuiteUrl, getPackagePath } from './url.ts';
+import { checkIfModified, getBaseSuiteUrl, getPackagePath } from './url.ts';
 import { extract, getFileCreationTime } from './utils.ts';
 
 /**
@@ -81,7 +81,7 @@ export async function downloadAndExtractPackage(
   const packageFileChanged = await downloadPackageFile(
     packageDownloadUrl,
     downloadedPackageFile,
-    packageReleaseInfo?.hash ?? '',
+    packageReleaseInfo.hash,
     http,
   );
 
@@ -169,7 +169,8 @@ export function getPackageFromReleaseFile(
 }
 
 /**
- * Downloads a package file if its checksum does not match the expected hash.
+ * Downloads a package file if its checksum does not match the expected hash
+ * or the already downloaded file is outdated.
  *
  * @param packageUrl - The base URL of the package.
  * @param packageFile - The path where the Package file will be saved.
@@ -184,25 +185,44 @@ export async function downloadPackageFile(
   packageHash: string,
   http: Http,
 ): Promise<boolean> {
-  const packageFileExists = await fs.cachePathIsFile(packageFile);
+  const lastDownloadTime = await getFileCreationTime(packageFile);
   const hashProvided = packageHash.length > 0;
 
-  if (packageFileExists && hashProvided) {
+  if (lastDownloadTime && hashProvided) {
     // check whether the file is modified locally
     const fileChecksum = await computeFileChecksum(packageFile);
     if (fileChecksum === packageHash) {
       logger.debug(
         { url: packageUrl, targetFile: packageFile },
-        'Package file is already downloaded',
+        'Package file is already downloaded and checksums match',
       );
       return false;
     }
-  } else if (packageFileExists) {
-    // file exists but we cannot compare as we don't have a hash value
-    return false;
+  } else if (lastDownloadTime) {
+    // package file exists but we cannot validate it with a hash value,
+    // so we check if the file is outdated by comparing the last modified date of the file with the Last-Modified header of the package file URL
+    let needsDownload = true;
+
+    // release file has been downloaded before, check if it is modified
+    try {
+      needsDownload = await checkIfModified(packageUrl, lastDownloadTime, http);
+    } catch (err) {
+      logger.debug(
+        { url: packageUrl, err },
+        'Could not check if package file is modified, continue with download',
+      );
+    }
+
+    if (!needsDownload) {
+      logger.debug(
+        { url: packageUrl, targetFile: packageFile },
+        'Package file is already downloaded and not modified since last download',
+      );
+      return false;
+    }
   }
 
-  // download the package file
+  // download the package file as it does not exist or the hash value does not match
   logger.debug(
     { url: packageUrl, targetFile: packageFile },
     'Downloading Debian package file',
