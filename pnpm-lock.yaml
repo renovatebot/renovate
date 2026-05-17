@@ -546,8 +546,8 @@ importers:
         specifier: 4.57.2
         version: 4.57.2(tslib@2.8.1)
       nock:
-        specifier: 14.0.14
-        version: 14.0.14
+        specifier: 14.0.15
+        version: 14.0.15
       npm-run-all2:
         specifier: 8.0.4
         version: 8.0.4
@@ -4584,8 +4584,8 @@ packages:
   nise@6.1.5:
     resolution: {integrity: sha512-SnRDPDBjxZZoU2n0+gzzLtSvo1OZo7j6jnbXsoh3AFxEGhaFU7ZF0TmefuKERq79wxR2U+MPn7ArW+Tl+clC3A==}
 
-  nock@14.0.14:
-    resolution: {integrity: sha512-PKk7tex0O3RRXUZC5XDKJ9yM3rYRPS13myduT85VIIYDBnib42Fpxoe6KxRSzqB4iL2NDxkcJ2yiskZ18hGLEQ==}
+  nock@14.0.15:
+    resolution: {integrity: sha512-S0a47C9pLvcYx/Ugf0H30BVBEcUgMMBDk9VJIDlJ8XGrfH2QDUD4Tgdp45qDIiHttokBG+IbsOtsvIjGR/j3bg==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-domexception@1.0.0:
@@ -10708,7 +10708,7 @@ snapshots:
       just-extend: 6.2.0
       path-to-regexp: 8.4.2
 
-  nock@14.0.14:
+  nock@14.0.15:
     dependencies:
       '@mswjs/interceptors': 0.41.8
       json-stringify-safe: 5.0.1
