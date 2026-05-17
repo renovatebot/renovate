@@ -134,24 +134,32 @@ export class UvProcessor extends BasePyProjectProcessor {
       packageFile,
       this.lockfileName,
     );
-    if (lockFileName === null) {
+    if (!lockFileName) {
       logger.debug({ packageFile }, `No uv lock file found`);
-    } else {
-      const lockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (lockFileContent) {
-        const { val: lockFileMapping, err } = Result.parse(
-          lockFileContent,
-          UvLockfile,
-        ).unwrap();
+      return Promise.resolve(deps);
+    }
+    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (lockFileContent) {
+      const { val: lockFileMapping, err } = Result.parse(
+        lockFileContent,
+        UvLockfile,
+      ).unwrap();
 
-        if (err) {
-          logger.debug({ packageFile, err }, `Error parsing uv lock file`);
-        } else {
-          for (const dep of deps) {
-            const packageName = dep.packageName;
-            if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName];
-            }
+      if (err) {
+        logger.debug({ packageFile, err }, `Error parsing uv lock file`);
+      } else {
+        for (const dep of deps) {
+          const packageName = dep.packageName;
+          if (packageName && packageName in lockFileMapping) {
+            dep.lockedVersion = lockFileMapping[packageName].version;
+          }
+        }
+
+        for (const [name, { version, virtual }] of Object.entries(
+          lockFileMapping,
+        )) {
+          if (!virtual && !deps.find((dep) => dep.packageName === name)) {
+            deps.push(indirectDep(name, version));
           }
         }
       }
@@ -275,6 +283,26 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   }
 
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
+}
+
+/**
+ * As indirect dependencies don't exist in the package file, we create them
+ * from the lock file. By omitting currentValue and currentVersion they are
+ * treated as unconstrained dependencies with a locked version, meaning they
+ * are updated via 'update-lockfile' strategy.
+ *
+ * They are disabled by default to avoid noise. When a vulnerability alert
+ * matches one of them, the alert system force-enables the update.
+ */
+function indirectDep(name: string, version: string): PackageDependency {
+  return {
+    packageName: name,
+    depName: name,
+    datasource: PypiDatasource.id,
+    lockedVersion: version,
+    depType: 'indirect',
+    enabled: false,
+  };
 }
 
 function getMatchingHostRule(url: string | undefined): HostRule {

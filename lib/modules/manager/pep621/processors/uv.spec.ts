@@ -12,7 +12,11 @@ import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import type {
+  PackageDependency,
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+} from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
@@ -356,6 +360,82 @@ describe('modules/manager/pep621/processors/uv', () => {
         'No uv lock file found',
       );
     });
+
+    it('adds indirect deps from lock file not present in direct deps', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "dep1"
+        version = "1.2.3"
+
+        [[package]]
+        name = "mako"
+        version = "1.3.10"
+
+        [[package]]
+        name = "markupsafe"
+        version = "2.1.5"
+      `);
+
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        deps,
+        'pyproject.toml',
+      );
+
+      expect(result).toMatchObject([
+        { packageName: 'dep1', lockedVersion: '1.2.3' },
+        {
+          packageName: 'mako',
+          depName: 'mako',
+          datasource: PypiDatasource.id,
+          lockedVersion: '1.3.10',
+          depType: 'indirect',
+          enabled: false,
+        },
+        {
+          packageName: 'markupsafe',
+          depName: 'markupsafe',
+          datasource: PypiDatasource.id,
+          lockedVersion: '2.1.5',
+          depType: 'indirect',
+          enabled: false,
+        },
+      ]);
+    });
+
+    it('does not add indirect dep if already present as direct dep', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "dep1"
+        version = "1.2.3"
+      `);
+
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        deps,
+        'pyproject.toml',
+      );
+
+      // dep1 should not be duplicated as indirect
+      expect(result.filter((d) => d.packageName === 'dep1')).toHaveLength(1);
+      expect(result).toHaveLength(1);
+    });
   });
 
   describe('updateArtifacts()', () => {
@@ -532,6 +612,50 @@ describe('modules/manager/pep621/processors/uv', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
+        },
+      ]);
+    });
+
+    it('includes indirect deps in upgrade command', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+        { packageName: 'mako', depType: 'indirect' },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package mako',
         },
       ]);
     });
