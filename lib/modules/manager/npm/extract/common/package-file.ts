@@ -21,6 +21,14 @@ import {
 import { setNodeCommitTopic } from './node.ts';
 import { extractOverrideDepsRec } from './overrides.ts';
 
+export function hasDevEnginesPackageManager(packageJson: NpmPackage): boolean {
+  const pm = packageJson.devEngines?.packageManager;
+  if (Array.isArray(pm)) {
+    return pm.some((item) => isNonEmptyObject(item));
+  }
+  return isNonEmptyObject(pm);
+}
+
 export function extractPackageJson(
   packageJson: NpmPackage,
   packageFile: string,
@@ -140,6 +148,37 @@ export function extractPackageJson(
     }
   }
 
+  if (packageJson.devEngines) {
+    for (const subKey of ['runtime', 'packageManager'] as const) {
+      const value = packageJson.devEngines[subKey];
+      if (!value) {
+        continue;
+      }
+      const items = Array.isArray(value) ? value : [value];
+      const depType = `devEngines.${subKey}`;
+      for (let i = 0; i < items.length; i += 1) {
+        const item = items[i];
+        if (!item?.name || !item.version) {
+          continue;
+        }
+        const dep: PackageDependency = {
+          depType,
+          depName: item.name,
+          ...extractDependency(depType, item.name, item.version),
+        };
+        setNodeCommitTopic(dep);
+        dep.prettyDepType = depType;
+        if (Array.isArray(value)) {
+          dep.managerData = {
+            ...(dep.managerData ?? {}),
+            devEnginesIndex: i,
+          };
+        }
+        deps.push(dep);
+      }
+    }
+  }
+
   const extractedConstraints = getExtractedConstraints(deps);
 
   return {
@@ -150,7 +189,7 @@ export function extractPackageJson(
       packageJsonName,
       hasPackageManager:
         isNonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
-        isNonEmptyObject(packageJson.devEngines?.packageManager),
+        hasDevEnginesPackageManager(packageJson),
       workspaces: packageJson.workspaces,
     },
   };

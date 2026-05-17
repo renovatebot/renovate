@@ -117,6 +117,84 @@ function replaceAsString(
   throw new Error();
 }
 
+function updateDevEnginesDependency({
+  fileContent,
+  upgrade,
+}: Pick<UpdateDependencyConfig, 'fileContent' | 'upgrade'>): string | null {
+  const { depType, depName, newValue, managerData } = upgrade;
+  /* v8 ignore next 7 -- defensive: dispatcher already filtered */
+  if (
+    !depName ||
+    !newValue ||
+    (depType !== 'devEngines.runtime' &&
+      depType !== 'devEngines.packageManager')
+  ) {
+    return null;
+  }
+  const subKey: 'runtime' | 'packageManager' =
+    depType === 'devEngines.runtime' ? 'runtime' : 'packageManager';
+  try {
+    const parsedContents: NpmPackage = JSON.parse(fileContent);
+    const block = parsedContents.devEngines?.[subKey];
+    if (!block) {
+      return null;
+    }
+    let oldVersion: string | undefined;
+    if (isArray(block)) {
+      const idx = managerData?.devEnginesIndex as number | undefined;
+      if (typeof idx !== 'number') {
+        return null;
+      }
+      const item = block[idx];
+      if (!item || item.name !== depName) {
+        return null;
+      }
+      oldVersion = item.version;
+      item.version = newValue;
+    } else {
+      if (block.name !== depName) {
+        return null;
+      }
+      oldVersion = block.version;
+      block.version = newValue;
+    }
+    /* v8 ignore next 3 -- defensive: extract filters out version-less items */
+    if (oldVersion === undefined) {
+      return null;
+    }
+    if (oldVersion === newValue) {
+      return fileContent;
+    }
+    const searchString = JSON.stringify(oldVersion);
+    const newString = JSON.stringify(newValue);
+    const anchor = '"devEngines"';
+    let searchIndex = fileContent.indexOf(anchor);
+    /* v8 ignore next 3 -- defensive: extract verified devEngines presence */
+    if (searchIndex === -1) {
+      return null;
+    }
+    searchIndex += anchor.length;
+    for (; searchIndex < fileContent.length; searchIndex += 1) {
+      if (matchAt(fileContent, searchIndex, searchString)) {
+        const testContent = replaceAt(
+          fileContent,
+          searchIndex,
+          searchString,
+          newString,
+        );
+        if (dequal(parsedContents, JSON.parse(testContent))) {
+          return testContent;
+        }
+      }
+    }
+    /* v8 ignore next -- defensive: oldVersion guaranteed to appear in JSON */
+    return null;
+  } catch (err) /* v8 ignore next 4 */ {
+    logger.warn({ err }, 'updateDevEnginesDependency error');
+    return null;
+  }
+}
+
 export function updateDependency({
   fileContent,
   packageFile: packageFileName,
@@ -138,6 +216,12 @@ export function updateDependency({
       packageFile: packageFileName,
       upgrade,
     });
+  }
+  if (
+    upgrade.depType === 'devEngines.runtime' ||
+    upgrade.depType === 'devEngines.packageManager'
+  ) {
+    return updateDevEnginesDependency({ fileContent, upgrade });
   }
 
   const { depType, managerData } = upgrade;

@@ -43,7 +43,12 @@ export function extractDependency(
     return dep;
   }
   dep.currentValue = input.trim();
-  if (depType === 'engines' || depType === 'packageManager') {
+  if (
+    depType === 'engines' ||
+    depType === 'packageManager' ||
+    depType === 'devEngines.runtime' ||
+    depType === 'devEngines.packageManager'
+  ) {
     if (depName === 'node') {
       dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {

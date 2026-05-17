@@ -1,6 +1,5 @@
 import {
   isArray,
-  isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
   isString,
 } from '@sindresorhus/is';
@@ -24,6 +23,7 @@ import type { NpmLockFiles, NpmManagerData } from '../types.ts';
 import { getExtractedConstraints } from './common/dependency.ts';
 import {
   extractPackageJson,
+  hasDevEnginesPackageManager,
   hasPackageManager,
 } from './common/package-file.ts';
 import { extractPnpmWorkspaceFile } from './pnpm.ts';
@@ -187,7 +187,7 @@ export async function extractPackageFile(
       yarnZeroInstall,
       hasPackageManager:
         isNonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
-        isNonEmptyObject(packageJson.devEngines?.packageManager),
+        hasDevEnginesPackageManager(packageJson),
       workspacesPackages,
       npmrcFileName, // store npmrc file name so we can later tell if it came from the workspace or not
     },
