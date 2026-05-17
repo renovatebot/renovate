@@ -3,6 +3,7 @@
   "all": {
     "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
+      "replacements:action-surefire-report-to-scalablecapital",
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
@@ -64,6 +65,17 @@
       "replacements:zap"
     ],
     "ignoreDeps": []
+  },
+  "action-surefire-report-to-scalablecapital": {
+    "description": "`ScaCap/action-surefire-report` moved to `ScalableCapital/action-surefire-report`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["ScaCap/action-surefire-report"],
+        "replacementName": "ScalableCapital/action-surefire-report",
+        "replacementVersion": "v2"
+      }
+    ]
   },
   "actions-attest-build-provenance-to-actions-attest": {
     "description": "`actions/attest-build-provenance` was renamed to `actions/attest`.",
