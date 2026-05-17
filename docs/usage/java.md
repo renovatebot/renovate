@@ -36,6 +36,7 @@ Renovate can update:
 - `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
   directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
 - `versions.props` and `versions.lock` from the [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin
+- `gradle/verification-metadata.xml` signatures and checksums for [dependency verification](./modules/manager/gradle.md#dependency-verification)
 
 Renovate does not support:
 
