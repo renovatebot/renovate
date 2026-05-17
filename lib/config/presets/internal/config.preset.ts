@@ -8,6 +8,8 @@ export const presets: Record<string, Preset> = {
       'config:recommended',
       'docker:pinDigests',
       'helpers:pinGitHubActionDigests',
+      // as well as helpers:pinGitHubActionDigests, so it can be ignored without removing the regular pinning
+      'helpers:pinGitHubActionDigestsToSemver',
       ':configMigration',
       ':pinDevDependencies',
       'abandonments:recommended',
