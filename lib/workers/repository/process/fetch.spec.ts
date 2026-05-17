@@ -208,6 +208,43 @@ describe('workers/repository/process/fetch', () => {
       });
     });
 
+    it('applies dependency extractedConstraints on top of package constraints', async () => {
+      config.rangeStrategy = 'auto';
+      config.constraints = { python: '>=3.9' };
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            extractedConstraints: { python: '>=3.8' },
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                extractedConstraints: { python: '<3.12' },
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          constraints: { python: '<3.12' },
+          datasource: 'maven',
+          depName: 'bbb',
+        }),
+      );
+      expect(packageFiles.maven[0].deps[0]).toEqual(
+        expect.objectContaining({
+          extractedConstraints: { python: '<3.12' },
+          updates: ['a', 'b'],
+        }),
+      );
+    });
+
     it('skips deps with empty names', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         docker: [
