@@ -1,5 +1,9 @@
 import { z } from 'zod/v3';
-import { LooseArray, Yaml } from '../../../util/schema-utils/index.ts';
+import {
+  LooseArray,
+  LooseRecord,
+  Yaml,
+} from '../../../util/schema-utils/index.ts';
 
 export const HelmRepository = z.object({
   name: z.string(),
@@ -25,6 +29,7 @@ export type HelmRelease = z.infer<typeof HelmRelease>;
 
 export const Doc = z.object({
   releases: LooseArray(HelmRelease).optional(),
+  templates: LooseRecord(HelmRelease).optional(),
   repositories: LooseArray(HelmRepository).optional(),
 });
 export type Doc = z.infer<typeof Doc>;
