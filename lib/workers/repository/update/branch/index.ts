@@ -259,7 +259,7 @@ export async function processBranch(
       };
     }
     if (
-      !branchConfig.rebaseRequested &&
+      !config.rebaseRequested &&
       isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
@@ -272,7 +272,7 @@ export async function processBranch(
       };
     }
     if (
-      !branchConfig.rebaseRequested &&
+      !config.rebaseRequested &&
       isLimitReached('HourlyCommits', branchConfig) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
