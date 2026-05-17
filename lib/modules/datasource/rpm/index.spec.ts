@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { gzipSync } from 'node:zlib';
 import { codeBlock } from 'common-tags';
@@ -15,6 +16,173 @@ const registryUrl = 'https://example.com/repo/repodata/';
 const primaryXmlUrl =
   'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
+const primaryDbUrl =
+  'https://example.com/repo/repodata/somesha256-primary.sqlite.gz';
+const primaryDbRegistryUrl = primaryDbUrl.replace(/\/[^/]+$/, '');
+
+function buildRepomdXml({
+  primaryDbHref,
+  primaryHref = 'repodata/somesha256-primary.xml.gz',
+}: {
+  primaryDbHref?: string;
+  primaryHref?: string;
+} = {}): string {
+  return codeBlock`
+    <?xml version="1.0" encoding="UTF-8"?>
+    <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+      ${
+        primaryHref
+          ? codeBlock`
+              <data type="primary">
+                <location href="${primaryHref}"/>
+              </data>
+            `
+          : ''
+      }
+      ${
+        primaryDbHref
+          ? codeBlock`
+              <data type="primary_db">
+                <location href="${primaryDbHref}"/>
+              </data>
+            `
+          : ''
+      }
+    </repomd>
+  `;
+}
+
+function buildPrimaryXml(packageEntries: string): string {
+  return codeBlock`
+    <?xml version="1.0" encoding="UTF-8"?>
+    <metadata xmlns="http://linux.duke.edu/metadata/common">
+      ${packageEntries}
+    </metadata>
+  `;
+}
+
+async function createPrimaryDbGzip(
+  rows: { name: string; release?: string | null; version: string | null }[],
+): Promise<Buffer> {
+  const dirResult = await tmpDir({ unsafeCleanup: true });
+  const dbFile = `${dirResult.path}/primary.sqlite`;
+  const { DatabaseSync: Sqlite } = await import('node:sqlite');
+  const db = new Sqlite(dbFile);
+
+  try {
+    db.exec(`
+      CREATE TABLE packages (
+        name TEXT,
+        version TEXT,
+        release TEXT
+      )
+    `);
+
+    const stmt = db.prepare(
+      'INSERT INTO packages (name, version, release) VALUES (?, ?, ?)',
+    );
+    for (const row of rows) {
+      stmt.run(row.name, row.version, row.release ?? null);
+    }
+  } finally {
+    db.close();
+  }
+
+  try {
+    const dbBuffer = await readFile(dbFile);
+    return gzipSync(dbBuffer);
+  } finally {
+    await dirResult.cleanup();
+  }
+}
+
+function mockRepomdResponse({
+  primaryDbHref,
+  primaryHref = 'repodata/somesha256-primary.xml.gz',
+}: {
+  primaryDbHref?: string;
+  primaryHref?: string;
+} = {}): void {
+  httpMock
+    .scope(registryUrl)
+    .get('/repomd.xml')
+    .reply(200, buildRepomdXml({ primaryDbHref, primaryHref }), {
+      'Content-Type': 'application/xml',
+    });
+}
+
+function mockRawRepomdResponse(repomdXml: string): void {
+  httpMock.scope(registryUrl).get('/repomd.xml').reply(200, repomdXml, {
+    'Content-Type': 'application/xml',
+  });
+}
+
+function mockPrimaryXmlResponse(primaryXml: string): void {
+  httpMock
+    .scope(primaryXmlRegistryUrl)
+    .get('/somesha256-primary.xml.gz')
+    .reply(200, gzipSync(primaryXml), {
+      'Content-Type': 'application/gzip',
+    });
+}
+
+function mockPrimaryDbResponse(primaryDbGzip: Buffer): void {
+  httpMock
+    .scope(primaryDbRegistryUrl)
+    .get('/somesha256-primary.sqlite.gz')
+    .reply(200, primaryDbGzip, {
+      'Content-Type': 'application/gzip',
+    });
+}
+
+function parseRegistryUrlForTest(
+  datasource: RpmDatasource,
+  url: string,
+): { metadataSource: string; registryUrl: string } {
+  return (
+    datasource as unknown as {
+      parseRegistryUrl: (url: string) => {
+        metadataSource: string;
+        registryUrl: string;
+      };
+    }
+  ).parseRegistryUrl(url);
+}
+
+function getAutoReleasesForTest(
+  datasource: RpmDatasource,
+  metadata: { repomdUrl: string },
+  packageName: string,
+  url: string,
+): Promise<unknown> {
+  return (
+    datasource as unknown as {
+      getAutoReleases: (
+        metadata: { repomdUrl: string },
+        packageName: string,
+        url: string,
+      ) => Promise<unknown>;
+    }
+  ).getAutoReleases(metadata, packageName, url);
+}
+
+function mockPrimaryDbProviderFailure(
+  datasource: RpmDatasource,
+  err: unknown,
+): void {
+  vi.spyOn(
+    (
+      datasource as unknown as {
+        providers: {
+          primary_db: {
+            getReleases: () => Promise<unknown>;
+          };
+        };
+      }
+    ).providers.primary_db,
+    'getReleases',
+  ).mockRejectedValue(err);
+}
 
 describe('modules/datasource/rpm/index', () => {
   let cacheDirResult: DirectoryResult | null;
@@ -41,19 +209,7 @@ describe('modules/datasource/rpm/index', () => {
 
   describe('getPrimaryGzipUrl', () => {
     it('returns the correct primary.xml URL', async () => {
-      const repomdXml = codeBlock`
-        <?xml version="1.0" encoding="UTF-8"?>
-        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-          <data type="primary">
-            <location href="repodata/somesha256-primary.xml.gz"/>
-          </data>
-        </repomd>
-      `;
-
-      httpMock
-        .scope(registryUrl)
-        .get('/repomd.xml')
-        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+      mockRepomdResponse();
 
       const resolvedPrimaryXmlUrl =
         await rpmDatasource.getPrimaryGzipUrl(registryUrl);
@@ -184,29 +340,86 @@ describe('modules/datasource/rpm/index', () => {
         rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
     });
+
+    it('ignores primary_db entries without a location element', async () => {
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+          <data type="primary_db">
+            <non-location href="repodata/somesha256-primary.sqlite.gz"/>
+          </data>
+        </repomd>
+      `;
+
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+
+      await expect(rpmDatasource.getPrimaryGzipUrl(registryUrl)).resolves.toBe(
+        primaryXmlUrl,
+      );
+    });
+
+    it('ignores primary_db entries without an href attribute', async () => {
+      const repomdXml = codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+          <data type="primary_db">
+            <location non-href="repodata/somesha256-primary.sqlite.gz"/>
+          </data>
+        </repomd>
+      `;
+
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+
+      await expect(rpmDatasource.getPrimaryGzipUrl(registryUrl)).resolves.toBe(
+        primaryXmlUrl,
+      );
+    });
+
+    it('validates primary metadata even when primary_db is present', async () => {
+      mockRawRepomdResponse(codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location non-href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+          <data type="primary_db">
+            <location href="repodata/somesha256-primary.sqlite.gz"/>
+          </data>
+        </repomd>
+      `);
+
+      await expect(
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
+      ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
+    });
+
+    it('throws when only primary_db metadata is present', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+
+      await expect(
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
+      ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
+    });
   });
 
   describe('getReleasesByPackageName', () => {
     const packageName = 'example-package';
     const extractedPrimaryXmlPath = `others/rpm/${toSha256(primaryXmlUrl)}.xml`;
-
-    function buildPrimaryXml(packageEntries: string): string {
-      return codeBlock`
-        <?xml version="1.0" encoding="UTF-8"?>
-        <metadata xmlns="http://linux.duke.edu/metadata/common">
-          ${packageEntries}
-        </metadata>
-      `;
-    }
-
-    function mockPrimaryXmlResponse(primaryXml: string): void {
-      httpMock
-        .scope(primaryXmlRegistryUrl)
-        .get('/somesha256-primary.xml.gz')
-        .reply(200, gzipSync(primaryXml), {
-          'Content-Type': 'application/gzip',
-        });
-    }
 
     it('returns the correct releases', async () => {
       mockPrimaryXmlResponse(
@@ -656,17 +869,31 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns the correct releases', async () => {
-      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockResolvedValue(
-        primaryXmlUrl,
+      mockRepomdResponse();
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1" rel="1.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.2"/>
+          </package>
+        `),
       );
-      vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockResolvedValue({
-        releases: [
-          { version: '1.0-2.azl3' },
-          { version: '1.1-1.azl3' },
-          { version: '1.1-2.azl3' },
-          { version: '1.2' },
-        ],
-      });
 
       const releases = await rpmDatasource.getReleases({
         registryUrl,
@@ -683,10 +910,11 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
-    it('throws an error if getPrimaryGzipUrl fails', async () => {
-      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockRejectedValue(
-        new Error('Something wrong'),
-      );
+    it('throws an error if repository metadata lookup fails', async () => {
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .replyWithError('Something wrong');
 
       await expect(
         rpmDatasource.getReleases({
@@ -696,12 +924,289 @@ describe('modules/datasource/rpm/index', () => {
       ).rejects.toThrow('Something wrong');
     });
 
-    it('throws an error if getReleasesByPackageName fails', async () => {
-      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockResolvedValue(
-        primaryXmlUrl,
+    it('throws an error if primary metadata parsing fails', async () => {
+      mockRepomdResponse();
+      mockPrimaryXmlResponse(codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <%$#metadata xmlns="http://linux.duke.edu/metadata/common">
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="1.azl3"/>
+          </package>
+        </metadata>
+      `);
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow('Unencoded <');
+    });
+
+    it('prefers primary_db metadata when available', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+      });
+      mockPrimaryDbResponse(
+        await createPrimaryDbGzip([
+          {
+            name: 'example-package',
+            release: '2.azl3',
+            version: '1.0',
+          },
+        ]),
       );
-      vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockRejectedValue(
-        new Error('Something wrong'),
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="9.9" rel="1.azl3"/>
+          </package>
+        `),
+      );
+
+      const autoReleases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'example-package',
+      });
+      const xmlReleases = await rpmDatasource.getReleases({
+        registryUrl: `${registryUrl}#rpmMetadataSource=primary`,
+        packageName: 'example-package',
+      });
+
+      expect(autoReleases).toEqual({
+        releases: [{ version: '1.0-2.azl3' }],
+      });
+      expect(xmlReleases).toEqual({
+        releases: [{ version: '9.9-1.azl3' }],
+      });
+    });
+
+    it('does not fall back to primary.xml.gz when primary_db has no matching package', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+      });
+      mockPrimaryDbResponse(
+        await createPrimaryDbGzip([
+          {
+            name: 'another-package',
+            release: '2.azl3',
+            version: '1.0',
+          },
+        ]),
+      );
+
+      const releases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'example-package',
+      });
+
+      expect(releases).toBeNull();
+    });
+
+    it('does not fall back to primary.xml.gz when registryUrl requires primary_db', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+      });
+      mockPrimaryDbResponse(gzipSync('not-a-sqlite-database'));
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow();
+    });
+
+    it('throws sqlite errors when only primary_db metadata is present in auto mode', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+      mockPrimaryDbResponse(gzipSync('not-a-sqlite-database'));
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow();
+    });
+
+    it('uses primary_db when primary metadata is malformed', async () => {
+      mockRawRepomdResponse(codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location non-href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+          <data type="primary_db">
+            <location href="repodata/somesha256-primary.sqlite.gz"/>
+          </data>
+        </repomd>
+      `);
+      mockPrimaryDbResponse(
+        await createPrimaryDbGzip([
+          {
+            name: 'example-package',
+            release: '2.azl3',
+            version: '1.0',
+          },
+        ]),
+      );
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
+          packageName: 'example-package',
+        }),
+      ).resolves.toEqual({
+        releases: [{ version: '1.0-2.azl3' }],
+      });
+    });
+
+    it('throws when registryUrl requires primary_db and primary_db metadata is absent', async () => {
+      mockRepomdResponse();
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(`No primary_db data found in ${registryUrl}repomd.xml`);
+    });
+
+    it('throws when registryUrl requires primary and primary metadata is absent', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=primary`,
+          packageName: 'missing-source-package',
+        }),
+      ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
+    });
+
+    it('throws when registryUrl has invalid rpmMetadataSource', async () => {
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=broken`,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(
+        'Invalid rpmMetadataSource in RPM registry URL: broken',
+      );
+    });
+
+    it('throws when registryUrl has empty rpmMetadataSource', async () => {
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=`,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow('Invalid rpmMetadataSource in RPM registry URL:');
+    });
+
+    it('strips explicit auto rpmMetadataSource from registryUrl', async () => {
+      mockRepomdResponse();
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+        `),
+      );
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=auto`,
+          packageName: 'example-package',
+        }),
+      ).resolves.toEqual({
+        releases: [{ version: '1.0-2.azl3' }],
+      });
+    });
+
+    it('keeps invalid registryUrl unchanged when parsing metadata source', () => {
+      expect(parseRegistryUrlForTest(rpmDatasource, 'not a url')).toEqual({
+        metadataSource: 'auto',
+        registryUrl: 'not a url',
+      });
+    });
+
+    it('falls back to primary.xml.gz when primary_db is absent', async () => {
+      mockRepomdResponse();
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.1"/>
+          </package>
+        `),
+      );
+
+      const releases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'example-package',
+      });
+
+      expect(releases).toEqual({
+        releases: [{ version: '1.0-2.azl3' }, { version: '1.1' }],
+      });
+    });
+
+    it('falls back to primary.xml.gz when primary_db lookup fails', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+      });
+      mockPrimaryDbResponse(gzipSync('not-a-sqlite-database'));
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="2.0" rel="1.azl3"/>
+          </package>
+        `),
+      );
+
+      const releases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'example-package',
+      });
+
+      expect(releases).toEqual({
+        releases: [{ version: '2.0-1.azl3' }],
+      });
+    });
+
+    it('falls back to primary.xml.gz when primary_db rejects with a non-Error', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+      });
+      mockPrimaryDbProviderFailure(rpmDatasource, 'not-a-sqlite-error');
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="2.0" rel="1.azl3"/>
+          </package>
+        `),
       );
 
       await expect(
@@ -709,7 +1214,179 @@ describe('modules/datasource/rpm/index', () => {
           registryUrl,
           packageName: 'example-package',
         }),
-      ).rejects.toThrow('Something wrong');
+      ).resolves.toEqual({
+        releases: [{ version: '2.0-1.azl3' }],
+      });
+    });
+
+    it('caches auto-mode primary.xml.gz fallback results', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+      });
+      mockPrimaryDbResponse(gzipSync('not-a-sqlite-database'));
+      mockPrimaryXmlResponse(
+        buildPrimaryXml(codeBlock`
+          <package type="rpm">
+            <name>example-package</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="2.0" rel="1.azl3"/>
+          </package>
+        `),
+      );
+
+      const fallbackReleases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'example-package',
+      });
+
+      const cachedReleases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'example-package',
+      });
+
+      expect(fallbackReleases).toEqual({
+        releases: [{ version: '2.0-1.azl3' }],
+      });
+      expect(cachedReleases).toEqual({
+        releases: [{ version: '2.0-1.azl3' }],
+      });
+    });
+
+    it('reuses the extracted primary_db file across package lookups', async () => {
+      const repomdScope = httpMock.scope(registryUrl);
+      repomdScope
+        .get('/repomd.xml')
+        .once()
+        .reply(
+          200,
+          buildRepomdXml({
+            primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+          }),
+          { 'Content-Type': 'application/xml' },
+        );
+
+      const primaryDbScope = httpMock.scope(primaryDbRegistryUrl);
+      primaryDbScope
+        .get('/somesha256-primary.sqlite.gz')
+        .once()
+        .reply(
+          200,
+          await createPrimaryDbGzip([
+            { name: 'bash', release: '1.azl3', version: '5.2.15' },
+            { name: 'curl', release: '2.azl3', version: '8.5.0' },
+          ]),
+          { 'Content-Type': 'application/gzip' },
+        );
+      primaryDbScope.head('/somesha256-primary.sqlite.gz').once().reply(304);
+
+      const bashReleases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'bash',
+      });
+      const curlReleases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'curl',
+      });
+
+      expect(bashReleases).toEqual({
+        releases: [{ version: '5.2.15-1.azl3' }],
+      });
+      expect(curlReleases).toEqual({
+        releases: [{ version: '8.5.0-2.azl3' }],
+      });
+    });
+
+    it('caches primary_db-only repository metadata across package lookups', async () => {
+      const repomdScope = httpMock.scope(registryUrl);
+      repomdScope
+        .get('/repomd.xml')
+        .once()
+        .reply(
+          200,
+          buildRepomdXml({
+            primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+            primaryHref: '',
+          }),
+          { 'Content-Type': 'application/xml' },
+        );
+
+      const primaryDbScope = httpMock.scope(primaryDbRegistryUrl);
+      primaryDbScope
+        .get('/somesha256-primary.sqlite.gz')
+        .once()
+        .reply(
+          200,
+          await createPrimaryDbGzip([
+            { name: 'bash', release: '1.azl3', version: '5.2.15' },
+            { name: 'curl', release: '2.azl3', version: '8.5.0' },
+          ]),
+          { 'Content-Type': 'application/gzip' },
+        );
+      primaryDbScope.head('/somesha256-primary.sqlite.gz').once().reply(304);
+
+      const bashReleases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'bash',
+      });
+      const curlReleases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'curl',
+      });
+
+      expect(bashReleases).toEqual({
+        releases: [{ version: '5.2.15-1.azl3' }],
+      });
+      expect(curlReleases).toEqual({
+        releases: [{ version: '8.5.0-2.azl3' }],
+      });
+    });
+
+    it('returns null when primary_db rows do not contain a version value', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+      mockPrimaryDbResponse(
+        await createPrimaryDbGzip([
+          {
+            name: 'example-package',
+            release: '1.azl3',
+            version: null,
+          },
+        ]),
+      );
+
+      const releases = await rpmDatasource.getReleases({
+        registryUrl,
+        packageName: 'example-package',
+      });
+
+      expect(releases).toBeNull();
+    });
+
+    it('throws an error if neither primary nor primary_db metadata is present', async () => {
+      mockRepomdResponse({
+        primaryDbHref: '',
+        primaryHref: '',
+      });
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
+    });
+
+    it('returns null when repository metadata has no usable source', async () => {
+      await expect(
+        getAutoReleasesForTest(
+          rpmDatasource,
+          { repomdUrl: `${registryUrl}repomd.xml` },
+          'example-package',
+          registryUrl,
+        ),
+      ).resolves.toBeNull();
     });
   });
 });
