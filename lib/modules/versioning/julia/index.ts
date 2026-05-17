@@ -42,6 +42,10 @@ function julia2npm(input: string): string {
 function npm2julia(input: string): string {
   /* v8 ignore if -- defensive */
   if (!input) {
+    logger.warn(
+      { input },
+      'julia: npm2julia received an empty value, returning as-is',
+    );
     return input;
   }
   // Convert npm union (`||`) back to Julia union (`,`).
@@ -55,8 +59,7 @@ function npm2julia(input: string): string {
 const isLessThanRange = (version: string, range: string): boolean =>
   !!npm.isLessThanRange?.(version, julia2npm(range));
 
-export const isValid = (input: string): boolean =>
-  npm.isValid(julia2npm(input));
+const isValid = (input: string): boolean => npm.isValid(julia2npm(input));
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, julia2npm(range));
@@ -75,9 +78,10 @@ function minSatisfyingVersion(
   return npm.minSatisfyingVersion(versions, julia2npm(range));
 }
 
-const isSingleVersion = (constraint: string): boolean =>
-  constraint.trim().startsWith('=') &&
-  isVersion(constraint.trim().substring(1).trim());
+function isSingleVersion(constraint: string): boolean {
+  const trimmed = constraint.trim();
+  return trimmed.startsWith('=') && isVersion(trimmed.substring(1).trim());
+}
 
 function getPinnedValue(newVersion: string): string {
   return `=${newVersion}`;
@@ -115,7 +119,7 @@ function getNewValue({
   });
   /* v8 ignore start: defensive — npm should always return a value for inputs julia2npm produces */
   if (!newSemver) {
-    logger.info(
+    logger.warn(
       { currentValue, rangeStrategy, newVersion },
       'Could not derive julia version range',
     );
