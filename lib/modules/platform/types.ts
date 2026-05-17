@@ -77,6 +77,8 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  /** Only set by Gerrit platform for now */
+  updatedAt?: string;
   isDraft?: boolean;
 }
 

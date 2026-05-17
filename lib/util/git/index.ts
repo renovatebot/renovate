@@ -1,5 +1,10 @@
 import URL from 'node:url';
-import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
+import {
+  isBoolean,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isString,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -268,6 +273,13 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] =
           sha as LongCommitSha;
       });
+
+    if (isNonEmptyArray(config.virtualBranches)) {
+      for (const branch of config.virtualBranches) {
+        config.branchCommits[branch.name] = branch.sha;
+      }
+    }
+
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
@@ -282,8 +294,8 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   }
 }
 
-export async function fetchRevSpec(revSpec: string): Promise<void> {
-  await gitRetry(() => git.fetch(['origin', revSpec]));
+export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', ...revSpec]));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -576,6 +588,15 @@ export const syncGit = withInstrumenting(
       });
     }
 
+    if (isNonEmptyArray(config.virtualBranches)) {
+      const refs = config.virtualBranches.map((branch) => branch.ref);
+      await fetchRevSpec(...refs);
+      for (const branch of config.virtualBranches) {
+        await setVirtualBranch(branch.name, branch.sha);
+      }
+      logger.debug(`Fetched ${config.virtualBranches.length} virtual branches`);
+    }
+
     config.currentBranchSha = (
       await git.revparse('HEAD')
     ).trim() as LongCommitSha;
@@ -722,6 +743,55 @@ export async function checkoutBranchFromRemote(
     }
     throw err;
   }
+}
+
+/**
+ * Returns the remote-tracking ref path for a virtual branch.
+ */
+export function virtualBranchRef(branchName: string): string {
+  return `refs/remotes/origin/${branchName}`;
+}
+
+/**
+ * Delete a virtual branch and its associated remote-tracking ref.
+ *
+ * @param branchName Virtual branch name to delete
+ */
+export async function deleteVirtualBranch(branchName: string): Promise<void> {
+  // Delete local branch if it exists
+  await deleteBranch(branchName, { localBranch: true });
+
+  // Delete remote-tracking ref that was created during init
+  // Note: git update-ref -d succeeds even if ref doesn't exist
+  const ref = virtualBranchRef(branchName);
+  await git.raw(['update-ref', '-d', ref]);
+  logger.debug(`Deleted remote-tracking ref: ${ref}`);
+}
+
+/**
+ * Set a virtual branch's remote-tracking ref and commit tracking.
+ * Used both during init (to create virtual branches from fetched refs)
+ * and after pushing (to keep tracking in sync with the remote).
+ *
+ * @param branchName Virtual branch name to set
+ * @param commitSha The commit SHA the virtual branch points to.
+ */
+async function setVirtualBranch(
+  branchName: string,
+  commitSha: LongCommitSha,
+): Promise<void> {
+  await git.raw(['update-ref', virtualBranchRef(branchName), commitSha]);
+  config.branchCommits[branchName] = commitSha;
+}
+
+/**
+ * Update a virtual branch's tracking to match the current local branch.
+ * To be called after a commit is pushed.
+ */
+export async function updateVirtualBranch(branchName: string): Promise<void> {
+  const commitSha = (await git.revparse([branchName])).trim() as LongCommitSha;
+  await setVirtualBranch(branchName, commitSha);
+  config.branchIsModified[branchName] = false;
 }
 
 export async function resetHardFromRemote(
@@ -1397,7 +1467,7 @@ export async function fetchBranch(
   await syncGit();
   logger.debug(`Fetching branch ${branchName}`);
   try {
-    const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+    const ref = `refs/heads/${branchName}:${virtualBranchRef(branchName)}`;
     await gitRetry(() => git.pull(['origin', ref, '--force']));
     const commit = (await git.revparse([branchName])).trim() as LongCommitSha;
     config.branchCommits[branchName] = commit;
