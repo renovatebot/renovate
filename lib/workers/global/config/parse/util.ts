@@ -58,6 +58,9 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         await readSystemFile(file, 'utf8'),
         file,
       ) as RenovateConfig;
+    case '.cts':
+    case '.mts':
+    case '.ts':
     case '.cjs':
     case '.mjs':
     case '.js': {
@@ -73,9 +76,9 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       } catch (err) {
         /* v8 ignore start -- CJS fallback not testable in vitest */
 
-        // If the file is .js, it might be a legacy CJS config (using module.exports)
+        // If the file is .js or .ts, it might be a legacy CJS config (using module.exports)
         // This usually throws ReferenceError (module is not defined) or SyntaxError
-        if (upath.extname(file) === '.js') {
+        if (['.js', '.ts'].includes(upath.extname(file))) {
           const require = createRequire(import.meta.url);
           try {
             tmpConfig = require(absoluteFilePath);
