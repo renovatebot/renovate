@@ -2,6 +2,40 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
+import { minimatchFilter } from '../minimatch.ts';
+
+/**
+ * Take a relative path reference from a repo-relative file and resolve it
+ * to a repo-relative path. Uses a virtual root to avoid upath.resolve
+ * prepending the real cwd for relative paths.
+ *
+ * Shared between NuGet (ProjectReference) and Go (replace directive) managers.
+ */
+export function resolveRelativePathToRoot(
+  baseFilePath: string,
+  relativePath: string,
+): string {
+  const virtualRoot = '/';
+  const absoluteBase = upath.resolve(virtualRoot, baseFilePath);
+  const absoluteResolved = upath.resolve(
+    upath.dirname(absoluteBase),
+    relativePath,
+  );
+  return upath.relative(virtualRoot, absoluteResolved);
+}
+
+/**
+ * Filter a list of repo-relative file paths by a minimatch pattern.
+ * Shared between managers for building dependency graphs from specific file types.
+ */
+export function getMatchingFiles(
+  pattern: string,
+  allFiles: string[],
+): string[] {
+  return allFiles.filter(
+    minimatchFilter(pattern, { matchBase: true, nocase: true }),
+  );
+}
 
 function assertBaseDir(path: string, allowedDir: string): void {
   if (!path.startsWith(allowedDir)) {
