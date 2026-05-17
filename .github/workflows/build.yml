@@ -363,7 +363,7 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@b572f7b1a1c2d41efaab43d504f68d215c3cd727 # v0.5.4
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
         with:
           version: 1.24.1
 
@@ -843,7 +843,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@e1e4d927909679da33a695d6136c4d5f83eb0fa7 # v4.6.28
+        uses: containerbase/internal-tools@9fb1bd386a2743ed92c422db984fbc1389c18770 # v4.6.29
         with:
           command: docker-config
 

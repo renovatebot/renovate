@@ -33,7 +33,7 @@ import {
 import { isGradleBuildFile } from './utils.ts';
 
 export function isGradleExecutionAllowed(command: string): boolean {
-  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', []);
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
 
   if (!allowlist.includes('gradleWrapper')) {
     logger.once.warn(

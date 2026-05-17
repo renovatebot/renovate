@@ -1,4 +1,5 @@
 import { detectPlatform } from '../../../util/common.ts';
+import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -138,12 +139,20 @@ function parseDependencyUrl(
   if (!url) {
     return null;
   }
-  const parsedUrl = parseUrl(url);
+
+  let normalizedUrl: string;
+  try {
+    normalizedUrl = getHttpUrl(url);
+  } catch {
+    return null;
+  }
+
+  const parsedUrl = parseUrl(normalizedUrl);
   if (!parsedUrl) {
     return null;
   }
   const { host, pathname, protocol } = parsedUrl;
-  const platform = detectPlatform(url);
+  const platform = detectPlatform(normalizedUrl);
   if (platform === 'github' || platform === 'gitlab') {
     const depName = pathname
       .replace(regEx(/^\//), '')

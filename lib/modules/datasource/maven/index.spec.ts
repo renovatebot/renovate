@@ -301,6 +301,27 @@ describe('modules/datasource/maven/index', () => {
     expect(res).toMatchSnapshot();
   });
 
+  it('merges releases from multiple registries', async () => {
+    mockGenericPackage();
+    mockGenericPackage({
+      base: baseUrlCustom,
+      meta: Fixtures.get('metadata-extra.xml'),
+      latest: '3.0.0',
+    });
+
+    const res = await get('org.example:package', baseUrl, baseUrlCustom);
+
+    expect(res).toMatchObject({
+      releases: expect.arrayContaining([
+        expect.objectContaining({ version: '2.0.0', registryUrl: baseUrl }),
+        expect.objectContaining({
+          version: '3.0.0',
+          registryUrl: baseUrlCustom,
+        }),
+      ]),
+    });
+  });
+
   it('throws EXTERNAL_HOST_ERROR for 50x', async () => {
     httpMock
       .scope(baseUrl)

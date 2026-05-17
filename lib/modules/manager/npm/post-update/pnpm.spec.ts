@@ -38,7 +38,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   beforeEach(() => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
@@ -594,6 +594,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         toolSettings: {
           nodeMaxMemory: 1234,
         },
+        binarySource: 'global',
       });
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValue('package-lock-contents');
