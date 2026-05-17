@@ -14,6 +14,11 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { api as dockerVersioningApi } from '../../versioning/docker/index.ts';
+import {
+  api as helmVersioningApi,
+  id as helmVersioningId,
+} from '../../versioning/helm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import { findDependencies } from '../helm-values/extract.ts';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
@@ -123,6 +128,13 @@ function resolveHelmRepository(
         if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
           // Change datasource to Docker
           dep.datasource = DockerDatasource.id;
+          if (
+            dep.currentValue &&
+            !dockerVersioningApi.isVersion(dep.currentValue) &&
+            helmVersioningApi.isValid(dep.currentValue)
+          ) {
+            dep.versioning = helmVersioningId;
+          }
           // Ensure the URL is a valid OCI path
           dep.packageName = getDep(
             `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
@@ -149,6 +161,13 @@ function resolveHelmRepository(
       if (isOCIRegistry(aliasUrl)) {
         // Treat alias value as an OCI registry URL
         dep.datasource = DockerDatasource.id;
+        if (
+          dep.currentValue &&
+          !dockerVersioningApi.isVersion(dep.currentValue) &&
+          helmVersioningApi.isValid(dep.currentValue)
+        ) {
+          dep.versioning = helmVersioningId;
+        }
         dep.packageName = getDep(
           `${removeOCIPrefix(aliasUrl)}/${dep.depName}`,
           false,
