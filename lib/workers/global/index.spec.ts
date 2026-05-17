@@ -96,6 +96,20 @@ describe('workers/global/index', () => {
       expect(repoConfig.repositoryEntryConfig).toBeUndefined();
       expect(repoConfig.repository).toBe('test/repo');
     });
+
+    it('applies force values over global config', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        {
+          ...globalConfig,
+          branchPrefix: 'renovate/',
+          labels: ['dependencies'],
+          force: { branchPrefix: 'cli-override/' },
+        },
+        'test/repo',
+      );
+      expect(repoConfig.branchPrefix).toBe('cli-override/');
+      expect(repoConfig.labels).toEqual(['dependencies']);
+    });
   });
 
   it('handles config warnings and errors', async () => {

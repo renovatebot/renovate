@@ -53,6 +53,7 @@ export async function getRepositoryConfig(
 
   const repoConfig: RepositoryWorkerConfig = {
     ...globalConfig,
+    ...globalConfig.force,
     repository: repoName,
   };
 
