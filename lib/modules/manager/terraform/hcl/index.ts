@@ -1,17 +1,31 @@
 import { parse } from '@cdktf/hcl2json';
-import type { TerraformDefinitionFile } from './types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { parseJson } from '../../../../util/common.ts';
+import type { TerraformDefinitionFile } from './schema.ts';
+import { TerraformDefinitionFileJSON } from './schema.ts';
 
 export async function parseHCL(
   content: string,
   fileName: string,
 ): Promise<TerraformDefinitionFile | null> {
   try {
-    return await parse(fileName, content);
-  } catch {
+    if (
+      (fileName.endsWith('.hcl') && !fileName.endsWith('.lock.hcl')) ||
+      fileName.endsWith('.tf') ||
+      fileName.endsWith('.tofu')
+    ) {
+      return await parse(fileName, content);
+    } else if (
+      fileName.endsWith('.hcl.json') ||
+      fileName.endsWith('.tf.json') ||
+      fileName.endsWith('.tofu.json')
+    ) {
+      return TerraformDefinitionFileJSON.parse(parseJson(content, fileName));
+    } else {
+      return null;
+    }
+  } catch (err) {
+    logger.debug({ err, packageFile: fileName }, 'HCL parse error');
     return null;
   }
-}
-
-export function parseJSON(content: string): TerraformDefinitionFile | null {
-  return JSON.parse(content);
 }
