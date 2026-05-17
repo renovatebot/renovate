@@ -158,10 +158,14 @@ export async function renovateRepository(
       if (res === 'automerged') {
         if (canRetry) {
           logger.info('Restarting repository job after automerge result');
-          const recursiveRes = await renovateRepository(repoConfig, false);
+          const recursiveRes = await renovateRepository(
+            { ...repoConfig, repoIsActivated: true },
+            false,
+          );
           return recursiveRes;
         }
         logger.debug(`Automerged but already retried once`);
+        config.repoIsActivated = true;
       } else {
         const configMigrationRes = await configMigration(config, branchList);
         await ensureDependencyDashboard(
