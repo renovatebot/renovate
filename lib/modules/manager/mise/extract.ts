@@ -7,6 +7,7 @@ import {
   isString,
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -23,7 +24,9 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
+import { MiseLockFile } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
 import {
   asdfTooling,
@@ -36,10 +39,15 @@ import { parseTomlFile } from './utils.ts';
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
 
-export function extractPackageFile(
+/**
+ * Extracts mise tool dependencies from a mise configuration file.
+ * Supports various backends (core, asdf, aqua, cargo, etc.) and
+ * extracts locked versions when a corresponding lock file exists.
+ */
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`mise.extractPackageFile(${packageFile})`);
 
   const misefile = parseTomlFile(content, packageFile);
@@ -72,7 +80,39 @@ export function extractPackageFile(
     }
   }
 
-  return deps.length ? { deps } : null;
+  if (!deps.length) {
+    return null;
+  }
+
+  const result: PackageFileContent = { deps };
+
+  const lockFileName = getLockFileName(packageFile);
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+
+  if (lockFileContent) {
+    const lockFileParsed = MiseLockFile.safeParse(lockFileContent);
+    if (lockFileParsed.success) {
+      result.lockFiles = [lockFileName];
+      for (const dep of deps) {
+        if (dep.depName) {
+          const lockedVersion = getLockedVersion(
+            lockFileParsed.data,
+            dep.depName,
+          );
+          if (lockedVersion) {
+            dep.lockedVersion = lockedVersion;
+          }
+        }
+      }
+    } else {
+      logger.debug(
+        { lockFileName, error: lockFileParsed.error },
+        'Failed to parse mise lock file',
+      );
+    }
+  }
+
+  return result;
 }
 
 function parseVersion(toolData: MiseTool): string | null {
