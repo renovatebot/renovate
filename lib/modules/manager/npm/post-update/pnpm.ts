@@ -25,6 +25,7 @@ import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
 import {
+  getInheritedPackageManagerVersion,
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
@@ -56,7 +57,8 @@ export async function generateLockFile(
       constraint:
         getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
         config.constraints?.pnpm ?? // from user config or extraction
-        getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in package.json > packageManager or engines
+        getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in sibling package.json > packageManager or engines
+        (await getInheritedPackageManagerVersion('pnpm', lockFileDir)) ?? // walk up to find an inherited packageManager (mirrors corepack)
         (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 

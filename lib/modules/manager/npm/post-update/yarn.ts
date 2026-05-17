@@ -31,6 +31,7 @@ import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
 import {
+  getInheritedPackageManagerVersion,
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
@@ -115,6 +116,7 @@ export async function generateLockFile(
     const yarnCompatibility =
       (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
       getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+      (await getInheritedPackageManagerVersion('yarn', lockFileDir)) ??
       getYarnVersionFromLock(await getYarnLock(lockFileName));
     const minYarnVersion =
       semver.validRange(yarnCompatibility) &&
