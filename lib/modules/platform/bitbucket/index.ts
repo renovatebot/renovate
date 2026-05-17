@@ -39,7 +39,6 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as comments from './comments.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import {
@@ -585,64 +584,8 @@ export async function setBranchStatus({
   aggressiveRepoCacheProvider.markSynced('get', branchStatusesUrl, false);
 }
 
-interface BbIssue {
-  id: number;
-  title: string;
-  kind: string;
-  content?: { raw: string };
-}
-
-async function findOpenIssues(title: string): Promise<BbIssue[]> {
-  try {
-    const filters = [
-      `title=${JSON.stringify(title)}`,
-      '(state = "new" OR state = "open")',
-    ];
-    if (renovateUserUuid) {
-      filters.push(`reporter.uuid="${renovateUserUuid}"`);
-    }
-    const filter = encodeURIComponent(filters.join(' AND '));
-    // v8 ignore next -- TODO: add test #40625
-    return (
-      (
-        await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
-          `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-          { cacheProvider: aggressiveRepoCacheProvider },
-        )
-      ).body.values || []
-    );
-  } catch (err) /* v8 ignore next */ {
-    logger.warn({ err }, 'Error finding issues');
-    return [];
-  }
-}
-
-export async function findIssue(title: string): Promise<Issue | null> {
-  logger.debug(`findIssue(${title})`);
-
-  /* v8 ignore next */
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot findIssue');
-    return null;
-  }
-  const issues = await findOpenIssues(title);
-  if (!issues.length) {
-    return null;
-  }
-  const [issue] = issues;
-  return {
-    number: issue.id,
-    body: issue.content?.raw,
-  };
-}
-
-async function closeIssue(issueNumber: number): Promise<void> {
-  await bitbucketHttp.putJson(
-    `/2.0/repositories/${config.repository}/issues/${issueNumber}`,
-    {
-      body: { state: 'closed' },
-    },
-  );
+export async function findIssue(_title: string): Promise<Issue | null> {
+  return Promise.resolve(null);
 }
 
 /**
@@ -766,115 +709,18 @@ export function maxBodyLength(): number {
   return 250000;
 }
 
-export async function ensureIssue({
-  title,
-  reuseTitle,
-  body,
-}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
-  logger.debug(`ensureIssue()`);
-  /* v8 ignore next */
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot ensureIssue');
-    logger.debug(`Failed to ensure Issue with title:${title}`);
-    return null;
-  }
-  try {
-    let issues = await findOpenIssues(title);
-    const description = massageMarkdown(sanitize(body));
-    const issueKind = 'task';
-
-    if (!issues.length && reuseTitle) {
-      issues = await findOpenIssues(reuseTitle);
-    }
-    if (issues.length) {
-      // Close any duplicates
-      for (const issue of issues.slice(1)) {
-        await closeIssue(issue.id);
-      }
-      const [issue] = issues;
-
-      if (
-        issue.title !== title ||
-        String(issue.content?.raw).trim() !== description.trim() ||
-        issue.kind !== issueKind
-      ) {
-        logger.debug('Issue updated');
-        await bitbucketHttp.putJson(
-          `/2.0/repositories/${config.repository}/issues/${issue.id}`,
-          {
-            body: {
-              kind: issueKind,
-              content: {
-                raw: readOnlyIssueBody(description),
-                markup: 'markdown',
-              },
-            },
-          },
-        );
-        return 'updated';
-      }
-    } else {
-      logger.info('Issue created');
-      await bitbucketHttp.postJson(
-        `/2.0/repositories/${config.repository}/issues`,
-        {
-          body: {
-            title,
-            kind: issueKind,
-            content: {
-              raw: readOnlyIssueBody(description),
-              markup: 'markdown',
-            },
-          },
-        },
-      );
-      return 'created';
-    }
-  } catch (err) /* v8 ignore next */ {
-    if (err.message.startsWith('Repository has no issue tracker.')) {
-      logger.debug(`Issues are disabled, so could not create issue: ${title}`);
-    } else {
-      logger.warn({ err }, 'Could not ensure issue');
-    }
-  }
-  return null;
+export async function ensureIssue(
+  _issueConfig: EnsureIssueConfig,
+): Promise<EnsureIssueResult | null> {
+  return Promise.resolve(null);
 }
 
-/* v8 ignore next */
 export async function getIssueList(): Promise<Issue[]> {
-  logger.debug(`getIssueList()`);
-
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot getIssueList');
-    return [];
-  }
-  try {
-    const filters = ['(state = "new" OR state = "open")'];
-    if (renovateUserUuid) {
-      filters.push(`reporter.uuid="${renovateUserUuid}"`);
-    }
-    const filter = encodeURIComponent(filters.join(' AND '));
-    const url = `/2.0/repositories/${config.repository}/issues?q=${filter}`;
-    const res = await bitbucketHttp.getJsonUnchecked<{ values: Issue[] }>(url, {
-      cacheProvider: repoCacheProvider,
-    });
-    return res.body.values || [];
-  } catch (err) {
-    logger.warn({ err }, 'Error finding issues');
-    return [];
-  }
+  return Promise.resolve([]);
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  /* v8 ignore next */
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot ensureIssueClosing');
-    return;
-  }
-  const issues = await findOpenIssues(title);
-  for (const issue of issues) {
-    await closeIssue(issue.id);
-  }
+  return Promise.resolve();
 }
 
 export function addAssignees(

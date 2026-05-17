@@ -31,8 +31,6 @@ Give the bot API token the following permission scopes:
 | [`read:pullrequest:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-pullrequest-bitbucket)   | Pull requests: Read  |
 | [`write:pullrequest:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#write-pullrequest-bitbucket) | Pull requests: Write |
 | [`read:user:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-user-bitbucket)                 | User: Read           |
-| [`read:issue:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-issue-bitbucket)               | Issues: Read         |
-| [`write:issue:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#write-issue-bitbucket)             | Issues: Write        |
 | [`read:workspace:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-workspace-bitbucket)       | Workspace: Read      |
 
 The bot also needs to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
@@ -50,6 +48,7 @@ Remember to:
 
 ## Unsupported platform features/concepts
 
+- Bitbucket Cloud issue tracking, see [feature sunset announcement](https://community.atlassian.com/forums/Bitbucket-articles/Announcing-sunset-of-Bitbucket-Issues-and-Wikis/ba-p/3193882)
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
 - `automergeStrategy=rebase` not supported by Bitbucket Cloud, see [Jira issue BCLOUD-16610](https://jira.atlassian.com/browse/BCLOUD-16610)
 - Markdown support for collapsible syntax, see [Jira issue BCLOUD-20231](https://jira.atlassian.com/browse/BCLOUD-20231)
