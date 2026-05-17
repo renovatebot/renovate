@@ -3817,6 +3817,26 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(0);
     });
 
+    it('uses lockedVersion timestamp when lockedVersion differs from currentVersion', async () => {
+      config.currentValue = '^1.0.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'replace';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // currentVersion should be the lockedVersion
+      expect(res.currentVersion).toBe('1.0.0');
+      // currentVersionTimestamp should be 1.0.0's timestamp, not 1.4.1's
+      expect(res.currentVersionTimestamp).toBe(
+        '2014-01-04T17:39:35.181Z' as Timestamp,
+      );
+    });
+
     it('ignores deprecated when it is not the latest', async () => {
       config.currentValue = '1.3.0';
       config.packageName = 'q2';
