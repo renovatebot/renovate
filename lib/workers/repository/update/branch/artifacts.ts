@@ -6,8 +6,19 @@ import type { BranchConfig } from '../../../types.ts';
 export async function setArtifactErrorStatus(
   config: BranchConfig,
 ): Promise<void> {
-  if (!config.artifactErrors?.length) {
-    // no errors
+  const mode = config.statusCheckWhen?.artifactError ?? 'failed';
+
+  if (mode === 'never') {
+    logger.debug(
+      'statusCheckWhen.artifactError is set to "never", skipping artifacts status check.',
+    );
+    return;
+  }
+
+  const hasErrors = !!config.artifactErrors?.length;
+
+  if (mode === 'failed' && !hasErrors) {
+    // default behavior: only set status when there are errors
     return;
   }
 
@@ -19,8 +30,10 @@ export async function setArtifactErrorStatus(
     return;
   }
 
-  const description = 'Artifact file update failure';
-  const state = 'red';
+  const state = hasErrors ? 'red' : 'green';
+  const description = hasErrors
+    ? 'Artifact file update failure'
+    : 'Artifact file update success';
   const existingState = await platform.getBranchStatusCheck(
     config.branchName,
     context,
@@ -28,7 +41,7 @@ export async function setArtifactErrorStatus(
 
   // Check if state needs setting
   if (existingState !== state) {
-    logger.debug(`Updating status check state to failed`);
+    logger.debug(`Updating status check state to ${state}`);
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would set branch status in ' + config.branchName);
     } else {

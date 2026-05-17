@@ -69,7 +69,20 @@ export interface StabilityConfig extends RenovateConfig {
 }
 
 export async function setStability(config: StabilityConfig): Promise<void> {
+  const mode = config.statusCheckWhen?.minimumReleaseAge ?? 'always';
+
+  if (mode === 'never') {
+    logger.debug(
+      'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+    );
+    return;
+  }
+
   if (!config.stabilityStatus) {
+    return;
+  }
+
+  if (mode === 'failed' && config.stabilityStatus === 'green') {
     return;
   }
 
@@ -106,6 +119,15 @@ export interface ConfidenceConfig extends RenovateConfig {
 }
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
+  const mode = config.statusCheckWhen?.mergeConfidence ?? 'always';
+
+  if (mode === 'never') {
+    logger.debug(
+      'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+    );
+    return;
+  }
+
   if (
     !config.branchName ||
     !config.confidenceStatus ||
@@ -114,6 +136,11 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   ) {
     return;
   }
+
+  if (mode === 'failed' && config.confidenceStatus === 'green') {
+    return;
+  }
+
   const context = config.statusCheckNames?.mergeConfidence;
   if (!context) {
     logger.debug(
