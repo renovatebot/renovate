@@ -91,7 +91,6 @@ const ignoredNodes = [
   'npmToken',
   'packageFile',
   'forkToken',
-  'repository',
   'vulnerabilityAlertsOnly',
   'vulnerabilityAlert',
   'isVulnerabilityAlert',
@@ -102,6 +101,7 @@ const ignoredNodes = [
 ];
 const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
+const repoEntryRe = regEx(/^repositories\[\d+\]$/);
 
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
@@ -215,6 +215,7 @@ export async function validateConfig(
     if (
       parentPath &&
       parentPath !== 'onboardingConfig' &&
+      !repoEntryRe.test(parentPath) &&
       topLevelObjects.includes(key)
     ) {
       errors.push({
@@ -294,7 +295,10 @@ export async function validateConfig(
           });
         }
       }
-      const parentName = getParentName(parentPath);
+      const parentName =
+        parentPath && repoEntryRe.test(parentPath)
+          ? '.'
+          : getParentName(parentPath);
       if (
         !isPreset &&
         optionParents[key] &&
@@ -1081,6 +1085,27 @@ async function validateGlobalConfig(
                 topic: 'Configuration Error',
                 message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
               });
+            }
+          }
+        }
+        if (key === 'repositories') {
+          for (const [subIndex, subval] of val.entries()) {
+            if (isPlainObject(subval)) {
+              if (!isNonEmptyString(subval.repository)) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
+                });
+              }
+              const { repository: _, ...repoEntryConfig } = subval;
+              const subValidation = await validateConfig(
+                'global',
+                repoEntryConfig,
+                false,
+                `${currentPath}[${subIndex}]`,
+              );
+              warnings.push(...subValidation.warnings);
+              errors.push(...subValidation.errors);
             }
           }
         }
