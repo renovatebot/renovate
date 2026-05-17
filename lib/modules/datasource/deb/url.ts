@@ -117,68 +117,19 @@ export async function checkIfModified(
     },
   };
 
-  try {
-    const response = await http.head(packageUrl, options);
-    return response.statusCode !== 304;
-  } catch (error) {
-    logger.warn(
-      { packageUrl, lastDownloadTimestamp, errorMessage: error.message },
-      'Could not determine if package file is modified since last download',
-    );
-    return true; // Assume it needs to be downloaded if check fails
-  }
+  const response = await http.head(packageUrl, options);
+  return response.statusCode !== 304;
 }
 
 /**
- * Constructs a URL for accessing the component directory for a specific release and architecture.
+ * Extract the relative package path from the base package URL.
+ * For example, given the URL 'https://deb.debian.org/debian/dists/bullseye/main/binary-amd64',
+ * will return 'main/binary-amd64'.
  *
- * @param baseUrl - The base URL of the repository.
- * @param release - The release name or codename (e.g., 'buster', 'bullseye').
- * @param component - The component name (e.g., 'main', 'contrib', 'non-free').
- * @param arch - The architecture name (e.g., 'amd64', 'i386').
- * @returns The complete URL to the component directory.
+ * @param basePackageUrl - The base URL of the package.
+ * @returns
  */
-export function getComponentUrl(
-  baseUrl: string,
-  release: string,
-  component: string,
-  arch: string,
-): string {
-  return `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
-}
-
-/**
- * Constructs a URL for accessing the Packages.gz file for a specific component, release, and architecture.
- *
- * @param baseUrl - The base URL of the repository.
- * @param release - The release name or codename (e.g., 'buster', 'bullseye').
- * @param component - The component name (e.g., 'main', 'contrib', 'non-free').
- * @param arch - The architecture name (e.g., 'amd64', 'i386').
- * @returns The complete URL to the Packages.gz file.
- */
-export function getPackageUrl(
-  baseUrl: string,
-  release: string,
-  component: string,
-  arch: string,
-): string {
-  return `${getComponentUrl(baseUrl, release, component, arch)}/Packages.gz`;
-}
-
-/**
- * Constructs a URL used generating the component url with specific release, components, and architecture.
- *
- * @param baseUrl - The base URL of the repository.
- * @param release - The release name or codename (e.g., 'buster', 'bullseye').
- * @param components - An array of component names (e.g., ['main', 'contrib', 'non-free']).
- * @param arch - The architecture name (e.g., 'amd64', 'i386').
- * @returns The complete URL to the package registry.
- */
-export function getRegistryUrl(
-  baseUrl: string,
-  release: string,
-  components: string[],
-  arch: string,
-): string {
-  return `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
+export function getPackagePath(basePackageUrl: string): string {
+  const urlParts = basePackageUrl.split('/');
+  return urlParts.slice(urlParts.length - 2).join('/');
 }

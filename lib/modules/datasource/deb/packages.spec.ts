@@ -1,3 +1,4 @@
+import { copyFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -7,124 +8,568 @@ import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { cacheSubDir } from './common.ts';
 import {
   computeFileChecksum,
+  getComponentUrl,
+  getPackageUrl,
   mockFetchInReleaseContent,
 } from './index.spec.ts';
-import { downloadAndExtractPackage } from './packages.ts';
-import { getComponentUrl, getPackageUrl } from './url.ts';
-import * as utils from './utils.ts';
+import {
+  downloadAndExtractPackage,
+  downloadPackageFile,
+  getPackageFromReleaseFile,
+} from './packages.ts';
+import * as fileUtils from './utils.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 
 describe('modules/datasource/deb/packages', () => {
-  // const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
+  let downloadedPackageFile: string;
+
+  const fixtureInRelease = Fixtures.get('InRelease');
+  const fixtureInReleaseBookworm = Fixtures.get('InReleaseBookworm');
+  const fixtureInReleaseInvalid = Fixtures.get('InReleaseInvalid');
+
+  const fixturePackagesArchiveXzPath = Fixtures.getPath('Packages.xz');
+  const fixturePackagesArchivePath = Fixtures.getPath('Packages.gz');
   const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
-  // const fixturePackagesPath = Fixtures.getPath(`Packages`);
-  // let fixturePackagesArchiveHash: string;
-  let fixturePackagesArchiveHash2: string;
+  const fixturePackagesArchiveNoCompr = Fixtures.getPath(`Packages`);
 
-  let cacheDir: DirectoryResult | null;
-  // let cfg: GetPkgReleasesConfig;
-  let extractionFolder: string;
-  let extractedPackageFile: string;
+  const packageArgs: [release: string, component: string, arch: string] = [
+    'stable',
+    'non-free',
+    'amd64',
+  ];
 
-  beforeEach(async () => {
-    cacheDir = await dir({ unsafeCleanup: true });
-    GlobalConfig.set({ cacheDir: cacheDir.path });
+  describe('getPackageFromReleaseFile', () => {
+    it('retrieves Packages.xz file from the release file', () => {
+      const packageBaseUrl = 'main/binary-arm64/';
 
-    extractionFolder = await fs.ensureCacheDir(cacheSubDir);
-    extractedPackageFile = upath.join(
-      extractionFolder,
-      `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
-    );
+      const { hash, packagesFile } = getPackageFromReleaseFile(
+        fixtureInRelease,
+        packageBaseUrl,
+      );
 
-    // cfg = {
-    //   datasource: 'deb',
-    //   packageName: 'album',
-    //   registryUrls: [
-    //     getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
-    //   ],
-    // };
+      expect(hash).toEqual(
+        '14fd8848875e988f92d00d0baeb058c068b8352d537d2836eb1f0a6633c7cdd2',
+      );
 
-    // fixturePackagesArchiveHash = await computeFileChecksum(
-    //   fixturePackagesArchivePath,
-    // );
-    fixturePackagesArchiveHash2 = await computeFileChecksum(
-      fixturePackagesArchivePath2,
-    );
+      expect(packagesFile).toEqual(`${packageBaseUrl}Packages.xz`);
+    });
+
+    it('retrieve Packages.xz if there is only Packages.xz available', () => {
+      const { hash, packagesFile } = getPackageFromReleaseFile(
+        fixtureInReleaseBookworm,
+        'main/binary-arm64/',
+      );
+
+      expect(hash).toEqual(
+        'e6334c735d1e2485ec9391c822fb133f18d18c27dc880a2678017f0365142543',
+      );
+
+      expect(packagesFile).toEqual('main/binary-arm64/Packages.xz');
+    });
+
+    it('retrieve Packages file if no compression is available', () => {
+      const { hash, packagesFile } = getPackageFromReleaseFile(
+        fixtureInReleaseBookworm,
+        'main/binary-mipsel/',
+      );
+
+      expect(hash).toEqual(
+        'ffd78fe14e1cc1883029fce4d128d2f8eb81bf338a64e2318251e908a714c987',
+      );
+
+      expect(packagesFile).toEqual('main/binary-mipsel/Packages');
+    });
+
+    it('throw error if no packages file was found', () => {
+      expect(() => {
+        getPackageFromReleaseFile(
+          fixtureInReleaseBookworm,
+          'main/non-existend/',
+        );
+      }).toThrow('No valid package file found in release files');
+    });
+
+    it('do not match invalid release file lines', () => {
+      expect(() => {
+        getPackageFromReleaseFile(
+          fixtureInReleaseInvalid,
+          'non-free/binary-s390x/',
+        );
+      }).toThrow('No valid package file found in release files');
+    });
   });
 
-  afterEach(async () => {
-    await cacheDir?.cleanup();
-    cacheDir = null;
+  describe('downloadPackageFile', () => {
+    let cacheDir: DirectoryResult | null;
+    let extractionFolder: string;
+
+    beforeEach(async () => {
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cacheDir: cacheDir.path });
+
+      extractionFolder = await fs.ensureCacheDir(cacheSubDir);
+      downloadedPackageFile = upath.join(
+        extractionFolder,
+        `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.txt`,
+      );
+    });
+
+    afterEach(async () => {
+      await cacheDir?.cleanup();
+    });
+
+    it('should download the package file if it has not been downloaded before', async () => {
+      const fixturePackageHash = await computeFileChecksum(
+        fixturePackagesArchiveXzPath,
+      );
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          fixturePackageHash,
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(true);
+
+      const fileHash = await computeFileChecksum(downloadedPackageFile);
+      expect(fileHash).toEqual(fixturePackageHash);
+    });
+
+    it('should download the package file if it has been modified', async () => {
+      const fixturePackageHash = await computeFileChecksum(
+        fixturePackagesArchiveXzPath,
+      );
+
+      // write distinct cached file from fixturePackagesArchiveXzPath
+      await fs.outputCacheFile(downloadedPackageFile, 'test');
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return the package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          fixturePackageHash,
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(true);
+
+      const fileHash = await computeFileChecksum(downloadedPackageFile);
+      expect(fileHash).toEqual(fixturePackageHash);
+    });
+
+    it('should not download if the package file has not been modified', async () => {
+      // write cached file from fixturePackagesArchiveXzPath
+      await copyFile(fixturePackagesArchiveXzPath, downloadedPackageFile);
+
+      const fixturePackageHash = await computeFileChecksum(
+        fixturePackagesArchiveXzPath,
+      );
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          fixturePackageHash,
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(false);
+    });
+
+    it('should download if the package file exists but is outdated and no hash is provided', async () => {
+      // write distinct cached file from fixturePackagesArchiveXzPath
+      await fs.outputCacheFile(downloadedPackageFile, 'test');
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return 200 to signal file has been modified
+      httpMock
+        .scope(debBaseUrl)
+        .head(packageUrl)
+        .reply(200, '', {
+          'Last-Modified': new Date(
+            Date.now() - 60 * 60 * 1000 * 24,
+          ).toUTCString(),
+        });
+
+      // return the package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          '', // empty hash
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(true);
+    });
+
+    it('should not download if the package file exists and is not outdated although no hash is provided', async () => {
+      // write distinct cached file from fixturePackagesArchiveXzPath
+      await fs.outputCacheFile(downloadedPackageFile, 'test');
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return 304 to signal file has not been modified
+      httpMock.scope(debBaseUrl).head(packageUrl).reply(304, '', {});
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          '', // empty hash
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(false);
+    });
+
+    it('should download if the package file exists but we cannot validate whether it has been modified', async () => {
+      // write distinct cached file from fixturePackagesArchiveXzPath
+      await fs.outputCacheFile(downloadedPackageFile, 'test');
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return 304 to signal file has not been modified
+      httpMock
+        .scope(debBaseUrl)
+        .head(packageUrl)
+        .replyWithError('not available');
+
+      // return the package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          '', // empty hash
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(true);
+    });
+
+    it('should download even though the checksum is not provided', async () => {
+      const fixturePackageHash = await computeFileChecksum(
+        fixturePackagesArchiveXzPath,
+      );
+
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return the package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          '', // empty hash
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(true);
+
+      const fileHash = await computeFileChecksum(downloadedPackageFile);
+      expect(fileHash).toEqual(fixturePackageHash);
+    });
+
+    it('throw error if checksum does not match', async () => {
+      const packageUrl = getPackageUrl('', ...packageArgs, 'xz');
+
+      // return the package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(packageUrl)
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadPackageFile(
+          joinUrlParts(debBaseUrl, packageUrl),
+          downloadedPackageFile,
+          'required-hash-value-from-InRelease-file', // assume value from inrelease file is provided
+          new Http('deb'),
+        ),
+      ).rejects.toThrow('SHA256 checksum validation failed');
+    });
   });
 
   describe('downloadAndExtractPackage', () => {
-    const debBaseUrl = 'http://deb.debian.org';
+    let cacheDir: DirectoryResult | null;
+    let extractionFolder: string;
 
-    it('should ignore error when fetching the InRelease content fails', async () => {
-      const packageArgs: [release: string, component: string, arch: string] = [
-        'stable',
-        'non-free',
-        'amd64',
-      ];
+    beforeEach(async () => {
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cacheDir: cacheDir.path });
 
+      extractionFolder = await fs.ensureCacheDir(cacheSubDir);
+      downloadedPackageFile = upath.join(
+        extractionFolder,
+        `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.txt`,
+      );
+    });
+
+    afterEach(async () => {
+      await cacheDir?.cleanup();
+    });
+
+    it('should ignore error when fetching of InRelease or Release content fails', async () => {
+      // return no InRelease content
+      mockFetchInReleaseContent(
+        'no-hash-value',
+        ...packageArgs,
+        true,
+        '',
+        'InRelease',
+      );
+
+      // return no Release content
+      mockFetchInReleaseContent(
+        'no-hash-value',
+        ...packageArgs,
+        true,
+        '',
+        'Release',
+      );
+
+      // provide mock for the Package.gz file as it is the default behavior
       httpMock
         .scope(debBaseUrl)
         .get(getPackageUrl('', ...packageArgs))
         .replyWithFile(200, fixturePackagesArchivePath2);
-      mockFetchInReleaseContent('wrong-hash', ...packageArgs, true);
 
       await expect(
         downloadAndExtractPackage(
           getComponentUrl(debBaseUrl, ...packageArgs),
-          new Http('default'),
+          new Http('deb'),
         ),
       ).resolves.toEqual(
         expect.objectContaining({
-          extractedFile: extractedPackageFile,
+          extractedFile: downloadedPackageFile,
+          lastTimestamp: expect.anything(),
+        }),
+      );
+    });
+
+    it('should fall back to no compression if release file only contains no compressed Package file', async () => {
+      const fixturePackageHash = await computeFileChecksum(
+        fixturePackagesArchiveNoCompr,
+      );
+
+      // return InRelease file
+      mockFetchInReleaseContent(
+        fixturePackageHash,
+        ...packageArgs,
+        false,
+        '',
+        'InRelease',
+      );
+
+      // return uncompressed Package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', ...packageArgs, ''))
+        .replyWithFile(200, fixturePackagesArchiveNoCompr);
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(
+        expect.objectContaining({
+          extractedFile: downloadedPackageFile,
+          lastTimestamp: expect.anything(),
+        }),
+      );
+    });
+
+    it('should fall back to Release file if InRelease cannot be found', async () => {
+      const fixturePackagesXzArchiveHash = await computeFileChecksum(
+        fixturePackagesArchiveXzPath,
+      );
+
+      // return no InRelease file
+      mockFetchInReleaseContent('', ...packageArgs, true, '', 'InRelease');
+
+      // return Release content
+      mockFetchInReleaseContent(
+        fixturePackagesXzArchiveHash,
+        ...packageArgs,
+        false,
+        'xz',
+        'Release',
+      );
+
+      // return package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', ...packageArgs, 'xz'))
+        .replyWithFile(200, fixturePackagesArchiveXzPath);
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(
+        expect.objectContaining({
+          extractedFile: downloadedPackageFile,
           lastTimestamp: expect.anything(),
         }),
       );
     });
 
     it('should throw error when checksum validation fails', async () => {
+      // return InRelease content
+      mockFetchInReleaseContent(
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // wrong hash
+        ...packageArgs,
+        false,
+        'xz',
+      );
+
+      // return package file
       httpMock
         .scope(debBaseUrl)
-        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
+        .get(getPackageUrl('', ...packageArgs, 'xz'))
         .replyWithFile(200, fixturePackagesArchivePath2);
-      mockFetchInReleaseContent('wrong-hash', 'bullseye', 'main', 'amd64');
 
       await expect(
         downloadAndExtractPackage(
-          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
-          new Http('default'),
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
         ),
       ).rejects.toThrow(`SHA256 checksum validation failed`);
     });
 
-    it('should throw error for when extracting fails', async () => {
-      vi.spyOn(utils, 'extract').mockRejectedValueOnce(new Error());
+    it('should default to downloading Package.gz when release file is fetched but package cannot be found', async () => {
+      // return InRelease content with bogus hash and no package info to trigger fallback to download of Package.gz file
+      // based on old module behavior
+      mockFetchInReleaseContent(
+        'non-compliant-hash',
+        ...packageArgs,
+        false,
+        'gz',
+      );
 
+      // return package file
       httpMock
         .scope(debBaseUrl)
-        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
-        .replyWithFile(200, fixturePackagesArchivePath2);
+        .get(getPackageUrl('', ...packageArgs, 'gz'))
+        .replyWithFile(200, fixturePackagesArchivePath);
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(
+        expect.objectContaining({
+          extractedFile: downloadedPackageFile,
+          lastTimestamp: expect.anything(),
+        }),
+      );
+    });
+
+    it('should throw error for when extracting fails', async () => {
+      vi.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
+
+      const fixturePackagesArchiveHash2 = await computeFileChecksum(
+        fixturePackagesArchivePath2,
+      );
+
+      // return InRelease content
       mockFetchInReleaseContent(
         fixturePackagesArchiveHash2,
-        'bullseye',
-        'main',
-        'amd64',
+        ...packageArgs,
+        false,
+        'gz',
+      );
+
+      // return package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', ...packageArgs, 'gz'))
+        .replyWithFile(200, fixturePackagesArchivePath2);
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
+        ),
+      ).rejects.toThrow(`Missing metadata in extracted package index file!`);
+    });
+
+    it('should not download if package file already exists', async () => {
+      downloadedPackageFile = upath.join(
+        extractionFolder,
+        `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.xz`,
+      );
+
+      const extractedFile = upath.join(
+        extractionFolder,
+        `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.txt`,
+      );
+
+      // write cached compressed package file
+      await copyFile(fixturePackagesArchiveXzPath, downloadedPackageFile);
+
+      // write cached extracted package file
+      await copyFile(fixturePackagesArchiveNoCompr, extractedFile);
+
+      const fixturePackageHash = await computeFileChecksum(
+        fixturePackagesArchiveXzPath,
+      );
+
+      // return InRelease content
+      mockFetchInReleaseContent(
+        fixturePackageHash,
+        ...packageArgs,
+        false,
+        'xz',
+        'InRelease',
       );
 
       await expect(
         downloadAndExtractPackage(
-          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
-          new Http('default'),
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
         ),
-      ).rejects.toThrow(`Missing metadata in extracted package index file!`);
+      ).resolves.toEqual(
+        expect.objectContaining({
+          extractedFile,
+          lastTimestamp: expect.anything(),
+        }),
+      );
     });
   });
 });

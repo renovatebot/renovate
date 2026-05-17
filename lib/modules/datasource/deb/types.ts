@@ -28,3 +28,18 @@ export interface PackageDescription {
   Version?: string;
   Homepage?: string;
 }
+
+/**
+ * Represents the names of the Package Index file compression algorithms.
+ * Ordered by preference.
+ *
+ * See https://wiki.debian.org/DebianRepository/Format#Compression_of_indices
+ */
+export const PackagesCompressionAlgos = ['xz', 'bz2', 'gz'] as const;
+
+export type PackageCompressionAlgos = (typeof PackagesCompressionAlgos)[number];
+
+export interface DownloadedPackage {
+  extractedFile: string;
+  lastTimestamp: Date;
+}
