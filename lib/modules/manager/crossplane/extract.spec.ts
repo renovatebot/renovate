@@ -103,6 +103,7 @@ describe('modules/manager/crossplane/extract', () => {
             datasource: 'docker',
             depName: 'xpkg.upbound.io/crossplane-contrib/provider-nop',
             packageName: 'xpkg.upbound.io/crossplane-contrib/provider-nop',
+            registryUrls: ['https://xpkg.upbound.io'],
             depType: 'provider',
             replaceString:
               'xpkg.upbound.io/crossplane-contrib/provider-nop:v0.2.0',
@@ -115,6 +116,7 @@ describe('modules/manager/crossplane/extract', () => {
             datasource: 'docker',
             depName: 'xpkg.upbound.io/crossplane-contrib/function-dummy',
             packageName: 'xpkg.upbound.io/crossplane-contrib/function-dummy',
+            registryUrls: ['https://xpkg.upbound.io'],
             depType: 'function',
             replaceString:
               'xpkg.upbound.io/crossplane-contrib/function-dummy:v0.2.1',
@@ -127,6 +129,7 @@ describe('modules/manager/crossplane/extract', () => {
             datasource: 'docker',
             depName: 'xpkg.upbound.io/upbound/platform-ref-aws',
             packageName: 'xpkg.upbound.io/upbound/platform-ref-aws',
+            registryUrls: ['https://xpkg.upbound.io'],
             depType: 'configuration',
             replaceString: 'xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0',
           },
@@ -146,6 +149,7 @@ describe('modules/manager/crossplane/extract', () => {
             datasource: 'docker',
             depName: 'xpkg.upbound.io/crossplane-contrib/provider-nop',
             packageName: 'xpkg.upbound.io/crossplane-contrib/provider-nop',
+            registryUrls: ['https://xpkg.upbound.io'],
             depType: 'provider',
             replaceString:
               'xpkg.upbound.io/crossplane-contrib/provider-nop:v0.2.0',

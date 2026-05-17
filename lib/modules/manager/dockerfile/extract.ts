@@ -1,6 +1,10 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { newlineRegex, regEx } from '../../../util/regex.ts';
+import {
+  hostnameMatchRegex,
+  newlineRegex,
+  regEx,
+} from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import * as debianVersioning from '../../versioning/debian/index.ts';
 import * as ubuntuVersioning from '../../versioning/ubuntu/index.ts';
@@ -155,6 +159,17 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
     if (!dep.currentDigest) {
       delete dep.currentDigest;
+    }
+  }
+
+  if (dep.depName) {
+    const match = hostnameMatchRegex.exec(dep.depName);
+    const hostname = match?.groups?.hostname;
+    if (hostname) {
+      const port = match?.groups?.port;
+      dep.registryUrls = [
+        port ? `https://${hostname}:${port}` : `https://${hostname}`,
+      ];
     }
   }
 

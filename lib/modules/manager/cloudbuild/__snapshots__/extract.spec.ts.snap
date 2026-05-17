@@ -9,6 +9,9 @@ exports[`modules/manager/cloudbuild/extract > extractPackageFile() > extracts mu
     "datasource": "docker",
     "depName": "gcr.io/cloud-builders/docker",
     "packageName": "gcr.io/cloud-builders/docker",
+    "registryUrls": [
+      "https://gcr.io",
+    ],
     "replaceString": "gcr.io/cloud-builders/docker:19.03.8",
   },
   {
@@ -27,6 +30,9 @@ exports[`modules/manager/cloudbuild/extract > extractPackageFile() > extracts mu
     "datasource": "docker",
     "depName": "gcr.io/cloud-builders/kubectl",
     "packageName": "gcr.io/cloud-builders/kubectl",
+    "registryUrls": [
+      "https://gcr.io",
+    ],
     "replaceString": "gcr.io/cloud-builders/kubectl",
   },
 ]

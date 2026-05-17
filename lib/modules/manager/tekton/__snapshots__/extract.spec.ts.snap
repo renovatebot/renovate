@@ -11,6 +11,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/pipeline",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     },
     {
@@ -21,6 +24,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-finally",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/pipeline-finally",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-finally:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     },
     {
@@ -31,6 +37,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     },
     {
@@ -41,6 +50,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/list-pipeline",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/list-pipeline",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/list-pipeline",
     },
     {
@@ -51,6 +63,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/list-pipeline-run",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/list-pipeline-run",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/list-pipeline-run",
     },
     {
@@ -61,6 +76,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/list-task-run",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/list-task-run",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/list-task-run",
     },
     {
@@ -71,6 +89,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run",
     },
     {
@@ -81,6 +102,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver",
     },
     {
@@ -91,6 +115,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run",
     },
     {
@@ -101,6 +128,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver",
     },
     {
@@ -111,6 +141,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/task-run",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/task-run",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/task-run",
     },
     {
@@ -121,6 +154,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/task-run-resolver",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/task-run-resolver",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/task-run-resolver",
     },
     {
@@ -131,6 +167,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-run",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/pipeline-run",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-run",
     },
     {
@@ -141,6 +180,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver",
     },
     {
@@ -151,6 +193,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/inline-pipeline",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/inline-pipeline",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/inline-pipeline",
     },
     {
@@ -173,6 +218,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     },
     {
@@ -183,6 +231,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
       "depType": "tekton-bundle",
       "packageName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
+      "registryUrls": [
+        "https://gcr.io",
+      ],
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     },
     {
@@ -193,6 +244,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.io/taskrun/spec/taskSpec/steps/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.io/taskrun/spec/taskSpec/steps/0/image",
+      "registryUrls": [
+        "https://example.io",
+      ],
       "replaceString": "example.io/taskrun/spec/taskSpec/steps/0/image",
     },
     {
@@ -203,6 +257,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.io/taskrun/spec/taskSpec/sidecars/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.io/taskrun/spec/taskSpec/sidecars/0/image",
+      "registryUrls": [
+        "https://example.io",
+      ],
       "replaceString": "example.io/taskrun/spec/taskSpec/sidecars/0/image",
     },
     {
@@ -213,6 +270,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.io/taskrun/spec/taskSpec/stepTemplate/image",
       "depType": "tekton-step-image",
       "packageName": "example.io/taskrun/spec/taskSpec/stepTemplate/image",
+      "registryUrls": [
+        "https://example.io",
+      ],
       "replaceString": "example.io/taskrun/spec/taskSpec/stepTemplate/image",
     },
     {
@@ -223,6 +283,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.io/task/spec/steps/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.io/task/spec/steps/0/image",
+      "registryUrls": [
+        "https://example.io",
+      ],
       "replaceString": "example.io/task/spec/steps/0/image",
     },
     {
@@ -233,6 +296,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.io/task/spec/sidecars/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.io/task/spec/sidecars/0/image",
+      "registryUrls": [
+        "https://example.io",
+      ],
       "replaceString": "example.io/task/spec/sidecars/0/image",
     },
     {
@@ -243,6 +309,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.io/task/spec/stepTemplate/image",
       "depType": "tekton-step-image",
       "packageName": "example.io/task/spec/stepTemplate/image",
+      "registryUrls": [
+        "https://example.io",
+      ],
       "replaceString": "example.io/task/spec/stepTemplate/image",
     },
     {
@@ -253,6 +322,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipeline/spec/tasks/0/taskSpec/steps/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipeline/spec/tasks/0/taskSpec/steps/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipeline/spec/tasks/0/taskSpec/steps/0/image",
     },
     {
@@ -263,6 +335,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipeline/spec/tasks/0/taskSpec/sidecars/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipeline/spec/tasks/0/taskSpec/sidecars/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipeline/spec/tasks/0/taskSpec/sidecars/0/image",
     },
     {
@@ -273,6 +348,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipeline/spec/tasks/0/taskSpec/stepTemplate/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipeline/spec/tasks/0/taskSpec/stepTemplate/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipeline/spec/tasks/0/taskSpec/stepTemplate/image",
     },
     {
@@ -283,6 +361,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipeline/spec/finally/0/taskSpec/steps/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipeline/spec/finally/0/taskSpec/steps/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipeline/spec/finally/0/taskSpec/steps/0/image",
     },
     {
@@ -293,6 +374,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipeline/spec/finally/0/taskSpec/sidecars/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipeline/spec/finally/0/taskSpec/sidecars/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipeline/spec/finally/0/taskSpec/sidecars/0/image",
     },
     {
@@ -303,6 +387,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipeline/spec/finally/0/taskSpec/stepTemplate/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipeline/spec/finally/0/taskSpec/stepTemplate/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipeline/spec/finally/0/taskSpec/stepTemplate/image",
     },
     {
@@ -313,6 +400,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/steps/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/steps/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/steps/0/image",
     },
     {
@@ -323,6 +413,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/sidecars/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/sidecars/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/sidecars/0/image",
     },
     {
@@ -333,6 +426,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/stepTemplate/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/stepTemplate/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/stepTemplate/image",
     },
     {
@@ -343,6 +439,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/steps/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/steps/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/steps/0/image",
     },
     {
@@ -353,6 +452,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/sidecars/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/sidecars/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/sidecars/0/image",
     },
     {
@@ -363,6 +465,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/stepTemplate/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/stepTemplate/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/stepTemplate/image",
     },
     {
@@ -373,6 +478,9 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "depName": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
       "depType": "tekton-step-image",
       "packageName": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
+      "registryUrls": [
+        "https://example.com",
+      ],
       "replaceString": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
     },
     {

@@ -79,6 +79,10 @@ export function escapeRegExp(input: string): string {
 
 export const newlineRegex = regEx(/\r?\n/);
 
+export const hostnameMatchRegex = regEx(
+  /^(?<hostname>[a-zA-Z\d]([a-zA-Z\d-]*\.)+[a-zA-Z\d]+)(?::(?<port>[0-9]+))?/,
+);
+
 /**
  * Matches hidden or invisible Unicode characters, including:
  * - Non-breaking space (\u00A0)
