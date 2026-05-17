@@ -1,5 +1,5 @@
 import { fs } from '~test/util.ts';
-import { extractAllPackageFiles } from './extract.ts';
+import { bunCatalogsToArray, extractAllPackageFiles } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -295,5 +295,274 @@ describe('modules/manager/bun/extract', () => {
     expect(packageFiles[0].npmrc).toBe(
       'registry=https://custom.registry.com\n',
     );
+  });
+
+  describe('bunCatalogsToArray()', () => {
+    it('extracts top-level default catalog', () => {
+      const result = bunCatalogsToArray({
+        catalog: { react: '^19.0.0', 'react-dom': '^19.0.0' },
+      });
+      expect(result).toEqual([
+        {
+          name: 'default',
+          dependencies: { react: '^19.0.0', 'react-dom': '^19.0.0' },
+        },
+      ]);
+    });
+
+    it('extracts top-level named catalogs', () => {
+      const result = bunCatalogsToArray({
+        catalogs: {
+          testing: { jest: '30.0.0' },
+          build: { webpack: '5.88.2' },
+        },
+      });
+      expect(result).toEqual([
+        { name: 'testing', dependencies: { jest: '30.0.0' } },
+        { name: 'build', dependencies: { webpack: '5.88.2' } },
+      ]);
+    });
+
+    it('extracts catalogs under workspaces object', () => {
+      const result = bunCatalogsToArray({
+        workspaces: {
+          packages: ['packages/*'],
+          catalog: { react: '^19.0.0' },
+          catalogs: { testing: { jest: '30.0.0' } },
+        },
+      });
+      expect(result).toEqual([
+        { name: 'default', dependencies: { react: '^19.0.0' } },
+        { name: 'testing', dependencies: { jest: '30.0.0' } },
+      ]);
+    });
+
+    it('prefers top-level over workspaces-nested when both exist', () => {
+      const result = bunCatalogsToArray({
+        catalog: { react: '^19.0.0' },
+        workspaces: {
+          packages: ['packages/*'],
+          catalog: { react: '^18.0.0' },
+        },
+      });
+      // Top-level takes precedence (??= only fills if undefined)
+      expect(result).toEqual([
+        { name: 'default', dependencies: { react: '^19.0.0' } },
+      ]);
+    });
+
+    it('returns empty array when no catalogs present', () => {
+      const result = bunCatalogsToArray({
+        name: 'my-app',
+        dependencies: { dep1: '1.0.0' },
+      });
+      expect(result).toEqual([]);
+    });
+
+    it('returns both default and named catalogs', () => {
+      const result = bunCatalogsToArray({
+        catalog: { react: '^19.0.0' },
+        catalogs: { testing: { jest: '30.0.0' } },
+      });
+      expect(result).toEqual([
+        { name: 'default', dependencies: { react: '^19.0.0' } },
+        { name: 'testing', dependencies: { jest: '30.0.0' } },
+      ]);
+    });
+
+    it('ignores invalid catalog values', () => {
+      const result = bunCatalogsToArray({
+        catalog: 'not-an-object',
+        catalogs: { valid: { dep: '1.0.0' }, invalid: 'not-an-object' },
+      });
+      expect(result).toEqual([
+        { name: 'valid', dependencies: { dep: '1.0.0' } },
+      ]);
+    });
+  });
+
+  describe('catalogs', () => {
+    it('extracts top-level catalog dependencies from root package.json', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'my-monorepo',
+          version: '1.0.0',
+          dependencies: { dep1: '1.0.0' },
+          catalog: { react: '^19.0.0', 'react-dom': '^19.0.0' },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      expect(packageFiles).toHaveLength(1);
+      expect(packageFiles[0].deps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            depType: 'dependencies',
+            depName: 'dep1',
+            currentValue: '1.0.0',
+          }),
+          expect.objectContaining({
+            depType: 'bun.catalog.default',
+            depName: 'react',
+            currentValue: '^19.0.0',
+            prettyDepType: 'bun.catalog.default',
+          }),
+          expect.objectContaining({
+            depType: 'bun.catalog.default',
+            depName: 'react-dom',
+            currentValue: '^19.0.0',
+            prettyDepType: 'bun.catalog.default',
+          }),
+        ]),
+      );
+    });
+
+    it('extracts named catalog dependencies', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'my-monorepo',
+          version: '1.0.0',
+          catalogs: {
+            testing: { jest: '30.0.0', vitest: '1.0.0' },
+          },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      expect(packageFiles).toHaveLength(1);
+      expect(packageFiles[0].deps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            depType: 'bun.catalog.testing',
+            depName: 'jest',
+            currentValue: '30.0.0',
+            prettyDepType: 'bun.catalog.testing',
+          }),
+          expect.objectContaining({
+            depType: 'bun.catalog.testing',
+            depName: 'vitest',
+            currentValue: '1.0.0',
+            prettyDepType: 'bun.catalog.testing',
+          }),
+        ]),
+      );
+    });
+
+    it('extracts catalogs nested under workspaces object', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'my-monorepo',
+          version: '1.0.0',
+          workspaces: {
+            packages: ['packages/*'],
+            catalog: { react: '^19.0.0' },
+            catalogs: { testing: { jest: '30.0.0' } },
+          },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      expect(packageFiles).toHaveLength(1);
+      expect(packageFiles[0].deps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            depType: 'bun.catalog.default',
+            depName: 'react',
+            currentValue: '^19.0.0',
+          }),
+          expect.objectContaining({
+            depType: 'bun.catalog.testing',
+            depName: 'jest',
+            currentValue: '30.0.0',
+          }),
+        ]),
+      );
+    });
+
+    it('does not extract catalogs from workspace sub-packages', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+
+      vi.mocked(fs.readLocalFile)
+        // Root package file
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'my-monorepo',
+            version: '1.0.0',
+            workspaces: ['packages/*'],
+            catalog: { react: '^19.0.0' },
+          }),
+        )
+        // Sub-package with its own catalog field (should be ignored)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: { react: 'catalog:' },
+            catalog: { lodash: '4.17.21' },
+          }),
+        );
+
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      // Root should have catalog deps
+      const rootFile = packageFiles.find(
+        (f) => f.packageFile === 'package.json',
+      );
+      expect(rootFile?.deps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            depType: 'bun.catalog.default',
+            depName: 'react',
+            currentValue: '^19.0.0',
+          }),
+        ]),
+      );
+
+      // Sub-package should NOT have catalog deps extracted
+      const subFile = packageFiles.find(
+        (f) => f.packageFile === 'packages/pkg1/package.json',
+      );
+      const subCatalogDeps = subFile?.deps.filter((d) =>
+        d.depType?.startsWith('bun.catalog.'),
+      );
+      expect(subCatalogDeps).toEqual([]);
+    });
+
+    it('skips workspace sub-packages that fail to parse', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+
+      vi.mocked(fs.readLocalFile)
+        // Root package file
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'my-monorepo',
+            version: '1.0.0',
+            workspaces: ['packages/*'],
+          }),
+        )
+        // Sub-package returns invalid JSON
+        .mockResolvedValueOnce('invalid json');
+
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      // Only root package file should be included
+      expect(packageFiles).toHaveLength(1);
+      expect(packageFiles[0].packageFile).toBe('package.json');
+    });
   });
 });
