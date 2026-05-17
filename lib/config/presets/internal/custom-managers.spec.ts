@@ -944,4 +944,45 @@ describe('config/presets/internal/custom-managers', () => {
       });
     });
   });
+
+  describe('update java.version in pom.xml properties', () => {
+    const customManager = presets.javaPropertiesVersion.customManagers?.[0];
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path             | expected
+        ${'pom.xml'}     | ${true}
+        ${'foo/pom.xml'} | ${true}
+        ${'pom'}         | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
+    });
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        <java.version>11</java.version>
+
+        <other.version>1.8</other.version>
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'pom.xml',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '11',
+          datasource: 'java-version',
+          depName: 'java',
+          replaceString: '<java.version>11</java.version>',
+        },
+      ]);
+    });
+  });
 });
