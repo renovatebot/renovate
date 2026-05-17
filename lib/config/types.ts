@@ -260,6 +260,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
+  userAgentPrefix?: string;
+  userAgentSuffix?: string;
   dockerMaxPages?: number;
   s3Endpoint?: string;
   s3PathStyle?: boolean;

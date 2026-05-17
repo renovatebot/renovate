@@ -57,6 +57,8 @@ export class GlobalConfig {
     's3PathStyle',
     'toolSettings',
     'userAgent',
+    'userAgentPrefix',
+    'userAgentSuffix',
   ];
 
   private static config: RepoGlobalConfig = {};

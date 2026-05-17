@@ -1,13 +1,16 @@
 import { ZodError, z } from 'zod/v3';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../../constants/error-messages.ts';
+import { pkg } from '../../expose.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { resetCache } from '../cache/repository/index.ts';
 import * as hostRules from '../host-rules.ts';
+import { applyDefaultHeaders } from './http.ts';
 import { Http, HttpError } from './index.ts';
 import * as queue from './queue.ts';
 import * as throttle from './throttle.ts';
@@ -24,6 +27,89 @@ describe('util/http/index', () => {
     queue.clear();
     throttle.clear();
     resetCache();
+  });
+
+  describe('applyDefaultHeaders', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('sets default user-agent', () => {
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: {
+          'user-agent': `Renovate/${pkg.version} (https://github.com/renovatebot/renovate)`,
+        },
+      });
+    });
+
+    it('uses userAgent when set', () => {
+      GlobalConfig.set({ userAgent: 'custom-agent/1.0' });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: { 'user-agent': 'custom-agent/1.0' },
+      });
+    });
+
+    it('uses userAgentPrefix when set', () => {
+      GlobalConfig.set({ userAgentPrefix: 'MyRenovate' });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: {
+          'user-agent': `MyRenovate/${pkg.version} (https://github.com/renovatebot/renovate)`,
+        },
+      });
+    });
+
+    it('uses userAgentSuffix when set', () => {
+      GlobalConfig.set({ userAgentSuffix: ' (my-instance)' });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: {
+          'user-agent': `Renovate/${pkg.version} (my-instance)`,
+        },
+      });
+    });
+
+    it('uses both userAgentPrefix and userAgentSuffix when set', () => {
+      GlobalConfig.set({
+        userAgentPrefix: 'MyRenovate',
+        userAgentSuffix: ' (my-instance)',
+      });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: {
+          'user-agent': `MyRenovate/${pkg.version} (my-instance)`,
+        },
+      });
+    });
+
+    it('userAgent takes precedence over userAgentPrefix and userAgentSuffix', () => {
+      GlobalConfig.set({
+        userAgent: 'custom-agent/1.0',
+        userAgentPrefix: 'MyRenovate',
+        userAgentSuffix: ' (my-instance)',
+      });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: { 'user-agent': 'custom-agent/1.0' },
+      });
+    });
+
+    it('preserves existing headers', () => {
+      const options = { headers: { authorization: 'Bearer token' } };
+      applyDefaultHeaders(options);
+      expect(options.headers).toMatchObject({
+        authorization: 'Bearer token',
+        'user-agent': `Renovate/${pkg.version} (https://github.com/renovatebot/renovate)`,
+      });
+    });
   });
 
   it('get', async () => {
