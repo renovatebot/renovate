@@ -67,6 +67,33 @@ flowchart TD
 
 This flows lowest-to-highest precedence top-to-bottom. The `exposeAllEnv` bypass is shown as a dashed shortcut since it skips the whole chain entirely.
 
+---
+
+```mermaid
+flowchart TD
+    A["<b>extraEnv</b><br/><small>Manager-defined defaults/hints<br/>string value = default, null = inherit key only</small>"]
+    B["<b>parentEnv</b><br/><small>process.env filtered to basicEnvVars<br/>+ string keys from extraEnv</small>"]
+    C["<b>globalConfigEnv</b><br/><small>customEnvVariables<br/>set by self-hosted admin at startup</small>"]
+    D["<b>userConfiguredEnv</b><br/><small>env config in renovate.json<br/>set by repo owner</small>"]
+    E["<b>forcedEnv</b><br/><small>Hardcoded per exec-call<br/>by Renovate internals</small>"]
+    F["<b>Child Process</b>"]
+
+    GATE["<b>allowedEnv / global:safeEnv</b><br/><small>Admin-controlled allowlist —<br/>gates which keys repo owners may set</small>"]
+
+    A -->|"overridden by"| B
+    B -->|"overridden by"| C
+    C -->|"overridden by"| D
+    D -->|"overridden by"| E
+    E --> F
+
+    GATE -.->|"restricts"| D
+
+    G["<b>exposeAllEnv = true</b><br/><small>Bypasses all layering,<br/>passes entire process.env</small>"]
+    G -.->|"short-circuits to"| F
+```
+
+The `allowedEnv`/`global:safeEnv` gate is shown as a dashed restrictor on the user env layer — it doesn't participate in the merge order itself, it just controls what `userConfiguredEnv` is allowed to contain.
+
 ## Templating
 
 Allowlisted environment variables can be referenced in templates.
