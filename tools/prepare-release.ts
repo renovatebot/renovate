@@ -60,6 +60,7 @@ async function build(): Promise<void> {
     logger.error({ res }, 'Process call failed');
     process.exit(-1);
   } else {
+    await generateShrinkwrap();
     logger.debug(`Build succeeded:\n${res.stdout || res.stderr}`);
   }
 }
@@ -108,5 +109,25 @@ async function buildMkdocs(version: string | undefined): Promise<void> {
     process.exit(tarRes.exitCode);
   } else {
     logger.info('Mkdocs site packaged successfully to tmp/mkdocs-site.tgz');
+  }
+}
+
+async function generateShrinkwrap(): Promise<void> {
+  logger.info('Generating npm-shrinkwrap.json ...');
+  const res = await exec('pnpm', ['update-npm-shrinkwrap'], { reject: false });
+
+  if (res.signal) {
+    logger.error(`Signal received: ${res.signal}`);
+    process.exit(-1);
+  } else if (res.exitCode) {
+    logger.error(
+      `Error generating npm-shrinkwrap.json:\n${res.stderr || res.stdout}`,
+    );
+    process.exit(res.exitCode);
+  } else if (res.failed) {
+    logger.error({ res }, 'npm-shrinkwrap.json generation failed');
+    process.exit(-1);
+  } else {
+    logger.debug(`npm-shrinkwrap.json generated:\n${res.stdout || res.stderr}`);
   }
 }
