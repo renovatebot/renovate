@@ -6,7 +6,7 @@ import { ensureTrailingSlash } from '../../../util/url.ts';
 import * as ivyVersioning from '../../versioning/ivy/index.ts';
 import { compare } from '../../versioning/maven/compare.ts';
 import { Datasource } from '../datasource.ts';
-import { MAVEN_REPO } from '../maven/common.ts';
+import { MAVEN_REPO, isMavenCentral } from '../maven/common.ts';
 import { downloadHttpContent } from '../maven/util.ts';
 import { extractPageLinks, getLatestVersion } from '../sbt-package/util.ts';
 import type {
@@ -235,7 +235,7 @@ export class SbtPluginDatasource extends Datasource {
     const repoRoot = ensureTrailingSlash(registryUrl);
     const searchRoots: string[] = [];
     // Optimize lookup order
-    if (!registryUrl.startsWith(MAVEN_REPO)) {
+    if (!isMavenCentral(registryUrl)) {
       searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
     }
     searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
