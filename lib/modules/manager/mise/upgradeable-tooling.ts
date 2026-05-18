@@ -325,21 +325,6 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^jq-(?<version>\\S+)',
     },
   },
-  kafka: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: (version) => {
-      const apacheMatches = /^apache-(?<version>\d\S+)/.exec(version)?.groups;
-      if (apacheMatches) {
-        return {
-          datasource: GithubTagsDatasource.id,
-          packageName: 'apache/kafka',
-          currentValue: apacheMatches.version,
-        };
-      }
-
-      return undefined;
-    },
-  },
   lefthook: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {

@@ -67,7 +67,6 @@ describe('modules/manager/mise/extract', () => {
       hivemind = "1.1.0"
       hk = "1.1.2"
       jq = "1.7.1"
-      kafka = "apache-3.9.0"
       lefthook = "1.11.13"
       localstack = "4.3.0"
       lychee = "0.19.1"
@@ -207,12 +206,6 @@ describe('modules/manager/mise/extract', () => {
             depName: 'jq',
             extractVersion: '^jq-(?<version>\\S+)',
             packageName: 'jqlang/jq',
-          },
-          {
-            currentValue: '3.9.0',
-            datasource: 'github-tags',
-            depName: 'kafka',
-            packageName: 'apache/kafka',
           },
           {
             currentValue: '1.11.13',
