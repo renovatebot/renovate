@@ -25,4 +25,4 @@ Two discussion categories are available:
 
 - PRs require 100% test coverage. Use `/* v8 ignore ... */` sparingly when tests wouldn't prove anything.
 - Do not force push PR branches.
-- Follow the PR template.
+- Follow the PR template (`.github/pull_request_template.md`).
