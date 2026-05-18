@@ -119,8 +119,7 @@ function extractRepositoryAction(
     const cleanComment = parsed.commentString.slice(1);
     const matchEndIndex = commentData.index + commentData.matchedString.length;
     const commentSuffix = cleanComment.slice(0, matchEndIndex);
-    dep.replaceString =
-      valueString + commentPrecedingWhitespace + '#' + commentSuffix;
+    dep.replaceString = `${valueString}${commentPrecedingWhitespace}#${commentSuffix}`;
   } else if (commentData.ratchetExclude) {
     dep.replaceString =
       valueString + commentPrecedingWhitespace + parsed.commentString;

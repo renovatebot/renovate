@@ -11,7 +11,7 @@ import { delimiters, extractRubyVersion, getLockFilePath } from './common.ts';
 import { extractLockFileEntries } from './locked-version.ts';
 
 function formatContent(input: string): string {
-  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
+  return `${input.replace(regEx(/^ {2}/), '')}\n`; //remove leading whitespace and add a new line at the end
 }
 
 const variableMatchRegex = regEx(

@@ -18,27 +18,27 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
   process.env.TMPDIR = process.env.RENOVATE_TMPDIR ?? os.tmpdir();
   if (config.baseDir) {
-    logger.debug('Using configured baseDir: ' + config.baseDir);
+    logger.debug(`Using configured baseDir: ${config.baseDir}`);
   } else {
     config.baseDir = upath.join(process.env.TMPDIR, 'renovate');
-    logger.debug('Using baseDir: ' + config.baseDir);
+    logger.debug(`Using baseDir: ${config.baseDir}`);
   }
   await fs.ensureDir(config.baseDir);
   if (config.cacheDir) {
-    logger.debug('Using configured cacheDir: ' + config.cacheDir);
+    logger.debug(`Using configured cacheDir: ${config.cacheDir}`);
   } else {
     config.cacheDir = upath.join(config.baseDir, 'cache');
-    logger.debug('Using cacheDir: ' + config.cacheDir);
+    logger.debug(`Using cacheDir: ${config.cacheDir}`);
   }
   await fs.ensureDir(config.cacheDir);
   if (config.binarySource === 'docker' || config.binarySource === 'install') {
     if (config.containerbaseDir) {
       logger.debug(
-        'Using configured containerbaseDir: ' + config.containerbaseDir,
+        `Using configured containerbaseDir: ${config.containerbaseDir}`,
       );
     } else {
       config.containerbaseDir = upath.join(config.cacheDir, 'containerbase');
-      logger.debug('Using containerbaseDir: ' + config.containerbaseDir);
+      logger.debug(`Using containerbaseDir: ${config.containerbaseDir}`);
     }
     await fs.ensureDir(config.containerbaseDir);
   }

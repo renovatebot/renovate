@@ -37,5 +37,5 @@ const registry = MiseRegistryJson.parse(
 
 await updateJsonFile(
   'lib/data/mise-registry.json',
-  JSON.stringify(registry, null, 2) + '\n',
+  `${JSON.stringify(registry, null, 2)}\n`,
 );

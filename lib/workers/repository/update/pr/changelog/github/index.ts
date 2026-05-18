@@ -85,7 +85,7 @@ export async function getReleaseNotesMd(
     { cacheProvider: memCacheProvider },
   );
 
-  const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
+  const changelogMd = `${fromBase64(fileRes.body.content)}\n#\n##`;
   return { changelogFile, changelogMd };
 }
 

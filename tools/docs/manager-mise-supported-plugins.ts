@@ -88,9 +88,7 @@ function generateCombinedTooling(): string {
   const maybeCount = allTools.filter((t) => t.supported === 'maybe').length;
   const unsupportedCount = allTools.filter((t) => t.supported === false).length;
 
-  content =
-    `Renovate's \`mise\` manager can version the following tool short names.\nOut of ${total} known tools: ${supportedCount} supported, ${maybeCount} possibly supported, ${unsupportedCount} unsupported.\n` +
-    content;
+  content = `Renovate's \`mise\` manager can version the following tool short names.\nOut of ${total} known tools: ${supportedCount} supported, ${maybeCount} possibly supported, ${unsupportedCount} unsupported.\n${content}`;
 
   for (const { name, url, source, supported, supportNote } of allTools) {
     let supportedOutput = '❌';

@@ -303,7 +303,7 @@ async function resetToBranch(branchName: string): Promise<void> {
   logger.debug(`resetToBranch(${branchName})`);
   await git.raw(['reset', '--hard']);
   await gitRetry(() => git.checkout(branchName));
-  await git.raw(['reset', '--hard', 'origin/' + branchName]);
+  await git.raw(['reset', '--hard', `origin/${branchName}`]);
   await git.raw(['clean', '-fd']);
 }
 
@@ -1046,7 +1046,7 @@ export async function mergeToLocal(
       git.checkout([
         '-B',
         config.currentBranch,
-        'origin/' + config.currentBranch,
+        `origin/${config.currentBranch}`,
       ]),
     );
     status = await git.status();
@@ -1078,13 +1078,13 @@ export async function mergeBranch(branchName: string): Promise<void> {
     await writeGitAuthor();
     await git.reset(ResetMode.HARD);
     await gitRetry(() =>
-      git.checkout(['-B', branchName, 'origin/' + branchName]),
+      git.checkout(['-B', branchName, `origin/${branchName}`]),
     );
     await gitRetry(() =>
       git.checkout([
         '-B',
         config.currentBranch,
-        'origin/' + config.currentBranch,
+        `origin/${config.currentBranch}`,
       ]),
     );
     status = await git.status();
@@ -1117,7 +1117,7 @@ export async function getBranchLastCommitTime(
 ): Promise<Date> {
   await syncGit();
   try {
-    const time = await getCommitDate('origin/' + branchName);
+    const time = await getCommitDate(`origin/${branchName}`);
     return time.toJSDate();
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
@@ -1165,7 +1165,7 @@ export async function getFile(
   await syncGit();
   try {
     const content = await git.show([
-      'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
+      `origin/${branchName ?? config.currentBranch}:${filePath}`,
     ]);
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(filePath, content);
@@ -1243,7 +1243,7 @@ export async function prepareCommit({
     await git.raw(['clean', '-fd']);
     const parentCommitSha = config.currentBranchSha;
     await gitRetry(() =>
-      git.checkout(['-B', branchName, 'origin/' + config.currentBranch]),
+      git.checkout(['-B', branchName, `origin/${config.currentBranch}`]),
     );
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
@@ -1458,7 +1458,7 @@ export function getUrl({
     auth,
     hostname,
     host,
-    pathname: repository + '.git',
+    pathname: `${repository}.git`,
   });
 }
 
