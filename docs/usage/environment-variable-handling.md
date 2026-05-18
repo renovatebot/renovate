@@ -21,7 +21,7 @@ This is an intentional decision to protect against two key attack vectors:
 - an ["insider attack"](./security-and-permissions.md#execution-of-code-insider-attack) from a user of your self-hosted Renovate deployment
 - an ["outsider attack"](./security-and-permissions.md#execution-of-code-outsider-attack) from a malicious dependency
 
-By reducing the environment variables provided to child processes, we can reduce the risk of a malicious actor from receiving access to potentially sensitive information, such as authentication tokens.
+By limiting the environment variables provided to child processes, we can reduce the risk of a malicious actor from receiving access to potentially sensitive information, such as authentication tokens.
 
 By default, Renovate will **always** pass the following environment variables to child processes:
 
@@ -40,9 +40,7 @@ As a self-hosted administrator, it is possible to allowlist other environment va
 - [`allowedEnv`](./self-hosted-configuration.md#allowedenv): allows users to specify values for allowlisted environment variables in their repository configuration using [`env`](./configuration-options.md#env)
 - [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables): administrator-defined environment variables, injected directly into every child process. Users cannot override these in their repository configuration
 - [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv): ⚠️ dangerously expose all environment variables from the Renovate process to all child processes
-- [`extends: ["global:safeEnv"]`](./presets-global.md#globalsafeenv): a curated list of commonly used environment variables that should be safe to allow users to configure with [`env`](./configuration-options.md#env)
-  - These were chosen to be safe to **??** to allow self-hosted administrators to decide **??**
-  - This is used by Mend-hosted Renovate
+- [`extends: ["global:safeEnv"]`](./presets-global.md#globalsafeenv): a curated list of commonly used environment variables that should be safe to allow users to configure with [`env`](./configuration-options.md#env). This is used by Mend-hosted Renovate
 
 With these option(s) configured, users will be able to set these environment variable(s) in their repository configuration using [`env`](./configuration-options.md#env).
 
