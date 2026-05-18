@@ -150,6 +150,18 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
+    it('returns undefined registryUrls when endpoint is invalid URL', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'not-a-valid-url',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml',
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
     it('extracts multiple action tag lines with double quotes and comments', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_3.yml'),

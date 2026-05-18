@@ -79,6 +79,15 @@ describe('modules/platform/gitlab/index', () => {
       await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
     });
 
+    it('should throw if endpoint is not a valid URL', async () => {
+      await expect(
+        gitlab.initPlatform({
+          token: 'some-token',
+          endpoint: 'not-a-url',
+        }),
+      ).rejects.toThrow('Invalid GitLab endpoint URL');
+    });
+
     it('should throw if auth fails', async () => {
       // user
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(403);

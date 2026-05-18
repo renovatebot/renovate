@@ -269,16 +269,15 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
         // ignore
       }
     }
-    if (returnVal !== 0) {
-      process.exit(returnVal);
-    }
-    if (filesValidated) {
+    if (returnVal === 0 && filesValidated) {
       logger.info(
         `Config validated successfully against ${filesValidated} file(s)`,
       );
     } else {
       logger.warn(`No files to perform configuration validation against`);
     }
+    // Use exitCode (not process.exit) so async log streams can flush
+    process.exitCode = returnVal;
   });
 
   await program.parseAsync();

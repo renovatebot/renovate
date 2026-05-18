@@ -113,4 +113,3 @@ Renovate's `mise` manager does not support the following tool syntax:
 ### Supported default registry tool short names
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->
