@@ -46,6 +46,29 @@ As a self-hosted administrator, it is possible to allowlist other environment va
 
 With these option(s) configured, users will be able to set these environment variable(s) in their repository configuration using [`env`](./configuration-options.md#env).
 
+## Precedence
+
+```mermaid
+flowchart TD
+    A["<b>extraEnv</b><br/><small>Manager-defined defaults/hints<br/>string value = default, null = inherit key only</small>"]
+    B["<b>parentEnv</b><br/><small>process.env filtered to basicEnvVars<br/>+ string keys from extraEnv</small>"]
+    C["<b>globalConfigEnv</b><br/><small>customEnvVariables<br/>set by self-hosted admin at startup</small>"]
+    D["<b>userConfiguredEnv</b><br/><small>env config in renovate.json<br/>repo owner, restricted by allowedEnv</small>"]
+    E["<b>forcedEnv</b><br/><small>Hardcoded per exec-call<br/>by Renovate internals</small>"]
+    F["<b>Child Process</b>"]
+
+    A -->|"overridden by"| B
+    B -->|"overridden by"| C
+    C -->|"overridden by"| D
+    D -->|"overridden by"| E
+    E --> F
+
+    G["<b>exposeAllEnv = true</b><br/><small>Bypasses all layering,<br/>passes entire process.env</small>"]
+    G -.->|"short-circuits to"| F
+```
+
+This flows lowest-to-highest precedence top-to-bottom. The `exposeAllEnv` bypass is shown as a dashed shortcut since it skips the whole chain entirely.
+
 ## Templating
 
 Allowlisted environment variables can be referenced in templates.
