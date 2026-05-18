@@ -1016,6 +1016,7 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
     type: 'boolean',
     default: false,
+    advancedUse: true,
   },
   {
     name: 'allowPlugins',
