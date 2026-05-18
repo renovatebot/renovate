@@ -26,4 +26,3 @@ Two discussion categories are available:
 - PRs require 100% test coverage. Use `/* v8 ignore ... */` sparingly when tests wouldn't prove anything.
 - Do not force push PR branches.
 - Follow the PR template.
-- AI assistance must be disclosed in pull requests. Include the model being used, too.
