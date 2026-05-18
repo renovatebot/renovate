@@ -171,17 +171,13 @@ describe('logger/pretty-stdout', () => {
     });
   });
 
-  describe('RenovateStream', () => {
-    it('writes formatted data to destination', () => {
-      const chunks: string[] = [];
-      const destination = partial<NodeJS.WritableStream>({
-        write: (chunk: string) => {
-          chunks.push(chunk);
-          return true;
-        },
-      });
+  describe('PrettyStdoutStream', () => {
+    it('writes formatted data to stdout', () => {
+      const stdoutSpy = vi
+        .spyOn(process.stdout, 'write')
+        .mockImplementation(() => true);
 
-      const stream = new prettyStdout.RenovateStream(destination);
+      const stream = new prettyStdout.PrettyStdoutStream();
       const rec: BunyanRecord = {
         level: 10,
         msg: 'test message',
@@ -189,28 +185,8 @@ describe('logger/pretty-stdout', () => {
       };
 
       stream.write(rec);
-      expect(chunks).toHaveLength(1);
-      expect(chunks[0]).toContain('test message');
-    });
-
-    it('writes without colors when colorize is false', () => {
-      const chunks: string[] = [];
-      const destination = partial<NodeJS.WritableStream>({
-        write: (chunk: string) => {
-          chunks.push(chunk);
-          return true;
-        },
-      });
-
-      const stream = new prettyStdout.RenovateStream(destination, false);
-      const rec: BunyanRecord = {
-        level: 10,
-        msg: 'test message',
-        v: 0,
-      };
-
-      stream.write(rec);
-      expect(chunks).toEqual(['TRACE: test message\n']);
+      expect(stdoutSpy).toHaveBeenCalledOnce();
+      expect(stdoutSpy.mock.calls[0][0]).toContain('test message');
     });
   });
 });

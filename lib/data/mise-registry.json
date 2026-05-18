@@ -283,7 +283,6 @@
     "asdf": "mathew-fleisch/asdf-bashbot"
   },
   "bashly": {
-    "asdf": "mise-plugins/mise-bashly",
     "gem": "bashly"
   },
   "bat": {
@@ -318,6 +317,10 @@
   "benthos": {
     "aqua": "redpanda-data/connect",
     "asdf": "benthosdev/benthos-asdf"
+  },
+  "betterleaks": {
+    "aqua": "betterleaks/betterleaks",
+    "github": "betterleaks/betterleaks"
   },
   "bfs": {
     "asdf": "mise-plugins/mise-bfs",
@@ -496,7 +499,7 @@
     "asdf": "jmoratilla/asdf-cheat-plugin"
   },
   "checkmake": {
-    "aqua": "mrtazz/checkmake"
+    "aqua": "checkmake/checkmake"
   },
   "checkov": {
     "aqua": "bridgecrewio/checkov",
@@ -553,10 +556,12 @@
   },
   "clang": {
     "asdf": "mise-plugins/mise-llvm",
+    "conda": "clang",
     "vfox": "mise-plugins/vfox-clang"
   },
   "clang-format": {
-    "asdf": "mise-plugins/mise-llvm"
+    "asdf": "mise-plugins/mise-llvm",
+    "conda": "clang-format"
   },
   "clarinet": {
     "asdf": "alexgo-io/asdf-clarinet",
@@ -638,6 +643,9 @@
     "aqua": "just-every/code",
     "npm": "@just-every/code"
   },
+  "code-review-graph": {
+    "pipx": "code-review-graph"
+  },
   "codebuff": {
     "npm": "codebuff"
   },
@@ -656,6 +664,9 @@
   "codex": {
     "aqua": "openai/codex",
     "npm": "@openai/codex"
+  },
+  "codon": {
+    "github": "exaloop/codon"
   },
   "colima": {
     "aqua": "abiosoft/colima",
@@ -1037,6 +1048,7 @@
     "core": "elixir"
   },
   "elixir-ls": {
+    "aqua": "elixir-lsp/elixir-ls",
     "asdf": "mise-plugins/mise-elixir-ls"
   },
   "elm": {
@@ -1083,7 +1095,12 @@
     "aqua": "ktr0731/evans",
     "asdf": "goki90210/asdf-evans"
   },
+  "expert": {
+    "aqua": "expert-lsp/expert",
+    "github": "expert-lsp/expert"
+  },
   "eza": {
+    "aqua": "eza-community/eza",
     "asdf": "mise-plugins/mise-eza",
     "cargo": "eza"
   },
@@ -1096,7 +1113,8 @@
     "cargo": "fd-find"
   },
   "ffmpeg": {
-    "asdf": "mise-plugins/mise-ffmpeg"
+    "asdf": "mise-plugins/mise-ffmpeg",
+    "conda": "ffmpeg"
   },
   "figma-export": {
     "asdf": "younke/asdf-figma-export",
@@ -1135,6 +1153,12 @@
   "fluttergen": {
     "asdf": "FlutterGen/asdf-fluttergen",
     "github": "FlutterGen/flutter_gen"
+  },
+  "flux-operator": {
+    "aqua": "controlplaneio-fluxcd/flux-operator"
+  },
+  "flux-operator-mcp": {
+    "aqua": "controlplaneio-fluxcd/flux-operator/flux-operator-mcp"
   },
   "flux2": {
     "aqua": "fluxcd/flux2",
@@ -1217,7 +1241,8 @@
     "aqua": "suzuki-shunsuke/ghalint"
   },
   "ghc": {
-    "asdf": "mise-plugins/mise-ghcup"
+    "asdf": "mise-plugins/mise-ghcup",
+    "conda": "ghc"
   },
   "ghcup": {
     "aqua": "haskell/ghcup-hs",
@@ -1242,6 +1267,9 @@
   "git-cliff": {
     "aqua": "orhun/git-cliff",
     "asdf": "jylenhof/asdf-git-cliff"
+  },
+  "git-filter-repo": {
+    "pipx": "git-filter-repo"
   },
   "git-lfs": {
     "aqua": "git-lfs/git-lfs"
@@ -1321,9 +1349,6 @@
     "aqua": "jstemmer/go-junit-report",
     "asdf": "jwillker/asdf-go-junit-report"
   },
-  "go-sdk": {
-    "asdf": "mise-plugins/mise-go-sdk"
-  },
   "go-swagger": {
     "aqua": "go-swagger/go-swagger",
     "asdf": "jfreeland/asdf-go-swagger"
@@ -1370,6 +1395,9 @@
     "aqua": "hairyhenderson/gomplate",
     "asdf": "sneakybeaky/asdf-gomplate"
   },
+  "google-java-format": {
+    "aqua": "google/google-java-format"
+  },
   "gopass": {
     "aqua": "gopasspw/gopass",
     "asdf": "trallnag/asdf-gopass"
@@ -1397,6 +1425,9 @@
   "gradle": {
     "aqua": "gradle/gradle",
     "vfox": "mise-plugins/vfox-gradle"
+  },
+  "grafana-kubernetes-plugin": {
+    "aqua": "ricoberger/grafana-kubernetes-plugin"
   },
   "grain": {
     "asdf": "mise-plugins/mise-grain",
@@ -1433,6 +1464,9 @@
   "grype": {
     "aqua": "anchore/grype",
     "asdf": "poikilotherm/asdf-grype"
+  },
+  "gsudo": {
+    "github": "gerardog/gsudo"
   },
   "gum": {
     "aqua": "charmbracelet/gum",
@@ -1600,7 +1634,8 @@
     "aqua": "IBM-Cloud/ibm-cloud-cli-release"
   },
   "imagemagick": {
-    "asdf": "mise-plugins/mise-imagemagick"
+    "asdf": "mise-plugins/mise-imagemagick",
+    "conda": "imagemagick"
   },
   "imgpkg": {
     "aqua": "carvel-dev/imgpkg",
@@ -1647,7 +1682,8 @@
     "go": "github.com/josephburnett/jd"
   },
   "jfrog-cli": {
-    "asdf": "mise-plugins/mise-jfrog-cli"
+    "asdf": "mise-plugins/mise-jfrog-cli",
+    "conda": "jfrog-cli"
   },
   "jib": {
     "asdf": "mise-plugins/mise-jib"
@@ -1800,6 +1836,9 @@
   "kiota": {
     "aqua": "microsoft/kiota",
     "asdf": "asdf-community/asdf-kiota"
+  },
+  "kiro-cli": {
+    "aqua": "kiro.dev/kiro-cli"
   },
   "kn": {
     "aqua": "knative/client",
@@ -2057,16 +2096,18 @@
     "aqua": "linkerd/linkerd2",
     "asdf": "kforsthoevel/asdf-linkerd"
   },
-  "liqoctl": {
-    "aqua": "liqotech/liqo",
-    "asdf": "pdemagny/asdf-liqoctl"
-  },
   "liquibase": {
     "asdf": "mise-plugins/mise-liquibase"
   },
   "litestream": {
     "aqua": "benbjohnson/litestream",
     "asdf": "threkk/asdf-litestream"
+  },
+  "llama.cpp": {
+    "github": "ggml-org/llama.cpp"
+  },
+  "llmfit": {
+    "github": "AlexsJones/llmfit"
   },
   "lnav": {
     "aqua": "tstack/lnav"
@@ -2097,7 +2138,8 @@
     "asdf": "bellini666/asdf-lua-language-server"
   },
   "luajit": {
-    "asdf": "mise-plugins/mise-luaJIT"
+    "asdf": "mise-plugins/mise-luaJIT",
+    "conda": "luajit"
   },
   "luau": {
     "aqua": "luau-lang/luau"
@@ -2121,7 +2163,8 @@
     "aqua": "carthage-software/mago"
   },
   "make": {
-    "asdf": "mise-plugins/mise-make"
+    "asdf": "mise-plugins/mise-make",
+    "conda": "make"
   },
   "mani": {
     "aqua": "alajmo/mani",
@@ -2210,7 +2253,8 @@
     "asdf": "alvarobp/asdf-minikube"
   },
   "minio": {
-    "asdf": "mise-plugins/mise-minio"
+    "asdf": "mise-plugins/mise-minio",
+    "conda": "minio-server"
   },
   "minishift": {
     "aqua": "minishift/minishift",
@@ -2271,6 +2315,9 @@
   "mysql": {
     "asdf": "mise-plugins/mise-mysql"
   },
+  "mysql-client": {
+    "conda": "mysql-client"
+  },
   "mysqldef": {
     "aqua": "sqldef/sqldef/mysqldef"
   },
@@ -2288,6 +2335,9 @@
   },
   "nelm": {
     "aqua": "werf/nelm"
+  },
+  "neo4j": {
+    "http": "neo4j"
   },
   "neonctl": {
     "aqua": "neondatabase/neonctl"
@@ -2357,7 +2407,8 @@
     "aqua": "cloudentity/oauth2c"
   },
   "oc": {
-    "asdf": "mise-plugins/mise-oc"
+    "asdf": "mise-plugins/mise-oc",
+    "conda": "openshift-cli"
   },
   "oci": {
     "asdf": "mise-plugins/mise-oci"
@@ -2438,9 +2489,6 @@
   "opensearch-cli": {
     "asdf": "mise-plugins/mise-opensearch-cli",
     "github": "opensearch-project/opensearch-cli"
-  },
-  "openshift-install": {
-    "asdf": "mise-plugins/mise-openshift-install"
   },
   "opentofu": {
     "aqua": "opentofu/opentofu",
@@ -2741,7 +2789,7 @@
     "asdf": "johnlayton/asdf-rclone"
   },
   "rebar": {
-    "asdf": "mise-plugins/mise-rebar"
+    "github": "erlang/rebar3"
   },
   "reckoner": {
     "asdf": "FairwindsOps/asdf-reckoner",
@@ -2839,6 +2887,7 @@
     "asdf": "simhem/asdf-ruff"
   },
   "rumdl": {
+    "aqua": "rvben/rumdl",
     "github": "rvben/rumdl"
   },
   "rush": {
@@ -2851,6 +2900,9 @@
   "rust-analyzer": {
     "aqua": "rust-lang/rust-analyzer",
     "asdf": "Xyven1/asdf-rust-analyzer"
+  },
+  "rustfs": {
+    "github": "rustfs/rustfs"
   },
   "rustic": {
     "aqua": "rustic-rs/rustic",
@@ -2872,7 +2924,8 @@
     "aqua": "sqshq/sampler"
   },
   "sbt": {
-    "asdf": "mise-plugins/mise-sbt"
+    "asdf": "mise-plugins/mise-sbt",
+    "conda": "sbt"
   },
   "scala": {
     "asdf": "mise-plugins/mise-scala",
@@ -3075,7 +3128,8 @@
     "github": "sqlc-dev/sqlc"
   },
   "sqlite": {
-    "asdf": "mise-plugins/mise-sqlite"
+    "asdf": "mise-plugins/mise-sqlite",
+    "conda": "sqlite"
   },
   "sqlite3def": {
     "aqua": "sqldef/sqldef/sqlite3def"
@@ -3189,6 +3243,9 @@
   "syft": {
     "aqua": "anchore/syft",
     "asdf": "davidgp1701/asdf-syft"
+  },
+  "systemctl-tui": {
+    "aqua": "rgwood/systemctl-tui"
   },
   "tailpipe": {
     "aqua": "turbot/tailpipe"
@@ -3496,6 +3553,9 @@
   "ubi": {
     "aqua": "houseabsolute/ubi"
   },
+  "umoci": {
+    "aqua": "opencontainers/umoci"
+  },
   "unison": {
     "asdf": "susurri/asdf-unison",
     "github": "unisonweb/unison"
@@ -3588,7 +3648,8 @@
     "asdf": "ryodocx/asdf-viddy"
   },
   "vim": {
-    "asdf": "mise-plugins/mise-vim"
+    "asdf": "mise-plugins/mise-vim",
+    "conda": "vim"
   },
   "viteplus": {
     "npm": "vite-plus"
@@ -3616,6 +3677,10 @@
   },
   "wash": {
     "aqua": "wasmCloud/wasmCloud/wash"
+  },
+  "wasm-tools": {
+    "aqua": "bytecodealliance/wasm-tools",
+    "cargo": "wasm-tools"
   },
   "wasm4": {
     "aqua": "aduros/wasm4",
@@ -3715,6 +3780,9 @@
   "yamlscript": {
     "aqua": "yaml/yamlscript",
     "asdf": "mise-plugins/mise-yamlscript"
+  },
+  "yara-x": {
+    "github": "VirusTotal/yara-x"
   },
   "yarn": {
     "aqua": "yarnpkg/berry",

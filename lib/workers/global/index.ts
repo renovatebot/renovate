@@ -67,12 +67,12 @@ export async function getRepositoryConfig(
   repoParts.pop();
   repoConfig.parentOrg = repoParts.join('/');
   repoConfig.topLevelOrg = repoParts.shift();
-  // TODO: types (#22198)
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   repoConfig.localDir =
     platform === 'local'
       ? process.cwd()
-      : upath.join(repoConfig.baseDir, `./repos/${platform}/${repoName}`);
+      : // TODO: types (#22198)
+        upath.join(repoConfig.baseDir!, `./repos/${platform}/${repoName}`);
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
   return configParser.filterConfig(repoConfig, 'repository');

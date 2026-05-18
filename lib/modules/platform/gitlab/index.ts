@@ -28,7 +28,11 @@ import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
+import {
+  ensureTrailingSlash,
+  getQueryString,
+  parseUrl,
+} from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -114,11 +118,13 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  if (endpoint) {
+  if (!endpoint) {
+    logger.debug(`Using default GitLab endpoint: ${defaults.endpoint}`);
+  } else if (parseUrl(endpoint) === null) {
+    throw new Error(`Invalid GitLab endpoint URL: ${endpoint}`);
+  } else {
     defaults.endpoint = ensureTrailingSlash(endpoint);
     setBaseUrl(defaults.endpoint);
-  } else {
-    logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
@@ -639,19 +645,43 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
+      // The merge_trains endpoint's auto_merge parameter requires GitLab
+      // 17.11+. On older versions we fall back to the /merge endpoint so the
+      // MR still automerges, just not on the train.
+      // https://docs.gitlab.com/api/merge_trains/#add-a-merge-request-to-a-merge-train
+      const useMergeTrain =
+        config.mergeTrainsEnabled && !semver.lt(defaults.version, '17.11.0');
+      if (config.mergeTrainsEnabled && !useMergeTrain) {
+        logger.once.warn(
+          { version: defaults.version },
+          'Merge trains require GitLab 17.11.0 or later, falling back to /merge endpoint',
+        );
+      }
+
       // Even if Gitlab returns a "merge-able" merge request status, enabling auto-merge sometimes
       // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
-          await gitlabApi.putJson(
-            `projects/${config.repository}/merge_requests/${pr}/merge`,
-            {
-              body: {
-                should_remove_source_branch: true,
-                merge_when_pipeline_succeeds: true,
+          if (useMergeTrain) {
+            await gitlabApi.postJson(
+              `projects/${config.repository}/merge_trains/merge_requests/${pr}`,
+              {
+                body: {
+                  auto_merge: true,
+                },
               },
-            },
-          );
+            );
+          } else {
+            await gitlabApi.putJson(
+              `projects/${config.repository}/merge_requests/${pr}/merge`,
+              {
+                body: {
+                  should_remove_source_branch: true,
+                  merge_when_pipeline_succeeds: true,
+                },
+              },
+            );
+          }
           break;
         } catch (err) {
           logger.debug(

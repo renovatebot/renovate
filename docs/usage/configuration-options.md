@@ -11,7 +11,6 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 You can store your Renovate configuration file in one of these locations:
 
 <!-- config-filenames-begin -->
-<!-- config-filenames-end -->
 
 Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
 The bot first checks all the files in the `configFileNames` array before checking from the above file list.
@@ -901,7 +900,6 @@ If you need to _override_ constraints that Renovate detects from the repository,
 The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
 
 <!-- constraints-tools-begin -->
-<!-- constraints-tools-end -->
 
 <!-- prettier-ignore -->
 !!! note
@@ -910,7 +908,6 @@ The following `constraints` are available to specify which package managers/lang
 Additionally, there are several additional constraints that can be specified:
 
 <!-- additional-constraints-begin -->
-<!-- additional-constraints-end -->
 
 <!-- prettier-ignore -->
 !!! note
@@ -932,6 +929,7 @@ Additionally, the "datasource" within Renovate must be capable of returning `con
 This feature is limited to the following datasources:
 
 - `crate`
+- `go`
 - `jenkins-plugins`
 - `npm`
 - `packagist`
@@ -944,6 +942,10 @@ Sometimes when using private registries they may omit constraints information, w
 !!! warning
     Enabling this feature may result in many package updates being filtered out silently.
     See below for a description of how it works.
+
+<!-- prettier-ignore -->
+!!! warning
+    Enabling this feature when using [`binarySource=global`](./self-hosted-configuration.md#binarysource) can lead to situations where Renovate suggests updates that it cannot then update, as it does not have the right tool versions installed.
 
 When `constraintsFiltering=strict`, the following logic applies:
 
@@ -965,6 +967,30 @@ When using with `npm`, we recommend you:
 
 - Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
+
+## `constraintsVersioning`
+
+Use `constraintsVersioning` to override the versioning scheme used when filtering releases by specific constraint names with [`constraintsFiltering`](#constraintsfiltering).
+
+<!-- prettier-ignore -->
+!!! note
+    Each key must be an [additional constraint name](#constraints) (i.e. not a tool name), and each value must be a valid versioning scheme ID.
+
+Datasources that support constraints filtering may set sensible defaults for their constraints.
+You can override these defaults in your Renovate config.
+
+For example, to use a SemVer-style versioning scheme when defining the `rubygems` constraint:
+
+```json title="Use SemVer-style range for defining version constraint, instead of 'ruby' versioning"
+{
+  "constraints": {
+    "rubygems": "^1.3"
+  },
+  "constraintsVersioning": {
+    "rubygems": "semver-coerced"
+  }
+}
+```
 
 ## `customDatasources`
 
@@ -2668,7 +2694,6 @@ Renovate then commits that lock file to the update branch and creates the lock f
 Supported lock files:
 
 <!-- lock-file-maintenance-table-start -->
-<!-- lock-file-maintenance-table-end -->
 
 Support for new lock files may be added via feature request.
 
@@ -2969,7 +2994,7 @@ If configured to `true`, it means that any `.npmrc` file in the repo will have `
 
 ## `osvVulnerabilityAlerts`
 
-Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies have known vulnerabilities.
+Renovate integrates with [OSV](https://osv.dev/), an Open Source vulnerability database, to check if extracted dependencies have known vulnerabilities.
 Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability fixes (once they are available).
 
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
@@ -4149,7 +4174,6 @@ Whether to install any additional tools dynamically before executing the `comman
 The possible tool names that are known by [Containerbase](https://github.com/containerbase/base) are:
 
 <!-- installTools-tools-begin -->
-<!-- installTools-tools-end -->
 
 <!-- prettier-ignore -->
 !!! note

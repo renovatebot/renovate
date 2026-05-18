@@ -627,6 +627,9 @@ export async function processBranch(
       config.artifactErrors = (config.artifactErrors ?? []).concat(
         additionalFiles.artifactErrors,
       );
+      config.artifactNotices = (config.artifactNotices ?? []).concat(
+        additionalFiles.artifactNotices ?? [],
+      );
       config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
         additionalFiles.updatedArtifacts,
       );

@@ -7,12 +7,14 @@ const githubApi = new githubHttp.GithubHttp();
 
 export async function getAppDetails(token: string): Promise<UserDetails> {
   try {
+    // set count to one bypass graphql check
     const appData = await githubApi.requestGraphql<{
       viewer: {
+        // https://docs.github.com/en/graphql/reference/objects#user
         login: string;
         databaseId: number;
       };
-    }>('query { viewer { login databaseId }}', { token });
+    }>('query { viewer { login databaseId }}', { token, count: 1 });
     if (!appData?.data) {
       throw new Error("Init: Can't get App details");
     }
@@ -20,6 +22,8 @@ export async function getAppDetails(token: string): Promise<UserDetails> {
       username: appData.data.viewer.login,
       name: appData.data.viewer.login,
       id: appData.data.viewer.databaseId,
+      // When using the GraphQL API, email requires a token with user:email scope
+      email: null,
     };
   } catch (err) {
     logger.debug({ err }, 'Error authenticating with GitHub');
@@ -34,9 +38,11 @@ export async function getUserDetails(
   try {
     const userData = (
       await githubApi.getJsonUnchecked<{
+        // https://docs.github.com/en/rest/users/users
         login: string;
         name: string;
         id: number;
+        email: EmailAddress | null;
       }>(endpoint + 'user', {
         token,
       })
@@ -45,6 +51,7 @@ export async function getUserDetails(
       username: userData.login,
       name: userData.name,
       id: userData.id,
+      email: userData.email,
     };
   } catch (err) {
     logger.debug({ err }, 'Error authenticating with GitHub');

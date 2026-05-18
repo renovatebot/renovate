@@ -1,10 +1,10 @@
 import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
 import _slugify from 'slugify';
-import { mergeChildConfig } from '../../config/index.ts';
 import type {
   PackageRule,
   PackageRuleInputConfig,
 } from '../../config/types.ts';
+import { mergeChildConfig } from '../../config/utils.ts';
 import { logger } from '../../logger/index.ts';
 import type { StageName } from '../../types/skip-reason.ts';
 import { compile } from '../template/index.ts';

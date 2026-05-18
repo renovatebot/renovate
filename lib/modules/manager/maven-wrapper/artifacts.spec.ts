@@ -32,7 +32,10 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
     osPlatformSpy.mockImplementation(() => 'linux');
-    GlobalConfig.set({ localDir: upath.join('/tmp/github/some/repo') });
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'global',
+    });
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
         isFile: () => true,

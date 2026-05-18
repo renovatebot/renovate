@@ -155,6 +155,22 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     }
   }
 
+  if (option.name === 'constraintsVersioning') {
+    temp.additionalProperties = false;
+    temp.properties = {};
+
+    for (const {
+      name,
+      description,
+    } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+      temp.properties[name] = {
+        type: 'string',
+        // prioritise contraint definitions, as they're more useful than the generated one
+        description: description ?? `A constraint for \`${name}\``,
+      };
+    }
+  }
+
   if (option.name === 'installTools') {
     temp.additionalProperties = false;
     temp.properties = {};
@@ -178,10 +194,11 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
 function createSchemaForParentConfigs(
   options: RenovateOptions[],
   properties: Record<string, any>,
+  definitions: Record<string, any>,
 ): void {
   for (const option of options) {
     if (!option.parents || option.parents.includes('.')) {
-      properties[option.name] = createSingleConfig(option);
+      properties[option.name] = { $ref: `#/definitions/${option.name}` };
     }
   }
 }
@@ -189,11 +206,12 @@ function createSchemaForParentConfigs(
 function addChildrenArrayInParents(
   options: RenovateOptions[],
   properties: Record<string, any>,
+  definitions: Record<string, any>,
 ): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        properties[parent].items = {
+        definitions[parent].items = {
           allOf: [
             {
               type: 'object',
@@ -248,15 +266,17 @@ function toRequiredPropertiesRule(
 function createSchemaForChildConfigs(
   options: RenovateOptions[],
   properties: Record<string, any>,
+  definitions: Record<string, any>,
 ): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        properties[parent].items.allOf[0].properties[option.name] =
-          createSingleConfig(option);
+        definitions[parent].items.allOf[0].properties[option.name] = {
+          $ref: `#/definitions/${option.name}`,
+        };
 
         for (const prop of option.requiredIf ?? []) {
-          properties[parent].items.allOf.push(
+          definitions[parent].items.allOf.push(
             toRequiredPropertiesRule(prop, option),
           );
         }
@@ -295,6 +315,7 @@ export async function generateSchema(
     'x-renovate-version': `${version}`,
     allowComments: true,
     type: 'object',
+    definitions: {} as Record<string, any>,
     properties: {},
 
     /* any configuration items that should not be set - only used in inherited or repo config */
@@ -362,11 +383,16 @@ export async function generateSchema(
     }
     return 0;
   });
+  const definitions = schema.definitions;
+  for (const option of configurationOptions) {
+    definitions[option.name] = createSingleConfig(option);
+  }
+
   const properties = schema.properties as Record<string, any>;
 
-  createSchemaForParentConfigs(configurationOptions, properties);
-  addChildrenArrayInParents(configurationOptions, properties);
-  createSchemaForChildConfigs(configurationOptions, properties);
+  createSchemaForParentConfigs(configurationOptions, properties, definitions);
+  addChildrenArrayInParents(configurationOptions, properties, definitions);
+  createSchemaForChildConfigs(configurationOptions, properties, definitions);
   await updateFile(
     `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,

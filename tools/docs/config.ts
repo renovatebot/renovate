@@ -7,6 +7,7 @@ import {
   allManagersList,
   getManagers,
 } from '../../lib/modules/manager/index.ts';
+import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
 import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
@@ -208,6 +209,14 @@ function genExperimentalMsg(el: Record<string, any>): string {
   return warning + '\n';
 }
 
+function genTemplatingMsg(): string {
+  return (
+    '\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate\'s template syntax"\n' +
+    indent`${2}See [templates](templates.md) for available variables and helpers.` +
+    '\n'
+  );
+}
+
 function genDeprecationMsg(el: Record<string, any>): string {
   let warning =
     '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
@@ -261,6 +270,21 @@ function generateLockFileTable(): string {
   }
 
   return table;
+}
+
+function generateCacheNamespacesList(): string {
+  const namespaces = packageCacheNamespaces
+    .filter((ns) => ns !== '_test-namespace')
+    .slice()
+    .sort();
+
+  let list = '\n';
+  for (const ns of namespaces) {
+    list += `- \`${ns}\`\n`;
+  }
+  list += '\n';
+
+  return list;
 }
 
 function generateConfigFileNames(): string {
@@ -368,17 +392,21 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       for (const key of lookupKeys) {
         const [headerIndex, footerIndex] = indexed[key];
-
-        configOptionsRaw[headerIndex] +=
+        let sectionContent =
           `\n${option.description}\n\n` +
           genTable(Object.entries(el), option.type, option.default);
 
-        if (el.advancedUse) {
-          configOptionsRaw[headerIndex] += generateAdvancedUse();
+        if (el.supportsTemplating) {
+          sectionContent += genTemplatingMsg();
         }
+
+        configOptionsRaw[headerIndex] += sectionContent;
 
         if (el.experimental) {
           configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+        }
+        if (el.advancedUse) {
+          configOptionsRaw[headerIndex] += generateAdvancedUse();
         }
 
         if (is.nonEmptyString(el.deprecationMsg)) {
@@ -389,39 +417,52 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   let content = configOptionsRaw.join('\n');
 
-  if (!bot) {
-    content = replaceContent(content, generateLockFileTable(), {
-      replaceStart: '<!-- lock-file-maintenance-table-start -->',
-      replaceStop: '<!-- lock-file-maintenance-table-end -->',
-    });
+  if (bot) {
+    content = replaceContent(
+      content,
+      generateCacheNamespacesList(),
+      '<!-- Autogenerate cache-namespaces -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateConfigFileNames(), {
-      replaceStart: '<!-- config-filenames-begin -->',
-      replaceStop: '<!-- config-filenames-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateLockFileTable(),
+      '<!-- lock-file-maintenance-table-start -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateToolsForConstraints(), {
-      replaceStart: '<!-- constraints-tools-begin -->',
-      replaceStop: '<!-- constraints-tools-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateConfigFileNames(),
+      '<!-- config-filenames-begin -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateAdditionalConstraints(), {
-      replaceStart: '<!-- additional-constraints-begin -->',
-      replaceStop: '<!-- additional-constraints-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateToolsForConstraints(),
+      '<!-- constraints-tools-begin -->',
+    );
   }
 
   if (!bot) {
-    content = replaceContent(content, generateToolsForInstallTools(), {
-      replaceStart: '<!-- installTools-tools-begin -->',
-      replaceStop: '<!-- installTools-tools-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateAdditionalConstraints(),
+      '<!-- additional-constraints-begin -->',
+    );
+  }
+
+  if (!bot) {
+    content = replaceContent(
+      content,
+      generateToolsForInstallTools(),
+      '<!-- installTools-tools-begin -->',
+    );
   }
 
   await updateFile(`${dist}/${configFile}`, content);

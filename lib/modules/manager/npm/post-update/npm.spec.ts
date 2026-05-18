@@ -1,8 +1,9 @@
 import upath from 'upath';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { ExecError } from '../../../../util/exec/exec-error.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as npmHelper from './npm.ts';
 
@@ -15,7 +16,7 @@ process.env.CONTAINERBASE = 'true';
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
@@ -496,6 +497,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         toolSettings: {
           nodeMaxMemory: 3456,
         },
+        binarySource: 'global',
       });
 
       const execSnapshots = mockExecAll();
@@ -952,6 +954,299 @@ describe('modules/manager/npm/post-update/npm', () => {
           cmd: "npm install --package-lock-only --no-audit --ignore-scripts '; date; echo @11.1.0'",
         },
       ]);
+    });
+  });
+
+  describe('--before with minimumReleaseAge', () => {
+    let execSnapshots: ReturnType<typeof mockExecAll>;
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+      execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('sets --before from minimumReleaseAge', async () => {
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(res.error).toBeFalse();
+      expect(res.beforeFallback).toBeFalse();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('skips --before on unparseable minimumReleaseAge', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: 'invalid garbage' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
+      // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-01T00:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('uses minimumReleaseAge date when stricter than npmrc before date', async () => {
+      // minimumReleaseAge (3 days = June 12) is earlier than npmrc (June 14)
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'before=2026-06-14T00:00:00.000Z\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('skips --before when minimumReleaseAge is absent even if npmrc has before', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'before=2026-06-01T00:00:00.000Z\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('skips --before when .npmrc has min-release-age to avoid npm conflict', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'min-release-age=30\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('retries without --before on ETARGET with "with a date before"', async () => {
+      const etargetError = new ExecError('npm error code ETARGET', {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        stdout: '',
+        stderr:
+          'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
+        options: {},
+      });
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      execSnapshots = mockExecSequence([
+        etargetError,
+        { stdout: '', stderr: '' },
+      ]);
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(res.error).toBeFalse();
+      expect(res.beforeFallback).toBeTrue();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('does not retry on non-before ETARGET errors', async () => {
+      const otherError = new ExecError('npm error code ETARGET', {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        stdout: '',
+        stderr:
+          'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@999.999.999.',
+        options: {},
+      });
+      execSnapshots = mockExecSequence([otherError]);
+
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(res.error).toBeTrue();
+      expect(res.beforeFallback).toBeUndefined();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+  });
+
+  describe('parseNpmrcCooldownDate', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    describe('returns null', () => {
+      it.each`
+        content
+        ${null}
+        ${''}
+        ${'registry=https://registry.npmjs.org\n'}
+        ${'before=not-a-date\n'}
+        ${'before=2026-13-99T00:00:00.000Z\n'}
+        ${'min-release-age=not-a-number\n'}
+      `('for: $content', ({ content }: { content: string | null }) => {
+        expect(npmHelper.parseNpmrcCooldownDate(content)).toBeNull();
+      });
+    });
+
+    describe('parses before= key', () => {
+      it.each`
+        input
+        ${'before=2026-06-01T00:00:00.000Z\n'}
+        ${'before="2026-06-01T00:00:00.000Z"\n'}
+        ${'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z # some comment\naudit=false\n'}
+      `('$input', ({ input }: { input: string }) => {
+        const result = npmHelper.parseNpmrcCooldownDate(input);
+        expect(result?.date.toISO()).toBe('2026-06-01T00:00:00.000Z');
+        expect(result?.source).toBe('before');
+      });
+    });
+
+    describe('parses min-release-age= key', () => {
+      it.each`
+        input
+        ${'min-release-age=30\n'}
+        ${'min-release-age="30"\n'}
+        ${'min-release-age=30 # 30 days\n'}
+        ${'registry=https://registry.npmjs.org\nmin-release-age=30 # 30 days\n'}
+      `('$input', ({ input }: { input: string }) => {
+        const result = npmHelper.parseNpmrcCooldownDate(input);
+        expect(result?.date.toISO()).toBe('2026-05-16T12:00:00.000Z');
+        expect(result?.source).toBe('min-release-age');
+      });
     });
   });
 });
