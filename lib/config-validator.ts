@@ -164,6 +164,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
 
   program.action(async (files, opts) => {
     const strict = opts.strict ?? false;
+    let filesValidated = 0;
 
     if (files.length) {
       let isGlobalConfig = true;
@@ -190,6 +191,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           logger.warn({ file, err }, 'File could not be parsed');
           returnVal = 1;
         }
+
+        filesValidated++;
       }
     } else {
       for (const file of getConfigFileNames().filter(
@@ -211,6 +214,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           logger.warn({ file, err }, 'File could not be parsed');
           returnVal = 1;
         }
+
+        filesValidated++;
       }
       try {
         const pkgJson = JSON.parse(
@@ -224,6 +229,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
             pkgJson.renovate,
             strict,
           );
+
+          filesValidated++;
         }
         if (pkgJson['renovate-config']) {
           logger.info(`Validating package.json > renovate-config`);
@@ -237,6 +244,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
               strict,
               true,
             );
+
+            filesValidated++;
           }
         }
       } catch {
@@ -254,13 +263,18 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
             logger.error({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
           }
+          filesValidated++;
         }
       } catch {
         // ignore
       }
     }
-    if (returnVal === 0) {
-      logger.info('Config validated successfully');
+    if (returnVal === 0 && filesValidated) {
+      logger.info(
+        `Config validated successfully against ${filesValidated} file(s)`,
+      );
+    } else {
+      logger.warn(`No files to perform configuration validation against`);
     }
     // Use exitCode (not process.exit) so async log streams can flush
     process.exitCode = returnVal;
