@@ -50,7 +50,7 @@ With these option(s) configured, users will be able to set these environment var
 flowchart TD
     A["<b>extraEnv</b><br/><small>Manager-defined defaults/hints<br/>string value = default, null = inherit key only</small>"]
     B["<b>parentEnv</b><br/><small>process.env filtered to basicEnvVars<br/>+ string keys from extraEnv</small>"]
-    C["<b>globalConfigEnv</b><br/><small>customEnvVariables<br/>set by self-hosted admin at startup</small>"]
+    C["<b>globalConfigEnv</b><br/><small><code>customEnvVariables</code><br/>set by self-hosted admin at startup</small>"]
     D["<b>userConfiguredEnv</b><br/><small>env config in renovate.json<br/>repo owner, restricted by allowedEnv</small>"]
     E["<b>forcedEnv</b><br/><small>Hardcoded per exec-call<br/>by Renovate internals</small>"]
     F["<b>Child Process</b>"]
