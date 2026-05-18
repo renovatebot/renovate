@@ -1,4 +1,10 @@
-import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNumber,
+  isString,
+} from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -14,6 +20,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { find } from '../../../util/host-rules.ts';
+import { toMs } from '../../../util/pretty-time.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import {
@@ -95,6 +102,16 @@ export function getPoetryRequirement(
   }
 
   return null;
+}
+
+export function getPoetryMinReleaseAgeDays(
+  pyProjectContent: string,
+): number | null {
+  const val = Result.parse(
+    massageToml(pyProjectContent),
+    PoetryPyProject.transform(({ solverMinReleaseAge }) => solverMinReleaseAge),
+  ).unwrapOrNull();
+  return val ?? null;
 }
 
 function getPoetrySources(content: string, fileName: string): PoetrySource[] {
@@ -215,7 +232,7 @@ export async function updateArtifacts({
     const poetryConstraint =
       config.constraints?.poetry ??
       getPoetryRequirement(newPackageFileContent, existingLockFileContent);
-    const extraEnv = {
+    const extraEnv: NodeJS.ProcessEnv = {
       ...(await getSourceCredentialVars(
         newPackageFileContent,
         packageFileName,
@@ -223,6 +240,21 @@ export async function updateArtifacts({
       ...getGitEnvironmentVariables(['poetry']),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };
+
+    if (config.minimumReleaseAge) {
+      const ageMs = toMs(config.minimumReleaseAge);
+      if (isNumber(ageMs)) {
+        const now = DateTime.now();
+        const cutoff = now.minus(ageMs).toUTC();
+        const renovateDays = Math.ceil(now.diff(cutoff, 'days').days);
+        const pyprojectDays = getPoetryMinReleaseAgeDays(newPackageFileContent);
+        const days =
+          isNumber(pyprojectDays) && pyprojectDays > renovateDays
+            ? pyprojectDays
+            : renovateDays;
+        extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = String(days);
+      }
+    }
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,

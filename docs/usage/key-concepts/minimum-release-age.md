@@ -60,6 +60,14 @@ This ensures existing lock files are never broken by the `--before` flag.
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 
+#### Poetry
+
+When `minimumReleaseAge` is configured, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry lock`.
+This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
+
+The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
+If `solver.min-release-age` is already set in `[tool.poetry.solver]` in `pyproject.toml`, Renovate uses the stricter (larger) of the two values.
+
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 <!-- prettier-ignore -->

@@ -272,6 +272,13 @@ export const PoetrySources = LooseArray(PoetrySource, {
   })
   .catch([]);
 
+export const PoetrySolverSection = z
+  .object({
+    'min-release-age': z.number().optional().catch(undefined),
+  })
+  .optional()
+  .catch(undefined);
+
 export const PoetrySection = z.object({
   version: z.string().optional().catch(undefined),
   dependencies: withDepType(
@@ -285,6 +292,7 @@ export const PoetrySection = z.object({
   ).optional(),
   group: PoetryGroupDependencies.optional(),
   source: PoetrySources,
+  solver: PoetrySolverSection,
 });
 
 export type PoetrySection = z.infer<typeof PoetrySection>;
@@ -431,6 +439,7 @@ export const PoetryPyProject = Toml.pipe(
       return {
         packageFileContent,
         poetryRequirement: buildSystem?.poetryRequirement,
+        solverMinReleaseAge: tool?.poetry?.solver?.['min-release-age'],
       };
     }),
 );

@@ -1,4 +1,9 @@
-import { PoetryPyProject, PoetrySection, PoetrySources } from './schema.ts';
+import {
+  PoetryPyProject,
+  PoetrySection,
+  PoetrySolverSection,
+  PoetrySources,
+} from './schema.ts';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {
@@ -7,6 +12,24 @@ describe('modules/manager/poetry/schema', () => {
     expect(
       PoetrySection.parse({ version: { some: 'value' } }).version,
     ).toBeUndefined();
+  });
+
+  describe('PoetrySolverSection', () => {
+    it('returns undefined when solver section is absent', () => {
+      expect(PoetrySolverSection.parse(undefined)).toBeUndefined();
+    });
+
+    it('parses min-release-age as a number', () => {
+      expect(PoetrySolverSection.parse({ 'min-release-age': 7 })).toStrictEqual(
+        { 'min-release-age': 7 },
+      );
+    });
+
+    it('returns undefined for min-release-age when value is not a number', () => {
+      expect(
+        PoetrySolverSection.parse({ 'min-release-age': 'invalid' }),
+      ).toStrictEqual({ 'min-release-age': undefined });
+    });
   });
 
   describe('PoetrySources', () => {
