@@ -3,7 +3,7 @@ import { readFile, updateFile } from '../utils/index.ts';
 import { replaceContent } from './utils.ts';
 
 export async function generateEnvVars(dist: string): Promise<void> {
-  const list = basicEnvVars
+  const list = [...basicEnvVars]
     // case-insensitive sort
     .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
     .map((v) => ` - \`${v}\``)
