@@ -1521,6 +1521,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 0.6.3',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -1994,6 +1995,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '> 0.8.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -2076,6 +2078,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 2.5.1',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -2167,6 +2170,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 5.9.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -2229,6 +2233,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 4.17.11',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -2314,6 +2319,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 0.8.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---

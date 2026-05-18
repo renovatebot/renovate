@@ -222,11 +222,11 @@ describe('modules/datasource/maven/util', () => {
             ),
         });
         await expect(
-          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
         ).rejects.toThrow(ExternalHostError);
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          { failedUrl: MAVEN_REPO + '/some/path' },
+          { failedUrl: `${MAVEN_REPO}/some/path` },
           'Maven Central rate limiting detected despite Redis caching.',
         );
       });
@@ -243,11 +243,11 @@ describe('modules/datasource/maven/util', () => {
             ),
         });
         await expect(
-          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
         ).rejects.toThrow(ExternalHostError);
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          { failedUrl: MAVEN_REPO + '/some/path' },
+          { failedUrl: `${MAVEN_REPO}/some/path` },
           'Maven Central rate limiting detected. Persistent caching required.',
         );
       });
@@ -257,11 +257,11 @@ describe('modules/datasource/maven/util', () => {
           getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
         });
         await expect(
-          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
         ).rejects.toThrow(ExternalHostError);
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          { failedUrl: MAVEN_REPO + '/some/path', err: expect.any(HttpError) },
+          { failedUrl: `${MAVEN_REPO}/some/path`, err: expect.any(HttpError) },
           'Temporary error',
         );
       });
