@@ -17,6 +17,7 @@ Renovate understands [codenames for Node.js LTS releases](https://github.com/nod
 Renovate can manage the Node.js version in the following files:
 
 - The [`engines`](https://docs.npmjs.com/files/package.json#engines) field in [`package.json`](https://docs.npmjs.com/files/package.json)
+- The [`devEngines.runtime`](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#devengines) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`volta`](https://docs.volta.sh/guide/understanding#managing-your-project) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`.nvmrc`](https://github.com/creationix/nvm#nvmrc) file for the [Node Version Manager](https://github.com/creationix/nvm)
 - The [`.node-version`](https://github.com/nodenv/nodenv#choosing-the-node-version) file for the [nodenv](https://github.com/nodenv/nodenv) environment manager
