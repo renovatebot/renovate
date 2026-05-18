@@ -46,7 +46,7 @@ export const basicEnvVars = [
   // pnpm specific variables
   'PNPM_WORKERS',
   'PNPM_MAX_WORKERS',
-];
+] as const;
 
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
