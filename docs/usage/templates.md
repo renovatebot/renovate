@@ -189,6 +189,10 @@ This is for security reasons.
 
 `HOME is {{env.HOME}}`
 
-If you're self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option.
+If you're self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option, which will also be available to all child processes.
 
-You can also use the [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.
+See also: [environment variable handling](./environment-variable-handling.md).
+
+<!-- prettier-ignore -->
+!!! warning
+    It is possible to use the [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.

@@ -40,8 +40,13 @@ As a self-hosted administrator, it is possible to allowlist other environment va
 - [`allowedEnv`](./self-hosted-configuration.md#allowedenv): allows users to specify values for allowlisted environment variables in their repository configuration using [`env`](./configuration-options.md#env)
 - [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables): administrator-defined environment variables, injected directly into every child process. Users cannot override these in their repository configuration
 - [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv): ⚠️ dangerously expose all environment variables from the Renovate process to all child processes
-- [`extends: ["global:safeEnv"]`](./presets-global.md#globalsafeenv): a curated list of commonly used environment variables that should be safe to allow users to configure with [`env`](./configuration-options.md#env). Used in Mend-hosted Renovate
+- [`extends: ["global:safeEnv"]`](./presets-global.md#globalsafeenv): a curated list of commonly used environment variables that should be safe to allow users to configure with [`env`](./configuration-options.md#env)
+  - These were chosen to be safe to **??** to allow self-hosted administrators to decide **??**
+  - This is used by Mend-hosted Renovate
 
 With these option(s) configured, users will be able to set these environment variable(s) in their repository configuration using [`env`](./configuration-options.md#env).
 
 ## Templating
+
+Allowlisted environment variables can be referenced in templates.
+See [templates and environment variables](./templates.md#environment-variables) for more details.
