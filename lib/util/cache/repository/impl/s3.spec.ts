@@ -25,7 +25,7 @@ function createGetObjectCommandInput(
   url: string,
   folder = '',
 ): GetObjectCommandInput {
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   return {
     Bucket: parseS3Url(url)?.Bucket,
     Key: `${folder}${platform}/${repository}/cache.json`,

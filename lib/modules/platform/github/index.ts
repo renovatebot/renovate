@@ -514,7 +514,7 @@ export async function initRepo({
     repository,
     cloneSubmodules,
     cloneSubmodulesFilter,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
   const opts = hostRules.find({
     hostType: 'github',

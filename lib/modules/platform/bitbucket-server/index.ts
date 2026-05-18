@@ -269,7 +269,7 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
 
   try {

@@ -709,7 +709,7 @@ export class DockerDatasource extends Datasource {
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
-      : GlobalConfig.get('dockerMaxPages', 20);
+      : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
     let foundMaxResultsError = false;
     do {
@@ -1073,7 +1073,7 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    const maxPages = GlobalConfig.get('dockerMaxPages', 20);
+    const maxPages = GlobalConfig.get('dockerMaxPages');
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {

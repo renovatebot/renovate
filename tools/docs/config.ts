@@ -7,6 +7,7 @@ import {
   allManagersList,
   getManagers,
 } from '../../lib/modules/manager/index.ts';
+import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
 import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
@@ -271,6 +272,21 @@ function generateLockFileTable(): string {
   return table;
 }
 
+function generateCacheNamespacesList(): string {
+  const namespaces = packageCacheNamespaces
+    .filter((ns) => ns !== '_test-namespace')
+    .slice()
+    .sort();
+
+  let list = '\n';
+  for (const ns of namespaces) {
+    list += `- \`${ns}\`\n`;
+  }
+  list += '\n';
+
+  return list;
+}
+
 function generateConfigFileNames(): string {
   // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
   const filenames = getConfigFileNames();
@@ -400,6 +416,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     });
 
   let content = configOptionsRaw.join('\n');
+
+  if (bot) {
+    content = replaceContent(
+      content,
+      generateCacheNamespacesList(),
+      '<!-- Autogenerate cache-namespaces -->',
+    );
+  }
 
   if (!bot) {
     content = replaceContent(
