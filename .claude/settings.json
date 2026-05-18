@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm oxlint:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(pnpm jest:*)",
+      "Bash(pnpm vitest:*)",
+      "WebFetch(domain:docs.jsonata.org)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/agents/start-check.ts"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/agents/stop-check.ts"
+          }
+        ]
+      }
+    ]
+  }
+}
