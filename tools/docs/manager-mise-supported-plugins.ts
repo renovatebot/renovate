@@ -78,6 +78,14 @@ function generateCombinedTooling(): string {
     }
   }
 
+  const registrySupportedTools = Object.keys(parsedMiseRegistry.tools);
+  for (const t of allTools) {
+    if (!registrySupportedTools.includes(t.name)) {
+      t.supported = false;
+      t.supportNote = `No longer supported as of mise \`${parsedMiseRegistry.meta.version}\``;
+    }
+  }
+
   allTools = allTools.sort((a, b) => a.name.localeCompare(b.name));
 
   const total = allTools.length;
@@ -100,6 +108,8 @@ function generateCombinedTooling(): string {
       supportedOutput = '✅';
     } else if (supported === 'maybe') {
       supportedOutput = `🤔 ${supportNote}`;
+    } else if (supported === false && supportNote) {
+      supportedOutput = `⚠️ ${supportNote}`;
     }
 
     if (url) {
