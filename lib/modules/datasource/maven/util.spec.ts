@@ -5,7 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { MAVEN_REPO } from './common.ts';
+import { MAVEN_CENTRAL_MIRROR, MAVEN_REPO } from './common.ts';
 import type { MavenFetchError } from './types.ts';
 import {
   downloadHttpContent,
@@ -210,26 +210,29 @@ describe('modules/datasource/maven/util', () => {
         getCacheTypeSpy.mockRestore();
       });
 
-      it('throws ExternalHostError for 429 status with redis cache', async () => {
-        getCacheTypeSpy.mockReturnValue('redis');
-        const http = partial<Http>({
-          getText: () =>
-            Promise.reject(
-              httpError({
-                code: 'ECONNRESET',
-                response: { statusCode: 429 } as never,
-              }),
-            ),
-        });
-        await expect(
-          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
-        ).rejects.toThrow(ExternalHostError);
+      it.each([MAVEN_REPO, MAVEN_CENTRAL_MIRROR])(
+        'throws ExternalHostError for 429 status with redis cache against Maven Central (%s)',
+        async (baseUrl: string) => {
+          getCacheTypeSpy.mockReturnValue('redis');
+          const http = partial<Http>({
+            getText: () =>
+              Promise.reject(
+                httpError({
+                  code: 'ECONNRESET',
+                  response: { statusCode: 429 } as never,
+                }),
+              ),
+          });
+          await expect(
+            downloadHttpProtocol(http, baseUrl + '/some/path'),
+          ).rejects.toThrow(ExternalHostError);
 
-        expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          { failedUrl: MAVEN_REPO + '/some/path' },
-          'Maven Central rate limiting detected despite Redis caching.',
-        );
-      });
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            { failedUrl: baseUrl + '/some/path' },
+            'Maven Central rate limiting detected despite Redis caching.',
+          );
+        },
+      );
 
       it('throws ExternalHostError for 429 status without redis cache', async () => {
         getCacheTypeSpy.mockReturnValue('file');
