@@ -53,8 +53,8 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts  modules', async () => {
       const res = await extractPackageFile(modules, 'modules.tf', {});
-      expect(res?.deps).toHaveLength(23);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
+      expect(res?.deps).toHaveLength(25);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
           packageName: 'hashicorp/example',
@@ -215,7 +215,64 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: undefined,
           skipReason: 'no-source',
         },
+        {
+          packageName: 'hashicorp/example',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example',
+          currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+          currentValue: 'v1.2.3',
+          datasource: 'github-tags',
+          autoReplaceStringTemplate: '{{currentDigest}}" # {{newValue}}',
+          replaceString: 'aabbccddee1122334455667788990011aabbccdd" # v1.2.3',
+        },
+        {
+          packageName: 'hashicorp/example',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example',
+          currentDigest: '1122334455667788990011aabbccddee11223344',
+          currentValue: undefined,
+          datasource: 'github-tags',
+          skipReason: 'unversioned-reference',
+        },
       ]);
+    });
+
+    it('extracts SHA-pinned github module with inline version comment', async () => {
+      const src = `
+module "pinned" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd" # v1.2.3
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'github.com/hashicorp/example',
+        packageName: 'hashicorp/example',
+        depType: 'module',
+        datasource: 'github-tags',
+        currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+        currentValue: 'v1.2.3',
+        replaceString: 'aabbccddee1122334455667788990011aabbccdd" # v1.2.3',
+        autoReplaceStringTemplate: '{{currentDigest}}" # {{newValue}}',
+      });
+    });
+
+    it('marks SHA-pinned github module without version comment as unversioned-reference', async () => {
+      const src = `
+module "pinned-no-ver" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd"
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'github.com/hashicorp/example',
+        packageName: 'hashicorp/example',
+        depType: 'module',
+        datasource: 'github-tags',
+        currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+        skipReason: 'unversioned-reference',
+      });
     });
 
     it('extracts bitbucket modules', async () => {

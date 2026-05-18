@@ -15,6 +15,7 @@ import { applyOciDependency } from '../../util.ts';
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
 );
+export const gitSha1Regex = regEx(/^[0-9a-f]{40}$/i);
 export const bitbucketRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*)\.git\/?(?<subfolder>.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
@@ -91,7 +92,13 @@ export class ModuleExtractor extends DependencyExtractor {
         '',
       );
       dep.depName = 'github.com/' + dep.packageName;
-      dep.currentValue = githubRefMatch.groups.tag;
+      const tag = githubRefMatch.groups.tag;
+      if (gitSha1Regex.test(tag)) {
+        dep.currentDigest = tag;
+        dep.currentValue = undefined;
+      } else {
+        dep.currentValue = tag;
+      }
       dep.datasource = GithubTagsDatasource.id;
     } else if (bitbucketRefMatch?.groups) {
       dep.depName =

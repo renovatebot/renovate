@@ -154,3 +154,11 @@ module "relative" {
 module "nosauce" {
   foo = "bar"
 }
+
+module "pinned-sha-with-version" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd" # v1.2.3
+}
+
+module "pinned-sha-without-version" {
+  source = "github.com/hashicorp/example?ref=1122334455667788990011aabbccddee11223344"
+}
