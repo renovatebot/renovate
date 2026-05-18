@@ -14,8 +14,8 @@ Instead, use **GitHub Discussions**: https://github.com/renovatebot/renovate/dis
 
 Two discussion categories are available:
 
-- **Request help** - for bugs, questions, or unexpected behavior. Include a minimal reproduction and relevant logs where possible.
-- **Suggest an idea** - for feature requests or improvements.
+- **Request help** (`.github/DISCUSSION_TEMPLATE/request-help.yml`) - for bugs, questions, or unexpected behavior. Include a minimal reproduction and relevant logs where possible.
+- **Suggest an idea** (`.github/DISCUSSION_TEMPLATE/suggest-an-idea.yml`) - for feature requests or improvements.
 
 **Do not attempt** to create a Discussion body without following the template, as it may result in being blocked from the repository.
 
