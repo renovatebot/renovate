@@ -61,6 +61,7 @@
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:wuchale-vite-plugin-to-wuchale",
       "replacements:xmldom-to-scoped",
+      "xlsx-to-scoped",
       "replacements:zap"
     ],
     "ignoreDeps": []
@@ -1267,6 +1268,18 @@
         "matchPackageNames": ["xmldom", "xmldom-alpha"],
         "replacementName": "@xmldom/xmldom",
         "replacementVersion": "0.7.5"
+      }
+    ]
+  },
+  "xlsx-to-scoped": {
+    "description": "The `xlsx` package is now published as `@e965/xlsx`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.18.5",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["xlsx"],
+        "replacementName": "@e965/xlsx",
+        "replacementVersion": "0.20.3"
       }
     ]
   },
