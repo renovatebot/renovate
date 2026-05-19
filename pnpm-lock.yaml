@@ -245,8 +245,8 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
       jsonata:
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 2.1.1
+        version: 2.1.1
       jsonc-weaver:
         specifier: 0.2.4
         version: 0.2.4
@@ -3830,8 +3830,8 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
-  jsonata@2.1.0:
-    resolution: {integrity: sha512-OCzaRMK8HobtX8fp37uIVmL8CY1IGc/a6gLsDqz3quExFR09/U78HUzWYr7T31UEB6+Eu0/8dkVD5fFDOl9a8w==}
+  jsonata@2.1.1:
+    resolution: {integrity: sha512-OXOWb1MRKcSy5y8rGUH4GYuVeS6p/QeytoBaCgdzmue/0XyTKH5QHWg7Z/C9AuyRWL+jF4FMkpYqo1TktqImJg==}
     engines: {node: '>= 8'}
 
   jsonc-morph@0.3.4:
@@ -9548,7 +9548,7 @@ snapshots:
 
   json5@2.2.3: {}
 
-  jsonata@2.1.0: {}
+  jsonata@2.1.1: {}
 
   jsonc-morph@0.3.4: {}
 
