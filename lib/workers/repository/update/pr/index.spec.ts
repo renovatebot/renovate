@@ -580,7 +580,7 @@ describe('workers/repository/update/pr/index', () => {
       it('does not re-request review when platform lacks getPrDismissedReviewers', async () => {
         const changedPr: Pr = { ...pr, title: 'Another title' };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
-        platform.getPrDismissedReviewers = undefined;
+        platform.getPrDismissedReviewers = undefined as never;
 
         await ensurePr({
           ...config,
