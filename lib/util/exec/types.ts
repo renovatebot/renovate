@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
+import type { VersioningName } from '../../versioning-list.generated.ts';
 
 export interface ConstraintDefinition {
   name: string;
@@ -125,7 +126,7 @@ export const toolDefinitions = [
   },
   {
     name: 'ruby',
-    description: 'Also used in the `rubygems` datasource',
+    description: 'Also used in the `rubygems` Datasource',
   },
   {
     name: 'rust',
@@ -165,52 +166,65 @@ export function isToolName(value: unknown): value is ToolName {
 }
 
 /**
- * Additional constraints that can be specified for some Managers, but are not
- * tools that Containerbase supports.
+ * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports, with optional description.
  */
 export const additionalConstraintDefinitions = [
+  /**
+   * @deprecated TODO remove in #42600
+   */
   {
     name: 'go',
-    description:
-      'Used in the `gomod` manager to specify the version of the Go toolchain to use.',
+    description: `Used in the \`gomod\` manager to specify the version of the Go toolchain to use.
+
+In precedence order:
+
+1. config: \`constraints.go\`
+1. \`go.mod\`: \`toolchain\` directive
+1. \`go.mod\`: \`go\` directive
+
+NOTE that the \`constraints.golang\` is not used (https://github.com/renovatebot/renovate/issues/42601)
+  `,
   },
   {
     name: 'gomodMod',
-    description:
-      'Used in the `gomod` manager to specify a tag for `github.com/marwan-at-work/mod`.',
+    description: `Used in the \`gomod\` manager to specify a tag for [\`github.com/marwan-at-work/mod\`](https://github.com/marwan-at-work/mod).
+
+Must be prefixed with \`v\`.`,
   },
   {
     name: 'jenkins',
     description:
-      'Used in the `jenkins-plugins` datasource to specify a minimum Jenkins version.',
+      'Used in the `jenkins-plugins` datasource to specify a minimum version of Jenkins that a plugin must support.',
   },
   {
     name: 'pipTools',
     description:
-      'Used in the `pip-compile` manager to specify a version of `pip-tools` to use.',
+      'Used in the `pip-compile` manager to specify a version of `pip-tools` to use. @deprecated TODO remove in #42599',
   },
   {
     name: 'platform',
     description:
-      'Used in the `rubygems` datasource to specify the supported Gem platform.',
+      'Used in the `rubygems` datasource to specify the `platform` that the Gem dependency supports.',
   },
   {
     name: 'rubygems',
     description:
-      'Used in the `rubygems` datasource to specify the required `rubygems` version.',
+      'Used in the `rubygems` datasource to specify the version of the `rubygems` tool that is needed to use this Gem.',
   },
   {
     name: 'vscode',
     description:
-      'Used in the `npm` manager to track the compatible VS Code version.',
+      'Used in the `npm` manager to track the version of VSCode that the package is compatible with.',
   },
   {
     name: 'dotnet-sdk',
-    description: 'Used in the `nuget` manager to track .NET SDK version.',
+    description:
+      'Used in the `nuget` manager to track .NET SDK version required.',
   },
   {
     name: 'perl',
-    description: 'Used in the `cpanfile` manager to track Perl version.',
+    description:
+      'Used in the `cpanfile` manager to track Perl version required.',
   },
   {
     name: '%goMod',
@@ -220,12 +234,14 @@ export const additionalConstraintDefinitions = [
 ] as const satisfies ConstraintDefinition[];
 
 /**
- * Additional constraints that can be specified for some Managers, but are not
- * tools that Containerbase supports.
+ * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
  */
 export type AdditionalConstraintName =
   (typeof additionalConstraintDefinitions)[number]['name'];
 
+/**
+ * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
+ */
 export const additionalConstraintNames: AdditionalConstraintName[] =
   additionalConstraintDefinitions.map((c) => c.name);
 
@@ -239,7 +255,7 @@ export function isAdditionalConstraintName(
 }
 
 /**
- * A name usable as a key in a `constraints` record.
+ * A name usable as a key in a `constraints` record, which may be tools that Containerbase supports.
  */
 export type ConstraintName = ToolName | AdditionalConstraintName;
 
@@ -256,7 +272,7 @@ export interface ToolConfig {
   datasource: string;
   extractVersion?: string;
   packageName: string;
-  versioning: string;
+  versioning: VersioningName;
 }
 
 export type Opt<T> = T | null | undefined;
