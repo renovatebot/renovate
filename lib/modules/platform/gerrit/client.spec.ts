@@ -612,7 +612,7 @@ describe('modules/platform/gerrit/client', () => {
 
     it('add too big message', async () => {
       const okMessage = 'a'.repeat(16 * 1024); // 16KB
-      const tooBigMessage = okMessage + 'b';
+      const tooBigMessage = `${okMessage}b`;
       const truncationNotice = '\n\n[Truncated by Renovate]';
       const truncatedMessage =
         tooBigMessage.slice(0, 16 * 1024 - truncationNotice.length) +

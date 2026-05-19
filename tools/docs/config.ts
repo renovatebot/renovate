@@ -86,10 +86,7 @@ function buildHtmlTable(data: string[][]): string {
 
       const cellHtml = formatCell(row, colIndex);
 
-      table +=
-        indent`${3}${cellHtml}` +
-        (`${col}`.endsWith('\n') ? indent`${3}` : '') +
-        `\n`;
+      table += `${indent`${3}${cellHtml}`}${`${col}`.endsWith('\n') ? indent`${3}` : ''}\n`;
     }
     table += indent`${2}</tr>\n`;
   }
@@ -200,21 +197,16 @@ function genExperimentalMsg(el: Record<string, any>): string {
     warning += `<br>To track this feature visit the following GitHub ${
       issues.length > 1 ? 'issues' : 'issue'
     } `;
-    warning +=
-      (issues
-        .map((issue: number) => `[#${issue}](${ghIssuesUrl}${issue})`)
-        .join(', ') as string) + '.';
+    warning += `${issues
+      .map((issue: number) => `[#${issue}](${ghIssuesUrl}${issue})`)
+      .join(', ')}.`;
   }
 
-  return warning + '\n';
+  return `${warning}\n`;
 }
 
 function genTemplatingMsg(): string {
-  return (
-    '\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate\'s template syntax"\n' +
-    indent`${2}See [templates](templates.md) for available variables and helpers.` +
-    '\n'
-  );
+  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${2}See [templates](templates.md) for available variables and helpers.`}\n`;
 }
 
 function genDeprecationMsg(el: Record<string, any>): string {
@@ -225,7 +217,7 @@ function genDeprecationMsg(el: Record<string, any>): string {
     warning += indent`${2}${el.deprecationMsg}`;
   }
 
-  return warning + '\n';
+  return `${warning}\n`;
 }
 
 function indexMarkdown(lines: string[]): Record<string, [number, number]> {
@@ -392,9 +384,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       for (const key of lookupKeys) {
         const [headerIndex, footerIndex] = indexed[key];
-        let sectionContent =
-          `\n${option.description}\n\n` +
-          genTable(Object.entries(el), option.type, option.default);
+        let sectionContent = `\n${option.description}\n\n${genTable(Object.entries(el), option.type, option.default)}`;
 
         if (el.supportsTemplating) {
           sectionContent += genTemplatingMsg();

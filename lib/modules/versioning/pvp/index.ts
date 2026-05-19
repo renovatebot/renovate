@@ -46,7 +46,7 @@ function getPatch(version: string): number | null {
   if (parts === null || parts.patch.length === 0) {
     return null;
   }
-  return Number(parts.patch[0] + '.' + parts.patch.slice(1).join(''));
+  return Number(`${parts.patch[0]}.${parts.patch.slice(1).join('')}`);
 }
 
 function matches(version: string, range: string): boolean {

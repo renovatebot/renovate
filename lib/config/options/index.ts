@@ -663,7 +663,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.47.2',
+    default: 'ghcr.io/renovatebot/base-image:13.49.0',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1016,6 +1016,7 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
     type: 'boolean',
     default: false,
+    advancedUse: true,
   },
   {
     name: 'allowPlugins',
@@ -2743,6 +2744,7 @@ const options: Readonly<RenovateOptions>[] = [
       'bundler',
       'composer',
       'gomod',
+      'mise',
       'npm',
       'pep621',
       'pipenv',

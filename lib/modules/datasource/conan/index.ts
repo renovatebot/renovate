@@ -106,7 +106,7 @@ export class ConanDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const conanPackage = getConanPackage(packageName);
-    const userAndChannel = '@' + conanPackage.userAndChannel;
+    const userAndChannel = `@${conanPackage.userAndChannel}`;
     if (
       isString(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl

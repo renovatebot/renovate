@@ -1469,6 +1469,19 @@ describe('config/validation', () => {
       expect(errors[0].message).toContain('github>owner/repo//path@commitHash');
     });
 
+    it('skips preset syntax validation for templates', async () => {
+      const config = {
+        extends: ['local>{{ env.PRESET_REPO }}:python-312'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('warns if only selectors in packageRules', async () => {
       const config = {
         packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],

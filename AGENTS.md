@@ -1,22 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance for AI agents working in this repository.
 
-## Commands
+## What is Renovate?
 
-Use `pnpm` for all commands (not npm/npx).
-
-- **Install dependencies:** `pnpm install`
-- **Run single test file:** `pnpm vitest lib/modules/manager/npm/extract.spec.ts`
-- **Run tests matching pattern:** `pnpm vitest -- --testPathPattern manager/npm`
-- **Full test suite:** `pnpm test` (runs lint + schema validation + all tests)
-- **Type-check:** `pnpm type-check`
-- **Lint:** `pnpm lint`
-- **Auto-fix lint/format:** `pnpm lint-fix`
-- **Build:** `pnpm build` (generates code, compiles with tsdown, produces `dist/`)
-- **Run from source:** `pnpm start` or `node lib/renovate.ts`
-
-Tests use Vitest (invoked via `pnpm vitest`). Test files use `.spec.ts` suffix and are co-located with source. Globals from `jest-extended` and `expect-more-jest` are available in tests.
+Renovate is an automated dependency update tool that scans repositories for dependency files, checks for newer versions via datasources, and creates pull requests to update them. It supports 90+ package managers and multiple hosting platforms (GitHub, GitLab, Bitbucket, Azure DevOps, Gitea, Forgejo, Gerrit, etc.).
 
 ## Architecture
 
@@ -52,12 +40,39 @@ Each module category has an `api.ts` barrel file at its root.
 
 Files matching `*.generated.ts` in `lib/` are auto-generated during build (`pnpm generate:*`). Do not edit these directly.
 
-## TypeScript
+## Raising issues/feature requests
 
-- Target: ES2024, module: NodeNext
-- `tsdown` compiles to `dist/` for distribution; `tsc --noEmit` is used only for type-checking
-- `isolatedModules: true` is required
+**Do not create GitHub Issues directly.** Issue creation is restricted to repository administrators. Creating an issue as a non-administrator will result in being blocked from the repository.
 
-## Contribution Requirements
+Instead, use **GitHub Discussions**: https://github.com/renovatebot/renovate/discussions/new/choose
 
-All PRs that use AI assistance must disclose this in the PR description (per `.github/contributing.md` and the PR template).
+Two discussion categories are available:
+
+- **Request help** (`.github/DISCUSSION_TEMPLATE/request-help.yml`) - for bugs, questions, or unexpected behavior. Include a minimal reproduction and relevant logs where possible.
+- **Suggest an idea** (`.github/DISCUSSION_TEMPLATE/suggest-an-idea.yml`) - for feature requests or improvements.
+
+**Do not attempt** to create a Discussion body without following the template, as it may result in being blocked from the repository.
+
+**Security vulnerabilities must not be reported on GitHub.** See [`SECURITY.md`](./SECURITY.md) for more details.
+
+## Contributing Notes
+
+- PRs require 100% test coverage. Use `/* v8 ignore ... */` sparingly when tests wouldn't prove anything.
+- Do not force push PR branches.
+- Follow the PR template (`.github/pull_request_template.md`).
+
+### Commands
+
+Use `pnpm` for all commands (not npm/npx).
+
+- **Install dependencies:** `pnpm install`
+- **Run single test file:** `pnpm vitest lib/modules/manager/npm/extract.spec.ts`
+- **Run tests matching pattern:** `pnpm vitest -- --testPathPattern manager/npm`
+- **Full test suite:** `pnpm test` (runs lint + schema validation + all tests)
+- **Type-check:** `pnpm type-check`
+- **Lint:** `pnpm lint`
+- **Auto-fix lint/format:** `pnpm lint-fix`
+- **Build:** `pnpm build` (generates code, compiles with tsdown, produces `dist/`)
+- **Run from source:** `pnpm start` or `node lib/renovate.ts`
+
+Tests use Vitest (invoked via `pnpm vitest`). Test files use `.spec.ts` suffix and are co-located with source. Globals from `jest-extended` and `expect-more-jest` are available in tests.
