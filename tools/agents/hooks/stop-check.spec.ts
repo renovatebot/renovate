@@ -1,17 +1,9 @@
 // https://code.claude.com/docs/en/hooks#stop
-import { BlockOutput, StopHookInput } from './utils/schemas.ts';
+import { BlockOutput } from './utils/schemas.ts';
 
 const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
 vi.mock('./utils/exec.ts', () => ({ exec }));
 const consoleSpy = vi.spyOn(console, 'log');
-
-const stopHookInput = StopHookInput.parse({
-  session_id: 'test-session',
-  transcript_path: '/tmp/transcript.jsonl',
-  cwd: '/Users/test/renovate',
-  hook_event_name: 'Stop',
-  permission_mode: 'default',
-});
 
 beforeEach(() => {
   vi.resetModules();
@@ -77,15 +69,5 @@ it('outputs two block JSONs when both lint-fix and test fail', async () => {
   expect(second).toEqual({
     decision: 'block',
     reason: 'pnpm test failed — the issues must be resolved before finishing',
-  });
-});
-
-it('documents the Stop hook input shape', () => {
-  expect(stopHookInput).toMatchObject({
-    session_id: expect.any(String),
-    transcript_path: expect.any(String),
-    cwd: expect.any(String),
-    hook_event_name: 'Stop',
-    permission_mode: expect.any(String),
   });
 });

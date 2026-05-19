@@ -5,15 +5,13 @@ import { readStdin } from './utils/stdin.ts';
 const raw = await readStdin();
 const result = PreToolUseHookInput.safeParse(JSON.parse(raw));
 
-if (!result.success) {
-  process.exit(0);
-}
+if (result.success) {
+  const parsed = result.data;
 
-const input = result.data;
-
-if (input.tool_name === 'Bash') {
-  const { command } = input.tool_input;
-  if (/(?:^|\s)(?:npm|npx|yarn)(?:\s|$)/.test(command)) {
-    deny('Use pnpm instead of npm/npx/yarn');
+  if (parsed.tool_name === 'Bash') {
+    const { command } = parsed.tool_input;
+    if (/(?:^|\s)(?:npm|npx|yarn)(?:\s|$)/.test(command)) {
+      deny('Use pnpm instead of npm/npx/yarn');
+    }
   }
 }

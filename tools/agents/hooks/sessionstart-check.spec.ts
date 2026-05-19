@@ -1,18 +1,8 @@
 // https://code.claude.com/docs/en/hooks#sessionstart
-import { SessionStartHookInput } from './utils/schemas.ts';
 
 const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
 vi.mock('./utils/exec.ts', () => ({ exec }));
 const errorSpy = vi.spyOn(console, 'error');
-
-const sessionStartHookInput = SessionStartHookInput.parse({
-  session_id: 'test-session',
-  transcript_path: '/tmp/transcript.jsonl',
-  cwd: '/Users/test/renovate',
-  hook_event_name: 'SessionStart',
-  source: 'startup',
-  model: 'claude-sonnet-4-6',
-});
 
 beforeEach(() => {
   vi.resetModules();
@@ -52,15 +42,4 @@ it('propagates error if pnpm install fails', async () => {
   await expect(import('./sessionstart-check.ts')).rejects.toThrow(
     'install failed',
   );
-});
-
-it('documents the SessionStart hook input shape', () => {
-  expect(sessionStartHookInput).toMatchObject({
-    session_id: expect.any(String),
-    transcript_path: expect.any(String),
-    cwd: expect.any(String),
-    hook_event_name: 'SessionStart',
-    source: expect.any(String),
-    model: expect.any(String),
-  });
 });

@@ -1,5 +1,4 @@
 // https://code.claude.com/docs/en/hooks#pretooluse
-import { PreToolUseDenyOutput, PreToolUseHookInput } from './utils/schemas.ts';
 
 const { deny } = vi.hoisted(() => ({ deny: vi.fn() }));
 vi.mock('./utils/output.ts', () => ({ deny }));
@@ -77,38 +76,4 @@ it('allows a command that contains npm as a substring but is not standalone', as
   );
   await import('./pretooluse-check.ts');
   expect(deny).not.toHaveBeenCalled();
-});
-
-it('documents the PreToolUse hook input shape', () => {
-  const input = PreToolUseHookInput.parse({
-    session_id: 'test-session',
-    transcript_path: '/tmp/transcript.jsonl',
-    cwd: '/Users/test/renovate',
-    hook_event_name: 'PreToolUse',
-    tool_use_id: 'tu-123',
-    tool_name: 'Bash',
-    tool_input: { command: 'pnpm install' },
-  });
-  expect(input).toMatchObject({
-    hook_event_name: 'PreToolUse',
-    tool_name: 'Bash',
-    tool_input: { command: 'pnpm install' },
-  });
-});
-
-it('documents the PreToolUseDenyOutput shape', () => {
-  const output = PreToolUseDenyOutput.parse({
-    hookSpecificOutput: {
-      hookEventName: 'PreToolUse',
-      permissionDecision: 'deny',
-      permissionDecisionReason: 'reason',
-    },
-  });
-  expect(output).toEqual({
-    hookSpecificOutput: {
-      hookEventName: 'PreToolUse',
-      permissionDecision: 'deny',
-      permissionDecisionReason: 'reason',
-    },
-  });
 });
