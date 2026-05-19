@@ -2744,6 +2744,7 @@ const options: Readonly<RenovateOptions>[] = [
       'bundler',
       'composer',
       'gomod',
+      'mise',
       'npm',
       'pep621',
       'pipenv',

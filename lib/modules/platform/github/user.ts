@@ -43,7 +43,7 @@ export async function getUserDetails(
         name: string;
         id: number;
         email: EmailAddress | null;
-      }>(endpoint + 'user', {
+      }>(`${endpoint}user`, {
         token,
       })
     ).body;
@@ -66,7 +66,7 @@ export async function getUserEmail(
   try {
     const emails = (
       await githubApi.getJsonUnchecked<{ email: EmailAddress }[]>(
-        endpoint + 'user/emails',
+        `${endpoint}user/emails`,
         {
           token,
         },
