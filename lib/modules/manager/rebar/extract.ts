@@ -258,6 +258,8 @@ function splitDepEntries(depsContent: string): string[] {
         entries.push(trimmed);
       }
       current = '';
+    } else if (depth === 0 && (ch === '[' || ch === ']')) {
+      // Ignore nested-list brackets between dep tuples
     } else {
       current += ch;
     }

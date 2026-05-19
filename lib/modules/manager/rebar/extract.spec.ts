@@ -336,7 +336,15 @@ describe('modules/manager/rebar/extract', () => {
         ]}.
       `;
       const res = await extractPackageFile(config, 'rebar.config');
-      expect(res).toBeDefined();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '2.13.0',
+          datasource: 'hex',
+          depName: 'cowboy',
+          depType: 'prod',
+          packageName: 'cowboy',
+        },
+      ]);
     });
 
     it('handles brackets in dep body lines', async () => {
@@ -346,7 +354,36 @@ describe('modules/manager/rebar/extract', () => {
         ]}.
       `;
       const res = await extractPackageFile(config, 'rebar.config');
-      expect(res).toBeDefined();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '2.13.0',
+          datasource: 'hex',
+          depName: 'cowboy',
+          depType: 'prod',
+          packageName: 'cowboy',
+        },
+      ]);
+    });
+
+    it('dedupes a dep that appears in both prod and a profile', async () => {
+      const config = codeBlock`
+        {deps, [{cowboy, "1.0.0"}]}.
+        {profiles, [
+          {test, [
+            {deps, [{cowboy, "2.0.0"}]}
+          ]}
+        ]}.
+      `;
+      const res = await extractPackageFile(config, 'rebar.config');
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '2.0.0',
+          datasource: 'hex',
+          depName: 'cowboy',
+          depType: 'test',
+          packageName: 'cowboy',
+        },
+      ]);
     });
 
     it('ignores lock entries not in deps', async () => {

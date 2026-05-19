@@ -8,23 +8,3 @@ It supports the following dependency formats:
 - Git subdirectory dependencies: `{app, {git_subdir, "url", {tag, "1.0"}, "path"}}`
 
 Dependencies from `profiles` (e.g., test profile) are also extracted with appropriate `depType`.
-
-The `rebar3` tool is used to keep the `rebar.lock` file up-to-date.
-
-### `lockFileMaintenance`
-
-We recommend you use [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) for the `rebar` manager.
-
-`lockFileMaintenance=true` periodically refreshes your `rebar.lock` file, ensuring all indirect dependencies are updated to their latest allowed versions.
-
-### Default `rangeStrategy=auto` behavior
-
-Renovate's default [`rangeStrategy`](../../../configuration-options.md#rangestrategy) is `"auto"`.
-
-For the `rebar` manager, `"auto"` behaves the same as `"update-lockfile"` for simple ranges and `"widen"` for complex ranges (e.g., `>= 1.0.0 and < 2.0.0`).
-
-### Recommended `rangeStrategy` for apps and libraries
-
-For applications, we recommend using `rangeStrategy=pin` to pin dependencies to exact versions.
-
-For libraries, use `rangeStrategy=widen` with version ranges in your `rebar.config` to allow greater compatibility.
