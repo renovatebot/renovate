@@ -6,6 +6,10 @@ This file provides guidance for AI agents working in this repository.
 
 Renovate is an automated dependency update tool that scans repositories for dependency files, checks for newer versions via datasources, and creates pull requests to update them. It supports 90+ package managers and multiple hosting platforms (GitHub, GitLab, Bitbucket, Azure DevOps, Gitea, Forgejo, Gerrit, etc.).
 
+## Development Documentation
+
+The **./docs/development/** directory contains detailed documentation for developers, like style guides, testing guidelines, and configuration options.
+
 ## Architecture
 
 Renovate is an automated dependency update tool. The runtime flow is:
