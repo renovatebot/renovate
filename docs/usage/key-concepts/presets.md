@@ -3,9 +3,13 @@ title: Presets
 description: Learn about Renovate configuration presets
 ---
 
-This document describes Renovate configuration presets and why you should use them.
+Renovate presets are reusable bits of confiuration in JSON format.
 
-To learn how to create your own presets, how to host them, and how to extend from presets read the [Shareable Config Presets](../config-presets.md) page.
+Presets that are included with Renovate are referenced by their name, like
+[`:dependencyDashboard`](https://docs.renovatebot.com/presets-default/#dependencydashboard).
+
+Custom presets are referenced by repository location. To learn how to create and host them,
+read the [Shareable Config Presets](../config-presets.md) page.
 
 ## Why you should use presets
 
