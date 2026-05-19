@@ -3449,6 +3449,68 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('getPrDismissedReviewers(prNo)', () => {
+    it('should return logins whose latest review state is DISMISSED', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls/42/reviews').reply(200, [
+        { user: { login: 'user1' }, state: 'APPROVED' },
+        { user: { login: 'user1' }, state: 'DISMISSED' },
+        { user: { login: 'user2' }, state: 'CHANGES_REQUESTED' },
+        { user: { login: 'user3' }, state: 'DISMISSED' },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const result = await github.getPrDismissedReviewers(42);
+      expect(result).toEqual(['user1', 'user3']);
+    });
+
+    it('should not return users who re-approved after dismissal', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls/42/reviews').reply(200, [
+        { user: { login: 'user1' }, state: 'APPROVED' },
+        { user: { login: 'user1' }, state: 'DISMISSED' },
+        { user: { login: 'user1' }, state: 'APPROVED' },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const result = await github.getPrDismissedReviewers(42);
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when no dismissed reviews exist', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls/42/reviews').reply(200, [
+        { user: { login: 'user1' }, state: 'APPROVED' },
+        { user: { login: 'user2' }, state: 'CHANGES_REQUESTED' },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const result = await github.getPrDismissedReviewers(42);
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array on error', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls/42/reviews').reply(404);
+      await github.initRepo({ repository: 'some/repo' });
+      const result = await github.getPrDismissedReviewers(42);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle reviews with null user', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls/42/reviews').reply(200, [
+        { user: null, state: 'DISMISSED' },
+        { user: { login: 'user1' }, state: 'DISMISSED' },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const result = await github.getPrDismissedReviewers(42);
+      expect(result).toEqual(['user1']);
+    });
+  });
+
   describe('ensureComment', () => {
     it('add comment if not found', async () => {
       const scope = httpMock.scope(githubApiHost);
