@@ -1640,7 +1640,7 @@ export async function addReviewers(
 export async function getPrDismissedReviewers(prNo: number): Promise<string[]> {
   logger.debug(`Getting reviewers with dismissed approvals for PR #${prNo}`);
   try {
-    const res = await githubApi.getJson<
+    const res = await githubApi.getJsonUnchecked<
       { user: { login: string } | null; state: string }[]
     >(`repos/${config.parentRepo ?? config.repository}/pulls/${prNo}/reviews`, {
       paginate: true,
