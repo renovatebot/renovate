@@ -10,12 +10,6 @@ Renovate is an automated dependency update tool that scans repositories for depe
 
 Renovate is an automated dependency update tool. The runtime flow is:
 
-```
-lib/renovate.ts → workers/global (orchestration, autodiscovery)
-  → workers/repository (per-repo: init → extract → update → finalize)
-    → modules/* (pluggable backends)
-```
-
 ```mermaid
 flowchart TD
     entry["lib/renovate.ts\nEntry Point"]
