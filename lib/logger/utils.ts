@@ -95,6 +95,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
   }
 
   const response: Record<string, unknown> = {
+    // We want to loose class information, but keep enumerable properties of the error
+    // oxlint-disable-next-line typescript/no-misused-spread
     ...err,
   };
 
@@ -163,6 +165,13 @@ export function sanitizeValue(
 ): any {
   if (isString(value)) {
     return sanitize(sanitizeUrls(value));
+  }
+
+  // Handle boxed String objects (e.g. from `new String()`), which `isString`
+  // rejects but `isObject` would iterate character-by-character producing
+  // `{"0":"h","1":"e",...}` in log output.
+  if (value instanceof String) {
+    return sanitize(sanitizeUrls(value.toString()));
   }
 
   if (isDate(value)) {

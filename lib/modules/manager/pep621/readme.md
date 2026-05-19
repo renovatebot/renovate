@@ -6,17 +6,6 @@ In addition to standard dependencies, these toolsets are also supported:
 - `uv` (including `uv.lock` files and `uv` workspaces)
 - `hatch`
 
-Available `depType`s:
-
-- `project.dependencies`
-- `project.optional-dependencies`
-- `dependency-groups`
-- `build-system.requires`
-- `tool.pdm.dev-dependencies`
-- `tool.uv.dev-dependencies`
-- `tool.uv.sources`
-- `tool.hatch.envs.<env-name>`
-
 ### Private Modules Authentication
 
 Before running the `pdm` or `uv` commands to update the `pdm.lock` or `uv.lock` respectively, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.

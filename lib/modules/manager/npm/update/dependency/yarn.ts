@@ -111,6 +111,7 @@ function changeDependencyIn(
     CST.setScalarValue(relevantNode.srcToken!.key!, newName);
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (newValue) {
     // We only support scalar values when substituting. This explicitly avoids
     // substituting aliases, since those can be resolved from a shared location,

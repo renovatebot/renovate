@@ -34,3 +34,5 @@ export const supportedDatasources = [
   TerraformModuleDatasource.id,
   TerraformProviderDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

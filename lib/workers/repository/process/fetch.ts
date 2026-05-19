@@ -127,6 +127,13 @@ async function fetchManagerPackagerFileUpdates(
       ...config.constraints,
     };
   }
+  const mergedConstraintsVersioning = {
+    ...pFile.constraintsVersioning,
+    ...config.constraintsVersioning,
+  };
+  if (Object.keys(mergedConstraintsVersioning).length > 0) {
+    packageFileConfig.constraintsVersioning = mergedConstraintsVersioning;
+  }
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => async (): Promise<PackageDependency> => {

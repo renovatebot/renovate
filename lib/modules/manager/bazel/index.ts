@@ -6,6 +6,7 @@ import { GoDatasource } from '../../datasource/go/index.ts';
 import { updateArtifacts } from './artifacts.ts';
 import { extractPackageFile } from './extract.ts';
 
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile, updateArtifacts };
 
 export const url = 'https://bazel.build/docs';

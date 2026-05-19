@@ -36,7 +36,8 @@ export function generateCommitFingerprintConfig(
   const res = branch.upgrades.map((upgrade) => {
     const filteredUpgrade = {} as UpgradeFingerprintConfig;
     for (const field of upgradeFingerprintFields) {
-      filteredUpgrade[field] = upgrade[field];
+      // TS cannot narrow the type here
+      filteredUpgrade[field] = upgrade[field]!;
     }
     return filteredUpgrade;
   });

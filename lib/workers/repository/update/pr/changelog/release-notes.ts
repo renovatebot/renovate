@@ -409,13 +409,17 @@ export async function getReleaseNotesMd(
           const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
           if (packageName && heading.search(releasesRegex) !== -1) {
             // Now check if any line contains both the package name and the version
+            // Skip Markdown link reference definitions (e.g. `[1.2.3]: https://…/compare/...`)
+            // which Keep-a-Changelog files list at the bottom and would otherwise match every version.
+            const linkRefDefRegex = regEx(/^\s*\[[^\]]+\]:\s*\S+/);
             const bodyLines = body.split('\n');
             if (
               bodyLines.some(
                 (line) =>
                   line.includes(packageName) &&
                   line.includes(version) &&
-                  !isHttpUrl(line),
+                  !isHttpUrl(line) &&
+                  !linkRefDefRegex.test(line),
               )
             ) {
               logger.trace({ body }, 'Found release notes for v' + version);

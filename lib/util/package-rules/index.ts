@@ -1,10 +1,10 @@
 import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
 import _slugify from 'slugify';
-import { mergeChildConfig } from '../../config/index.ts';
 import type {
   PackageRule,
   PackageRuleInputConfig,
 } from '../../config/types.ts';
+import { mergeChildConfig } from '../../config/utils.ts';
 import { logger } from '../../logger/index.ts';
 import type { StageName } from '../../types/skip-reason.ts';
 import { compile } from '../template/index.ts';
@@ -53,13 +53,21 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
           lower: true,
         });
       }
-      if (toApply.enabled === false && config.enabled !== false) {
+
+      if (
+        // if it's got higher precedence, as it's a force'd config option
+        // multiple force'd config options are "last defined wins"
+        toApply.force?.enabled === false ||
+        // otherwise, if it has regular precedence, compare
+        (toApply.enabled === false && config.enabled !== false)
+      ) {
         config.skipReason = 'package-rules';
         if (stageName) {
           config.skipStage = stageName;
         }
       }
-      if (toApply.enabled === true && config.enabled === false) {
+
+      if (toApply.force?.enabled || toApply.enabled) {
         delete config.skipReason;
         delete config.skipStage;
       }
@@ -90,6 +98,9 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         );
         config.packageName = compile(toApply.overridePackageName, config);
       }
+      if (isString(toApply.sourceUrl)) {
+        toApply.sourceUrl = compile(toApply.sourceUrl, config);
+      }
       delete toApply.overrideDatasource;
       delete toApply.overrideDepName;
       delete toApply.overridePackageName;
@@ -101,7 +112,9 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
 
 function removeMatchers<T extends Record<string, unknown>>(
   packageRule: T,
-): Record<string, unknown> {
+): Record<string, unknown> & {
+  force?: Record<string, unknown>;
+} {
   for (const key of Object.keys(packageRule)) {
     if (key.startsWith('match') || key.startsWith('exclude')) {
       delete packageRule[key];

@@ -3,6 +3,7 @@
   "all": {
     "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
+      "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
       "replacements:babel-eslint-to-eslint-parser",
@@ -28,6 +29,7 @@
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
       "replacements:k8s-registry-move",
+      "replacements:kotlin-logging-to-oshai",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
       "replacements:now-to-vercel",
@@ -42,6 +44,7 @@
       "replacements:read-pkg-up-rename",
       "replacements:redux-devtools-extension-to-scope",
       "replacements:renovate-pep440-to-renovatebot-pep440",
+      "replacements:rolldown-vite-to-vite",
       "replacements:rollup-babel-to-scoped",
       "replacements:rollup-json-to-scoped",
       "replacements:rollup-node-resolve-to-scoped",
@@ -53,12 +56,25 @@
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
+      "replacements:wuchale-vite-plugin-to-wuchale",
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
     "ignoreDeps": []
+  },
+  "actions-attest-build-provenance-to-actions-attest": {
+    "description": "`actions/attest-build-provenance` was renamed to `actions/attest`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=4",
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["actions/attest-build-provenance"],
+        "replacementName": "actions/attest"
+      }
+    ]
   },
   "airbnb-prop-types-to-prop-types-tools": {
     "description": "`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.",
@@ -832,6 +848,18 @@
       }
     ]
   },
+  "kotlin-logging-to-oshai": {
+    "description": "replaces kotlin-logging github organization and maven group from MicroUtils to oshai",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "[3,4)",
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["/^io\\.github\\.microutils:kotlin-logging/"],
+        "replacementNameTemplate": "{{{replace 'io.github.microutils' 'io.github.oshai' packageName}}}",
+        "replacementVersion": "5.1.4"
+      }
+    ]
+  },
   "mem-rename": {
     "description": "`mem` was renamed to `memoize`.",
     "packageRules": [
@@ -1007,6 +1035,17 @@
       }
     ]
   },
+  "rolldown-vite-to-vite": {
+    "description": "`rolldown-vite` was merged to `vite` in version 8.0.0.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rolldown-vite"],
+        "replacementName": "vite",
+        "replacementVersion": "8.0.0"
+      }
+    ]
+  },
   "rollup-babel-to-scoped": {
     "description": "The babel plugin for rollup became scoped.",
     "packageRules": [
@@ -1174,6 +1213,18 @@
       }
     ]
   },
+  "vitest-coverage-c8-to-coverage-v8": {
+    "description": "`@vitest/coverage-c8` was renamed to `@vitest/coverage-v8`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.32.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@vitest/coverage-c8"],
+        "replacementName": "@vitest/coverage-v8",
+        "replacementVersion": "0.33.0"
+      }
+    ]
+  },
   "vso-task-lib-to-azure-pipelines-task-lib": {
     "description": "The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.",
     "packageRules": [
@@ -1193,6 +1244,18 @@
         "matchPackageNames": ["vsts-task-lib"],
         "replacementName": "azure-pipelines-task-lib",
         "replacementVersion": "3.4.0"
+      }
+    ]
+  },
+  "wuchale-vite-plugin-to-wuchale": {
+    "description": "The `@wuchale/vite-plugin` package is now included in `wuchale` at `wuchale/vite`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^0.17.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@wuchale/vite-plugin"],
+        "replacementName": "wuchale",
+        "replacementVersion": "0.22.0"
       }
     ]
   },

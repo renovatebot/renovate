@@ -227,7 +227,8 @@ const platform: Platform = {
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
+      // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
+      gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
       const env = getEnv();
@@ -285,7 +286,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
     // Try to fetch information about repository
     try {

@@ -181,16 +181,14 @@ export function getDep(
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
     if (currentFrom.startsWith(`${name}/`)) {
       const depName = currentFrom.substring(name.length + 1);
-      const dep = {
-        ...getDep(`${value}/${depName}`, false),
-        replaceString: currentFrom,
-      };
+      const dep = getDep(`${value}/${depName}`, false);
       // retain depName, not sure if condition is necessary
       if (dep.depName?.startsWith(value)) {
         dep.packageName = dep.depName;
         dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
       }
       if (specifyReplaceString) {
+        dep.replaceString = currentFrom;
         dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
       }
       return dep;

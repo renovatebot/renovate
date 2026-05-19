@@ -139,9 +139,10 @@ export function filterVersions(
         semver.satisfies(
           semver.valid(r.version)
             ? r.version
-            : /* istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
+            : /* v8 ignore start: not reachable, but it's safer to preserve it */ semver.coerce(
                 r.version,
               )!,
+          /* v8 ignore stop */
           allowedVersions,
         ),
       );
@@ -161,7 +162,7 @@ export function filterVersions(
       error.validationSource = 'config';
       error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
-        'The following allowedVersions does not parse as a valid version or range: ' +
+        `The following allowedVersions does not parse as a valid version or range with versioning=${JSON.stringify(config.versioning)}: ` +
         JSON.stringify(allowedVersions);
       throw error;
     }

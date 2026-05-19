@@ -14,16 +14,6 @@ export interface TerraformBuild {
   shasums_url?: string;
 }
 
-export interface TerraformProvider {
-  namespace: string;
-  name: string;
-  provider: string;
-  source?: string;
-  versions: string[];
-  version: string;
-  published_at: string;
-}
-
 /**
  * API Docs https://www.terraform.io/internals/provider-registry-protocol
  */

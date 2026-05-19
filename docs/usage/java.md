@@ -5,7 +5,7 @@ description: Java versions support in Renovate
 
 # Java Dependency Updates
 
-Renovate can update Gradle and Maven dependencies.
+Renovate can update Gradle, Maven, and Ant dependencies.
 This includes libraries and plugins as well as the Gradle Wrapper.
 
 ## LTS releases

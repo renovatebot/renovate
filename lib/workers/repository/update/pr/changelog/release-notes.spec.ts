@@ -81,6 +81,26 @@ release-plan 0.14.0 (minor)
   * [#152](https://github.com/embroider-build/release-plan/pull/152) remove conditional coverage run
 `;
 
+const keepAChangelogMd = `# Changelog
+
+## [Unreleased]
+
+- Enhance security when \`dry-run\` is true.
+
+## [1.30.1] - 2026-04-17
+
+- Enhance security against supply chain attacks.
+
+## [1.0.0] - 2021-02-03
+
+Initial release
+
+[Unreleased]: https://github.com/taiki-e/upload-rust-binary-action/compare/v1.30.2...HEAD
+[1.30.2]: https://github.com/taiki-e/upload-rust-binary-action/compare/v1.30.1...v1.30.2
+[1.30.1]: https://github.com/taiki-e/upload-rust-binary-action/compare/v1.30.0...v1.30.1
+[1.0.0]: https://github.com/taiki-e/upload-rust-binary-action/releases/tag/v1.0.0
+`;
+
 const bitbucketTreeResponse = {
   values: [
     {
@@ -1560,6 +1580,32 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         expect(res?.url).toStrictEqual(
           'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md#Release-2025-03-03',
         );
+      });
+
+      it('ignores trailing link reference definitions when searching body', async () => {
+        httpMock
+          .scope('https://api.github.com')
+          .get('/repos/taiki-e/upload-rust-binary-action')
+          .reply(200, { default_branch: 'main' })
+          .get('/repos/taiki-e/upload-rust-binary-action/git/trees/main')
+          .reply(200, githubTreeResponse)
+          .get('/repos/taiki-e/upload-rust-binary-action/git/blobs/abcd')
+          .reply(200, {
+            content: toBase64(keepAChangelogMd),
+          });
+        const res = await getReleaseNotesMd(
+          {
+            ...githubProject,
+            repository: 'taiki-e/upload-rust-binary-action',
+            packageName: 'taiki-e/upload-rust-binary-action',
+          },
+          partial<ChangeLogRelease>({
+            version: '1.30.2',
+            gitRef: '1.30.2',
+          }),
+        );
+
+        expect(res).toBeNull();
       });
 
       it('handles gitlab sourceDirectory', async () => {

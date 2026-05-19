@@ -141,13 +141,28 @@ export async function ensureOnboardingPr(
     config.productLinks!.homepage
   })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
-    config.requireConfig === 'required'
+    getInheritedOrGlobal('requireConfig') === 'required'
       ? emojify(
           `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
         )
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
         );
+
+  prTemplate += emojify(
+    `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+  );
+
+  const configFile = getDefaultConfigFileName();
+  prTemplate += emojify(
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
+  );
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
+  prTemplate += '\n\n';
   // TODO #22198
   prTemplate += emojify(
     `

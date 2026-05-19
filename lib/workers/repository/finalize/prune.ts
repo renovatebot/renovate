@@ -9,6 +9,7 @@ import { scm } from '../../../modules/platform/scm.ts';
 import { getBranchList, setUserRepoConfig } from '../../../util/git/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { uniqueStrings } from '../../../util/string.ts';
+import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
 async function cleanUpBranches(
@@ -22,16 +23,20 @@ async function cleanUpBranches(
   // set Git author in case the repository is not initialized yet
   setUserRepoConfig(config);
 
-  // calculate regex to extract base branch from branch name
-  const baseBranchRe = calculateBaseBranchRegex(config);
+  // in multi-base mode the base branch is encoded in the branch name
+  const multiBase = isMultiBaseBranch(config);
+  const baseBranchRe = multiBase ? calculateBaseBranchRegex(config) : null;
 
   for (const branchName of remainingBranches) {
     try {
-      // get base branch from branch name if base branches are configured
-      // use default branch if no base branches are configured
-      // use defaul branch name if no match (can happen when base branches are configured later)
-      const baseBranch =
-        baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
+      let baseBranch: string;
+      if (multiBase) {
+        baseBranch =
+          baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
+      } else {
+        // single base branch: branch name doesn't encode it, use the configured one
+        baseBranch = config.baseBranches?.[0] ?? config.defaultBranch!;
+      }
       const pr = await platform.findPr({
         branchName,
         state: 'open',
@@ -120,7 +125,7 @@ async function cleanUpBranches(
  * @param config Renovate configuration
  */
 function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
-  if (!config.baseBranchPatterns?.length) {
+  if (!config.baseBranchPatterns?.length || !config.baseBranches?.length) {
     return null;
   }
 
@@ -130,9 +135,7 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
     .filter(uniqueStrings)
     .map(escapeRegExp);
 
-  // calculate possible base branches and escape for regex
-  // if baseBranchPatterns is configured, baseBranches will be defined too
-  const baseBranches = config.baseBranches!.map(escapeRegExp);
+  const baseBranches = config.baseBranches.map(escapeRegExp);
 
   // create regex to extract base branche from branch name
   const baseBranchRe = regEx(
@@ -152,6 +155,10 @@ export async function pruneStaleBranches(
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
+    return;
+  }
+  if (!config.defaultBranch) {
+    logger.debug('No defaultBranch set - skipping branch pruning');
     return;
   }
   // TODO: types (#22198)

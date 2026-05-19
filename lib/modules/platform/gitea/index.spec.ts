@@ -15,6 +15,7 @@ import {
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './gitea-helper.ts';
 import * as gitea from './index.ts';
@@ -284,13 +285,13 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock.scope('https://gitea.com/api/v1');
       scope
         .get('/user')
-        .reply(200, mockUser)
+        .reply(200, { ...mockUser, full_name: '' })
         .get('/version')
         .reply(200, { version: GITEA_VERSION });
 
       expect(await gitea.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://gitea.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'renovate <renovate@example.com>',
       });
     });
 
@@ -747,7 +748,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      const url = new URL(`${mockRepo.clone_url}`);
+      const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
@@ -775,7 +776,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      const url = new URL(`${mockRepo.clone_url}`);
+      const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),

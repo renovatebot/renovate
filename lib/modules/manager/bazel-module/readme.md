@@ -107,3 +107,5 @@ Requirements:
 - Bazelisk determines the correct Bazel version from the `.bazelversion` file in the repository (if present)
 
 If no `MODULE.bazel.lock` file is found, the lockfile update step is skipped.
+
+It will only run if the [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) global option includes `bazelModDeps`.

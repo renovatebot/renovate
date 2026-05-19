@@ -939,7 +939,11 @@ describe('modules/datasource/index', () => {
             constraintsFiltering: 'strict',
           });
           expect(res).toMatchObject({
-            releases: [{ version: '0.0.3' }, { version: '0.0.4' }],
+            releases: [
+              { version: '0.0.2' },
+              { version: '0.0.3' },
+              { version: '0.0.4' },
+            ],
           });
         });
       });

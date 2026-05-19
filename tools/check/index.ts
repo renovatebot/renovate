@@ -1,24 +1,25 @@
 /**
  * Fast local CI check script
  *
- * Usage: pnpm check [options]
+ * Usage: pnpm check [options] [targets...]
+ *
+ * Arguments:
+ *   targets           Files or directories to scope checks to
  *
  * Options:
- *   --no-fix          Skip auto-fix (eslint-fix, prettier-fix)
+ *   --fix             Run fixers only (oxlint-fix, biome-fix, prettier-fix)
  *   --no-test         Skip tests
- *   --full            Run full vitest instead of only affected shards
- *   --base <branch>   Compare against different base branch (default: main)
  */
 
+import { readdirSync } from 'node:fs';
+import { extname } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
-  TOTAL_SHARDS,
-  getMatchingShards,
-  getTestPatternsForShards,
-} from '../test-shards.ts';
-import { parseCoverageJson } from './coverage.ts';
+  getCoverageForDir,
+  getCoverageForFiles,
+  loadCoverage,
+} from './coverage.ts';
 import { runChecksParallel, runCommand } from './execution.ts';
-import { getChangedFiles } from './git.ts';
 import {
   ANSI,
   formatCompletedLine,
@@ -36,12 +37,13 @@ import type {
   CheckResult,
   CheckResultWithCoverage,
   CliArgs,
+  CoverageInfo,
   ExecutionProgress,
   ParallelCheck,
   ProcessManager,
 } from './types.ts';
 
-// Module-level state for signal handler (set by main, checked by handler)
+// Module-level state for signal handler
 let currentProgress: ExecutionProgress | null = null;
 let currentProcessManager: ProcessManager | null = null;
 
@@ -67,22 +69,16 @@ function handleSigint(): void {
   process.exit(130);
 }
 
-// Register signal handler at module load (like original)
 process.on('SIGINT', handleSigint);
 
 function pnpmScript(name: string): ParallelCheck {
   return { name, cmd: 'pnpm', args: [name] };
 }
 
-const FIX_CHECKS = [
-  'oxlint-fix',
-  'biome-fix',
-  'eslint-fix',
-  'prettier-fix',
-].map(pnpmScript);
-const FIXABLE_CHECKS = ['oxlint', 'biome', 'eslint', 'prettier'].map(
-  pnpmScript,
-);
+const PRETTIER_ENV = { PRETTIER_EXPERIMENTAL_CLI: '1' };
+
+const FIX_CHECKS = ['oxlint-fix', 'biome-fix', 'prettier-fix'].map(pnpmScript);
+const FIXABLE_CHECKS = ['oxlint', 'biome', 'prettier'].map(pnpmScript);
 const OTHER_CHECKS = [
   'ls-lint',
   'git-check',
@@ -94,66 +90,159 @@ const OTHER_CHECKS = [
   'type-check',
 ].map(pnpmScript);
 
-function parseCliArgs(): CliArgs {
-  const { values } = parseArgs({
-    options: {
-      'no-fix': { type: 'boolean', default: false },
-      'no-test': { type: 'boolean', default: false },
-      full: { type: 'boolean', default: false },
-      base: { type: 'string', default: 'main' },
+function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
+  const suffix = fix ? '-fix' : '';
+  return [
+    {
+      name: `oxlint${suffix}`,
+      cmd: 'pnpm',
+      args: [
+        'exec',
+        'oxlint',
+        ...(fix ? ['--fix'] : []),
+        '-c',
+        '.oxlintrc.json',
+        ...targets,
+      ],
     },
+    {
+      name: `biome${suffix}`,
+      cmd: 'pnpm',
+      args: ['exec', 'biome', 'check', ...(fix ? ['--write'] : []), ...targets],
+    },
+    {
+      name: `prettier${suffix}`,
+      cmd: 'pnpm',
+      args: [
+        'exec',
+        'prettier',
+        fix ? '--write' : '--check',
+        '--cache',
+        ...targets,
+      ],
+      env: PRETTIER_ENV,
+    },
+  ];
+}
+
+function toSpecPath(file: string): string {
+  if (file.endsWith('.spec.ts')) {
+    return file;
+  }
+  return file.replace(/\.ts$/, '.spec.ts');
+}
+
+function countSpecFiles(dir: string): number {
+  try {
+    return readdirSync(dir, { recursive: true, encoding: 'utf-8' }).filter(
+      (f) => f.endsWith('.spec.ts'),
+    ).length;
+  } catch {
+    return 0;
+  }
+}
+
+function toSourcePath(target: string): string | null {
+  if (target.endsWith('.spec.ts')) {
+    return target.replace('.spec.ts', '.ts');
+  }
+  if (target.endsWith('.ts')) {
+    return target;
+  }
+  return null;
+}
+
+async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
+  const coverageData = await loadCoverage('./coverage');
+  if (!coverageData) {
+    return [];
+  }
+
+  const targets = args.targets.length > 0 ? args.targets : ['.'];
+
+  const coverage: CoverageInfo[] = [];
+  const sourceFiles: string[] = [];
+
+  for (const t of targets) {
+    const source = toSourcePath(t);
+    if (source) {
+      sourceFiles.push(source);
+    } else {
+      coverage.push(...getCoverageForDir(coverageData, t));
+    }
+  }
+
+  coverage.push(...getCoverageForFiles(coverageData, sourceFiles));
+  return coverage;
+}
+
+function parseCliArgs(): CliArgs {
+  const { values, positionals } = parseArgs({
+    options: {
+      fix: { type: 'boolean', default: false },
+      'no-test': { type: 'boolean', default: false },
+    },
+    allowPositionals: true,
   });
 
   return {
-    noFix: values['no-fix'] ?? false,
+    fix: values.fix ?? false,
     noTest: values['no-test'] ?? false,
-    full: values.full ?? false,
-    base: values.base ?? 'main',
+    targets: positionals,
   };
 }
 
-function buildTestChecks(
-  args: CliArgs,
-  changedFiles: string[],
-): ParallelCheck[] {
-  if (args.noTest) {
+function buildTestChecks(args: CliArgs): ParallelCheck[] {
+  if (args.noTest || args.fix) {
     return [];
   }
 
-  if (args.full) {
-    return [{ name: 'test (all)', cmd: 'pnpm', args: ['vitest'] }];
+  if (args.targets.length === 0) {
+    return [{ name: 'test', cmd: 'pnpm', args: ['vitest'] }];
   }
 
-  const shardsToRun = getMatchingShards(changedFiles);
-  if (shardsToRun.length === 0) {
+  const patterns = [
+    ...new Set(
+      args.targets
+        .filter((t) => extname(t) === '' || t.endsWith('.ts'))
+        .map((t) => (t.endsWith('.ts') ? toSpecPath(t) : t)),
+    ),
+  ];
+  if (patterns.length === 0) {
     return [];
   }
-
-  const patterns = getTestPatternsForShards(shardsToRun);
-  const n = shardsToRun.length;
-
-  if (n === TOTAL_SHARDS) {
-    return [{ name: 'test (all)', cmd: 'pnpm', args: ['vitest'] }];
+  let fileCount = 0;
+  for (const p of patterns) {
+    fileCount += extname(p) === '' ? countSpecFiles(p) : 1;
   }
-
-  const name = `test (${n} ${n === 1 ? 'shard' : 'shards'})`;
+  if (fileCount === 0) {
+    return [];
+  }
+  const name = `test (${fileCount} ${fileCount === 1 ? 'file' : 'files'})`;
   return [{ name, cmd: 'pnpm', args: ['vitest', ...patterns] }];
 }
 
 async function main(): Promise<void> {
   const startTime = Date.now();
   const args = parseCliArgs();
-  const changedFiles = await getChangedFiles(args.base);
+  const testChecks = buildTestChecks(args);
 
-  const testChecks = buildTestChecks(args, changedFiles);
+  let fixChecks: ParallelCheck[];
+  let lintChecks: ParallelCheck[];
 
-  // Fix checks run sequentially first (eslint-fix, prettier-fix)
-  // When skipped, we run the non-fix variants (eslint, prettier) in parallel
-  const fixChecks: ParallelCheck[] = args.noFix ? [] : [...FIX_CHECKS];
-  const lintChecks: ParallelCheck[] = [
-    ...(args.noFix ? FIXABLE_CHECKS : []),
-    ...OTHER_CHECKS,
-  ];
+  if (args.fix) {
+    fixChecks =
+      args.targets.length > 0
+        ? buildTargetedChecks(args.targets, true)
+        : [...FIX_CHECKS];
+    lintChecks = [];
+  } else if (args.targets.length > 0) {
+    fixChecks = [];
+    lintChecks = buildTargetedChecks(args.targets, false);
+  } else {
+    fixChecks = [];
+    lintChecks = [...FIXABLE_CHECKS, ...OTHER_CHECKS];
+  }
 
   const allChecks = [...fixChecks, ...lintChecks, ...testChecks];
 
@@ -172,7 +261,6 @@ async function main(): Promise<void> {
     displayLines: allChecks.length + 2,
   };
 
-  // Set module-level state for signal handler
   currentProgress = progress;
   currentProcessManager = processManager;
 
@@ -189,7 +277,6 @@ async function main(): Promise<void> {
 
   startRenderLoop(progress, processManager);
 
-  // Fix checks run sequentially
   for (let i = 0; i < fixChecks.length; i++) {
     const check = fixChecks[i];
     progress.startedIndices.add(i);
@@ -199,6 +286,7 @@ async function main(): Promise<void> {
       check.cmd,
       check.args,
       processManager,
+      check.env,
     );
     const duration = (Date.now() - checkStart) / 1000;
     const result: CheckResult = { name: check.name, success, duration, output };
@@ -209,7 +297,6 @@ async function main(): Promise<void> {
     }
   }
 
-  // Run all lint checks in parallel
   await runChecksParallel(
     lintChecks,
     fixChecks.length,
@@ -217,7 +304,6 @@ async function main(): Promise<void> {
     processManager,
   );
 
-  // Run tests (single vitest process)
   if (testChecks.length > 0) {
     await runChecksParallel(
       testChecks,
@@ -235,9 +321,7 @@ async function main(): Promise<void> {
   );
   const hasFailure = allResults.some((r) => !r.result.success);
 
-  // Parse coverage for changed files with gaps
-  const coverage =
-    testChecks.length > 0 ? parseCoverageJson('./coverage', changedFiles) : [];
+  const coverage = testChecks.length > 0 ? await collectCoverage(args) : [];
 
   printCoverageReport(coverage);
   printFailedOutputs(progress.results);

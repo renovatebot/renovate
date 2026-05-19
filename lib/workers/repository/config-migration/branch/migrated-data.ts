@@ -1,6 +1,7 @@
 import { isNumber } from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
+import { weave } from 'jsonc-weaver';
 import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration.ts';
@@ -155,6 +156,16 @@ export class MigratedDataFactory {
 
       if (filename.endsWith('.json5')) {
         content = JSON5.stringify(migratedConfig, undefined, indentSpace);
+      } else if (raw) {
+        try {
+          content = weave(raw, migratedConfig);
+        } catch (err) {
+          logger.warn(
+            { err },
+            'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
+          );
+          content = JSON.stringify(migratedConfig, undefined, indentSpace);
+        }
       } else {
         content = JSON.stringify(migratedConfig, undefined, indentSpace);
       }

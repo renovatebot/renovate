@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is';
 import {
   filterConfig,
   getManagerConfig,
@@ -150,6 +151,10 @@ export async function flattenUpdates(
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
+
+            // make sure that we use the dependency's current state of attestation, rather than using the new update's value
+            updateConfig.hasAttestation = depConfig.hasAttestation;
+
             updates.push(updateConfig);
           }
         }
@@ -230,6 +235,7 @@ export async function flattenUpdates(
   }
   const filteredUpdates = updates
     .filter((update) => update.enabled !== false)
+    .filter((update) => isUndefined(update.skipReason))
     .map(({ vulnerabilityAlerts: _, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
   if (filteredUpdates.length < updates.length) {

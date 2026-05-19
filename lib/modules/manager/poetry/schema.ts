@@ -1,8 +1,9 @@
+import deepmerge from 'deepmerge';
 import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
-import { regEx } from '../../../util/regex.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -20,8 +21,7 @@ import * as gitVersioning from '../../versioning/git/index.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
 import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import { DependencyGroup, ProjectSection } from '../pep621/schema.ts';
-import { depTypes } from '../pep621/utils.ts';
-import { dependencyPattern } from '../pip_requirements/extract.ts';
+import { depTypes, pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const PoetryOptionalDependencyMixin = z
@@ -108,16 +108,17 @@ const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional(), source: z.string().optional() })
     .transform(({ version: currentValue, source }): PackageDependency => {
+      const managerData = {
+        ...(source ? { sourceName: source.toLowerCase() } : {}),
+      };
+
       if (!currentValue) {
-        return { datasource: PypiDatasource.id };
+        return { datasource: PypiDatasource.id, managerData };
       }
 
       return {
         datasource: PypiDatasource.id,
-        managerData: {
-          nestedVersion: true,
-          ...(source ? { sourceName: source.toLowerCase() } : {}),
-        },
+        managerData: { ...managerData, nestedVersion: true },
         currentValue,
       };
     })
@@ -288,22 +289,15 @@ export const PoetrySection = z.object({
 
 export type PoetrySection = z.infer<typeof PoetrySection>;
 
-const BuildSystemRequireVal = z
-  .string()
-  .nonempty()
-  .transform((val) => regEx(`^${dependencyPattern}$`).exec(val))
-  .transform((match, ctx) => {
-    if (!match) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'invalid requirement',
-      });
-      return z.NEVER;
-    }
-
-    const [, depName, , poetryRequirement] = match;
-    return { depName, poetryRequirement };
-  });
+const BuildSystemRequires = LooseArray(
+  z
+    .string()
+    .nonempty()
+    .transform((val) =>
+      pep508ToPackageDependency(depTypes.buildSystemRequires, val),
+    )
+    .refine((dep) => dep !== null),
+).catch([]);
 
 export const PoetryPyProject = Toml.pipe(
   z
@@ -319,17 +313,20 @@ export const PoetryPyProject = Toml.pipe(
               buildBackend === 'poetry.masonry.api' ||
               buildBackend === 'poetry.core.masonry.api',
           ),
-          requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
-            const req = vals.find(
-              ({ depName }) =>
-                depName === 'poetry' ||
-                depName === 'poetry_core' ||
-                depName === 'poetry-core',
-            );
-            return req?.poetryRequirement;
-          }),
+          requires: BuildSystemRequires,
         })
-        .transform(({ requires: poetryRequirement }) => poetryRequirement)
+        .transform(({ requires }) => {
+          const req = requires.find(
+            ({ depName }) =>
+              depName === 'poetry' ||
+              depName === 'poetry_core' ||
+              depName === 'poetry-core',
+          );
+          return {
+            poetryRequirement: req?.currentValue,
+            requires,
+          };
+        })
         .optional()
         .catch(undefined),
     })
@@ -337,38 +334,70 @@ export const PoetryPyProject = Toml.pipe(
       const {
         project,
         tool,
-        'build-system': poetryRequirement,
+        'build-system': buildSystem,
         'dependency-groups': dependencyGroups,
       } = pyproject;
 
       const deps: PackageDependency[] = [];
+      const projectDependencies = coerceArray(project?.dependencies);
+      const projectOptionalDependencies = coerceArray(
+        project?.['optional-dependencies'],
+      );
 
-      const projectDependencies = project?.dependencies;
-      if (projectDependencies) {
-        deps.push(...projectDependencies);
+      const projectDepsByName: Record<string, PackageDependency> = {};
+      for (const dep of [
+        ...projectDependencies,
+        ...dependencyGroups,
+        ...projectOptionalDependencies,
+      ]) {
+        projectDepsByName[dep.depName!] = dep;
       }
 
-      const projectOptionalDependencies = project?.['optional-dependencies'];
-      if (projectOptionalDependencies) {
-        deps.push(...projectOptionalDependencies);
+      if (buildSystem?.requires) {
+        deps.push(...buildSystem.requires);
       }
 
-      deps.push(...dependencyGroups);
+      const poetryDependencies = coerceArray(tool?.poetry?.dependencies);
 
-      const poetryDependencies = tool?.poetry?.dependencies;
-      if (poetryDependencies) {
-        deps.push(...poetryDependencies);
+      const poetryDevDependencies = coerceArray(
+        tool?.poetry?.['dev-dependencies'],
+      );
+
+      const poetryGroupDependencies = coerceArray(tool?.poetry?.group);
+
+      for (const poetryDep of [
+        ...poetryDependencies,
+        ...poetryDevDependencies,
+        ...poetryGroupDependencies,
+      ]) {
+        const depName = poetryDep.depName;
+        const projectDep = depName && projectDepsByName[depName];
+        // When the same dep exists in project.dependencies or dependency-groups,
+        // Poetry just uses the Poetry dep to enrich the project dependency.
+        if (projectDep) {
+          const mergedDep = deepmerge<PackageDependency>(poetryDep, projectDep);
+          // Poetry supports specifying the version in project.dependencies and
+          // tool.poetry.dependencies *at the same time* and only errors if both
+          // are not compatible - we require a single constraint per dependency.
+          if (projectDep.currentValue && poetryDep.currentValue) {
+            mergedDep.skipReason = 'invalid-dependency-specification';
+          }
+          // When a skipReason is 'unspecified-version', we defer to the other skipReason,
+          // so that 'unspecified-version' only persists if both deps have no version.
+          if (mergedDep.skipReason === 'unspecified-version') {
+            if (poetryDep.skipReason === 'unspecified-version') {
+              mergedDep.skipReason = projectDep.skipReason;
+            } else {
+              mergedDep.skipReason = poetryDep.skipReason;
+            }
+          }
+          projectDepsByName[depName] = mergedDep;
+        } else {
+          deps.push(poetryDep);
+        }
       }
 
-      const poetryDevDependencies = tool?.poetry?.['dev-dependencies'];
-      if (poetryDevDependencies) {
-        deps.push(...poetryDevDependencies);
-      }
-
-      const poetryGroupDependencies = tool?.poetry?.group;
-      if (poetryGroupDependencies) {
-        deps.push(...poetryGroupDependencies);
-      }
+      deps.push(...Object.values(projectDepsByName));
 
       const packageFileVersion = tool?.poetry?.version;
       const packageFileContent: PackageFileContent = {
@@ -399,7 +428,10 @@ export const PoetryPyProject = Toml.pipe(
         }
       }
 
-      return { packageFileContent, poetryRequirement };
+      return {
+        packageFileContent,
+        poetryRequirement: buildSystem?.poetryRequirement,
+      };
     }),
 );
 

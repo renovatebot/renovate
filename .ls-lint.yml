@@ -8,7 +8,6 @@ ls:
 
 ignore:
   - .cache
-  - .eslintrc.js
   - .git
   - .github/ISSUE_TEMPLATE
   - .github/pull_request_template.md

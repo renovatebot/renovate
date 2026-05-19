@@ -1,6 +1,6 @@
 {
   "*.{js,cjs,mjs,mts,ts}": [
-    "oxlint --import-plugin --fix",
+    "oxlint --import-plugin --fix -c .oxlintrc.json",
     "biome check --write",
     "prettier --write"
   ],

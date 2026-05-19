@@ -17,6 +17,19 @@ describe('config/app-strings', () => {
     expect(filenames.includes('def')).toBeTrue();
   });
 
+  it('expands brace patterns for json and json5 filenames', () => {
+    const filenames = getConfigFileNames();
+
+    expect(filenames.includes('renovate.json')).toBeTrue();
+    expect(filenames.includes('renovate.json5')).toBeTrue();
+    expect(filenames.includes('.renovaterc.json')).toBeTrue();
+    expect(filenames.includes('.renovaterc.json5')).toBeTrue();
+
+    expect(filenames.includes('renovate.json{,5}')).toBeFalse();
+
+    expect(filenames.includes('package.json5')).toBeFalse();
+  });
+
   it('filters based on platform', () => {
     const filenames = getConfigFileNames('gitea');
     expect(filenames.includes('.github/renovate.json')).toBeFalse();

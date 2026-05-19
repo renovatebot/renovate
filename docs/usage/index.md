@@ -52,7 +52,7 @@ Multi-platform and multi-language.
 
     ---
 
-    Renovate is licensed under the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license).
+    Renovate is licensed under the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license) (`AGPL-3.0-only`).
 
 </div>
 
@@ -110,6 +110,7 @@ A non-exhaustive list of companies and projects using Renovate can be seen below
 You can run Renovate as:
 
 - an [Open Source npm package](https://www.npmjs.com/package/renovate)
+- a [pre-built Open Source image on GitHub Container Registry](https://github.com/renovatebot/renovate/pkgs/container/renovate)
 - a [pre-built Open Source image on Docker Hub](https://hub.docker.com/r/renovate/renovate)
 
 Or you can use [the Mend Renovate App](https://github.com/marketplace/renovate) which is hosted by [Mend](https://www.mend.io/).

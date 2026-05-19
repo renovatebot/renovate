@@ -19,7 +19,7 @@ vi.mock('../../../modules/platform/index.ts', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
 }));
-vi.unmock('../../../util/mutex');
+vi.unmock('../../../util/mutex.ts');
 
 const apis = vi.mocked(_apis);
 const config = vi.mocked(_config);
@@ -63,12 +63,12 @@ describe('workers/repository/init/index', () => {
       await initRepo({});
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { platform: undefined },
+        { platform: 'github' },
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
       );
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { platform: undefined },
+        { platform: 'github' },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",
       );
     });

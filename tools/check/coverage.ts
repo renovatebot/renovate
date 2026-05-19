@@ -41,14 +41,18 @@ function groupConsecutiveNumbers(numbers: number[]): string[] {
   return ranges;
 }
 
-function loadCoverageFile(coverageDir: string): CoverageData | null {
+async function loadCoverageFile(
+  coverageDir: string,
+): Promise<CoverageData | null> {
   const coverageFile = upath.resolve(coverageDir, 'coverage-final.json');
-  if (!fs.existsSync(coverageFile)) {
+  if (!(await fs.pathExists(coverageFile))) {
     return null;
   }
 
   try {
-    const rawJson: unknown = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+    const rawJson: unknown = JSON.parse(
+      await fs.readFile(coverageFile, 'utf8'),
+    );
     const parseResult = CoverageJson.safeParse(rawJson);
     return parseResult.success ? parseResult.data : null;
   } catch {
@@ -118,27 +122,51 @@ function extractFileCoverage(
   };
 }
 
-export function parseCoverageJson(
+export async function loadCoverage(
   coverageDir: string,
-  changedFiles: string[],
-): CoverageInfo[] {
-  const data = loadCoverageFile(coverageDir);
+): Promise<Map<string, CoverageData[string]> | null> {
+  const data = await loadCoverageFile(coverageDir);
   if (!data) {
-    return [];
+    return null;
   }
+  return normalizeCoveragePaths(data);
+}
 
-  const normalized = normalizeCoveragePaths(data);
+export function getCoverageForFiles(
+  coverage: Map<string, CoverageData[string]>,
+  files: string[],
+): CoverageInfo[] {
   const results: CoverageInfo[] = [];
-
-  for (const file of changedFiles) {
+  for (const file of files) {
     if (!isSourceFile(file)) {
       continue;
     }
-    const info = extractFileCoverage(file, normalized);
+    const info = extractFileCoverage(file, coverage);
     if (info) {
       results.push(info);
     }
   }
+  return results;
+}
 
+export function getCoverageForDir(
+  coverage: Map<string, CoverageData[string]>,
+  dir: string,
+): CoverageInfo[] {
+  const absDir = upath.resolve(process.cwd(), dir) + '/';
+  const results: CoverageInfo[] = [];
+  for (const absPath of coverage.keys()) {
+    if (!absPath.startsWith(absDir)) {
+      continue;
+    }
+    const relPath = upath.relative(process.cwd(), absPath);
+    if (!isSourceFile(relPath)) {
+      continue;
+    }
+    const info = extractFileCoverage(relPath, coverage);
+    if (info) {
+      results.push(info);
+    }
+  }
   return results;
 }

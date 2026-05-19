@@ -1,4 +1,8 @@
+import type { Category } from '../../../constants/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+
+export const categories: Category[] = ['helm', 'kubernetes'];
+
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -16,3 +20,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [HelmDatasource.id, DockerDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

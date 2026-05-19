@@ -17,12 +17,14 @@ export async function generateUpdate(
   currentVersion: string,
   bucket: string,
   release: Release,
+  allVersions: Set<string>,
 ): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {
     bucket,
     newVersion,
     newValue: null!,
+    hasAttestation: release.attestation,
   };
 
   // istanbul ignore if
@@ -59,6 +61,7 @@ export async function generateUpdate(
         rangeStrategy,
         currentVersion,
         newVersion,
+        allVersions,
       })!;
     } catch (err) /* istanbul ignore next */ {
       logger.warn(

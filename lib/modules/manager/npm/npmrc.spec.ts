@@ -8,7 +8,9 @@ vi.mock('../../../util/fs/index.ts');
 describe('modules/manager/npm/npmrc', () => {
   describe('resolveNpmrc', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../util/fs/index.ts',
+      );
       fs.readLocalFile.mockResolvedValue(null);
       fs.findLocalSiblingOrParent.mockResolvedValue(null);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);

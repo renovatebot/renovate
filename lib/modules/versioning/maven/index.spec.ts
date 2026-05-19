@@ -9,12 +9,22 @@ describe('modules/versioning/maven/index', () => {
   });
 
   it.each`
-    version              | expected
-    ${'1.0.0'}           | ${true}
-    ${'[1.0.0]'}         | ${true}
-    ${'17.0.5+8'}        | ${true}
-    ${'[1.12.6,1.18.6]'} | ${true}
-    ${undefined}         | ${false}
+    version                  | expected
+    ${'1.0.0'}               | ${true}
+    ${'[1.0.0]'}             | ${true}
+    ${'17.0.5+8'}            | ${true}
+    ${'[1.12.6,1.18.6]'}     | ${true}
+    ${'(,1.0]'}              | ${true}
+    ${'[1.0,)'}              | ${true}
+    ${'[1.0,2.0)'}           | ${true}
+    ${'(1.0,2.0]'}           | ${true}
+    ${'],1.0]'}              | ${true}
+    ${'[1.0,['}              | ${true}
+    ${'[1.0,2.0],[3.0,4.0)'} | ${true}
+    ${undefined}             | ${false}
+    ${'[,1.0]'}              | ${false}
+    ${'[1.0,]'}              | ${false}
+    ${'[2.0,1.0)'}           | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(!!isValid(version)).toBe(expected);
   });
@@ -122,6 +132,22 @@ describe('modules/versioning/maven/index', () => {
     ${'1.2.3'}       | ${'[1,2],[3,4]'}                   | ${true}
     ${'1.2.3'}       | ${'[1.2.3]'}                       | ${true}
     ${'1.2.3'}       | ${'[1.2.4]'}                       | ${false}
+    ${'1.0'}         | ${'[1.0,2.0)'}                     | ${true}
+    ${'2.0'}         | ${'[1.0,2.0)'}                     | ${false}
+    ${'1.5'}         | ${'[1.0,2.0)'}                     | ${true}
+    ${'0.9'}         | ${'[1.0,2.0)'}                     | ${false}
+    ${'1.0'}         | ${'(1.0,2.0]'}                     | ${false}
+    ${'2.0'}         | ${'(1.0,2.0]'}                     | ${true}
+    ${'1.5'}         | ${'(1.0,2.0]'}                     | ${true}
+    ${'0'}           | ${']0,2]'}                         | ${false}
+    ${'1'}           | ${']0,2]'}                         | ${true}
+    ${'2'}           | ${']0,2]'}                         | ${true}
+    ${'0'}           | ${']0,2['}                         | ${false}
+    ${'1'}           | ${']0,2['}                         | ${true}
+    ${'2'}           | ${']0,2['}                         | ${false}
+    ${'1'}           | ${'[1,2['}                         | ${true}
+    ${'2'}           | ${'[1,2['}                         | ${false}
+    ${'0'}           | ${'[1,2['}                         | ${false}
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
@@ -137,8 +163,12 @@ describe('modules/versioning/maven/index', () => {
   });
 
   it.each`
-    versions | range  | expected
-    ${['1']} | ${'1'} | ${'1'}
+    versions               | range          | expected
+    ${['1']}               | ${'1'}         | ${'1'}
+    ${['1', '2', '3']}     | ${'[1,2]'}     | ${'2'}
+    ${['1', '2', '3']}     | ${'[1,)'}      | ${'3'}
+    ${['1', '2', '3']}     | ${'[4,)'}      | ${null}
+    ${['1.0', '1.1', '2']} | ${'[1.0,2.0)'} | ${'1.1'}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -147,12 +177,16 @@ describe('modules/versioning/maven/index', () => {
   );
 
   it.each`
-    versions | range  | expected
-    ${['1']} | ${'1'} | ${'1'}
+    versions               | range          | expected
+    ${['1']}               | ${'1'}         | ${'1'}
+    ${['1', '2', '3']}     | ${'[1,2]'}     | ${'2'}
+    ${['1', '2', '3']}     | ${'[1,)'}      | ${'3'}
+    ${['1', '2', '3']}     | ${'[4,)'}      | ${null}
+    ${['1.0', '1.1', '2']} | ${'[1.0,2.0)'} | ${'1.1'}
   `(
-    'getSatisfyingVersion($versions, "$range") === $expected',
+    'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
-      expect(maven.getSatisfyingVersion(versions, range)).toBe(expected);
+      expect(maven.minSatisfyingVersion(versions, range)).toBe(expected);
     },
   );
 
@@ -171,6 +205,9 @@ describe('modules/versioning/maven/index', () => {
     ${'[1.0,1.2],[1.3,1.5['} | ${'pin'}      | ${'1.0'}       | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.2.3,)'}            | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.2.3,['}            | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'[1.0.0,1.2.3]'}       | ${'widen'}    | ${'1.0.0'}     | ${'1.2.4'}  | ${'[1.0.0,1.2.4]'}
+    ${'[1.0.0,1.2.3]'}       | ${'bump'}     | ${'1.0.0'}     | ${'1.2.4'}  | ${'[1.0.0,1.2.4]'}
+    ${'[1.0.0,1.2.3]'}       | ${'replace'}  | ${'1.0.0'}     | ${'1.2.4'}  | ${'[1.0.0,1.2.4]'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -183,4 +220,62 @@ describe('modules/versioning/maven/index', () => {
       expect(res).toBe(expected);
     },
   );
+
+  describe('range constraints for Jenkins-style version numbers', () => {
+    describe('>=2.164.0 <2.165.0', () => {
+      const range = '[2.164.0,2.165.0)';
+
+      it.each`
+        version               | expected
+        ${'2.164.0'}          | ${true}
+        ${'2.164.1'}          | ${true}
+        ${'2.164.99'}         | ${true}
+        ${'2.165.0'}          | ${false}
+        ${'2.163.9'}          | ${false}
+        ${'2.164.0-SNAPSHOT'} | ${false}
+      `(
+        'matches("$version", "' + range + '") === $expected',
+        ({ version, expected }) => {
+          expect(matches(version, range)).toBe(expected);
+        },
+      );
+    });
+
+    describe('>=2.164.0 <=2.165.0', () => {
+      const range = '[2.164.0,2.165.0]';
+
+      it.each`
+        version               | expected
+        ${'2.164.0'}          | ${true}
+        ${'2.164.1'}          | ${true}
+        ${'2.164.99'}         | ${true}
+        ${'2.165.0'}          | ${true}
+        ${'2.163.9'}          | ${false}
+        ${'2.164.0-SNAPSHOT'} | ${false}
+      `(
+        'matches("$version", "' + range + '") === $expected',
+        ({ version, expected }) => {
+          expect(matches(version, range)).toBe(expected);
+        },
+      );
+    });
+
+    describe('<2.164.0', () => {
+      const range = '(,2.164.0)';
+
+      it.each`
+        version               | expected
+        ${'2.164.0'}          | ${false}
+        ${'2.164.1'}          | ${false}
+        ${'2.163.9'}          | ${true}
+        ${'2.164.0-SNAPSHOT'} | ${true}
+        ${'1.0.0'}            | ${true}
+      `(
+        'matches("$version", "' + range + '") === $expected',
+        ({ version, expected }) => {
+          expect(matches(version, range)).toBe(expected);
+        },
+      );
+    });
+  });
 });

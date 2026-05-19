@@ -1,4 +1,3 @@
-import tsconfigPaths from 'vite-tsconfig-paths';
 import type { ViteUserConfig } from 'vitest/config';
 import {
   coverageConfigDefaults,
@@ -74,7 +73,7 @@ function configureShardingOrFallbackTo(
 export default defineConfig(() =>
   mergeConfig(
     {
-      plugins: [tsconfigPaths()],
+      resolve: { tsconfigPaths: true },
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
