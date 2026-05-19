@@ -157,7 +157,7 @@ export async function initPlatform({
       ).body;
       gitlabVersion = version.version;
     }
-    logger.debug('GitLab version is: ' + gitlabVersion);
+    logger.debug(`GitLab version is: ${gitlabVersion}`);
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     [gitlabVersion] = gitlabVersion.split('-');
     defaults.version = gitlabVersion;
@@ -207,7 +207,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       ),
     );
   } else {
-    urls.push('projects?' + getQueryString(queryParams));
+    urls.push(`projects?${getQueryString(queryParams)}`);
   }
 
   try {
@@ -247,9 +247,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url =
-    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
-    (branchOrTag ?? `HEAD`);
+  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
   const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
     cacheProvider: memCacheProvider,
   });

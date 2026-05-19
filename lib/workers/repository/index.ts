@@ -80,7 +80,7 @@ export async function renovateRepository(
 
       try {
         await fs.ensureDir(localDir);
-        logger.debug('Using localDir: ' + localDir);
+        logger.debug(`Using localDir: ${localDir}`);
         config = await initRepo(config);
         addSplit('init');
       } catch (err) /* istanbul ignore next */ {

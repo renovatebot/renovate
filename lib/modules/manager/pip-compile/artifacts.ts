@@ -79,7 +79,7 @@ export function constructPipCompileCmd(
   }
   for (const dep of upgradePackages) {
     compileArgs.argv.push(
-      `--upgrade-package=${quote(dep.depName + '==' + dep.newVersion)}`,
+      `--upgrade-package=${quote(`${dep.depName}==${dep.newVersion}`)}`,
     );
   }
   return compileArgs.argv.map(quote).join(' ');

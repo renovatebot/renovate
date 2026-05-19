@@ -208,10 +208,7 @@ export async function getRawFile(
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
-  const url =
-    `/2.0/repositories/${repo}/src/` +
-    (finalBranchOrTag ?? `HEAD`) +
-    `/${path}`;
+  const url = `/2.0/repositories/${repo}/src/${finalBranchOrTag ?? `HEAD`}/${path}`;
   const res = await bitbucketHttp.getText(url, {
     cacheProvider: repoCacheProvider,
   });
