@@ -1260,17 +1260,6 @@
       }
     ]
   },
-  "xmldom-to-scoped": {
-    "description": "The `xmldom` package is now published as `@xmldom/xmldom`.",
-    "packageRules": [
-      {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["xmldom", "xmldom-alpha"],
-        "replacementName": "@xmldom/xmldom",
-        "replacementVersion": "0.7.5"
-      }
-    ]
-  },
   "xlsx-to-scoped": {
     "description": "The `xlsx` package is now published as `@e965/xlsx`.",
     "packageRules": [
@@ -1280,6 +1269,17 @@
         "matchPackageNames": ["xlsx"],
         "replacementName": "@e965/xlsx",
         "replacementVersion": "0.20.3"
+      }
+    ]
+  },
+  "xmldom-to-scoped": {
+    "description": "The `xmldom` package is now published as `@xmldom/xmldom`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["xmldom", "xmldom-alpha"],
+        "replacementName": "@xmldom/xmldom",
+        "replacementVersion": "0.7.5"
       }
     ]
   },
