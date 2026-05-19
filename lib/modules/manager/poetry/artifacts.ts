@@ -104,16 +104,6 @@ export function getPoetryRequirement(
   return null;
 }
 
-export function getPoetryMinReleaseAgeDays(
-  pyProjectContent: string,
-): number | null {
-  const val = Result.parse(
-    massageToml(pyProjectContent),
-    PoetryPyProject.transform(({ solverMinReleaseAge }) => solverMinReleaseAge),
-  ).unwrapOrNull();
-  return val ?? null;
-}
-
 function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   let pyprojectFile: PoetryFile;
   try {
@@ -246,12 +236,7 @@ export async function updateArtifacts({
       if (isNumber(ageMs)) {
         const now = DateTime.now();
         const cutoff = now.minus(ageMs).toUTC();
-        const renovateDays = Math.ceil(now.diff(cutoff, 'days').days);
-        const pyprojectDays = getPoetryMinReleaseAgeDays(newPackageFileContent);
-        const days =
-          isNumber(pyprojectDays) && pyprojectDays > renovateDays
-            ? pyprojectDays
-            : renovateDays;
+        const days = Math.ceil(now.diff(cutoff, 'days').days);
         extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = String(days);
       }
     }
