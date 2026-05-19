@@ -11,10 +11,7 @@ import * as docker from '../../../util/exec/docker/index.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
-import {
-  getPoetryRequirement,
-  getPythonConstraint,
-} from './artifacts.ts';
+import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
@@ -771,6 +768,5 @@ describe('modules/manager/poetry/artifacts', () => {
         },
       ]);
     });
-
   });
 });
