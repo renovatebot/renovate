@@ -60,8 +60,8 @@
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:wuchale-vite-plugin-to-wuchale",
-      "replacements:xmldom-to-scoped",
       "replacements:xlsx-to-scoped",
+      "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
     "ignoreDeps": []
