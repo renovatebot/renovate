@@ -6,7 +6,7 @@ description: Learn about Renovate configuration presets
 Renovate presets are reusable bits of confiuration in JSON format.
 
 Presets that are included with Renovate are referenced by their name, like
-[`:dependencyDashboard`](https://docs.renovatebot.com/presets-default/#dependencydashboard).
+[`:dependencyDashboard`](../presets-default.md#dependencydashboard).
 
 Custom presets are referenced by repository location. To learn how to create and host them,
 read the [Shareable Config Presets](../config-presets.md) page.
