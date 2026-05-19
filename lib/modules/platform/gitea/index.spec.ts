@@ -1958,7 +1958,7 @@ describe('modules/platform/gitea/index', () => {
 
     it('attempts merge anyway if mergeable is still false after all retries', async () => {
       process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY = '1';
-      process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
+      process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS = '2';
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1986,7 +1986,7 @@ describe('modules/platform/gitea/index', () => {
         'Gitea-native automerge: mergeable still false after retries, attempting merge call anyway',
       );
       delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY;
-      delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPS;
+      delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS;
     });
 
     describe('reattemptPlatformAutomerge', () => {

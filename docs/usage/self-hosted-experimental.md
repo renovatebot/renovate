@@ -47,6 +47,18 @@ If set to `"true"`, a config error Issue will be raised in case repository confi
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
+## `RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS`
+
+If set to a positive integer, Renovate uses this as the maximum number of times to check if a Gitea pull request is mergeable before issuing the automerge call.
+
+Default value: `5`.
+
+## `RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY`
+
+If set, Renovate uses this as the base delay between mergeable checks on Gitea. Each attempt waits longer than the last (`delay * attempt * attempt` milliseconds).
+
+Default value: `250` (milliseconds).
+
 ## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
 
 If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.

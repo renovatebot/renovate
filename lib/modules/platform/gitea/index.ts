@@ -219,7 +219,7 @@ async function fetchRepositories({
  * This helper polls the PR a small number of times until `mergeable` is true,
  * then issues the merge call. Mirrors GitLab's `tryPrAutomerge` pattern.
  * Tunable via the experimental env vars
- *   RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPS   (default 5)
+ *   RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS   (default 5)
  *   RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY    (default 250 ms, exponential)
  */
 async function tryPrAutomerge(
@@ -244,7 +244,7 @@ async function tryPrAutomerge(
 
   const env = getEnv();
   const retryTimes = parseInteger(
-    env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPS,
+    env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS,
     5,
   );
   const baseDelay = parseInteger(
