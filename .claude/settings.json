@@ -10,6 +10,16 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/agents/hooks/pretooluse-check.ts"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
