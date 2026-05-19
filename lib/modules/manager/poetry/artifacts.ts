@@ -4,7 +4,6 @@ import {
   isNumber,
   isString,
 } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -234,9 +233,7 @@ export async function updateArtifacts({
     if (config.minimumReleaseAge) {
       const ageMs = toMs(config.minimumReleaseAge);
       if (isNumber(ageMs)) {
-        const now = DateTime.now();
-        const cutoff = now.minus(ageMs).toUTC();
-        const days = Math.ceil(now.diff(cutoff, 'days').days);
+        const days = Math.ceil(ageMs / 86_400_000);
         extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = String(days);
       }
     }
