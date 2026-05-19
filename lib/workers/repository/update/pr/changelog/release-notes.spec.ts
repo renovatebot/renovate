@@ -948,7 +948,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
-    it('gets release notes with body "other@"', async () => {
+    it('gets release notes with body "other/v"', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {
           version: 'other/v1.0.0',
