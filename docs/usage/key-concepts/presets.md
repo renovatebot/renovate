@@ -3,13 +3,12 @@ title: Presets
 description: Learn about Renovate configuration presets
 ---
 
-Renovate presets are reusable bits of confiuration in JSON format.
+Renovate presets are reusable bits of configuration, stored in JSON, JSON5 or JSONC format.
 
-Presets that are included with Renovate are referenced by their name, like
-[`:dependencyDashboard`](../presets-default.md#dependencydashboard).
+Presets that are included with Renovate are referenced by their name, like [`:dependencyDashboard`](../presets-default.md#dependencydashboard) and [`security:minimumReleaseAgeNpm`](../presets-security.md#securityminimumreleaseagenpm).
 
-Custom presets are referenced by repository location. To learn how to create and host them,
-read the [Shareable Config Presets](../config-presets.md) page.
+Custom presets are referenced by repository location.
+To learn how to create and host them, read the [Shareable Config Presets](../config-presets.md) page.
 
 ## Why you should use presets
 
