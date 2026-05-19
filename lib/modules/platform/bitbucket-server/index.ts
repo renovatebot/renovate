@@ -146,7 +146,7 @@ export async function initPlatform({
       );
       config.username = headers['x-ausername'];
     }
-    logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    logger.debug(`Bitbucket Server version is: ${bitbucketServerVersion}`);
 
     // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
@@ -226,9 +226,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
-  const fileUrl =
-    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
-    (branchOrTag ? '&at=' + branchOrTag : '');
+  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000${branchOrTag ? `&at=${branchOrTag}` : ''}`;
   const res = await bitbucketServerHttp.getJsonUnchecked<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {

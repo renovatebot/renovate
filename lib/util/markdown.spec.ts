@@ -16,8 +16,7 @@ describe('util/markdown', () => {
       *   Mention: @wooorm
     `;
 
-    const after =
-      codeBlock`
+    const after = `${codeBlock`
         Some references:
 
         - Commit: [\`f808317\`](https://github.com/some/repo/commit/f8083175fe890cbf14f41d0a06e7aa35d4989587)
@@ -28,7 +27,7 @@ describe('util/markdown', () => {
         - Issue or PR (fork): [foo#1](https://github.com/foo/repo/issues/1)
         - Issue or PR (project): [remarkjs/remark#1](https://github.com/remarkjs/remark/issues/1)
         - Mention: [@wooorm](https://github.com/wooorm)
-    ` + '\n';
+    `}\n`;
 
     it('works', async () => {
       const res = await linkify(before, { repository: 'some/repo' });

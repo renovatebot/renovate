@@ -55,7 +55,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     defaultBranch = (await repo.raw('branch', '--show-current')).trim();
     await repo.addConfig('user.email', 'Jest@example.com');
     await repo.addConfig('user.name', 'Jest');
-    await fs.writeFile(base.path + '/past_file', 'past');
+    await fs.writeFile(`${base.path}/past_file`, 'past');
     await repo.addConfig('commit.gpgsign', 'false');
     await repo.add(['past_file']);
     await repo.commit('past message');
@@ -64,42 +64,42 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.checkout(['-b', 'develop', defaultBranch]);
 
     await repo.checkout(defaultBranch);
-    await fs.writeFile(base.path + '/master_file', defaultBranch);
-    await fs.writeFile(base.path + '/file_to_delete', 'bye');
+    await fs.writeFile(`${base.path}/master_file`, defaultBranch);
+    await fs.writeFile(`${base.path}/file_to_delete`, 'bye');
     await repo.add(['master_file', 'file_to_delete']);
     process.env.GIT_COMMITTER_DATE = masterCommitDate.toISOString();
     await repo.commit('master message');
     delete process.env.GIT_COMMITTER_DATE;
 
     await repo.checkout(['-b', 'renovate/future_branch', defaultBranch]);
-    await fs.writeFile(base.path + '/future_file', 'future');
+    await fs.writeFile(`${base.path}/future_file`, 'future');
     await repo.add(['future_file']);
     await repo.commit('future message');
 
     await repo.checkoutBranch('renovate/modified_branch', defaultBranch);
-    await fs.writeFile(base.path + '/base_file', 'base');
+    await fs.writeFile(`${base.path}/base_file`, 'base');
     await repo.add(['base_file']);
     await repo.commit('base message');
-    await fs.writeFile(base.path + '/modified_file', 'modified');
+    await fs.writeFile(`${base.path}/modified_file`, 'modified');
     await repo.add(['modified_file']);
     await repo.commit('modification');
 
     await repo.checkoutBranch('renovate/custom_author', defaultBranch);
-    await fs.writeFile(base.path + '/custom_file', 'custom');
+    await fs.writeFile(`${base.path}/custom_file`, 'custom');
     await repo.add(['custom_file']);
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
     await repo.checkoutBranch('renovate/nested_files', defaultBranch);
-    await fs.mkdirp(base.path + '/bin/');
-    await fs.writeFile(base.path + '/bin/nested', 'nested');
-    await fs.writeFile(base.path + '/root', 'root');
+    await fs.mkdirp(`${base.path}/bin/`);
+    await fs.writeFile(`${base.path}/bin/nested`, 'nested');
+    await fs.writeFile(`${base.path}/root`, 'root');
     await repo.add(['root', 'bin/nested']);
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('nested message');
 
     await repo.checkout(['-b', 'renovate/hidden-unicode', defaultBranch]);
-    await fs.writeFile(base.path + '/Dockerfile', 'FROM scratch\u00A0');
+    await fs.writeFile(`${base.path}/Dockerfile`, 'FROM scratch\u00A0');
     await repo.add(['Dockerfile']);
     await repo.commit('hidden Unicode');
 
@@ -107,7 +107,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     const binaryContent = Buffer.from([
       0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x00,
     ]); // 0xe2 0x80 0x8b is UTF-8 encoding of U+200B (zero-width space)
-    await fs.writeFile(base.path + '/binary.dat', binaryContent);
+    await fs.writeFile(`${base.path}/binary.dat`, binaryContent);
     await repo.add(['binary.dat']);
     await repo.commit('add binary file');
 
@@ -239,7 +239,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
           GIT_ALLOW_PROTOCOL: 'file',
         });
 
-        const submoduleBasePath = base.path + '/submodule';
+        const submoduleBasePath = `${base.path}/submodule`;
         await fs.mkdir(submoduleBasePath);
         const submodule = simpleGit(submoduleBasePath);
         await submodule.init();
@@ -247,7 +247,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await submodule.addConfig('user.name', 'Jest');
         await submodule.addConfig('commit.gpgsign', 'false');
 
-        await fs.writeFile(submoduleBasePath + '/init_file', 'init');
+        await fs.writeFile(`${submoduleBasePath}/init_file`, 'init');
         await submodule.add('init_file');
         await submodule.commit('init submodule');
 
@@ -255,7 +255,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await repo.commit('add submodule');
         await repo.branch(['stable']);
 
-        await fs.writeFile(submoduleBasePath + '/current_file', 'current');
+        await fs.writeFile(`${submoduleBasePath}/current_file`, 'current');
         await submodule.add('current_file');
         await submodule.commit('update');
         await repo.add('submodule');
@@ -286,7 +286,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await repo.checkout(defaultBranch);
         await repo.reset(['--hard', 'HEAD~2']);
         await repo.branch(['-D', 'stable']);
-        await fs.rm(base.path + '/submodule', { recursive: true });
+        await fs.rm(`${base.path}/submodule`, { recursive: true });
       });
     });
   });
@@ -312,7 +312,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
       expect(git.isCloned()).toBeFalse();
       await git.syncGit();
-      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(`${tmpDir.path}/.gitmodules`)).toBeTruthy();
       expect(await git.getFileList()).toEqual([
         '.gitmodules',
         'file_to_delete',
@@ -1045,7 +1045,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should fetch latest', async () => {
       const repo = simpleGit(base.path);
       await repo.checkout(['-b', 'test', defaultBranch]);
-      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await fs.writeFile(`${base.path}/test`, 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');
       await repo.checkout(defaultBranch);
@@ -1075,7 +1075,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should set branch prefix', async () => {
       const repo = simpleGit(base.path);
       await repo.checkout(['-b', 'renovate/test', defaultBranch]);
-      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await fs.writeFile(`${base.path}/test`, 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');
       await repo.checkout(defaultBranch);
@@ -1101,7 +1101,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should fail clone ssh submodule', async () => {
       const repo = simpleGit(base.path);
       await fs.writeFile(
-        base.path + '/.gitmodules',
+        `${base.path}/.gitmodules`,
         '[submodule "test"]\npath=test\nurl=ssh://0.0.0.0',
       );
       await repo.add('.gitmodules');
@@ -1119,7 +1119,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(`${tmpDir.path}/.gitmodules`)).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
     });
 
@@ -1179,17 +1179,17 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ]);
 
       await repo.checkout(defaultBranch);
-      await fs.writeFile(base.path + '/one_file', 'past (updated)');
+      await fs.writeFile(`${base.path}/one_file`, 'past (updated)');
       await repo.add(['one_file']);
       await repo.commit('past (updated) message');
 
       await repo.checkout('renovate/conflicted_branch');
-      await fs.writeFile(base.path + '/one_file', 'past (updated branch)');
+      await fs.writeFile(`${base.path}/one_file`, 'past (updated branch)');
       await repo.add(['one_file']);
       await repo.commit('past (updated branch) message');
 
       await repo.checkout('renovate/non_conflicted_branch');
-      await fs.writeFile(base.path + '/another_file', 'other');
+      await fs.writeFile(`${base.path}/another_file`, 'other');
       await repo.add(['another_file']);
       await repo.commit('other (updated branch) message');
 
@@ -1415,8 +1415,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should pass options into git status', async () => {
       await git.checkoutBranch('renovate/nested_files');
 
-      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
-      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
+      await fs.writeFile(`${tmpDir.path}/root`, 'new root');
       const resp = await git.getRepoStatus('bin');
 
       expect(resp.modified).toStrictEqual(['bin/nested']);
@@ -1426,8 +1426,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
       GlobalConfig.set({ localDir: tmpDir.path });
       await git.checkoutBranch('renovate/nested_files');
 
-      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
-      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
+      await fs.writeFile(`${tmpDir.path}/root`, 'new root');
 
       await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
         INVALID_PATH,
@@ -1668,7 +1668,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ).trim();
       await upstream.addConfig('user.email', 'other@example.com');
       await upstream.addConfig('user.name', 'Other');
-      await fs.writeFile(upstreamBase.path + '/past_file', 'past');
+      await fs.writeFile(`${upstreamBase.path}/past_file`, 'past');
       await upstream.addConfig('commit.gpgsign', 'false');
       await upstream.add(['past_file']);
       await upstream.commit('past message');

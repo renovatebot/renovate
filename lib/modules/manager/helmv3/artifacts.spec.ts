@@ -1144,7 +1144,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const password = 'pass>word';
     mockEcrAuthResolve({
       authorizationData: [
-        { authorizationToken: toBase64(username + ':' + password) },
+        { authorizationToken: toBase64(`${username}:${password}`) },
       ],
     });
 
