@@ -139,7 +139,7 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
   mise: {
     datasource: 'github-releases',
     packageName: 'jdx/mise',
-    versioning: npmVersioningId,
+    versioning: 'npm',
   },
   nix: {
     datasource: 'github-releases',
