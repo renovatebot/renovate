@@ -1,6 +1,5 @@
 import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
-import type { VersioningName } from '../../versioning-list.generated.ts';
 
 export interface ConstraintDefinition {
   name: string;
@@ -272,7 +271,7 @@ export interface ToolConfig {
   datasource: string;
   extractVersion?: string;
   packageName: string;
-  versioning: VersioningName;
+  versioning: string;
 }
 
 export type Opt<T> = T | null | undefined;
