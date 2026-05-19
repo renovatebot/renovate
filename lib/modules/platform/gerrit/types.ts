@@ -149,3 +149,21 @@ export interface GerritHashtagsInput {
   add?: string[] | null;
   remove?: string[] | null;
 }
+
+export interface GerritDownloadSchemeInfo {
+  url: string;
+  description?: string;
+  is_auth_required?: boolean;
+  is_auth_supported?: boolean;
+  commands: Record<string, string>;
+  clone_commands: Record<string, string>;
+}
+
+export interface GerritServerInfo {
+  download: {
+    archives: string[];
+    schemes: Partial<
+      Record<'anonymous http' | 'http' | 'ssh', GerritDownloadSchemeInfo>
+    >;
+  };
+}

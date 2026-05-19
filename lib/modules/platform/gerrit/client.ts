@@ -16,6 +16,7 @@ import type {
   GerritMergeableInfo,
   GerritProjectInfo,
   GerritRequestDetail,
+  GerritServerInfo,
 } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
@@ -39,6 +40,13 @@ class GerritClient {
       'a/config/server/version',
       options,
       z.string(),
+    );
+    return res.body;
+  }
+
+  async getServerInfo(): Promise<GerritServerInfo> {
+    const res = await this.gerritHttp.getJsonUnchecked<GerritServerInfo>(
+      'a/config/server/info',
     );
     return res.body;
   }

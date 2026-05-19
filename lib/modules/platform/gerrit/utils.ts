@@ -12,6 +12,7 @@ import type {
   GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRequestDetail,
+  GerritServerInfo,
 } from './types.ts';
 
 export const MIN_GERRIT_VERSION = '3.0.0';
@@ -38,6 +39,7 @@ export function getGerritRepoUrl(
   repository: string,
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
+  serverInfo: GerritServerInfo,
 ): string {
   const endpointUrl = parseUrl(endpoint);
   if (!endpointUrl) {
@@ -46,18 +48,38 @@ export function getGerritRepoUrl(
 
   const url =
     gitUrl === 'ssh'
-      ? createSshUrl(endpointUrl, repository)
-      : createHttpUrl(endpointUrl, endpoint, repository);
+      ? createSshUrl(endpointUrl, repository, serverInfo)
+      : createHttpUrl(endpointUrl, endpoint, repository, serverInfo);
   logger.trace({ url }, 'using URL based on configured endpoint');
 
   return url;
 }
 
-function createSshUrl(url: URL, repository: string): string {
-  return `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+function createSshUrl(
+  url: URL,
+  repository: string,
+  serverInfo: GerritServerInfo,
+): string {
+  if (serverInfo.download.schemes.ssh) {
+    const sshUrl = serverInfo.download.schemes.ssh.url.replace(
+      // eslint-disable-next-line no-template-curly-in-string
+      '${project}',
+      repository,
+    );
+    logger.debug(`Using SSH URL from server info: ${sshUrl}`);
+    return sshUrl;
+  }
+  const fallbackUrl = `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+  logger.debug(`SSH scheme not in server info, using fallback: ${fallbackUrl}`);
+  return fallbackUrl;
 }
 
-function createHttpUrl(url: URL, endpoint: string, repository: string): string {
+function createHttpUrl(
+  url: URL,
+  endpoint: string,
+  repository: string,
+  serverInfo: GerritServerInfo,
+): string {
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
     hostType: 'gerrit',
@@ -70,12 +92,32 @@ function createHttpUrl(url: URL, endpoint: string, repository: string): string {
     );
   }
 
+  // Prefer HTTP scheme URL from server info when available
+  if (serverInfo.download.schemes.http) {
+    const httpUrl = parseUrl(
+      serverInfo.download.schemes.http.url.replace(
+        // eslint-disable-next-line no-template-curly-in-string
+        '${project}',
+        encodeURIComponent(repository),
+      ),
+    );
+    if (httpUrl) {
+      httpUrl.username = opts.username;
+      httpUrl.password = opts.password;
+      logger.debug(`Using HTTP URL from server info: ${httpUrl.toString()}`);
+      return httpUrl.toString();
+    }
+  }
+
   url.username = opts.username;
   url.password = opts.password;
   url.pathname = joinUrlParts(
     url.pathname,
     'a',
     encodeURIComponent(repository),
+  );
+  logger.debug(
+    `HTTP scheme not in server info, using endpoint fallback: ${url.toString()}`,
   );
   return url.toString();
 }
