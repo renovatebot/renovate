@@ -1,10 +1,12 @@
 import { z } from 'zod/v3';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
-export const MiseRegistryJson = z.record(
-  z.string(),
-  z.record(z.string(), z.string()),
-);
+export const MiseRegistryJson = z.object({
+  meta: z.object({
+    version: z.string(),
+  }),
+  tools: z.record(z.string(), z.record(z.string(), z.string())),
+});
 
 const MiseToolOptions = z.object({
   // ubi backend only

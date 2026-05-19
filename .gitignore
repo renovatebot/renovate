@@ -25,6 +25,7 @@ renovate-global-schema.json
 **/*.generated.ts
 tools/dist
 test/datasource/nuget/_fixtures/obj
+npm-shrinkwrap.json
 
 # testing
 /.env
@@ -42,4 +43,3 @@ test/datasource/nuget/_fixtures/obj
 /.opencode
 /AGENTS.md
 /CLAUDE.md
-npm-shrinkwrap.json

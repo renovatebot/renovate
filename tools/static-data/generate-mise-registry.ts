@@ -19,8 +19,11 @@ const output = await execa('mise', ['registry', '--json'], {
 });
 const tools = MiseRegistry.parse(JSON.parse(output.stdout));
 
-const registry = MiseRegistryJson.parse(
-  Object.fromEntries(
+const registry = MiseRegistryJson.parse({
+  meta: {
+    version: version.version,
+  },
+  tools: Object.fromEntries(
     tools
       .map(({ short, backends }): [string, Record<string, string>] => {
         const result: Record<string, string> = {};
@@ -33,7 +36,7 @@ const registry = MiseRegistryJson.parse(
       })
       .sort(([a], [b]) => a.localeCompare(b)),
   ),
-);
+});
 
 await updateJsonFile(
   'lib/data/mise-registry.json',
