@@ -87,8 +87,7 @@ export async function getInheritedPackageManagerVersion(
     const pkg = await loadPackageJson(currentDir);
     const version = getPackageManagerVersion(name, pkg);
     if (version) {
-      const relPath =
-        currentDir === '.' ? 'package.json' : `${currentDir}/package.json`;
+      const relPath = upath.join(currentDir, 'package.json');
       logger.debug(
         `Found inherited ${name} constraint in ${relPath}: ${version}`,
       );

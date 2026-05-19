@@ -108,14 +108,14 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
-    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
+      await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility =
       (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
-      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+      getPackageManagerVersion('yarn', await lazyPkgJson.getValue()) ??
       (await getInheritedPackageManagerVersion('yarn', lockFileDir)) ??
       getYarnVersionFromLock(await getYarnLock(lockFileName));
     const minYarnVersion =
