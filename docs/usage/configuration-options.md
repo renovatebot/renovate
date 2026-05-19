@@ -1768,8 +1768,11 @@ This is particularly useful when combined with `assigneesSampleSize` and `assign
 
 ## `extends`
 
+Contains references to [presets](./key-concepts/presets.md). The reference can be a name of preset included with Renovate, a link to reposory
+with `default.json` for custom a preset, or a full path to JSON file in a repository.
+
 See [shareable config presets](./config-presets.md) for details.
-Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/presets.md#how-to-use-presets) page.
+
 
 ## `extractVersion`
 
