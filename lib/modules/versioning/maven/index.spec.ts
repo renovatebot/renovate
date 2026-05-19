@@ -234,7 +234,7 @@ describe('modules/versioning/maven/index', () => {
         ${'2.163.9'}          | ${false}
         ${'2.164.0-SNAPSHOT'} | ${false}
       `(
-        'matches("$version", "' + range + '") === $expected',
+        `matches("$version", "${range}") === $expected`,
         ({ version, expected }) => {
           expect(matches(version, range)).toBe(expected);
         },
@@ -253,7 +253,7 @@ describe('modules/versioning/maven/index', () => {
         ${'2.163.9'}          | ${false}
         ${'2.164.0-SNAPSHOT'} | ${false}
       `(
-        'matches("$version", "' + range + '") === $expected',
+        `matches("$version", "${range}") === $expected`,
         ({ version, expected }) => {
           expect(matches(version, range)).toBe(expected);
         },
@@ -271,7 +271,7 @@ describe('modules/versioning/maven/index', () => {
         ${'2.164.0-SNAPSHOT'} | ${true}
         ${'1.0.0'}            | ${true}
       `(
-        'matches("$version", "' + range + '") === $expected',
+        `matches("$version", "${range}") === $expected`,
         ({ version, expected }) => {
           expect(matches(version, range)).toBe(expected);
         },

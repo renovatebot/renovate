@@ -506,7 +506,7 @@ describe('logger/index', () => {
     const childLogger = (logger as RenovateLogger).childLogger();
     childLogger.addSerializers({
       baz: (baz: string): any => {
-        return 'baz custom serializer: ' + baz;
+        return `baz custom serializer: ${baz}`;
       },
     });
 
