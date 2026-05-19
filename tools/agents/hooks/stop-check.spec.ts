@@ -39,7 +39,8 @@ it('outputs block JSON when pnpm lint-fix fails', async () => {
   const output = BlockOutput.parse(JSON.parse(consoleSpy.mock.calls[0][0]));
   expect(output).toEqual({
     decision: 'block',
-    reason: 'pnpm lint-fix failed — please fix the issues before finishing',
+    reason:
+      'pnpm lint-fix failed — the issues must be resolved before finishing',
   });
 });
 
@@ -54,7 +55,7 @@ it('outputs block JSON when pnpm test fails', async () => {
   const output = BlockOutput.parse(JSON.parse(consoleSpy.mock.calls[0][0]));
   expect(output).toEqual({
     decision: 'block',
-    reason: 'pnpm test failed — please fix the issues before finishing',
+    reason: 'pnpm test failed — the issues must be resolved before finishing',
   });
 });
 
@@ -70,11 +71,12 @@ it('outputs two block JSONs when both lint-fix and test fail', async () => {
   const second = BlockOutput.parse(JSON.parse(consoleSpy.mock.calls[1][0]));
   expect(first).toEqual({
     decision: 'block',
-    reason: 'pnpm lint-fix failed — please fix the issues before finishing',
+    reason:
+      'pnpm lint-fix failed — the issues must be resolved before finishing',
   });
   expect(second).toEqual({
     decision: 'block',
-    reason: 'pnpm test failed — please fix the issues before finishing',
+    reason: 'pnpm test failed — the issues must be resolved before finishing',
   });
 });
 

@@ -90,11 +90,11 @@ Two discussion categories are available:
 
 ### Commands
 
-Use `pnpm` for all commands (not npm/npx).
+Use `pnpm` for all commands (NOT npm/npx).
 
 - **Install dependencies:** `pnpm install`
 - **Run single test file:** `pnpm vitest lib/modules/manager/npm/extract.spec.ts`
-- **Run tests matching pattern:** `pnpm vitest -- --testPathPattern manager/npm`
+- **Run tests matching pattern:** `pnpm vitest manager/npm`
 - **Full test suite:** `pnpm test` (runs lint + schema validation + all tests)
 - **Type-check:** `pnpm type-check`
 - **Lint:** `pnpm lint`

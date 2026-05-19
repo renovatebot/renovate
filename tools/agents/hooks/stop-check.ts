@@ -1,23 +1,14 @@
 import { exec } from './utils/exec.ts';
+import { block } from './utils/output.ts';
 
 try {
   await exec('pnpm', ['lint-fix']);
 } catch {
-  console.log(
-    JSON.stringify({
-      decision: 'block',
-      reason: 'pnpm lint-fix failed — please fix the issues before finishing',
-    }),
-  );
+  block('pnpm lint-fix failed — the issues must be resolved before finishing');
 }
 
 try {
   await exec('pnpm', ['test']);
 } catch {
-  console.log(
-    JSON.stringify({
-      decision: 'block',
-      reason: 'pnpm test failed — please fix the issues before finishing',
-    }),
-  );
+  block('pnpm test failed — the issues must be resolved before finishing');
 }
