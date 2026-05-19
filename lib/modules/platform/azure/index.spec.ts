@@ -11,7 +11,7 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
+import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.ts';
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
