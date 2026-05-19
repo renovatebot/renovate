@@ -1,5 +1,5 @@
 import type { Options } from 'execa';
-import { exec as execBase } from '../../utils/exec.ts';
+import { exec as execBase } from '../../../utils/exec.ts';
 
 export async function exec(
   cmd: string,

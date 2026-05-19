@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/agents/start-check.ts"
+            "command": "node tools/agents/hooks/sessionstart-check.ts"
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/agents/stop-check.ts"
+            "command": "node tools/agents/hooks/stop-check.ts"
           }
         ]
       }

@@ -16,6 +16,39 @@ lib/renovate.ts → workers/global (orchestration, autodiscovery)
     → modules/* (pluggable backends)
 ```
 
+```mermaid
+flowchart TD
+    entry["lib/renovate.ts\nEntry Point"]
+    global["Global Worker\nOrchestration & Autodiscovery"]
+    init["Init\nClone repo, read config"]
+    extract["Extract\nScan dependency files"]
+    lookup["Lookup\nFetch versions & compare"]
+    update["Update\nWrite changes, create PRs"]
+    finalize["Finalize\nPrune branches, update cache"]
+
+    platform([Platform])
+    manager([Manager])
+    datasource([Datasource])
+    versioning([Versioning])
+
+    entry --> global
+    global --> init
+    init --> extract
+    extract --> lookup
+    lookup --> update
+    update --> finalize
+
+    global -. "autodiscover repos" .-> platform
+    init -. "clone, read config" .-> platform
+    extract -. "parse dep files" .-> manager
+    lookup -. "fetch releases" .-> datasource
+    lookup -. "compare versions" .-> versioning
+    update -. "update dep files" .-> manager
+    update -. "create/update PRs" .-> platform
+    finalize -. "prune branches" .-> platform
+    finalize -- "next repository" --> init
+```
+
 ### Module System (`lib/modules/`)
 
 Four module categories, each with many implementations:
