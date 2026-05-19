@@ -1773,7 +1773,6 @@ with `default.json` for a custom preset, or a full path to JSON file with preset
 
 See [shareable config presets](./config-presets.md) for details.
 
-
 ## `extractVersion`
 
 Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
