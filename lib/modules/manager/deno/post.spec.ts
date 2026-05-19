@@ -185,6 +185,24 @@ describe('modules/manager/deno/post', () => {
       expect(result).toBe('1.8.5');
     });
 
+    // https://github.com/renovatebot/renovate/discussions/43015
+    it('gets lockedVersion for npm package names containing dots', () => {
+      const result = getLockedVersion(
+        {
+          datasource: 'npm',
+          currentValue: '^14.0.0',
+          currentRawValue: 'npm:discord.js@^14.0.0',
+          depName: 'discord.js',
+        },
+        {
+          lockedVersions: {
+            'npm:discord.js@14': '14.26.3',
+          },
+        },
+      );
+      expect(result).toBe('14.26.3');
+    });
+
     it('invalid lock file content', () => {
       const result = getLockedVersion(
         {

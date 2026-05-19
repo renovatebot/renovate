@@ -3,7 +3,7 @@ import './legacy.ts';
 
 import { isNumber } from '@sindresorhus/is';
 import type { OptionsInit } from 'got';
-import { RequestError, got } from 'got';
+import got, { RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
 import { logger } from '../../logger/index.ts';
 import { coerceNumber } from '../number.ts';

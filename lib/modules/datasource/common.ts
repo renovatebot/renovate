@@ -223,7 +223,11 @@ export function applyConstraintsFiltering<
         config.constraintsVersioning?.[name]
       ) {
         const val = config.constraintsVersioning[name];
-        logger.debug(
+        logger.once.debug(
+          { packageName: config.packageName, release },
+          `applyConstraintsFiltering(${config.packageName}, ${name}): overriding constraintsVersioning from ${constraintVersioningName} to ${val}`,
+        );
+        logger.trace(
           { packageName: config.packageName, release },
           `applyConstraintsFiltering(${release.version}): overriding constraintsVersioning from ${constraintVersioningName} to ${val}`,
         );

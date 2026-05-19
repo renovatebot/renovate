@@ -1,5 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { z } from 'zod/v3';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
@@ -77,7 +78,7 @@ const OpenTofuModuleVersion = z
   })
   .transform(
     (version): Release => ({
-      version: version.id,
+      version: version.id.replace(regEx(/^v/), ''),
       releaseTimestamp: version.published,
     }),
   );

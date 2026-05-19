@@ -11,7 +11,6 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 You can store your Renovate configuration file in one of these locations:
 
 <!-- config-filenames-begin -->
-<!-- config-filenames-end -->
 
 Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
 The bot first checks all the files in the `configFileNames` array before checking from the above file list.
@@ -901,7 +900,6 @@ If you need to _override_ constraints that Renovate detects from the repository,
 The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
 
 <!-- constraints-tools-begin -->
-<!-- constraints-tools-end -->
 
 <!-- prettier-ignore -->
 !!! note
@@ -910,7 +908,6 @@ The following `constraints` are available to specify which package managers/lang
 Additionally, there are several additional constraints that can be specified:
 
 <!-- additional-constraints-begin -->
-<!-- additional-constraints-end -->
 
 <!-- prettier-ignore -->
 !!! note
@@ -2697,7 +2694,6 @@ Renovate then commits that lock file to the update branch and creates the lock f
 Supported lock files:
 
 <!-- lock-file-maintenance-table-start -->
-<!-- lock-file-maintenance-table-end -->
 
 Support for new lock files may be added via feature request.
 
@@ -2998,7 +2994,7 @@ If configured to `true`, it means that any `.npmrc` file in the repo will have `
 
 ## `osvVulnerabilityAlerts`
 
-Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies have known vulnerabilities.
+Renovate integrates with [OSV](https://osv.dev/), an Open Source vulnerability database, to check if extracted dependencies have known vulnerabilities.
 Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability fixes (once they are available).
 
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
@@ -4178,7 +4174,6 @@ Whether to install any additional tools dynamically before executing the `comman
 The possible tool names that are known by [Containerbase](https://github.com/containerbase/base) are:
 
 <!-- installTools-tools-begin -->
-<!-- installTools-tools-end -->
 
 <!-- prettier-ignore -->
 !!! note

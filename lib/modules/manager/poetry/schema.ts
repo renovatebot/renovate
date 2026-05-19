@@ -1,3 +1,4 @@
+import deepmerge from 'deepmerge';
 import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -338,16 +339,10 @@ export const PoetryPyProject = Toml.pipe(
       } = pyproject;
 
       const deps: PackageDependency[] = [];
-
       const projectDependencies = coerceArray(project?.dependencies);
-      deps.push(...projectDependencies);
-
       const projectOptionalDependencies = coerceArray(
         project?.['optional-dependencies'],
       );
-      deps.push(...projectOptionalDependencies);
-
-      deps.push(...dependencyGroups);
 
       const projectDepsByName: Record<string, PackageDependency> = {};
       for (const dep of [
@@ -375,15 +370,34 @@ export const PoetryPyProject = Toml.pipe(
         ...poetryDevDependencies,
         ...poetryGroupDependencies,
       ]) {
+        const depName = poetryDep.depName;
+        const projectDep = depName && projectDepsByName[depName];
         // When the same dep exists in project.dependencies or dependency-groups,
-        // Poetry just uses the Poetry dep for enrichment with source info.
-        if (poetryDep.depName && projectDepsByName[poetryDep.depName]) {
-          const dep = projectDepsByName[poetryDep.depName];
-          dep.managerData = { ...poetryDep.managerData, ...dep.managerData };
+        // Poetry just uses the Poetry dep to enrich the project dependency.
+        if (projectDep) {
+          const mergedDep = deepmerge<PackageDependency>(poetryDep, projectDep);
+          // Poetry supports specifying the version in project.dependencies and
+          // tool.poetry.dependencies *at the same time* and only errors if both
+          // are not compatible - we require a single constraint per dependency.
+          if (projectDep.currentValue && poetryDep.currentValue) {
+            mergedDep.skipReason = 'invalid-dependency-specification';
+          }
+          // When a skipReason is 'unspecified-version', we defer to the other skipReason,
+          // so that 'unspecified-version' only persists if both deps have no version.
+          if (mergedDep.skipReason === 'unspecified-version') {
+            if (poetryDep.skipReason === 'unspecified-version') {
+              mergedDep.skipReason = projectDep.skipReason;
+            } else {
+              mergedDep.skipReason = poetryDep.skipReason;
+            }
+          }
+          projectDepsByName[depName] = mergedDep;
         } else {
           deps.push(poetryDep);
         }
       }
+
+      deps.push(...Object.values(projectDepsByName));
 
       const packageFileVersion = tool?.poetry?.version;
       const packageFileContent: PackageFileContent = {

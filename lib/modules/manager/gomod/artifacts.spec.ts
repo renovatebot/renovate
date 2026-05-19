@@ -61,6 +61,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {

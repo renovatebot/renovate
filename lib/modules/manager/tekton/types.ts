@@ -7,6 +7,8 @@ export interface TektonResource {
 }
 
 export interface TektonResourceSpec {
+  // StepAction
+  image?: string;
   // TaskRun
   taskRef: TektonBundle;
   // TaskRun with inline Pipeline definition

@@ -3,7 +3,7 @@
 Mend provides cloud hosting services for running Renovate in free and paid versions:
 
 - Mend Renovate Community Cloud (Free)
-- Mend Renovate Enterprise Cloud
+- Mend Renovate Enterprise Cloud (Paid)
 
 They are available for Git repositories hosted on the following cloud platforms:
 
@@ -30,39 +30,45 @@ Features of the Developer Portal include:
 - View logs for all Renovate jobs
 - Configure settings that apply at the Org-level or Repo-level
 
-## Resources and Scheduling
+## Plans
 
-The resources, scheduling and concurrency of Renovate jobs is determined by the version of Mend Renovate used by the Org.
-Details of the Mend Renovate Cloud versions are shown in the table below.
+### Mend Renovate Community Cloud
 
-|                               | Mend Renovate Community Cloud (Free) | Mend Renovate Enterprise Cloud |
-| ----------------------------- | ------------------------------------ | ------------------------------ |
-| Concurrent jobs per Org       | 1                                    | 16                             |
-| Job scheduling (active repos) | Every 4 hours                        | Hourly (\*1)                   |
-| Job runner CPUs               | 1 CPU                                | 2 CPU                          |
-| Job runner Memory             | 3GB                                  | 8Gb                            |
-| Job runner Disk space         | 15Gb                                 | 40Gb                           |
-| Job timeout                   | 30 minutes                           | 60 minutes                     |
-| Merge Confidence Workflows    | Not included                         | Included                       |
-| Mend.io Helpdesk Support      | Not included                         | Included                       |
+A generous free tier, available for all across an unlimited number of public and private repositories.
 
-(1) Bitbucket repositories running Mend Renovate Enterprise are scheduled to run every 4 hours, to avoid hitting rate limits on GitHub APIs.
+### Mend Renovate Community (OSS) Cloud
 
-**Mend Renovate Community Cloud (Free)** - Available for free for all repositories.
+As part of Mend's commitment to support the Open Source community, we provide an enhanced free offering for maintainers of the projects the ecosystem rely upon.
 
-**Mend Renovate Enterprise Cloud** - Supported premium version. Contact Mend at [sales@mend.io](mailto:sales@mend.io) for purchase details.
+This offering provides increased resources and concurrency, as well as access to [Merge Confidence Workflows](../merge-confidence.md#merge-confidence-workflows) to allow maintainers to more intelligently receive updates based on signals Mend collects from other projects.
+
+Projects licensed under an Open Source Initiative (OSI) approved license can request increased resources on Mend Renovate Cloud under the Community (OSS) plan.
 
 <!-- prettier-ignore -->
-!!! note
-    OSS-licensed orgs can request increased resources on Mend Renovate Community Cloud.
-    To request increased resources, create a “[Suggest an Idea](https://github.com/renovatebot/renovate/discussions/categories/suggest-an-idea)” item on the Renovate discussions board on GitHub.
-    Acceptance is at the discretion of Mend.io.
+!!! tip
+    To request increased resources, create a [Mend Hosted Request](https://github.com/renovatebot/renovate/discussions/new?category=mend-hosted-request) on the Renovate GitHub Discussions board.
+    <br>
+    Acceptance is at the discretion of Mend.
 
-## IP Addresses used
+### Mend Renovate Enterprise Cloud
 
-If you are looking at restricting access to your source code via IP allowlisting, you will need to know which public IPs Mend's Developer Platform accesses from.
+Mend's premium offering for our Cloud product, with support, enhanced scalability and scheduling, and access to [Merge Confidence Workflows](../merge-confidence.md#merge-confidence-workflows).
 
-These can be found documented [on the Mend docs site](https://docs.mend.io/platform/latest/ip-addresses-used-by-mend-io) under the `developer-platform` section.
+Contact Mend at [sales@mend.io](mailto:sales@mend.io) for purchase details.
 
-- the `us` grouping is for [`developer.mend.io`](https://developer.mend.io/)
-- the `eu` grouping is for [`developer-eu.mend.io/`](https://developer-eu.mend.io/)
+### Resources and Scheduling
+
+The resources, scheduling and concurrency of Renovate jobs is determined by the Mend Renovate plan used by the Org, which can be seen below:
+
+|                               | Mend Renovate Community Cloud | Mend Renovate Community (OSS) Cloud | Mend Renovate Enterprise Cloud |
+| ----------------------------- | ----------------------------- | ----------------------------------- | ------------------------------ |
+| Concurrent jobs per Org       | 1                             | 2                                   | 16                             |
+| Job scheduling (active repos) | Every 4 hours                 | Every 4 hours                       | Hourly<sup>1</sup>             |
+| Job runner CPUs               | 1 vCPU                        | 2 vCPU                              | 2 vCPU                         |
+| Job runner Memory             | 3GB                           | 6GB                                 | 8GB                            |
+| Job runner Disk space         | 15GB                          | 25GB                                | 40GB                           |
+| Job timeout                   | 30 minutes                    | 60 minutes                          | 60 minutes                     |
+| Merge Confidence Workflows    | ❌ Not included               | ✅ Included                         | ✅ Included                    |
+| Mend.io Helpdesk Support      | ❌ Not included               | ❌ Not included                     | ✅ Included                    |
+
+<sup>1</sup> Bitbucket repositories running Mend Renovate Enterprise are scheduled to run every 4 hours, to avoid hitting rate limits on GitHub APIs.
