@@ -145,8 +145,14 @@ describe('modules/platform/gitlab/code-owners', () => {
       const lines = ['[Docs] @docs-team', 'docs/', '!docs/internal/'];
       const rules = extractRulesFromCodeOwnersLines(lines);
 
-      expect(rules[0]).toMatchObject({ pattern: 'docs/', usernames: ['@docs-team'] });
-      expect(rules[1]).toMatchObject({ pattern: '!docs/internal/', usernames: [] });
+      expect(rules[0]).toMatchObject({
+        pattern: 'docs/',
+        usernames: ['@docs-team'],
+      });
+      expect(rules[1]).toMatchObject({
+        pattern: '!docs/internal/',
+        usernames: [],
+      });
     });
 
     it('should match excluded paths via the ! exclusion rule', () => {

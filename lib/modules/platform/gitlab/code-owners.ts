@@ -49,7 +49,11 @@ function extractOwnersFromLine(
     isExclusion ? pattern.substring(1) : pattern,
   );
   return {
-    usernames: isExclusion ? [] : usernames.length > 0 ? usernames : defaultUsernames,
+    usernames: isExclusion
+      ? []
+      : usernames.length > 0
+        ? usernames
+        : defaultUsernames,
     pattern,
     score: pattern.length,
     match: (path: string) => matchPattern.ignores(path),
