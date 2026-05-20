@@ -1432,7 +1432,7 @@ You can control if Renovate should try to access these services with the `useClo
 
 ## `userAgent`
 
-Overrides the `user-agent` header sent with HTTP requests.
+Specifies the `user-agent` header sent with HTTP requests.
 Supports `{{renovateVersion}}` as a template variable for the current Renovate version.
 
 ## `username`
