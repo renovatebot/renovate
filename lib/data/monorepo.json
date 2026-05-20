@@ -765,6 +765,7 @@
     "vstest": "https://github.com/microsoft/vstest",
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],
     "vue-cli": "https://github.com/vuejs/vue-cli",
+    "vue-language-tools": "https://github.com/vuejs/language-tools",
     "vuepress": "https://github.com/vuejs/vuepress",
     "vueuse": "https://github.com/vueuse/vueuse",
     "weasel": "https://github.com/JasperFx/weasel",
