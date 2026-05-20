@@ -123,6 +123,7 @@ export interface LocalRepoConfig {
 
 export interface GhRepo {
   id: string;
+  sshUrl: string | null;
   isFork: boolean;
   parent?: {
     nameWithOwner: string;
