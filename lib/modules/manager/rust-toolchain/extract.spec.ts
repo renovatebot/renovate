@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -5,7 +6,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts major.minor.patch versions', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "1.89.1"',
+        codeBlock`
+          [toolchain]
+          channel = "1.89.1"
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toEqual({
@@ -22,7 +26,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('extracts major.minor ranges', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "1.89"',
+        codeBlock`
+          [toolchain]
+          channel = "1.89"
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toEqual({
@@ -39,7 +46,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('extracts beta channel', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "beta"',
+        codeBlock`
+          [toolchain]
+          channel = "beta"
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toEqual({
@@ -56,7 +66,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('extracts nightly channel', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "nightly"',
+        codeBlock`
+          [toolchain]
+          channel = "nightly"
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toEqual({
@@ -73,7 +86,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('extracts dated nightly channel', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "nightly-2025-10-12"',
+        codeBlock`
+          [toolchain]
+          channel = "nightly-2025-10-12"
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toEqual({
@@ -106,7 +122,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('returns null when channel is absent', () => {
       const result = extractPackageFile(
-        '[toolchain]\ncomponents = ["rustfmt"]\n',
+        codeBlock`
+          [toolchain]
+          components = ["rustfmt"]
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toBeNull();
@@ -114,7 +133,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('returns null for unparseable channel value', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "not-a-rust-channel"',
+        codeBlock`
+          [toolchain]
+          channel = "not-a-rust-channel"
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toBeNull();
@@ -122,7 +144,12 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('can handle additional fields', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "1.89.1"\ncomponents = ["rustfmt", "clippy"]\ntargets = ["wasm32-unknown-unknown"]\n',
+        codeBlock`
+          [toolchain]
+          channel = "1.89.1"
+          components = ["rustfmt", "clippy"]
+          targets = ["wasm32-unknown-unknown"]
+        `,
         'rust-toolchain.toml',
       );
       expect(result).toEqual({
@@ -139,7 +166,10 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('can read from legacy filename', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "1.89.1"',
+        codeBlock`
+          [toolchain]
+          channel = "1.89.1"
+        `,
         'rust-toolchain',
       );
       expect(result).toEqual({
@@ -175,7 +205,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('returns null for multiline legacy files', () => {
       const result = extractPackageFile(
-        '1.89.1\nextra line\nanother line\n',
+        codeBlock`
+          1.89.1
+          extra line
+          another line
+        `,
         'rust-toolchain',
       );
       expect(result).toBeNull();
