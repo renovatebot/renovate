@@ -209,12 +209,24 @@ async function updatePnpmWorkspace(
       continue;
     }
 
-    const { item: matchedItem, allExcluded } = getMatchedItem(
-      excludeDepName!,
-      excludeNode.items,
-    );
+    const {
+      item: matchedItem,
+      allExcluded,
+      malformed,
+    } = getMatchedItem(excludeDepName!, excludeNode.items);
 
     if (allExcluded) {
+      continue;
+    }
+
+    if (malformed && isScalar<string>(matchedItem)) {
+      logger.debug(
+        { entry: matchedItem.value, excludeDepName, newVersion },
+        'Replacing malformed minimumReleaseAgeExclude entry',
+      );
+      matchedItem.value = `${excludeDepName}@${newVersion}`;
+      matchedItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
+      updated = true;
       continue;
     }
 
@@ -297,7 +309,10 @@ function getMatchedItem(
 ): {
   item: Scalar | null;
   allExcluded: boolean;
+  malformed?: boolean;
 } {
+  let malformedItem: Scalar | null = null;
+
   for (const item of items) {
     /* v8 ignore if -- should not happen */
     if (!isScalar(item) || !isString(item.value)) {
@@ -305,10 +320,14 @@ function getMatchedItem(
     }
 
     if (item.value.startsWith(`${depName}@`)) {
-      return {
-        allExcluded: false,
-        item,
-      };
+      if (isValidMinimumReleaseAgeExcludeEntry(item.value, depName)) {
+        return {
+          allExcluded: false,
+          item,
+        };
+      }
+      malformedItem ??= item;
+      continue;
     }
 
     if (item.value === depName || matchRegexOrGlob(depName, item.value)) {
@@ -319,10 +338,30 @@ function getMatchedItem(
     }
   }
 
+  if (malformedItem) {
+    return {
+      allExcluded: false,
+      item: malformedItem,
+      malformed: true,
+    };
+  }
+
   return {
     item: null,
     allExcluded: false,
   };
+}
+
+/** pnpm requires package@version entries without range selectors or extra @ in the version part */
+function isValidMinimumReleaseAgeExcludeEntry(
+  value: string,
+  packageName: string,
+): boolean {
+  const prefix = `${packageName}@`;
+  if (!value.startsWith(prefix)) {
+    return false;
+  }
+  return !value.slice(prefix.length).includes('@');
 }
 
 /** determine whether a comment or a list item contains the depName at a given newVersion */
