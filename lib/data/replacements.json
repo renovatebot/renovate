@@ -1264,7 +1264,7 @@
     "description": "The `xlsx` package is now published as `@e965/xlsx`.",
     "packageRules": [
       {
-        "matchCurrentVersion": "=0.18.5",
+        "matchCurrentVersion": "0.18.5",
         "matchDatasources": ["npm"],
         "matchPackageNames": ["xlsx"],
         "replacementName": "@e965/xlsx",
