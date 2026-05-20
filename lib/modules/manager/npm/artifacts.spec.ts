@@ -732,13 +732,12 @@ minimumReleaseAgeExclude:
           file: {
             type: 'addition',
             path: 'pnpm-workspace.yaml',
-            contents:
-              codeBlock`
-                minimumReleaseAge: 4320
-                minimumReleaseAgeExclude:
-                  # Renovate security update: fast-xml-parser@5.5.7
-                  - fast-xml-parser@5.5.7
-              ` + '\n',
+            contents: `${codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.7
+            `}\n`,
           },
         },
       ]);
