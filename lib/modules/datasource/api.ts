@@ -80,6 +80,7 @@ import type { DatasourceApi } from './types.ts';
 import { TypstDatasource } from './typst/index.ts';
 import { Unity3dDatasource } from './unity3d/index.ts';
 import { Unity3dPackagesDatasource } from './unity3d-packages/index.ts';
+import { VcpkgDatasource } from './vcpkg/index.ts';
 
 const api = new Map<string, DatasourceApi>();
 export default api;
@@ -168,3 +169,4 @@ api.set(TerraformProviderDatasource.id, new TerraformProviderDatasource());
 api.set(TypstDatasource.id, new TypstDatasource());
 api.set(Unity3dDatasource.id, new Unity3dDatasource());
 api.set(Unity3dPackagesDatasource.id, new Unity3dPackagesDatasource());
+api.set(VcpkgDatasource.id, new VcpkgDatasource());
