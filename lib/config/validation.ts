@@ -412,13 +412,15 @@ export async function validateConfig(
                       });
                     }
                   }
-                  try {
-                    parsePreset(subval);
-                  } catch {
-                    errors.push({
-                      topic: 'Configuration Error',
-                      message: `${currentPath}: preset "${subval}" is not valid`,
-                    });
+                  if (!subval.includes('{{')) {
+                    try {
+                      parsePreset(subval);
+                    } catch {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `${currentPath}: preset "${subval}" is not valid`,
+                      });
+                    }
                   }
                 } else {
                   errors.push({

@@ -20,8 +20,8 @@ function convertToCaret(item: string): string {
   // In Cargo, caret versions are used by default, so "1.2.3" actually means ^1.2.3.
   // Similarly, "0.4" actually means ^0.4.
   // See: https://doc.rust-lang.org/stable/cargo/reference/specifying-dependencies.html#caret-requirements
-  if (isVersion(item) || isVersion(item + '.0') || isVersion(item + '.0.0')) {
-    return '^' + item.trim();
+  if (isVersion(item) || isVersion(`${item}.0`) || isVersion(`${item}.0.0`)) {
+    return `^${item.trim()}`;
   }
   return item.trim();
 }
@@ -49,7 +49,7 @@ function npm2cargo(input: string): string {
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
     if (operators.includes(res[i])) {
-      const newValue = res[i] + ' ' + res[i + 1];
+      const newValue = `${res[i]} ${res[i + 1]}`;
       res.splice(i, 2, newValue);
     }
   }

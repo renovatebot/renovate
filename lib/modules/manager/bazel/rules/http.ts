@@ -51,11 +51,10 @@ export function parseGithubPath(
   pathname: string,
 ): Partial<PackageDependency> | null {
   const [p0, p1, p2, p3, p4, p5] = pathname.split('/').slice(1);
-  const packageName = p0 + '/' + p1;
+  const packageName = `${p0}/${p1}`;
   let datasource = '';
   let value: string | null = null;
   if (p2 === 'releases' && p3 === 'download') {
-    // https://github.com/foo/bar/releases/download/1.2.3/bar-1.2.3.tar.gz
     datasource = GithubReleasesDatasource.id;
     value = p4;
   } else if (p2 === 'archive' && p3 === 'refs' && p4 === 'tags') {
@@ -82,7 +81,7 @@ function parseGitlabPath(pathname: string): Partial<PackageDependency> | null {
   // https://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.zip
   // https://gitlab.com/libeigen/eigen/-/archive/90ee821c563fa20db4d64d6991ddca256d5c52f2/eigen-90ee821c563fa20db4d64d6991ddca256d5c52f2.tar.gz
   const [p0, p1, p2, p3, p4] = pathname.split('/').slice(1);
-  const packageName = p0 + '/' + p1;
+  const packageName = `${p0}/${p1}`;
   if (p2 === '-' && p3 === 'archive' && p4) {
     return isHash(p4)
       ? {
