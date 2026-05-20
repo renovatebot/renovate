@@ -307,6 +307,30 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 }
 ```
 
+##### Using ambient AWS credentials
+
+If you omit `username` and `password`, Renovate falls back to the [AWS SDK default credential provider chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html) when fetching the ECR authorization token.
+This means Renovate will automatically use credentials from any of the following sources, in order:
+
+- Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`)
+- Web identity tokens (`AWS_WEB_IDENTITY_TOKEN_FILE` + `AWS_ROLE_ARN`) — set by [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services) via [`aws-actions/configure-aws-credentials`](https://github.com/aws-actions/configure-aws-credentials), [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), and [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html)
+- Container or EC2 instance roles
+
+When using ambient credentials you only need to declare the host so Renovate knows to fetch a token for it:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "123456789012.dkr.ecr.us-east-1.amazonaws.com"
+    }
+  ]
+}
+```
+
+The IAM role used must have at least `ecr:GetAuthorizationToken`, plus the standard ECR read actions (`ecr:BatchCheckLayerAvailability`, `ecr:BatchGetImage`, `ecr:DescribeImages`, `ecr:GetDownloadUrlForLayer`, `ecr:ListImages`) on the repositories you want Renovate to scan.
+
 #### Google Container Registry / Google Artifact Registry
 
 ##### Using Workload Identity

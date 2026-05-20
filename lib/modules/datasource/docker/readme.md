@@ -14,3 +14,12 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 ```
 
 If you use [Harbor](https://goharbor.io/) as a proxy cache for Docker Hub, then you must use Harbor version `2.5.0` or higher.
+
+## Authenticating to private registries
+
+See the [Docker package manager docs](../../../docker.md#registry-authentication) for how to configure `hostRules` for private Docker registries, including:
+
+- [Docker Hub](../../../docker.md#docker-hub)
+- [Self-hosted registries](../../../docker.md#self-hosted-docker-registry)
+- [AWS ECR](../../../docker.md#aws-ecr-amazon-web-services-elastic-container-registry) (including ambient AWS credentials via OIDC, IRSA, or Pod Identity)
+- [Google Container Registry / Google Artifact Registry](../../../docker.md#google-container-registry--google-artifact-registry)

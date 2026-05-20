@@ -551,6 +551,85 @@ module.exports = {
 };
 ```
 
+## AWS CodeArtifact
+
+[AWS CodeArtifact](https://docs.aws.amazon.com/codeartifact/) hosts private package repositories for `npm`, `maven`, `nuget`, `pypi`, and other ecosystems.
+Renovate does not call the AWS SDK to authenticate against CodeArtifact, so you must supply an authorization token via `hostRules`.
+
+### Fetch a CodeArtifact authorization token
+
+CodeArtifact uses short-lived authorization tokens (the maximum lifetime is 12 hours).
+Fetch one with the AWS CLI:
+
+```shell
+aws codeartifact get-authorization-token \
+  --domain <your-domain> \
+  --domain-owner <aws-account-id> \
+  --query authorizationToken \
+  --output text
+```
+
+Inject the token into Renovate via an environment variable, then reference it from `hostRules`.
+You must refresh the token at least once every 12 hours, so most users obtain it as a step in their CI job, in an init container, or via a scheduled secret update for the Mend Renovate App.
+
+<!-- prettier-ignore -->
+!!! tip "Use the AWS SDK credential chain"
+    The AWS CLI command above will pick up credentials from the standard AWS credential provider chain.
+    This means you can authenticate to AWS via [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services), [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html), or instance/task roles — no long-lived access keys required.
+
+### CodeArtifact hostRules per ecosystem
+
+Set `matchHost` to your CodeArtifact endpoint and `hostType` to the matching ecosystem.
+The host follows the pattern `<domain>-<account-id>.d.codeartifact.<region>.amazonaws.com`.
+
+```json title="hostRules for AWS CodeArtifact"
+{
+  "hostRules": [
+    {
+      "hostType": "npm",
+      "matchHost": "my-domain-123456789012.d.codeartifact.us-east-1.amazonaws.com",
+      "token": "{{ env.CODEARTIFACT_AUTH_TOKEN }}"
+    },
+    {
+      "hostType": "maven",
+      "matchHost": "my-domain-123456789012.d.codeartifact.us-east-1.amazonaws.com",
+      "token": "{{ env.CODEARTIFACT_AUTH_TOKEN }}"
+    },
+    {
+      "hostType": "nuget",
+      "matchHost": "my-domain-123456789012.d.codeartifact.us-east-1.amazonaws.com",
+      "token": "{{ env.CODEARTIFACT_AUTH_TOKEN }}"
+    },
+    {
+      "hostType": "pypi",
+      "matchHost": "my-domain-123456789012.d.codeartifact.us-east-1.amazonaws.com",
+      "token": "{{ env.CODEARTIFACT_AUTH_TOKEN }}"
+    }
+  ]
+}
+```
+
+To direct lookups for a particular ecosystem at CodeArtifact, configure `packageRules.registryUrls`:
+
+```json title="Routing maven lookups to CodeArtifact"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["maven"],
+      "registryUrls": [
+        "https://my-domain-123456789012.d.codeartifact.us-east-1.amazonaws.com/maven/my-repo/"
+      ]
+    }
+  ]
+}
+```
+
+### Mend Renovate App
+
+The hosted app cannot fetch CodeArtifact tokens for you because [it does not run user scripts](https://github.com/renovatebot/renovate/discussions/19651#discussioncomment-4602340).
+Store the token as a secret in your Mend organisation or repository settings and reference it via `{{ secrets.CODEARTIFACT_AUTH_TOKEN }}`, then refresh the secret on a schedule that runs at least every 12 hours.
+See [Using Secrets with Mend Cloud Apps](../mend-hosted/credentials.md) and [Automating secrets via APIs](../mend-hosted/credentials.md#automating-secrets-via-apis-github-only).
+
 ## Automatic hostRules credentials for platform-hosted registries
 
 ### GitHub Packages
