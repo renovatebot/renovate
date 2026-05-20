@@ -1,12 +1,13 @@
+import { codeBlock } from 'common-tags';
 import { RustToolchain } from './schema.ts';
 
 describe('modules/manager/rust-toolchain/schema', () => {
   describe('RustToolchain', () => {
     it('parses valid TOML with channel', () => {
-      const toml = `
-[toolchain]
-channel = "1.89.1"
-`;
+      const toml = codeBlock`
+        [toolchain]
+        channel = "1.89.1"
+      `;
 
       const result = RustToolchain.parse(toml);
 
@@ -18,12 +19,12 @@ channel = "1.89.1"
     });
 
     it('parses TOML with additional fields', () => {
-      const toml = `
-[toolchain]
-channel = "1.89.1"
-components = ["rustfmt", "clippy"]
-targets = ["wasm32-unknown-unknown"]
-`;
+      const toml = codeBlock`
+        [toolchain]
+        channel = "1.89.1"
+        components = ["rustfmt", "clippy"]
+        targets = ["wasm32-unknown-unknown"]
+      `;
 
       const result = RustToolchain.parse(toml);
 
@@ -41,46 +42,46 @@ targets = ["wasm32-unknown-unknown"]
     });
 
     it('throws error for missing toolchain section', () => {
-      const toml = `
-[other]
-channel = "1.89.1"
-`;
+      const toml = codeBlock`
+        [other]
+        channel = "1.89.1"
+      `;
 
       expect(() => RustToolchain.parse(toml)).toThrow();
     });
 
     it('throws error for missing channel field', () => {
-      const toml = `
-[toolchain]
-components = ["rustfmt"]
-`;
+      const toml = codeBlock`
+        [toolchain]
+        components = ["rustfmt"]
+      `;
 
       expect(() => RustToolchain.parse(toml)).toThrow();
     });
 
     it('throws error for non-string channel', () => {
-      const toml = `
-[toolchain]
-channel = 123
-`;
+      const toml = codeBlock`
+        [toolchain]
+        channel = 123
+      `;
 
       expect(() => RustToolchain.parse(toml)).toThrow();
     });
 
     it('throws error for empty channel', () => {
-      const toml = `
-[toolchain]
-channel = ""
-`;
+      const toml = codeBlock`
+        [toolchain]
+        channel = ""
+      `;
 
       expect(() => RustToolchain.parse(toml)).toThrow();
     });
 
     it('parses nightly channel', () => {
-      const toml = `
-[toolchain]
-channel = "nightly-2025-10-12"
-`;
+      const toml = codeBlock`
+        [toolchain]
+        channel = "nightly-2025-10-12"
+      `;
 
       const result = RustToolchain.parse(toml);
 
@@ -92,10 +93,10 @@ channel = "nightly-2025-10-12"
     });
 
     it('parses stable keyword', () => {
-      const toml = `
-[toolchain]
-channel = "stable"
-`;
+      const toml = codeBlock`
+        [toolchain]
+        channel = "stable"
+      `;
 
       const result = RustToolchain.parse(toml);
 
