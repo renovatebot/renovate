@@ -1432,8 +1432,8 @@ You can control if Renovate should try to access these services with the `useClo
 
 ## `userAgent`
 
-If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
+Specifies the `user-agent` header sent with HTTP requests.
+Supports `{{renovateVersion}}` as a template variable for the current Renovate version.
 
 ## `username`
 
