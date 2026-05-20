@@ -10,6 +10,7 @@ If you'd like to pin your toolchain to a particular version, the following confi
 {
   "packageRules": [
     {
+      "matchManagers": ["rust-toolchain"],
       "matchDepTypes": ["toolchain"],
       "rangeStrategy": "pin"
     }
