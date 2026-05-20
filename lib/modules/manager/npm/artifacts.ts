@@ -357,11 +357,7 @@ function isValidMinimumReleaseAgeExcludeEntry(
   value: string,
   packageName: string,
 ): boolean {
-  const prefix = `${packageName}@`;
-  if (!value.startsWith(prefix)) {
-    return false;
-  }
-  return !value.slice(prefix.length).includes('@');
+  return !value.slice(`${packageName}@`.length).includes('@');
 }
 
 /** determine whether a comment or a list item contains the depName at a given newVersion */
