@@ -108,7 +108,7 @@ export function toUnicodeEscape(str: string): string {
   const items = new Set(
     str.split('').map((char) => {
       const code = char.charCodeAt(0);
-      return '\\u' + code.toString(16).padStart(4, '0').toUpperCase();
+      return `\\u${code.toString(16).padStart(4, '0').toUpperCase()}`;
     }),
   );
 

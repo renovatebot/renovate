@@ -420,8 +420,7 @@ export function mockFetchInReleaseContent(
   const mockCall = httpMock
     .scope(debBaseUrl)
     .get(
-      getBaseSuiteUrl(getComponentUrl('', release, component, arch)) +
-        '/InRelease',
+      `${getBaseSuiteUrl(getComponentUrl('', release, component, arch))}/InRelease`,
     );
 
   if (error) {

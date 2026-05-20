@@ -363,7 +363,7 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@b572f7b1a1c2d41efaab43d504f68d215c3cd727 # v0.5.4
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
         with:
           version: 1.25.2
 
@@ -425,7 +425,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
+        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
         with:
           use_oidc: true
           report_type: test_results
@@ -478,7 +478,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
+        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -843,7 +843,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@e1e4d927909679da33a695d6136c4d5f83eb0fa7 # v4.6.28
+        uses: containerbase/internal-tools@f8723091cfbf2dafad5686273c2772a981f29c66 # v4.6.31
         with:
           command: docker-config
 
