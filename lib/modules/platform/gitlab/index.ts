@@ -670,13 +670,24 @@ async function tryPrAutomerge(
               },
             );
           } else {
+            const requestBody: Record<string, unknown> = {
+              should_remove_source_branch: true,
+              merge_when_pipeline_succeeds: true,
+            };
+
+            // Set merge_after on the GitLab API request when scheduled in the future
+            if (platformPrOptions?.mergeAfter) {
+              requestBody.merge_after = platformPrOptions.mergeAfter;
+              logger.debug(
+                { merge_after: platformPrOptions.mergeAfter },
+                'Setting merge_after from platform options',
+              );
+            }
+
             await gitlabApi.putJson(
               `projects/${config.repository}/merge_requests/${pr}/merge`,
               {
-                body: {
-                  should_remove_source_branch: true,
-                  merge_when_pipeline_succeeds: true,
-                },
+                body: requestBody,
               },
             );
           }
