@@ -100,7 +100,7 @@ import type {
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
-import { warnIfDefaultGitAuthorEmail } from './utils.ts';
+import { getRepoUrl, warnIfDefaultGitAuthorEmail } from './utils.ts';
 
 export const id = 'github';
 
@@ -504,6 +504,7 @@ export async function initRepo({
   forkCreation,
   forkOrg,
   forkToken,
+  gitUrl,
   renovateUsername,
   cloneSubmodules,
   cloneSubmodulesFilter,
@@ -524,6 +525,7 @@ export async function initRepo({
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo | undefined;
+  let forkSshUrl: string | null = null;
   try {
     let infoQuery = repoInfoQuery;
 
@@ -679,6 +681,7 @@ export async function initRepo({
     let forkedRepo = await findFork(forkToken, repository, forkOrg);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
       const forkDefaultBranch = forkedRepo.default_branch;
       if (forkDefaultBranch !== config.defaultBranch) {
         const body = {
@@ -731,17 +734,13 @@ export async function initRepo({
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
     } else {
       logger.debug('Forked repo is not found and forkCreation is disabled');
       throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
-  const parsedEndpoint = parseUrl(platformConfig.endpoint);
-  // v8 ignore if: endpoint is validated during initPlatform
-  if (!parsedEndpoint) {
-    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
-  }
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
@@ -753,21 +752,23 @@ export async function initRepo({
     logger.debug(`Using ${tokenType} token for git init`);
     authToken = opts.token ?? null;
   }
-  if (authToken) {
-    const [username, password] = authToken.split(':');
-    parsedEndpoint.username = username;
-    parsedEndpoint.password = password ?? '';
-  }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
-    'api.github.com',
-    'github.com',
+  const workingSshUrl = forkToken ? forkSshUrl : repo.sshUrl;
+  const url = getRepoUrl(
+    config.repository,
+    gitUrl,
+    workingSshUrl,
+    platformConfig.endpoint,
+    authToken,
   );
-  parsedEndpoint.pathname = `${config.repository}.git`;
-  const url = parsedEndpoint.href;
-  let upstreamUrl = undefined;
+  let upstreamUrl: string | undefined;
   if (forkCreation && config.parentRepo) {
-    parsedEndpoint.pathname = `${config.parentRepo}.git`;
-    upstreamUrl = parsedEndpoint.href;
+    upstreamUrl = getRepoUrl(
+      config.parentRepo,
+      gitUrl,
+      repo.sshUrl,
+      platformConfig.endpoint,
+      authToken,
+    );
   }
   await git.initRepo({
     ...config,
