@@ -837,7 +837,9 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 ## `httpCacheTtlDays`
 
-This option sets the number of days that Renovate will cache HTTP responses.
+This option sets the number of days that Renovate will cache HTTP responses within the Repository Cache.
+This does not affect the Package Cache.
+
 The default value is 90 days.
 Value of `0` means no caching.
 

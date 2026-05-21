@@ -3416,7 +3416,8 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'httpCacheTtlDays',
-    description: 'Maximum duration in days to keep HTTP cache entries.',
+    description:
+      "Maximum duration in days to keep the Repository Cache's HTTP cache entries.",
     type: 'integer',
     stage: 'repository',
     default: 90,
