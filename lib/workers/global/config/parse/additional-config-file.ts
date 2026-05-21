@@ -27,7 +27,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     process.exit(1);
   }
 
-  logger.debug('Checking for additional config file in ' + configFile);
+  logger.debug(`Checking for additional config file in ${configFile}`);
   try {
     config = await getParsedContent(configFile);
   } catch (err) {

@@ -111,7 +111,8 @@ To learn how to configure Renovate CE or Renovate EE, read the documentation on 
 
 #### Mend Remediate
 
-[Mend Remediate](https://www.whitesourcesoftware.com/wp-content/media/2021/04/whitesource-remediation-solution.pdf) is an extension of WSOP available for Mend commercial customers, with full enterprise support.
+[Mend Remediate](https://docs.mend.io/integrations/latest/mend-remediate-and-renovate) is part of Mend's [Classic Repository Integrations](https://docs.mend.io/integrations/latest/mend-classic-repository-integrations) product which is for Mend commercial customers, with full enterprise support.
+
 It is integrated with Mend's vulnerability detection capabilities and additionally supports the capability of "horizontal" scalability - the ability to configure many Renovate "worker" containers which share a common job queue in order to not conflict with each other.
 
 Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
@@ -157,7 +158,7 @@ Renovate's server-side/admin config is referred to as its "global" config, and c
 - CLI parameters
 
 By default Renovate checks if a file named `config.js` is present.
-Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
+Any other (`*.js`, `*.ts`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
 Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
@@ -194,6 +195,32 @@ module.exports = {
 `config.js` may also export a `Promise` of such an object, or a function that will return either a plain JavaScript object or a `Promise` of such an object.
 This allows one to include the results of asynchronous operations in the exported value.
 An example of a `config.js` that exports an `async` function (which is a function that returns a `Promise`) can be seen in a comment for [#10011: Allow autodiscover filtering for repo topic](https://github.com/renovatebot/renovate/issues/10011#issuecomment-992568583) and more examples can be seen in [`file.spec.ts`](https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts).
+
+#### Using TypeScript config files
+
+Renovate supports TypeScript config files (`.ts`, `.mts`, `.cts`) via Node.js's built-in type stripping.
+Set the `RENOVATE_CONFIG_FILE` environment variable to point to your TypeScript config file:
+
+```bash
+RENOVATE_CONFIG_FILE=config.ts renovate
+```
+
+An example `config.ts`:
+
+```typescript
+import type { AllConfig } from 'renovate/dist/config/types';
+
+const config: AllConfig = {
+  platform: 'github',
+  token: process.env.RENOVATE_TOKEN,
+  repositories: ['my-org/my-repo'],
+};
+
+export default config;
+```
+
+TypeScript config files follow the same rules as JavaScript config files: they can export a plain object, a `Promise`, or a function.
+The `.mts` extension is always treated as an ES module, and `.cts` is always treated as CommonJS.
 
 ### Authentication
 
