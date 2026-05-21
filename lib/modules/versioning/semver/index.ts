@@ -26,7 +26,7 @@ const {
 // If this is left as an alias, inputs like "17.04.0" throw errors
 export const isVersion = (input: string): boolean => !!valid(input);
 
-export { isVersion as isValid, getSatisfyingVersion };
+export { getSatisfyingVersion, isVersion as isValid };
 
 function getNewValue({
   currentValue,

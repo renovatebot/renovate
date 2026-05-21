@@ -16,7 +16,7 @@ const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
   beforeEach(() => {
-    GlobalConfig.set({ onboarding: true });
+    GlobalConfig.set({ onboarding: true, requireConfig: 'required' });
   });
 
   const config = partial<RenovateConfig>({

@@ -24,6 +24,7 @@ import { addSplit, getSplits, splitInit } from '../../util/split.ts';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
+  GetDatasourceReleasesStats,
   GitOperationStats,
   HttpCacheStats,
   HttpStats,
@@ -75,11 +76,11 @@ export async function renovateRepository(
       logger.trace({ config });
       queue.clear();
       throttle.clear();
-      const localDir = GlobalConfig.get('localDir')!;
+      const localDir = GlobalConfig.get('localDir');
 
       try {
         await fs.ensureDir(localDir);
-        logger.debug('Using localDir: ' + localDir);
+        logger.debug(`Using localDir: ${localDir}`);
         config = await initRepo(config);
         addSplit('init');
       } catch (err) /* istanbul ignore next */ {
@@ -207,6 +208,7 @@ export async function renovateRepository(
   HttpStats.report();
   HttpCacheStats.report();
   LookupStats.report();
+  GetDatasourceReleasesStats.report();
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   GitOperationStats.report();

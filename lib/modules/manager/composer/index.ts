@@ -13,8 +13,8 @@ export const lockFileNames = ['composer.lock'];
 
 export {
   extractPackageFile,
-  updateArtifacts,
   getRangeStrategy,
+  updateArtifacts,
   updateLockedDependency,
 };
 

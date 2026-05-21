@@ -36,7 +36,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
             const { selector } = structUtils.parseRange(range);
 
             logger.trace({ entry, version: val.version });
-            lockedVersions[packageName + '@' + selector] = parsed[key].version;
+            lockedVersions[`${packageName}@${selector}`] = parsed[key].version;
           } catch (err) {
             logger.debug(
               { entry, err },

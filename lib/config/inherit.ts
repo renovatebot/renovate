@@ -14,6 +14,7 @@ export class InheritConfig {
     'onboardingConfigFileName',
     'onboardingNoDeps',
     'onboardingPrTitle',
+    'requireConfig',
   ];
 
   private static config: GlobalInheritableConfig = {};

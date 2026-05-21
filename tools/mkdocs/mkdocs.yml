@@ -22,6 +22,7 @@ remote_branch: gh-pages
 
 hooks:
   - mkdocs-hooks/custom-edit-url.py
+  - mkdocs-hooks/sidebar-label.py
 
 # General site info
 

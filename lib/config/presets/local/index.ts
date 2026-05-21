@@ -1,10 +1,6 @@
 import type { PlatformId } from '../../../constants/index.ts';
 import type { Nullish } from '../../../types/index.ts';
 import { GlobalConfig } from '../../global.ts';
-import * as forgejo from '../forgejo/index.ts';
-import * as gitea from '../gitea/index.ts';
-import * as github from '../github/index.ts';
-import * as gitlab from '../gitlab/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import * as local from './common.ts';
 
@@ -18,21 +14,31 @@ interface Resolver {
   ): Promise<Nullish<Preset>>;
 }
 
-const resolvers = {
-  azure: local,
-  bitbucket: local,
-  'bitbucket-server': local,
-  codecommit: null,
-  forgejo,
-  gerrit: local,
-  gitea,
-  github,
-  gitlab,
-  local: null,
-  'scm-manager': null,
-} satisfies Record<PlatformId, Resolver | null>;
+type ResolverOrNull = Resolver | null;
 
-export function getPreset({
+async function getResolver(platform: PlatformId): Promise<ResolverOrNull> {
+  switch (platform) {
+    case 'forgejo':
+      return import('../forgejo/index.ts');
+    case 'gitea':
+      return import('../gitea/index.ts');
+    case 'github':
+      return import('../github/index.ts');
+    case 'gitlab':
+      return import('../gitlab/index.ts');
+    case 'azure':
+    case 'bitbucket':
+    case 'bitbucket-server':
+    case 'gerrit':
+      return local;
+    case 'codecommit':
+    case 'local':
+    case 'scm-manager':
+      return null;
+  }
+}
+
+export async function getPreset({
   repo,
   presetName = 'default',
   presetPath,
@@ -42,7 +48,7 @@ export function getPreset({
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
-  const resolver = resolvers[platform];
+  const resolver = await getResolver(platform);
   if (!resolver) {
     throw new Error(
       `The platform you're using (${platform}) does not support local presets.`,
@@ -53,8 +59,7 @@ export function getPreset({
     repo,
     presetName,
     presetPath,
-    // TODO: fix type #22198
-    endpoint!,
+    endpoint,
     tag,
   );
 }

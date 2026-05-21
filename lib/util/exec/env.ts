@@ -15,16 +15,21 @@ const basicEnvVars = [
   'DOCKER_HOST',
   'DOCKER_TLS_VERIFY',
   'DOCKER_CERT_PATH',
-  // Custom certificte variables
+  // Custom certificate variables
   // https://github.com/containerbase/base/blob/main/docs/custom-root-ca.md
   'SSL_CERT_DIR',
   'SSL_CERT_FILE',
   'NODE_EXTRA_CA_CERTS',
+  'GIT_SSL_CAPATH',
+  'GIT_SSL_CAINFO',
   // Required for NuGet to work on Windows.
   'PROGRAMFILES',
   'PROGRAMFILES(X86)',
   'APPDATA',
   'LOCALAPPDATA',
+  // Required for .NET dotnet-install.ps1 to work on Windows.
+  'PROCESSOR_ARCHITECTURE',
+  'PATHEXT',
   // Corepack: https://github.com/nodejs/corepack
   'COREPACK_DEFAULT_TO_LATEST',
   'COREPACK_ENABLE_NETWORK',
@@ -38,6 +43,9 @@ const basicEnvVars = [
   'COREPACK_NPM_USERNAME',
   'COREPACK_NPM_PASSWORD',
   'COREPACK_ROOT',
+  // pnpm specific variables
+  'PNPM_WORKERS',
+  'PNPM_MAX_WORKERS',
 ];
 
 export function getChildProcessEnv(

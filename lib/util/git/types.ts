@@ -90,8 +90,6 @@ export interface CommitFilesConfig {
   prTitle?: string;
   /** Only needed by Gerrit platform */
   autoApprove?: boolean;
-  /** Only needed by Gerrit platform */
-  labels?: string[];
 }
 
 export interface PushFilesConfig {
