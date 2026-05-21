@@ -158,7 +158,7 @@ export function extractDependency(
     githubOwnerRepo = `${githubOwner}/${githubRepo}`;
   }
   const githubOwnerRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
-  const githubRepoRegex = /^[a-zA-Z0-9._-]{1,100}$/;
+  const githubRepoRegex = regEx(/^[a-zA-Z0-9._-]{1,100}$/);
   if (
     !githubOwnerRegex.test(githubOwner) ||
     !githubRepoRegex.test(githubRepo)
