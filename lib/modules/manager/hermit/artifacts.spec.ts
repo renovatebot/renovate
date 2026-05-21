@@ -652,5 +652,35 @@ describe('modules/manager/hermit/artifacts', () => {
         },
       ]);
     });
+
+    it('stringifies non-Error thrown values in the generic fallback', async () => {
+      vi.spyOn(gitAuth, 'getGitEnvironmentVariables').mockImplementationOnce(
+        () => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error -- deliberately testing non-Error throw path
+          throw 'raw string failure';
+        },
+      );
+
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              currentVersion: '1.17',
+              newValue: '1.17.1',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        }),
+      );
+
+      expect(res).toStrictEqual([
+        {
+          artifactError: {
+            stderr: 'raw string failure',
+          },
+        },
+      ]);
+    });
   });
 });
