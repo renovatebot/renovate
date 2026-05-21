@@ -53,6 +53,7 @@ describe('modules/manager/kas/extract', () => {
       ${'project.YAML'}         | ${'project.lock.YAML'}
       ${'project.txt'}          | ${null}
       ${'project'}              | ${null}
+      ${'project.lock.yml'}     | ${null}
     `('converts "$filePath" to "$expected"', ({ filePath, expected }) => {
       expect(getLockFilePath(filePath)).toBe(expected);
     });
@@ -109,7 +110,7 @@ describe('modules/manager/kas/extract', () => {
     it('extracts repo strings from yaml kas file', () => {
       const kasFile = codeBlock`
         header:
-          version: 1
+          version: 22
 
         build_system: isar
 
@@ -121,7 +122,7 @@ describe('modules/manager/kas/extract', () => {
           isar:
             url: https://github.com/ilbers/isar.git
             branch: next
-            commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+            commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
             layers:
               meta:
               meta-isar:
@@ -133,7 +134,7 @@ describe('modules/manager/kas/extract', () => {
             isar:
                 url: https://github.com/ilbers/isar.git
                 branch: next
-                commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+                commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
                 layers:
                   meta:
                   meta-isar:
@@ -155,22 +156,44 @@ describe('modules/manager/kas/extract', () => {
     it('returns empty map if no repos found in yaml file', () => {
       const kasFile = codeBlock`
         header:
-          version: 1
+          version: 22
         repos: {}
       `;
       expect(extractRepoStrings(kasFile, 'project.yml')).toEqual(new Map());
     });
 
+    it('returns empty map if no repos found in yaml lock file', () => {
+      const kasFile = codeBlock`
+        header:
+          version: 22
+        overrides:
+          repos: {}
+      `;
+      expect(extractRepoStrings(kasFile, 'project.lock.yml')).toEqual(
+        new Map(),
+      );
+    });
+
+    it('returns empty map if no repo and no overrides exist', () => {
+      const kasFile = codeBlock`
+        header:
+          version: 22
+      `;
+      expect(extractRepoStrings(kasFile, 'project.lock.yml')).toEqual(
+        new Map(),
+      );
+    });
+
     it('returns empty map for JSON files', () => {
       const kasFile = JSON.stringify({
-        header: { version: 1 },
+        header: { version: 22 },
         build_system: 'isar',
         repos: {
           'meta-test': { path: 'meta-test/', layers: { '.': {} } },
           isar: {
             url: 'https://github.com/ilbers/isar.git',
             branch: 'next',
-            commit: 'd63a1cbae6f737aa843d00d8812547fe7b87104a',
+            commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
             layers: { meta: {}, 'meta-isar': {} },
           },
         },

@@ -4,11 +4,11 @@ import { executeKasDump } from './extract.ts';
 describe('modules/manager/kas/execute-kas-dump', () => {
   it('returns parsed KasDump on valid JSON stdout', async () => {
     const validDump = JSON.stringify({
-      header: { version: 1 },
+      header: { version: 22 },
       repos: {
         isar: {
           url: 'https://github.com/ilbers/isar.git',
-          commit: 'd63a1cbae6f737aa843d00d8812547fe7b87104a',
+          commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         },
       },
     });
@@ -17,18 +17,18 @@ describe('modules/manager/kas/execute-kas-dump', () => {
     const result = await executeKasDump('kas-project.yml');
 
     expect(result).toMatchObject({
-      header: { version: 1 },
+      header: { version: 22 },
       repos: {
         isar: {
           url: 'https://github.com/ilbers/isar.git',
-          commit: 'd63a1cbae6f737aa843d00d8812547fe7b87104a',
+          commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         },
       },
     });
   });
 
   it('passes correct command and options to exec', async () => {
-    const validDump = JSON.stringify({ header: { version: 1 } });
+    const validDump = JSON.stringify({ header: { version: 22 } });
     const snapshots = mockExecAll({ stdout: validDump, stderr: '' });
 
     await executeKasDump('path/to/kas-project.yml');
@@ -67,7 +67,7 @@ describe('modules/manager/kas/execute-kas-dump', () => {
 
   it('parses dump with repos and overrides', async () => {
     const dumpWithOverrides = JSON.stringify({
-      header: { version: 1 },
+      header: { version: 22 },
       repos: {
         isar: {
           url: 'https://github.com/ilbers/isar.git',
@@ -86,7 +86,7 @@ describe('modules/manager/kas/execute-kas-dump', () => {
     const result = await executeKasDump('kas-project.yml');
 
     expect(result).toMatchObject({
-      header: { version: 1 },
+      header: { version: 22 },
       repos: {
         isar: {
           url: 'https://github.com/ilbers/isar.git',

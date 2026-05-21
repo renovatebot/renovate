@@ -4,7 +4,7 @@ import type { KasDump } from './schema.ts';
 
 const kasHeadTracking = codeBlock`
   header:
-    version: 1
+    version: 22
 
   build_system: isar
 
@@ -15,7 +15,7 @@ const kasHeadTracking = codeBlock`
         .:
     isar:
       url: https://github.com/ilbers/isar.git
-      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
       layers:
         meta:
         meta-isar:
@@ -23,7 +23,7 @@ const kasHeadTracking = codeBlock`
 
 const kasBranchCommit = codeBlock`
   header:
-    version: 1
+    version: 22
 
   build_system: isar
 
@@ -35,7 +35,7 @@ const kasBranchCommit = codeBlock`
     isar:
       url: https://github.com/ilbers/isar.git
       branch: next
-      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
       layers:
         meta:
         meta-isar:
@@ -43,7 +43,7 @@ const kasBranchCommit = codeBlock`
 
 const kasTag = codeBlock`
   header:
-    version: 1
+    version: 22
 
   build_system: isar
 
@@ -54,7 +54,7 @@ const kasTag = codeBlock`
         .:
     isar:
       url: https://github.com/ilbers/isar.git
-      tag: v0.0.1
+      tag: v1.0
       layers:
         meta:
         meta-isar:
@@ -62,7 +62,7 @@ const kasTag = codeBlock`
 
 const kasTagCommit = codeBlock`
   header:
-    version: 1
+    version: 22
 
   build_system: isar
 
@@ -73,15 +73,33 @@ const kasTagCommit = codeBlock`
         .:
     isar:
       url: https://github.com/ilbers/isar.git
-      tag: v0.0.1
-      commit: d63a1cbae6f737aa843d00d8812547fe7b87104a
+      tag: v1.0
+      commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
       layers:
         meta:
         meta-isar:
 `;
 
-const isarCommitSha = 'd63a1cbae6f737aa843d00d8812547fe7b87104a';
-const isarTag = 'v0.0.1';
+const kasJsonTag = JSON.stringify(
+  {
+    header: { version: 22 },
+    build_system: 'isar',
+    repos: {
+      'meta-test': { path: 'meta-test/', layers: { '.': {} } },
+      isar: {
+        url: 'https://github.com/ilbers/isar.git',
+        tag: 'v1.0',
+        commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
+        layers: { meta: {}, 'meta-isar': {} },
+      },
+    },
+  },
+  null,
+  4,
+);
+
+const isarCommitSha = 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7';
+const isarTag = 'v1.0';
 const isarBranch = 'next';
 const isarUrl = 'https://github.com/ilbers/isar.git';
 
@@ -90,7 +108,7 @@ function makeDump(
   overrides?: KasDump['overrides'],
 ): KasDump {
   return {
-    header: { version: 1 },
+    header: { version: 22 },
     repos,
     overrides,
   } as KasDump;
@@ -110,7 +128,7 @@ describe('modules/manager/kas/extract-package-file', () => {
 
   it('returns null when no repos section exists', () => {
     const dump = makeDump({});
-    const content = 'header:\n  version: 1\n';
+    const content = 'header:\n  version: 22\n';
     const result = _extractPackageFile(content, 'kas.yml', dump, undefined);
     expect(result).toBeNull();
   });
@@ -218,6 +236,28 @@ describe('modules/manager/kas/extract-package-file', () => {
     expect(result!.deps).toHaveLength(1);
   });
 
+  it('extracts tag + commit dependency from JSON file', () => {
+    const dump = makeDump({
+      isar: {
+        url: isarUrl,
+        commit: isarCommitSha,
+        tag: isarTag,
+      },
+    });
+    const result = _extractPackageFile(kasJsonTag, 'kas.json', dump, undefined);
+    expect(result).toMatchObject({
+      deps: [
+        {
+          currentDigest: isarCommitSha,
+          currentValue: isarTag,
+          datasource: 'git-tags',
+          packageName: isarUrl,
+        },
+      ],
+    });
+    expect(result!.deps).toHaveLength(1);
+  });
+
   it('skips repo not present in dump', () => {
     const dump = makeDump({});
     const result = _extractPackageFile(
@@ -232,7 +272,7 @@ describe('modules/manager/kas/extract-package-file', () => {
   it('skips mercurial repos', () => {
     const content = codeBlock`
       header:
-        version: 1
+        version: 22
       repos:
         hg-repo:
           url: https://example.com/repo
@@ -285,7 +325,7 @@ describe('modules/manager/kas/extract-package-file', () => {
   it('skips when no repo URL found for non-lock file', () => {
     const content = codeBlock`
       header:
-        version: 1
+        version: 22
       repos:
         local-repo:
           commit: abc123
@@ -305,7 +345,7 @@ describe('modules/manager/kas/extract-package-file', () => {
         url: isarUrl,
         commit: isarCommitSha,
         branch: 'main',
-        tag: 'v1.0.0',
+        tag: 'v1.0',
       },
     });
     const result = _extractPackageFile(
@@ -317,11 +357,28 @@ describe('modules/manager/kas/extract-package-file', () => {
     expect(result).toBeNull();
   });
 
+  it('skips when repo is empty', () => {
+    const content = codeBlock`
+      header:
+        version: 22
+      repos:
+        isar:
+    `;
+    const dump = makeDump({
+      isar: {
+        url: isarUrl,
+        commit: isarCommitSha,
+      },
+    });
+    const result = _extractPackageFile(content, 'kas.yml', dump, undefined);
+    expect(result).toBeNull();
+  });
+
   it('uses overrides commit from dump when available', () => {
     const overriddenCommit = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
     const content = codeBlock`
       header:
-        version: 1
+        version: 22
       repos:
         isar:
           url: ${isarUrl}
