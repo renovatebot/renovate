@@ -35,7 +35,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['**/bitbucket-pipelines.{yml,yaml}'],
+        managerFilePatterns: ['**/*-pipelines.yml'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
         ],

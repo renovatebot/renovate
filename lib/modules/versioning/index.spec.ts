@@ -5,6 +5,10 @@ import * as allVersioning from './index.ts';
 import * as semverCoercedVersioning from './semver-coerced/index.ts';
 
 describe('modules/versioning/index', () => {
+  it('should return versioning list', () => {
+    expect(allVersioning.getVersioningList()).toBeNonEmptyArray();
+  });
+
   it('should fallback to semver-coerced', () => {
     const semverCoerced = allVersioning.get(semverCoercedVersioning.id);
     expect(allVersioning.get(undefined)).toBe(semverCoerced);

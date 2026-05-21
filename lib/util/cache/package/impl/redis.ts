@@ -99,10 +99,6 @@ export class PackageCacheRedis extends PackageCacheBase {
         'Returning cached value',
       );
 
-      if (!cached.compress) {
-        return cached.value;
-      }
-
       const json = await decompressFromBase64(cached.value);
       return JSON.parse(json);
     } catch {
@@ -134,7 +130,6 @@ export class PackageCacheRedis extends PackageCacheBase {
       const compressedValue = await compressToBase64(serialized);
       const expiry = DateTime.local().plus({ minutes: hardTtlMinutes });
       const payload = JSON.stringify({
-        compress: true,
         value: compressedValue,
         expiry,
       });

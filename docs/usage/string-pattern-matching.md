@@ -67,7 +67,7 @@ You can use the Code Generator in the sidebar and copy the regex in the generate
 <!-- prettier-ignore -->
 !!! warning "Escape the backslashes from regex101"
     Before you copy/paste the regex from regex101 into your Renovate config, you must escape the backslashes (`\`) first.
-    For example: `\n\s` --> `\\n\\s`.
+    For example: `\n\s` → `\\n\\s`.
 
 ## Glob matching
 

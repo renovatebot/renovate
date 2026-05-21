@@ -1,1 +1,1 @@
-export const defaultRegistryUrls = ['https://registry.npmjs.org'];
+export const defaultRegistryUrl = 'https://registry.npmjs.org';

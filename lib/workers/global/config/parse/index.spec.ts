@@ -11,6 +11,9 @@ import * as _fileConfigParser from './file.ts';
 import * as _hostRulesFromEnv from './host-rules-from-env.ts';
 
 vi.mock('../../../../modules/datasource/npm.ts');
+vi.mock('../../../../modules/manager/index.ts', () => ({
+  detectAllGlobalConfig: vi.fn().mockResolvedValue({}),
+}));
 vi.mock('../../../../util/fs/index.ts');
 vi.mock('../../../../config/decrypt.ts');
 vi.mock('./host-rules-from-env.ts');

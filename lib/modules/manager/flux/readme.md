@@ -58,8 +58,7 @@ Renovate can update `image`[^1] references from `Kustomization` resources.
 
 Renovate can update `oci` references from `OCIRepository` resources.
 
-The `flux` manager only updates `OCIRepository` fields that have a `digest` or `tag` key.
-If `tag` _and_ `digest` exist then `digest` takes precedence.
+The `flux` manager updates `OCIRepository` fields that have a `digest`, `tag` or both keys.
 
 ### Flux system manifests support
 
