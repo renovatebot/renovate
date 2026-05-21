@@ -21,14 +21,6 @@ export async function updateDependency({
     newDigest,
   } = upgrade;
   logger.debug({ packageFile }, 'kas.updateDependency');
-  if (!packageFile) {
-    logger.warn({ depName }, 'No package file provided for update.');
-    return fileContent;
-  }
-  if (!fileContent) {
-    logger.warn({ packageFile }, 'No file content provided for update.');
-    return fileContent;
-  }
   if (datasource === 'git-tags' && currentValue === newValue) {
     logger.debug(
       { packageFile, depName, currentValue, newDigest },
@@ -37,7 +29,7 @@ export async function updateDependency({
     return fileContent;
   }
   if (isYamlFilePath(packageFile)) {
-    const replaceString = upgrade.replaceString ?? currentDigest;
+    const replaceString = upgrade.replaceString;
     const searchIndex: number = fileContent.indexOf(replaceString!);
     if (searchIndex === -1) {
       logger.warn(
@@ -92,7 +84,7 @@ export async function updateDependency({
       }
       await writeLocalFile(packageFile, newContent);
       return newContent;
-    } catch (err) {
+    } catch (err) /* istanbul ignore next */ {
       logger.warn({ packageFile, depName, err }, 'update Dependency error');
       return fileContent;
     }

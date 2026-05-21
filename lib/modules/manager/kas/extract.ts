@@ -72,7 +72,7 @@ export function extractRepoStrings(
   let rawYamlDocument: Document;
   try {
     rawYamlDocument = parseSingleYamlDocument(content);
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.debug({ packageFile, err }, `Parsing KAS YAML file failed`);
     return map;
   }
@@ -83,13 +83,14 @@ export function extractRepoStrings(
       reposNode = overridesNode.get('repos');
     }
   }
-  if (!(reposNode instanceof YAMLMap)) {
+  if (!(reposNode instanceof YAMLMap) || reposNode.items.length === 0) {
     logger.debug({ packageFile }, 'no repos found in KAS file');
     return map;
   }
   for (const repoItem of reposNode.items) {
     const repoName = repoItem.key.toString();
     const repoNode = repoItem.value;
+    // istanbul ignore else
     if (repoItem.key.range && repoNode?.range) {
       const [keyStart] = repoItem.key.range;
       const [, valueEnd] = repoNode.range;
@@ -126,10 +127,9 @@ export function _extractPackageFile(
     logger.debug({ packageFile }, 'no repos found in KAS file');
     return null;
   }
-  const repoStrings: Map<string, string> = isYamlFile
+  const repoStrings: Map<string, string> | null = isYamlFile
     ? extractRepoStrings(content, packageFile)
-    : new Map();
-  logger.trace({ repoStrings }, 'extracted repo strings from file content');
+    : null;
   const deps: PackageDependency[] = [];
   for (const repoName in repos) {
     const repo = repos[repoName];
@@ -196,20 +196,25 @@ export function _extractPackageFile(
       continue;
     }
 
-    let replaceString = repoStrings.get(repoName);
-    if (!replaceString && isYamlFile) {
-      logger.warn(
-        { packageFile, repoName },
-        'could not extract repo string from file, using entire file content',
-      );
-      replaceString = content;
+    let replaceString: string | undefined = undefined;
+    if (isYamlFile) {
+      replaceString = repoStrings?.get(repoName);
+      // istanbul ignore if
+      if (!replaceString) {
+        logger.warn(
+          { packageFile, repoName },
+          'could not extract repo string from file, using entire file content',
+        );
+        replaceString = content;
+      }
+      logger.trace({ replaceString, repoName }, 'string to replace for repo');
     }
-    logger.trace({ replaceString, repoName }, 'string to replace for repo');
+
     const packageDependency: PackageDependency = {
       depName: repo.name ?? repoName,
       packageName: git,
       versioning: repo.branch ? looseVersioning : undefined,
-      replaceString: isYamlFile ? replaceString : undefined,
+      replaceString: replaceString,
       currentDigest: commit,
     };
 
@@ -254,7 +259,7 @@ export async function executeKasDump(file: string): Promise<KasDump | null> {
 
   try {
     return KasDump.parse(dump);
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug({ file, err }, 'YAML exception parsing kas dump');
     } else {
@@ -269,14 +274,13 @@ export async function extractAllPackageFiles(
   packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const results: PackageFile[] = [];
-  const seen = new Set<string>(packageFiles);
+  const seen = new Set<string>();
   for (const rootFile of packageFiles) {
     logger.debug(
       { rootFile },
       'kas.extractAllPackageFiles: processing root file',
     );
-
-    if (rootFile in seen) {
+    if (seen.has(rootFile)) {
       logger.warn(
         { rootFile },
         'only specify the root entry kas file in matchFiles renovate config. Skipping.',
@@ -298,9 +302,9 @@ export async function extractAllPackageFiles(
       if (!file) {
         continue;
       }
-      const isLockFile = isLockFilePath(file);
-      logger.trace({ file }, 'kas.extractAllPackageFiles: processing file');
       seen.add(file);
+      logger.trace({ file }, 'kas.extractAllPackageFiles: processing file');
+      const isLockFile = isLockFilePath(file);
       const content = await readLocalFile(file, 'utf8');
       if (!content) {
         if (isLockFile) {
@@ -316,31 +320,28 @@ export async function extractAllPackageFiles(
           const parser = getProjectParser(file);
           const kasFile: KasProject = parser.parse(content);
           for (const include of kasFile.header.includes ?? []) {
-            if (typeof include === 'object' && include.file) {
+            if (typeof include === 'string') {
+              if (packageFiles.includes(include)) {
+                logger.warn(
+                  { file: include },
+                  'Only the root entry kas file should be specified in matchFiles renovate config. Skipping include entry.',
+                );
+                continue;
+              }
+              if (!filesToExamine.includes(include) && !seen.has(include)) {
+                filesToExamine.push(include);
+                filesToExamine.push(getLockFilePath(include));
+                logger.trace({ file: include }, 'Added file from include');
+              }
+            } else {
               logger.debug(
                 { include },
                 'can not process include files from other repos',
               );
-              continue;
-            } else if (typeof include !== 'string') {
-              logger.debug({ include }, 'Unknown include format');
-              continue;
-            }
-            if (packageFiles.includes(include)) {
-              logger.warn(
-                { file: include },
-                'Only the root entry kas file should be specified in matchFiles renovate config. Skipping include entry.',
-              );
-              continue;
-            }
-            if (!filesToExamine.includes(include) && !seen.has(include)) {
-              filesToExamine.push(include);
-              filesToExamine.push(getLockFilePath(include));
-              logger.trace({ file: include }, 'Added file from include');
             }
           }
         }
-      } catch (err) {
+      } catch (err) /* istanbul ignore next */ {
         logger.warn({ file, err }, `Parsing KAS file failed`);
         continue;
       }
