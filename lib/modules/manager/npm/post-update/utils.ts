@@ -75,7 +75,7 @@ export async function getInheritedPackageManagerVersion(
   name: string,
   lockFileDir: string,
 ): Promise<string | null> {
-  const startDir = upath.normalize(lockFileDir || '.');
+  const startDir = upath.normalize(lockFileDir ?? '.');
   let currentDir = upath.dirname(startDir);
 
   // No ancestor to walk to — lockFileDir is already at the repo root.
