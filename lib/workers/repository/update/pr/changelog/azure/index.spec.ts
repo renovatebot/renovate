@@ -77,7 +77,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toStrictEqual({
         changelogFile: '/CHANGELOG.md',
-        changelogMd: changelogMd + '\n#\n##',
+        changelogMd: `${changelogMd}\n#\n##`,
       });
     });
 
@@ -112,7 +112,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       const res = await getReleaseNotesMdFile(project);
       expect(res).toStrictEqual({
         changelogFile: '/src/docs/CHANGELOG.md',
-        changelogMd: changelogMd + '\n#\n##',
+        changelogMd: `${changelogMd}\n#\n##`,
       });
     });
 
@@ -147,7 +147,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       const res = await getReleaseNotesMdFile(project);
       expect(res).toStrictEqual({
         changelogFile: '/src/docs/CHANGELOG.md',
-        changelogMd: changelogMd + '\n#\n##',
+        changelogMd: `${changelogMd}\n#\n##`,
       });
     });
 
@@ -273,7 +273,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toStrictEqual({
         changelogFile: '/changelog.md',
-        changelogMd: changelogMd + '\n#\n##',
+        changelogMd: `${changelogMd}\n#\n##`,
       });
     });
 
@@ -364,7 +364,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
 
       expect(res).toStrictEqual({
         changelogFile: '/docs/changes.md',
-        changelogMd: changelogMd + '\n#\n##',
+        changelogMd: `${changelogMd}\n#\n##`,
       });
     });
 
@@ -400,7 +400,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
 
       expect(res).toStrictEqual({
         changelogFile: '/CHANGELOG',
-        changelogMd: 'changelog content\n#\n##',
+        changelogMd: `changelog content\n#\n##`,
       });
     });
   });
