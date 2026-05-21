@@ -33,10 +33,8 @@ export class RustVersionDatasource extends Datasource {
 
     const parsedResults = [];
     for (const line of lines) {
-      // Skip blank/whitespace-only lines silently. `manifests.txt` ends
-      // with a trailing newline, so `split('\n')` always yields an empty
-      // final element — warning on it produces a spurious "Repository
-      // Problems" entry on every Dependency Dashboard.
+      // skip trailing empty element from .split('\n') upstream
+
       if (!line.trim()) {
         continue;
       }
