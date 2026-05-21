@@ -262,7 +262,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
-  httpCacheTtlDays?: number;
+  repositoryCacheMaximumHttpDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
