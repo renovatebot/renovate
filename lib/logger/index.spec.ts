@@ -5,13 +5,14 @@ import { DateTime } from 'luxon';
 import { partial } from '~test/util.ts';
 import { add } from '../util/host-rules.ts';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
+import { createDefaultStreams } from './bunyan.ts';
 import {
   addMeta,
   addStream,
   clearProblems,
-  createDefaultStreams,
   getContext,
   getProblems,
+  init,
   levels,
   logLevel,
   logger,
@@ -20,17 +21,20 @@ import {
   setMeta,
   withMeta,
 } from './index.ts';
+import { ProblemStream } from './problem-stream.ts';
 import type { RenovateLogger } from './renovate-logger.ts';
-import { ProblemStream } from './utils.ts';
 
 const logContext = 'initial_context';
 
-vi.unmock('.');
+vi.unmock('./index.ts');
 vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => 'initial_context'),
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
+
+// init logger
+await init();
 
 describe('logger/index', () => {
   beforeEach(() => {

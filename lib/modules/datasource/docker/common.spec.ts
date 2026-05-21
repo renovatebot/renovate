@@ -238,6 +238,33 @@ describe('modules/datasource/docker/common', () => {
         }
       `);
     });
+
+    it('supports multiple challenges in www-authenticate header', async () => {
+      httpMock
+        .scope('https://codeberg.org')
+        .get('/v2/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://codeberg.org/v2/token",service="container_registry",scope="*",Basic realm="https://codeberg.org/v2",service="container_registry",scope="*"',
+        })
+        .get(
+          '/v2/token?service=container_registry&scope=repository:my/node/prefix:pull',
+        )
+        .reply(200, { token: 'abc' });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://codeberg.org',
+        'my/node/prefix',
+      );
+
+      // do not inline, otherwise we get false positive from codeql
+      expect(headers).toMatchInlineSnapshot(`
+        {
+          "authorization": "Bearer abc",
+        }
+      `);
+    });
   });
 
   it('findLatestStable works', () => {

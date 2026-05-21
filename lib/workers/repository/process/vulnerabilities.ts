@@ -25,6 +25,11 @@ import { sanitizeMarkdown } from '../../../util/markdown.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { titleCase } from '../../../util/string.ts';
+import { datasourceToOsvEcosystem } from '../../../util/vulnerability/ecosystem.ts';
+import {
+  getFixedVersionConstraint,
+  getLastAffectedVersionConstraint,
+} from '../../../util/vulnerability/utils.ts';
 import type {
   DependencyVulnerabilities,
   SeverityDetails,
@@ -39,21 +44,7 @@ export class Vulnerabilities {
 
   private osvOffline: OsvOffline;
 
-  private static readonly datasourceEcosystemMap: Record<
-    string,
-    Ecosystem | undefined
-  > = {
-    crate: 'crates.io',
-    go: 'Go',
-    hackage: 'Hackage',
-    hex: 'Hex',
-    maven: 'Maven',
-    npm: 'npm',
-    nuget: 'NuGet',
-    packagist: 'Packagist',
-    pypi: 'PyPI',
-    rubygems: 'RubyGems',
-  };
+  private static readonly datasourceEcosystemMap = datasourceToOsvEcosystem;
 
   private constructor(osvOffline: OsvOffline) {
     this.osvOffline = osvOffline;
@@ -441,24 +432,14 @@ export class Vulnerabilities {
     fixedVersion: string,
     ecosystem: Ecosystem,
   ): string {
-    if (ecosystem === 'Maven' || ecosystem === 'NuGet') {
-      return `[${fixedVersion},)`;
-    }
-
-    // crates.io, Go, Hex, npm, RubyGems, PyPI
-    return `>= ${fixedVersion}`;
+    return getFixedVersionConstraint(fixedVersion, ecosystem);
   }
 
   private getLastAffectedByEcosystem(
     lastAffected: string,
     ecosystem: Ecosystem,
   ): string {
-    if (ecosystem === 'Maven') {
-      return `(${lastAffected},)`;
-    }
-
-    // crates.io, Go, Hex, npm, RubyGems, PyPI
-    return `> ${lastAffected}`;
+    return getLastAffectedVersionConstraint(lastAffected, ecosystem);
   }
 
   private isVersionGt(

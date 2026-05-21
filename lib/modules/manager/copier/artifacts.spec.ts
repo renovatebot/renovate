@@ -76,7 +76,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'Missing copier template version to update to',
           },
         },
@@ -126,7 +126,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'Unexpected number of dependencies: 0 (should be 1)',
           },
         },
@@ -147,7 +147,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr:
               'Unexpected number of dependencies: undefined (should be 1)',
           },
@@ -347,7 +347,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: '.copier-answers.yml',
+            fileName: '.copier-answers.yml',
             stderr: 'exec exception',
           },
         },

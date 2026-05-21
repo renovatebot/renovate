@@ -29,7 +29,7 @@ async function cleanUpBranches(
     try {
       // get base branch from branch name if base branches are configured
       // use default branch if no base branches are configured
-      // use defaul branch name if no match (can happen when base branches are configured later)
+      // use default branch name if no match (can happen when base branches are configured later)
       const baseBranch =
         baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
       const pr = await platform.findPr({
@@ -120,7 +120,7 @@ async function cleanUpBranches(
  * @param config Renovate configuration
  */
 function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
-  if (!config.baseBranchPatterns?.length) {
+  if (!config.baseBranchPatterns?.length || !config.baseBranches?.length) {
     return null;
   }
 
@@ -130,9 +130,7 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
     .filter(uniqueStrings)
     .map(escapeRegExp);
 
-  // calculate possible base branches and escape for regex
-  // if baseBranchPatterns is configured, baseBranches will be defined too
-  const baseBranches = config.baseBranches!.map(escapeRegExp);
+  const baseBranches = config.baseBranches.map(escapeRegExp);
 
   // create regex to extract base branche from branch name
   const baseBranchRe = regEx(
@@ -152,6 +150,10 @@ export async function pruneStaleBranches(
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
+    return;
+  }
+  if (!config.defaultBranch) {
+    logger.debug('No defaultBranch set - skipping branch pruning');
     return;
   }
   // TODO: types (#22198)

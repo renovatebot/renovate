@@ -11,10 +11,8 @@ import {
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
-import type {
-  ArtifactError,
-  WriteExistingFilesResult,
-} from '../../../../modules/manager/npm/post-update/types.ts';
+import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
+import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import type {
   EnsureCommentConfig,
   Pr,

@@ -23,7 +23,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
   });
 
   describe('rebaseMigrationBranch()', () => {
-    const repoConfig = Fixtures.getJson('./renovate.json');
+    const repoConfig = Fixtures.getJsonc('./renovate.json');
     const indent = '  ';
     const renovateConfigJson =
       JSON.stringify(repoConfig, undefined, indent) + '\n';

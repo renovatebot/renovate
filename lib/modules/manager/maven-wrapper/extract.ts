@@ -2,7 +2,6 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
-import { id as versioning } from '../../versioning/maven/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { MavenVersionExtract, Version } from './types.ts';
 
@@ -68,7 +67,6 @@ export function extractPackageFile(
       currentValue: extractResult.maven?.version,
       replaceString: extractResult.maven?.replaceString,
       datasource: MavenDatasource.id,
-      versioning,
     };
     deps.push(maven);
   }
@@ -80,7 +78,6 @@ export function extractPackageFile(
       currentValue: extractResult.wrapper?.version,
       replaceString: extractResult.wrapper?.replaceString,
       datasource: MavenDatasource.id,
-      versioning,
     };
     deps.push(wrapper);
   }

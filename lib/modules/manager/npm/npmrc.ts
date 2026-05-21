@@ -20,6 +20,7 @@ export async function resolveNpmrc(
   const npmrcFileName = await findLocalSiblingOrParent(packageFile, '.npmrc');
   if (npmrcFileName) {
     let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
+    // v8 ignore else -- TODO: add test #40625
     if (isString(repoNpmrc)) {
       if (isString(config.npmrc) && !config.npmrcMerge) {
         logger.debug(

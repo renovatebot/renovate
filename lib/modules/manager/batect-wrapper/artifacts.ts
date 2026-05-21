@@ -23,7 +23,7 @@ async function updateArtifact(
 
     return {
       artifactError: {
-        lockFile: path,
+        fileName: path,
         stderr: `HTTP GET ${url} failed: ${errorDescription}`,
       },
     };

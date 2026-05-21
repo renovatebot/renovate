@@ -1,9 +1,11 @@
 import { Command } from 'commander';
 import type { ExecaSyncReturnValue } from 'execa';
 import fs from 'fs-extra';
-import { logger } from '../lib/logger/index.ts';
+import { init, logger } from '../lib/logger/index.ts';
 import { generateDocs } from './docs/index.ts';
 import { exec } from './utils/exec.ts';
+
+await init();
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
@@ -26,13 +28,14 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
+    const res = await exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
       env: {
         ...process.env,
         RENOVATE_VERSION: opts.version ?? '',
       },
+      reject: false,
     });
     checkResult(res);
   });
@@ -50,9 +53,10 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
+    const res = await exec('pdm', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
+      reject: false,
     });
     checkResult(res);
   });
@@ -75,6 +79,15 @@ function checkResult(res: ExecaSyncReturnValue<string>): void {
   } else if (res.exitCode) {
     logger.error(`Error occured:\n${res.stderr || res.stdout}`);
     process.exit(res.exitCode);
+  } else if (res.timedOut) {
+    logger.error({ res }, 'Process timed out');
+    process.exit(-1);
+  } else if (res.killed) {
+    logger.error({ res }, 'Process was killed');
+    process.exit(-1);
+  } else if (res.failed) {
+    logger.error({ res }, 'Process call failed');
+    process.exit(-1);
   } else {
     logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
   }

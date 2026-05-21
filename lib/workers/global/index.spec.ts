@@ -33,7 +33,7 @@ vi.mock('fs-extra', async () => {
 });
 
 // TODO: why do we need git here?
-vi.unmock('../../util/git');
+vi.unmock('../../util/git/index.ts');
 
 const addSecretForSanitizing = vi.spyOn(secrets, 'addSecretForSanitizing');
 const parseConfigs = vi.spyOn(configParser, 'parseConfigs');

@@ -188,7 +188,7 @@ export const allowedFields = {
   manager: 'The (package) manager which detected the dependency',
   newDigest: 'The new digest value',
   newDigestShort:
-    'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
+    'A shortened version of newDigest, for use when the full digest is too long to be conveniently displayed',
   newMajor:
     'The major version of the new version. e.g. "3" if the new version is "3.1.0"',
   newMinor:
@@ -317,7 +317,9 @@ export function compile<T>(
     : data;
 
   logger.trace({ template, filteredInput }, 'Compiling template');
-  const result = handlebars.compile(template)(filteredInput);
+  const result = handlebars.compile(template, { noEscape: true })(
+    filteredInput,
+  );
 
   if (warnVariables.size > 0) {
     logger.info(

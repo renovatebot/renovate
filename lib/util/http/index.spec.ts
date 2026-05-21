@@ -45,6 +45,42 @@ describe('util/http/index', () => {
     expect(httpMock.allUsed()).toBeTrue();
   });
 
+  it('returns 401 error', async () => {
+    httpMock
+      .scope('https://renovate.com')
+      .get('/v2/')
+      .reply(401, '', {
+        'www-authenticate': [
+          'Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*"',
+          'Basic realm="https://renovate.com/v2"',
+        ],
+      })
+      .get('/v2/')
+      .reply(401, '', [
+        'WWW-Authenticate',
+        'Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*"',
+        'www-authenticate',
+        'Basic realm="https://renovate.com/v2"',
+      ]);
+    let resp = await http.get('https://renovate.com/v2/', {
+      throwHttpErrors: false,
+    });
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.headers['www-authenticate']).toEqual(
+      `Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*", Basic realm="https://renovate.com/v2"`,
+    );
+
+    resp = await http.get('https://renovate.com/v2/', {
+      throwHttpErrors: false,
+    });
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.headers['www-authenticate']).toEqual(
+      `Bearer realm="https://renovate.com/v2/token",service="container_registry",scope="*", Basic realm="https://renovate.com/v2"`,
+    );
+
+    expect(httpMock.allUsed()).toBeTrue();
+  });
+
   it('converts 404 error to ExternalHostError', async () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true });

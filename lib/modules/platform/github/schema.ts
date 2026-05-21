@@ -44,8 +44,9 @@ const SecurityAdvisory = z.object({
   ),
   references: z.array(z.object({ url: z.string() })).optional(),
 });
+export type SecurityAdvisory = z.infer<typeof SecurityAdvisory>;
 
-export const GithubVulnerabilityAlert = LooseArray(
+export const GithubVulnerabilityAlerts = LooseArray(
   z.object({
     dismissed_reason: z.string().nullish(),
     security_advisory: SecurityAdvisory,
@@ -65,7 +66,10 @@ export const GithubVulnerabilityAlert = LooseArray(
 ).transform((alerts) =>
   alerts.filter((alert) => alert.security_vulnerability?.package?.ecosystem),
 );
-export type GithubVulnerabilityAlert = z.infer<typeof GithubVulnerabilityAlert>;
+export type GithubVulnerabilityAlerts = z.infer<
+  typeof GithubVulnerabilityAlerts
+>;
+export type GithubVulnerabilityAlert = GithubVulnerabilityAlerts[number];
 
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
 const GithubResponseMetadata = z.object({

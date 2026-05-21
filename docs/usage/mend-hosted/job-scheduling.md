@@ -36,3 +36,26 @@ The table below describes all the Renovate statuses.
 | resource-limit       | A resource limit was hit while running the last job   | Weekly   |
 | unknown              | An unknown error occurred while running the last job  | Weekly   |
 | disabled             | Renovate will not run on this repository              | Monthly  |
+
+```mermaid
+flowchart TD
+    A[Installed Repository] --> B{Renovate Status}
+    B -->|<code>new</code>| C[Active jobs<br>4-hourly #40;1#41;]
+    B -->|<code>activated</code>| C
+    B -->|<code>onboarded</code>| D[Inactive jobs<br>Daily]
+    B -->|<code>onboarding</code>| D
+    B -->|<code>silent</code>| D
+    B -->|<code>failed</code>| D
+    B -->|<code>timeout</code>| E[Blocked jobs<br>Weekly]
+    B -->|<code>resource-limit</code>| E
+    B -->|<code>kernel-out-of-memory</code>| E
+    B -->|<code>unknown</code>| E
+    B -->|<code>disabled</code>| F[All repos<br>Monthly]
+    C --> G[Job Queue]
+    D --> G
+    E --> G
+    F --> G
+    G --> H[Job Runner]
+```
+
+(1) Renovate Enterprise jobs are scheduled every hour for repositories on GitHub and Azure DevOps.

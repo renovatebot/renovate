@@ -665,7 +665,7 @@ describe('modules/manager/poetry/artifacts', () => {
           newPackageFileContent: '{}',
           config,
         }),
-      ).toMatchObject([{ artifactError: { lockFile: 'poetry.lock' } }]);
+      ).toMatchObject([{ artifactError: { fileName: 'poetry.lock' } }]);
       expect(execSnapshots).toMatchObject([]);
     });
 

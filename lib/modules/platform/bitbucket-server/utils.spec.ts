@@ -13,7 +13,7 @@ import {
   getRepoGitUrl,
 } from './utils.ts';
 
-vi.unmock('../../../util/git');
+vi.unmock('../../../util/git/index.ts');
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;

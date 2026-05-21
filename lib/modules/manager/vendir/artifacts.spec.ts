@@ -178,7 +178,7 @@ describe('modules/manager/vendir/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'vendir.yml',
+          fileName: 'vendir.yml',
           stderr: 'not found',
         },
       },

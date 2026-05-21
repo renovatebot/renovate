@@ -57,8 +57,7 @@ export async function updateNpmrcContent(
       logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
       await writeLocalFile(npmrcFilePath, `${newContent}\n`);
     }
-  } catch {
-    /* v8 ignore next -- needs test */
+  } catch /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn('Unable to write custom npmrc file');
   }
 }
@@ -71,15 +70,13 @@ export async function resetNpmrcContent(
   if (originalContent) {
     try {
       await writeLocalFile(npmrcFilePath, originalContent);
-      /* v8 ignore next -- needs test */
-    } catch {
+    } catch /* v8 ignore next -- TODO: add test #40625 */ {
       logger.warn('Unable to reset npmrc to original contents');
     }
   } else {
     try {
       await deleteLocalFile(npmrcFilePath);
-    } catch {
-      /* v8 ignore next -- needs test */
+    } catch /* v8 ignore next -- TODO: add test #40625 */ {
       logger.warn('Unable to delete custom npmrc');
     }
   }

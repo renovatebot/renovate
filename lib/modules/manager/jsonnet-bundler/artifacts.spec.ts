@@ -198,7 +198,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
     ).toMatchObject([
       {
         artifactError: {
-          lockFile: 'jsonnetfile.lock.json',
+          fileName: 'jsonnetfile.lock.json',
           stderr: 'jb released the magic smoke',
         },
       },

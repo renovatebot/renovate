@@ -399,7 +399,7 @@ export function handleRegistryUrl(ctx: Ctx): Ctx {
   return ctx;
 }
 
-export function handleLibraryDep(ctx: Ctx): Ctx {
+export function handleCatalogLongFormDep(ctx: Ctx): Ctx {
   const groupIdTokens = loadFromTokenMap(ctx, 'groupId');
   const artifactIdTokens = loadFromTokenMap(ctx, 'artifactId');
 
@@ -427,6 +427,26 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
   }
 
   return ctx;
+}
+
+export function handleCatalogDepString(ctx: Ctx): Ctx {
+  const templateStringTokens = loadFromTokenMap(ctx, 'templateStringTokens');
+  const templateString = interpolateString(templateStringTokens, ctx);
+  if (!templateString) {
+    return ctx;
+  }
+
+  const aliasToken = loadFromTokenMap(ctx, 'alias')[0];
+  const key = `libs.${aliasToken.value.replace(regEx(/[-_]/g), '.')}`;
+
+  ctx.globalVars[key] = {
+    key,
+    value: templateString,
+    fileReplacePosition: aliasToken.offset,
+    packageFile: ctx.packageFile,
+  };
+
+  return handleDepString(ctx);
 }
 
 export function handleApplyFrom(ctx: Ctx): Ctx {

@@ -774,7 +774,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Pipfile.lock', stderr: 'not found' } },
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([]);

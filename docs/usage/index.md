@@ -52,7 +52,7 @@ Multi-platform and multi-language.
 
     ---
 
-    Renovate is licensed under the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license).
+    Renovate is licensed under the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license) (`AGPL-3.0-only`).
 
 </div>
 

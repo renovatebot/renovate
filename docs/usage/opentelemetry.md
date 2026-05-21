@@ -77,6 +77,7 @@ Renovate provides instrumentation through traces for (non-exhaustively):
 - Any Git operations
 - Per-manager traces when performing the `lookup` and `extract` splits
 - Per-branch traces when performing the `update` split
+- Cache lifecycle operations (repository cache load/save, package cache init/destroy)
 - Important functions (more instrumentation be added)
 
 As well as following [OpenTelemetry's semantic conventions](https://opentelemetry.io/docs/specs/semconv/) where possible, Renovate defines several Custom Attributes, which can be found in [`lib/instrumentation/types.ts`](https://github.com/renovatebot/renovate/blob/main/lib/instrumentation/types.ts).

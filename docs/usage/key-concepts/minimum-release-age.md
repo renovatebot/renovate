@@ -212,6 +212,7 @@ The below is a non-exhaustive list of public registries which support release ti
 | `maven`              | `https://repo1.maven.org/maven2`                   | ✅        |                                                                  |
 | `node-version`       | `https://nodejs.org/dist`                          | ✅        |                                                                  |
 | `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                                  |
+| `nuget`              | `https://api.nuget.org/v3/index.json`              | ✅        |                                                                  |
 | `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                                  |
 | `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                                  |
 | `jsr`                | `https://jsr.io`                                   | ✅        | For packages without explicit timestamps, defaults to 2025-09-18 |

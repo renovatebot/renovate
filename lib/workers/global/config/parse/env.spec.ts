@@ -1,4 +1,5 @@
 import type { MockInstance } from 'vitest';
+import { getOptions } from '../../../../config/options/index.ts';
 import type { RequiredConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as env from './env.ts';
@@ -389,6 +390,27 @@ describe('workers/global/config/parse/env', () => {
         expect(config.platformAutomerge).toBe(true);
       });
     });
+  });
+
+  it('has no duplicate env names across options', () => {
+    const options = getOptions();
+    const envNameToOptions = new Map<string, string[]>();
+
+    for (const option of options) {
+      const envName = env.getEnvName(option);
+      if (envName === '') {
+        continue;
+      }
+      const existing = envNameToOptions.get(envName) ?? [];
+      existing.push(option.name);
+      envNameToOptions.set(envName, existing);
+    }
+
+    const duplicates = [...envNameToOptions.entries()]
+      .filter(([, names]) => names.length > 1)
+      .map(([envName, names]) => `${envName}: ${names.join(', ')}`);
+
+    expect(duplicates).toEqual([]);
   });
 
   describe('.getEnvName(definition)', () => {

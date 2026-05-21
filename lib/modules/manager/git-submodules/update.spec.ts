@@ -52,6 +52,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBeNull();
@@ -63,6 +64,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
@@ -79,6 +81,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
@@ -113,6 +116,7 @@ describe('modules/manager/git-submodules/update', () => {
       };
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe(updatedGitModules);
@@ -135,6 +139,7 @@ describe('modules/manager/git-submodules/update', () => {
       };
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
@@ -159,6 +164,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');

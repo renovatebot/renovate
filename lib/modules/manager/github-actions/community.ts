@@ -265,6 +265,31 @@ const SetupGolangciLint = z
     };
   });
 
+const ZizmorcoreZizmorAction = z
+  .object({
+    uses: matchAction('zizmorcore/zizmor-action'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: PypiDatasource.id,
+      depName: 'zizmor',
+      packageName: 'zizmor',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -282,4 +307,5 @@ export const CommunityActions = z.union([
   SetupRuby,
   SetupHatch,
   SetupGolangciLint,
+  ZizmorcoreZizmorAction,
 ]);

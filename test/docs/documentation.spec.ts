@@ -29,7 +29,9 @@ describe('docs/documentation', () => {
       const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
       const reg = regEx(`##\\s${configOption}[\\s\\S]+?\n##\\s`);
       const match = reg.exec(content);
-      const subHeadersMatch = match?.[0]?.matchAll(/\n###\s(?<child>\w+)\n/g);
+      const subHeadersMatch = match?.[0]?.matchAll(
+        /\n###\s(?<child>[\w.]+)\n/g,
+      );
       if (subHeadersMatch) {
         for (const subHeaderStr of subHeadersMatch) {
           if (subHeaderStr?.groups?.child) {
@@ -86,10 +88,15 @@ describe('docs/documentation', () => {
           .filter((option) => option.stage !== 'global')
           .filter((option) => !option.globalOnly)
           .filter((option) => option.parents)
-          .map((option) => option.name)
           .filter(
-            (header) =>
-              header !== 'managerFilePatterns' && header !== 'enabled',
+            (option) =>
+              option.name !== 'managerFilePatterns' &&
+              option.name !== 'enabled',
+          )
+          .flatMap((option) =>
+            (option.parents ?? [])
+              .filter((parent) => parent !== '.')
+              .map((parent) => `${parent}.${option.name}`),
           )
           .sort();
       }

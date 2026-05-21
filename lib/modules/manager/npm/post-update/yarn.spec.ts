@@ -14,8 +14,8 @@ import * as yarnHelper from './yarn.ts';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('~test/fixtures.js')>(
-      '~test/fixtures.js',
+    await vi.importActual<typeof import('~test/fixtures.ts')>(
+      '~test/fixtures.ts',
     )
   ).fsExtra(),
 );

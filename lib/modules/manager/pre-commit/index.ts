@@ -23,3 +23,5 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

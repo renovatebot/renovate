@@ -123,21 +123,18 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 
 function addPullRequestNoteIfAttestationHasBeenLost(
   upgrade: BranchUpgradeConfig,
+  currentReleaseHasAttestation: boolean | undefined,
 ): void {
   const { packageName, depName, currentVersion, newVersion } = upgrade;
   const name = packageName ?? depName;
 
-  const currentRelease = upgrade.releases?.find(
-    (release) => release.version === currentVersion,
-  );
   const newRelease = upgrade.releases?.find(
     (release) => release.version === newVersion,
   );
 
   if (
-    currentRelease &&
     newRelease &&
-    currentRelease.attestation === true &&
+    currentReleaseHasAttestation === true &&
     newRelease.attestation !== true
   ) {
     upgrade.prBodyNotes ??= [];
@@ -168,6 +165,7 @@ export async function ensurePr(
     internalChecksAsSuccess,
     prTitle = '',
     upgrades,
+    hasAttestation: currentReleaseHasAttestation,
   } = config;
   const getBranchStatus = memoize(() =>
     resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests),
@@ -338,7 +336,10 @@ export async function ensurePr(
       }
     }
 
-    addPullRequestNoteIfAttestationHasBeenLost(upgrade);
+    addPullRequestNoteIfAttestationHasBeenLost(
+      upgrade,
+      currentReleaseHasAttestation,
+    );
 
     config.upgrades.push(upgrade);
   }

@@ -9,6 +9,9 @@ import MarkdownIt from 'markdown-it';
 import type Token from 'markdown-it/lib/token.mjs';
 import { migrateConfig } from '../lib/config/migration.ts';
 import type { RenovateConfig } from '../lib/config/types.ts';
+import { init } from '../lib/logger/index.ts';
+
+await init();
 
 const addFormats = _addFormats as unknown as typeof _addFormats.default;
 

@@ -81,7 +81,7 @@ describe('modules/datasource/git-tags/index', () => {
         { packageName: 'a tag to look up' },
         'v1.0.2',
       );
-      expect(digest).toBe('9cb93e0b236385a4e2efd089d7c6a458f5ff321f');
+      expect(digest).toBe('3936a6bced3587dc9fd464b0a910e0dfd4cfe10d');
     });
 
     it('returns digest for HEAD', async () => {

@@ -19,6 +19,11 @@ import { getEnv } from '../env.ts';
 import type { Opt, ToolConfig, ToolConstraint } from './types.ts';
 
 const allToolConfig: Record<string, ToolConfig> = {
+  bazelisk: {
+    datasource: 'github-releases',
+    packageName: 'bazelbuild/bazelisk',
+    versioning: semverVersioningId,
+  },
   bun: {
     datasource: 'github-releases',
     packageName: 'oven-sh/bun',
@@ -236,13 +241,13 @@ const allToolConfig: Record<string, ToolConfig> = {
 };
 
 let _getPkgReleases: Promise<
-  typeof import('../../modules/datasource/index.js')
+  typeof import('../../modules/datasource/index.ts')
 > | null = null;
 
 async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
-  _getPkgReleases ??= import('../../modules/datasource/index.js');
+  _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);
 }

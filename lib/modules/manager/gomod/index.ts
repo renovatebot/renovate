@@ -6,6 +6,7 @@ import { extractPackageFile } from './extract.ts';
 import { updateDependency } from './update.ts';
 
 export { extractPackageFile, updateDependency, updateArtifacts };
+export { knownDepTypes } from './dep-types.ts';
 
 export const displayName = 'Go Modules';
 export const url = 'https://go.dev/ref/mod';

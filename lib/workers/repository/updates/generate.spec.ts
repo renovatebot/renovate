@@ -1814,5 +1814,44 @@ describe('workers/repository/updates/generate', () => {
         );
       },
     );
+
+    it('uses prettyDepType when already set', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+          prettyDepType: 'devDependency',
+          depType: 'dev',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].prettyDepType).toBe('devDependency');
+    });
+
+    it('falls back to depType when prettyDepType is not set', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+          depType: 'dev',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].prettyDepType).toBe('dev');
+    });
+
+    it('defaults prettyDepType to dependency when neither prettyDepType nor depType is set', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].prettyDepType).toBe('dependency');
+    });
   });
 });

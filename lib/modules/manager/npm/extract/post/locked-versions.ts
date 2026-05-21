@@ -23,6 +23,7 @@ export async function getLockedVersions(
     if (yarnLock) {
       logger.trace('Found yarnLock');
       lockFiles.push(yarnLock);
+      // v8 ignore else -- TODO: add test #40625
       if (!lockFileCache[yarnLock]) {
         logger.trace(`Retrieving/parsing ${yarnLock}`);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
@@ -153,6 +154,7 @@ export async function getLockedVersions(
             ]?.[depName!],
           );
 
+          // v8 ignore else -- TODO: add test #40625
           if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }
@@ -164,6 +166,7 @@ export async function getLockedVersions(
             ]?.[depType!]?.[depName!],
           );
 
+          // v8 ignore else -- TODO: add test #40625
           if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }

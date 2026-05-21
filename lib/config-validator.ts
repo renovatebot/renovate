@@ -12,11 +12,13 @@ import { migrateConfig } from './config/migration.ts';
 import type { RenovateConfig } from './config/types.ts';
 import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
-import { logger } from './logger/index.ts';
+import { init, logger } from './logger/index.ts';
 import { getEnv } from './util/env.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
+
+await init();
 
 const { pathExists, readFile } = fs;
 

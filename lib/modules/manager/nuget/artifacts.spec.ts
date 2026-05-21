@@ -32,10 +32,9 @@ const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/nuget/artifacts', () => {
   beforeEach(async () => {
-    const realFs =
-      await vi.importActual<typeof import('../../../util/fs/index.ts')>(
-        '../../../util/fs',
-      );
+    const realFs = await vi.importActual<
+      typeof import('../../../util/fs/index.ts')
+    >('../../../util/fs/index.ts');
     hostRules.find.mockReturnValue({});
     getDefaultRegistries.mockReturnValue([
       { url: nugetOrg, name: 'nuget.org' },
@@ -435,7 +434,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'packages.lock.json',
+          fileName: 'packages.lock.json',
           stderr: 'not found',
         },
       },

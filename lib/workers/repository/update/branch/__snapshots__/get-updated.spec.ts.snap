@@ -132,7 +132,7 @@ exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles()
 {
   "artifactErrors": [
     {
-      "lockFile": "composer.lock",
+      "fileName": "composer.lock",
       "stderr": "some error",
     },
   ],
@@ -191,7 +191,7 @@ exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles()
 {
   "artifactErrors": [
     {
-      "lockFile": "composer.lock",
+      "fileName": "composer.lock",
       "stderr": "some error",
     },
   ],

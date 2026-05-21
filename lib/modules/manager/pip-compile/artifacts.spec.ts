@@ -444,7 +444,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).toEqual([
       {
-        artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
+        artifactError: { fileName: 'requirements.txt', stderr: 'not found' },
       },
     ]);
     expect(execSnapshots).toEqual([]);
@@ -759,7 +759,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       });
       expect(results).toMatchObject([
         {
-          artifactError: { lockFile: 'requirements1.txt', stderr: 'Oh noes!' },
+          artifactError: { fileName: 'requirements1.txt', stderr: 'Oh noes!' },
         },
       ]);
     });

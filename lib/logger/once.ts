@@ -1,3 +1,5 @@
+// Do not static import `bunyan` here!
+// Otherwise otel can't instrument it.
 import { createHash } from 'node:crypto';
 import { stringify } from 'safe-stable-stringify';
 

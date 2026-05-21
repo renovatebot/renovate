@@ -1,4 +1,4 @@
-import { scm } from '~test/util.ts';
+import { logger, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { LongCommitSha } from '../../../../util/git/types.ts';
 import type { BranchConfig } from '../../../types.ts';
@@ -70,6 +70,9 @@ describe('workers/repository/update/branch/commit', () => {
       });
       await commitFilesToBranch(config);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(logger.logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would commit files to branch renovate/some-branch. See debug logs for raw commit information',
+      );
     });
   });
 });

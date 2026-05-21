@@ -268,7 +268,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ).toMatchObject([
       {
         artifactError: {
-          lockFile: 'Chart.lock',
+          fileName: 'Chart.lock',
           stderr: 'not found',
         },
       },

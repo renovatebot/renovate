@@ -18,64 +18,77 @@ const terraformProviderDatasource = new TerraformProviderDatasource();
 const primaryUrl = terraformProviderDatasource.defaultRegistryUrls[0];
 const secondaryUrl = terraformProviderDatasource.defaultRegistryUrls[1];
 
+type MockVariant = 'empty' | '404' | 'error';
+
+function mockDefaultRegistryLookup(variant: MockVariant): void {
+  const primaryScope = httpMock
+    .scope(primaryUrl)
+    .get('/v1/providers/hashicorp/azurerm');
+  const primarySd = httpMock
+    .scope(primaryUrl)
+    .get('/.well-known/terraform.json');
+  const secondaryScope = httpMock
+    .scope(secondaryUrl)
+    .get('/terraform-provider-azurerm/index.json');
+
+  if (variant === 'empty') {
+    primaryScope.reply(200, {});
+    primarySd.reply(200, serviceDiscoveryResult);
+    secondaryScope.reply(200, {});
+    return;
+  }
+
+  if (variant === '404') {
+    primaryScope.reply(404);
+    primarySd.reply(200, serviceDiscoveryResult);
+    secondaryScope.reply(404);
+    return;
+  }
+
+  primaryScope.replyWithError('');
+  primarySd.reply(200, serviceDiscoveryResult);
+  secondaryScope.replyWithError('');
+}
+
+function mockThirdPartyRegistryLookup(variant: MockVariant): void {
+  const scope = httpMock
+    .scope('https://registry.company.com')
+    .get('/v1/providers/hashicorp/azurerm/versions');
+
+  if (variant === 'empty') {
+    scope.reply(200, {});
+  } else if (variant === '404') {
+    scope.reply(404);
+  } else {
+    scope.replyWithError('');
+  }
+
+  httpMock
+    .scope('https://registry.company.com')
+    .get('/.well-known/terraform.json')
+    .reply(200, serviceDiscoveryResult);
+}
+
 describe('modules/datasource/terraform-provider/index', () => {
   describe('getReleases', () => {
-    it('returns null for empty result', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, {})
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      httpMock
-        .scope(secondaryUrl)
-        .get('/terraform-provider-azurerm/index.json')
-        .reply(200, {});
-      expect(
-        await getPkgReleases({
-          datasource: TerraformProviderDatasource.id,
-          packageName: 'azurerm',
-        }),
-      ).toBeNull();
-    });
+    it.each`
+      description         | variant
+      ${'empty results'}  | ${'empty'}
+      ${'404 responses'}  | ${'404'}
+      ${'unknown errors'} | ${'error'}
+    `(
+      'returns null when both default registries return $description',
+      async ({ variant }) => {
+        mockDefaultRegistryLookup(variant);
 
-    it('returns null for 404', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/azurerm')
-        .reply(404)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      httpMock
-        .scope(secondaryUrl)
-        .get('/terraform-provider-azurerm/index.json')
-        .reply(404);
-      expect(
-        await getPkgReleases({
-          datasource: TerraformProviderDatasource.id,
-          packageName: 'azurerm',
-        }),
-      ).toBeNull();
-    });
-
-    it('returns null for unknown error', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/azurerm')
-        .replyWithError('')
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      httpMock
-        .scope(secondaryUrl)
-        .get('/terraform-provider-azurerm/index.json')
-        .replyWithError('');
-      expect(
-        await getPkgReleases({
-          datasource: TerraformProviderDatasource.id,
-          packageName: 'azurerm',
-        }),
-      ).toBeNull();
-    });
+        expect(
+          await getPkgReleases({
+            datasource: TerraformProviderDatasource.id,
+            packageName: 'azurerm',
+          }),
+        ).toBeNull();
+      },
+    );
 
     it('processes real data', async () => {
       httpMock
@@ -105,53 +118,49 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
     });
 
-    it('returns null for empty result from third party', async () => {
+    it('does not set releaseTimestamp when latest version is not in releases', async () => {
       httpMock
-        .scope('https://registry.company.com')
-        .get('/v1/providers/hashicorp/azurerm/versions')
-        .reply(200, {})
+        .scope(primaryUrl)
+        .get('/v1/providers/hashicorp/azurerm')
+        .reply(200, {
+          source: 'https://github.com/hashicorp/terraform-provider-azurerm',
+          versions: ['2.52.0'],
+          version: '9.9.9',
+          published_at: '2019-11-26T08:22:56Z',
+        })
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
-      expect(
-        await getPkgReleases({
-          datasource: TerraformProviderDatasource.id,
-          packageName: 'azurerm',
-          registryUrls: ['https://registry.company.com'],
-        }),
-      ).toBeNull();
+      const res = await getPkgReleases({
+        datasource: TerraformProviderDatasource.id,
+        packageName: 'azurerm',
+      });
+      expect(res).toEqual({
+        homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
+        registryUrl: 'https://registry.terraform.io',
+        releases: [{ version: '2.52.0' }],
+        sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
+      });
     });
 
-    it('returns null for 404 from third party', async () => {
-      httpMock
-        .scope('https://registry.company.com')
-        .get('/v1/providers/hashicorp/azurerm/versions')
-        .reply(404)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      expect(
-        await getPkgReleases({
-          datasource: TerraformProviderDatasource.id,
-          packageName: 'azurerm',
-          registryUrls: ['https://registry.company.com'],
-        }),
-      ).toBeNull();
-    });
+    it.each`
+      description         | variant
+      ${'empty results'}  | ${'empty'}
+      ${'404 responses'}  | ${'404'}
+      ${'unknown errors'} | ${'error'}
+    `(
+      'returns null when a third-party registry returns $description',
+      async ({ variant }) => {
+        mockThirdPartyRegistryLookup(variant);
 
-    it('returns null for unknown error from third party', async () => {
-      httpMock
-        .scope('https://registry.company.com')
-        .get('/v1/providers/hashicorp/azurerm/versions')
-        .replyWithError('')
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      expect(
-        await getPkgReleases({
-          datasource: TerraformProviderDatasource.id,
-          packageName: 'azurerm',
-          registryUrls: ['https://registry.company.com'],
-        }),
-      ).toBeNull();
-    });
+        expect(
+          await getPkgReleases({
+            datasource: TerraformProviderDatasource.id,
+            packageName: 'azurerm',
+            registryUrls: ['https://registry.company.com'],
+          }),
+        ).toBeNull();
+      },
+    );
 
     it('processes real data from third party', async () => {
       httpMock
@@ -215,41 +224,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         sourceUrl:
           'https://github.com/terraform-providers/terraform-provider-google-beta',
       });
-    });
-
-    it('simulate failing secondary release source', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/datadog')
-        .reply(404, {
-          errors: ['Not Found'],
-        })
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      httpMock
-        .scope(secondaryUrl)
-        .get('/terraform-provider-datadog/index.json')
-        .reply(404);
-
-      const res = await getPkgReleases({
-        datasource: TerraformProviderDatasource.id,
-        packageName: 'datadog',
-      });
-      expect(res).toBeNull();
-    });
-
-    it('returns null for error in service discovery', async () => {
-      httpMock.scope(primaryUrl).get('/.well-known/terraform.json').reply(404);
-      httpMock
-        .scope(secondaryUrl)
-        .get('/terraform-provider-azurerm/index.json')
-        .replyWithError('');
-      expect(
-        await getPkgReleases({
-          datasource: TerraformProviderDatasource.id,
-          packageName: 'azurerm',
-        }),
-      ).toBeNull();
     });
   });
 

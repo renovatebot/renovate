@@ -118,8 +118,7 @@ export async function findFirstParentVersion(
         return parentVersion;
       }
     }
-    /* v8 ignore next -- needs test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn(
       { parentName, parentStartingVersion, targetDepName, targetVersion, err },
       'findFirstParentVersion error',

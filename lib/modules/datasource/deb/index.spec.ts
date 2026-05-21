@@ -19,6 +19,8 @@ import {
   getRegistryUrl,
 } from './url.ts';
 
+vi.unmock('../../../util/mutex.ts');
+
 const debBaseUrl = 'http://deb.debian.org';
 
 describe('modules/datasource/deb/index', () => {
@@ -277,7 +279,6 @@ describe('modules/datasource/deb/index', () => {
     });
 
     it('should not lead to a race condition on parallel lookups', async () => {
-      vi.unmock('../../../util/mutex');
       const packages = [
         'album',
         'album-data',

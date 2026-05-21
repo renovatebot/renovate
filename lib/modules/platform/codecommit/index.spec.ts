@@ -27,6 +27,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import type { Platform } from '../types.ts';
 import { getCodeCommitUrl } from './codecommit-client.ts';
+import * as codeCommit from './index.ts';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
@@ -44,10 +45,7 @@ async function reInitRepo(codeCommit: Platform): Promise<void> {
 }
 
 describe('modules/platform/codecommit/index', () => {
-  let codeCommit: Platform;
-
   beforeAll(async () => {
-    codeCommit = await vi.importActual('.');
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',

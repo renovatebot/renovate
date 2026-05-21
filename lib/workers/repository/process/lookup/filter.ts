@@ -139,9 +139,10 @@ export function filterVersions(
         semver.satisfies(
           semver.valid(r.version)
             ? r.version
-            : /* istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
+            : /* v8 ignore start: not reachable, but it's safer to preserve it */ semver.coerce(
                 r.version,
               )!,
+          /* v8 ignore stop */
           allowedVersions,
         ),
       );

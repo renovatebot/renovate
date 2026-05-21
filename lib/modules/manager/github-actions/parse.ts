@@ -194,19 +194,19 @@ export function parseActionReference(uses: string): ActionReference | null {
 
 export interface CommentData {
   pinnedVersion?: string;
+  ref?: string;
   ratchetExclude?: boolean;
   matchedString?: string;
   index?: number;
 }
 
-// Matches version strings with optional prefixes, e.g.:
-// - "@v1.2.3", "v1.2.3", "1.2.3"
-// - "renovate: pin @v1.2.3", "tag=v1.2.3"
-// - "ratchet:owner/repo@v1.2.3"
-// - "stable/v1.2.3", "stable-v1.2.3"
-const pinnedVersionRe = regEx(
+const pinTokenRe = regEx(
   /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+))?@?(?<version>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)/,
 );
+
+export const versionLikeRe = regEx(/^v?\d+/);
+
+const bareTokenRe = regEx(/^\s*(?<token>\S+)\s*$/);
 
 export function parseComment(commentBody: string): CommentData {
   const trimmed = commentBody.trim();
@@ -215,12 +215,21 @@ export function parseComment(commentBody: string): CommentData {
   }
 
   // We use commentBody (with leading spaces) to get the correct index relative to the comment start
-  const match = pinnedVersionRe.exec(commentBody);
+  const match = pinTokenRe.exec(commentBody);
   if (match?.groups?.version) {
     return {
       pinnedVersion: match.groups.version,
       matchedString: match[0],
       index: match.index,
+    };
+  }
+
+  const bareMatch = bareTokenRe.exec(commentBody);
+  if (bareMatch?.groups?.token) {
+    return {
+      ref: bareMatch.groups.token,
+      matchedString: bareMatch[0],
+      index: bareMatch.index,
     };
   }
 
@@ -290,7 +299,7 @@ export function parseUsesLine(line: string): ParsedUsesLine | null {
   );
 
   const { value, quote } = parseQuote(rawValuePart);
-  // commentPart always starts with '#' since we found ' #' and sliced after the space
+  // commentPart always starts with '#' (see commentIndex search above)
   const cleanCommentBody = commentPart.slice(1);
 
   return {

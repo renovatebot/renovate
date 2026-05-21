@@ -153,7 +153,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
       return [
         {
           artifactError: {
-            lockFile: lockFileName,
+            fileName: lockFileName,
             stderr: err.message,
           },
         },

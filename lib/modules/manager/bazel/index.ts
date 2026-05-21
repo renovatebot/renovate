@@ -7,6 +7,7 @@ import { updateArtifacts } from './artifacts.ts';
 import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile, updateArtifacts };
+export { knownDepTypes } from './dep-types.ts';
 
 export const url = 'https://bazel.build/docs';
 export const categories: Category[] = ['bazel'];

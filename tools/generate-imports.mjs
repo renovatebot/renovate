@@ -83,7 +83,7 @@ async function getFileHash(filePath) {
  */
 export async function getManagerHash(managerName, isCustomManager) {
   /** @type {string[]} */
-  let hashes = [];
+  const hashes = [];
   let folderPattern = `lib/modules/manager/${managerName}/**`;
   if (isCustomManager) {
     folderPattern = `lib/modules/manager/custom/${managerName}/**`;
@@ -160,7 +160,7 @@ async function generateHash() {
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
     /** @type {Record<string, string>[]} */
-    let hashes = [];
+    const hashes = [];
     // get managers list
     const managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })

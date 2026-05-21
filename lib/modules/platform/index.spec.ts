@@ -1,13 +1,13 @@
 import * as httpMock from '~test/http-mock.ts';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
-import type { PlatformId } from '../../constants/index.ts';
+import { PLATFORM_HOST_TYPES, type PlatformId } from '../../constants/index.ts';
 import { loadModules } from '../../util/modules.ts';
 import api from './api.ts';
 import * as platform from './index.ts';
 import type { Platform } from './types.ts';
 
-vi.unmock('.');
-vi.unmock('./scm');
+vi.unmock('./index.ts');
+vi.unmock('./scm.ts');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {
@@ -245,6 +245,14 @@ describe('modules/platform/index', () => {
         platform: 'github',
         renovateUsername: 'abc',
       });
+    });
+  });
+
+  describe('getPlatformList', () => {
+    it('has the same values as PLATFORM_HOST_TYPES', () => {
+      expect(new Set(platform.getPlatformList())).toEqual(
+        new Set(PLATFORM_HOST_TYPES),
+      );
     });
   });
 });

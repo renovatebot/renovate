@@ -251,7 +251,7 @@ export interface UpgradeFingerprintConfig {
   lockedVersion?: string;
   manager?: string | null;
   newName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   packageFile?: string;

@@ -31,3 +31,5 @@ export const supportedDatasources = [
   GitTagsDatasource.id,
   PackagistDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

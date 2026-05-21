@@ -340,7 +340,7 @@ describe('modules/manager/pixi/artifacts', () => {
           newPackageFileContent: '{}',
           config,
         }),
-      ).toMatchObject([{ artifactError: { lockFile: 'pixi.lock' } }]);
+      ).toMatchObject([{ artifactError: { fileName: 'pixi.lock' } }]);
       expect(execSnapshots).toMatchObject([]);
     });
 

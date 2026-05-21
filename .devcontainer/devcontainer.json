@@ -13,7 +13,6 @@
     "vscode": {
       "terminal.integrated.defaultProfile.linux": "bash",
       "extensions": [
-        "dbaeumer.vscode-eslint",
         "oxc.oxc-vscode",
         "esbenp.prettier-vscode",
         "vitest.explorer",

@@ -4,6 +4,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile };
+export { knownDepTypes } from './dep-types.ts';
 
 export const url = 'https://tekton.dev/docs';
 export const categories: Category[] = ['ci', 'cd'];

@@ -158,6 +158,7 @@ export async function generateLockFile(
           .map((update) => update.managerData?.packageKey)
           .filter((packageKey) => !rootDeps.has(packageKey));
 
+        // v8 ignore else -- TODO: add test #40625
         if (currentWorkspaceUpdates.length) {
           const updateCmd = `npm install ${cmdOptions} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
             .map(quote)
@@ -196,8 +197,7 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.debug(
           { err, lockFileName },
           'Error removing `package-lock.json` for lock file maintenance',
@@ -213,6 +213,7 @@ export async function generateLockFile(
       commands = [];
       for (const command of existingCommands) {
         commands.push(command);
+        // v8 ignore else -- TODO: add test #40625
         if (command.startsWith('npm install')) {
           commands.push(command);
         }
@@ -254,6 +255,7 @@ export async function generateLockFile(
             | 'optionalDependencies';
 
           // TODO #22198
+          // v8 ignore else -- TODO: add test #40625
           if (
             lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
           ) {
@@ -264,8 +266,8 @@ export async function generateLockFile(
         lockFile = composeLockFile(lockFileParsed, detectedIndent);
       }
     }
-    /* v8 ignore next -- needs test */
   } catch (err) {
+    // v8 ignore if -- TODO: add test #40625
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -276,6 +278,7 @@ export async function generateLockFile(
       },
       'lock file error',
     );
+    // v8 ignore if -- TODO: add test #40625
     if (err.stderr?.includes('ENOSPC: no space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
@@ -337,6 +340,7 @@ export function divideWorkspaceAndRootDeps(
           }
         }
         if (workspaceName) {
+          // v8 ignore else -- TODO: add test #40625
           if (
             !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
           ) {

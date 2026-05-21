@@ -480,7 +480,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'uv.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'uv.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

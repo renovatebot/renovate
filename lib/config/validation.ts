@@ -32,6 +32,7 @@ import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
 import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
+import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
@@ -397,9 +398,17 @@ export async function validateConfig(
                       });
                     }
                   }
+                  try {
+                    parsePreset(subval);
+                  } catch {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `${currentPath}: preset "${subval}" is not valid`,
+                    });
+                  }
                 } else {
                   errors.push({
-                    topic: 'Configuration Warning',
+                    topic: 'Configuration Error',
                     message: `${currentPath}: preset value is not a string`,
                   });
                 }
@@ -419,6 +428,7 @@ export async function validateConfig(
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrls',
+              'matchRegistryUrls',
               'matchUpdateTypes',
               'matchConfidence',
               'matchCurrentAge',
