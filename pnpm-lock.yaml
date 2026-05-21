@@ -393,8 +393,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.3)
       '@smithy/util-stream':
-        specifier: 4.6.1
-        version: 4.6.1
+        specifier: 4.6.2
+        version: 4.6.2
       '@types/aws4':
         specifier: 1.11.6
         version: 1.11.6
@@ -2040,10 +2040,9 @@ packages:
     resolution: {integrity: sha512-m5PNfr7xKdIegNG8DlLz+Gf/DlAhHWFGmFbe0DZo9pnvBwuZ3P/9OMtQU0UyWMYy8zjl+HDFVS7rdD9p2xEFjQ==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/core@3.24.1':
-    resolution: {integrity: sha512-3mT7o4qQyUWttYnVK3A0Z/u3Xha3E81tXn32Tz6vjZiUXhBrkEivpw1hBYfh84iFF9CSzkBU9Y1DJ3Q6RQ231g==}
+  '@smithy/core@3.24.2':
+    resolution: {integrity: sha512-IKS7qX59fAGCYBmt5JChcDswQDupZqT2Yn2ZBA3UgTlsjRNNkQzZobbn95xoAAdtTyJmBiJB3Y02qR3rgy3Zog==}
     engines: {node: '>=18.0.0'}
-    deprecated: Deprecated due to bug in browser bundling instructions https://github.com/smithy-lang/smithy-typescript/issues/2025
 
   '@smithy/credential-provider-imds@4.3.0':
     resolution: {integrity: sha512-5gi+28FH+RurB2+tcRH1CK7KiLJ0dVnabjWLY3DgeFLiU45dbyrsq7NOYvMUcHgu9LVZH5F7G+Qk1GdXF0y6jg==}
@@ -2193,8 +2192,8 @@ packages:
     resolution: {integrity: sha512-pV/Kq4jUuP9raOqwSPeBiut2IWmwbc9vM+nE3ly4YUkzPHbBZvfhikwMOyudER+KHPjakuc8r4TecEPMsI7nVg==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/util-stream@4.6.1':
-    resolution: {integrity: sha512-GjZfEft0M0V3n2YM/LGkr5LeLd8gxHUIzW0rUz6VtTtlAq245GxHlJghvoPEjJHKTj255iHFAiA4IsIdK40Ueg==}
+  '@smithy/util-stream@4.6.2':
+    resolution: {integrity: sha512-b5kyVsNM3pU36cJGyxwAQajGxs4JkNuaKKNufDu7oASWmzKG5gtXEdVK1rvz99O2JV1B85Pp9bAcN7fXWbN6Aw==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-utf8@2.3.0':
@@ -5850,7 +5849,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/fetch-http-handler': 5.4.0
       '@smithy/hash-node': 4.3.0
       '@smithy/invalid-dependency': 4.3.0
@@ -5894,7 +5893,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/fetch-http-handler': 5.4.0
       '@smithy/hash-node': 4.3.0
       '@smithy/invalid-dependency': 4.3.0
@@ -5939,7 +5938,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/fetch-http-handler': 5.4.0
       '@smithy/hash-node': 4.3.0
       '@smithy/invalid-dependency': 4.3.0
@@ -5984,7 +5983,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/fetch-http-handler': 5.4.0
       '@smithy/hash-node': 4.3.0
       '@smithy/invalid-dependency': 4.3.0
@@ -6029,7 +6028,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/fetch-http-handler': 5.4.0
       '@smithy/hash-node': 4.3.0
       '@smithy/invalid-dependency': 4.3.0
@@ -6075,7 +6074,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/fetch-http-handler': 5.4.0
       '@smithy/hash-node': 4.3.0
       '@smithy/invalid-dependency': 4.3.0
@@ -6128,7 +6127,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/eventstream-serde-browser': 4.3.0
       '@smithy/eventstream-serde-config-resolver': 4.4.0
       '@smithy/eventstream-serde-node': 4.3.0
@@ -6157,7 +6156,7 @@ snapshots:
       '@smithy/util-endpoints': 3.5.0
       '@smithy/util-middleware': 4.3.0
       '@smithy/util-retry': 4.4.0
-      '@smithy/util-stream': 4.6.1
+      '@smithy/util-stream': 4.6.2
       '@smithy/util-utf8': 4.3.0
       '@smithy/util-waiter': 4.4.0
       tslib: 2.8.1
@@ -6168,7 +6167,7 @@ snapshots:
     dependencies:
       '@aws-sdk/types': 3.973.8
       '@aws-sdk/xml-builder': 3.972.22
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/node-config-provider': 4.4.0
       '@smithy/property-provider': 4.3.0
       '@smithy/protocol-http': 5.4.0
@@ -6214,7 +6213,7 @@ snapshots:
       '@smithy/protocol-http': 5.4.0
       '@smithy/smithy-client': 4.13.0
       '@smithy/types': 4.14.1
-      '@smithy/util-stream': 4.6.1
+      '@smithy/util-stream': 4.6.2
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-ini@3.972.38':
@@ -6316,7 +6315,7 @@ snapshots:
       '@aws-sdk/nested-clients': 3.997.6
       '@aws-sdk/types': 3.973.8
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/credential-provider-imds': 4.3.0
       '@smithy/node-config-provider': 4.4.0
       '@smithy/property-provider': 4.3.0
@@ -6355,7 +6354,7 @@ snapshots:
       '@smithy/protocol-http': 5.4.0
       '@smithy/types': 4.14.1
       '@smithy/util-middleware': 4.3.0
-      '@smithy/util-stream': 4.6.1
+      '@smithy/util-stream': 4.6.2
       '@smithy/util-utf8': 4.3.0
       tslib: 2.8.1
 
@@ -6412,7 +6411,7 @@ snapshots:
       '@aws-sdk/core': 3.974.8
       '@aws-sdk/types': 3.973.8
       '@aws-sdk/util-arn-parser': 3.972.3
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/node-config-provider': 4.4.0
       '@smithy/protocol-http': 5.4.0
       '@smithy/signature-v4': 5.4.0
@@ -6420,7 +6419,7 @@ snapshots:
       '@smithy/types': 4.14.1
       '@smithy/util-config-provider': 4.3.0
       '@smithy/util-middleware': 4.3.0
-      '@smithy/util-stream': 4.6.1
+      '@smithy/util-stream': 4.6.2
       '@smithy/util-utf8': 4.3.0
       tslib: 2.8.1
 
@@ -6435,7 +6434,7 @@ snapshots:
       '@aws-sdk/core': 3.974.8
       '@aws-sdk/types': 3.973.8
       '@aws-sdk/util-endpoints': 3.996.8
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/protocol-http': 5.4.0
       '@smithy/types': 4.14.1
       '@smithy/util-retry': 4.4.0
@@ -6457,7 +6456,7 @@ snapshots:
       '@aws-sdk/util-user-agent-browser': 3.972.10
       '@aws-sdk/util-user-agent-node': 3.973.24
       '@smithy/config-resolver': 4.5.0
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/fetch-http-handler': 5.4.0
       '@smithy/hash-node': 4.3.0
       '@smithy/invalid-dependency': 4.3.0
@@ -7680,10 +7679,10 @@ snapshots:
 
   '@smithy/config-resolver@4.5.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
-  '@smithy/core@3.24.1':
+  '@smithy/core@3.24.2':
     dependencies:
       '@aws-crypto/crc32': 5.2.0
       '@smithy/types': 4.14.1
@@ -7691,49 +7690,49 @@ snapshots:
 
   '@smithy/credential-provider-imds@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/types': 4.14.1
       tslib: 2.8.1
 
   '@smithy/eventstream-serde-browser@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/eventstream-serde-config-resolver@4.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/eventstream-serde-node@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/fetch-http-handler@5.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/types': 4.14.1
       tslib: 2.8.1
 
   '@smithy/hash-blob-browser@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/hash-node@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/hash-stream-node@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/invalid-dependency@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/is-array-buffer@2.2.0':
@@ -7742,79 +7741,79 @@ snapshots:
 
   '@smithy/is-array-buffer@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/md5-js@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/middleware-content-length@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/middleware-endpoint@4.5.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/middleware-retry@4.6.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/middleware-serde@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/middleware-stack@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/node-config-provider@4.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/node-http-handler@4.7.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/types': 4.14.1
       tslib: 2.8.1
 
   '@smithy/property-provider@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/protocol-http@5.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/querystring-builder@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/shared-ini-file-loader@4.5.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/signature-v4@5.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/types': 4.14.1
       tslib: 2.8.1
 
   '@smithy/smithy-client@4.13.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       '@smithy/types': 4.14.1
       tslib: 2.8.1
 
@@ -7824,22 +7823,22 @@ snapshots:
 
   '@smithy/url-parser@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-base64@4.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-body-length-browser@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-body-length-node@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-buffer-from@2.2.0':
@@ -7849,37 +7848,37 @@ snapshots:
 
   '@smithy/util-config-provider@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-defaults-mode-browser@4.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-defaults-mode-node@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-endpoints@3.5.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-middleware@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-retry@4.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
-  '@smithy/util-stream@4.6.1':
+  '@smithy/util-stream@4.6.2':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-utf8@2.3.0':
@@ -7889,12 +7888,12 @@ snapshots:
 
   '@smithy/util-utf8@4.3.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@smithy/util-waiter@4.4.0':
     dependencies:
-      '@smithy/core': 3.24.1
+      '@smithy/core': 3.24.2
       tslib: 2.8.1
 
   '@standard-schema/spec@1.1.0': {}
