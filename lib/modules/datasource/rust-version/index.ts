@@ -34,7 +34,6 @@ export class RustVersionDatasource extends Datasource {
     const parsedResults = [];
     for (const line of lines) {
       // skip trailing empty element from .split('\n') upstream
-
       if (!line.trim()) {
         continue;
       }
