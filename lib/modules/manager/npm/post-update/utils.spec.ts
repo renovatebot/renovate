@@ -111,6 +111,15 @@ describe('modules/manager/npm/post-update/utils', () => {
       expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
+    it('treats nullish lockFileDir as repo root', async () => {
+      const version = await getInheritedPackageManagerVersion(
+        'pnpm',
+        undefined as unknown as string,
+      );
+      expect(version).toBeNull();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
     it('also reads engines fields from ancestor package.json', async () => {
       fs.readLocalFile.mockImplementation(
         (fileName: string): Promise<string | null> => {
