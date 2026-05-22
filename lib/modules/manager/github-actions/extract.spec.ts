@@ -32,8 +32,10 @@ jobs:
   test10:
       runs-on: abc-123
   test11:
-      runs-on: macos-15-intel
+      runs-on: windows-11-arm
   test12:
+      runs-on: macos-15-intel
+  test13:
       runs-on: macos-26-intel
 `;
 
@@ -749,6 +751,14 @@ describe('modules/manager/github-actions/extract', () => {
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
           depName: 'macos',
           currentValue: '15-intel',
           replaceString: 'macos-15-intel',
@@ -767,7 +777,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(9);
+      ).toHaveLength(10);
     });
 
     it('extracts x-version from actions/setup-x', () => {
