@@ -32,6 +32,8 @@ jobs:
   test10:
       runs-on: abc-123
   test11:
+      runs-on: windows-11-arm
+  test12:
       runs-on: ubuntu-22.04-arm
 `;
 
@@ -747,6 +749,14 @@ describe('modules/manager/github-actions/extract', () => {
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
           depName: 'ubuntu',
           currentValue: '22.04-arm',
           replaceString: 'ubuntu-22.04-arm',
@@ -757,7 +767,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(8);
+      ).toHaveLength(9);
     });
 
     it('extracts x-version from actions/setup-x', () => {
