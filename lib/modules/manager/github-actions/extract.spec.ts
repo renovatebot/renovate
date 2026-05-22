@@ -31,6 +31,8 @@ jobs:
        labels: ubuntu-20.04-16core
   test10:
       runs-on: abc-123
+  test11:
+      runs-on: windows-11-arm
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -744,10 +746,18 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(8);
     });
 
     it('extracts x-version from actions/setup-x', () => {
