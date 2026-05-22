@@ -43,30 +43,6 @@ Secondly, Renovate will conditionally cache based on whether it detects it is in
 
 Finally, if you're running Renovate across many hosts (for instance across a Kubernetes cluster or on your automated build platform like GitLab CI), [we recommend](#recommended-performance-improvements) using a persistent Package Cache, and ideally a persistent Repository Cache, too.
 
-<details>
-
-In addition, there are internal caches set on **??**
-
-In addition,
-
-Renovate's operation model leads to a lot of external traffic being sent.
-
-With even a "medium sized" deployment, **??**.
-
-When operating, Renovate **??**
-
-Where possible, Renovate works in a **??**.
-
-However, **??**
-
-<!-- prettier-ignore -->
-!!! tip
-    It is strongly recommended to set up caching if you're running **??**.
-    <br>
-    It is ideal if you have a proxy/etc to handle package cahhing to avoid **??**
-
-</details>
-
 ## Cache types
 
 Renovate uses 3 types of cache:
@@ -80,7 +56,7 @@ The In-Memory Cache includes any short-lived data which is worth caching within 
 
 #### What is in it?
 
-Renovate stores **??**, for instance when retrieving HTTP-/npm-based config presets, getting the public key for a Hex registry or for listing status checks on a GitHub branch.
+Renovate stores a mix of different types of data in the In-Memory Cache, for instance when retrieving HTTP-/npm-based config presets, getting the public key for a Hex registry or for listing status checks on a GitHub branch.
 
 <!-- markdownlint-disable MD024 -->
 
@@ -114,11 +90,12 @@ The Repository Cache is primarily aimed at reducing the work that Renovate needs
 
 This cache includes (among other information):
 
+<!-- prettier-ignore -->
 - `configFileName`: this repository's filename i.e. `renovate.json5`
 - `branches`: information about the branches Renovate is currently managing, and:
-  - whether they're associated with a PR
-  - what update(s) are in the given branch
-  - whether the branch is conflicted/behind the base branch or if it's been modified by someone other than Renovate
+    - whether they're associated with a PR
+    - what update(s) are in the given branch
+    - whether the branch is conflicted/behind the base branch or if it's been modified by someone other than Renovate
 - `onboardingBranchCache`, `reconfigureBranchCache`: cache for the state of the onboarding/reconfigure branches
 - `platform`: specific information for the given Platform, such as a cache of all PRs
 - `httpCache`/`httpCacheHead`: cached repository-specific HTTP responses
@@ -166,11 +143,21 @@ The Package Cache contains:
 
 <!-- markdownlint-disable MD007 -->
 <!-- prettier-ignore -->
-- **??**
-    - The full list of namespaces that are included in the [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride) docs
+- HTTP responses from Datasources
+    - See below for the full list of namespaces
 - GitHub GraphQL data for GitHub releases/tags
     - If the repo is public, any tags/releases will be stored in the cache
     - If the repo is private, any tags/releases will be cached in-memory in the Renovate process (and subsequent Renovate runs will need to re-fetch the data)
+
+<details markdown>
+
+<summary>Package Cache Namespaces</summary>
+
+The following namespaces are used (and explained in more detail in the [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride) docs):
+
+<!-- Autogenerate cache-namespaces -->
+
+</details>
 
 <!-- markdownlint-disable MD024 -->
 
@@ -235,9 +222,7 @@ In the case that **??**, for instance, `go mod tidy`, then **??**.
 
 Where possible, Renovate will centralise these cache locations under [`cacheDir`](./self-hosted-configuration.md#cachedir), i.e. in `$cacheDir/others`.
 
-This directry can **??** over time https://github.com/renovatebot/renovate/discussions/33612
-
-### How do I use the **??** with S3-compatbile?
+Note that this directory can grow over time (as noted in [#33612](https://github.com/renovatebot/renovate/discussions/33612)), so should be periodically cleaned up, if you are running long-lived hosts and/or persistently caching the `cacheDir`.
 
 ### Where are HTTP responses cached?
 
