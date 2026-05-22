@@ -17,6 +17,7 @@ import {
   toolNames,
 } from '../../lib/util/exec/types.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
+import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { formatCell, replaceContent } from './utils.ts';
 
@@ -25,14 +26,24 @@ const managers = new Set(allManagersList);
 
 const previousNames: ReadonlyMap<string, string[]> = (() => {
   const map = new Map<string, string[]>();
-  for (const [oldName, newName] of MigrationsService.renamedProperties) {
-    const existing = map.get(newName);
+
+  function add(optionName: string, previousName: string): void {
+    const existing = map.get(optionName);
     if (existing) {
-      existing.push(oldName);
+      existing.push(previousName);
     } else {
-      map.set(newName, [oldName]);
+      map.set(optionName, [previousName]);
     }
   }
+
+  for (const [oldName, newName] of MigrationsService.renamedProperties) {
+    add(newName, oldName);
+  }
+
+  for (const [oldEnvVar, { optionName }] of convertedExperimentalEnvVars) {
+    add(optionName, oldEnvVar);
+  }
+
   return map;
 })();
 
