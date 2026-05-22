@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { MigrationsService } from '../../lib/config/migrations/index.ts';
 import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
@@ -21,6 +22,19 @@ import { formatCell, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
+
+const previousNames: ReadonlyMap<string, string[]> = (() => {
+  const map = new Map<string, string[]>();
+  for (const [oldName, newName] of MigrationsService.renamedProperties) {
+    const existing = map.get(newName);
+    if (existing) {
+      existing.push(oldName);
+    } else {
+      map.set(newName, [oldName]);
+    }
+  }
+  return map;
+})();
 
 /**
  * Merge string arrays one by one
@@ -141,7 +155,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         ((type === 'object' || type === 'array') &&
           (el[0] === 'default' || el[0] === 'additionalProperties')) ||
         // enum values for `allowedValues` should be printed in JSON notation
-        el[0] === 'allowedValues'
+        el[0] === 'allowedValues' ||
+        // previous names should be printed in JSON notation
+        el[0] === 'previouslyKnownAs'
       ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
@@ -172,7 +188,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
 }
 
 function stringifyArrays(el: Record<string, any>): void {
-  const ignoredKeys = ['allowedValues', 'default', 'experimentalIssues'];
+  const ignoredKeys = [
+    'allowedValues',
+    'default',
+    'experimentalIssues',
+    'previouslyKnownAs',
+  ];
 
   for (const [key, value] of Object.entries(el)) {
     if (!ignoredKeys.includes(key) && Array.isArray(value)) {
@@ -380,6 +401,10 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       el.cli = getCliName(option);
       el.env = getEnvName(option);
+      const prevNames = previousNames.get(option.name);
+      if (prevNames) {
+        el.previouslyKnownAs = prevNames;
+      }
       stringifyArrays(el);
 
       for (const key of lookupKeys) {
