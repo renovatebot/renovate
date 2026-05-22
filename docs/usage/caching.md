@@ -184,7 +184,7 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 - [`presetCachePersistence`](./self-hosted-configuration.md#presetcachepersistence): whether to cache remote presets in the Package Cache
 - [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride): overrides for the expiry/TTL of specified datasource cache entries
 - [`cacheHardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes): maximum duration to keep datasource cache entries
-- [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages): cache private packages (**see below ??**)
+- [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages): cache private packages (See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details)
 - [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache): use SQLite as the Package Cache backend
 - [`RENOVATE_X_SQLITE_BUSY_TIMEOUT`](./self-hosted-experimental.md#renovate_x_sqlite_busy_timeout): when using SQLite, increase the busy timeout
 - [`prCacheSyncMaxPages`](./self-hosted-configuration.md#prcachesyncmaxpages): maximum number of pages to fetch when syncing the pull request cache
