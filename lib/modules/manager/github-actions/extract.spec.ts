@@ -757,7 +757,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(8);
     });
 
     it('extracts x-version from actions/setup-x', () => {
