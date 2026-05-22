@@ -30,6 +30,14 @@ jobs:
        group: ubuntu-runners
        labels: ubuntu-20.04-16core
   test10:
+      runs-on: ubuntu-22.04-arm
+  test11:
+      runs-on: macos-15-intel
+  test12:
+      runs-on: macos-26-intel
+  test13:
+      runs-on: windows-11-arm
+  test14:
       runs-on: abc-123
 `;
 
@@ -744,10 +752,42 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'ubuntu',
+          currentValue: '22.04-arm',
+          replaceString: 'ubuntu-22.04-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '15-intel',
+          replaceString: 'macos-15-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '26-intel',
+          replaceString: 'macos-26-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(11);
     });
 
     it('extracts x-version from actions/setup-x', () => {

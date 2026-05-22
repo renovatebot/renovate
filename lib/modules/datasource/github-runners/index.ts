@@ -28,8 +28,10 @@ export class GithubRunnersDatasource extends Datasource {
     ],
     macos: [
       { version: '26' },
+      { version: '26-intel' },
       { version: '26-xlarge' },
       { version: '15' },
+      { version: '15-intel' },
       { version: '15-large' },
       { version: '15-xlarge' },
       { version: '14' },
@@ -46,6 +48,7 @@ export class GithubRunnersDatasource extends Datasource {
     windows: [
       { version: '2025' },
       { version: '2022' },
+      { version: '11-arm' },
       { version: '2019', isDeprecated: true },
       { version: '2016', isDeprecated: true },
     ],
