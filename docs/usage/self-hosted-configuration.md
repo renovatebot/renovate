@@ -13,19 +13,19 @@ The config options below _must_ be configured in the bot/admin config, so in eit
 
 <!-- prettier-ignore -->
 !!! note
-     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
 
 For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
 
 <!-- prettier-ignore -->
 !!! tip
-    This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-global-schema.json`](renovate-global-schema.json), and any [inherited config options](./config-overview.md#inherited-config) are also present in [`docs.renovatebot.com/renovate-inherited-schema.json`](renovate-inherited-schema.json).
+  This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-global-schema.json`](renovate-global-schema.json), and any [inherited config options](./config-overview.md#inherited-config) are also present in [`docs.renovatebot.com/renovate-inherited-schema.json`](renovate-inherited-schema.json).
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
 !!! note
-    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+  Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
 ## `allowCustomCrateRegistries`
 
@@ -63,9 +63,9 @@ This will not affect calling a script like:
 
 <!-- prettier-ignore -->
 !!! warning
-    This has the risk of arbitrary environment variable access or additional command execution.
-    It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`),
-    as there may be special characters included in the given commands that can be leveraged
+  This has the risk of arbitrary environment variable access or additional command execution.
+  It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`),
+  as there may be special characters included in the given commands that can be leveraged
 
 ## `allowedCommands`
 
@@ -232,8 +232,8 @@ For example:
 
 <!-- prettier-ignore -->
 !!! note
-    On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
-    Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
+  On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
+  Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
 
 ## `autodiscoverProjects`
 
@@ -319,7 +319,7 @@ If you are building your own Renovate image, e.g. by installing Renovate using `
 
 <!-- prettier-ignore -->
 !!! warning
-    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+  The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
 
 We also have a deprecated `docker` mode.
 
@@ -452,7 +452,7 @@ Example:
 
 <!-- prettier-ignore -->
 !!! note
-    If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+  If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
 
 ## `configValidationError`
 
@@ -470,8 +470,8 @@ This configuration will be applied after all other environment variables so you 
 
 <!-- prettier-ignore -->
 !!! warning
-    Do not configure any secret values directly into `customEnvVariables` because they may be logged to stdout.
-    Instead, configure them into `secrets` first so that they will be redacted in logs.
+  Do not configure any secret values directly into `customEnvVariables` because they may be logged to stdout.
+  Instead, configure them into `secrets` first so that they will be redacted in logs.
 
 If configuring secrets in to `customEnvVariables`, take this approach:
 
@@ -501,7 +501,7 @@ The process that runs Renovate must have the correct permissions to delete the a
 
 <!-- prettier-ignore -->
 !!! tip
-    You can tell Renovate where to find your config file with the `RENOVATE_ADDITONAL_CONFIG_FILE` environment variable.
+  You can tell Renovate where to find your config file with the `RENOVATE_ADDITONAL_CONFIG_FILE` environment variable.
 
 ## `deleteConfigFile`
 
@@ -511,7 +511,7 @@ The process that runs Renovate must have the correct permissions to delete the c
 
 <!-- prettier-ignore -->
 !!! tip
-    You can tell Renovate where to find your config file with the `RENOVATE_CONFIG_FILE` environment variable.
+  You can tell Renovate where to find your config file with the `RENOVATE_CONFIG_FILE` environment variable.
 
 ## `detectGlobalManagerConfig`
 
@@ -538,8 +538,8 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 <!-- prettier-ignore -->
 !!! note
-    You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
-    In addition, platform host rules will only be picked up when `matchHost` is supplied.
+  You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+  In addition, platform host rules will only be picked up when `matchHost` is supplied.
 
 ### npmjs registry token example
 
@@ -621,7 +621,7 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 
 <!-- prettier-ignore -->
 !!! note
-    Dangling containers are only removed when Renovate runs again with the same prefix.
+  Dangling containers are only removed when Renovate runs again with the same prefix.
 
 ## `dockerCliOptions`
 
@@ -708,8 +708,8 @@ If you must expose all environment variables to package managers, you can set th
 
 <!-- prettier-ignore -->
 !!! warning
-    Always consider the security implications of using `exposeAllEnv`!
-    Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
+  Always consider the security implications of using `exposeAllEnv`!
+  Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
 Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
@@ -758,7 +758,7 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 
 <!-- prettier-ignore -->
 !!! note
-    Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
+  Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
 ## `gitNoVerify`
 
@@ -776,7 +776,7 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 
 <!-- prettier-ignore -->
 !!! note
-    The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
+  The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
@@ -796,11 +796,11 @@ When provided, Renovate will automatically decrypt the SSH private key during th
 
 <!-- prettier-ignore -->
 !!! note
-    Passphrases are not yet supported for GPG keys. If you provide a passphrase for a GPG key, it will be ignored and a warning will be logged.
+  Passphrases are not yet supported for GPG keys. If you provide a passphrase for a GPG key, it will be ignored and a warning will be logged.
 
 <!-- prettier-ignore -->
 !!! warning
-    Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
+  Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
 
 ## `gitTimeout`
 
@@ -831,9 +831,9 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 <!-- prettier-ignore -->
 !!! warning
-    `globalExtends` presets can't be private.
-    When Renovate resolves `globalExtends` it does not fully process the configuration.
-    This means that Renovate does not have the authentication it needs to fetch private things.
+  `globalExtends` presets can't be private.
+  When Renovate resolves `globalExtends` it does not fully process the configuration.
+  This means that Renovate does not have the authentication it needs to fetch private things.
 
 ## `httpCacheTtlDays`
 
@@ -843,7 +843,7 @@ Value of `0` means no caching.
 
 <!-- prettier-ignore -->
 !!! warning
-    When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
+  When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
 
 ## `ignorePrAuthor`
 
@@ -885,8 +885,8 @@ The inherited config may include all valid repository config and these config op
 
 <!-- prettier-ignore -->
 !!! note
-    The above list is prepared manually and may become out of date.
-    Consult the self-hosted configuration docs and look for `inheritConfigSupport` values there for the definitive list.
+  The above list is prepared manually and may become out of date.
+  Consult the self-hosted configuration docs and look for `inheritConfigSupport` values there for the definitive list.
 
 This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 
@@ -911,7 +911,7 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 
 <!-- prettier-ignore -->
 !!! warning
-    Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
+  Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
 
 ## `logContext`
 
@@ -971,7 +971,7 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 <!-- prettier-ignore -->
 !!! tip
-    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
+  Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
 
 ## `onboarding`
 
@@ -991,7 +991,7 @@ By default this option is set to `null`.
 
 <!-- prettier-ignore -->
 !!! note
-    This setting is independent of `branchPrefix`.
+  This setting is independent of `branchPrefix`.
 
 For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
 If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
@@ -1009,7 +1009,7 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 <!-- prettier-ignore -->
 !!! note
-    If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
+  If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
 
 ## `onboardingNoDeps`
 
@@ -1081,8 +1081,8 @@ TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachet
 
 <!-- prettier-ignore -->
 !!! warning
-     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
-     You should only enable this when all repositories are trusted, such as a corporate environment.
+   Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+   You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## `privateKey`
 
@@ -1147,8 +1147,8 @@ sub   rsa4096 2021-09-10 [E]
 
 <!-- prettier-ignore -->
 !!! note
-    If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
-    This is needed to allow Renovate to decrypt the encrypted values.
+  If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
+  This is needed to allow Renovate to decrypt the encrypted values.
 
 <details><summary>key edit log</summary>
 
@@ -1184,9 +1184,9 @@ The public key can be used to replace the existing key in <https://app.renovateb
 
 <!-- prettier-ignore -->
 !!! note "Base64 Encoding Support"
-    Renovate supports base64-encoded private keys for easier handling in environment variables or configuration files.
-    Simply provide the base64-encoded version of your private key, and Renovate will automatically detect and decode it.
-    This works for both GPG and SSH private keys.
+  Renovate supports base64-encoded private keys for easier handling in environment variables or configuration files.
+  Simply provide the base64-encoded version of your private key, and Renovate will automatically detect and decode it.
+  This works for both GPG and SSH private keys.
 
 Any PGP-encrypted secrets must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
@@ -1194,9 +1194,9 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 
 <!-- prettier-ignore -->
 !!! note
-    You could use public key encryption with earlier versions of Renovate.
-    We deprecated this approach and removed the documentation for it.
-    If you're _still_ using public key encryption then we recommend that you use private keys instead.
+  You could use public key encryption with earlier versions of Renovate.
+  We deprecated this approach and removed the documentation for it.
+  If you're _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## `privateKeyOld`
 
@@ -1210,7 +1210,7 @@ You can remove the `privateKeyOld` config option once all the old encrypted valu
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate now logs a warning whenever repositories use non-PGP encrypted config variables.
+  Renovate now logs a warning whenever repositories use non-PGP encrypted config variables.
 
 ## `privateKeyPath`
 
@@ -1328,12 +1328,12 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
 
 <!-- prettier-ignore -->
 !!! tip
-    If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
-    For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+  If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+  For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
 <!-- prettier-ignore -->
 !!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
+  S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## `requireConfig`
 
@@ -1428,7 +1428,7 @@ You can control if Renovate should try to access these services with the `useClo
 
 <!-- prettier-ignore -->
 !!! note
-    This should only be set via an environment variable, as it is used before Renovate initialises its global configuration.
+  This should only be set via an environment variable, as it is used before Renovate initialises its global configuration.
 
 ## `userAgent`
 

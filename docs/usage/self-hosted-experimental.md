@@ -107,8 +107,8 @@ Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
 
 <!-- prettier-ignore -->
 !!! note
-    `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
-    Incompatible with `RENOVATE_X_USE_OPENPGP`.
+  `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
+  Incompatible with `RENOVATE_X_USE_OPENPGP`.
 
 Default: `wasm-java`.
 
@@ -125,7 +125,7 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 
 <!-- prettier-ignore -->
 !!! note
-    For the GitHub Enterprise Server platform only.
+  For the GitHub Enterprise Server platform only.
 
 ## `RENOVATE_X_SQLITE_BUSY_TIMEOUT`
 
@@ -144,11 +144,11 @@ If set to a valid path pointing to a file containing a _valid_ Renovate configur
 
 <!-- prettier-ignore -->
 !!! warning
-    If the file is missing or contains invalid configuration, the scan will be aborted.
+  If the file is missing or contains invalid configuration, the scan will be aborted.
 
 <!-- prettier-ignore -->
 !!! note
-    You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
+  You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
@@ -158,7 +158,7 @@ Suppress the pre-commit support warning in PR bodies.
 
 <!-- prettier-ignore -->
 !!! note
-    Incompatible with `RENOVATE_X_PGP_RUNTIME`.
+  Incompatible with `RENOVATE_X_PGP_RUNTIME`.
 
 Use `openpgp` instead of [Bouncy Castle](https://www.bouncycastle.org/) for `PGP` decryption.
 

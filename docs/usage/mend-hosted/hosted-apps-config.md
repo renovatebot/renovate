@@ -7,7 +7,7 @@ This page:
 
 <!-- prettier-ignore -->
 !!! note
-    For general configuration of the Renovate CLI, read the main [Configuration/Overview](../config-overview.md) section.
+  For general configuration of the Renovate CLI, read the main [Configuration/Overview](../config-overview.md) section.
 
 ## Finding the logs
 
@@ -48,7 +48,7 @@ Follow these steps to see which version the Mend Renovate app used for a specifi
 
 <!-- prettier-ignore -->
 !!! tip
-    The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
+  The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
 
 ## Onboarding behavior
 
@@ -117,13 +117,13 @@ As noted in [Validation of Renovate config change PRs](../config-validation.md#v
 
 <!-- prettier-ignore -->
 !!! tip
-    When using a Mend-hosted app, the "reconfigure" branch defaults to `renovate/reconfigure`.
+  When using a Mend-hosted app, the "reconfigure" branch defaults to `renovate/reconfigure`.
 
 When pushing to this specific branch name, Renovate will run its validation and report a status check to the Platform whether this passes/fails validation.
 
 <!-- prettier-ignore -->
 !!! note
-    The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
+  The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
 
 If you have a Pull Request open from this branch (including draft PRs), Renovate will comment on the PR to note:
 

@@ -12,7 +12,7 @@ It is recommended to set this between 1.5GB and 2.5GB but may require tweaking a
 
 <!-- prettier-ignore -->
 !!! note
-    It is at the discretion of Mend to raise the memory limit for repositories, in a similar way to how [there are increased resources for Open Source projects on Renovate Cloud](https://github.com/renovatebot/renovate/discussions/33617).
+  It is at the discretion of Mend to raise the memory limit for repositories, in a similar way to how [there are increased resources for Open Source projects on Renovate Cloud](https://github.com/renovatebot/renovate/discussions/33617).
 
 ## What IP Addresses are used by Mend Renovate Cloud?
 

@@ -46,9 +46,9 @@ Projects licensed under an Open Source Initiative (OSI) approved license can req
 
 <!-- prettier-ignore -->
 !!! tip
-    To request increased resources, create a [Mend Hosted Request](https://github.com/renovatebot/renovate/discussions/new?category=mend-hosted-request) on the Renovate GitHub Discussions board.
-    <br>
-    Acceptance is at the discretion of Mend.
+  To request increased resources, create a [Mend Hosted Request](https://github.com/renovatebot/renovate/discussions/new?category=mend-hosted-request) on the Renovate GitHub Discussions board.
+  <br>
+  Acceptance is at the discretion of Mend.
 
 ### Mend Renovate Enterprise Cloud
 

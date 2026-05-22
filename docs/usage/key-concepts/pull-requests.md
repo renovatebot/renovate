@@ -89,6 +89,6 @@ Close a Renovate PR to ignore it.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate re-creates any PRs that are marked "immortal".
-    This means that any immortal PR you close, pops up again the next time Renovate runs.
-    To ignore immortal PRs, follow the advice in the [How to fix immortal PRs](#how-to-fix-immortal-prs) section.
+  Renovate re-creates any PRs that are marked "immortal".
+  This means that any immortal PR you close, pops up again the next time Renovate runs.
+  To ignore immortal PRs, follow the advice in the [How to fix immortal PRs](#how-to-fix-immortal-prs) section.

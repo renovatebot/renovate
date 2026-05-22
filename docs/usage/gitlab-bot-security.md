@@ -8,7 +8,7 @@ Make sure you understand GitLab's security model, before you run a "bot" service
 
 <!-- prettier-ignore -->
 !!! warning
-    If you have any doubts or concerns about this content that could affect other users, please follow our [Security Policy](https://github.com/renovatebot/renovate/security/policy) and report them confidentially.
+  If you have any doubts or concerns about this content that could affect other users, please follow our [Security Policy](https://github.com/renovatebot/renovate/security/policy) and report them confidentially.
 
 ## `CI_JOB_TOKEN` permissions
 
