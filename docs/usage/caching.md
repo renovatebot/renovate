@@ -90,6 +90,7 @@ The Repository Cache is primarily aimed at reducing the work that Renovate needs
 
 This cache includes (among other information):
 
+<!-- markdownlint-disable MD007 -->
 <!-- prettier-ignore -->
 - `configFileName`: this repository's filename i.e. `renovate.json5`
 - `branches`: information about the branches Renovate is currently managing, and:
@@ -207,7 +208,7 @@ Unfortunately "it depends".
 
 <!-- prettier-ignore -->
 !!! warning
-    TODO: Jamie add more details about Mend's usage once confirmed
+    TODO: Jamie add more details about Mend's usage once confirmed **??**
 
 ### Why does Renovate attempt to categorise **??**?
 
@@ -219,11 +220,32 @@ However, because it could lead to information **??** that may not be intended, e
 
 ### What's the difference between the "soft" and "hard" cache?
 
-**??**
+Renovate internally uses two types of Time-to-Live (TTL) for its cache:
+
+- **Soft TTL (logical):** When a cache entry's soft TTL expires, Renovate tries to refresh the data from the upstream source.
+- **Hard TTL (physical):** When a cache entry's hard TTL expires, Renovate permanently removes the data from the cache.
+
+This two-level cache expiry is used for:
+
+1. [HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) with `ETag`, `Last-Modified`, and `If-Modified-Since` headers
+2. `getReleases` and `getDigest` datasource methods, i.e. the package release data
+
+If an upstream request fails, Renovate can still use stale data from the cache as long as its hard TTL has not expired.
+
+If the soft TTL for a cache entry is longer than the hard TTL, Renovate uses the soft TTL value for both.
+The soft TTL is hard-coded but can be overridden with [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride).
+
+**Example:**
+
+The `npm` datasource has a default soft TTL of 15 minutes.
+When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stale `npm` data in the following ways:
+
+- The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
+- If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
 ### What's happens to package manager caches?
 
-In the case that **??**, for instance, `go mod tidy`, then **??**.
+In the case that Renovate executes commands that trigger a package manager to run, for instance `go mod tidy`, then there may be some downloads + caching that the package manager itself may do.
 
 Where possible, Renovate will centralise these cache locations under [`cacheDir`](./self-hosted-configuration.md#cachedir), i.e. in `$cacheDir/others`.
 
@@ -258,6 +280,8 @@ No, Renovate will not.
 Renovate treats the absence of a **??**
 
 ### What happens to HTTP calls that require authentication?
+
+**??**
 
 ### What happens to private packages being retrieved?
 
