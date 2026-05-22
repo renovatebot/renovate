@@ -74,6 +74,7 @@ export default defineConfig(() =>
   mergeConfig(
     {
       resolve: { tsconfigPaths: true },
+      oxc: { include: /\.(cm?ts|[jt]sx)$/ }, // https://github.com/vitejs/vite/pull/22459
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
