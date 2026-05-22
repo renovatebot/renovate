@@ -10,6 +10,7 @@ export interface JSONataManagerTemplates {
   currentDigestTemplate?: string;
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
+  autoReplaceStringTemplate?: string;
 }
 
 export interface JSONataManagerConfig extends JSONataManagerTemplates {

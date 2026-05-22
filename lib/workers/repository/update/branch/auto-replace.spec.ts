@@ -1454,6 +1454,29 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('jsonata: reformats newValue via autoReplaceStringTemplate', async () => {
+      const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '26.0.0.1';
+      upgrade.newValue = '27.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'nuget';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentValue": version }',
+      ];
+      upgrade.autoReplaceStringTemplate =
+        '{{replace "^(\\d+\\.\\d+\\.\\d+)$" "$1.0" newValue}}';
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe('[ { "version": "27.0.0.0", "package": "foo" } ]');
+    });
+
     it('github-actions: updates with newValue only', async () => {
       const githubAction = codeBlock`
         jobs:
