@@ -292,15 +292,15 @@ function createSchemaForChildConfigs(
     if (
       isUndefined(option.parents) &&
       isNullOrUndefined(
-        properties[parent].items.allOf[0].properties[option.name],
+        definitions[parent].items.allOf[0].properties[option.name],
       )
     ) {
-      properties[parent].items.allOf[0].properties[option.name] = {
+      definitions[parent].items.allOf[0].properties[option.name] = {
         $ref: `#/definitions/${option.name}`,
       };
 
       for (const prop of option.requiredIf ?? []) {
-        properties[parent].items.allOf.push(
+        definitions[parent].items.allOf.push(
           toRequiredPropertiesRule(prop, option),
         );
       }
