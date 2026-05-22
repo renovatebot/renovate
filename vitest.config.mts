@@ -74,6 +74,7 @@ export default defineConfig(() =>
   mergeConfig(
     {
       resolve: { tsconfigPaths: true },
+      oxc: { include: /\.([cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
