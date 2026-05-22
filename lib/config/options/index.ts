@@ -112,10 +112,11 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'userAgent',
     description:
-      'If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.',
+      'Sets the `user-agent` header to be sent with HTTP requests. Supports `{{renovateVersion}}` as a template variable for the current Renovate version.',
     type: 'string',
-    default: null,
+    default: `Renovate/{{renovateVersion}} (https://github.com/renovatebot/renovate)`,
     globalOnly: true,
+    supportsTemplating: true,
   },
   {
     name: 'allowedCommands',
@@ -663,7 +664,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.49.3',
+    default: 'ghcr.io/renovatebot/base-image:13.51.0',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
