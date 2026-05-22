@@ -1,4 +1,5 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { getRepoUrl } from './utils.ts';
 
 describe('modules/platform/github/utils', () => {
@@ -9,7 +10,7 @@ describe('modules/platform/github/utils', () => {
           'some/repo',
           'ssh',
           'git@github.com:some/repo.git',
-          'https://api.github.com',
+          parseUrl('https://api.github.com')!,
           'token',
         ),
       ).toBe('git@github.com:some/repo.git');
@@ -17,7 +18,13 @@ describe('modules/platform/github/utils', () => {
 
     it('throws when gitUrl is ssh but sshUrl is missing', () => {
       expect(() =>
-        getRepoUrl('some/repo', 'ssh', null, 'https://api.github.com', 'token'),
+        getRepoUrl(
+          'some/repo',
+          'ssh',
+          null,
+          parseUrl('https://api.github.com')!,
+          'token',
+        ),
       ).toThrow(CONFIG_GIT_URL_UNAVAILABLE);
     });
 
@@ -27,7 +34,7 @@ describe('modules/platform/github/utils', () => {
           'some/repo',
           undefined,
           'git@github.com:some/repo.git',
-          'https://api.github.com',
+          parseUrl('https://api.github.com')!,
           'x-access-token:abc123',
         ),
       ).toBe('https://x-access-token:abc123@github.com/some/repo.git');
@@ -39,7 +46,7 @@ describe('modules/platform/github/utils', () => {
           'some/repo',
           'endpoint',
           'git@github.com:some/repo.git',
-          'https://api.github.com',
+          parseUrl('https://api.github.com')!,
           'token',
         ),
       ).toBe('https://token@github.com/some/repo.git');
@@ -51,7 +58,7 @@ describe('modules/platform/github/utils', () => {
           'some/repo',
           undefined,
           null,
-          'https://api.github.com',
+          parseUrl('https://api.github.com')!,
           null,
         ),
       ).toBe('https://github.com/some/repo.git');
@@ -63,7 +70,7 @@ describe('modules/platform/github/utils', () => {
           'some/repo',
           undefined,
           null,
-          'https://ghe.example.com/api/v3',
+          parseUrl('https://ghe.example.com/api/v3')!,
           'token',
         ),
       ).toBe('https://token@ghe.example.com/some/repo.git');

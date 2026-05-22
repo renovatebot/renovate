@@ -29,7 +29,7 @@ export function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   sshUrl: string | null,
-  endpoint: string,
+  endpoint: URL,
   authToken: string | null,
 ): string {
   if (gitUrl === 'ssh') {
@@ -40,20 +40,14 @@ export function getRepoUrl(
     return sshUrl;
   }
 
-  const parsedEndpoint = parseUrl(endpoint);
-  // v8 ignore if: endpoint is validated during initPlatform
-  if (!parsedEndpoint) {
-    throw new Error(`Invalid GitHub endpoint: ${endpoint}`);
-  }
+  // clone to avoid mutating the caller's URL; href is known-valid
+  const url = parseUrl(endpoint.href)!;
   if (authToken) {
     const [username, password] = authToken.split(':');
-    parsedEndpoint.username = username;
-    parsedEndpoint.password = password ?? '';
+    url.username = username;
+    url.password = password ?? '';
   }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
-    'api.github.com',
-    'github.com',
-  );
-  parsedEndpoint.pathname = `${repository}.git`;
-  return parsedEndpoint.href;
+  url.host = url.host.replace('api.github.com', 'github.com');
+  url.pathname = `${repository}.git`;
+  return url.href;
 }

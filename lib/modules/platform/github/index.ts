@@ -752,12 +752,14 @@ export async function initRepo({
     logger.debug(`Using ${tokenType} token for git init`);
     authToken = opts.token ?? null;
   }
+  // endpoint is validated during initPlatform
+  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
   const workingSshUrl = forkToken ? forkSshUrl : repo.sshUrl;
   const url = getRepoUrl(
-    config.repository,
+    config.repository!,
     gitUrl,
     workingSshUrl,
-    platformConfig.endpoint,
+    parsedEndpoint,
     authToken,
   );
   let upstreamUrl: string | undefined;
@@ -766,7 +768,7 @@ export async function initRepo({
       config.parentRepo,
       gitUrl,
       repo.sshUrl,
-      platformConfig.endpoint,
+      parsedEndpoint,
       authToken,
     );
   }
