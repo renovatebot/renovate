@@ -228,7 +228,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   const execOptions: ExecOptions = {
     docker: {},
     cwdFile: update.packageFileName,
-    extraEnv: { ...getGitEnvironmentVariables(['hermit']) },
+    extraEnv: getGitEnvironmentVariables(['hermit']),
   };
 
   const fromPackages = from.map(quote).join(' ');
