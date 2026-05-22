@@ -170,9 +170,6 @@ When using the local filesystem, the [cacache](https://www.npmjs.com/package/cac
 When the [`redisUrl`](./self-hosted-configuration.md#redisurl) self-hosted configuration option is set, the Package Cache will be stored in Redis.
 
 <!-- prettier-ignore -->
-!!! warning
-    Experimental features might be changed or even removed at any time.
-
 Renovate has experimental support for using SQLite as the Package Cache backend, which can be configured using [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache).
 
 <!-- markdownlint-disable MD024 -->
@@ -195,14 +192,22 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 
 ## Recommended performance improvements
 
-1. Strongly recommended: Set the Package Cache **??**
-1. Preferably: Set the Repository Cache
+<!-- prettier-ignore -->
+!!! tip
+    Following these recommendations not only improve the performance for your own Renovate deployment, but make it less heavy on the registries you rely upon.
+
+1. **Strongly recommended**: Set the Package Cache to use Redis, or the `cacheDir` to a persistent volume shared across runs
+1. Preferably: Set the Repository Cache to use an S3-compatible backend
 
 ## FAQs
 
 ### How much memory should I use for my Package Cache?
 
-🤷
+Unfortunately "it depends".
+
+<!-- prettier-ignore -->
+!!! warning
+    TODO: Jamie add more details about Mend's usage once confirmed
 
 ### Why does Renovate attempt to categorise **??**?
 
@@ -236,9 +241,14 @@ The cache used for HTTP responses is not user-configurable.
 
 ### Is the data encrypted in the cache(s)?
 
-No. Data is currently **??** and then Base64-encoded.
+No.
 
-It is recommended to **??**.
+Neither Repository Cache nor Package Cache data is stored encrypted at rest.
+
+Encryption at rest with the Repository Cache should be configured on the S3-compatible backend.
+
+Encryption at rest for the Package Cache should be configured on the Redis instance.
+Encryption in transit for the Package Cache can be configured by using TLS/SSL-enabled Redis, and specifying [`redisUrl=rediss://...`](./self-hosted-configuration.md#redisurl).
 
 ### Does Renovate cache HTTP calls that don't return a `Cache-Control` header?
 
