@@ -31,6 +31,10 @@ jobs:
        labels: ubuntu-20.04-16core
   test10:
       runs-on: abc-123
+  test11:
+      runs-on: macos-15-intel
+  test12:
+      runs-on: macos-26-intel
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -744,10 +748,26 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'macos',
+          currentValue: '15-intel',
+          replaceString: 'macos-15-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '26-intel',
+          replaceString: 'macos-26-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(9);
     });
 
     it('extracts x-version from actions/setup-x', () => {
