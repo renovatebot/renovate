@@ -383,7 +383,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       stringifyArrays(el);
 
       for (const key of lookupKeys) {
-        const [headerIndex, footerIndex] = indexed[key];
+        const [headerIndex] = indexed[key];
         let sectionContent = `\n${option.description}\n\n${genTable(Object.entries(el), option.type, option.default)}`;
 
         if (el.supportsTemplating) {
@@ -393,14 +393,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         configOptionsRaw[headerIndex] += sectionContent;
 
         if (el.experimental) {
-          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+          configOptionsRaw[headerIndex] += genExperimentalMsg(el);
         }
         if (el.advancedUse) {
           configOptionsRaw[headerIndex] += generateAdvancedUse();
         }
 
         if (is.nonEmptyString(el.deprecationMsg)) {
-          configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+          configOptionsRaw[headerIndex] += genDeprecationMsg(el);
         }
       }
     });
