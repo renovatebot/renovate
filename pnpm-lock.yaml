@@ -375,8 +375,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(commander@14.0.3)
       '@containerbase/istanbul-reports-html':
-        specifier: 2.0.4
-        version: 2.0.4
+        specifier: 2.0.5
+        version: 2.0.5
       '@containerbase/semantic-release-pnpm':
         specifier: 1.4.1
         version: 1.4.1(semantic-release@25.0.3)
@@ -534,8 +534,8 @@ importers:
         specifier: 7.0.0
         version: 7.0.0(typescript@6.0.3)
       lint-staged:
-        specifier: 17.0.4
-        version: 17.0.4
+        specifier: 17.0.5
+        version: 17.0.5
       markdownlint-cli2:
         specifier: 0.22.1
         version: 0.22.1
@@ -993,8 +993,8 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@containerbase/istanbul-reports-html@2.0.4':
-    resolution: {integrity: sha512-Uf/hBw9LDZ9ZlKKBeXbPjwSbWOvMmSiVHmN7hntd9kLy/fR99ARVAdPzQhEvtIGsrVcbJuzYGfirHpEPYTURvA==}
+  '@containerbase/istanbul-reports-html@2.0.5':
+    resolution: {integrity: sha512-HLXY+ItJ/XWtVSpbLEQBHQ3FI/SW9VnvN2JnuXhS+XsLpjPY4gPY7CNBgfcUEU8IbUImJPmHedKYJpQ4jrJHIA==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
   '@containerbase/semantic-release-pnpm@1.4.1':
@@ -3952,8 +3952,8 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
-  lint-staged@17.0.4:
-    resolution: {integrity: sha512-+rU9lSUyVOZ/hDUmRLVGzyS2v73cDdQjX+XQz1AaOdIE4RysLq0HoPW2HrrgeNCLklkhi904VBU1bmgWLHVnkA==}
+  lint-staged@17.0.5:
+    resolution: {integrity: sha512-d12yC+/e8RhBjZtaxZn71FyrgU/P5e+uAPifhCLwdosQZP/zamSdKRWDC30ocVIbzDKiFG1McHc/LUgB92GIPw==}
     engines: {node: '>=22.22.1'}
     hasBin: true
 
@@ -6744,7 +6744,7 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@containerbase/istanbul-reports-html@2.0.4':
+  '@containerbase/istanbul-reports-html@2.0.5':
     dependencies:
       istanbul-reports: 3.2.0
 
@@ -9647,7 +9647,7 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  lint-staged@17.0.4:
+  lint-staged@17.0.5:
     dependencies:
       listr2: 10.2.1
       picomatch: 4.0.4
