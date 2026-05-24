@@ -22,6 +22,7 @@ It wraps the Renovate CLI in a Kubernetes operator and adds features like:
 ## `renovate-pretty-log-tui`
 
 [`renovate-pretty-log-tui`](https://gitlab.com/tanna.dev/renovate-pretty-log/) is a Terminal User Interface (TUI) to provide a richer, local-only view, for your Renovate debug logs.
+
 ## DepCast
 
 [DepCast](https://github.com/ahafarag/depcast) is a companion GitHub Actions integration that scores every Renovate-opened upgrade PR using the Compatibility Risk Score (CRS) — a four-signal model derived from an empirical study of 346 breaking npm/PyPI/pub.dev releases (AUC-ROC = 0.853).
