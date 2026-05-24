@@ -1621,6 +1621,52 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
+    it('sets releaseTimestamp from OCI manifest created annotation for non-Docker-Hub registries', async () => {
+      const created = '2024-01-02T03:04:05.000Z';
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/chart/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/chart/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .twice()
+        .reply(200, '', {})
+        .get('/acme/chart/manifests/1.0.0')
+        .twice()
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:123',
+            mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.created': created,
+            'org.opencontainers.image.source': 'https://github.com/acme/chart',
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        packageName: 'ghcr.io/acme/chart',
+      });
+
+      expect(res).toMatchObject({
+        registryUrl: 'https://ghcr.io',
+        lookupName: 'acme/chart',
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: created,
+          },
+        ],
+        sourceUrl: 'https://github.com/acme/chart',
+      });
+    });
+
     it('uses quay api', async () => {
       const tags = [{ name: '5.0.12' }];
       httpMock

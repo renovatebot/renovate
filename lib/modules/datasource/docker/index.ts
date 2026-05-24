@@ -9,6 +9,7 @@ import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-pro
 import { HttpError } from '../../../util/http/index.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { hasKey } from '../../../util/object.ts';
+import { map as pMap } from '../../../util/promises.ts';
 import { type AsyncResult, Result } from '../../../util/result.ts';
 import { isDockerDigest } from '../../../util/string-match.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -75,6 +76,9 @@ const defaultConfig = {
   },
 };
 
+const ociCreatedLabel = 'org.opencontainers.image.created';
+const maxOciCreatedTimestampLookups = 20;
+
 export class DockerDatasource extends Datasource {
   static readonly id = dockerDatasourceId;
 
@@ -86,7 +90,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'Only supported on Docker Hub: The release timestamp is determined from the `tag_last_pushed` field in the results. **NOTE**: Currently, digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
+    'Docker Hub release timestamps are determined from the `tag_last_pushed` field in the results. Other OCI registries may use the `org.opencontainers.image.created` manifest annotation for the newest releases. **NOTE**: Currently, Docker Hub digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -1126,6 +1130,62 @@ export class DockerDatasource extends Datasource {
     );
   }
 
+  private async getOciCreatedReleaseTimestamp(
+    registryHost: string,
+    dockerRepository: string,
+    tag: string,
+  ): Promise<Release['releaseTimestamp'] | null> {
+    try {
+      const manifest = await this.getManifest(
+        registryHost,
+        dockerRepository,
+        tag,
+      );
+      if (!manifest || !('annotations' in manifest)) {
+        return null;
+      }
+
+      return asTimestamp(manifest.annotations?.[ociCreatedLabel]);
+    } catch (err) {
+      logger.debug(
+        { registryHost, dockerRepository, tag, err },
+        'Could not determine OCI created release timestamp',
+      );
+      return null;
+    }
+  }
+
+  private async addOciCreatedReleaseTimestamps(
+    registryHost: string,
+    dockerRepository: string,
+    releases: Release[],
+  ): Promise<Release[]> {
+    if (registryHost === DOCKER_HUB) {
+      return releases;
+    }
+
+    const releasesToCheck = releases
+      .filter((release) => !release.releaseTimestamp)
+      .slice(-maxOciCreatedTimestampLookups);
+
+    await pMap(
+      releasesToCheck,
+      async (release) => {
+        const releaseTimestamp = await this.getOciCreatedReleaseTimestamp(
+          registryHost,
+          dockerRepository,
+          release.version,
+        );
+        if (releaseTimestamp) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+      },
+      { concurrency: 5 },
+    );
+
+    return releases;
+  }
+
   /**
    * docker.getReleases
    *
@@ -1138,6 +1198,7 @@ export class DockerDatasource extends Datasource {
    * This function will filter only tags that contain a semver version
    */
   private async _getReleases({
+    currentValue,
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -1155,7 +1216,17 @@ export class DockerDatasource extends Datasource {
       Result.wrapNullable(
         this.getTags(registryHost, dockerRepository),
         'tags-error' as const,
-      ).transform((tags) => tags.map((version) => ({ version })));
+      )
+        .transform((tags) => tags.map((version) => ({ version })))
+        .transform(async (releases) =>
+          currentValue
+            ? await this.addOciCreatedReleaseTimestamps(
+                registryHost,
+                dockerRepository,
+                releases,
+              )
+            : releases,
+        );
 
     const getDockerHubTags = (): TagsResultType =>
       Result.wrapNullable(
