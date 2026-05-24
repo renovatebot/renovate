@@ -11,7 +11,9 @@ import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   OpenTofuProviderDocsResponse,
+  OpenTofuProviderPackagesResponse,
   TerraformProviderV2Response,
+  TerraformProviderVersionsResponse,
 } from './schema.ts';
 import type {
   TerraformBuild,
@@ -336,6 +338,55 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         key: `getBuilds:${registryURL}/${repository}/${version}`,
       },
       () => this._getBuilds(registryURL, repository, version),
+    );
+  }
+
+  /**
+   * OpenTofu Registry exposes a `packages` field on the per-platform download
+   * endpoint that contains both `zh:` and `h1:` hashes for every platform of
+   * a version, removing the need to download and re-hash each zip locally.
+   * See https://github.com/opentofu/opentofu/pull/3434
+   */
+  private async _getProviderPackages(
+    repository: string,
+    version: string,
+  ): Promise<string[] | null> {
+    const baseUrl = joinUrlParts(
+      TerraformProviderDatasource.openTofuRegistryUrl,
+      'v1/providers',
+      repository,
+    );
+    const { body: versionsResponse } = await this.http.getJson(
+      `${baseUrl}/versions`,
+      TerraformProviderVersionsResponse,
+    );
+    const versionEntry = versionsResponse.versions.find(
+      (entry) => entry.version === version,
+    );
+    const platform = versionEntry?.platforms?.[0];
+    if (!platform) {
+      return null;
+    }
+    const { body: hashes } = await this.http.getJson(
+      `${baseUrl}/${version}/download/${platform.os}/${platform.arch}`,
+      OpenTofuProviderPackagesResponse,
+    );
+    if (!hashes?.length) {
+      return null;
+    }
+    return hashes;
+  }
+
+  getProviderPackages(
+    repository: string,
+    version: string,
+  ): Promise<string[] | null> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformProviderDatasource.id}`,
+        key: `getProviderPackages:${repository}/${version}`,
+      },
+      () => this._getProviderPackages(repository, version),
     );
   }
 

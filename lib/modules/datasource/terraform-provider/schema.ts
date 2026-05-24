@@ -66,3 +66,44 @@ export const OpenTofuProviderDocsResponse = z
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse
 >;
+
+const TerraformProviderPlatform = z.object({
+  os: z.string(),
+  arch: z.string(),
+});
+
+const TerraformProviderVersionEntry = z.object({
+  version: z.string(),
+  platforms: LooseArray(TerraformProviderPlatform).catch([]),
+});
+
+export const TerraformProviderVersionsResponse = z.object({
+  versions: LooseArray(TerraformProviderVersionEntry).catch([]),
+});
+
+export type TerraformProviderVersionsResponse = z.infer<
+  typeof TerraformProviderVersionsResponse
+>;
+
+const OpenTofuProviderPackage = z.object({
+  hashes: LooseArray(z.string()).catch([]),
+});
+
+export const OpenTofuProviderPackagesResponse = z
+  .object({
+    packages: z.record(z.string(), OpenTofuProviderPackage).optional(),
+  })
+  .transform(({ packages }): string[] | null => {
+    if (!packages) {
+      return null;
+    }
+    const hashes: string[] = [];
+    for (const pkg of Object.values(packages)) {
+      hashes.push(...pkg.hashes);
+    }
+    return hashes;
+  });
+
+export type OpenTofuProviderPackagesResponse = z.infer<
+  typeof OpenTofuProviderPackagesResponse
+>;
