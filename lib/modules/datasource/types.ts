@@ -1,6 +1,7 @@
 import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
+  DockerReleaseTimestampSource,
 } from '../../config/types.ts';
 import type { ModuleApi } from '../../types/index.ts';
 import type {
@@ -42,6 +43,7 @@ export interface GetReleasesConfig {
    */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   constraintsFiltering?: ConstraintsFilter;
+  dockerReleaseTimestampSource?: DockerReleaseTimestampSource;
 }
 
 export interface GetPkgReleasesConfig {
@@ -61,6 +63,7 @@ export interface GetPkgReleasesConfig {
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  dockerReleaseTimestampSource?: DockerReleaseTimestampSource;
   /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */

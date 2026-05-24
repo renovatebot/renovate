@@ -1603,6 +1603,20 @@ Presets which consist only of other presets have their own description omitted f
 
 Add to this object if you wish to define rules that apply only to PRs that update digests.
 
+## `dockerReleaseTimestampSource`
+
+This option controls whether Docker release timestamps may fall back to OCI image metadata when registry-controlled timestamps are unavailable.
+
+Supported values:
+
+- `registry`: Use only registry-controlled timestamps, such as Docker Hub's `tag_last_pushed`
+- `metadata`: For non-Docker-Hub registries, fall back to the OCI manifest `org.opencontainers.image.created` annotation, then the image config `created` field
+
+The `metadata` fallback is opt-in because OCI image metadata is controlled by the image publisher or build system, not the registry.
+Anyone who can publish an image can spoof these values, and reproducible-build tooling may rewrite them to deterministic values rather than publish times.
+
+Use `metadata` only when you accept this trade-off, for example with private registries, pull-through caches, or public OCI registries that do not expose a supported registry timestamp.
+
 ## `draftPR`
 
 If you want the PRs created by Renovate to be considered as drafts rather than normal PRs, you could add this property to your `renovate.json`:

@@ -77,7 +77,7 @@ const defaultConfig = {
 };
 
 const ociCreatedLabel = 'org.opencontainers.image.created';
-const maxOciCreatedTimestampLookups = 20;
+const maxMetadataTimestampLookups = 20;
 
 export class DockerDatasource extends Datasource {
   static readonly id = dockerDatasourceId;
@@ -90,7 +90,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'Docker Hub release timestamps are determined from the `tag_last_pushed` field in the results. Other OCI registries may use the `org.opencontainers.image.created` manifest annotation for the newest releases. **NOTE**: Currently, Docker Hub digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
+    'Docker Hub release timestamps are determined from the `tag_last_pushed` field in the results. Other registries only receive release timestamps from OCI image metadata if `dockerReleaseTimestampSource=metadata` is enabled. **NOTE**: Currently, Docker Hub digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -1130,7 +1130,7 @@ export class DockerDatasource extends Datasource {
     );
   }
 
-  private async getOciCreatedReleaseTimestamp(
+  private async getMetadataReleaseTimestamp(
     registryHost: string,
     dockerRepository: string,
     tag: string,
@@ -1141,21 +1141,36 @@ export class DockerDatasource extends Datasource {
         dockerRepository,
         tag,
       );
-      if (!manifest || !('annotations' in manifest)) {
+      if (!manifest) {
         return null;
       }
 
-      return asTimestamp(manifest.annotations?.[ociCreatedLabel]);
+      if ('annotations' in manifest) {
+        const annotationTimestamp = asTimestamp(
+          manifest.annotations?.[ociCreatedLabel],
+        );
+        if (annotationTimestamp) {
+          return annotationTimestamp;
+        }
+      }
+
+      const configResponse = await this.getImageConfig(
+        registryHost,
+        dockerRepository,
+        manifest.config.digest,
+      );
+
+      return asTimestamp(configResponse?.body.created);
     } catch (err) {
       logger.debug(
         { registryHost, dockerRepository, tag, err },
-        'Could not determine OCI created release timestamp',
+        'Could not determine Docker metadata release timestamp',
       );
       return null;
     }
   }
 
-  private async addOciCreatedReleaseTimestamps(
+  private async addMetadataReleaseTimestamps(
     registryHost: string,
     dockerRepository: string,
     releases: Release[],
@@ -1166,12 +1181,12 @@ export class DockerDatasource extends Datasource {
 
     const releasesToCheck = releases
       .filter((release) => !release.releaseTimestamp)
-      .slice(-maxOciCreatedTimestampLookups);
+      .slice(-maxMetadataTimestampLookups);
 
     await pMap(
       releasesToCheck,
       async (release) => {
-        const releaseTimestamp = await this.getOciCreatedReleaseTimestamp(
+        const releaseTimestamp = await this.getMetadataReleaseTimestamp(
           registryHost,
           dockerRepository,
           release.version,
@@ -1199,6 +1214,7 @@ export class DockerDatasource extends Datasource {
    */
   private async _getReleases({
     currentValue,
+    dockerReleaseTimestampSource,
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -1219,8 +1235,8 @@ export class DockerDatasource extends Datasource {
       )
         .transform((tags) => tags.map((version) => ({ version })))
         .transform(async (releases) =>
-          currentValue
-            ? await this.addOciCreatedReleaseTimestamps(
+          currentValue && dockerReleaseTimestampSource === 'metadata'
+            ? await this.addMetadataReleaseTimestamps(
                 registryHost,
                 dockerRepository,
                 releases,
