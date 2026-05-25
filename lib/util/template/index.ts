@@ -238,6 +238,8 @@ export const allowedFields = {
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',
   releaseTimestamp: 'The timestamp of the release',
+  renovateVersion:
+    'The currently running Renovate version. Only supported in the `user-agent` configuration option.',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
   sourceRepo: 'The repository in the sourceUrl, if present',

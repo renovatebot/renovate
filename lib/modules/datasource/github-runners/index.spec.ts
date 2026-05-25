@@ -14,9 +14,9 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '16.04', isDeprecated: true },
           { version: '18.04', isDeprecated: true },
           { version: '20.04', isDeprecated: true },
-          { version: '22.04-arm', isStable: false },
+          { version: '22.04-arm' },
           { version: '22.04' },
-          { version: '24.04-arm', isStable: false },
+          { version: '24.04-arm' },
           { version: '24.04' },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
@@ -59,6 +59,7 @@ describe('modules/datasource/github-runners/index', () => {
 
       expect(res).toMatchObject({
         releases: [
+          { version: '11-arm' },
           { version: '2016', isDeprecated: true },
           { version: '2019', isDeprecated: true },
           { version: '2022' },

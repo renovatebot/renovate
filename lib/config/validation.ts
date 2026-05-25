@@ -17,6 +17,7 @@ import {
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
+import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
@@ -1120,6 +1121,15 @@ async function validateGlobalConfig(
                 subKey,
               ),
             );
+
+            if (
+              !(packageCacheNamespaces as readonly string[]).includes(subKey)
+            ) {
+              errors.push({
+                message: `${currentPath}: namespace \`${subKey}\` does not exist`,
+                topic: 'Configuration Error',
+              });
+            }
           }
         } else {
           const res = validatePlainObject(val);
