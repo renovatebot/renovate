@@ -1,14 +1,17 @@
 import { exec } from './utils/exec.ts';
+import { getChangedFiles } from './utils/git.ts';
 import { block } from './utils/output.ts';
 
-try {
-  await exec('pnpm', ['lint-fix']);
-} catch {
-  block('pnpm lint-fix failed — the issues must be resolved before finishing');
-}
+const changedFiles = await getChangedFiles();
 
 try {
-  await exec('pnpm', ['test']);
+  if (changedFiles.length > 0) {
+    await exec('pnpm', ['check', '--all', ...changedFiles]);
+  } else {
+    await exec('pnpm', ['check', '--all']);
+  }
 } catch {
-  block('pnpm test failed — the issues must be resolved before finishing');
+  block(
+    'pnpm check --all failed — the issues must be resolved before finishing',
+  );
 }
