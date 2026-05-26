@@ -4,7 +4,6 @@
     "allow": [
       "Bash(pnpm oxlint:*)",
       "Bash(pnpm type-check:*)",
-      "Bash(pnpm jest:*)",
       "Bash(pnpm vitest:*)",
       "WebFetch(domain:docs.jsonata.org)"
     ]

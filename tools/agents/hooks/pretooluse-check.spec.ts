@@ -77,3 +77,42 @@ it('allows a command that contains npm as a substring but is not standalone', as
   await import('./pretooluse-check.ts');
   expect(deny).not.toHaveBeenCalled();
 });
+
+it('blocks pnpm jest', async () => {
+  readStdin.mockResolvedValue(makeInput('Bash', { command: 'pnpm jest' }));
+  await import('./pretooluse-check.ts');
+  expect(deny).toHaveBeenCalledOnce();
+  expect(deny).toHaveBeenCalledWith('Use pnpm vitest instead of pnpm jest');
+});
+
+it('blocks pnpm run jest with args', async () => {
+  readStdin.mockResolvedValue(
+    makeInput('Bash', { command: 'pnpm run jest lib/foo.spec.ts' }),
+  );
+  await import('./pretooluse-check.ts');
+  expect(deny).toHaveBeenCalledOnce();
+  expect(deny).toHaveBeenCalledWith('Use pnpm vitest instead of pnpm jest');
+});
+
+it('blocks pnpm exec jest', async () => {
+  readStdin.mockResolvedValue(makeInput('Bash', { command: 'pnpm exec jest' }));
+  await import('./pretooluse-check.ts');
+  expect(deny).toHaveBeenCalledOnce();
+  expect(deny).toHaveBeenCalledWith('Use pnpm vitest instead of pnpm jest');
+});
+
+it('allows pnpm vitest', async () => {
+  readStdin.mockResolvedValue(
+    makeInput('Bash', { command: 'pnpm vitest lib/foo.spec.ts' }),
+  );
+  await import('./pretooluse-check.ts');
+  expect(deny).not.toHaveBeenCalled();
+});
+
+it('allows command containing jest as substring but not standalone', async () => {
+  readStdin.mockResolvedValue(
+    makeInput('Bash', { command: 'cat package.json | jq .jestConfig' }),
+  );
+  await import('./pretooluse-check.ts');
+  expect(deny).not.toHaveBeenCalled();
+});

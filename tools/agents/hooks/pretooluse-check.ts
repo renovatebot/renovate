@@ -13,5 +13,8 @@ if (result.success) {
     if (/(?:^|\s)(?:npm|npx|yarn)(?:\s|$)/.test(command)) {
       deny('Use pnpm instead of npm/npx/yarn');
     }
+    if (/(?:^|\s)pnpm\s+(?:run\s+|exec\s+)?jest(?:\s|$)/.test(command)) {
+      deny('Use pnpm vitest instead of pnpm jest');
+    }
   }
 }
