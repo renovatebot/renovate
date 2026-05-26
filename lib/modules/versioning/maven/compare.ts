@@ -461,12 +461,14 @@ function rangeToStr(fullRange: Range[] | null): string | null {
 
 function tokensToStr(tokens: Token[]): string {
   return tokens.reduce((result: string, token: Token) => {
-    const prefix =
-      token.prefix === PREFIX_DOT
-        ? '.'
-        : token.prefix === PREFIX_HYPHEN
-          ? '-'
-          : token.prefix;
+    let prefix: string;
+    if (token.prefix === PREFIX_DOT) {
+      prefix = '.';
+    } else if (token.prefix === PREFIX_HYPHEN) {
+      prefix = '-';
+    } else {
+      prefix = token.prefix;
+    }
     return `${result}${prefix}${token.val}`;
   }, '');
 }
