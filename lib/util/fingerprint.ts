@@ -7,11 +7,7 @@ import { createHash, type Hash } from 'node:crypto';
 // This avoids `RangeError: Invalid string length` in monorepos where the
 // fingerprint input grows large (e.g. one PR carrying upgrades and advisory
 // notes across hundreds of manifest files exceeds V8's max string length).
-function fingerprintInto(
-  h: Hash,
-  value: unknown,
-  seen: WeakSet<object>,
-): void {
+function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
   if (value === null || typeof value !== 'object') {
     // JSON.stringify handles primitive escapes, numbers, booleans, and
     // returns undefined for functions/symbols/undefined (caller already
@@ -28,11 +24,11 @@ function fingerprintInto(
     return;
   }
 
-  if (seen.has(value as object)) {
+  if (seen.has(value)) {
     h.update('"[Circular]"');
     return;
   }
-  seen.add(value as object);
+  seen.add(value);
 
   if (Array.isArray(value)) {
     h.update('[');
@@ -40,7 +36,7 @@ function fingerprintInto(
       if (i > 0) {
         h.update(',');
       }
-      const item = value[i] as unknown;
+      const item: unknown = value[i];
       // safe-stable-stringify: undefined/function/symbol in arrays → null
       if (
         item === undefined ||
@@ -74,7 +70,7 @@ function fingerprintInto(
     }
     h.update('}');
   }
-  seen.delete(value as object);
+  seen.delete(value);
 }
 
 export function fingerprint(input: unknown): string {
