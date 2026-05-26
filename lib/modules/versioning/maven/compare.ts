@@ -558,12 +558,9 @@ function autoExtendMavenRange(
     // so this if handles the conceptually same case as the last if
     // just for the case when proper Maven ranges are used
     // [1,2-alpha) / 4.3.2 => [4,5-alpha)
-    /* v8 ignore next */
-    if (compare(newValue, leftValue) !== -1) {
-      interval.leftValue = coerceRangeValue(leftValue, newValue);
-      interval.rightValue =
-        incrementRangeValue(interval.leftValue) + ALPHA_SUFFIX;
-    }
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
+    interval.rightValue =
+      incrementRangeValue(interval.leftValue) + ALPHA_SUFFIX;
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
