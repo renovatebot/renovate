@@ -109,8 +109,8 @@ We recommend you use the `cron` syntax in your Renovate schedules.
 
 <!-- prettier-ignore -->
 !!! note
-    For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
-    And the cron schedule must have five parts.
+  For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
+  And the cron schedule must have five parts.
 
 #### Deprecated breejs/later syntax
 
@@ -133,8 +133,8 @@ The `@breejs/later` library also controls the interpretation of "days", time_bef
 
 <!-- prettier-ignore -->
 !!! warning
-    Renovate does _not_ support scheduled minutes or "at an exact time" granularity.
-    Granularity must be at least one hour.
+  Renovate does _not_ support scheduled minutes or "at an exact time" granularity.
+  Granularity must be at least one hour.
 
 ### In-repository schedule configuration
 

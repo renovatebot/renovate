@@ -72,6 +72,6 @@ With this in mind, when Renovate releases a major version, we store an archive o
 
 <!-- prettier-ignore -->
 !!! note
-    Previous major versions are only available since Renovate 39 (2025-04-29).
+  Previous major versions are only available since Renovate 39 (2025-04-29).
 
 For instance, if you are running Renovate 41, you will be able to use i.e. [`www.schemastore.org/renovate-41.json`](https://www.schemastore.org/renovate-41.json) for your JSON Schema.

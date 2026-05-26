@@ -64,20 +64,18 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 <!-- prettier-ignore -->
 !!! warning
-    Renovate 42 changed the behaviour detailed below.
-    In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
-    Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
-    If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
+  Renovate 42 changed the behaviour detailed below.
+  In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
+  Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
+  If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
 
 Consider that:
 
-<!-- markdownlint-disable MD007 -->
-<!-- prettier-ignore -->
 - we have set `minimumReleaseAge` to apply to a given dependency
 - that dependency has 4 updates available
-    - 1 of which has a release timestamp that has passed
-    - 2 of which have a release timestamp that has _not_ yet passed
-    - 1 of which does not have a release timestamp
+  - 1 of which has a release timestamp that has passed
+  - 2 of which have a release timestamp that has _not_ yet passed
+  - 1 of which does not have a release timestamp
 
 Renovate will create a PR for the 1 dependency update that has passed the release timestamp, and the others will be marked as "Pending Status Checks" on the Dependency Dashboard.
 As time goes on, if the 2 updates with a release timestamp are now passed the minimum release age, Renovate will add them to the PR (or create a new one).
@@ -110,7 +108,7 @@ You can force the dependency update by requesting it via the Dependency Dashboar
 
 <!-- prettier-ignore -->
 !!! note
-    A previous version of the documentation (up until Renovate 42.19.9) recommended configuring [`prCreation`](../configuration-options.md#prcreation). This is no longer the case.
+  A previous version of the documentation (up until Renovate 42.19.9) recommended configuring [`prCreation`](../configuration-options.md#prcreation). This is no longer the case.
 
 If no branch is created, Renovate will not raise a PR, regardless of [`prCreation`](../configuration-options.md#prcreation)'s settings.
 
@@ -148,7 +146,7 @@ Security updates bypass any `minimumReleaseAge` checks, and so will be raised as
 
 <!-- prettier-ignore -->
 !!! note
-    This is based on the [recommended settings above](#recommended-settings)
+  This is based on the [recommended settings above](#recommended-settings)
 
 Renovate waits for the set duration to pass for each **separate** version.
 
@@ -192,13 +190,13 @@ To opt out a dependency from minimum release age checks, create a package rule w
 
 <!-- prettier-ignore -->
 !!! note
-    As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
+  As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
 
 ### Which datasources support release timestamps?
 
 <!-- prettier-ignore -->
 !!! tip
-    You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](../modules/datasource/index.md).
+  You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](../modules/datasource/index.md).
 
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
 Some datasources may have a release timestamp, but in a format Renovate does not support.

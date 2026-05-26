@@ -111,7 +111,7 @@ Separately, there are also opportunities for malicious external code to execute,
 
 <!-- prettier-ignore -->
 !!! warning
-    Below are _some_ of the options, but note that this is **not exhaustive**.
+  Below are _some_ of the options, but note that this is **not exhaustive**.
 
 For instance:
 

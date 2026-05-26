@@ -55,7 +55,7 @@ This benefits when upgrading versions as well as when rolling back in case of pr
 
 <!-- prettier-ignore -->
 !!! note
-    We'll cover lock files later, don't worry.
+  We'll cover lock files later, don't worry.
 
 ### Upgrading pinned versions
 

@@ -35,7 +35,7 @@ In the example above, Renovate follows the rules from the `config:recommended` p
 
 <!-- prettier-ignore -->
 !!! tip
-    If there is a logical conflict between presets, then the _last_ preset in the `"extends"` array "wins".
+  If there is a logical conflict between presets, then the _last_ preset in the `"extends"` array "wins".
 
 ## Managing config for many repositories
 

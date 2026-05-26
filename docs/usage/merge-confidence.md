@@ -53,7 +53,7 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 
 <!-- prettier-ignore -->
 !!! note
-    The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
+  The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
 
 If you want to disable the badges in the Mend Renovate App, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
 
