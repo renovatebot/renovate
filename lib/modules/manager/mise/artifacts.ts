@@ -1,5 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
@@ -49,6 +50,7 @@ export async function updateArtifacts({
   if (env) {
     extraEnv.MISE_ENV = env;
   }
+  extraEnv.MISE_TRUSTED_CONFIG_PATHS = GlobalConfig.get('localDir');
   const token = findGithubToken(
     hostRules.find({
       hostType: 'github',

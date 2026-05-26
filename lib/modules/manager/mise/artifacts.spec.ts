@@ -235,6 +235,37 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('injects trusted config paths for mise', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('new content');
+    fs.writeLocalFile.mockResolvedValueOnce();
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['mise.lock'],
+      }),
+    );
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: updateToolCmd,
+        options: {
+          env: expect.objectContaining({
+            MISE_TRUSTED_CONFIG_PATHS: adminConfig.localDir,
+          }),
+        },
+      },
+    ]);
+  });
+
   it('handles empty updatedDeps with fallback to full lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce('existing content');
     fs.writeLocalFile.mockResolvedValueOnce();
