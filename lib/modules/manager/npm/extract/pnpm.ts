@@ -166,7 +166,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     // main lockfile is always the last document.
     // https://pnpm.io/config-dependencies.
     const parsedDocs = parseYaml(pnpmLockRaw);
-    const lockParsed = parsedDocs[parsedDocs.length - 1];
+    const lockParsed = parsedDocs.at(-1);
     if (!isPnpmLockfile(lockParsed)) {
       throw new Error('Invalid or empty lockfile');
     }
