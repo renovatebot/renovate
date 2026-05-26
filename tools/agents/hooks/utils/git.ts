@@ -1,32 +1,34 @@
-import { exec } from './exec.ts';
+import { type SimpleGit, type SimpleGitOptions, simpleGit } from 'simple-git';
 
-/**
- * Resolves the base ref to diff against.
- * Tries merge-base with origin/main first, then falls back to the upstream
- * tracking branch, and finally to HEAD.
- */
+const config: Partial<SimpleGitOptions> = {
+  completion: { onClose: true, onExit: false },
+  config: ['core.quotePath=false'],
+};
+
+const git: SimpleGit = simpleGit(config).env({
+  ...process.env,
+  LANG: 'C.UTF-8',
+  LC_ALL: 'C.UTF-8',
+});
+
 async function getBaseRef(): Promise<string> {
   try {
-    const { stdout } = await exec(
-      'git',
-      ['merge-base', 'origin/main', 'HEAD'],
-      { stdout: 'pipe' },
-    );
-    if (stdout.trim()) {
-      return stdout.trim();
+    const out = await git.raw(['merge-base', 'origin/main', 'HEAD']);
+    if (out.trim()) {
+      return out.trim();
     }
   } catch {
     // origin/main not available
   }
 
   try {
-    const { stdout } = await exec(
-      'git',
-      ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'],
-      { stdout: 'pipe' },
-    );
-    if (stdout.trim()) {
-      return stdout.trim();
+    const out = await git.revparse([
+      '--abbrev-ref',
+      '--symbolic-full-name',
+      '@{u}',
+    ]);
+    if (out.trim()) {
+      return out.trim();
     }
   } catch {
     // No upstream configured
@@ -35,19 +37,10 @@ async function getBaseRef(): Promise<string> {
   return 'HEAD';
 }
 
-/**
- * Returns the list of files changed relative to the branch the current one
- * originated from, falling back to HEAD (uncommitted changes) if a parent cannot be found.
- */
 export async function getChangedFiles(): Promise<string[]> {
   const baseRef = await getBaseRef();
-
-  const { stdout: diffOut } = await exec(
-    'git',
-    ['diff', '--name-only', '--diff-filter=ACMR', baseRef],
-    { stdout: 'pipe' },
-  );
-  return diffOut
+  const out = await git.diff(['--name-only', '--diff-filter=ACMR', baseRef]);
+  return out
     .trim()
     .split('\n')
     .filter((f) => f.length > 0);

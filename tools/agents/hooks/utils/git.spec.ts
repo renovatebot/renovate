@@ -1,78 +1,85 @@
 import { getChangedFiles } from './git.ts';
 
-const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
-vi.mock('./exec.ts', () => ({ exec }));
+const mockGit = vi.hoisted(() => {
+  const obj = {
+    raw: vi.fn(),
+    revparse: vi.fn(),
+    diff: vi.fn(),
+    env: vi.fn(),
+  };
+  obj.env.mockReturnValue(obj);
+  return obj;
+});
+
+vi.mock('simple-git', () => ({
+  simpleGit: vi.fn(() => mockGit),
+}));
 
 beforeEach(() => {
-  exec.mockReset();
+  mockGit.raw.mockReset();
+  mockGit.revparse.mockReset();
+  mockGit.diff.mockReset();
+  mockGit.env.mockReset();
+  mockGit.env.mockReturnValue(mockGit);
 });
 
 it('returns changed files using merge-base with origin/main', async () => {
-  exec
-    .mockResolvedValueOnce({ stdout: 'abc1234\n' })
-    .mockResolvedValueOnce({ stdout: 'lib/foo.ts\nlib/bar.ts\n' });
+  mockGit.raw.mockResolvedValueOnce('abc1234\n');
+  mockGit.diff.mockResolvedValueOnce('lib/foo.ts\nlib/bar.ts\n');
 
   const result = await getChangedFiles();
 
-  expect(exec).toHaveBeenNthCalledWith(
-    1,
-    'git',
-    ['merge-base', 'origin/main', 'HEAD'],
-    { stdout: 'pipe' },
-  );
-  expect(exec).toHaveBeenNthCalledWith(
-    2,
-    'git',
-    ['diff', '--name-only', '--diff-filter=ACMR', 'abc1234'],
-    { stdout: 'pipe' },
-  );
+  expect(mockGit.raw).toHaveBeenCalledWith([
+    'merge-base',
+    'origin/main',
+    'HEAD',
+  ]);
+  expect(mockGit.diff).toHaveBeenCalledWith([
+    '--name-only',
+    '--diff-filter=ACMR',
+    'abc1234',
+  ]);
   expect(result).toEqual(['lib/foo.ts', 'lib/bar.ts']);
 });
 
 it('falls back to upstream tracking branch when origin/main is not available', async () => {
-  exec
-    .mockRejectedValueOnce(new Error('no origin/main'))
-    .mockResolvedValueOnce({ stdout: 'upstream/feature\n' })
-    .mockResolvedValueOnce({ stdout: 'lib/foo.ts\n' });
+  mockGit.raw.mockRejectedValueOnce(new Error('no origin/main'));
+  mockGit.revparse.mockResolvedValueOnce('upstream/feature\n');
+  mockGit.diff.mockResolvedValueOnce('lib/foo.ts\n');
 
   const result = await getChangedFiles();
 
-  expect(exec).toHaveBeenNthCalledWith(
-    2,
-    'git',
-    ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'],
-    { stdout: 'pipe' },
-  );
-  expect(exec).toHaveBeenNthCalledWith(
-    3,
-    'git',
-    ['diff', '--name-only', '--diff-filter=ACMR', 'upstream/feature'],
-    { stdout: 'pipe' },
-  );
+  expect(mockGit.revparse).toHaveBeenCalledWith([
+    '--abbrev-ref',
+    '--symbolic-full-name',
+    '@{u}',
+  ]);
+  expect(mockGit.diff).toHaveBeenCalledWith([
+    '--name-only',
+    '--diff-filter=ACMR',
+    'upstream/feature',
+  ]);
   expect(result).toEqual(['lib/foo.ts']);
 });
 
 it('falls back to HEAD when neither origin/main nor upstream is available', async () => {
-  exec
-    .mockRejectedValueOnce(new Error('no origin/main'))
-    .mockRejectedValueOnce(new Error('no upstream'))
-    .mockResolvedValueOnce({ stdout: 'lib/foo.ts\n' });
+  mockGit.raw.mockRejectedValueOnce(new Error('no origin/main'));
+  mockGit.revparse.mockRejectedValueOnce(new Error('no upstream'));
+  mockGit.diff.mockResolvedValueOnce('lib/foo.ts\n');
 
   const result = await getChangedFiles();
 
-  expect(exec).toHaveBeenNthCalledWith(
-    3,
-    'git',
-    ['diff', '--name-only', '--diff-filter=ACMR', 'HEAD'],
-    { stdout: 'pipe' },
-  );
+  expect(mockGit.diff).toHaveBeenCalledWith([
+    '--name-only',
+    '--diff-filter=ACMR',
+    'HEAD',
+  ]);
   expect(result).toEqual(['lib/foo.ts']);
 });
 
 it('returns empty array when no files changed', async () => {
-  exec
-    .mockResolvedValueOnce({ stdout: 'abc1234\n' })
-    .mockResolvedValueOnce({ stdout: '' });
+  mockGit.raw.mockResolvedValueOnce('abc1234\n');
+  mockGit.diff.mockResolvedValueOnce('');
 
   const result = await getChangedFiles();
 
