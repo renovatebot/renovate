@@ -1,14 +1,35 @@
-import { createHash, type Hash } from 'node:crypto';
+import { type Hash, createHash } from 'node:crypto';
 
-// Walks `value` and emits deterministic JSON chunks directly into `h`,
+// Returns true when `value` would appear in the canonical JSON produced by
+// `safe-stable-stringify`. We pre-check before emitting because objects must
+// drop keys whose value resolves to nothing (incl. via toJSON → undefined),
+// and incremental hashing can't roll back already-emitted bytes.
+function isEmittable(value: unknown): boolean {
+  if (
+    value === undefined ||
+    typeof value === 'function' ||
+    typeof value === 'symbol'
+  ) {
+    return false;
+  }
+  if (value === null || typeof value !== 'object') {
+    return true;
+  }
+  const obj = value as { toJSON?: () => unknown };
+  if (typeof obj.toJSON === 'function') {
+    return isEmittable(obj.toJSON());
+  }
+  return true;
+}
+
+// Walks `value` and emits canonical JSON chunks directly into `h`,
 // matching `safe-stable-stringify` (deterministic mode) byte-for-byte
 // without materializing the full string. Required to avoid V8's max
 // string length when the input is large (e.g. a PR carrying upgrades
 // across hundreds of manifest files).
 function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
   if (value === null || typeof value !== 'object') {
-    const s = JSON.stringify(value);
-    h.update(s ?? 'null');
+    h.update(JSON.stringify(value)!);
     return;
   }
 
@@ -31,14 +52,10 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
         h.update(',');
       }
       const item: unknown = value[i];
-      if (
-        item === undefined ||
-        typeof item === 'function' ||
-        typeof item === 'symbol'
-      ) {
-        h.update('null');
-      } else {
+      if (isEmittable(item)) {
         fingerprintInto(h, item, seen);
+      } else {
+        h.update('null');
       }
     }
     h.update(']');
@@ -49,7 +66,7 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
     let first = true;
     for (const k of keys) {
       const v = entries[k];
-      if (v === undefined || typeof v === 'function' || typeof v === 'symbol') {
+      if (!isEmittable(v)) {
         continue;
       }
       if (!first) {
@@ -66,13 +83,7 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
 }
 
 export function fingerprint(input: unknown): string {
-  // Preserve the prior `safeStringify(input) ? ... : ''` short-circuit:
-  // root undefined/function/symbol returns an empty fingerprint.
-  if (
-    input === undefined ||
-    typeof input === 'function' ||
-    typeof input === 'symbol'
-  ) {
+  if (!isEmittable(input)) {
     return '';
   }
   const h = createHash('sha512');
