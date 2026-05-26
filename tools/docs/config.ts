@@ -219,9 +219,9 @@ function genExperimentalMsg(el: Record<string, any>): string {
     '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
 
   if (el.experimentalDescription) {
-    warning += indent`${2}${el.experimentalDescription}`;
+    warning += indent`${1}${el.experimentalDescription}`;
   } else {
-    warning += indent`${2}Experimental features might be changed or even removed at any time.`;
+    warning += indent`${1}Experimental features might be changed or even removed at any time.`;
   }
 
   const issues = el.experimentalIssues ?? [];
@@ -238,7 +238,7 @@ function genExperimentalMsg(el: Record<string, any>): string {
 }
 
 function genTemplatingMsg(): string {
-  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${2}See [templates](./templates.md) for available variables and helpers.`}\n`;
+  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${1}See [templates](templates.md) for available variables and helpers.`}\n`;
 }
 
 function genDeprecationMsg(el: Record<string, any>): string {
@@ -246,7 +246,7 @@ function genDeprecationMsg(el: Record<string, any>): string {
     '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
 
   if (el.deprecationMsg) {
-    warning += indent`${2}${el.deprecationMsg}`;
+    warning += indent`${1}${el.deprecationMsg}`;
   }
 
   return `${warning}\n`;
@@ -497,6 +497,6 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 function generateAdvancedUse(): string {
   return (
     '\n<!-- prettier-ignore -->\n!!! warning\n' +
-    '    For advanced use only! Use at your own risk!\n'
+    '  For advanced use only! Use at your own risk!\n'
   );
 }
