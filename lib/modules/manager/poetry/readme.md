@@ -2,7 +2,6 @@ Poetry 0.x, 1.x and 2.x versions are supported.
 
 Whenever the `pyproject.toml` file is updated, the Poetry lock file will be checked for updates as well.
 
-<!-- prettier-ignore -->
 !!! warning
   Updating locked versions of Poetry dependencies is at times unreliable.
   We recommended that you pin dependency versions in your `pyproject.toml` instead.

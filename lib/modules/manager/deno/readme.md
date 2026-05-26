@@ -15,11 +15,9 @@ Additionally, an [import map](https://developer.mozilla.org/en-US/docs/Web/HTML/
 
 The deno manager also supports some `depTypes` that supported by [npm manager](../npm/index.md).
 
-<!-- prettier-ignore -->
 !!! note
   Deno cli supports [private npm compatible registries](https://docs.deno.com/runtime/fundamentals/node/#private-registries) itself, however the deno managaer is not yet ready to support [Private npm module](../../../getting-started/private-packages.md#npm).
 
-<!-- prettier-ignore -->
 !!! note
   In source dependencies are not supported.
 

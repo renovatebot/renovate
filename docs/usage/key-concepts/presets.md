@@ -33,7 +33,6 @@ Then you add the preset to the `"extends"` array in your Renovate configuration 
 
 In the example above, Renovate follows the rules from the `config:recommended` preset, plus the rules for `helpers:pinGitHubActionDigests`.
 
-<!-- prettier-ignore -->
 !!! tip
   If there is a logical conflict between presets, then the _last_ preset in the `"extends"` array "wins".
 

@@ -48,7 +48,6 @@ RUN apk add --no-cache \
 
 When the operating system package for `gcc` of `Alpine Linux 3.12` is updated, Renovate updates the environment variable.
 
-<!-- prettier-ignore -->
 !!! tip
   We recommend you try `loose` or `deb` versioning for distribution packages first.
   This is because the version number usually doesn't match Renovate's default `semver-coerced` specification.

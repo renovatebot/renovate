@@ -44,7 +44,6 @@ This offering provides increased resources and concurrency, as well as access to
 
 Projects licensed under an Open Source Initiative (OSI) approved license can request increased resources on Mend Renovate Cloud under the Community (OSS) plan.
 
-<!-- prettier-ignore -->
 !!! tip
   To request increased resources, create a [Mend Hosted Request](https://github.com/renovatebot/renovate/discussions/new?category=mend-hosted-request) on the Renovate GitHub Discussions board.
   <br>

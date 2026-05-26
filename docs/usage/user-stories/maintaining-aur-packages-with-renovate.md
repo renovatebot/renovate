@@ -13,7 +13,6 @@ title: Maintaining AUR packages with Renovate
 
 > This article was written by [Jamie Magee](https://github.com/JamieMagee) and originally published on [Jamie Magee's blog](https://jamiemagee.co.uk/blog/maintaining-aur-packages-with-renovate/).
 
-<!-- prettier-ignore -->
 !!! note
   Jamie Magee helps to maintain Renovate.
   They obviously like Renovate, and want you to use it.

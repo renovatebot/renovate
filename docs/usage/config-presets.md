@@ -10,7 +10,6 @@ Read the [Key concepts, presets](./key-concepts/presets.md) page to learn more a
 
 Shareable config presets must use the JSON or JSON5 formats, other formats are not supported.
 
-<!-- prettier-ignore -->
 !!! tip
   Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
 
@@ -25,7 +24,6 @@ Presets should be hosted in repositories, which usually means the same platform 
 
 Alternatively, Renovate can fetch preset files from an HTTP server.
 
-<!-- prettier-ignore -->
 !!! warning
   We deprecated npm-based presets.
   We plan to drop the npm-based presets feature in a future major release of Renovate.
@@ -38,7 +36,6 @@ Presets are repo-hosted, and you can have one or more presets hosted per reposit
 If you omit a file name from your preset (e.g. `github>abc/foo`) then Renovate will look for a `default.json` file in the repo.
 If you wish to have an alternative file name, you need to specify it (e.g. `github>abc/foo//alternative-name.json5`).
 
-<!-- prettier-ignore -->
 !!! warning
   We've deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
   If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
@@ -105,7 +102,6 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Local with preset name and path with a tag | `local>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
 | Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
-<!-- prettier-ignore -->
 !!! tip
   You can't combine the path and sub-preset syntaxes.
   This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
@@ -119,7 +115,6 @@ It simply sets the configuration option `rangeStrategy` to `replace`.
 An example of a full config is `config:recommended`, which is Renovate's default configuration.
 It mostly uses Renovate config defaults but adds a few smart customizations such as grouping monorepo packages together.
 
-<!-- prettier-ignore -->
 !!! note
   The `:xyz` naming convention (with `:` prefix) is shorthand for the `default:` presets.
   For example: `:xyz` is the same as `default:xyz`.
@@ -264,7 +259,6 @@ Parameters are supported similar to other methods:
 You can use [Handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.
 This can be handy when you want to include presets conditionally.
 
-<!-- prettier-ignore -->
 !!! note
   The template only supports a small subset of options, but you can extend them via `customEnvVariables`.
 
@@ -321,7 +315,6 @@ For example the result may be:
 
 ## npm-hosted presets
 
-<!-- prettier-ignore -->
 !!! warning
   Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
 

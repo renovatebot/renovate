@@ -1,6 +1,5 @@
 This datasource allows to lookup git tags from a [Gitea](https://about.gitea.com/) repositories.
 
-<!-- prettier-ignore -->
 !!! note
   Use [`forgejo-tags`](../forgejo-tags/index.md) as the datasource if you are using [Forgejo](https://forgejo.org).
   Forgejo support will be removed from `gitea-tags` datasource in a future release.

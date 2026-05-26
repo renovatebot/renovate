@@ -30,7 +30,6 @@ You must set `platform=gerrit` in your Renovate config file.
 If you use the "Code-Review" label and want to get `automerge` working then you must set `autoApprove=true` in your Renovate config.
 Renovate will now add the _Code-Review_ label with the value "+2" to each of its "pull requests" (Gerrit-Change).
 
-<!-- prettier-ignore -->
 !!! note
   The bot's user account must have permission to give +2 for the Code-Review label.
 

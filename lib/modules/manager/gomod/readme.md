@@ -57,7 +57,6 @@ We can then configure Renovate to set the same constraint when updating any Go d
 
 In this case, Renovate would only propose an update to a version of `golang.org/x/mod` that supports Go 1.24.x.
 
-<!-- prettier-ignore -->
 !!! note
   It is recommended to read the [`constraintsFiltering`](../../../configuration-options.md#constraintsfiltering) documentation and [Language constraints and upgrading](../../../language-constraints-and-upgrading.md) for more information about how the filtering works and how _strict_ this can be.
 

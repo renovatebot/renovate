@@ -70,7 +70,6 @@ If you're using a previous major version of Renovate, there will likely be many 
 
 With this in mind, when Renovate releases a major version, we store an archive of the JSON Schema for the previous major version [in Schema Store](https://www.schemastore.org/).
 
-<!-- prettier-ignore -->
 !!! note
   Previous major versions are only available since Renovate 39 (2025-04-29).
 
