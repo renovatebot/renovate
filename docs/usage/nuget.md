@@ -65,7 +65,7 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
 
 <!-- prettier-ignore -->
 !!! note
-    Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
+  Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
 
 ### Protocol versions
 
@@ -129,10 +129,10 @@ If you use Azure DevOps:
 
 <!-- prettier-ignore -->
 !!! note
-    Only Basic HTTP authentication (via username and password) is supported.
-    For Azure DevOps: use a PAT with `read` permissions on `Packaging`.
-    The username of the PAT must match the username of the _user of the PAT_.
-    The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
+  Only Basic HTTP authentication (via username and password) is supported.
+  For Azure DevOps: use a PAT with `read` permissions on `Packaging`.
+  The username of the PAT must match the username of the _user of the PAT_.
+  The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
 
 ## Ignoring package files when using presets
 

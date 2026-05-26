@@ -9,7 +9,10 @@ import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { TerraformProviderV2Response } from './schema.ts';
+import {
+  OpenTofuProviderDocsResponse,
+  TerraformProviderV2Response,
+} from './schema.ts';
 import type {
   TerraformBuild,
   TerraformProviderReleaseBackend,
@@ -44,10 +47,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `published-at` field in the Terraform Registry v2 API response and is only available for `https://registry.terraform.io`.';
+    'The release timestamp is only available for `registry.terraform.io` (v2 API) and `registry.opentofu.org` (via `api.opentofu.org`). Other registries using the Provider Registry Protocol do not provide timestamps.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source URL is determined from the the `source` field in the results.';
+    'For `registry.terraform.io`, the source URL is taken from the `source` field of the v2 API response. For `registry.opentofu.org`, it is derived from the package name following the OpenTofu registry policy of `github.com/NAMESPACE/terraform-provider-NAME`.';
 
   private async _getReleases({
     packageName,
@@ -63,6 +66,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
     if (registryUrl === TerraformProviderDatasource.terraformRegistryUrl) {
       return await this.queryTerraformRegistryV2(registryUrl, packageName);
+    }
+    if (
+      registryUrl === TerraformProviderDatasource.openTofuRegistryUrl ||
+      registryUrl === TerraformProviderDatasource.openTofuApiUrl
+    ) {
+      return await this.queryOpenTofuRegistry(packageName);
     }
     if (registryUrl === TerraformProviderDatasource.hashicorpReleaseUrl) {
       return await this.queryReleaseBackend(packageName, registryUrl);
@@ -112,6 +121,41 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       TerraformProviderV2Response,
     );
     res.homepage = `${registryUrl}/providers/${repository}`;
+    return res;
+  }
+
+  /**
+   * Query the OpenTofu registry docs API.
+   * https://api.opentofu.org/
+   *
+   * Used when the registry URL is `registry.opentofu.org`.
+   * Queries `api.opentofu.org` for provider versions with release timestamps.
+   */
+  private async queryOpenTofuRegistry(
+    packageName: string,
+  ): Promise<ReleaseResult> {
+    const repository = TerraformProviderDatasource.getRepository({
+      packageName,
+    });
+    const docsUrl = joinUrlParts(
+      TerraformProviderDatasource.openTofuApiUrl,
+      'registry/docs/providers',
+      repository,
+      'index.json',
+    );
+    const { body: res } = await this.http.getJson(
+      docsUrl,
+      OpenTofuProviderDocsResponse,
+    );
+    res.homepage = `https://search.opentofu.org/provider/${repository}`;
+
+    // The OpenTofu registry only indexes providers hosted on GitHub under the
+    // `NAMESPACE/terraform-provider-NAME` repository naming convention, so the
+    // source URL can be derived deterministically from the package name.
+    // https://github.com/opentofu/registry/blob/main/PROCEDURES.md
+    const [namespace, name] = repository.split('/');
+    res.sourceUrl = `https://github.com/${namespace}/terraform-provider-${name}`;
+
     return res;
   }
 

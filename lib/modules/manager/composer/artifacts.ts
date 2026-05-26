@@ -169,8 +169,7 @@ export async function updateArtifacts({
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(lockfile)) {
       const preCmd = 'composer';
-      const preArgs =
-        'install' + getComposerArguments(config, composerToolConstraint);
+      const preArgs = `install${getComposerArguments(config, composerToolConstraint)}`;
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);

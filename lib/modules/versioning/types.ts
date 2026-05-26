@@ -12,7 +12,7 @@ export interface NewValueConfig {
    *
    * Allows Versioning modules to determine whether the version they're proposing matches a known version.
    */
-  allVersions?: string[];
+  allVersions?: Set<string>;
 }
 export interface VersioningApi {
   // validation

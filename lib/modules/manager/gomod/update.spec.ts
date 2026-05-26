@@ -370,6 +370,36 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toEqual(gomod2);
     });
 
+    it('updates pseudo-version with digest updateType', () => {
+      const fileContent = codeBlock`
+        module example.com/test
+        require (
+          knative.dev/pkg v0.0.0-20250312035536-b7bbf4be5dbd
+          k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
+        )
+      `;
+      const upgrade = {
+        depName: 'knative.dev/pkg',
+        managerData: { lineNumber: 2, multiLine: true },
+        updateType: 'digest' as const,
+        currentValue: 'v0.0.0-20250312035536-b7bbf4be5dbd',
+        currentDigest: 'b7bbf4be5dbd',
+        newValue: 'v0.0.0-20260120122510-4a022ed9999a',
+        newDigest: '4a022ed9999a',
+        depType: 'require',
+      };
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade,
+      });
+      // Should write the full pseudo-version, not just the digest
+      expect(res).toContain(
+        'knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a',
+      );
+      expect(res).not.toContain('knative.dev/pkg 4a022ed9999a');
+    });
+
     it('handles multiline mismatch', () => {
       const upgrade = {
         depName: 'github.com/fatih/color',

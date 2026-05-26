@@ -8,7 +8,6 @@ import type { AllConfig } from '../../../../config/types.ts';
 import { mergeChildConfig } from '../../../../config/utils.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger, setContext } from '../../../../logger/index.ts';
-import { detectAllGlobalConfig } from '../../../../modules/manager/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { setCustomEnv } from '../../../../util/env.ts';
 import { readSystemFile } from '../../../../util/fs/index.ts';
@@ -19,7 +18,6 @@ import * as cliParser from './cli.ts';
 import * as codespaces from './codespaces.ts';
 import * as envParser from './env.ts';
 import * as fileParser from './file.ts';
-import { hostRulesFromEnv } from './host-rules-from-env.ts';
 
 export async function resolveGlobalExtends(
   globalExtends: string[],
@@ -158,12 +156,15 @@ export async function parseConfigs(
 
   if (config.detectGlobalManagerConfig) {
     logger.debug('Detecting global manager config');
+    const { detectAllGlobalConfig } =
+      await import('../../../../modules/manager/index.ts');
     const globalManagerConfig = await detectAllGlobalConfig();
     logger.debug({ config: globalManagerConfig }, 'Global manager config');
     config = mergeChildConfig(config, globalManagerConfig);
   }
 
   if (config.detectHostRulesFromEnv) {
+    const { hostRulesFromEnv } = await import('./host-rules-from-env.ts');
     const hostRules = hostRulesFromEnv(env);
     config.hostRules = [...coerceArray(config.hostRules), ...hostRules];
   }

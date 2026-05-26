@@ -127,17 +127,14 @@ export async function postUpgradeCommandsExecutor(
           );
         }
         if (
-          allowedCommands!.some((pattern) => regEx(pattern).test(compiledCmd))
+          allowedCommands.some((pattern) => regEx(pattern).test(compiledCmd))
         ) {
           try {
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              // WARNING to self-hosted administrators: always run post-upgrade commands with `shell` mode on, which has the risk of arbitrary environment variable access or additional command execution
-              // It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`), as there may be special characters included in the given commands that can be leveraged here
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
-                false,
               ),
 
               cwd: workingDir,

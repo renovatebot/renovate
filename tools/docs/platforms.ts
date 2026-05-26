@@ -33,9 +33,10 @@ export async function generatePlatforms(
       md += '\n\n';
 
       md += lines.slice(1).join('\n');
+    } else {
+      md += contents;
     }
 
-    md += contents;
     md += generateFeatureAndBugMarkdown(platformIssuesMap, id);
 
     await updateFile(`${dist}/modules/platform/${id}/index.md`, md);

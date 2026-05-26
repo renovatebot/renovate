@@ -135,9 +135,9 @@ The steps to enable GitHub's Merge Queue differ based on whether you use GitHub 
 
 <!-- prettier-ignore -->
 !!! tip "GitHub Merge Queue overview page"
-    GitHub has a page that shows all the PRs in the Merge Queue.
-    The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
-    For example, here's [Renovate's main repository's Merge Queue overview](https://github.com/renovatebot/renovate/queue/main).
+  GitHub has a page that shows all the PRs in the Merge Queue.
+  The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
+  For example, here's [Renovate's main repository's Merge Queue overview](https://github.com/renovatebot/renovate/queue/main).
 
 #### If you use GitHub Actions
 
@@ -234,7 +234,7 @@ If you have no tests but still want Renovate to automerge, you need to add `"ign
 
 <!-- prettier-ignore -->
 !!! tip
-    We strongly recommend you have tests in any project where you are regularly updating dependencies.
+  We strongly recommend you have tests in any project where you are regularly updating dependencies.
 
 ### Committer restrictions
 
