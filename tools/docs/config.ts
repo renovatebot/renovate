@@ -16,6 +16,7 @@ import {
   toolDefinitions,
   toolNames,
 } from '../../lib/util/exec/types.ts';
+import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
@@ -311,7 +312,7 @@ function generateCacheNamespacesList(): string {
 
 function generateStatusCheckWhenTable(): string {
   const option = options.find((o) => o.name === 'statusCheckWhen');
-  const defaults = (option?.default ?? {}) as Record<string, string>;
+  const defaults = coerceObject<Record<string, string>>(option?.default);
 
   const reasoning: Record<string, string> = {
     artifactError: 'Legacy behavior — only reports artifact failures',
@@ -512,10 +513,11 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   }
 
   if (!bot) {
-    content = replaceContent(content, generateStatusCheckWhenTable(), {
-      replaceStart: '<!-- status-check-when-defaults-begin -->',
-      replaceStop: '<!-- status-check-when-defaults-end -->',
-    });
+    content = replaceContent(
+      content,
+      generateStatusCheckWhenTable(),
+      '<!-- status-check-when-defaults-begin -->',
+    );
   }
 
   await updateFile(`${dist}/${configFile}`, content);

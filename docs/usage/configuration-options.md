@@ -4834,15 +4834,6 @@ Default values:
 
 <!-- status-check-when-defaults-begin -->
 
-| Key                 | Default  | Reasoning                                        |
-| ------------------- | -------- | ------------------------------------------------ |
-| `artifactError`     | `failed` | Legacy behavior — only reports artifact failures |
-| `configValidation`  | `always` | Always reports validation pass/fail              |
-| `mergeConfidence`   | `always` | Always reports confidence level                  |
-| `minimumReleaseAge` | `always` | Always reports stability status                  |
-
-<!-- status-check-when-defaults-end -->
-
 For example, to make `renovate/artifacts` a required check, set `artifactError` to `"always"` so it always reports green/red, allowing you to mark it as required in your branch protection rules.
 To skip a check entirely, set any key to `"never"` to suppress that status check.
 To only report failures for stability, set `minimumReleaseAge` to `"failed"` if you only care about the red/pending status.
