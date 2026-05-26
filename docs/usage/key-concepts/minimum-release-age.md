@@ -31,6 +31,20 @@ The following configuration options can be used to enable and tune the functiona
 
 ## FAQs
 
+### Where does the release timestamp need to be set?
+
+To prevent supply-chain attacks, Renovate requires that the registry/datasource provides the timestamp.
+
+This ensures that a package maintainer cannot specify (maliciously or accidentally) a different timestamp to when the package was actually published.
+
+<!-- prettier-ignore -->
+!!! warning
+  For instance, a suggestion for the Docker ecosystem is to use the `org.opencontainers.image.created` image annotation.
+  <br>
+  Unfortunately, the publisher controls this annotation, so could allow a maintainer to say that their image was published earlier than it had been to bypass Minimum Release Age restrictions.
+
+As long as the registry/datasource provides the release timestamp, Renovate will add support for it.
+
 ### My package manager has support for minimum release age, how does Renovate work with that? Do I need to set it in both?
 
 We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
@@ -501,7 +515,7 @@ Notice that this indicates that:
 
 ### How do I add timestamp data to custom registries?
 
-Renovate requires release timestamp to be provided by the registry.
+Renovate [requires release timestamp to be provided by the registry](#where-does-the-release-timestamp-need-to-be-set).
 
 A common solution is to point Renovate to a registry that _does_ have the release timestamp in the form that Renovate is expecting.
 You can achieve this by using `packageRules` to **prepend** the public registry's URL to the `registryUrls`.
