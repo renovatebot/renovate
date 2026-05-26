@@ -1461,6 +1461,36 @@ describe('util/package-rules/index', () => {
     expect(res.packageName).toBe('docker.io/library/node');
   });
 
+  it('propagates fetchChangeLogs from matching packageRule', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['npm'],
+          fetchChangeLogs: 'off',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.fetchChangeLogs).toBe('off');
+  });
+
+  it('does not set fetchChangeLogs when packageRule does not match', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['pypi'],
+          fetchChangeLogs: 'off',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res).not.toHaveProperty('fetchChangeLogs');
+  });
+
   it('compiles sourceUrl with template helper functions', async () => {
     const config: TestConfig = {
       datasource: 'terraform-provider',

@@ -41,8 +41,8 @@ Once you're done selecting repositories for Renovate to run on, select the green
 
 <!-- prettier-ignore -->
 !!! note
-    If you are using the Mend Renovate App then it has a custom behavior for forked repositories.
-    If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
+  If you are using the Mend Renovate App then it has a custom behavior for forked repositories.
+  If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
 
 ### Hosted GitLab.com App
 
@@ -69,7 +69,7 @@ Once you have enabled Renovate on a repository, you will get a "Configure Renova
 
 <!-- prettier-ignore -->
 !!! note
-    If you self-host Renovate, and want to add the rebase/retry checkbox to Renovate's onboarding PRs: enable the [`onboardingRebaseCheckbox` config option](../self-hosted-configuration.md#onboardingrebasecheckbox) first.
+  If you self-host Renovate, and want to add the rebase/retry checkbox to Renovate's onboarding PRs: enable the [`onboardingRebaseCheckbox` config option](../self-hosted-configuration.md#onboardingrebasecheckbox) first.
 
 ### No risk onboarding
 
@@ -78,8 +78,8 @@ If there is anything about the Pull Request that you don't like or understand, t
 
 You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can work on the config until you're satisfied with the results.
 
-If you wish to out-out of having Renovate run for your repo, simply close the onboarding Pull Request without merging it.
-This is action reversible - you can re-request an onboarding PR by renaming the (closed) onboarding PR, or you can commit a Renovate configuration file to your default branch to manually onboard.
+If you wish to opt-out of having Renovate run for your repo, simply close the onboarding Pull Request without merging it.
+This action is reversible - you can re-request an onboarding PR by renaming the (closed) onboarding PR, or you can commit a Renovate configuration file to your default branch to manually onboard.
 
 ### Check for warnings
 
@@ -108,7 +108,7 @@ The bot first checks all the files in the `configFileNames` array before checkin
 
 <!-- prettier-ignore -->
 !!! warning
-    This approach has been deprecated and will be removed in a future release.
+  This approach has been deprecated and will be removed in a future release.
 
 You can add the same settings to a `"renovate"` section in your `package.json` file instead.
 The `package.json` file must be located at the root of your repository.

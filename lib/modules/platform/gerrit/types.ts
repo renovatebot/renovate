@@ -144,3 +144,8 @@ export interface GerritMergeableInfo {
     | 'CHERRY_PICK';
   mergeable: boolean;
 }
+
+export interface GerritHashtagsInput {
+  add?: string[] | null;
+  remove?: string[] | null;
+}

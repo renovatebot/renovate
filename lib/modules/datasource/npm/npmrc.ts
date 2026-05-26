@@ -9,7 +9,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
-import { defaultRegistryUrls } from './common.ts';
+import { defaultRegistryUrl } from './common.ts';
 import type { NpmrcRules } from './types.ts';
 
 let npmrc: Record<string, any> = {};
@@ -37,7 +37,7 @@ export function getMatchHostFromNpmrcHost(input: string): string {
   if (input.startsWith('//')) {
     const matchHost = input.replace('//', '');
     if (matchHost.includes('/')) {
-      return 'https://' + matchHost;
+      return `https://${matchHost}`;
     }
     return matchHost;
   }
@@ -166,7 +166,7 @@ export function setNpmrc(input?: string): void {
 }
 
 export function resolveRegistryUrl(packageName: string): string {
-  let registryUrl = defaultRegistryUrls[0];
+  let registryUrl = defaultRegistryUrl;
   for (const rule of packageRules) {
     const { matchPackageNames, registryUrls } = rule;
     if (

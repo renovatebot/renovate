@@ -58,8 +58,8 @@ $ npx --yes --package renovate -- renovate-config-validator first_config.json
 
 <!-- prettier-ignore -->
 !!! note
-    If you specify the filename, `renovate-config-validator` treats the file(s) as global self-hosted configuration instead of repo-level configuration.
-    If this isn't intentional - for instance if you're validating a [shared config preset](./config-presets.md) or a non-standard filename - make sure you specify `--no-global`, i.e. `renovate-config-validator --no-global go-presets.json`.
+  If you specify the filename, `renovate-config-validator` treats the file(s) as global self-hosted configuration instead of repo-level configuration.
+  If this isn't intentional - for instance if you're validating a [shared config preset](./config-presets.md) or a non-standard filename - make sure you specify `--no-global`, i.e. `renovate-config-validator --no-global go-presets.json`.
 
 ### Providing global configuration
 
@@ -96,7 +96,7 @@ Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovat
 
 <!-- prettier-ignore -->
 !!! tip
-    Using the Mend-hosted apps? Push a branch to `renovate/reconfigure` for feedback (via status check), and if there's a PR, Renovate will add comments to it!
+  Using the Mend-hosted apps? Push a branch to `renovate/reconfigure` for feedback (via status check), and if there's a PR, Renovate will add comments to it!
 
 Renovate can validate configuration changes in Pull Requests when you use a special branch name.
 
@@ -115,4 +115,4 @@ The next time Renovate runs on that repo it will:
 
 <!-- prettier-ignore -->
 !!! note
-    The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
+  The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.

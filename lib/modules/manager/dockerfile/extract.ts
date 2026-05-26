@@ -303,7 +303,7 @@ export function extractPackageFile(
       lookForSyntaxDirective = false;
     }
 
-    const lineContinuationRegex = regEx(escapeChar + '[ \\t]*$|^[ \\t]*#', 'm');
+    const lineContinuationRegex = regEx(`${escapeChar}[ \\t]*$|^[ \\t]*#`, 'm');
     let lineLookahead = instruction;
     while (
       !lookForEscapeChar &&
@@ -311,13 +311,11 @@ export function extractPackageFile(
       lineContinuationRegex.test(lineLookahead)
     ) {
       lineLookahead = lines[++lineNumber] || '';
-      instruction += '\n' + lineLookahead;
+      instruction += `\n${lineLookahead}`;
     }
 
     const argRegex = regEx(
-      '^[ \\t]*ARG(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\w+)[ =](?<value>\\S*)',
+      `^[ \\t]*ARG(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\w+)[ =](?<value>\\S*)`,
       'im',
     );
     const argMatch = argRegex.exec(instruction);
@@ -333,11 +331,7 @@ export function extractPackageFile(
     }
 
     const fromRegex = new RegExp(
-      '^[ \\t]*FROM(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?',
+      `^[ \\t]*FROM(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?`,
       'im',
     ); // TODO #12875 complex for re2 has too many not supported groups
     const fromMatch = instruction.match(fromRegex);
@@ -382,9 +376,7 @@ export function extractPackageFile(
     }
 
     const copyFromRegex = new RegExp(
-      '^[ \\t]*COPY(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)',
+      `^[ \\t]*COPY(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)`,
       'im',
     ); // TODO #12875 complex for re2 has too many not supported groups
     const copyFromMatch = instruction.match(copyFromRegex);
@@ -422,9 +414,7 @@ export function extractPackageFile(
     }
 
     const runMountFromRegex = regEx(
-      '^[ \\t]*RUN(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
+      `^[ \\t]*RUN(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)`,
       'im',
     );
     const runMountFromMatch = instruction.match(runMountFromRegex);

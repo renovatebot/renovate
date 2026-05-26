@@ -18,7 +18,7 @@ const Distribution = z.object({
 
 const Version = z.object({
   repository: Repository.optional(),
-  homepage: z.string().optional(),
+  homepage: z.string().optional().catch(undefined),
   deprecated: z.union([z.string(), z.boolean()]).optional(),
   gitHead: z.string().optional(),
   dependencies: z.record(z.string()).optional(),

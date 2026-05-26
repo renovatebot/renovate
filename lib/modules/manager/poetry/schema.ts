@@ -1,5 +1,7 @@
+import deepmerge from 'deepmerge';
 import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import {
@@ -106,16 +108,17 @@ const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional(), source: z.string().optional() })
     .transform(({ version: currentValue, source }): PackageDependency => {
+      const managerData = {
+        ...(source ? { sourceName: source.toLowerCase() } : {}),
+      };
+
       if (!currentValue) {
-        return { datasource: PypiDatasource.id };
+        return { datasource: PypiDatasource.id, managerData };
       }
 
       return {
         datasource: PypiDatasource.id,
-        managerData: {
-          nestedVersion: true,
-          ...(source ? { sourceName: source.toLowerCase() } : {}),
-        },
+        managerData: { ...managerData, nestedVersion: true },
         currentValue,
       };
     })
@@ -336,37 +339,65 @@ export const PoetryPyProject = Toml.pipe(
       } = pyproject;
 
       const deps: PackageDependency[] = [];
+      const projectDependencies = coerceArray(project?.dependencies);
+      const projectOptionalDependencies = coerceArray(
+        project?.['optional-dependencies'],
+      );
 
-      const projectDependencies = project?.dependencies;
-      if (projectDependencies) {
-        deps.push(...projectDependencies);
+      const projectDepsByName: Record<string, PackageDependency> = {};
+      for (const dep of [
+        ...projectDependencies,
+        ...dependencyGroups,
+        ...projectOptionalDependencies,
+      ]) {
+        projectDepsByName[dep.depName!] = dep;
       }
-
-      const projectOptionalDependencies = project?.['optional-dependencies'];
-      if (projectOptionalDependencies) {
-        deps.push(...projectOptionalDependencies);
-      }
-
-      deps.push(...dependencyGroups);
 
       if (buildSystem?.requires) {
         deps.push(...buildSystem.requires);
       }
 
-      const poetryDependencies = tool?.poetry?.dependencies;
-      if (poetryDependencies) {
-        deps.push(...poetryDependencies);
+      const poetryDependencies = coerceArray(tool?.poetry?.dependencies);
+
+      const poetryDevDependencies = coerceArray(
+        tool?.poetry?.['dev-dependencies'],
+      );
+
+      const poetryGroupDependencies = coerceArray(tool?.poetry?.group);
+
+      for (const poetryDep of [
+        ...poetryDependencies,
+        ...poetryDevDependencies,
+        ...poetryGroupDependencies,
+      ]) {
+        const depName = poetryDep.depName;
+        const projectDep = depName && projectDepsByName[depName];
+        // When the same dep exists in project.dependencies or dependency-groups,
+        // Poetry just uses the Poetry dep to enrich the project dependency.
+        if (projectDep) {
+          const mergedDep = deepmerge<PackageDependency>(poetryDep, projectDep);
+          // Poetry supports specifying the version in project.dependencies and
+          // tool.poetry.dependencies *at the same time* and only errors if both
+          // are not compatible - we require a single constraint per dependency.
+          if (projectDep.currentValue && poetryDep.currentValue) {
+            mergedDep.skipReason = 'invalid-dependency-specification';
+          }
+          // When a skipReason is 'unspecified-version', we defer to the other skipReason,
+          // so that 'unspecified-version' only persists if both deps have no version.
+          if (mergedDep.skipReason === 'unspecified-version') {
+            if (poetryDep.skipReason === 'unspecified-version') {
+              mergedDep.skipReason = projectDep.skipReason;
+            } else {
+              mergedDep.skipReason = poetryDep.skipReason;
+            }
+          }
+          projectDepsByName[depName] = mergedDep;
+        } else {
+          deps.push(poetryDep);
+        }
       }
 
-      const poetryDevDependencies = tool?.poetry?.['dev-dependencies'];
-      if (poetryDevDependencies) {
-        deps.push(...poetryDevDependencies);
-      }
-
-      const poetryGroupDependencies = tool?.poetry?.group;
-      if (poetryGroupDependencies) {
-        deps.push(...poetryGroupDependencies);
-      }
+      deps.push(...Object.values(projectDepsByName));
 
       const packageFileVersion = tool?.poetry?.version;
       const packageFileContent: PackageFileContent = {

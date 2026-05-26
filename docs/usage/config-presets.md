@@ -12,7 +12,7 @@ Shareable config presets must use the JSON or JSON5 formats, other formats are n
 
 <!-- prettier-ignore -->
 !!! tip
-    Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
+  Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
 
 ## Extending from a preset
 
@@ -27,8 +27,8 @@ Alternatively, Renovate can fetch preset files from an HTTP server.
 
 <!-- prettier-ignore -->
 !!! warning
-    We deprecated npm-based presets.
-    We plan to drop the npm-based presets feature in a future major release of Renovate.
+  We deprecated npm-based presets.
+  We plan to drop the npm-based presets feature in a future major release of Renovate.
 
 You can set a Git tag (like a SemVer) to use a specific release of your shared config.
 
@@ -40,8 +40,8 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 
 <!-- prettier-ignore -->
 !!! warning
-    We've deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
-    If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
+  We've deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
+  If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
 
 ### GitHub
 
@@ -107,9 +107,9 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 
 <!-- prettier-ignore -->
 !!! tip
-    You can't combine the path and sub-preset syntaxes.
-    This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
-    One workaround is to use distinct files instead of sub-presets.
+  You can't combine the path and sub-preset syntaxes.
+  This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
+  One workaround is to use distinct files instead of sub-presets.
 
 ## Example configs
 
@@ -121,8 +121,8 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 
 <!-- prettier-ignore -->
 !!! note
-    The `:xyz` naming convention (with `:` prefix) is shorthand for the `default:` presets.
-    For example: `:xyz` is the same as `default:xyz`.
+  The `:xyz` naming convention (with `:` prefix) is shorthand for the `default:` presets.
+  For example: `:xyz` is the same as `default:xyz`.
 
 ## How to Use Preset Configs
 
@@ -266,7 +266,7 @@ This can be handy when you want to include presets conditionally.
 
 <!-- prettier-ignore -->
 !!! note
-    The template only supports a small subset of options, but you can extend them via `customEnvVariables`.
+  The template only supports a small subset of options, but you can extend them via `customEnvVariables`.
 
 Read the [templates](./templates.md) section to learn more.
 
@@ -323,7 +323,7 @@ For example the result may be:
 
 <!-- prettier-ignore -->
 !!! warning
-    Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
+  Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
 
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.

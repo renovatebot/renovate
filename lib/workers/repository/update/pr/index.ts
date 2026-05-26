@@ -60,6 +60,7 @@ export function getPlatformPrOptions(
 
   return {
     autoApprove: !!config.autoApprove,
+    automergeCommitMessage: config.commitMessage,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
     bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
@@ -287,10 +288,11 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchChangeLogs === 'pr') {
-    // fetch changelogs when not already done;
-    await embedChangelogs(upgrades);
-  }
+  // fetch changelogs for matching upgrades.
+  await embedChangelogs({
+    upgrades: upgrades,
+    stage: 'pr',
+  });
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
@@ -518,7 +520,7 @@ export async function ensurePr(
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { labels: prepareLabels(config) },
-        'DRY-RUN: Would create PR: ' + prTitle,
+        `DRY-RUN: Would create PR: ${prTitle}`,
       );
       pr = { number: 0 } as never;
     } else {

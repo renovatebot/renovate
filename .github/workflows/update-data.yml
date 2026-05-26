@@ -22,7 +22,7 @@ jobs:
           show-progress: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
         with:
           standalone: true
 
@@ -35,6 +35,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          # don't run `mise install`, but do install a version of `mise` itself
+          install: false
+
       - name: Update static data
         run: pnpm run update-static-data
 
@@ -44,9 +50,9 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
+          author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
           branch: 'chore/update-static-data'
-          commit-message: 'fix(data): automatic update of static data'
-          committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
-          title: 'fix(data): automatic update of static data'
+          commit-message: 'feat(data): automatic update of static data'
+          committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          title: 'feat(data): automatic update of static data'
           assignees: viceice,secustor,jamietanna

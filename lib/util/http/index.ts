@@ -4,8 +4,7 @@ import { EmptyResultError } from './errors.ts';
 import { RequestError } from './got.ts';
 import { HttpBase } from './http.ts';
 
-export { RequestError as HttpError, EmptyResultError };
-
 export type * from './types.ts';
+export { EmptyResultError, RequestError as HttpError };
 
 export class Http extends HttpBase {}

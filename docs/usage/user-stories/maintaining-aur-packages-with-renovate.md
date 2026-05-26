@@ -15,8 +15,8 @@ title: Maintaining AUR packages with Renovate
 
 <!-- prettier-ignore -->
 !!! note
-    Jamie Magee helps to maintain Renovate.
-    They obviously like Renovate, and want you to use it.
+  Jamie Magee helps to maintain Renovate.
+  They obviously like Renovate, and want you to use it.
 
 One big advantage that Arch Linux has over other distributions, apart from being able to say “BTW I use Arch.”, is the Arch User Repository (AUR).
 It’s a community-driven repository with over 80,000 packages.

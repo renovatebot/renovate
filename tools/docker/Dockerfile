@@ -1,23 +1,23 @@
-# syntax=docker/dockerfile:1.23.0@sha256:2780b5c3bab67f1f76c781860de469442999ed1a0d7992a5efdf2cffc0e3d769
+# syntax=docker/dockerfile:1.24.0@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.35.2@sha256:6672c498b483b981a7b9f8a3b0d8144aa815dfe8acefe5b7ec8f5d42ba17c40a AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.51.3@sha256:028f83f9304f25dbb739d1ef0fce446d7301600f12fd43e507ed72df66290188 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.35.2-full@sha256:c89c92c836946d2f15f5675b25428da87a3afdb525f9b952587e64a775e6e6ae AS full-base
+FROM ghcr.io/renovatebot/base-image:13.51.3-full@sha256:7c3f21fad3ec9a5ca5f35d7576ed5bcd574a11d1a41a243dbe3350ccfca21742 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.35.2@sha256:6672c498b483b981a7b9f8a3b0d8144aa815dfe8acefe5b7ec8f5d42ba17c40a AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.51.3@sha256:028f83f9304f25dbb739d1ef0fce446d7301600f12fd43e507ed72df66290188 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
@@ -25,7 +25,7 @@ RUN install-tool node 24.15.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.33.0
+RUN install-tool pnpm 10.33.4
 
 WORKDIR /usr/local/renovate
 
@@ -64,6 +64,7 @@ ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 COPY --link .npmrc ./
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
+COPY --link pnpm-workspace.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
@@ -75,7 +76,7 @@ COPY --link . ./
 # install npm packages
 RUN set -ex; \
   pnpm install --prod --offline --ignore-scripts; \
-  pnpm rebuild re2 better-sqlite3; \
+  pnpm rebuild re2; \
   true
 
 # --------------------------------------
@@ -110,7 +111,7 @@ RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repo
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  node -e "new require('re2')('.*').exec('test')"; \
   true
 
 LABEL \

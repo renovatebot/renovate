@@ -7,9 +7,9 @@ description: How to use OpenTelemetry with Renovate
 
 <!-- prettier-ignore -->
 !!! warning "This feature is flagged as experimental"
-    Experimental features might be changed at any time.
-    <br /> <br />
-    Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a breaking, even in non-major version updates.
+  Experimental features might be changed at any time.
+  <br /> <br />
+  Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a breaking, even in non-major version updates.
 
 Renovate supports the [OpenTelemetry](https://opentelemetry.io/) monitoring and observability standard.
 
@@ -21,9 +21,9 @@ OpenTelemetry has three types of observability data it supports within the OpenT
 
 <!-- prettier-ignore -->
 !!! note
-    While the OpenTelemetry Protocol (OTLP) support traces, metrics, and logs, Renovate only supports traces, and some metrics.
-    <br /> <br />
-    This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
+  While the OpenTelemetry Protocol (OTLP) support traces, metrics, and logs, Renovate only supports traces, and some metrics.
+  <br /> <br />
+  This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
 
 Renovate uses [`@opentelemetry/exporter-trace-otlp-http`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-http) under the hood.
 This means that Renovate sends traces via [OTLP/HTTP](https://opentelemetry.io/docs/reference/specification/protocol/otlp/#otlphttp) in JSON-encoded protobuf format only.
