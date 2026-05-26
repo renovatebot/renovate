@@ -10,6 +10,8 @@ Renovate is an automated dependency update tool that scans repositories for depe
 
 The **./docs/development/** directory contains detailed documentation for developers, like style guides, testing guidelines, and configuration options.
 
+ALWAYS READ ./docs/best-practices.md for guidance on code style.
+
 ## Architecture
 
 Renovate is an automated dependency update tool. The runtime flow is:

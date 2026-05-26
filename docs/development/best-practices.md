@@ -303,6 +303,16 @@ if (end) {
 Where possible, reduce the test fixture to a size where an inline `codeBlock` is possible to use instead of a separate fixture file.
 Inline `codeBlock`s improve performance plus are more readable.
 
+```ts
+import { codeBlock } from 'common-tags';
+
+const input = codeBlock`
+  line one
+  line two
+`;
+// → 'line one\nline two'
+```
+
 Use the `Fixture` class if loading fixtures from files.
 For example:
 
