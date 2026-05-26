@@ -22,3 +22,20 @@ These can be found documented [on the Mend docs site](https://docs.mend.io/platf
 
 - the `us` grouping is for [`developer.mend.io`](https://developer.mend.io/)
 - the `eu` grouping is for [`developer-eu.mend.io/`](https://developer-eu.mend.io/)
+
+## How do I set Environment Variables for my **??**?
+
+As of **2026-05-18**, it is possible for all Mend-hosted users to specify **??**.
+
+This can be done by browsing to your organization/repository on the Mend Developer Platform, clicking `Settings`
+
+These environment variables will be passed **??**.
+However, as noted in [Environment Variable Handling](../environment-variable-handling.md), **??**.
+
+Environment
+
+Yes, Mend-hosted users **??**.
+
+In addition to the **??** which can be set
+
+Note that Renovate will not **??**
