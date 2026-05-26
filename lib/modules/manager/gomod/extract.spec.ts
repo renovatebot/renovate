@@ -1,7 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { describe } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { getDefaultVersioning } from '../../datasource/common.ts';
 import * as allVersioning from '../../versioning/index.ts';
+import { convertGoDirectiveToSemVerRange } from './extract.ts';
 import { extractPackageFile } from './index.ts';
 
 const gomod1 = Fixtures.get('1/go-mod');
@@ -600,6 +602,14 @@ describe('modules/manager/gomod/extract', () => {
     it('does not match the previous SemVer minor', () => {
       expect(versioning.matches('1.18.0', constraint)).toBeFalse();
       expect(versioning.matches('1.18.5', constraint)).toBeFalse();
+    });
+  });
+
+  describe('convertGoDirectiveToSemVerRange()', () => {
+    it('handles undefined go directive', () => {
+      const goDirective = undefined;
+      const semVerRange = convertGoDirectiveToSemVerRange(goDirective);
+      expect(semVerRange.version).toBeUndefined();
     });
   });
 });
