@@ -29,7 +29,7 @@ function isEmittable(value: unknown): boolean {
 // across hundreds of manifest files).
 function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
   if (value === null || typeof value !== 'object') {
-    h.update(JSON.stringify(value)!);
+    h.update(JSON.stringify(value));
     return;
   }
 
