@@ -98,8 +98,8 @@ function generateCombinedTooling(): string {
   content += `Renovate's \`mise\` manager can version the following tool short names.\nOut of ${total} known tools: ${supportedCount} supported, ${maybeCount} possibly supported, ${unsupportedCount} unsupported.\n`;
 
   content += `\n
-  | Name | Source | Supported |
-  | ---- | ------ | --------- |
+| Name | Source | Supported |
+| ---- | ------ | --------- |
   `;
 
   for (const { name, url, source, supported, supportNote } of allTools) {
