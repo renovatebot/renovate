@@ -4,7 +4,10 @@ import { type Hash, createHash } from 'node:crypto';
 // `safe-stable-stringify`. We pre-check before emitting because objects must
 // drop keys whose value resolves to nothing (incl. via toJSON → undefined),
 // and incremental hashing can't roll back already-emitted bytes.
-function isEmittable(value: unknown): boolean {
+//
+// `cache` memoizes the result per object reference so callers that invoke
+// isEmittable just before recursing don't re-walk the toJSON chain twice.
+function isEmittable(value: unknown, cache: WeakMap<object, boolean>): boolean {
   if (
     value === undefined ||
     typeof value === 'function' ||
@@ -15,11 +18,15 @@ function isEmittable(value: unknown): boolean {
   if (value === null || typeof value !== 'object') {
     return true;
   }
-  const obj = value as { toJSON?: () => unknown };
-  if (typeof obj.toJSON === 'function') {
-    return isEmittable(obj.toJSON());
+  const cached = cache.get(value);
+  if (cached !== undefined) {
+    return cached;
   }
-  return true;
+  const obj = value as { toJSON?: () => unknown };
+  const result =
+    typeof obj.toJSON === 'function' ? isEmittable(obj.toJSON(), cache) : true;
+  cache.set(value, result);
+  return result;
 }
 
 // Walks `value` and emits canonical JSON chunks directly into `h`,
@@ -27,7 +34,12 @@ function isEmittable(value: unknown): boolean {
 // without materializing the full string. Required to avoid V8's max
 // string length when the input is large (e.g. a PR carrying upgrades
 // across hundreds of manifest files).
-function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
+function fingerprintInto(
+  h: Hash,
+  value: unknown,
+  seen: WeakSet<object>,
+  emittableCache: WeakMap<object, boolean>,
+): void {
   if (value === null || typeof value !== 'object') {
     h.update(JSON.stringify(value));
     return;
@@ -35,7 +47,7 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
 
   const obj = value as { toJSON?: () => unknown };
   if (typeof obj.toJSON === 'function') {
-    fingerprintInto(h, obj.toJSON(), seen);
+    fingerprintInto(h, obj.toJSON(), seen, emittableCache);
     return;
   }
 
@@ -52,8 +64,8 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
         h.update(',');
       }
       const item: unknown = value[i];
-      if (isEmittable(item)) {
-        fingerprintInto(h, item, seen);
+      if (isEmittable(item, emittableCache)) {
+        fingerprintInto(h, item, seen, emittableCache);
       } else {
         h.update('null');
       }
@@ -66,7 +78,7 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
     let first = true;
     for (const k of keys) {
       const v = entries[k];
-      if (!isEmittable(v)) {
+      if (!isEmittable(v, emittableCache)) {
         continue;
       }
       if (!first) {
@@ -75,7 +87,7 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
       first = false;
       h.update(JSON.stringify(k));
       h.update(':');
-      fingerprintInto(h, v, seen);
+      fingerprintInto(h, v, seen, emittableCache);
     }
     h.update('}');
   }
@@ -83,10 +95,11 @@ function fingerprintInto(h: Hash, value: unknown, seen: WeakSet<object>): void {
 }
 
 export function fingerprint(input: unknown): string {
-  if (!isEmittable(input)) {
+  const emittableCache = new WeakMap<object, boolean>();
+  if (!isEmittable(input, emittableCache)) {
     return '';
   }
   const h = createHash('sha512');
-  fingerprintInto(h, input, new WeakSet());
+  fingerprintInto(h, input, new WeakSet(), emittableCache);
   return h.digest('hex');
 }
