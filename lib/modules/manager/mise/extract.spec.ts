@@ -1293,5 +1293,19 @@ describe('modules/manager/mise/extract', () => {
         lockedVersion: '3.10.17',
       });
     });
+
+    it('skips kafka tool when version has no apache- prefix', async () => {
+      const content = codeBlock`
+        [tools]
+        kafka = "3.5.0"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'kafka',
+          skipReason: 'unsupported-datasource',
+        }),
+      ]);
+    });
   });
 });
