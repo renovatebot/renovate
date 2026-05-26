@@ -325,7 +325,7 @@ export function getRegistryRepository(
     registryHost = registryHost.replace('https', 'http');
   }
   if (registryHost.endsWith('.docker.io') && !dockerRepository.includes('/')) {
-    dockerRepository = 'library/' + dockerRepository;
+    dockerRepository = `library/${dockerRepository}`;
   }
   return {
     registryHost,
@@ -336,7 +336,7 @@ export function getRegistryRepository(
 export function extractDigestFromResponseBody(
   manifestResponse: HttpResponse,
 ): string {
-  return 'sha256:' + toSha256(manifestResponse.body);
+  return `sha256:${toSha256(manifestResponse.body)}`;
 }
 
 export function findLatestStable(tags: string[]): string | null {

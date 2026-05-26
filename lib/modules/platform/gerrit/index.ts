@@ -101,7 +101,7 @@ export async function initPlatform({
     throw new Error('Init: Authentication failure');
   }
 
-  logger.debug('Gerrit version is: ' + gerritVersion);
+  logger.debug(`Gerrit version is: ${gerritVersion}`);
   // Example: 3.13.0-rc3-148-gb478dbbb57
   const parsed = semver.parse(gerritVersion);
   if (!parsed) {

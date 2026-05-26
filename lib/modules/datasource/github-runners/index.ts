@@ -19,9 +19,9 @@ export class GithubRunnersDatasource extends Datasource {
   private static readonly releases: Record<string, Release[] | undefined> = {
     ubuntu: [
       { version: '24.04' },
-      { version: '24.04-arm', isStable: false },
+      { version: '24.04-arm' },
       { version: '22.04' },
-      { version: '22.04-arm', isStable: false },
+      { version: '22.04-arm' },
       { version: '20.04', isDeprecated: true },
       { version: '18.04', isDeprecated: true },
       { version: '16.04', isDeprecated: true },
@@ -46,6 +46,7 @@ export class GithubRunnersDatasource extends Datasource {
     windows: [
       { version: '2025' },
       { version: '2022' },
+      { version: '11-arm' },
       { version: '2019', isDeprecated: true },
       { version: '2016', isDeprecated: true },
     ],

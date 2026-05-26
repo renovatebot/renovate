@@ -148,6 +148,7 @@ function parseDependencyUrl(
   }
 
   const parsedUrl = parseUrl(normalizedUrl);
+  // v8 ignore if -- getHttpUrl always returns a parseable URL
   if (!parsedUrl) {
     return null;
   }

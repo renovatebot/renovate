@@ -520,7 +520,7 @@ export async function ensurePr(
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { labels: prepareLabels(config) },
-        'DRY-RUN: Would create PR: ' + prTitle,
+        `DRY-RUN: Would create PR: ${prTitle}`,
       );
       pr = { number: 0 } as never;
     } else {

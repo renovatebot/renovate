@@ -2,7 +2,7 @@ import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
-import type { RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfig } from './types.ts';
 import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
@@ -1469,6 +1469,19 @@ describe('config/validation', () => {
       expect(errors[0].message).toContain('github>owner/repo//path@commitHash');
     });
 
+    it('skips preset syntax validation for templates', async () => {
+      const config = {
+        extends: ['local>{{ env.PRESET_REPO }}:python-312'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('warns if only selectors in packageRules', async () => {
       const config = {
         packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],
@@ -2687,6 +2700,47 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
+    });
+
+    describe('cacheTtlOverride', () => {
+      it('errors when using an invalid cache namespace', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            // removed in 40.9.0
+            'datasource-maven:metadata-xml': 123,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'cacheTtlOverride: namespace `datasource-maven:metadata-xml` does not exist',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('allows a valid cache namespace', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            'datasource-docker-hub-tags': 90,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
     });
   });
 });

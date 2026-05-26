@@ -23,7 +23,7 @@ If the item has the `mergeable` property, it will merge with lower numbers inste
 
 <!-- prettier-ignore -->
 !!! note
-    If you use a Mend-hosted app, please read [Mend-hosted Apps Configuration](mend-hosted/hosted-apps-config.md) _after_ reading this page.
+  If you use a Mend-hosted app, please read [Mend-hosted Apps Configuration](mend-hosted/hosted-apps-config.md) _after_ reading this page.
 
 ## Types of config
 
@@ -80,7 +80,7 @@ You may use synchronous or asynchronous methods inside a `.js` file, including e
 
 <!-- prettier-ignore -->
 !!! warning
-    Do not name the additional config file `config.js` as it is reserved for file config.
+  Do not name the additional config file `config.js` as it is reserved for file config.
 
 #### Environment config
 
@@ -100,8 +100,8 @@ Any additional Environment config variables take precedence over values in `RENO
 
 <!-- prettier-ignore -->
 !!! warning
-    Make sure to escape any punctuation.
-    Be extra careful if you're passing stringified values.
+  Make sure to escape any punctuation.
+  Be extra careful if you're passing stringified values.
 
 Boolean:
 
@@ -127,7 +127,7 @@ Objects, or lists with objects:
 
 <!-- prettier-ignore -->
 !!! tip
-    Use "stringify" ([Example online service](https://jsonformatter.org/json-stringify-online)) for strings and objects.
+  Use "stringify" ([Example online service](https://jsonformatter.org/json-stringify-online)) for strings and objects.
 
 ##### Experimental variables
 
@@ -276,7 +276,7 @@ Additionally for platforms which support nested Organization/Group hierarchies, 
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate will also check for a `renovate.json` file if it cannot find a `default.json` file in a preset, however this option is deprecated and not recommended.
+  Renovate will also check for a `renovate.json` file if it cannot find a `default.json` file in a preset, however this option is deprecated and not recommended.
 
 If a default config is not found in a `renovate-config` repository within the Organization, Renovate will also check for the presence of a `renovate-config.json` file within a `.{{platform}}` repository parallel to the current repository.
 For example if the repository being onboarded is `abc/def` on a GitHub platform then Renovate will look for the existence of an `abc/.github` repository containing a `renovate-config.json` file.

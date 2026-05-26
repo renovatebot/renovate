@@ -111,7 +111,7 @@ export class RollingReleasesData {
       for (let j = 0; j < i; j++) {
         prefix += 'old';
       }
-      di.series = prefix + 'stable';
+      di.series = `${prefix}stable`;
 
       this.ltsToVer.set(di.series, di);
       this.verToLts.set(di.version, di);
