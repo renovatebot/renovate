@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 !!! warning
-    This datasource is experimental.
-    Its syntax and behavior may change at any time!
+  This datasource is experimental.
+  Its syntax and behavior may change at any time!
 
 This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API.
 

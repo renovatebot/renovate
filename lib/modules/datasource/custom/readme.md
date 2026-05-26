@@ -15,7 +15,7 @@ Options:
 
 <!-- prettier-ignore -->
 !!! tip
-    Use [JSONata Exerciser](https://try.jsonata.org/) to test your JSONata rules.
+  Use [JSONata Exerciser](https://try.jsonata.org/) to test your JSONata rules.
 
 Available template variables:
 

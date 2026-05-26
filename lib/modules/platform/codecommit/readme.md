@@ -2,11 +2,11 @@
 
 <!-- prettier-ignore -->
 !!! warning "No new features for the Codecommit platform"
-    In July 2024, [Amazon deprecated the CodeCommit platform](https://aws.amazon.com/blogs/devops/how-to-migrate-your-aws-codecommit-repository-to-another-git-provider/).
-    In November 2025, [Amazon re-instated support for CodeCommit](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability/).
-    Since July 2024, CodeCommit is in a "feature freeze", and Amazon re-instating support for CodeCommit as of November 2025 does not currently change that.
-    The Renovate maintainers have decided that we will not add any new features unless a company is willing to contribute feature(s) for CodeCommit **and maintain them**.
-    For more details [see Discussion 39741](https://github.com/renovatebot/renovate/discussions/39741#discussioncomment-15172240).
+  In July 2024, [Amazon deprecated the CodeCommit platform](https://aws.amazon.com/blogs/devops/how-to-migrate-your-aws-codecommit-repository-to-another-git-provider/).
+  In November 2025, [Amazon re-instated support for CodeCommit](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability/).
+  Since July 2024, CodeCommit is in a "feature freeze", and Amazon re-instating support for CodeCommit as of November 2025 does not currently change that.
+  The Renovate maintainers have decided that we will not add any new features unless a company is willing to contribute feature(s) for CodeCommit **and maintain them**.
+  For more details [see Discussion 39741](https://github.com/renovatebot/renovate/discussions/39741#discussioncomment-15172240).
 
 ## Authentication
 
@@ -14,17 +14,10 @@
 
 #### Machine pre-requisites
 
-<!--
-  TODO: remove ignore
-  prettier & markdownlint conflicting nested list format
-  see: https://github.com/renovatebot/renovate/pull/30608
--->
-<!-- prettier-ignore -->
 1. Install the `aws-cli` program on the machine.
 2. Set up the environment with the `git-credentials-helper`:
-    - For EC2 or Linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
-    - For Windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
-
+   - For EC2 or Linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
+   - For Windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
 3. Set the environment variable `AWS_REGION`.
 
 #### Codebuild Configuration

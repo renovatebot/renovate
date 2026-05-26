@@ -22,7 +22,7 @@ If you continue to experience rate limiting issues after implementing persistent
 
 <!-- prettier-ignore -->
 !!! note
-    Dependencies that appear to be Gradle plugins (where the groupId or artifactId ends with `.gradle.plugin`) will **not** be looked up in Maven Central.
+  Dependencies that appear to be Gradle plugins (where the groupId or artifactId ends with `.gradle.plugin`) will **not** be looked up in Maven Central.
 
 #### Making your changelogs fetchable
 
@@ -40,8 +40,8 @@ This is what allows `Renovate` to determine the `sourceUrl`, that it then uses t
 
 <!-- prettier-ignore -->
 !!! note
-    This also works for private repositories.
-    It can leverage the same `token` that you had to configure in order to be able to reach the private Artifactory.
+  This also works for private repositories.
+  It can leverage the same `token` that you had to configure in order to be able to reach the private Artifactory.
 
 #### Specifying your project homepage
 
