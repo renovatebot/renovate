@@ -238,7 +238,7 @@ function genExperimentalMsg(el: Record<string, any>): string {
 }
 
 function genTemplatingMsg(): string {
-  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${2}See [templates](templates.md) for available variables and helpers.`}\n`;
+  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${2}See [templates](./templates.md) for available variables and helpers.`}\n`;
 }
 
 function genDeprecationMsg(el: Record<string, any>): string {
