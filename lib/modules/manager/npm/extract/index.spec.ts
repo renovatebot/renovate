@@ -644,6 +644,8 @@ describe('modules/manager/npm/extract/index', () => {
           p: 'Owner/P.git#v2.0.0',
           q: 'github:owner/q#semver:1.1.0',
           r: 'github:owner/r#semver:^1.0.0',
+          s: 'github:owner/repo.with.dots#v1.0.0',
+          t: 'git@github.com:owner/repo.with.dots.git#v1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -752,6 +754,18 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: '^1.0.0',
             datasource: 'github-tags',
             sourceUrl: 'https://github.com/owner/r',
+          },
+          {
+            depName: 's',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
+          },
+          {
+            depName: 't',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
           },
         ],
       });
