@@ -2,10 +2,10 @@ import { fingerprint } from './fingerprint.ts';
 import { hash } from './hash.ts';
 import { safeStringify } from './stringify.ts';
 
-// Compute the fingerprint via the prior `safeStringify` + `hash` approach.
-// Used to assert that the new incremental implementation produces
-// byte-identical output for inputs that fit in a single V8 string,
-// so existing stored fingerprints remain valid.
+// Compute the fingerprint via the prior `safeStringify` + `hash` approach so
+// the new incremental implementation can be asserted byte-identical for
+// inputs that fit in a single V8 string (existing stored fingerprints stay
+// valid across the upgrade).
 function legacyFingerprint(input: unknown): string {
   const s = safeStringify(input);
   return s ? hash(s) : '';
@@ -55,6 +55,11 @@ describe('util/fingerprint', () => {
     expect(fingerprint(input)).toEqual(legacyFingerprint(input));
   });
 
+  it('returns empty string for root function/symbol', () => {
+    expect(fingerprint(() => 1)).toBeEmptyString();
+    expect(fingerprint(Symbol('s'))).toBeEmptyString();
+  });
+
   it('drops undefined/function/symbol object values like JSON.stringify', () => {
     const sym = Symbol('s');
     const input = {
@@ -71,10 +76,19 @@ describe('util/fingerprint', () => {
     expect(fingerprint(input)).toEqual(legacyFingerprint(input));
   });
 
+  it('drops object keys whose toJSON resolves to undefined', () => {
+    const input = { x: { toJSON: () => undefined }, y: 1 };
+    expect(fingerprint(input)).toEqual(legacyFingerprint(input));
+  });
+
+  it('renders array items whose toJSON resolves to undefined as null', () => {
+    const input = [{ toJSON: () => undefined }, 1];
+    expect(fingerprint(input)).toEqual(legacyFingerprint(input));
+  });
+
   it('handles circular references', () => {
     const a: any = { name: 'a' };
     a.self = a;
-    // Should not throw and should be deterministic across calls.
     const res1 = fingerprint(a);
     const res2 = fingerprint(a);
     expect(res1).toEqual(res2);
@@ -82,10 +96,6 @@ describe('util/fingerprint', () => {
   });
 
   it('handles many entries without stack overflow', () => {
-    // Sanity check that the recursive walk handles structures with many
-    // siblings (the failure mode this change targets is one PR carrying
-    // upgrades across hundreds of manifests; this test just confirms the
-    // walker doesn't blow the stack on a moderately wide input).
     const wide = Array.from({ length: 10_000 }, (_, i) => ({
       id: i,
       body: 'x'.repeat(100),
