@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.5.11 linux-x64 (2026-05-17)"
+    "version": "2026.5.15 linux-x64 (2026-05-23)"
   },
   "tools": {
     "1password": {
@@ -2622,6 +2622,7 @@
       "github": "natesales/q"
     },
     "qsv": {
+      "aqua": "dathere/qsv",
       "asdf": "vjda/asdf-qsv",
       "github": "dathere/qsv"
     },
@@ -3435,7 +3436,7 @@
       "aqua": "daveshanley/vacuum"
     },
     "vale": {
-      "aqua": "errata-ai/vale",
+      "aqua": "vale-cli/vale",
       "asdf": "pdemagny/asdf-vale"
     },
     "vals": {
@@ -3451,7 +3452,7 @@
       "asdf": "https"
     },
     "vector": {
-      "github": "vectordotdev/vector"
+      "aqua": "vectordotdev/vector"
     },
     "velad": {
       "asdf": "mise-plugins/mise-velad",
