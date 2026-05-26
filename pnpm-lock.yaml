@@ -245,8 +245,8 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
       jsonata:
-        specifier: 2.2.0
-        version: 2.2.0
+        specifier: 2.2.1
+        version: 2.2.1
       jsonc-weaver:
         specifier: 0.2.4
         version: 0.2.4
@@ -673,10 +673,6 @@ packages:
     resolution: {integrity: sha512-QpnINq5FZH6EOaDEkmHdT7eUunbvD27pDNQypaWjFyYz7Zl1q3UCMQErBZxpmfGfI7MvI2TlK8KTkgNpv8b1ug==}
     engines: {node: '>=20.0.0'}
     deprecated: Deprecated due to an error deserialization bug in JSON 1.0 protocol services, see https://github.com/aws/aws-sdk-js-v3/pull/8031. Newer version available.
-
-  '@aws-sdk/core@3.974.8':
-    resolution: {integrity: sha512-njR2qoG6ZuB0kvAS2FyICsFZJ6gmCcf2X/7JcD14sUvGDm26wiZ5BrA6LOiUxKFEF+IVe7kdroxyE00YlkiYsw==}
-    engines: {node: '>=20.0.0'}
 
   '@aws-sdk/crc64-nvme@3.972.8':
     resolution: {integrity: sha512-fVfUCL/Xh2zINYMPZvj+iBn6XWouQf0DAnjaWCI9MkmqXzL2Iy5FoQB8O7syFe6gN6AH1ecDDU58T51Ou0kFkA==}
@@ -3814,8 +3810,8 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
-  jsonata@2.2.0:
-    resolution: {integrity: sha512-rAsmwxKHDKQIQ8qJBDErhd34BpNHses6QtiEOJVzJwJSY48LRx0S/tb7cJ9EtgfoIyiVx72Lzi88+HYxwnUybw==}
+  jsonata@2.2.1:
+    resolution: {integrity: sha512-xd1uwUrKeIcJbsWhaoS3qAX4Ea8m0Mw0G5nlnAQvPT7TbZ5qaPdzBVTQia9KfyuyQm+nenfyjvzUDTRYHsC2sw==}
     engines: {node: '>= 8'}
 
   jsonc-morph@0.3.4:
@@ -5822,7 +5818,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-node': 3.972.42
       '@aws-sdk/middleware-host-header': 3.972.12
       '@aws-sdk/middleware-logger': 3.972.11
@@ -5864,7 +5860,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-node': 3.972.42
       '@aws-sdk/middleware-host-header': 3.972.12
       '@aws-sdk/middleware-logger': 3.972.11
@@ -5906,7 +5902,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-node': 3.972.42
       '@aws-sdk/middleware-host-header': 3.972.12
       '@aws-sdk/middleware-logger': 3.972.11
@@ -5950,7 +5946,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-node': 3.972.42
       '@aws-sdk/middleware-host-header': 3.972.12
       '@aws-sdk/middleware-logger': 3.972.11
@@ -5993,7 +5989,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-node': 3.972.42
       '@aws-sdk/middleware-host-header': 3.972.12
       '@aws-sdk/middleware-logger': 3.972.11
@@ -6036,7 +6032,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-node': 3.972.42
       '@aws-sdk/middleware-host-header': 3.972.12
       '@aws-sdk/middleware-logger': 3.972.11
@@ -6081,7 +6077,7 @@ snapshots:
       '@aws-crypto/sha1-browser': 5.2.0
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-node': 3.972.42
       '@aws-sdk/middleware-bucket-endpoint': 3.972.13
       '@aws-sdk/middleware-expect-continue': 3.972.12
@@ -6143,23 +6139,6 @@ snapshots:
       '@smithy/signature-v4': 5.4.3
       '@smithy/types': 4.14.2
       bowser: 2.14.1
-      tslib: 2.8.1
-
-  '@aws-sdk/core@3.974.8':
-    dependencies:
-      '@aws-sdk/types': 3.973.8
-      '@aws-sdk/xml-builder': 3.972.24
-      '@smithy/core': 3.24.3
-      '@smithy/node-config-provider': 4.4.3
-      '@smithy/property-provider': 4.3.3
-      '@smithy/protocol-http': 5.4.3
-      '@smithy/signature-v4': 5.4.3
-      '@smithy/smithy-client': 4.13.3
-      '@smithy/types': 4.14.2
-      '@smithy/util-base64': 4.4.3
-      '@smithy/util-middleware': 4.3.3
-      '@smithy/util-retry': 4.4.3
-      '@smithy/util-utf8': 4.3.3
       tslib: 2.8.1
 
   '@aws-sdk/crc64-nvme@3.972.8':
@@ -6262,7 +6241,7 @@ snapshots:
   '@aws-sdk/credential-providers@3.1036.0':
     dependencies:
       '@aws-sdk/client-cognito-identity': 3.1036.0
-      '@aws-sdk/core': 3.974.8
+      '@aws-sdk/core': 3.974.11
       '@aws-sdk/credential-provider-cognito-identity': 3.972.34
       '@aws-sdk/credential-provider-env': 3.972.37
       '@aws-sdk/credential-provider-http': 3.972.39
@@ -9406,7 +9385,7 @@ snapshots:
 
   json5@2.2.3: {}
 
-  jsonata@2.2.0: {}
+  jsonata@2.2.1: {}
 
   jsonc-morph@0.3.4: {}
 
