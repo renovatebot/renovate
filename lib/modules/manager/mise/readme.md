@@ -29,6 +29,26 @@ Renovate recognizes environment-specific lock files:
 
 For more information about mise lock files, see the [mise lock file documentation](https://mise.jdx.dev/dev-tools/mise-lock.html).
 
+### Trust model for lock file updates
+
+When Renovate runs `mise lock`, it sets `MISE_TRUSTED_CONFIG_PATHS` to the ephemeral repository checkout directory for that subprocess.
+This allows `mise` to process trusted-only project features non-interactively during lock file updates.
+
+This is intentionally scoped to the current repository checkout instead of globally trusting all paths or permanently modifying the runner's mise trust store.
+
+#### Security considerations
+
+This does reduce one layer of mise's built-in trust protection for the checked out repository.
+As a result, `mise` configs inside that repository can use features that normally require trust, such as:
+
+- `[env]` directives
+- templates
+- hooks and tasks
+- `path:` plugin versions
+
+On Renovate runners, this means any `mise` config within the current checkout is trusted for the duration of the `mise lock` subprocess.
+This is a localized trade-off to support non-interactive lock file generation, but it should still be considered part of the runner's repository command-execution trust model.
+
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
