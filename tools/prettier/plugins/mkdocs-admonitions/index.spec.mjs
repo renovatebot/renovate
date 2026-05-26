@@ -26,7 +26,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       !!! note
           This is the body.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves 2-space-indented body (mirrors typst/readme.md)', async () => {
@@ -34,7 +34,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       !!! note
         Body with two spaces.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves 3-space-indented body (mirrors configuration-options.md)', async () => {
@@ -42,7 +42,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       !!! note
          Body with three spaces.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves 5-space-indented body (mirrors self-hosted-configuration.md)', async () => {
@@ -50,7 +50,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       !!! note
            Renovate supports \`JSONC\` for \`.json\` files.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves multi-line body with internal blank line', async () => {
@@ -60,7 +60,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
 
           Second paragraph.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves !!! warning with quoted title', async () => {
@@ -68,12 +68,12 @@ describe('mkdocs-admonitions prettier plugin', () => {
       !!! warning "Custom Title"
           Content here.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves empty-body admonition', async () => {
     const input = '!!! note\n';
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('does not mask admonitions inside fenced code blocks', async () => {
@@ -127,7 +127,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       ??? note
           This is collapsible.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves ???+ collapsible admonition (open by default)', async () => {
@@ -135,7 +135,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       ???+ tip
           This is open by default.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves ??? collapsible with quoted title', async () => {
@@ -143,7 +143,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       ??? warning "Custom Title"
           Content here.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('preserves ???+ collapsible with multi-line body', async () => {
@@ -153,7 +153,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
 
           Second paragraph.
     `;
-    expect(await fmt(input)).toBe(input);
+    await expect(fmt(input)).resolves.toBe(input);
   });
 
   it('throws when source contains collision guard string', async () => {
