@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 // Common fields present on all hook events
 const BaseHookInput = z.object({
