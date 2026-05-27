@@ -4,7 +4,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
-import { env, fs } from '~test/util.ts';
+import { env, fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -744,7 +744,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { minimumReleaseAge: 'not-a-duration' },
         'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
       );
