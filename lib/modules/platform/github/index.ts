@@ -47,7 +47,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
@@ -130,6 +130,7 @@ export function isGHApp(): boolean {
 
 export async function detectGhe(token: string): Promise<void> {
   const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
   if (!parsedEndpoint) {
     throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
   }
@@ -165,10 +166,13 @@ export async function initPlatform({
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
+    if (!isHttpUrl(endpoint)) {
+      throw new Error(`Init: Invalid GitHub endpoint URL: ${endpoint}`);
+    }
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
-    logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
+    logger.debug(`Using default github endpoint: ${platformConfig.endpoint}`);
   }
 
   await detectGhe(token);
@@ -205,16 +209,12 @@ export async function initPlatform({
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
       let ghHostname: string;
+      /* v8 ignore next -- false negative due to V8/source-map artifact */
       if (platformConfig.isGheCloud) {
         ghHostname = 'ghe.com';
       } else if (platformConfig.isGhe) {
-        const parsedEndpoint = parseUrl(platformConfig.endpoint);
-        // v8 ignore if: endpoint is validated before initPlatform, this is here for defensive purposes
-        if (!parsedEndpoint) {
-          throw new Error(
-            `Invalid GitHub endpoint: ${platformConfig.endpoint}`,
-          );
-        }
+        // valid url ensured at the function start
+        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
         ghHostname = parsedEndpoint.hostname;
       } else {
         ghHostname = 'github.com';
@@ -393,7 +393,7 @@ export async function getRawFile(
 
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
-    url += `?ref=` + branchOrTag;
+    url += `?ref=${branchOrTag}`;
   }
   const res = await githubApi.getJsonUnchecked<{ content: string }>(
     url,
@@ -766,7 +766,7 @@ export async function initRepo({
   const url = parsedEndpoint.href;
   let upstreamUrl = undefined;
   if (forkCreation && config.parentRepo) {
-    parsedEndpoint.pathname = config.parentRepo + '.git';
+    parsedEndpoint.pathname = `${config.parentRepo}.git`;
     upstreamUrl = parsedEndpoint.href;
   }
   await git.initRepo({

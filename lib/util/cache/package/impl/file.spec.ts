@@ -145,6 +145,17 @@ describe('util/cache/package/impl/file', () => {
       ).rejects.toThrow('ENOENT');
     });
 
+    it('keeps entries with valid non-expired expiry read from disk', async () => {
+      const futureExpiry = DateTime.local().plus({ days: 1 }).toISO();
+      const payload = JSON.stringify({ value: 'future', expiry: futureExpiry });
+      await cacache.put(cacheFileName, 'future-expiry-key', payload);
+
+      await cache.destroy();
+
+      const entries = await cacache.ls(cacheFileName);
+      expect(Object.keys(entries)).toContain('future-expiry-key');
+    });
+
     it('keeps entries without expiry field', async () => {
       const payload = JSON.stringify({ value: 'no-expiry' });
       await cacache.put(cacheFileName, 'no-expiry-key', payload);

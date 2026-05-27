@@ -14,9 +14,23 @@ export function setReconfigureBranchCache(
     ...(extractResult && { extractResult }),
   };
   if (cache.reconfigureBranchCache) {
-    logger.debug({ reconfigureBranchCache }, 'Update reconfigure branch cache');
+    logger.debug(
+      {
+        reconfigureBranchSha,
+        isConfigValid,
+      },
+      'Update reconfigure branch cache',
+    );
+    logger.trace({ reconfigureBranchCache }, 'Update reconfigure branch cache');
   } else {
-    logger.debug({ reconfigureBranchCache }, 'Create reconfigure branch cache');
+    logger.debug(
+      {
+        reconfigureBranchSha,
+        isConfigValid,
+      },
+      'Create reconfigure branch cache',
+    );
+    logger.trace({ reconfigureBranchCache }, 'Create reconfigure branch cache');
   }
   cache.reconfigureBranchCache = reconfigureBranchCache;
 }

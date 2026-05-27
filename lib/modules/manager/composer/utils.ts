@@ -38,7 +38,7 @@ export function getComposerArguments(
       }
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
-        args += ' --ignore-platform-req ' + quote(req);
+        args += ` --ignore-platform-req ${quote(req)}`;
       });
     }
   }

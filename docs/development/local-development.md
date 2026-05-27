@@ -248,6 +248,48 @@ So most new functionality should be controllable via configuration options.
 Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `docs/usage/configuration-options.md` file.
 
+### `Error: Cannot find module './build/Release/re2.node'`
+
+If you're seeing errors related to `re2`, such as:
+
+```
+> renovate@0.0.0-semantic-release prepare:deps ...
+> node tools/prepare-deps.mjs
+
+Checking re2 ...
+Error: Cannot find module './build/Release/re2.node'
+Require stack:
+- .../renovate/node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js
+- .../renovate/[eval]
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1475:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+    at Module._load (node:internal/modules/cjs/loader:1261:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1575:12)
+    at require (node:internal/modules/helpers:191:16)
+    at Object.<anonymous> (.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js:3:13)
+    at Module._compile (node:internal/modules/cjs/loader:1829:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js',
+    '.../[eval]'
+  ]
+}
+Failed.
+```
+
+This is likely due to the version of `re2` being out-of-sync with your Node version.
+
+You can rebuild it with:
+
+```sh
+pnpm rebuild re2
+```
+
+This will rebuild it for the current Node version in use.
+
 ## Debugging
 
 ### Chrome's inspect tool
