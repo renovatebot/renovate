@@ -1,7 +1,7 @@
+import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { logger as _logger } from '~test/util.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
+import { logger as _logger, partial } from '~test/util.ts';
 import * as _azureApi from './azure-got-wrapper.ts';
 import { IssueService } from './issue.ts';
 import type { Config } from './types.ts';
@@ -10,7 +10,6 @@ const logger = _logger.logger;
 
 vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 vi.mock('./azure-helper.ts', () => mockDeep());
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/sanitize.ts', () =>
   mockDeep({ sanitize: (s: string) => s }),
 );
@@ -19,7 +18,6 @@ vi.mock('./util.ts', () => ({
 }));
 
 const azureApi = vi.mocked(_azureApi, true);
-const hostRules = vi.mocked(_hostRules);
 
 describe('modules/platform/azure/issue', () => {
   let config: Config;
@@ -27,7 +25,6 @@ describe('modules/platform/azure/issue', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    hostRules.find.mockReturnValue({ token: 'token' });
 
     config = {
       repository: 'test/repo',
@@ -40,13 +37,12 @@ describe('modules/platform/azure/issue', () => {
 
   describe('getIssueList()', () => {
     it('should return empty array when no work items found', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [],
-            }),
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({
+            workItems: [],
+          }),
+        }),
       );
 
       const result = await issueService.getIssueList();
@@ -73,14 +69,13 @@ describe('modules/platform/azure/issue', () => {
         },
       ];
 
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [{ id: 1 }, { id: 2 }],
-            }),
-            getWorkItems: vi.fn().mockResolvedValue(mockWorkItems),
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({
+            workItems: [{ id: 1 }, { id: 2 }],
+          }),
+          getWorkItems: vi.fn().mockResolvedValue(mockWorkItems),
+        }),
       );
 
       const result = await issueService.getIssueList();
@@ -102,47 +97,40 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should filter by title when titleFilter provided', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [],
-            }),
-          }) as any,
+      const queryByWiqlMock = vi.fn().mockResolvedValue({ workItems: [] });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: queryByWiqlMock,
+        }),
       );
 
       await issueService.getIssueList('Test Filter');
 
-      const mockCall =
-        azureApi.workItemTrackingApi.mock.results[0].value.queryByWiql.mock
-          .calls[0][0];
-      expect(mockCall.query).toContain("AND [System.Title] = 'Test Filter'");
+      expect(queryByWiqlMock.mock.calls[0][0].query).toContain(
+        "AND [System.Title] = 'Test Filter'",
+      );
     });
 
     it('should escape single quotes in title filter', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [],
-            }),
-          }) as any,
+      const queryByWiqlMock = vi.fn().mockResolvedValue({ workItems: [] });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: queryByWiqlMock,
+        }),
       );
 
       await issueService.getIssueList("Test's Filter");
 
-      const mockCall =
-        azureApi.workItemTrackingApi.mock.results[0].value.queryByWiql.mock
-          .calls[0][0];
-      expect(mockCall.query).toContain("AND [System.Title] = 'Test''s Filter'");
+      expect(queryByWiqlMock.mock.calls[0][0].query).toContain(
+        "AND [System.Title] = 'Test''s Filter'",
+      );
     });
 
     it('should handle errors gracefully', async () => {
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockRejectedValue(new Error('API Error')),
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockRejectedValue(new Error('API Error')),
+        }),
       );
 
       const result = await issueService.getIssueList();
@@ -178,14 +166,13 @@ describe('modules/platform/azure/issue', () => {
         },
       ];
 
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            queryByWiql: vi.fn().mockResolvedValue({
-              workItems: [{ id: 1 }, { id: 2 }, { id: 3 }],
-            }),
-            getWorkItems: vi.fn().mockResolvedValue(mockWorkItems),
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({
+            workItems: [{ id: 1 }, { id: 2 }, { id: 3 }],
+          }),
+          getWorkItems: vi.fn().mockResolvedValue(mockWorkItems),
+        }),
       );
 
       const result = await issueService.getIssueList();
@@ -244,11 +231,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       await issueService.ensureIssueClosing('Test Issue');
@@ -272,11 +258,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       await issueService.ensureIssueClosing('Test Issue');
@@ -295,11 +280,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       await issueService.ensureIssueClosing('Test Issue');
@@ -324,11 +308,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
 
       const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            createWorkItem: createWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+        }),
       );
 
       const result = await issueService.ensureIssue({
@@ -353,11 +336,10 @@ describe('modules/platform/azure/issue', () => {
       ]);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       const result = await issueService.ensureIssue({
@@ -419,11 +401,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([mockOpenIssue]);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       const result = await issueService.ensureIssue({
@@ -476,11 +457,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue(mockOpenIssues);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       await issueService.ensureIssue({
@@ -522,11 +502,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue(mockOpenIssues);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       await issueService.ensureIssue({
@@ -570,11 +549,10 @@ describe('modules/platform/azure/issue', () => {
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([mockOpenIssue]);
 
       const updateWorkItemMock = vi.fn();
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            updateWorkItem: updateWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
       );
 
       const result = await issueService.ensureIssue({
@@ -649,11 +627,10 @@ describe('modules/platform/azure/issue', () => {
       ]);
 
       const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
-      azureApi.workItemTrackingApi.mockImplementation(
-        () =>
-          ({
-            createWorkItem: createWorkItemMock,
-          }) as any,
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+        }),
       );
 
       const result = await issueService.ensureIssue({
