@@ -4,6 +4,7 @@ import {
   isNumber,
   isString,
 } from '@sindresorhus/is';
+import { Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -233,8 +234,13 @@ export async function updateArtifacts({
     if (config.minimumReleaseAge) {
       const ageMs = toMs(config.minimumReleaseAge);
       if (isNumber(ageMs)) {
-        const days = Math.ceil(ageMs / 86_400_000);
+        const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
         extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = String(days);
+      } else {
+        logger.debug(
+          { minimumReleaseAge: config.minimumReleaseAge },
+          'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
+        );
       }
     }
 

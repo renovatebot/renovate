@@ -744,6 +744,10 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
+      expect(logger.debug).toHaveBeenCalledWith(
+        { minimumReleaseAge: 'not-a-duration' },
+        'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
+      );
     });
 
     it('rounds up sub-day durations to 1 day for POETRY_SOLVER_MIN_RELEASE_AGE', async () => {
