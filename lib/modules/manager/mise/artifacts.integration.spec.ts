@@ -27,10 +27,7 @@ async function getModule() {
 
 async function hasBinary(binary: string): Promise<boolean> {
   try {
-    await exec(`command -v ${binary}`, {
-      shell: '/bin/bash',
-      stdio: 'ignore',
-    });
+    await exec(`command -v ${binary}`, { shell: '/bin/bash' });
     return true;
   } catch {
     return false;
