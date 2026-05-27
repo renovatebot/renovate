@@ -35,6 +35,30 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
+  describe('getServerInfo()', () => {
+    it('returns server info', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/config/server/info')
+        .reply(
+          200,
+          gerritRestResponse({
+            download: {
+              archives: ['tar', 'tgz'],
+              schemes: { http: { url: 'https://example.com', commands: {} } },
+            },
+          }),
+          jsonResultHeader,
+        );
+      expect(await client.getServerInfo()).toEqual({
+        download: {
+          archives: ['tar', 'tgz'],
+          schemes: { http: { url: 'https://example.com', commands: {} } },
+        },
+      });
+    });
+  });
+
   describe('getRepos()', () => {
     it('returns repos', async () => {
       httpMock
