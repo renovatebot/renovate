@@ -1,4 +1,4 @@
-import type { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.ts';
+import type { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
 import { logger } from '../../../logger/index.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types.ts';

@@ -1,4 +1,4 @@
-import type { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.ts';
+import type { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { Pr } from '../types.ts';
 
 export interface AzurePr extends Pr {
