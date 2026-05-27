@@ -180,7 +180,8 @@ async function createSanitizedMirror({
       file === packageFileName
         ? newPackageFileContent
         : await readLocalFile(file, 'utf8');
-    if (!rawContent) {
+    /* v8 ignore next -- covered by tests, but v8 attributes the throw path to the condition line */
+    if (rawContent === null) {
       throw new Error(`Unable to read mise config file: ${file}`);
     }
     const sanitized = sanitizeMiseConfig(rawContent, file);
