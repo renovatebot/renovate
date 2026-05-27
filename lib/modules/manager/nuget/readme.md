@@ -53,3 +53,14 @@ You can enable this behavior by adding `dotnetWorkloadRestore` to the `postUpdat
   "postUpdateOptions": ["dotnetWorkloadRestore"]
 }
 ```
+
+### Windows targeting
+
+In case you need to allow Windows targeting during package restore, e.g. adding the `-p:EnableWindowsTargeting=true`.
+You can do so by adding `dotnetEnableWindowsTargeting` to the `postUpdateOptions`.
+
+```json
+{
+  "postUpdateOptions": ["dotnetEnableWindowsTargeting"]
+}
+```
