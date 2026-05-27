@@ -768,3 +768,13 @@
     This improves the maintainers' time to triage, as key information is clearly indicated in the format we expect.
 
     Thanks, the Renovate team
+
+'auto:cla':
+  comment: >
+    Hi there,
+
+    We notice that the Pull Request author hasn't yet signed [Renovate's Contributor License Agreement (CLA)](https://cla-assistant.io/renovateapp/renovate).
+
+    Because this means we can't accept the contribution until that is signed, maintainers will not review the PR.
+
+    Thanks, the Renovate team
