@@ -4,7 +4,6 @@ Generally speaking, all publicly released database versions are available for us
 However, new versions may not be available on RDS for a few weeks or months after their release while AWS tests them.
 In addition, AWS may pull existing versions if serious problems arise during their use.
 
-<!-- prettier-ignore -->
 !!! warning
   The default versioning of the `aws-rds` datasource is _not_ compatible with [AWS Aurora](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html)!
   If you use AWS Aurora, you must set your own custom versioning.

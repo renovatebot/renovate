@@ -39,7 +39,6 @@ Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you 
 
 Once you're done selecting repositories for Renovate to run on, select the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
-<!-- prettier-ignore -->
 !!! note
   If you are using the Mend Renovate App then it has a custom behavior for forked repositories.
   If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
@@ -67,7 +66,6 @@ Once you have enabled Renovate on a repository, you will get a "Configure Renova
 
 ![Onboarding PR from Renovate](../assets/images/onboarding.png){ loading=lazy }
 
-<!-- prettier-ignore -->
 !!! note
   If you self-host Renovate, and want to add the rebase/retry checkbox to Renovate's onboarding PRs: enable the [`onboardingRebaseCheckbox` config option](../self-hosted-configuration.md#onboardingrebasecheckbox) first.
 
@@ -106,7 +104,6 @@ The bot first checks all the files in the `configFileNames` array before checkin
 
 #### package.json
 
-<!-- prettier-ignore -->
 !!! warning
   This approach has been deprecated and will be removed in a future release.
 

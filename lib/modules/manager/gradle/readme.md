@@ -19,7 +19,6 @@ As the output of these commands can be very large, any text other than errors (i
 If Renovate finds a `gradle/verification-metadata.xml` file and either `<verify-metadata>true</verify-metadata>` or `<verify-signatures>true</verify-signatures>` (or both), it updates the content by using the `./gradlew --write-verification-metadata <hashTypes> dependencies` command.
 Renovate will check the file for existing hash types (like `sha256`) and use them as `<hashTypes>`.
 
-<!-- prettier-ignore -->
 !!! warning
   Gradle allows verification metadata to use the `md5` and `sha1` algorithms.
   Because those algorithms are prone to collision attacks, Renovate ignores them.

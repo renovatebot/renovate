@@ -6,7 +6,6 @@ title: GitLab bot security
 
 Make sure you understand GitLab's security model, before you run a "bot" service like Renovate on GitLab, particularly the pipeline credentials.
 
-<!-- prettier-ignore -->
 !!! warning
   If you have any doubts or concerns about this content that could affect other users, please follow our [Security Policy](https://github.com/renovatebot/renovate/security/policy) and report them confidentially.
 

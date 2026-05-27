@@ -1,6 +1,5 @@
 # AWS CodeCommit
 
-<!-- prettier-ignore -->
 !!! warning "No new features for the Codecommit platform"
   In July 2024, [Amazon deprecated the CodeCommit platform](https://aws.amazon.com/blogs/devops/how-to-migrate-your-aws-codecommit-repository-to-another-git-provider/).
   In November 2025, [Amazon re-instated support for CodeCommit](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability/).

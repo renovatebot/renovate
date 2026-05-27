@@ -51,7 +51,6 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
   The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
 

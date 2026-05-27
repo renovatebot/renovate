@@ -109,7 +109,6 @@ As it is difficult to craft a regular expression that may deny usage of special 
 
 Separately, there are also opportunities for malicious external code to execute, as part of Renovate's update process.
 
-<!-- prettier-ignore -->
 !!! warning
   Below are _some_ of the options, but note that this is **not exhaustive**.
 

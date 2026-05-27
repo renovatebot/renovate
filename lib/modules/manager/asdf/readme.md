@@ -5,6 +5,5 @@ The following tools are currently supported:
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
 
-<!-- prettier-ignore -->
 !!! note
   Only the first version entry for each supported tool is managed, this is because `.tool-versions` supports fallback versions.

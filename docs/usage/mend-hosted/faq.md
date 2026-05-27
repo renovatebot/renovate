@@ -10,7 +10,6 @@ Mend-hosted apps don't set a maximum allowed `nodeMaxMemory`, so you can use [th
 
 It is recommended to set this between 1.5GB and 2.5GB but may require tweaking according to your repository.
 
-<!-- prettier-ignore -->
 !!! note
   It is at the discretion of Mend to raise the memory limit for repositories, in a similar way to how [there are increased resources for Open Source projects on Renovate Cloud](https://github.com/renovatebot/renovate/discussions/33617).
 

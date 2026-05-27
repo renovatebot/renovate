@@ -133,7 +133,6 @@ Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/reposi
 
 The steps to enable GitHub's Merge Queue differ based on whether you use GitHub Actions or another CI provider.
 
-<!-- prettier-ignore -->
 !!! tip "GitHub Merge Queue overview page"
   GitHub has a page that shows all the PRs in the Merge Queue.
   The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
@@ -232,7 +231,6 @@ If you see "Automerge: Disabled by config" it means you need to make a config ch
 By default, Renovate will not automerge until it sees passing status checks / check runs for the branch.
 If you have no tests but still want Renovate to automerge, you need to add `"ignoreTests": true` to your configuration.
 
-<!-- prettier-ignore -->
 !!! tip
   We strongly recommend you have tests in any project where you are regularly updating dependencies.
 

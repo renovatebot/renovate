@@ -1,4 +1,3 @@
-<!-- prettier-ignore -->
 !!! warning
   This datasource is experimental.
   Its syntax and behavior may change at any time!

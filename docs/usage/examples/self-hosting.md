@@ -1,10 +1,8 @@
 # Self-Hosting Examples
 
-<!-- prettier-ignore -->
 !!! warning
   All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](../security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
 
-<!-- prettier-ignore -->
 !!! warning
   Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
   GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
@@ -40,7 +38,6 @@ docker run --rm renovate/renovate:43.195
 docker run --rm renovate/renovate:43.195.2
 ```
 
-<!-- prettier-ignore -->
 !!! warning
   Do not use the example tags listed above, as they will be out-of-date.
   Go to [the `renovate/renovate` tags on DockerHub](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
@@ -163,7 +160,6 @@ spec:
 
 ### CircleCI
 
-<!-- prettier-ignore -->
 !!! warning
   The CircleCI configuration examples are for version `2` of `daniel-shuy/renovate`, which is outdated.
   Do you know how to get `daniel-shuy/renovate` version `3` working?
@@ -283,7 +279,6 @@ renovate
 Save the script file, and run the script manually.
 Only add the script to `cron` after you checked it works.
 
-<!-- prettier-ignore -->
 !!! note
   The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
   You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.

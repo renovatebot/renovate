@@ -83,7 +83,6 @@ directories:
 
 ### HTTP
 
-<!-- prettier-ignore -->
 !!! note
   Updates to dependencies tracked through the HTTP source can only be updated using [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
 
