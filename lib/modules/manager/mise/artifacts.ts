@@ -2,6 +2,7 @@ import os from 'node:os';
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { quote } from 'shlex';
+import { stringify as serializeToml } from 'smol-toml';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -14,7 +15,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
-import type { MiseFile, MiseTool } from './schema.ts';
+import type { MiseFile, MiseSettingValue, MiseTool } from './schema.ts';
 import { parseTomlFile } from './utils.ts';
 
 const managerFilePatterns = [
@@ -25,6 +26,17 @@ const managerFilePatterns = [
   '**/.config/mise/conf.d/*.toml',
   '**/.rtx{,.*}.toml',
 ];
+
+const allowedSettings = new Set([
+  'disable_tools',
+  'enable_tools',
+  'locked',
+  'locked_verify_provenance',
+  'lockfile',
+  'lockfile_platforms',
+  'minimum_release_age',
+  'slsa',
+]);
 
 /**
  * Updates mise lock files when dependencies are updated.
@@ -40,15 +52,7 @@ export async function updateArtifacts({
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug({ lockFileName }, 'No mise lock file found');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr:
-            'mise lock file updating requires an existing lock file to refresh',
-        },
-      },
-    ];
+    return null;
   }
 
   const { isLocal, env } = getConfigType(packageFileName);
@@ -92,27 +96,19 @@ export async function updateArtifacts({
   };
 
   try {
-    const {
-      mirrorRoot,
-      mirroredLockFilePath,
-      mirroredCwd,
-      mirroredPackageFilePath,
-    } = await createSanitizedMirror({
-      packageFileName,
-      lockFileName,
-      newPackageFileContent,
-      existingLockFileContent,
-    });
+    const { mirrorRoot, mirroredLockFilePath, mirroredCwd } =
+      await createSanitizedMirror({
+        packageFileName,
+        lockFileName,
+        newPackageFileContent,
+        existingLockFileContent,
+      });
     execOptions.env = {
       ...execOptions.env,
       HOME: upath.join(mirrorRoot, '.home'),
       XDG_CONFIG_HOME: upath.join(mirrorRoot, '.home/.config'),
     };
     execOptions.cwd = mirroredCwd;
-    await exec(
-      `mise trust ${quote(mirroredPackageFilePath.replace(`${mirroredCwd}/`, ''))}`,
-      execOptions,
-    );
     await exec(cmd, execOptions);
     const newLockFileContent = await fs.readFile(mirroredLockFilePath, 'utf8');
     if (existingLockFileContent === newLockFileContent) {
@@ -165,7 +161,6 @@ async function createSanitizedMirror({
   mirrorRoot: string;
   mirroredLockFilePath: string;
   mirroredCwd: string;
-  mirroredPackageFilePath: string;
 }> {
   const configFiles = await getSameScopeConfigFiles(
     packageFileName,
@@ -180,14 +175,13 @@ async function createSanitizedMirror({
       file === packageFileName
         ? newPackageFileContent
         : await readLocalFile(file, 'utf8');
-    /* v8 ignore next -- covered by tests, but v8 attributes the throw path to the condition line */
     if (rawContent === null) {
       throw new Error(`Unable to read mise config file: ${file}`);
     }
     const sanitized = sanitizeMiseConfig(rawContent, file);
     if (!sanitized) {
       throw new Error(
-        `Unable to sanitize mise config file safely (only literal [tools] entries are supported): ${file}`,
+        `Unable to sanitize mise config file safely (only literal [tools] and [settings] entries are supported): ${file}`,
       );
     }
     const mirroredFilePath = upath.join(mirrorRoot, file);
@@ -203,7 +197,6 @@ async function createSanitizedMirror({
     mirrorRoot,
     mirroredLockFilePath,
     mirroredCwd: upath.join(mirrorRoot, upath.dirname(packageFileName)),
-    mirroredPackageFilePath: upath.join(mirrorRoot, packageFileName),
   };
 }
 
@@ -227,32 +220,40 @@ function sanitizeMiseConfig(
   if (!parsed) {
     return null;
   }
-  return renderToolsOnlyToml(parsed);
+  return renderSanitizedToml(parsed);
 }
 
-function renderToolsOnlyToml(misefile: MiseFile): string {
-  const lines = ['[tools]'];
-  const entries = Object.entries(misefile.tools);
-  for (const [name, toolData] of entries) {
-    lines.push(`${quoteTomlKey(name)} = ${renderMiseTool(toolData)}`);
+function renderSanitizedToml(misefile: MiseFile): string {
+  const sanitizedConfig: {
+    tools: Record<string, MiseTool>;
+    settings?: Record<string, MiseSettingValue>;
+  } = {
+    tools: Object.fromEntries(
+      Object.entries(misefile.tools).map(([name, toolData]) => [
+        name,
+        normalizeMiseTool(toolData),
+      ]),
+    ),
+  };
+
+  const sanitizedSettings = Object.fromEntries(
+    Object.entries(misefile.settings).filter(([key]) =>
+      allowedSettings.has(key),
+    ),
+  );
+
+  if (Object.keys(sanitizedSettings).length > 0) {
+    sanitizedConfig.settings = sanitizedSettings;
   }
-  lines.push('');
-  return lines.join('\n');
+
+  return serializeToml(sanitizedConfig);
 }
 
-function renderMiseTool(toolData: MiseTool): string {
-  if (typeof toolData === 'string') {
-    return JSON.stringify(toolData);
+function normalizeMiseTool(toolData: MiseTool): MiseTool {
+  if (typeof toolData === 'string' || Array.isArray(toolData)) {
+    return toolData;
   }
-  if (Array.isArray(toolData)) {
-    return `[${toolData.map((item) => JSON.stringify(item)).join(', ')}]`;
-  }
-  const parts = Object.entries(toolData)
-    .filter(([, value]) => typeof value === 'string')
-    .map(([key, value]) => `${key} = ${JSON.stringify(value)}`);
-  return `{ ${parts.join(', ')} }`;
-}
-
-function quoteTomlKey(key: string): string {
-  return JSON.stringify(key);
+  return Object.fromEntries(
+    Object.entries(toolData).filter(([, value]) => typeof value === 'string'),
+  );
 }

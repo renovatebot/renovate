@@ -1,5 +1,9 @@
-/* v8 ignore file -- opt-in real-binary integration test */
-import { execSync } from 'node:child_process';
+import {
+  exec as execCallback,
+  execFile as execFileCallback,
+} from 'node:child_process';
+import { promisify } from 'node:util';
+import { stripIndent } from 'common-tags';
 import fs from 'fs-extra';
 import tmp from 'tmp-promise';
 import upath from 'upath';
@@ -14,20 +18,19 @@ vi.mock('../../../util/git/index.ts', async (importOriginal) => ({
   getFileList: vi.fn(),
 }));
 
-const runIntegration =
-  process.env.RUN_MISE_INTEGRATION === '1' &&
-  hasBinary('mise') &&
-  hasNetworkAccess();
-
-const describeIntegration = runIntegration ? describe : describe.skip;
+const exec = promisify(execCallback);
+const execFile = promisify(execFileCallback);
 
 async function getModule() {
   return import('./artifacts.ts');
 }
 
-function hasBinary(binary: string): boolean {
+async function hasBinary(binary: string): Promise<boolean> {
   try {
-    execSync(`command -v ${binary}`, { stdio: 'ignore', shell: '/bin/bash' });
+    await exec(`command -v ${binary}`, {
+      shell: '/bin/bash',
+      stdio: 'ignore',
+    });
     return true;
   } catch {
     return false;
@@ -40,6 +43,17 @@ function hasNetworkAccess(): boolean {
     process.env.RUN_MISE_INTEGRATION_NETWORK === '1'
   );
 }
+
+async function gitExec(cwd: string, ...args: string[]): Promise<void> {
+  await execFile('git', args, { cwd });
+}
+
+const runIntegration =
+  process.env.RUN_MISE_INTEGRATION === '1' &&
+  (await hasBinary('mise')) &&
+  hasNetworkAccess();
+
+const describeIntegration = runIntegration ? describe : describe.skip;
 
 describeIntegration('modules/manager/mise/artifacts integration', () => {
   let tmpDir: tmp.DirectoryResult;
@@ -80,43 +94,48 @@ describeIntegration('modules/manager/mise/artifacts integration', () => {
 
     await fs.writeFile(
       packageFilePath,
-      ['[tools]', 'node = "24.15.0"', '', '[env]', 'FOO = "bar"', ''].join(
-        '\n',
-      ),
+      stripIndent`
+        [tools]
+        node = "24.15.0"
+
+        [settings]
+        lockfile = true
+
+        [env]
+        FOO = "bar"
+      `,
       'utf8',
     );
 
     await fs.writeFile(
       lockFilePath,
-      [
-        '[[tools.node]]',
-        'version = "24.15.0"',
-        'backend = "core:node"',
-        '',
-      ].join('\n'),
+      stripIndent`
+        [[tools.node]]
+        version = "24.15.0"
+        backend = "core:node"
+      `,
       'utf8',
     );
 
-    execSync('git init -b main', { cwd: tmpDir.path, stdio: 'ignore' });
-    execSync('git config user.email "test@example.com"', {
-      cwd: tmpDir.path,
-      stdio: 'ignore',
-    });
-    execSync('git config user.name "Test User"', {
-      cwd: tmpDir.path,
-      stdio: 'ignore',
-    });
-    execSync('git add mise.toml mise.lock && git commit -m "init"', {
-      cwd: tmpDir.path,
-      stdio: 'ignore',
-      shell: '/bin/bash',
-    });
+    await gitExec(tmpDir.path, 'init', '-b', 'main');
+    await gitExec(tmpDir.path, 'config', 'user.email', 'test@example.com');
+    await gitExec(tmpDir.path, 'config', 'user.name', 'Test User');
+    await gitExec(tmpDir.path, 'add', 'mise.toml', 'mise.lock');
+    await gitExec(tmpDir.path, 'commit', '-m', 'init');
 
     const res = await updateArtifacts({
       packageFileName,
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent:
-        '[tools]\nnode = "24.16.0"\n\n[env]\nFOO = "bar"\n',
+      newPackageFileContent: stripIndent`
+        [tools]
+        node = "24.16.0"
+
+        [settings]
+        lockfile = true
+
+        [env]
+        FOO = "bar"
+      `,
       config: {},
     });
 

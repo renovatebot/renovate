@@ -31,20 +31,22 @@ For more information about mise lock files, see the [mise lock file documentatio
 
 ### Trust model for lock file updates
 
-When Renovate updates an existing `mise.lock`, it mirrors the discovered mise config files for the relevant lockfile scope into a temporary working tree, strips them down to `[tools]` entries only, copies in the existing lock file, and runs `mise lock` there.
+When Renovate updates an existing `mise.lock`, it mirrors the discovered mise config files for the relevant lockfile scope into a temporary working tree, strips them down to literal `[tools]` entries plus a small allowlist of lockfile-relevant `[settings]`, copies in the existing lock file, and runs `mise lock` there.
 
-This lets Renovate preserve mise's normal lockfile behavior while avoiding direct execution against the repository's original mise config files.
+This lets Renovate preserve mise's normal lockfile behavior while avoiding direct execution against the repository's original mise config files. Renovate does not call `mise trust` on the source repository or the mirrored config.
 
 #### Security considerations
 
-Because Renovate only keeps literal `[tools]` data in the mirrored config files, it intentionally drops trust-gated and dynamic features from the source configs, such as:
+Because Renovate only keeps literal `[tools]` data and an allowlisted subset of `[settings]` in the mirrored config files, it intentionally drops trust-gated, discovery-related, and dynamic features from the source configs, such as:
 
 - `[env]` directives
 - templates
 - hooks and tasks
 - `path:` plugin versions
 
-This means Renovate's mise lockfile updating is limited to repositories whose lock refresh can be driven from literal `[tools]` entries plus an existing `mise.lock`.
+The preserved settings are limited to lockfile-relevant options such as `lockfile`, `locked`, `lockfile_platforms`, `locked_verify_provenance`, `minimum_release_age`, `slsa`, `disable_tools`, and `enable_tools`.
+
+This means Renovate's mise lockfile updating is limited to repositories whose lock refresh can be driven from literal `[tools]` entries and those allowlisted settings plus an existing `mise.lock`, without executing repository-defined hooks or plugin paths from the original config.
 
 In particular:
 

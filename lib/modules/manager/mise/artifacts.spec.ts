@@ -35,7 +35,6 @@ const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateToolCmd = 'mise lock node';
 const updateMultipleToolsCmd = 'mise lock node python';
 const lockfileMaintenanceCmd = 'mise lock';
-const trustCmd = 'mise trust mise.toml';
 const mirroredCwd = '/tmp/renovate-mise-';
 const validMiseToml = '[tools]\nnode = "24.16.0"\n';
 
@@ -66,7 +65,7 @@ describe('modules/manager/mise/artifacts', () => {
     git.getFileList.mockResolvedValue(['mise.toml']);
   });
 
-  it('returns artifactError if lock file does not exist', async () => {
+  it('returns null if lock file does not exist', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
     const res = await updateArtifacts({
@@ -76,15 +75,7 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
-    expect(res).toEqual([
-      {
-        artifactError: {
-          fileName: 'mise.lock',
-          stderr:
-            'mise lock file updating requires an existing lock file to refresh',
-        },
-      },
-    ]);
+    expect(res).toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
@@ -103,7 +94,6 @@ describe('modules/manager/mise/artifacts', () => {
 
     expect(res).toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd, options: { cwd: expect.stringContaining(mirroredCwd) } },
       {
         cmd: updateToolCmd,
         options: { cwd: expect.stringContaining(mirroredCwd) },
@@ -135,7 +125,6 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd, options: { cwd: expect.stringContaining(mirroredCwd) } },
       {
         cmd: updateToolCmd,
         options: { cwd: expect.stringContaining(mirroredCwd) },
@@ -167,7 +156,7 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: trustCmd }]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
   });
 
   it('rethrows TEMPORARY_ERROR', async () => {
@@ -199,10 +188,7 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
-    expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd },
-      { cmd: lockfileMaintenanceCmd },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: lockfileMaintenanceCmd }]);
   });
 
   it('runs mise lock <tools> for targeted updates', async () => {
@@ -218,10 +204,7 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
-    expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd },
-      { cmd: updateMultipleToolsCmd },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateMultipleToolsCmd }]);
   });
 
   it('injects GITHUB_TOKEN when host rule found', async () => {
@@ -253,7 +236,6 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd },
       {
         cmd: updateToolCmd,
         options: {
@@ -279,7 +261,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots[0]).toMatchObject({
-      cmd: trustCmd,
+      cmd: updateToolCmd,
       options: {
         env: expect.objectContaining({
           HOME: expect.stringMatching(/\/tmp\/renovate-mise-.*\/\.home$/),
@@ -304,10 +286,7 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
-    expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd },
-      { cmd: lockfileMaintenanceCmd },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: lockfileMaintenanceCmd }]);
   });
 
   it('handles environment-specific lock files', async () => {
@@ -334,7 +313,6 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'mise trust mise.test.toml' },
       {
         cmd: updateToolCmd,
         options: {
@@ -367,10 +345,7 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'mise trust mise.local.toml' },
-      { cmd: 'mise lock --local node' },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'mise lock --local node' }]);
   });
 
   it('uses --local flag and MISE_ENV for env-specific local config files', async () => {
@@ -387,7 +362,6 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'mise trust mise.test.local.toml' },
       {
         cmd: 'mise lock --local node',
         options: {
@@ -410,10 +384,7 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'mise trust mise.local.toml' },
-      { cmd: 'mise lock --local' },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'mise lock --local' }]);
   });
 
   // Note: Docker and install mode tests are not included here because mise
@@ -434,7 +405,6 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd },
       { cmd: "mise lock '|| date; echo ' node" },
     ]);
   });
@@ -462,10 +432,7 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'mise trust mise.toml' },
-      { cmd: updateToolCmd },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
   });
 
   it('returns artifactError if a sibling config file in scope cannot be read', async () => {
@@ -515,14 +482,14 @@ node = 123
         artifactError: {
           fileName: 'mise.lock',
           stderr:
-            'Unable to sanitize mise config file safely (only literal [tools] entries are supported): mise.toml',
+            'Unable to sanitize mise config file safely (only literal [tools] and [settings] entries are supported): mise.toml',
         },
       },
     ]);
     expect(execSnapshots).toEqual([]);
   });
 
-  it('sanitizes array and object tool entries before locking', async () => {
+  it('sanitizes array and object tool entries and preserves allowlisted settings only', async () => {
     fs.readLocalFile.mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
@@ -534,22 +501,40 @@ node = 123
         'python = ["3.12.0", "3.11.0"]',
         '"github:foo/bar" = { version = "1.2.3", version_prefix = "v" }',
         '',
+        '[settings]',
+        'lockfile = true',
+        'locked = true',
+        'jobs = 4',
+        'disable_tools = ["node"]',
+        'trusted_config_paths = ["/"]',
+        'env_file = ".env"',
+        '',
+        '[settings.node]',
+        'mirror_url = "https://example.com/node"',
+        '',
       ].join('\n'),
       config,
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'mise trust mise.toml' },
       { cmd: 'mise lock github:foo/bar python' },
     ]);
-    const trustCwd = execSnapshots[0].options?.cwd;
+    const lockCwd = execSnapshots[0].options?.cwd;
     await expect(
-      fsExtra.readFile(upath.join(trustCwd!, 'mise.toml'), 'utf8'),
+      fsExtra.readFile(upath.join(lockCwd!, 'mise.toml'), 'utf8'),
     ).resolves.toBe(
       [
         '[tools]',
-        '"python" = ["3.12.0", "3.11.0"]',
-        '"github:foo/bar" = { version_prefix = "v", version = "1.2.3" }',
+        'python = [ "3.12.0", "3.11.0" ]',
+        '',
+        '[tools."github:foo/bar"]',
+        'version_prefix = "v"',
+        'version = "1.2.3"',
+        '',
+        '[settings]',
+        'lockfile = true',
+        'locked = true',
+        'disable_tools = [ "node" ]',
         '',
       ].join('\n'),
     );
@@ -568,10 +553,7 @@ node = 123
       config,
     });
 
-    expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd },
-      { cmd: updateToolCmd },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
   });
 
   describe('updateLockedDependency', () => {
