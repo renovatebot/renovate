@@ -12,7 +12,6 @@ import * as fs from '../../../../util/fs/index.ts';
 import { ensureCacheDir } from '../../../../util/fs/index.ts';
 import { Http } from '../../../../util/http/index.ts';
 import * as p from '../../../../util/promises.ts';
-import { TerraformDatasource } from '../../../datasource/terraform-module/base.ts';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/types.ts';
 
@@ -169,7 +168,7 @@ export class TerraformProviderHash {
       `Creating hashes for ${repository}@${version} (${registryURL})`,
     );
 
-    if (registryURL === TerraformDatasource.openTofuRegistryUrl) {
+    if (registryURL === TerraformProviderDatasource.openTofuRegistryUrl) {
       const packagesHashes =
         await TerraformProviderHash.terraformDatasource.getProviderPackages(
           repository,

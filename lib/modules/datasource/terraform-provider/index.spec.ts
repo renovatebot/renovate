@@ -484,11 +484,9 @@ describe('modules/datasource/terraform-provider/index', () => {
   });
 
   describe('getProviderPackages', () => {
-    const openTofuRegistryUrl = 'https://registry.opentofu.org';
-
     it('returns flat hash list from packages map', async () => {
       httpMock
-        .scope(openTofuRegistryUrl)
+        .scope(TerraformProviderDatasource.openTofuRegistryUrl)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(200, {
           versions: [
@@ -534,7 +532,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
     it('returns null when the requested version is missing from /versions', async () => {
       httpMock
-        .scope(openTofuRegistryUrl)
+        .scope(TerraformProviderDatasource.openTofuRegistryUrl)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(200, { versions: [] });
 
@@ -548,7 +546,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
     it('returns null when /versions has no platforms for the version', async () => {
       httpMock
-        .scope(openTofuRegistryUrl)
+        .scope(TerraformProviderDatasource.openTofuRegistryUrl)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(200, {
           versions: [{ version: '2.5.1', platforms: [] }],
@@ -564,7 +562,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
     it('returns null when the download response has no packages field', async () => {
       httpMock
-        .scope(openTofuRegistryUrl)
+        .scope(TerraformProviderDatasource.openTofuRegistryUrl)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(200, {
           versions: [
@@ -589,7 +587,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
     it('returns null when packages map is empty', async () => {
       httpMock
-        .scope(openTofuRegistryUrl)
+        .scope(TerraformProviderDatasource.openTofuRegistryUrl)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(200, {
           versions: [
@@ -609,7 +607,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
     it('throws when /versions errors', async () => {
       httpMock
-        .scope(openTofuRegistryUrl)
+        .scope(TerraformProviderDatasource.openTofuRegistryUrl)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(500);
 
