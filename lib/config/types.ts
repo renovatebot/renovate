@@ -270,6 +270,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
   toolSettings?: ToolSettingsOptions;
+  containerbasePackageRules?: PackageRule[];
 }
 
 /**

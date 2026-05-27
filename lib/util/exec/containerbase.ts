@@ -297,14 +297,44 @@ function isStable(
   return true;
 }
 
+async function applyToolPackageRules(
+  toolName: ToolName,
+  toolConfig: ToolConfig,
+): Promise<ToolConfig> {
+  const packageRules = GlobalConfig.get('containerbasePackageRules');
+  if (!packageRules?.length) {
+    return toolConfig;
+  }
+
+  const { datasource, extractVersion, packageName, versioning } = toolConfig;
+  const { applyPackageRules } = await import('../package-rules/index.ts');
+  const config = await applyPackageRules({
+    depName: toolName,
+    packageName,
+    datasource,
+    versioning,
+    depType: 'tool-constraint',
+    packageRules,
+  });
+
+  return {
+    datasource: config.datasource ?? toolConfig.datasource,
+    packageName: config.packageName ?? toolConfig.packageName,
+    versioning: config.versioning ?? toolConfig.versioning,
+    extractVersion,
+  };
+}
+
 export async function resolveConstraint(
   toolConstraint: ToolConstraint,
 ): Promise<string> {
   const { toolName } = toolConstraint;
-  const toolConfig = allToolConfig[toolName];
-  if (!toolConfig) {
+  const baseToolConfig = allToolConfig[toolName];
+  if (!baseToolConfig) {
     throw new Error(`Invalid tool to install: ${toolName}`);
   }
+
+  const toolConfig = await applyToolPackageRules(toolName, baseToolConfig);
 
   const { get: getVersioning } =
     await import('../../modules/versioning/index.ts');

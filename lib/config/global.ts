@@ -22,6 +22,7 @@ export class GlobalConfig {
     'cacheTtlOverride',
     'configFileNames',
     'containerbaseDir',
+    'containerbasePackageRules',
     'customEnvVariables',
     'dockerChildPrefix',
     'dockerCliOptions',
