@@ -124,6 +124,9 @@ describe('modules/platform/gerrit/index', () => {
     };
 
     beforeEach(() => {
+      clientMock.getServerInfo.mockResolvedValueOnce({
+        download: { archives: [], schemes: {} },
+      });
       clientMock.getBranchInfo.mockResolvedValueOnce({
         ref: 'sha-hash....',
         revision: 'main',

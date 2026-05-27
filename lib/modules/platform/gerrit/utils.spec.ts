@@ -110,6 +110,32 @@ describe('modules/platform/gerrit/utils', () => {
         );
         expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
+
+      it('falls back to endpoint when server info http url is invalid', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const serverInfo = partial<GerritServerInfo>({
+          download: {
+            archives: [],
+            schemes: {
+              http: {
+                url: '://invalid-url',
+                commands: {},
+                clone_commands: {},
+              },
+            },
+          },
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'default',
+          serverInfo,
+        );
+        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
+      });
     });
     describe('endpoint gitUrl', () => {
       it('create a git url with username/password', () => {
