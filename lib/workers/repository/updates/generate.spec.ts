@@ -70,6 +70,42 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe(false);
     });
 
+    it('uses group settings when same dep appears in multiple files and groupSingleUpdates is true', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '2.0.0',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: true,
+          group: {
+            foo: 2,
+          },
+          packageFile: 'package.json',
+        },
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '2.0.0',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: true,
+          group: {
+            foo: 2,
+          },
+          packageFile: 'packages/core/package.json',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBe('some-group');
+      expect(res.isGroup).toBeTrue();
+    });
+
     it('does not group single upgrade when groupSingleUpdates is false', () => {
       const branch = [
         {
