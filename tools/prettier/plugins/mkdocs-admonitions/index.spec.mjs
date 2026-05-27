@@ -21,12 +21,16 @@ function block(strings, ...values) {
 }
 
 describe('mkdocs-admonitions prettier plugin', () => {
-  it('preserves simple !!! note with 4-space body', async () => {
+  it('normalizes 4-space body to 2-space', async () => {
     const input = block`
       !!! note
           This is the body.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      !!! note
+        This is the body.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
   it('preserves 2-space-indented body (mirrors typst/readme.md)', async () => {
@@ -37,38 +41,56 @@ describe('mkdocs-admonitions prettier plugin', () => {
     await expect(fmt(input)).resolves.toBe(input);
   });
 
-  it('preserves 3-space-indented body (mirrors configuration-options.md)', async () => {
+  it('normalizes 3-space body to 2-space', async () => {
     const input = block`
       !!! note
          Body with three spaces.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      !!! note
+        Body with three spaces.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
-  it('preserves 5-space-indented body (mirrors self-hosted-configuration.md)', async () => {
+  it('normalizes 5-space body to 2-space', async () => {
     const input = block`
       !!! note
            Renovate supports \`JSONC\` for \`.json\` files.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      !!! note
+        Renovate supports \`JSONC\` for \`.json\` files.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
-  it('preserves multi-line body with internal blank line', async () => {
+  it('normalizes multi-line body with internal blank line from 4 to 2 spaces', async () => {
     const input = block`
       !!! note
           First paragraph.
 
           Second paragraph.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      !!! note
+        First paragraph.
+
+        Second paragraph.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
-  it('preserves !!! warning with quoted title', async () => {
+  it('normalizes body of !!! warning with quoted title from 4 to 2 spaces', async () => {
     const input = block`
       !!! warning "Custom Title"
           Content here.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      !!! warning "Custom Title"
+        Content here.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
   it('preserves empty-body admonition', async () => {
@@ -102,7 +124,7 @@ describe('mkdocs-admonitions prettier plugin', () => {
       More text.
     `;
     const output = await fmt(input);
-    expect(output).toContain('!!! note\n    Body.');
+    expect(output).toContain('!!! note\n  Body.');
     // Prettier normalizes the paragraph's extra spaces
     expect(output).not.toContain('Some   extra   spaces.');
     expect(output).toContain('Some extra spaces.');
@@ -118,42 +140,74 @@ describe('mkdocs-admonitions prettier plugin', () => {
           Other.
     `;
     const output = await fmt(input);
-    expect(output).toContain('!!! note\n    Body.');
-    expect(output).toContain('!!! tip\n    Other.');
+    expect(output).toContain('!!! note\n  Body.');
+    expect(output).toContain('!!! tip\n  Other.');
   });
 
-  it('preserves ??? collapsible admonition (closed by default)', async () => {
+  it('normalizes ??? collapsible admonition body from 4 to 2 spaces', async () => {
     const input = block`
       ??? note
           This is collapsible.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      ??? note
+        This is collapsible.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
-  it('preserves ???+ collapsible admonition (open by default)', async () => {
+  it('normalizes ???+ collapsible admonition body from 4 to 2 spaces', async () => {
     const input = block`
       ???+ tip
           This is open by default.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      ???+ tip
+        This is open by default.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
-  it('preserves ??? collapsible with quoted title', async () => {
+  it('normalizes ??? collapsible with quoted title body from 4 to 2 spaces', async () => {
     const input = block`
       ??? warning "Custom Title"
           Content here.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      ??? warning "Custom Title"
+        Content here.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
-  it('preserves ???+ collapsible with multi-line body', async () => {
+  it('normalizes ???+ collapsible multi-line body from 4 to 2 spaces', async () => {
     const input = block`
       ???+ note "Title"
           First paragraph.
 
           Second paragraph.
     `;
-    await expect(fmt(input)).resolves.toBe(input);
+    const expected = block`
+      ???+ note "Title"
+        First paragraph.
+
+        Second paragraph.
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
+  });
+
+  it('preserves relative indent of nested content while normalizing base to 2 spaces', async () => {
+    const input = block`
+      !!! note
+          outer
+              inner
+    `;
+    const expected = block`
+      !!! note
+        outer
+            inner
+    `;
+    await expect(fmt(input)).resolves.toBe(expected);
   });
 
   it('throws when source contains collision guard string', async () => {

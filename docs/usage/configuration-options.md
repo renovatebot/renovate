@@ -19,8 +19,8 @@ The bot first checks all the files in the `configFileNames` array before checkin
   Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
 
 !!! note
-   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
-   We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
+  Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+  We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
 
 When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
 Renovate stops the search after it finds the first match.
@@ -4082,7 +4082,7 @@ Example:
 ```
 
 !!! note
-   `dataFileTemplate` is ignored if there is no `commands` configured.
+  `dataFileTemplate` is ignored if there is no `commands` configured.
 
 ### `postUpgradeTasks.executionMode`
 
@@ -4751,7 +4751,7 @@ When this option is set, Renovate won't attempt to update artifacts such as lock
   When this option is used in package rules, along with grouped upgrades, artifact updating will only be skipped if every upgrade in the grouped branch wants to skip it.
 
 !!! warning
-    When artifact updates are skipped and the `packageManager` field in `package.json` is updated, the new version will not contain a hash. The hash is only applied when artifacts are updated. For example, a value of `packageManager: "yarn@3.0.0+sha224.deadbeef"` would be updated to just `packageManager: "yarn@3.1.0"` rather than `packageManager: "yarn@3.1.0+sha224.f0cacc1a"`.
+  When artifact updates are skipped and the `packageManager` field in `package.json` is updated, the new version will not contain a hash. The hash is only applied when artifacts are updated. For example, a value of `packageManager: "yarn@3.0.0+sha224.deadbeef"` would be updated to just `packageManager: "yarn@3.1.0"` rather than `packageManager: "yarn@3.1.0+sha224.f0cacc1a"`.
 
 ## `skipInstalls`
 
