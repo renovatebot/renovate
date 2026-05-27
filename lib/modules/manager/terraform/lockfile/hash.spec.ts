@@ -10,6 +10,7 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error.
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
 import { TerraformProviderHash } from './hash.ts';
 
+const openTofuRegistryUrl = TerraformProviderDatasource.openTofuRegistryUrl;
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
   TerraformProviderDatasource.defaultRegistryUrls[0];
@@ -446,8 +447,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
   });
 
   describe('OpenTofu fast path', () => {
-    const openTofuRegistryUrl = TerraformProviderDatasource.openTofuRegistryUrl;
-
     it('uses packages API without downloading zips', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
