@@ -783,7 +783,6 @@ minimumReleaseAgeExclude:
               minimumReleaseAgeExclude:
                 # Renovate security update: fast-xml-parser@5.5.7
                 - fast-xml-parser@5.5.6 || 5.5.7
-                - fast-xml-parser@<=5.3.5@5.5.7
             ` + '\n',
           },
         },

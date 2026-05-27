@@ -216,10 +216,8 @@ async function updatePnpmWorkspace(
     } = getMatchedItem(excludeDepName!, excludeNode.items);
 
     if (allExcluded) {
-      continue;
-    }
-
-    if (malformed && isScalar<string>(matchedItem)) {
+      // still clean up any malformed entries even when a wildcard covers the package
+    } else if (malformed && isScalar<string>(matchedItem)) {
       logger.debug(
         { entry: matchedItem.value, excludeDepName, newVersion },
         'Replacing malformed minimumReleaseAgeExclude entry',
@@ -227,10 +225,7 @@ async function updatePnpmWorkspace(
       matchedItem.value = `${excludeDepName}@${newVersion}`;
       matchedItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
       updated = true;
-      continue;
-    }
-
-    if (isScalar<string>(matchedItem)) {
+    } else if (isScalar<string>(matchedItem)) {
       // if we have a comment before the list, which includes the dependency
       if (excludeNode?.commentBefore?.includes(`${excludeDepName}@`)) {
         // and it doesn't already have the version included in it
@@ -284,6 +279,21 @@ async function updatePnpmWorkspace(
 
       excludeNode.items.push(newItem);
       updated = true;
+    }
+
+    // Remove any malformed entries for the same package left over from the prior bug
+    for (let i = excludeNode.items.length - 1; i >= 0; i--) {
+      const item = excludeNode.items[i];
+      if (
+        item !== matchedItem &&
+        isScalar(item) &&
+        isString(item.value) &&
+        item.value.startsWith(`${excludeDepName}@`) &&
+        !isValidMinimumReleaseAgeExcludeEntry(item.value, excludeDepName!)
+      ) {
+        excludeNode.items.splice(i, 1);
+        updated = true;
+      }
     }
   }
 
