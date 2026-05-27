@@ -306,21 +306,21 @@ async function applyToolPackageRules(
     return toolConfig;
   }
 
-  const { datasource, extractVersion, packageName, versioning } = toolConfig;
+  const { extractVersion, datasource, packageName, versioning } = toolConfig;
   const { applyPackageRules } = await import('../package-rules/index.ts');
-  const config = await applyPackageRules({
+  const configOverride = await applyPackageRules({
     depName: toolName,
-    packageName,
     datasource,
+    packageName,
     versioning,
     depType: 'tool-constraint',
     packageRules,
   });
 
   return {
-    datasource: config.datasource ?? toolConfig.datasource,
-    packageName: config.packageName ?? toolConfig.packageName,
-    versioning: config.versioning ?? toolConfig.versioning,
+    datasource: configOverride.datasource,
+    packageName: configOverride.packageName,
+    versioning: configOverride.versioning,
     extractVersion,
   };
 }
