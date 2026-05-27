@@ -12,7 +12,7 @@ Do _not_ put the self-hosted config options listed on this page in your "reposit
 The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
 !!! note
-   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+  Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
 
 For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
 
@@ -1056,8 +1056,8 @@ When this feature is enabled, resolved presets will be cached in Renovate's pack
 TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
 
 !!! warning
-   Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
-   You should only enable this when all repositories are trusted, such as a corporate environment.
+  Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+  You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## `privateKey`
 
