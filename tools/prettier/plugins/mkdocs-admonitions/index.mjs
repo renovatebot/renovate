@@ -13,7 +13,7 @@ import markdownPlugin from 'prettier/plugins/markdown';
 const ADMONITION_HEADER =
   /^(?:!!!|\?\?\?\+?)\s+[A-Za-z][\w-]*(?:\s+"[^"\n]*")?\s*$/;
 const BODY_LINE = /^(?:$|\s{2,})/;
-const PLACEHOLDER_RE = /^<!--mkdocs-admonition:(\d+)-->\s*$/;
+const PLACEHOLDER_RE = /^<!--mkdocs-admonition:(?<index>\d+)-->\s*$/;
 const COLLISION_GUARD = 'mkdocs-admonition:';
 // When <!-- prettier-ignore --> precedes an admonition, prettier will attempt
 // to output the *next* AST node verbatim using original-text offsets that come
@@ -38,11 +38,9 @@ function maskAdmonitions(text) {
 
     if (inFence) {
       // Closing fence: same char, at least as many chars, no content after
-      const closeMatch = /^(\s{0,3})(`{3,}|~{3,})\s*$/.exec(line);
-      if (
-        closeMatch?.[2][0] === fenceChar &&
-        closeMatch[2].length >= fenceLen
-      ) {
+      const closeMatch = /^\s{0,3}(?<fence>`{3,}|~{3,})\s*$/.exec(line);
+      const closeFence = closeMatch?.groups?.fence;
+      if (closeFence?.[0] === fenceChar && closeFence.length >= fenceLen) {
         inFence = false;
       }
       masked.push(line);
@@ -51,11 +49,11 @@ function maskAdmonitions(text) {
     }
 
     // Opening fence: 0-3 spaces then 3+ backticks or tildes
-    const fenceMatch = /^(\s{0,3})(`{3,}|~{3,})/.exec(line);
-    if (fenceMatch) {
+    const fenceMatch = /^\s{0,3}(?<fence>`{3,}|~{3,})/.exec(line);
+    if (fenceMatch?.groups) {
       inFence = true;
-      fenceChar = fenceMatch[2][0];
-      fenceLen = fenceMatch[2].length;
+      fenceChar = fenceMatch.groups.fence[0];
+      fenceLen = fenceMatch.groups.fence.length;
       masked.push(line);
       i++;
       continue;
@@ -138,8 +136,8 @@ function unmaskAdmonitions(ast, placeholders) {
   function walk(node) {
     if (node.type === 'html') {
       const match = PLACEHOLDER_RE.exec(node.value);
-      if (match) {
-        node.value = placeholders[Number(match[1])];
+      if (match?.groups) {
+        node.value = placeholders[Number(match.groups.index)];
       }
       return;
     }
