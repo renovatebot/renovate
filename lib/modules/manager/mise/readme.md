@@ -31,23 +31,26 @@ For more information about mise lock files, see the [mise lock file documentatio
 
 ### Trust model for lock file updates
 
-When Renovate runs `mise lock`, it sets `MISE_TRUSTED_CONFIG_PATHS` to the ephemeral repository checkout directory for that subprocess.
-This allows `mise` to process trusted-only project features non-interactively during lock file updates.
+When Renovate updates an existing `mise.lock`, it mirrors the discovered mise config files for the relevant lockfile scope into a temporary working tree, strips them down to `[tools]` entries only, copies in the existing lock file, and runs `mise lock` there.
 
-This is intentionally scoped to the current repository checkout instead of globally trusting all paths or permanently modifying the runner's mise trust store.
+This lets Renovate preserve mise's normal lockfile behavior while avoiding direct execution against the repository's original mise config files.
 
 #### Security considerations
 
-This does reduce one layer of mise's built-in trust protection for the checked out repository.
-As a result, `mise` configs inside that repository can use features that normally require trust, such as:
+Because Renovate only keeps literal `[tools]` data in the mirrored config files, it intentionally drops trust-gated and dynamic features from the source configs, such as:
 
 - `[env]` directives
 - templates
 - hooks and tasks
 - `path:` plugin versions
 
-On Renovate runners, this means any `mise` config within the current checkout is trusted for the duration of the `mise lock` subprocess.
-This is a localized trade-off to support non-interactive lock file generation, but it should still be considered part of the runner's repository command-execution trust model.
+This means Renovate's mise lockfile updating is limited to repositories whose lock refresh can be driven from literal `[tools]` entries plus an existing `mise.lock`.
+
+In particular:
+
+- an existing `mise.lock` is required
+- dynamic config behavior is not preserved in the mirrored update workspace
+- first-time lockfile generation is not supported through this path
 
 ### Renovate only updates primary versions
 
