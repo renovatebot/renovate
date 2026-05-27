@@ -17,11 +17,12 @@ The deno manager also supports some `depTypes` that supported by [npm manager](.
 
 <!-- prettier-ignore -->
 !!! note
-    Deno cli supports [private npm compatible registries](https://docs.deno.com/runtime/fundamentals/node/#private-registries) itself, however the deno managaer is not yet ready to support [Private npm module](../../../getting-started/private-packages.md#npm).
+  Deno cli supports [private npm compatible registries](https://docs.deno.com/runtime/fundamentals/node/#private-registries) itself, however the deno managaer is not yet ready to support [Private npm module](../../../getting-started/private-packages.md#npm).
 
 <!-- prettier-ignore -->
 !!! note
-    In source dependencies are not supported.
-    ```ts
-    import { assert } from "jsr:@std/assert@1.0.0";
-    ```
+  In source dependencies are not supported.
+
+```ts
+import { assert } from 'jsr:@std/assert@1.0.0';
+```

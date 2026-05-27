@@ -7,4 +7,4 @@ The following tools are currently supported:
 
 <!-- prettier-ignore -->
 !!! note
-    Only the first version entry for each supported tool is managed, this is because `.tool-versions` supports fallback versions.
+  Only the first version entry for each supported tool is managed, this is because `.tool-versions` supports fallback versions.

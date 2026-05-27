@@ -85,7 +85,7 @@ directories:
 
 <!-- prettier-ignore -->
 !!! note
-    Updates to dependencies tracked through the HTTP source can only be updated using [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
+  Updates to dependencies tracked through the HTTP source can only be updated using [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
 
 Renovate can extract HTTP dependency sources, but will not update them without [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
 

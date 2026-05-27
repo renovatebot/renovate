@@ -4,8 +4,8 @@ Renovate supports [Gitea](https://gitea.io).
 
 <!-- prettier-ignore -->
 !!! note
-    Use [`forgejo`](../forgejo/index.md) as the platform if you are using Forgejo.
-    Forgejo support will be removed from `gitea` platform in a future release.
+  Use [`forgejo`](../forgejo/index.md) as the platform if you are using Forgejo.
+  Forgejo support will be removed from `gitea` platform in a future release.
 
 ## Authentication
 

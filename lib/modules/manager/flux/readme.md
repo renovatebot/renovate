@@ -67,9 +67,9 @@ System manifests are identified via being named `gotk-components.y(a)ml` and con
 
 <!-- prettier-ignore -->
 !!! warning
-    Renovate cannot identify the use of custom bootstrap flags, such as `--cluster-domain`.
-    In such a scenario Renovate's PR will overwrite these values with the Flux defaults.
-    See [issue #13952 on GitHub](https://github.com/renovatebot/renovate/issues/13952) for more information.
+  Renovate cannot identify the use of custom bootstrap flags, such as `--cluster-domain`.
+  In such a scenario Renovate's PR will overwrite these values with the Flux defaults.
+  See [issue #13952 on GitHub](https://github.com/renovatebot/renovate/issues/13952) for more information.
 
 Updating system manifests requires that either:
 
