@@ -468,6 +468,92 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('returns artifactError if a sibling config file in scope cannot be read', async () => {
+    git.getFileList.mockResolvedValue([
+      '.config/mise/conf.d/default.toml',
+      '.config/mise/conf.d/node.toml',
+    ]);
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: '.config/mise/conf.d/default.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: validMiseToml,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: '.config/mise/mise.lock',
+          stderr:
+            'Unable to read mise config file: .config/mise/conf.d/node.toml',
+        },
+      },
+    ]);
+    expect(execSnapshots).toEqual([]);
+  });
+
+  it('returns artifactError if the target config cannot be sanitized safely', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: `[tools]
+node = 123
+`,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'mise.lock',
+          stderr:
+            'Unable to sanitize mise config file safely (only literal [tools] entries are supported): mise.toml',
+        },
+      },
+    ]);
+    expect(execSnapshots).toEqual([]);
+  });
+
+  it('sanitizes array and object tool entries before locking', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'github:foo/bar' }, { depName: 'python' }],
+      newPackageFileContent: [
+        '[tools]',
+        'python = ["3.12.0", "3.11.0"]',
+        '"github:foo/bar" = { version = "1.2.3", version_prefix = "v" }',
+        '',
+      ].join('\n'),
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'mise trust mise.toml' },
+      { cmd: 'mise lock github:foo/bar python' },
+    ]);
+    const trustCwd = execSnapshots[0].options?.cwd;
+    await expect(
+      fsExtra.readFile(upath.join(trustCwd!, 'mise.toml'), 'utf8'),
+    ).resolves.toBe(
+      [
+        '[tools]',
+        '"python" = ["3.12.0", "3.11.0"]',
+        '"github:foo/bar" = { version_prefix = "v", version = "1.2.3" }',
+        '',
+      ].join('\n'),
+    );
+  });
   it('mirrors sibling config files in the same lockfile scope', async () => {
     git.getFileList.mockResolvedValue(['mise.toml', 'mise.local.toml']);
     fs.readLocalFile
