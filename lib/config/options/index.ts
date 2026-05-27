@@ -2579,6 +2579,15 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     advancedUse: true,
   },
+  {
+    name: 'groupSingleUpdates',
+    description:
+      'Apply group settings even when the group contains only one update.',
+    type: 'boolean',
+    default: false,
+    cli: false,
+    env: false,
+  },
   // Pull Request options
   {
     name: 'labels',

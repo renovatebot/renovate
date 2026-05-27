@@ -49,6 +49,65 @@ describe('workers/repository/updates/generate', () => {
       expect(res.minimumGroupSize).toBe(1);
     });
 
+    it('uses group settings for single upgrade when groupSingleUpdates is true', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: true,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBe('some-group');
+      expect(res.isGroup).toBeTrue();
+      expect(res.recreateClosed).toBe(false);
+    });
+
+    it('does not group single upgrade when groupSingleUpdates is false', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: false,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeUndefined();
+      expect(res.recreateClosed).toBe(false);
+    });
+
+    it('does not group single upgrade without groupName even with groupSingleUpdates', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: true,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeUndefined();
+    });
+
     it('handles lockFileMaintenance', () => {
       const branch = [
         {
