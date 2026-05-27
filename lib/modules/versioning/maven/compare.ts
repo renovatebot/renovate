@@ -2,6 +2,7 @@ import { regEx } from '../../../util/regex.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
+const ALPHA_SUFFIX = '-alpha';
 
 const TYPE_NUMBER = 'TYPE_NUMBER';
 const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
@@ -461,12 +462,14 @@ function rangeToStr(fullRange: Range[] | null): string | null {
 
 function tokensToStr(tokens: Token[]): string {
   return tokens.reduce((result: string, token: Token) => {
-    const prefix =
-      token.prefix === PREFIX_DOT
-        ? '.'
-        : token.prefix === PREFIX_HYPHEN
-          ? '-'
-          : token.prefix;
+    let prefix: string;
+    if (token.prefix === PREFIX_DOT) {
+      prefix = '.';
+    } else if (token.prefix === PREFIX_HYPHEN) {
+      prefix = '-';
+    } else {
+      prefix = token.prefix;
+    }
     return `${result}${prefix}${token.val}`;
   }, '');
 }
@@ -534,10 +537,32 @@ function autoExtendMavenRange(
     rightValue !== null &&
     incrementRangeValue(leftValue) === rightValue
   ) {
+    // if a range was detected where incrementing the lower value once results in the upper value
+    // and the new version is outside the range, construct a new range that follows the same semantic
+    // [1,2) / 4.3.2 => [4,5)
     if (compare(newValue, leftValue) !== -1) {
       interval.leftValue = coerceRangeValue(leftValue, newValue);
       interval.rightValue = incrementRangeValue(interval.leftValue);
     }
+  } else if (
+    leftValue !== null &&
+    rightValue !== null &&
+    incrementRangeValue(leftValue) + ALPHA_SUFFIX === rightValue
+  ) {
+    // same as last if, but properly considering Maven ordering specification documented at
+    // https://maven.apache.org/pom.html#Version_Order_Specification
+    // 4-alpha is smaller than 4.0.0 for example
+    // while often people that intend to only match version 1.x use [1,2)
+    // this is not correct as it matches various 2.x versions, mostly pre-versions
+    // so the correct range definition would be [1,2-alpha) as nothing
+    // starting with 2 can be lower than 2-alpha in Maven version ordering logic
+    //
+    // so this if handles the conceptually same case as the last if
+    // just for the case when proper Maven ranges are used
+    // [1,2-alpha) / 4.3.2 => [4,5-alpha)
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
+    interval.rightValue =
+      incrementRangeValue(interval.leftValue) + ALPHA_SUFFIX;
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
