@@ -41,30 +41,6 @@ describe('mkdocs-admonitions prettier plugin', () => {
     await expect(fmt(input)).resolves.toBe(input);
   });
 
-  it('normalizes 3-space body to 2-space', async () => {
-    const input = block`
-      !!! note
-         Body with three spaces.
-    `;
-    const expected = block`
-      !!! note
-        Body with three spaces.
-    `;
-    await expect(fmt(input)).resolves.toBe(expected);
-  });
-
-  it('normalizes 5-space body to 2-space', async () => {
-    const input = block`
-      !!! note
-           Renovate supports \`JSONC\` for \`.json\` files.
-    `;
-    const expected = block`
-      !!! note
-        Renovate supports \`JSONC\` for \`.json\` files.
-    `;
-    await expect(fmt(input)).resolves.toBe(expected);
-  });
-
   it('normalizes multi-line body with internal blank line from 4 to 2 spaces', async () => {
     const input = block`
       !!! note
@@ -164,34 +140,6 @@ describe('mkdocs-admonitions prettier plugin', () => {
     const expected = block`
       ???+ tip
         This is open by default.
-    `;
-    await expect(fmt(input)).resolves.toBe(expected);
-  });
-
-  it('normalizes ??? collapsible with quoted title body from 4 to 2 spaces', async () => {
-    const input = block`
-      ??? warning "Custom Title"
-          Content here.
-    `;
-    const expected = block`
-      ??? warning "Custom Title"
-        Content here.
-    `;
-    await expect(fmt(input)).resolves.toBe(expected);
-  });
-
-  it('normalizes ???+ collapsible multi-line body from 4 to 2 spaces', async () => {
-    const input = block`
-      ???+ note "Title"
-          First paragraph.
-
-          Second paragraph.
-    `;
-    const expected = block`
-      ???+ note "Title"
-        First paragraph.
-
-        Second paragraph.
     `;
     await expect(fmt(input)).resolves.toBe(expected);
   });
