@@ -35,6 +35,7 @@ const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateToolCmd = 'mise lock node';
 const updateMultipleToolsCmd = 'mise lock node python';
 const lockfileMaintenanceCmd = 'mise lock';
+const trustCmd = 'mise trust mise.toml';
 const mirroredCwd = '/tmp/renovate-mise-';
 const validMiseToml = '[tools]\nnode = "24.16.0"\n';
 
@@ -102,6 +103,7 @@ describe('modules/manager/mise/artifacts', () => {
 
     expect(res).toBeNull();
     expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd, options: { cwd: expect.stringContaining(mirroredCwd) } },
       {
         cmd: updateToolCmd,
         options: { cwd: expect.stringContaining(mirroredCwd) },
@@ -133,6 +135,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd, options: { cwd: expect.stringContaining(mirroredCwd) } },
       {
         cmd: updateToolCmd,
         options: { cwd: expect.stringContaining(mirroredCwd) },
@@ -164,7 +167,7 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
+    expect(execSnapshots).toMatchObject([{ cmd: trustCmd }]);
   });
 
   it('rethrows TEMPORARY_ERROR', async () => {
@@ -196,7 +199,10 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
-    expect(execSnapshots).toMatchObject([{ cmd: lockfileMaintenanceCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: lockfileMaintenanceCmd },
+    ]);
   });
 
   it('runs mise lock <tools> for targeted updates', async () => {
@@ -212,7 +218,10 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
-    expect(execSnapshots).toMatchObject([{ cmd: updateMultipleToolsCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: updateMultipleToolsCmd },
+    ]);
   });
 
   it('injects GITHUB_TOKEN when host rule found', async () => {
@@ -244,6 +253,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
       {
         cmd: updateToolCmd,
         options: {
@@ -253,6 +263,32 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
+  });
+
+  it('sets writable HOME/XDG config envs for mirrored execution', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('new package file content');
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: validMiseToml,
+      config,
+    });
+
+    expect(execSnapshots[0]).toMatchObject({
+      cmd: trustCmd,
+      options: {
+        env: expect.objectContaining({
+          HOME: expect.stringMatching(/\/tmp\/renovate-mise-.*\/\.home$/),
+          XDG_CONFIG_HOME: expect.stringMatching(
+            /\/tmp\/renovate-mise-.*\/\.home\/\.config$/,
+          ),
+        }),
+      },
+    });
   });
 
   it('handles empty updatedDeps with fallback to full lock', async () => {
@@ -268,7 +304,10 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
-    expect(execSnapshots).toMatchObject([{ cmd: lockfileMaintenanceCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: lockfileMaintenanceCmd },
+    ]);
   });
 
   it('handles environment-specific lock files', async () => {
@@ -295,6 +334,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: 'mise trust mise.test.toml' },
       {
         cmd: updateToolCmd,
         options: {
@@ -327,7 +367,10 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'mise lock --local node' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'mise trust mise.local.toml' },
+      { cmd: 'mise lock --local node' },
+    ]);
   });
 
   it('uses --local flag and MISE_ENV for env-specific local config files', async () => {
@@ -344,6 +387,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: 'mise trust mise.test.local.toml' },
       {
         cmd: 'mise lock --local node',
         options: {
@@ -366,7 +410,10 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
-    expect(execSnapshots).toMatchObject([{ cmd: 'mise lock --local' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'mise trust mise.local.toml' },
+      { cmd: 'mise lock --local' },
+    ]);
   });
 
   // Note: Docker and install mode tests are not included here because mise
@@ -387,6 +434,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
       { cmd: "mise lock '|| date; echo ' node" },
     ]);
   });
@@ -414,7 +462,10 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'mise trust mise.toml' },
+      { cmd: updateToolCmd },
+    ]);
   });
 
   it('mirrors sibling config files in the same lockfile scope', async () => {
@@ -431,7 +482,10 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
-    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: updateToolCmd },
+    ]);
   });
 
   describe('updateLockedDependency', () => {

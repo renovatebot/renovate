@@ -92,13 +92,27 @@ export async function updateArtifacts({
   };
 
   try {
-    const { mirroredLockFilePath, mirroredCwd } = await createSanitizedMirror({
+    const {
+      mirrorRoot,
+      mirroredLockFilePath,
+      mirroredCwd,
+      mirroredPackageFilePath,
+    } = await createSanitizedMirror({
       packageFileName,
       lockFileName,
       newPackageFileContent,
       existingLockFileContent,
     });
+    execOptions.env = {
+      ...execOptions.env,
+      HOME: upath.join(mirrorRoot, '.home'),
+      XDG_CONFIG_HOME: upath.join(mirrorRoot, '.home/.config'),
+    };
     execOptions.cwd = mirroredCwd;
+    await exec(
+      `mise trust ${quote(mirroredPackageFilePath.replace(`${mirroredCwd}/`, ''))}`,
+      execOptions,
+    );
     await exec(cmd, execOptions);
     const newLockFileContent = await fs.readFile(mirroredLockFilePath, 'utf8');
     if (existingLockFileContent === newLockFileContent) {
@@ -151,6 +165,7 @@ async function createSanitizedMirror({
   mirrorRoot: string;
   mirroredLockFilePath: string;
   mirroredCwd: string;
+  mirroredPackageFilePath: string;
 }> {
   const configFiles = await getSameScopeConfigFiles(
     packageFileName,
@@ -187,6 +202,7 @@ async function createSanitizedMirror({
     mirrorRoot,
     mirroredLockFilePath,
     mirroredCwd: upath.join(mirrorRoot, upath.dirname(packageFileName)),
+    mirroredPackageFilePath: upath.join(mirrorRoot, packageFileName),
   };
 }
 
