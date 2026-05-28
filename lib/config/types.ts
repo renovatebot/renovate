@@ -2,7 +2,11 @@ import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
+import type {
+  GitUrlOption,
+  RepoSortMethod,
+  SortMethod,
+} from '../modules/platform/types.ts';
 import type {
   AutoMergeType,
   HostRule,
@@ -249,6 +253,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   executionTimeout?: number;
   exposeAllEnv?: boolean;
   gitTimeout?: number;
+  gitUrl?: GitUrlOption;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
