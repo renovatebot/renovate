@@ -128,7 +128,7 @@ export async function postUpgradeCommandsExecutor(
           );
         }
         if (
-          allowedCommands!.some((pattern) => regEx(pattern).test(compiledCmd))
+          allowedCommands.some((pattern) => regEx(pattern).test(compiledCmd))
         ) {
           try {
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
@@ -136,7 +136,6 @@ export async function postUpgradeCommandsExecutor(
             const execOpts: ExecOptions = {
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
-                false,
               ),
 
               cwd: workingDir,

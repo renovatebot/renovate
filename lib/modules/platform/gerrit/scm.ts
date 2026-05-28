@@ -259,5 +259,5 @@ export class GerritScm extends DefaultGitScm {
  * TODO: Gerrit don't accept longer Change-IDs (sha256), but what happens with this https://git-scm.com/docs/hash-function-transition/ ?
  */
 function generateChangeId(): string {
-  return 'I' + hash(randomUUID(), 'sha1');
+  return `I${hash(randomUUID(), 'sha1')}`;
 }

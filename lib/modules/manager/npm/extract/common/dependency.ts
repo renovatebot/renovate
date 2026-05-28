@@ -16,7 +16,7 @@ import {
 import type { PackageDependency } from '../../../types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
-  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/,
+  /(?:git@)github.com:([^/]+)\/([^/]+?)(?:\.git)?$/,
 );
 
 export function parseDepName(depType: string, key: string): string {
@@ -109,7 +109,7 @@ export function extractDependency(
       dep.packageName = valSplit[0];
       dep.currentValue = valSplit[1];
     } else if (valSplit.length === 3) {
-      dep.packageName = valSplit[0] + '@' + valSplit[1];
+      dep.packageName = `${valSplit[0]}@${valSplit[1]}`;
       dep.currentValue = valSplit[2];
     } else {
       logger.debug(
@@ -157,10 +157,11 @@ export function extractDependency(
     githubRepo = matchUrlSshFormat[2];
     githubOwnerRepo = `${githubOwner}/${githubRepo}`;
   }
-  const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
+  const githubOwnerRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
+  const githubRepoRegex = regEx(/^[a-zA-Z0-9._-]{1,100}$/);
   if (
-    !githubValidRegex.test(githubOwner) ||
-    !githubValidRegex.test(githubRepo)
+    !githubOwnerRegex.test(githubOwner) ||
+    !githubRepoRegex.test(githubRepo)
   ) {
     dep.skipReason = 'unspecified-version';
     return dep;

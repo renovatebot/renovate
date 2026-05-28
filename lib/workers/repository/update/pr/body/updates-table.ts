@@ -92,8 +92,8 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   let res = '\n\nThis PR contains the following updates:\n\n';
   const headerCells = tableColumns.map((col) => getHeaderLabel(col, config));
 
-  res += '| ' + headerCells.join(' | ') + ' |\n';
-  res += '|' + tableColumns.map(() => '---|').join('') + '\n';
+  res += `| ${headerCells.join(' | ')} |\n`;
+  res += `|${tableColumns.map(() => '---|').join('')}\n`;
   const rows = [];
   for (const row of tableValues) {
     let val = '|';

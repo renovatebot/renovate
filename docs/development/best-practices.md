@@ -333,7 +333,22 @@ Declare types and function prototypes with [JSDoc](https://jsdoc.app/index.html)
 
 ## regex
 
-Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing multiple groups, for example: `(?<groupName>CapturedGroup)`.
+Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing groups.
+Prefer named groups even for a single capture — positional references (`match[1]`) break silently when the pattern changes.
+Non-capturing groups (`(?:...)`) are always fine and encouraged when the captured value is not needed.
+
+Always use the `regEx()` utility from `lib/util/regex.ts` instead of the `RegExp` constructor or regex literals.
+It transparently uses the RE2 engine when available for safer, denial-of-service-resistant matching.
+
+```ts
+import { regEx } from '~/lib/util/regex';
+
+const pattern = regEx(/^(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?$/);
+const match = pattern.exec(version);
+if (match?.groups) {
+  const { major, minor, patch } = match.groups;
+}
+```
 
 ## Windows
 

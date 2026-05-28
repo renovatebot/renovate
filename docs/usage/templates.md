@@ -18,19 +18,16 @@ Some are configuration options passed through, while others are generated as par
 ## Options that support templating
 
 <!-- Automatically insert options that support templating here -->
-<!-- Automatically insert options that support templating end -->
 
 ## Exposed config options
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->
 
 <!-- Automatically insert exposed configuration options here -->
 
 ## Other available fields
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->
 
 <!-- Insert runtime fields here -->
 
