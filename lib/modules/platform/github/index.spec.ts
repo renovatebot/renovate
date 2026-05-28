@@ -73,7 +73,7 @@ describe('modules/platform/github/index', () => {
           endpoint: 'https://[invalid',
           token: 'abc',
         }),
-      ).rejects.toThrow('Invalid GitHub endpoint: https://[invalid/');
+      ).rejects.toThrow('Invalid GitHub endpoint URL: https://[invalid');
     });
 
     it('should throw if using fine-grained token with GHE <3.10', async () => {

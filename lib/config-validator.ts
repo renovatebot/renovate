@@ -77,17 +77,22 @@ async function validate(
     const added = styleText('green', '+ ');
     const removed = styleText('red', '- ');
     const msg = changedObjects
-      .flatMap((part) =>
-        part.value
+      .flatMap((part) => {
+        let linePrefix: string;
+        if (part.added) {
+          linePrefix = added;
+        } else if (part.removed) {
+          linePrefix = removed;
+        } else {
+          linePrefix = '  ';
+        }
+        return part.value
           .split('\n')
           .filter(isNonEmptyStringAndNotWhitespace)
           .map((line) =>
-            line.replace(
-              regEx(/^(?<ws> *)/),
-              `${part.added ? added : part.removed ? removed : '  '}$<ws>`,
-            ),
-          ),
-      )
+            line.replace(regEx(/^(?<ws> *)/), `${linePrefix}$<ws>`),
+          );
+      })
       .join('\n');
     logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {

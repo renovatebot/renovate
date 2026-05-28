@@ -57,9 +57,8 @@ We recommend this default image for most users.
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
-<!-- prettier-ignore -->
 !!! warning
-    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+  The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
@@ -176,10 +175,9 @@ If you are configuring Renovate using environment variables, there are two possi
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
-<!-- prettier-ignore -->
 !!! note
-    It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
-    For example: `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+  It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
+  For example: `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 #### Using `config.js`
 
@@ -228,10 +226,9 @@ Regardless of platform, you need to select a user account for `renovate` to assu
 We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
 We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@some.domain.test>"`.
 
-<!-- prettier-ignore -->
 !!! warning
-    We recommend you use a single, dedicated username for your Renovate bot.
-    Never share the Renovate username with your other bots, as this can cause flip-flopping.
+  We recommend you use a single, dedicated username for your Renovate bot.
+  Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
 #### Docs
 
@@ -253,10 +250,9 @@ This account can be _any_ account on GitHub, and needs only `read-only` access.
 It's used when fetching changelogs for repositories, as well as some Renovate-specific tools at runtime, in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
-<!-- prettier-ignore -->
 !!! note
-    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
-    Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+  If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
+  Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
 

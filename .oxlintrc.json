@@ -56,6 +56,8 @@
     ],
     "no-unassigned-vars": "error",
     "prefer-template": "error",
+    "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
+    "no-nested-ternary": "error",
 
     "renovate/enforce-ts-extension": "error",
     "renovate/no-new-url": "error",
