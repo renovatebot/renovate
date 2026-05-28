@@ -2353,7 +2353,6 @@ describe('config/validation', () => {
         };
         const { warnings } = await configValidation.validateConfig(
           'global',
-          // @ts-expect-error: contains invalid values
           config,
         );
         expect(warnings).toEqual([

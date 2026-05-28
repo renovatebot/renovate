@@ -253,7 +253,6 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   executionTimeout?: number;
   exposeAllEnv?: boolean;
   gitTimeout?: number;
-  gitUrl?: GitUrlOption;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
@@ -398,6 +397,7 @@ export interface RenovateConfig
   forkToken?: string;
 
   gitAuthor?: string;
+  gitUrl?: GitUrlOption;
 
   hostRules?: HostRule[];
 
