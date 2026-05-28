@@ -34,7 +34,6 @@ export class GlobalConfig {
     'executionTimeout',
     'exposeAllEnv',
     'gitTimeout',
-    'gitUrl',
     'githubTokenWarn',
     'httpCacheTtlDays',
     'ignorePrAuthor',
