@@ -2,6 +2,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import * as tar from 'tar';
 import { getProblems, logger } from '../../lib/logger/index.ts';
+import { generateCaching } from './caching.ts';
 import { generateConfig } from './config.ts';
 import { generateDatasources } from './datasources.ts';
 import { generateEnvOptions } from './env-options.ts';
@@ -74,6 +75,10 @@ export async function generateDocs(
     // env-options
     logger.info('* env-options');
     await generateEnvOptions(dist);
+
+    // caching.md
+    logger.info('* caching');
+    await generateCaching(dist);
 
     // json-schema
     logger.info('* json-schema');

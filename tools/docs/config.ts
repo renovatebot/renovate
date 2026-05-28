@@ -294,7 +294,7 @@ function generateLockFileTable(): string {
   return table;
 }
 
-function generateCacheNamespacesList(): string {
+export function generateCacheNamespacesList(): string {
   const namespaces = packageCacheNamespaces
     .filter((ns) => ns !== '_test-namespace')
     .slice()
