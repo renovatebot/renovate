@@ -131,14 +131,7 @@ export async function updateDependency({
         );
         return fileContent;
       }
-      let repo = repos[depName];
-      if (!repo || repo.name !== depName) {
-        for (const r of Object.values(repos)) {
-          if (r?.name === depName) {
-            repo = r;
-          }
-        }
-      }
+      const repo = repos[depName];
       if (!repo) {
         logger.warn(
           { packageFile, depName },

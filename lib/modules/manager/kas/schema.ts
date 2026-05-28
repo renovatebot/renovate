@@ -2,7 +2,6 @@ import { z } from 'zod/v3';
 import { Json, Yaml } from '../../../util/schema-utils/index.ts';
 
 export const KasRepo = z.object({
-  name: z.string().optional(),
   url: z.string().optional(),
   commit: z.string().optional(),
   branch: z.string().nullable().optional(),

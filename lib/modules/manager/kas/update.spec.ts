@@ -71,7 +71,6 @@ const kasFileJsonBranch = JSON.stringify(
     repos: {
       'meta-test': { path: 'meta-test/', layers: { '.': {} } },
       isar: {
-        name: 'isar',
         url: 'https://github.com/ilbers/isar.git',
         branch: 'next',
         commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
@@ -384,41 +383,6 @@ describe('modules/manager/kas/update', () => {
         upgrade,
       });
       expect(result).toBe(kasFileJsonBranch);
-    });
-
-    it('update json file when repo.name is different than repo key', async () => {
-      const upgrade = {
-        depName: 'isar',
-        datasource: 'git-refs',
-        currentValue: 'next',
-        currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
-        newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
-      };
-      const kasFileWithDifferentRepoName = JSON.stringify(
-        {
-          header: { version: 22 },
-          build_system: 'isar',
-          repos: {
-            'meta-test': { path: 'meta-test/', layers: { '.': {} } },
-            1: {
-              name: 'isar',
-              url: 'https://github.com/ilbers/isar.git',
-              branch: 'next',
-              commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
-              layers: { meta: {}, 'meta-isar': {} },
-            },
-          },
-        },
-        null,
-        4,
-      );
-      const result = await updateDependency({
-        fileContent: kasFileWithDifferentRepoName,
-        packageFile: 'kas-branch-commit.json',
-        upgrade,
-      });
-      expect(result).toContain('next');
-      expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
   });
 });

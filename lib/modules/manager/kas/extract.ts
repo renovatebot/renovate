@@ -209,7 +209,7 @@ export function _extractPackageFile(
     }
 
     const packageDependency: PackageDependency = {
-      depName: repo.name ?? repoName,
+      depName: repoName,
       packageName: git,
       versioning: repo.branch ? looseVersioning : undefined,
       replaceString: replaceString,
