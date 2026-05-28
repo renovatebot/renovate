@@ -146,7 +146,12 @@ export async function initRepo({
     labels: projectInfo.labels ?? {},
   };
   const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl, gitUrl);
+  const url = getGerritRepoUrl(
+    repository,
+    baseUrl,
+    gitUrl,
+    config.gerritUsername!,
+  );
   configureScm(repository, config.gerritUsername!);
   await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 

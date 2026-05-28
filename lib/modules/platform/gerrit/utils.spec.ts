@@ -30,20 +30,25 @@ describe('modules/platform/gerrit/utils', () => {
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, undefined);
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          undefined,
+          'abc',
+        );
         expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
 
       it('create a git url without username/password', () => {
         hostRules.find.mockReturnValue({});
         expect(() =>
-          utils.getGerritRepoUrl('web/apps', baseUrl, undefined),
+          utils.getGerritRepoUrl('web/apps', baseUrl, undefined, 'abc'),
         ).toThrow('Init: You must configure a Gerrit Server username/password');
       });
 
       it('throws on invalid endpoint', () => {
         expect(() =>
-          utils.getGerritRepoUrl('web/apps', '...', undefined),
+          utils.getGerritRepoUrl('web/apps', '...', undefined, 'abc'),
         ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
       });
     });
@@ -53,7 +58,12 @@ describe('modules/platform/gerrit/utils', () => {
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'default');
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'default',
+          'abc',
+        );
         expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
     });
@@ -63,7 +73,12 @@ describe('modules/platform/gerrit/utils', () => {
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'endpoint');
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'endpoint',
+          'abc',
+        );
         expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
     });
@@ -73,8 +88,13 @@ describe('modules/platform/gerrit/utils', () => {
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'ssh');
-        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'ssh',
+          'abc',
+        );
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
 
       it('create a url with trailing slash', () => {
@@ -86,8 +106,9 @@ describe('modules/platform/gerrit/utils', () => {
           'web/apps',
           'https://gerrit.example.com/',
           'ssh',
+          'abc',
         );
-        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
 
       it('create a url when base has context', () => {
@@ -99,8 +120,9 @@ describe('modules/platform/gerrit/utils', () => {
           'web/apps',
           'https://gerrit.example.com/context',
           'ssh',
+          'abc',
         );
-        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
     });
   });
