@@ -131,7 +131,7 @@ export function _extractPackageFile(
     ? extractRepoStrings(content, packageFile)
     : null;
   const deps: PackageDependency[] = [];
-  for (const repoName in repos) {
+  for (const repoName of Object.keys(repos)) {
     const repo = repos[repoName];
     if (!repo) {
       logger.trace(
@@ -147,15 +147,13 @@ export function _extractPackageFile(
     }
     const overridesCommit: string | undefined =
       kasDump.overrides?.repos?.[repoName]?.commit;
-    if (overridesCommit) {
-      dumpRepo.commit = overridesCommit;
-    }
+    const effectiveCommit = overridesCommit ?? dumpRepo.commit;
     logger.trace(
       { packageFile, dumpRepo, repo },
       'corresponding dump repo details',
     );
 
-    if (dumpRepo.type && repo.type === 'hg') {
+    if (dumpRepo.type === 'hg' || repo.type === 'hg') {
       logger.debug(
         { repo, dumpRepo },
         'Mercurial repos are not supported by Renovate. Skipping.',
@@ -174,7 +172,7 @@ export function _extractPackageFile(
       logger.debug({ repo }, 'No repo URL found. Skipping');
       continue;
     }
-    const isCommitInDump = repo.commit && dumpRepo.commit === repo.commit;
+    const isCommitInDump = repo.commit && effectiveCommit === repo.commit;
     const isTagInDump = repo.tag && repo.tag === dumpRepo.tag;
     if (!isCommitInDump && !isTagInDump) {
       logger.debug(
@@ -184,7 +182,7 @@ export function _extractPackageFile(
       continue;
     }
 
-    const commit = isCommitInDump ? dumpRepo.commit : undefined;
+    const commit = isCommitInDump ? effectiveCommit : undefined;
     const branch = dumpRepo.branch ?? undefined;
     const tag = dumpRepo.tag ?? undefined;
 
@@ -272,7 +270,7 @@ export async function executeKasDump(file: string): Promise<KasDump | null> {
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
-): Promise<PackageFile[] | null> {
+): Promise<PackageFile[]> {
   const results: PackageFile[] = [];
   const seen = new Set<string>();
   for (const rootFile of packageFiles) {

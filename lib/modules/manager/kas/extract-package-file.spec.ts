@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { partial } from '~test/util.ts';
 import { _extractPackageFile } from './extract.ts';
 import type { KasDump } from './schema.ts';
 
@@ -107,11 +108,11 @@ function makeDump(
   repos: KasDump['repos'],
   overrides?: KasDump['overrides'],
 ): KasDump {
-  return {
+  return partial<KasDump>({
     header: { version: 22 },
     repos,
     overrides,
-  } as KasDump;
+  });
 }
 
 describe('modules/manager/kas/extract-package-file', () => {
