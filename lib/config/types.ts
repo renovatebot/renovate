@@ -397,7 +397,6 @@ export interface RenovateConfig
   forkToken?: string;
 
   gitAuthor?: string;
-  gitUrl?: GitUrlOption;
 
   hostRules?: HostRule[];
 
@@ -511,6 +510,7 @@ export interface CustomDatasourceConfig {
  */
 export interface AllConfig
   extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
+  gitUrl?: GitUrlOption;
   password?: string;
   token?: string;
   username?: string;
