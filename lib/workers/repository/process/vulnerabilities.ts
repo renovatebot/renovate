@@ -168,19 +168,28 @@ export class Vulnerabilities {
       return null;
     }
 
-    let packageName = dep.packageName ?? dep.depName!;
+    const packageName = dep.packageName ?? dep.depName!;
+    let osvPackageName = packageName;
     if (ecosystem === 'PyPI') {
       // https://peps.python.org/pep-0503/#normalized-names
-      packageName = packageName.toLowerCase().replace(regEx(/[_.-]+/g), '-');
+      osvPackageName = osvPackageName
+        .toLowerCase()
+        .replace(regEx(/[_.-]+/g), '-');
+    } else if (ecosystem === 'Go' && packageName === 'go') {
+      if (dep.depType !== 'toolchain') {
+        // The `go` directive is source compatibility, not the build toolchain, so we skip it
+        return null;
+      }
+      osvPackageName = 'stdlib';
     }
 
     try {
       const osvVulnerabilities = await instrument(
         'get OSV vulnerabilities',
-        () => this.osvOffline.getVulnerabilities(ecosystem, packageName),
+        () => this.osvOffline.getVulnerabilities(ecosystem, osvPackageName),
         {
           attributes: {
-            packageName,
+            osvPackageName,
             ecosystem,
           },
         },
@@ -219,7 +228,7 @@ export class Vulnerabilities {
 
         this.skipMaliciousPackages(
           ecosystem,
-          packageName,
+          osvPackageName,
           depVersion,
           versioningApi,
           dep,
@@ -231,7 +240,7 @@ export class Vulnerabilities {
         for (const affected of osvVulnerability.affected ?? []) {
           const isVulnerable = this.isPackageVulnerable(
             ecosystem,
-            packageName,
+            osvPackageName,
             depVersion,
             affected,
             versioningApi,
@@ -252,6 +261,7 @@ export class Vulnerabilities {
 
           vulnerabilities.push({
             packageName,
+            osvPackageName,
             vulnerability: osvVulnerability,
             affected,
             depVersion,
@@ -274,7 +284,7 @@ export class Vulnerabilities {
 
   private skipMaliciousPackages(
     ecosystem: Ecosystem,
-    packageName: string,
+    osvPackageName: string,
     depVersion: string,
     versioningApi: VersioningApi,
     dep: PackageDependency,
@@ -289,7 +299,7 @@ export class Vulnerabilities {
         // is the current dependency vulnerable?
         const isVulnerable = this.isPackageVulnerable(
           ecosystem,
-          packageName,
+          osvPackageName,
           depVersion,
           affected,
           versioningApi,
@@ -317,7 +327,7 @@ export class Vulnerabilities {
 
           const isUpdateVulnerable = this.isPackageVulnerable(
             ecosystem,
-            packageName,
+            osvPackageName,
             newVersion,
             affected,
             versioningApi,
@@ -393,11 +403,11 @@ export class Vulnerabilities {
 
   private isPackageAffected(
     ecosystem: Ecosystem,
-    packageName: string,
+    osvPackageName: string,
     affected: Osv.Affected,
   ): boolean {
     return (
-      affected.package?.name === packageName &&
+      affected.package?.name === osvPackageName &&
       affected.package?.ecosystem === ecosystem
     );
   }
@@ -451,13 +461,13 @@ export class Vulnerabilities {
   // https://ossf.github.io/osv-schema/#evaluation
   private isPackageVulnerable(
     ecosystem: Ecosystem,
-    packageName: string,
+    osvPackageName: string,
     depVersion: string,
     affected: Osv.Affected,
     versioningApi: VersioningApi,
   ): boolean {
     return (
-      this.isPackageAffected(ecosystem, packageName, affected) &&
+      this.isPackageAffected(ecosystem, osvPackageName, affected) &&
       (this.includedInVersions(depVersion, affected) ||
         this.includedInRanges(depVersion, affected, versioningApi))
     );
@@ -567,7 +577,15 @@ export class Vulnerabilities {
       return null;
     }
 
+    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
+    const versioning = getDefaultVersioning(datasource);
+
     logger.debug(
+      {
+        datasource,
+        versioning,
+      },
+
       `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
     );
 
@@ -580,6 +598,7 @@ export class Vulnerabilities {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
       matchCurrentVersion: depVersion,
+      versioning,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
       vulnerabilitySeverity: severityDetails.severityLevel,

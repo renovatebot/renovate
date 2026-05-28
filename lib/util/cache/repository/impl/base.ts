@@ -11,7 +11,7 @@ import { RepoCacheV13 } from '../schema.ts';
 import type { RepoCache, RepoCacheData } from '../types.ts';
 
 export abstract class RepoCacheBase implements RepoCache {
-  protected platform = GlobalConfig.get('platform')!;
+  protected platform = GlobalConfig.get('platform');
   private oldHash: string | null = null;
   private data: RepoCacheData = {};
   protected readonly repository: string;
