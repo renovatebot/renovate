@@ -15,6 +15,7 @@ import {
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './forgejo-helper.ts';
 import * as forgejo from './index.ts';
@@ -785,7 +786,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      const url = new URL(`${mockRepo.clone_url}`);
+      const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
@@ -815,7 +816,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      const url = new URL(`${mockRepo.clone_url}`);
+      const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),

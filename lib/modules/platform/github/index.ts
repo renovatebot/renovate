@@ -47,7 +47,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
@@ -129,7 +129,12 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  const host = new URL(platformConfig.endpoint).host;
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
+  const host = parsedEndpoint.host;
   platformConfig.isGhe = host !== 'api.github.com';
   platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
@@ -161,10 +166,13 @@ export async function initPlatform({
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
+    if (!isHttpUrl(endpoint)) {
+      throw new Error(`Init: Invalid GitHub endpoint URL: ${endpoint}`);
+    }
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
-    logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
+    logger.debug(`Using default github endpoint: ${platformConfig.endpoint}`);
   }
 
   await detectGhe(token);
@@ -201,10 +209,13 @@ export async function initPlatform({
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
       let ghHostname: string;
+      /* v8 ignore next -- false negative due to V8/source-map artifact */
       if (platformConfig.isGheCloud) {
         ghHostname = 'ghe.com';
       } else if (platformConfig.isGhe) {
-        ghHostname = new URL(platformConfig.endpoint).hostname;
+        // valid url ensured at the function start
+        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+        ghHostname = parsedEndpoint.hostname;
       } else {
         ghHostname = 'github.com';
       }
@@ -382,7 +393,7 @@ export async function getRawFile(
 
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
-    url += `?ref=` + branchOrTag;
+    url += `?ref=${branchOrTag}`;
   }
   const res = await githubApi.getJsonUnchecked<{ content: string }>(
     url,
@@ -503,7 +514,7 @@ export async function initRepo({
     repository,
     cloneSubmodules,
     cloneSubmodulesFilter,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -726,7 +737,11 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = new URL(platformConfig.endpoint);
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  // v8 ignore if: endpoint is validated during initPlatform
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
@@ -751,7 +766,7 @@ export async function initRepo({
   const url = parsedEndpoint.href;
   let upstreamUrl = undefined;
   if (forkCreation && config.parentRepo) {
-    parsedEndpoint.pathname = config.parentRepo + '.git';
+    parsedEndpoint.pathname = `${config.parentRepo}.git`;
     upstreamUrl = parsedEndpoint.href;
   }
   await git.initRepo({
@@ -1837,7 +1852,32 @@ async function tryPrAutomerge(
 
   try {
     const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
-    const variables = { pullRequestId: prNodeId, mergeMethod };
+
+    let commitHeadline: string | undefined;
+    let commitBody: string | undefined;
+    // For SQUASH and MERGE methods, pass the commit message explicitly to avoid
+    // GitHub using the PR description as the commit body when "Use PR title and
+    // body as commit message" is enabled in repository settings.
+    const automergeCommitMessage = platformPrOptions?.automergeCommitMessage;
+    if (mergeMethod !== 'REBASE' && automergeCommitMessage) {
+      const newlineIndex = automergeCommitMessage.indexOf('\n');
+      if (newlineIndex === -1) {
+        commitHeadline = automergeCommitMessage;
+      } else {
+        commitHeadline = automergeCommitMessage.slice(0, newlineIndex);
+        commitBody = automergeCommitMessage.slice(newlineIndex + 1).trim();
+      }
+
+      // Add PR number to the commit headline to match the default GitHub behavior
+      commitHeadline = `${commitHeadline} (#${prNumber})`;
+    }
+
+    const variables = {
+      pullRequestId: prNodeId,
+      mergeMethod,
+      commitHeadline,
+      commitBody,
+    };
     // set count to one bypass graphql check
     const queryOptions = { variables, count: 1 };
 

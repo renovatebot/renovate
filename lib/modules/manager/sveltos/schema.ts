@@ -34,10 +34,22 @@ export const EventTrigger = KubernetesResource.extend({
   spec: SveltosHelmSpec,
 });
 
+export const ClusterPromotionSpec = z.object({
+  profileSpec: SveltosHelmSpec.optional(),
+});
+export type ClusterPromotionSpec = z.infer<typeof ClusterPromotionSpec>;
+
+export const ClusterPromotion = KubernetesResource.extend({
+  apiVersion: z.string().startsWith('config.projectsveltos.io/'),
+  kind: z.literal('ClusterPromotion'),
+  spec: ClusterPromotionSpec,
+});
+
 // Create a union schema for ProfileDefinition
 export const ProfileDefinition = z.union([
   Profile,
   ClusterProfile,
   EventTrigger,
+  ClusterPromotion,
 ]);
 export type ProfileDefinition = z.infer<typeof ProfileDefinition>;

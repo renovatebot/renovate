@@ -275,6 +275,7 @@ function getNewValue({
 
   // Check if currentValue is a full version (has patch component)
   const currentParsed = parseVersion(currentValue);
+  // v8 ignore if -- currentValue can't fail both parseRange and parseVersion
   if (currentParsed) {
     // currentValue is a full version, return full newVersion
     return newVersion;

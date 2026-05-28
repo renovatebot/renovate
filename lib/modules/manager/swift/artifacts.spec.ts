@@ -434,6 +434,127 @@ describe('modules/manager/swift/artifacts', () => {
     expect(contents).toContain('"version": "5.10.0"');
   });
 
+  it('matches pin when Package.resolved uses SSH URL', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const sshFixture = v2Fixture.replace(
+      '"https://github.com/Alamofire/Alamofire"',
+      '"git@github.com:Alamofire/Alamofire.git"',
+    );
+    fs.readLocalFile.mockResolvedValue(sshFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin with git-tags datasource using SSH URL as depName', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'git@github.com:Alamofire/Alamofire.git',
+          datasource: GitTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin when Package.resolved uses ssh:// URL', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const sshFixture = v2Fixture.replace(
+      '"https://github.com/Alamofire/Alamofire"',
+      '"ssh://git@github.com/Alamofire/Alamofire.git"',
+    );
+    fs.readLocalFile.mockResolvedValue(sshFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('falls back to basic normalization for host-only URLs', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const hostOnlyFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'my-lib',
+            kind: 'remoteSourceControl',
+            location: 'https://custom-registry.example.com',
+            state: {
+              revision: 'oldsha',
+              version: '1.0.0',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    fs.readLocalFile.mockResolvedValue(hostOnlyFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    // No match expected since host-only URL won't match any dep
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'org/my-lib',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v2.0.0',
+          newValue: '2.0.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toBeNull();
+  });
+
   it('handles gitlab-tags with custom registryUrls', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     const gitlabFixture = JSON.stringify(

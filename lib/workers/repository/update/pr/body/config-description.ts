@@ -15,14 +15,8 @@ export function getPrConfigDescription(config: BranchConfig): string {
   }
   prBody += '\n\n'; // to ensure that Markdown renderers will note that the Schedule is a different element to the list
 
-  prBody +=
-    '- Branch creation\n' +
-    scheduleToString(config.schedule, config.timezone) +
-    '\n';
-  prBody +=
-    '- Automerge\n' +
-    scheduleToString(config.automergeSchedule, config.timezone) +
-    '\n';
+  prBody += `- Branch creation\n${scheduleToString(config.schedule, config.timezone)}\n`;
+  prBody += `- Automerge\n${scheduleToString(config.automergeSchedule, config.timezone)}\n`;
 
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
@@ -73,7 +67,7 @@ function scheduleToString(
   } else {
     scheduleLines.push('At any time (no schedule defined)');
   }
-  return '  - ' + scheduleLines.join('\n  - ');
+  return `  - ${scheduleLines.join('\n  - ')}`;
 }
 
 /**
@@ -86,13 +80,13 @@ function getReadableCronSchedule(scheduleText: string[]): string[] | null {
     new CronPattern(scheduleText[0]); // validate cron
     return scheduleText.map(
       (cron) =>
-        capitalize(
+        `${capitalize(
           cronstrue
             .toString(cron, {
               throwExceptionOnParseError: false,
             })
             .replace('Every minute, ', ''),
-        ) + ` (\`${cron}\`)`,
+        )} (\`${cron}\`)`,
     );
   } catch {
     return null;

@@ -3,9 +3,11 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import * as urlUtil from '../../../util/url.ts';
 import * as mavenVersioning from '../../versioning/maven/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { MAVEN_REPO } from '../maven/common.ts';
+import * as mavenUtil from '../maven/util.ts';
 import { SbtPackageDatasource } from './index.ts';
 import { extractPageLinks } from './util.ts';
 
@@ -278,6 +280,83 @@ describe('modules/datasource/sbt-package/index', () => {
       });
 
       expect(res).toMatchObject({});
+    });
+
+    it('continues when parseUrl returns null for packageRootUrl', async () => {
+      httpMock
+        .scope('https://repo.maven.apache.org/maven2/')
+        .get('/org/example/example/maven-metadata.xml')
+        .reply(404);
+
+      const downloadSpy = vi
+        .spyOn(mavenUtil, 'downloadHttpContent')
+        .mockResolvedValueOnce(
+          `<a href="example/" title='example/'>example/</a>`,
+        )
+        .mockResolvedValueOnce(null); // dot-separated group URL returns nothing
+
+      const realParseUrl = urlUtil.parseUrl;
+      const parseUrlSpy = vi
+        .spyOn(urlUtil, 'parseUrl')
+        .mockImplementation((url) => {
+          if (
+            typeof url === 'string' &&
+            url === 'https://repo.maven.apache.org/maven2/org/example/'
+          ) {
+            return null;
+          }
+          return realParseUrl(url);
+        });
+
+      const res = await getPkgReleases({
+        versioning: mavenVersioning.id,
+        datasource: SbtPackageDatasource.id,
+        packageName: 'org.example:example',
+        registryUrls: [MAVEN_REPO],
+      });
+
+      parseUrlSpy.mockRestore();
+      downloadSpy.mockRestore();
+      expect(res).toBeNull();
+    });
+
+    it('skips pkgUrl when parseUrl returns null for it', async () => {
+      httpMock
+        .scope('https://repo.maven.apache.org/maven2/')
+        .get('/org/example/example/maven-metadata.xml')
+        .reply(404);
+
+      const downloadSpy = vi
+        .spyOn(mavenUtil, 'downloadHttpContent')
+        .mockResolvedValueOnce(
+          `<a href="example/" title='example/'>example/</a>`,
+        )
+        .mockResolvedValueOnce(null) // dot-separated group URL returns nothing
+        .mockResolvedValueOnce(`<a href='1.2.3/'>1.2.3/</a>`); // artifact subdir
+
+      const realParseUrl = urlUtil.parseUrl;
+      const parseUrlSpy = vi
+        .spyOn(urlUtil, 'parseUrl')
+        .mockImplementation((url) => {
+          if (
+            typeof url === 'string' &&
+            url === 'https://repo.maven.apache.org/maven2/org/example/example/'
+          ) {
+            return null;
+          }
+          return realParseUrl(url);
+        });
+
+      const res = await getPkgReleases({
+        versioning: mavenVersioning.id,
+        datasource: SbtPackageDatasource.id,
+        packageName: 'org.example:example',
+        registryUrls: [MAVEN_REPO],
+      });
+
+      parseUrlSpy.mockRestore();
+      downloadSpy.mockRestore();
+      expect(res).toBeNull();
     });
   });
 

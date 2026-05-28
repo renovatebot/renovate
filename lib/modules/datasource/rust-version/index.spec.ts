@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import { getPkgReleases } from '../index.ts';
 import { RustVersionDatasource } from './index.ts';
 
@@ -86,6 +87,32 @@ static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml`;
           releaseTimestamp: '2024-10-17T00:00:00.000Z',
         },
       ]);
+    });
+
+    it('ignores blank lines silently (no spurious warning)', async () => {
+      // `manifests.txt` ends with a trailing newline upstream, so the
+      // body's `split('\n')` always yields an empty final element. Also
+      // exercise a whitespace-only line in case upstream introduces one.
+      const manifestsContent =
+        'static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml\n\n   \n';
+
+      httpMock
+        .scope('https://static.rust-lang.org')
+        .get('/manifests.txt')
+        .reply(200, manifestsContent);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'rust',
+      });
+
+      expect(res?.releases).toEqual([
+        {
+          version: '1.82.0',
+          releaseTimestamp: '2024-10-17T00:00:00.000Z',
+        },
+      ]);
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
     it('throws for network error', async () => {
