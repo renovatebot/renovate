@@ -44,14 +44,12 @@ describe('config/presets/util', () => {
       ['default.json', 'default.json'],
       ['renovate.json', 'renovate.json'],
       ['renovate.json5', 'renovate.json5'],
+      ['renovate.jsonc', 'renovate.jsonc'],
 
       // the .json suffix is added if there is no `.json` or `.json5` suffix
       ['some-path', 'some-path.json'],
       ['some-path.', 'some-path..json'],
       ['some-path.js', 'some-path.js.json'],
-
-      // as JSONC is unsupported
-      ['renovate.jsonc', 'renovate.jsonc.json'],
     ])('when filename is %s, %s is fetched', async (input, expected) => {
       fetch.mockResolvedValueOnce({});
 
