@@ -106,7 +106,6 @@ export async function updateArtifacts({
     execOptions.env = {
       ...execOptions.env,
       HOME: upath.join(mirrorRoot, '.home'),
-      MISE_TRUSTED_CONFIG_PATHS: mirrorRoot,
       XDG_CONFIG_HOME: upath.join(mirrorRoot, '.home/.config'),
     };
     execOptions.cwd = mirroredCwd;
@@ -170,7 +169,6 @@ async function createSanitizedMirror({
   const mirrorRoot = await fs.mkdtemp(
     upath.join(upath.toUnix(os.tmpdir()), 'renovate-mise-'),
   );
-  await writeMirrorGlobalConfig(mirrorRoot);
 
   for (const file of configFiles) {
     const rawContent =
@@ -200,21 +198,6 @@ async function createSanitizedMirror({
     mirroredLockFilePath,
     mirroredCwd: upath.join(mirrorRoot, upath.dirname(packageFileName)),
   };
-}
-
-async function writeMirrorGlobalConfig(mirrorRoot: string): Promise<void> {
-  const globalConfigPath = upath.join(
-    mirrorRoot,
-    '.home/.config/mise/config.toml',
-  );
-  await fs.ensureDir(upath.dirname(globalConfigPath));
-  await fs.writeFile(
-    globalConfigPath,
-    serializeToml({
-      trusted_config_paths: [mirrorRoot],
-    }),
-    'utf8',
-  );
 }
 
 async function getSameScopeConfigFiles(

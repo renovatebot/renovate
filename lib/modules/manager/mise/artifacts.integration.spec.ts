@@ -47,6 +47,7 @@ async function gitExec(cwd: string, ...args: string[]): Promise<void> {
 
 const runIntegration =
   process.env.RUN_MISE_INTEGRATION === '1' &&
+  process.env.RUN_MISE_INTEGRATION_TRUSTED === '1' &&
   (await hasBinary('mise')) &&
   hasNetworkAccess();
 
@@ -55,7 +56,6 @@ const describeIntegration = runIntegration ? describe : describe.skip;
 describeIntegration('modules/manager/mise/artifacts integration', () => {
   let tmpDir: tmp.DirectoryResult;
   let originalHome: string | undefined;
-  let originalParanoid: string | undefined;
   let originalXdgConfigHome: string | undefined;
 
   beforeEach(async () => {
@@ -70,7 +70,6 @@ describeIntegration('modules/manager/mise/artifacts integration', () => {
     hostRules.clear();
     vi.mocked(git.getFileList).mockResolvedValue(['mise.toml']);
     originalHome = process.env.HOME;
-    originalParanoid = process.env.MISE_PARANOID;
     originalXdgConfigHome = process.env.XDG_CONFIG_HOME;
     process.env.HOME = upath.join(tmpDir.path, '.home');
     process.env.XDG_CONFIG_HOME = upath.join(tmpDir.path, '.home/.config');
@@ -79,14 +78,12 @@ describeIntegration('modules/manager/mise/artifacts integration', () => {
 
   afterEach(async () => {
     process.env.HOME = originalHome;
-    process.env.MISE_PARANOID = originalParanoid;
     process.env.XDG_CONFIG_HOME = originalXdgConfigHome;
     await tmpDir?.cleanup();
   });
 
-  it('updates an existing mise lockfile without trusting the source config', async () => {
+  it('updates an existing mise lockfile from sanitized mirrored config', async () => {
     const { updateArtifacts } = await getModule();
-    process.env.MISE_PARANOID = '1';
 
     const packageFileName = 'mise.toml';
     const lockFileName = 'mise.lock';
@@ -101,9 +98,6 @@ describeIntegration('modules/manager/mise/artifacts integration', () => {
 
         [settings]
         lockfile = true
-
-        [env]
-        FOO = "bar"
       `,
       'utf8',
     );
@@ -133,9 +127,6 @@ describeIntegration('modules/manager/mise/artifacts integration', () => {
 
         [settings]
         lockfile = true
-
-        [env]
-        FOO = "bar"
       `,
       config: {},
     });

@@ -265,40 +265,12 @@ describe('modules/manager/mise/artifacts', () => {
       options: {
         env: expect.objectContaining({
           HOME: expect.stringMatching(/\/tmp\/renovate-mise-.*\/\.home$/),
-          MISE_TRUSTED_CONFIG_PATHS: expect.stringMatching(
-            /\/tmp\/renovate-mise-.*$/,
-          ),
           XDG_CONFIG_HOME: expect.stringMatching(
             /\/tmp\/renovate-mise-.*\/\.home\/\.config$/,
           ),
         }),
       },
     });
-  });
-
-  it('writes an isolated global mise config that trusts only the mirror root', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
-    const execSnapshots = mockExecAll();
-
-    await updateArtifacts({
-      packageFileName: 'mise.toml',
-      updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
-      config,
-    });
-
-    const lockCwd = execSnapshots[0].options?.cwd;
-    if (!lockCwd) {
-      throw new Error('Expected mirrored cwd to be set');
-    }
-    await expect(
-      fsExtra.readFile(
-        upath.join(lockCwd, '.home/.config/mise/config.toml'),
-        'utf8',
-      ),
-    ).resolves.toBe(`trusted_config_paths = [ "${lockCwd}" ]\n`);
   });
 
   it('handles empty updatedDeps with fallback to full lock', async () => {
