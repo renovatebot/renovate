@@ -37,8 +37,7 @@ const uvUpdateCMD = 'uv lock';
 function parseUvExcludeNewer(value: string): DateTime<true> | null {
   const dur = Duration.fromISO(value);
   if (dur.isValid) {
-    const dt = DateTime.now().minus(dur).toUTC();
-    return dt.isValid ? dt : null;
+    return DateTime.now().minus(dur).toUTC();
   }
   const ts = DateTime.fromISO(value, { zone: 'utc' });
   if (ts.isValid) {
@@ -48,8 +47,7 @@ function parseUvExcludeNewer(value: string): DateTime<true> | null {
   if (millis === null) {
     return null;
   }
-  const dt = DateTime.now().minus(millis).toUTC();
-  return dt.isValid ? dt : null;
+  return DateTime.now().minus(millis).toUTC();
 }
 
 export class UvProcessor extends BasePyProjectProcessor {
