@@ -211,17 +211,16 @@ export function updateDependency({
             `Replacement ${upgrade.newName} already exists, skipping update of ${depName}`,
           );
           return null;
-        } else {
-          newFileContent = replaceAsString(
-            parsedContents,
-            newFileContent,
-            depType as NpmDepType,
-            depName,
-            depName,
-            upgrade.newName,
-            overrideDepParents,
-          );
         }
+        newFileContent = replaceAsString(
+          parsedContents,
+          newFileContent,
+          depType as NpmDepType,
+          depName,
+          depName,
+          upgrade.newName,
+          overrideDepParents,
+        );
       }
     }
     /* v8 ignore next -- needs test */

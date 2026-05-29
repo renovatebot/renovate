@@ -481,6 +481,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         null,
         2,
       );
+
       const res = npmUpdater.updateDependency({
         fileContent: input,
         packageFile: 'package.json',
@@ -491,6 +492,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
           newValue: '^5.0.0',
         },
       });
+
       expect(res).toBeNull();
     });
   });
