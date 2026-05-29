@@ -47,7 +47,6 @@ async function gitExec(cwd: string, ...args: string[]): Promise<void> {
 
 const runIntegration =
   process.env.RUN_MISE_INTEGRATION === '1' &&
-  process.env.RUN_MISE_INTEGRATION_TRUSTED === '1' &&
   (await hasBinary('mise')) &&
   hasNetworkAccess();
 
