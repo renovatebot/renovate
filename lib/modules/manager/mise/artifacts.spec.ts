@@ -290,7 +290,9 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     const lockCwd = execSnapshots[0].options?.cwd;
-    expect(lockCwd).toBeString();
+    if (!lockCwd) {
+      throw new Error('Expected mirrored cwd to be set');
+    }
     await expect(
       fsExtra.readFile(
         upath.join(lockCwd, '.home/.config/mise/config.toml'),
