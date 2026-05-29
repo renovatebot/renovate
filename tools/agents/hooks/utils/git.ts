@@ -3,6 +3,10 @@ import { type SimpleGit, type SimpleGitOptions, simpleGit } from 'simple-git';
 const config: Partial<SimpleGitOptions> = {
   completion: { onClose: true, onExit: false },
   config: ['core.quotePath=false'],
+  unsafe: {
+    allowUnsafePager: true,
+    allowUnsafeEditor: true,
+  },
 };
 
 const git: SimpleGit = simpleGit(config).env({
