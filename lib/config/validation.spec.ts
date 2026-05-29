@@ -2,7 +2,7 @@ import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
-import type { RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfig } from './types.ts';
 import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
@@ -160,6 +160,19 @@ describe('config/validation', () => {
       const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
+    });
+
+    it('accepts templates referencing runtime-only fields', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['rabbitmq'],
+            allowedVersions: '<{{add major 1}}',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(0);
     });
 
     it('catches invalid jsonata expressions', async () => {
@@ -1138,6 +1151,146 @@ describe('config/validation', () => {
       });
     });
 
+    describe('constraintsVersioning', () => {
+      it('cannot contain a valid tool name for Containerbase', async () => {
+        const config: RenovateConfig = {
+          constraintsVersioning: {
+            // @ts-expect-error: not an AdditionalConstraintName
+            golang: 'semver',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraintsVersioning.golang` is not a valid additional constraint name, as `golang` is a tool name, and `constraintsVersioning` can only override the versioning for a non-tool constraint',
+          },
+        ]);
+      });
+
+      it('can contain a constraint for a non-Containerbase tool', async () => {
+        const config: RenovateConfig = {
+          constraintsVersioning: {
+            gomodMod: 'semver',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('cannot contain an additional constraint name with an invalid versioning scheme', async () => {
+        const config: RenovateConfig = {
+          constraintsVersioning: {
+            gomodMod: 'not-supported-versioning',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraintsVersioning.gomodMod=not-supported-versioning`: `not-supported-versioning` is not a valid versioning scheme',
+          },
+        ]);
+      });
+
+      it('can contain an additional constraint name with a regex versioning scheme', async () => {
+        const config: RenovateConfig = {
+          constraintsVersioning: {
+            gomodMod:
+              'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('cannot contain an unsupported constraint', async () => {
+        const config: RenovateConfig = {
+          constraintsVersioning: {
+            // @ts-expect-error: contains invalid values
+            'not-supported': '4.5.6',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraintsVersioning.not-supported`: `not-supported` is not a known additional constraint name',
+          },
+        ]);
+      });
+
+      it('errors if constraintsVersioning is a malformed object', async () => {
+        const config: RenovateConfig = {
+          constraintsVersioning: {
+            // @ts-expect-error: contains invalid values
+            packageRules: [{}],
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraintsVersioning.packageRules` should be an object of key-value pairs of additional constraint names and their versioning',
+          },
+        ]);
+      });
+
+      it('errors if constraintsVersioning is a malformed array', async () => {
+        const config: RenovateConfig = {
+          // @ts-expect-error: contains invalid values
+          constraintsVersioning: [1, 2, 3],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraintsVersioning` should be a json object',
+          },
+        ]);
+      });
+    });
+
     it('validates object with ignored children', async () => {
       const config = {
         prBodyDefinitions: {},
@@ -1314,6 +1467,19 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toContain('github>owner/repo//path@commitHash');
+    });
+
+    it('skips preset syntax validation for templates', async () => {
+      const config = {
+        extends: ['local>{{ env.PRESET_REPO }}:python-312'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
     });
 
     it('warns if only selectors in packageRules', async () => {
@@ -1585,8 +1751,8 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('errors if allowedHeaders is empty or not defined', async () => {
-      GlobalConfig.set({});
+    it('errors if allowedHeaders is empty', async () => {
+      GlobalConfig.set({ allowedHeaders: [] });
 
       const config = {
         hostRules: [
@@ -2534,6 +2700,47 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
+    });
+
+    describe('cacheTtlOverride', () => {
+      it('errors when using an invalid cache namespace', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            // removed in 40.9.0
+            'datasource-maven:metadata-xml': 123,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'cacheTtlOverride: namespace `datasource-maven:metadata-xml` does not exist',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('allows a valid cache namespace', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            'datasource-docker-hub-tags': 90,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
     });
   });
 });

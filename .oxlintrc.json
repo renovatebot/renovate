@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "typescript", "vitest"],
+  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -34,7 +34,16 @@
     "no-restricted-imports": [
       "error",
       {
-        "paths": ["nock", "parse-link-header", "path"]
+        "paths": [
+          "nock",
+          "parse-link-header",
+          "path",
+          {
+            "name": "simple-git",
+            "importNames": ["simpleGit"],
+            "message": "Use createSimpleGit instead of simpleGit."
+          }
+        ]
       }
     ],
     "no-unused-vars": [
@@ -46,8 +55,12 @@
       }
     ],
     "no-unassigned-vars": "error",
+    "prefer-template": "error",
+    "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
+    "no-nested-ternary": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
 
     "typescript/await-thenable": "error",
@@ -139,7 +152,8 @@
     "typescript/no-namespace": "error",
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
-    "typescript/no-unsafe-function-type": "error"
+    "typescript/no-unsafe-function-type": "error",
+    "unicorn/prefer-node-protocol": "error"
   },
   "overrides": [
     {
@@ -196,6 +210,17 @@
         "typescript/restrict-template-expressions": "off",
         "typescript/explicit-function-return-type": "off",
         "renovate/enforce-ts-extension": "off"
+      }
+    },
+    {
+      "files": ["lib/util/git/index.ts", "tools/**/*.mjs", "lib/**/*.spec.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": ["nock", "parse-link-header", "path"]
+          }
+        ]
       }
     }
   ],

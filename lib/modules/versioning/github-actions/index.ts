@@ -122,7 +122,11 @@ function sortVersions(x: string, y: string): number {
   if (!a || !b) {
     return 0;
   }
-  return semver.compare(a, b);
+  const cmp = semver.compare(a, b);
+  if (cmp === 0) {
+    return x.localeCompare(y, undefined, { numeric: true });
+  }
+  return cmp;
 }
 
 function equals(x: string, y: string): boolean {
@@ -271,6 +275,7 @@ function getNewValue({
 
   // Check if currentValue is a full version (has patch component)
   const currentParsed = parseVersion(currentValue);
+  // v8 ignore if -- currentValue can't fail both parseRange and parseVersion
   if (currentParsed) {
     // currentValue is a full version, return full newVersion
     return newVersion;

@@ -26,8 +26,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-provider';
 
   static readonly hashicorpReleaseUrl = 'https://releases.hashicorp.com';
-  static readonly openTofuApiUrl = 'https://api.opentofu.org';
-  static readonly openTofuRegistryUrl = 'https://registry.opentofu.org';
 
   static readonly defaultRegistryUrls = [
     TerraformProviderDatasource.terraformRegistryUrl,

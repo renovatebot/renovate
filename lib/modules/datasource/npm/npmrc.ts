@@ -37,7 +37,7 @@ export function getMatchHostFromNpmrcHost(input: string): string {
   if (input.startsWith('//')) {
     const matchHost = input.replace('//', '');
     if (matchHost.includes('/')) {
-      return 'https://' + matchHost;
+      return `https://${matchHost}`;
     }
     return matchHost;
   }

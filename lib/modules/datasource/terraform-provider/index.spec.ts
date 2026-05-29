@@ -240,11 +240,11 @@ describe('modules/datasource/terraform-provider/index', () => {
         releases: [
           {
             releaseTimestamp: '2019-11-19T08:22:56.000Z',
-            version: 'v2.52.0',
+            version: '2.52.0',
           },
           {
             releaseTimestamp: '2019-11-26T08:22:56.000Z',
-            version: 'v2.53.0',
+            version: '2.53.0',
           },
         ],
       });

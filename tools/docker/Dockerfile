@@ -1,23 +1,23 @@
-# syntax=docker/dockerfile:1.23.0@sha256:2780b5c3bab67f1f76c781860de469442999ed1a0d7992a5efdf2cffc0e3d769
+# syntax=docker/dockerfile:1.24.0@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.41.1@sha256:856d44cff06e69368be3639af36068847da6e522f7b44be35a8e79b45673edcf AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.55.0@sha256:d2dc7c324434dccf396ebf1178a524ee7344889aaba7018eec88b510b8fde9e8 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.41.1-full@sha256:0156b75e97cb6ce1ac8ddce0235a4c5a351114ae9cd679b1d6232584bb95c64c AS full-base
+FROM ghcr.io/renovatebot/base-image:13.55.0-full@sha256:6e77660553862172bd378dda67eab968cc781287f3c4ca0038aea95e763aea26 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.41.1@sha256:856d44cff06e69368be3639af36068847da6e522f7b44be35a8e79b45673edcf AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.55.0@sha256:d2dc7c324434dccf396ebf1178a524ee7344889aaba7018eec88b510b8fde9e8 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
@@ -25,7 +25,7 @@ RUN install-tool node 24.15.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.33.1
+RUN install-tool pnpm 10.33.4
 
 WORKDIR /usr/local/renovate
 
@@ -76,7 +76,7 @@ COPY --link . ./
 # install npm packages
 RUN set -ex; \
   pnpm install --prod --offline --ignore-scripts; \
-  pnpm rebuild re2 better-sqlite3; \
+  pnpm rebuild re2; \
   true
 
 # --------------------------------------
@@ -111,7 +111,7 @@ RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repo
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  node -e "new require('re2')('.*').exec('test')"; \
   true
 
 LABEL \

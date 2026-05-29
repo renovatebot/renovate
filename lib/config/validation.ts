@@ -10,11 +10,14 @@ import is, {
 } from '@sindresorhus/is';
 import type { PlatformId } from '../constants/index.ts';
 import { logger } from '../logger/index.ts';
+import {
+  AllManagersListLiteral,
+  CustomManagersListLiteral,
+} from '../manager-list.generated.ts';
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import { allManagersList, getManagerList } from '../modules/manager/index.ts';
-import * as allVersioning from '../modules/versioning/index.ts';
 import type { HostRule } from '../types/index.ts';
+import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
@@ -26,6 +29,10 @@ import {
 } from '../util/string-match.ts';
 import * as template from '../util/template/index.ts';
 import { parseUrl } from '../util/url.ts';
+import {
+  AllVersioningsListLiteral,
+  type VersioningName,
+} from '../versioning-list.generated.ts';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -67,8 +74,14 @@ let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
+let optionSupportsTemplating: Set<string>;
 
-const managerList = getManagerList();
+const managerList: readonly string[] = AllManagersListLiteral;
+
+const allManagersList: readonly string[] = [
+  ...AllManagersListLiteral,
+  ...CustomManagersListLiteral,
+];
 
 const topLevelObjects = [...managerList, 'env'];
 
@@ -146,6 +159,7 @@ function initOptions(): void {
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
   optionAllowsNegativeIntegers = new Set();
+  optionSupportsTemplating = new Set();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -168,6 +182,10 @@ function initOptions(): void {
 
     if (option.allowNegative) {
       optionAllowsNegativeIntegers.add(option.name);
+    }
+
+    if (option.supportsTemplating) {
+      optionSupportsTemplating.add(option.name);
     }
   }
 
@@ -266,19 +284,10 @@ export async function validateConfig(
           message: getDeprecationMessage(key)!,
         });
       }
-      const templateKeys = [
-        'branchName',
-        'commitBody',
-        'commitMessage',
-        'prTitle',
-        'semanticCommitScope',
-      ];
-      if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
+      if (optionSupportsTemplating.has(key) && val) {
         try {
-          // TODO: validate string #22198
-          let res = template.compile((val as string).toString(), config, false);
-          res = template.compile(res, config, false);
-          template.compile(res, config, false);
+          // TODO: types (#22198)
+          template.validate((val as string).toString());
         } catch {
           errors.push({
             topic: 'Configuration Error',
@@ -404,13 +413,15 @@ export async function validateConfig(
                       });
                     }
                   }
-                  try {
-                    parsePreset(subval);
-                  } catch {
-                    errors.push({
-                      topic: 'Configuration Error',
-                      message: `${currentPath}: preset "${subval}" is not valid`,
-                    });
+                  if (!subval.includes('{{')) {
+                    try {
+                      parsePreset(subval);
+                    } catch {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `${currentPath}: preset "${subval}" is not valid`,
+                      });
+                    }
                   }
                 } else {
                   errors.push({
@@ -666,7 +677,7 @@ export async function validateConfig(
               const allowedEnvVars =
                 configType === 'global'
                   ? (config.allowedEnv ?? [])
-                  : GlobalConfig.get('allowedEnv', []);
+                  : GlobalConfig.get('allowedEnv');
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!isString(envVarValue)) {
                   errors.push({
@@ -763,6 +774,8 @@ export async function validateConfig(
                 }
               }
             } else if (key === 'constraints') {
+              const { get: getVersioning } =
+                await import('../modules/versioning/index.ts');
               for (const [k, v] of Object.entries(val)) {
                 if (!isString(v)) {
                   errors.push({
@@ -780,13 +793,47 @@ export async function validateConfig(
                 } else if (isToolName(k)) {
                   // TODO: #31831
                   const versioningId = getToolConfig(k).versioning;
-                  const versioning = allVersioning.get(versioningId);
+                  const versioning = getVersioning(versioningId);
                   if (!versioning.isValid(v)) {
                     warnings.push({
                       topic: 'Configuration Error',
                       message: `Configuration option \`${currentPath}.${k}=${v}\` is not a valid tool version constraint, according to \`${versioningId}\` versioning`,
                     });
                   }
+                }
+              }
+            } else if (key === 'constraintsVersioning') {
+              for (const [k, v] of Object.entries(val)) {
+                if (!isString(v)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of additional constraint names and their versioning`,
+                  });
+                  break;
+                }
+
+                if (isToolName(k)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\` is not a valid additional constraint name, as \`${k}\` is a tool name, and \`constraintsVersioning\` can only override the versioning for a non-tool constraint`,
+                  });
+                } else if (isConstraintName(k)) {
+                  const versioningName = v.split(':')[0];
+                  if (
+                    !AllVersioningsListLiteral.includes(
+                      versioningName as VersioningName,
+                    )
+                  ) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Configuration option \`${currentPath}.${k}=${v}\`: \`${v}\` is not a valid versioning scheme`,
+                    });
+                  }
+                } else {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a known additional constraint name`,
+                  });
                 }
               }
             } else {
@@ -824,7 +871,7 @@ export async function validateConfig(
       const allowedHeaders =
         configType === 'global'
           ? (config.allowedHeaders ?? [])
-          : GlobalConfig.get('allowedHeaders', []);
+          : GlobalConfig.get('allowedHeaders');
       for (const rule of val as HostRule[]) {
         if (isNonEmptyString(rule.matchHost)) {
           if (rule.matchHost.includes('://')) {
@@ -1074,6 +1121,15 @@ async function validateGlobalConfig(
                 subKey,
               ),
             );
+
+            if (
+              !(packageCacheNamespaces as readonly string[]).includes(subKey)
+            ) {
+              errors.push({
+                message: `${currentPath}: namespace \`${subKey}\` does not exist`,
+                topic: 'Configuration Error',
+              });
+            }
           }
         } else {
           const res = validatePlainObject(val);

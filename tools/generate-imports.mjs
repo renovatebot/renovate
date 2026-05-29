@@ -148,12 +148,103 @@ async function generateManagerList() {
     .sort()
     .map((fname) => `"${fname}"`);
 
+  // get custom managers list
+  const customManagers = (
+    await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory())
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
   const content = `
 export const AllManagersListLiteral = [${managers.join(',')}] as const;
 export type ManagerName = typeof AllManagersListLiteral[number];
+export const CustomManagersListLiteral = [${customManagers.join(',')}] as const;
+export type CustomManagerName = typeof CustomManagersListLiteral[number];
 `;
 
   await updateFile(`lib/manager-list.generated.ts`, content);
+}
+
+async function generateManagerDefaultConfigs() {
+  const { default: managers } = await import('../lib/modules/manager/api.ts');
+  const { default: customManagers } =
+    await import('../lib/modules/manager/custom/api.ts');
+
+  const allManagers = new Map([
+    ...managers.entries(),
+    ...customManagers.entries(),
+  ]);
+  /** @type {Record<string, Record<string, unknown>>} */
+  const managerDefaultConfigs = {};
+  for (const [name, manager] of allManagers) {
+    if (manager.defaultConfig) {
+      managerDefaultConfigs[name] = manager.defaultConfig;
+    }
+  }
+
+  const content = `
+export const managerDefaultConfigs: Record<string, Record<string, unknown>> = ${JSON.stringify(managerDefaultConfigs, null, 2)};
+`;
+
+  await updateFile('lib/manager-default-configs.generated.ts', content);
+}
+
+async function generateVersioningList() {
+  const versionings = (
+    await fs.readdir('lib/modules/versioning', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory())
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
+  const content = `
+export const AllVersioningsListLiteral = [${versionings.join(',')}] as const;
+export type VersioningName = typeof AllVersioningsListLiteral[number];
+`;
+
+  await updateFile(`lib/versioning-list.generated.ts`, content);
+}
+
+async function generateDatasourceList() {
+  const datasources = (
+    await fs.readdir('lib/modules/datasource', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory() && !file.name.startsWith('__'))
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
+  const content = `
+export const AllDatasourcesListLiteral = [${datasources.join(',')}] as const;
+export type DatasourceName = typeof AllDatasourcesListLiteral[number];
+`;
+
+  await updateFile(`lib/datasource-list.generated.ts`, content);
+}
+
+async function generateGlobalConfigOptionDefaults() {
+  const { getOptions } = await import('../lib/config/options/index.ts');
+  const options = getOptions();
+
+  /** @type {Record<string, unknown>} */
+  const defaults = {};
+  for (const option of options
+    .filter((o) => o.globalOnly)
+    .filter((o) => 'default' in o)
+    // if the default is null, it means there is no default, so don't include it
+    .filter((o) => o.default !== null)
+    .sort((a, b) => a.name.localeCompare(b.name))) {
+    defaults[option.name] = option.default;
+  }
+
+  const content = `
+export const globalConfigOptionDefaults: Record<string, unknown> = ${JSON.stringify(defaults, null, 2)};
+`;
+
+  await updateFile('lib/global-config-option-defaults.generated.ts', content);
 }
 
 async function generateHash() {
@@ -203,9 +294,22 @@ async function generateHash() {
 
 await (async () => {
   try {
+    // prevent import cycles when trying to generate config options
+    const stubFile = 'lib/global-config-option-defaults.generated.ts';
+    if (!fs.existsSync(stubFile)) {
+      await fs.writeFile(
+        stubFile,
+        '\nexport const globalConfigOptionDefaults: Record<string, unknown> = {};\n',
+      );
+    }
+
     // data-files
     await generateData();
     await generateManagerList();
+    await generateManagerDefaultConfigs();
+    await generateVersioningList();
+    await generateDatasourceList();
+    await generateGlobalConfigOptionDefaults();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))

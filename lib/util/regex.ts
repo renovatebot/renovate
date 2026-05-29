@@ -68,6 +68,11 @@ export function regEx(
   }
 }
 
+/**
+ * Escapes any RegExp syntax characters in the input string, returning a new string that can be safely interpolated into a RegExp as a literal string to match.
+ *
+ * @deprecated use `RegExp.escape` instead
+ */
 export function escapeRegExp(input: string): string {
   return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string
 }
@@ -103,7 +108,7 @@ export function toUnicodeEscape(str: string): string {
   const items = new Set(
     str.split('').map((char) => {
       const code = char.charCodeAt(0);
-      return '\\u' + code.toString(16).padStart(4, '0').toUpperCase();
+      return `\\u${code.toString(16).padStart(4, '0').toUpperCase()}`;
     }),
   );
 

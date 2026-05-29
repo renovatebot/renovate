@@ -55,6 +55,7 @@ describe('modules/manager/pip-compile/common', () => {
       `--no-strip-extras`,
       '--universal',
       '--constraints=constraints.txt',
+      '--constraint=constraints.txt',
       '--python-version=3.13',
       '--no-emit-package=cffi',
       '--prerelease=if-necessary',
@@ -64,6 +65,8 @@ describe('modules/manager/pip-compile/common', () => {
       '--exclude-newer=2025-11-01',
       '--exclude-newer-package="tqdm=2022-04-04T00:00:00Z"',
       '--group=docs',
+      '--override=overrides.txt',
+      '--overrides=overrides.txt',
     ])('returns object on correct uv options', (argument: string) => {
       expect(
         extractHeaderCommand(
