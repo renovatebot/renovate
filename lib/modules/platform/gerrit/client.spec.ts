@@ -1,3 +1,4 @@
+import { z } from 'zod/v3';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
@@ -56,6 +57,18 @@ describe('modules/platform/gerrit/client', () => {
           schemes: { http: { url: 'https://example.com', commands: {} } },
         },
       });
+    });
+
+    it('throws on invalid server info response', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/config/server/info')
+        .reply(
+          200,
+          gerritRestResponse({ auth: { type: 'LDAP' } }),
+          jsonResultHeader,
+        );
+      await expect(client.getServerInfo()).rejects.toThrow(z.ZodError);
     });
   });
 
