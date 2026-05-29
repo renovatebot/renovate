@@ -33,7 +33,7 @@ For more information about mise lock files, see the [mise lock file documentatio
 
 When Renovate updates an existing `mise.lock`, it mirrors the discovered mise config files for the relevant lockfile scope into a temporary working tree, strips them down to literal `[tools]` entries plus a small allowlist of lockfile-relevant `[settings]`, copies in the existing lock file, and runs `mise lock` there.
 
-This lets Renovate preserve mise's normal lockfile behavior while avoiding direct execution against the repository's original mise config files. Renovate does not call `mise trust` on the source repository or the mirrored config.
+This lets Renovate preserve mise's normal lockfile behavior while avoiding direct execution against the repository's original mise config files. Renovate does not call `mise trust` on the source repository. Instead, it scopes trust to the temporary mirrored workspace only, including setting `MISE_TRUSTED_CONFIG_PATHS` to that mirror path so the update flow remains compatible with [`mise` paranoid mode](https://mise.jdx.dev/paranoid.html) without trusting the original checkout.
 
 #### Security considerations
 
