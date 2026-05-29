@@ -135,7 +135,17 @@ export async function initRepo({
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo(${repository}, ${gitUrl})`);
-  const serverInfo = await client.getServerInfo();
+
+  let serverInfo;
+  try {
+    serverInfo = await client.getServerInfo();
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Failed to fetch server info, falling back to endpoint-based URL',
+    );
+  }
+
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 

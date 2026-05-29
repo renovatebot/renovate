@@ -125,7 +125,7 @@ describe('modules/platform/gerrit/index', () => {
 
     beforeEach(() => {
       clientMock.getServerInfo.mockResolvedValueOnce({
-        download: { archives: [], schemes: {} },
+        download: { schemes: {}, archives: [] },
       });
       clientMock.getBranchInfo.mockResolvedValueOnce({
         ref: 'sha-hash....',
@@ -189,6 +189,28 @@ describe('modules/platform/gerrit/index', () => {
           'This change has been abandoned as it was voted with Code-Review -2.',
         ],
       ]);
+    });
+
+    it('initRepo() - falls back gracefully when getServerInfo fails', async () => {
+      clientMock.getServerInfo.mockReset();
+      clientMock.getServerInfo.mockRejectedValueOnce(
+        new Error('Permission denied'),
+      );
+      clientMock.getBranchInfo.mockResolvedValueOnce({
+        ref: 'sha-hash....',
+        revision: 'main',
+      });
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
+        defaultBranch: 'main',
+        isFork: false,
+        repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
+      });
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+      });
     });
   });
 

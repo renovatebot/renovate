@@ -6,6 +6,10 @@ import { logger } from '../../../logger/index.ts';
 import { GerritHttp } from '../../../util/http/gerrit.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { getQueryString } from '../../../util/url.ts';
+import {
+  type GerritServerInfo,
+  GerritServerInfo as GerritServerInfoSchema,
+} from './schema.ts';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -16,7 +20,6 @@ import type {
   GerritMergeableInfo,
   GerritProjectInfo,
   GerritRequestDetail,
-  GerritServerInfo,
 } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
@@ -45,8 +48,9 @@ class GerritClient {
   }
 
   async getServerInfo(): Promise<GerritServerInfo> {
-    const res = await this.gerritHttp.getJsonUnchecked<GerritServerInfo>(
+    const res = await this.gerritHttp.getJson(
       'a/config/server/info',
+      GerritServerInfoSchema,
     );
     return res.body;
   }
