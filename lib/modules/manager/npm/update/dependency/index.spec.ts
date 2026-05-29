@@ -469,31 +469,5 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(expected);
     });
-
-    it('returns fileContent unchanged when replacement already exists', () => {
-      const input = JSON.stringify(
-        {
-          dependencies: {
-            '@material-ui/core': '^4.9.13',
-            '@mui/material': '^6.1.7',
-          },
-        },
-        null,
-        2,
-      );
-
-      const res = npmUpdater.updateDependency({
-        fileContent: input,
-        packageFile: 'package.json',
-        upgrade: {
-          depType: 'dependencies',
-          depName: '@material-ui/core',
-          newName: '@mui/material',
-          newValue: '^5.0.0',
-        },
-      });
-
-      expect(res).toBe(input);
-    });
   });
 });

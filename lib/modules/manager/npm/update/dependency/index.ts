@@ -114,7 +114,7 @@ function replaceAsString(
     }
   }
   // v8 ignore next -- TODO: add test #40625
-  throw new Error('Could not replace dependency');
+  throw new Error();
 }
 
 export function updateDependency({
@@ -204,14 +204,6 @@ export function updateDependency({
         overrideDepParents,
       );
       if (upgrade.newName) {
-        const newNameExists =
-          parsedContents[depType as NpmDepType]?.[upgrade.newName];
-        if (newNameExists) {
-          logger.debug(
-            `Replacement ${upgrade.newName} already exists, skipping update of ${depName}`,
-          );
-          return fileContent;
-        }
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent,
