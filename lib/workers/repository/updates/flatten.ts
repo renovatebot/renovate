@@ -112,6 +112,21 @@ export async function flattenUpdates(
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates!) {
+            if (
+              update.updateType === 'replacement' &&
+              update.newName &&
+              packageFile.deps.some(
+                (sibling) =>
+                  sibling !== dep &&
+                  (sibling.depName === update.newName ||
+                    sibling.packageName === update.newName),
+              )
+            ) {
+              logger.debug(
+                `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile.packageFile}`,
+              );
+              continue;
+            }
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
             if (updateConfig.updateType) {
