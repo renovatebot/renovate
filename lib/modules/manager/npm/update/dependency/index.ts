@@ -210,7 +210,7 @@ export function updateDependency({
           logger.debug(
             `Replacement ${upgrade.newName} already exists, skipping update of ${depName}`,
           );
-          return null;
+          return fileContent;
         }
         newFileContent = replaceAsString(
           parsedContents,

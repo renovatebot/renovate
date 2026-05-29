@@ -470,7 +470,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(testContent).toEqual(expected);
     });
 
-    it('returns null when replacement already exists', () => {
+    it('returns fileContent unchanged when replacement already exists', () => {
       const input = JSON.stringify(
         {
           dependencies: {
@@ -493,7 +493,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         },
       });
 
-      expect(res).toBeNull();
+      expect(res).toBe(input);
     });
   });
 });
