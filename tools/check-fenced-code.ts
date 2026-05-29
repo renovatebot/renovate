@@ -1,3 +1,4 @@
+import { promises } from 'node:fs';
 import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
@@ -36,6 +37,7 @@ let issues = 0;
 markdown.enable(['fence']);
 
 let validate: ValidateFunction;
+let validateCustomDatasources: ValidateFunction;
 
 function checkValidJson(file: string, token: Token): object | undefined {
   try {
@@ -55,6 +57,21 @@ function checkSchemaCompliantJson(
     return value as RenovateConfig;
   }
   for (const error of validate.errors ?? []) {
+    reportIssue(file, token, `${error.instancePath} ${error.message}`);
+  }
+}
+
+function checkCustomDatasourcesSchemaCompliantJson(
+  file: string,
+  token: Token,
+  value: object,
+): void {
+  const isValid = validateCustomDatasources(value);
+  if (isValid) {
+    return;
+  }
+
+  for (const error of validateCustomDatasources.errors ?? []) {
     reportIssue(file, token, `${error.instancePath} ${error.message}`);
   }
 }
@@ -94,6 +111,13 @@ async function processFile(file: string): Promise<void> {
     ) {
       continue;
     }
+
+    // TODO
+    if (token.info.includes('type=custom-datasource')) {
+      checkCustomDatasourcesSchemaCompliantJson(file, token, validJson);
+      continue;
+    }
+
     const configuration = checkSchemaCompliantJson(file, token, validJson);
     if (configuration !== undefined) {
       checkMigrationStatus(file, token, configuration);
@@ -107,6 +131,24 @@ void (async () => {
   );
   addFormats(validator);
   validate = validator.compile(draft7MetaSchema);
+
+  // TODO path won't exist
+  const customDatasourcesSchema = JSON.parse(
+    await promises.readFile(
+      'tmp/docs/renovate-custom-datasources-response-schema.json',
+      'utf-8',
+    ),
+  );
+  const customDatasourcesValidator = new Ajv({
+    schemaId: '$id',
+    meta: false,
+    // don't use strict mode as **??**
+    strict: false,
+  }).addMetaSchema(draft7MetaSchema);
+  addFormats(customDatasourcesValidator);
+  validateCustomDatasources = customDatasourcesValidator.compile(
+    customDatasourcesSchema,
+  );
 
   const files = await glob(markdownGlob);
 
