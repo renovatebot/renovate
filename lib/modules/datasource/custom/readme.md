@@ -84,6 +84,9 @@ All available options:
 }
 ```
 
+!!! tip
+  There is a JSON Schema for the format of a Custom Datasource at [`renovate-custom-datasources-response-schema.json`](https://docs.renovatebot.com/renovate-custom-datasources-response-schema.json).
+
 ### Debugging
 
 Renovate writes tracing logs entries before transformation.
