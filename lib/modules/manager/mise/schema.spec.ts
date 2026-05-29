@@ -24,5 +24,28 @@ describe('modules/manager/mise/schema', () => {
         settings: {},
       });
     });
+
+    it('parses recursive [settings] values', () => {
+      const content = codeBlock`
+        [settings]
+        lockfile = true
+        jobs = 4
+        disable_tools = ["node"]
+
+        [settings.node]
+        mirror_url = "https://example.com/node"
+      `;
+      expect(MiseFile.parse(content)).toEqual({
+        tools: {},
+        settings: {
+          lockfile: true,
+          jobs: 4,
+          disable_tools: ['node'],
+          node: {
+            mirror_url: 'https://example.com/node',
+          },
+        },
+      });
+    });
   });
 });
