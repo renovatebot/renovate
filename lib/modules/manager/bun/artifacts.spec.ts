@@ -15,6 +15,7 @@ const fs = vi.mocked(_fs);
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
+  binarySource: 'global',
 };
 
 describe('modules/manager/bun/artifacts', () => {

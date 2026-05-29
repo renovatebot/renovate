@@ -65,7 +65,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
       continue;
     }
     if (npmEnvPrefixes.some((prefix) => envName.startsWith(prefix))) {
-      logger.trace('Ignoring npm env: ' + envName);
+      logger.trace(`Ignoring npm env: ${envName}`);
       continue;
     }
     // Double underscore __ is used in place of hyphen -

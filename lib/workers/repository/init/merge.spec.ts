@@ -31,6 +31,7 @@ import {
 import type { RepositoryWorkerConfig } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
+vi.mock('../onboarding/branch/config.ts');
 vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
 
 const migrate = vi.mocked(_migrate);
