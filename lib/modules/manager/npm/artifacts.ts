@@ -228,8 +228,7 @@ async function updatePnpmWorkspace(
           // then append it
 
           // normalize value (no quote handling needed)
-          excludeNode.commentBefore =
-            excludeNode.commentBefore + ` || ${newVersion}`;
+          excludeNode.commentBefore = `${excludeNode.commentBefore} || ${newVersion}`;
           updated = true;
         }
       }
@@ -244,8 +243,7 @@ async function updatePnpmWorkspace(
           )
         ) {
           // normalize value (no quote handling needed)
-          matchedItem.commentBefore =
-            matchedItem.commentBefore + ` || ${newVersion}`;
+          matchedItem.commentBefore = `${matchedItem.commentBefore} || ${newVersion}`;
           updated = true;
         }
       } else {
@@ -260,7 +258,7 @@ async function updatePnpmWorkspace(
           newVersion,
         )
       ) {
-        matchedItem.value = matchedItem.value + ` || ${newVersion}`;
+        matchedItem.value = `${matchedItem.value} || ${newVersion}`;
         updated = true;
       }
     } else {
