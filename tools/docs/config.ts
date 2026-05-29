@@ -361,7 +361,7 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of [...toolNames]) {
+  for (const tool of toolNames) {
     output += `- \`${tool}\`\n`;
   }
 
