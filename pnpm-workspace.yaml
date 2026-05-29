@@ -21,6 +21,7 @@ overrides:
   esbuild: $esbuild
   protobufjs@8.0.1: 8.4.2
   vite: $vite
+  yauzl: ^3.3.1
 
 ignoredOptionalDependencies:
   - dtrace-provider
