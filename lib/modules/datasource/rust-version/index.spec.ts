@@ -1,5 +1,7 @@
+import { isString } from '@sindresorhus/is';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
+import { regEx } from '../../../util/regex.ts';
 import { getPkgReleases } from '../index.ts';
 import { RustVersionDatasource } from './index.ts';
 
@@ -17,6 +19,7 @@ static.rust-lang.org/dist/2025-11-24/channel-rust-beta.toml`;
       httpMock
         .scope('https://static.rust-lang.org')
         .get('/manifests.txt')
+        .query((query) => isString(query.t) && regEx(/^\d+$/).test(query.t))
         .reply(200, manifestsContent);
 
       const res = await getPkgReleases({
@@ -52,6 +55,7 @@ static.rust-lang.org/dist/2024-10-19/channel-rust-1.82.0.toml`;
       httpMock
         .scope('https://static.rust-lang.org')
         .get('/manifests.txt')
+        .query((query) => isString(query.t) && regEx(/^\d+$/).test(query.t))
         .reply(200, manifestsContent);
 
       const res = await getPkgReleases({
@@ -74,6 +78,7 @@ static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml`;
       httpMock
         .scope('https://static.rust-lang.org')
         .get('/manifests.txt')
+        .query((query) => isString(query.t) && regEx(/^\d+$/).test(query.t))
         .reply(200, manifestsContent);
 
       const res = await getPkgReleases({
@@ -99,6 +104,7 @@ static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml`;
       httpMock
         .scope('https://static.rust-lang.org')
         .get('/manifests.txt')
+        .query((query) => isString(query.t) && regEx(/^\d+$/).test(query.t))
         .reply(200, manifestsContent);
 
       const res = await getPkgReleases({
@@ -119,6 +125,7 @@ static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml`;
       httpMock
         .scope('https://static.rust-lang.org')
         .get('/manifests.txt')
+        .query((query) => isString(query.t) && regEx(/^\d+$/).test(query.t))
         .reply(500);
 
       await expect(

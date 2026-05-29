@@ -53,6 +53,11 @@ export class RustVersionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = new URL('manifests.txt', registryUrl);
 
+    // Bust the CDN cache, which can serve a stale `manifests.txt` for up to a
+    // day. Renovate's package cache still controls how often we fetch, so this
+    // only fires on a cache miss.
+    url.searchParams.set('t', Date.now().toString());
+
     let parsedResults: ParsedManifestUrl[];
     try {
       parsedResults = await this.getManifests(url);
