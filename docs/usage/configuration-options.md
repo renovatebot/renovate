@@ -43,7 +43,8 @@ Renovate stops the search after it finds the first match.
 
 !!! note
   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
-  We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
+  We also recommend you prefer using a `.jsonc` file if you want to add comments to your configuration, instead of a `.json5` file.
+  Using an explicit `.jsonc` file is preferred over using a `.json` file with comments, as it can cause issues with editors and syntax highlighting.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
 Renovate does not read/override the config from within each base branch if present.
