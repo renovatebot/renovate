@@ -6,6 +6,15 @@ import { logger } from '../../../logger/index.ts';
 import { GerritHttp } from '../../../util/http/gerrit.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { getQueryString } from '../../../util/url.ts';
+import {
+  GerritBranchInfoSchema,
+  GerritChangeMessagesSchema,
+  GerritChangeSchema,
+  GerritChangesSchema,
+  GerritMergeableInfoSchema,
+  GerritProjectInfoSchema,
+  GerritReposSchema,
+} from './schema.ts';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -44,17 +53,18 @@ class GerritClient {
   }
 
   async getRepos(): Promise<string[]> {
-    const res = await this.gerritHttp.getJsonUnchecked<string[]>(
+    const res = await this.gerritHttp.getJson(
       'a/projects/?type=CODE&state=ACTIVE',
+      GerritReposSchema,
     );
     return Object.keys(res.body);
   }
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
-    const projectInfo =
-      await this.gerritHttp.getJsonUnchecked<GerritProjectInfo>(
-        `a/projects/${encodeURIComponent(repository)}`,
-      );
+    const projectInfo = await this.gerritHttp.getJson(
+      `a/projects/${encodeURIComponent(repository)}`,
+      GerritProjectInfoSchema,
+    );
     if (projectInfo.body.state !== 'ACTIVE') {
       throw new Error(REPOSITORY_ARCHIVED);
     }
@@ -62,8 +72,9 @@ class GerritClient {
   }
 
   async getBranchInfo(repository: string): Promise<GerritBranchInfo> {
-    const branchInfo = await this.gerritHttp.getJsonUnchecked<GerritBranchInfo>(
+    const branchInfo = await this.gerritHttp.getJson(
       `a/projects/${encodeURIComponent(repository)}/branches/HEAD`,
+      GerritBranchInfoSchema,
     );
     return branchInfo.body;
   }
@@ -125,22 +136,23 @@ class GerritClient {
     while (true) {
       query.S = allChanges.length + startOffset;
       const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
-      const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
+      const changes = await this.gerritHttp.getJson(
         `a/changes/?${queryString}`,
+        GerritChangesSchema,
       );
 
       logger.trace(
         `findChanges(${queryString},start=${query.S},limit=${query.n}) => ${changes.body.length}`,
       );
 
-      const lastChange = changes.body.at(-1);
+      const lastChange = changes.body.at(-1) as GerritChange | undefined;
       let hasMoreChanges = false;
       if (lastChange?._more_changes) {
         hasMoreChanges = true;
         delete lastChange._more_changes;
       }
 
-      allChanges.push(...changes.body);
+      allChanges.push(...(changes.body as GerritChange[]));
 
       if (
         findPRConfig.singleChange ||
@@ -159,17 +171,18 @@ class GerritClient {
     requestDetails?: GerritRequestDetail[],
   ): Promise<GerritChange> {
     const queryString = getQueryString({ o: requestDetails });
-    const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
+    const changes = await this.gerritHttp.getJson(
       `a/changes/${changeNumber}?${queryString}`,
+      GerritChangeSchema,
     );
-    return changes.body;
+    return changes.body as GerritChange;
   }
 
   async getMergeableInfo(change: GerritChange): Promise<GerritMergeableInfo> {
-    const mergeable =
-      await this.gerritHttp.getJsonUnchecked<GerritMergeableInfo>(
-        `a/changes/${change._number}/revisions/current/mergeable`,
-      );
+    const mergeable = await this.gerritHttp.getJson(
+      `a/changes/${change._number}/revisions/current/mergeable`,
+      GerritMergeableInfoSchema,
+    );
     return mergeable.body;
   }
 
@@ -190,10 +203,11 @@ class GerritClient {
   }
 
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
-    const messages = await this.gerritHttp.getJsonUnchecked<
-      GerritChangeMessageInfo[]
-    >(`a/changes/${changeNumber}/messages`);
-    return messages.body;
+    const messages = await this.gerritHttp.getJson(
+      `a/changes/${changeNumber}/messages`,
+      GerritChangeMessagesSchema,
+    );
+    return messages.body as GerritChangeMessageInfo[];
   }
 
   async addMessage(
