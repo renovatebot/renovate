@@ -9,7 +9,7 @@ import {
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
 import * as _aeCvss from 'ae-cvss-calculator';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
