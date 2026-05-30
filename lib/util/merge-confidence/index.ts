@@ -1,5 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig, UpdateType } from '../../config/types.ts';
 import { instrument } from '../../instrumentation/index.ts';

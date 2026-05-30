@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import type { Http } from '../../../../util/http/index.ts';
 import type { CustomDatasourceFetcher } from './types.ts';

@@ -1,4 +1,4 @@
-import { type ZodType, type ZodTypeDef } from 'zod/v3';
+import { type ZodType } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { clone } from '../../../util/clone.ts';
@@ -136,7 +136,7 @@ export class JenkinsPluginsDatasource extends Datasource {
 
   private async getJenkinsUpdateCenterResponse<T>(
     url: string,
-    schema: ZodType<T, ZodTypeDef, unknown>,
+    schema: ZodType<T>,
   ): Promise<T> {
     let response: T;
 
