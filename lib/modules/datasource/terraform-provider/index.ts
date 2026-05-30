@@ -1,4 +1,3 @@
-// TODO: types (#22198)
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -9,18 +8,16 @@ import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { TerraformBuild, VersionDetailResponse } from './schema.ts';
 import {
   OpenTofuProviderDocsResponse,
+  TerraformProviderReleaseBackendSchema,
   TerraformProviderV2Response,
+  TerraformProviderVersionsSchema,
+  TerraformRegistryBuildResponseSchema,
+  TerraformRegistryVersionsSchema,
+  VersionDetailResponseSchema,
 } from './schema.ts';
-import type {
-  TerraformBuild,
-  TerraformProviderReleaseBackend,
-  TerraformProviderVersions,
-  TerraformRegistryBuildResponse,
-  TerraformRegistryVersions,
-  VersionDetailResponse,
-} from './types.ts';
 
 export class TerraformProviderDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-provider';
@@ -180,7 +177,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       `${repository}/versions`,
     );
     const res = (
-      await this.http.getJsonUnchecked<TerraformProviderVersions>(backendURL)
+      await this.http.getJson(backendURL, TerraformProviderVersionsSchema)
     ).body;
     const dep: ReleaseResult = {
       releases: res.versions.map(({ version }) => ({
@@ -202,9 +199,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       `index.json`,
     );
     const res = (
-      await this.http.getJsonUnchecked<TerraformProviderReleaseBackend>(
-        backendURL,
-      )
+      await this.http.getJson(backendURL, TerraformProviderReleaseBackendSchema)
     ).body;
 
     const dep: ReleaseResult = {
@@ -270,8 +265,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       repository,
     );
     const versionsResponse = (
-      await this.http.getJsonUnchecked<TerraformRegistryVersions>(
+      await this.http.getJson(
         `${backendURL}/versions`,
+        TerraformRegistryVersionsSchema,
       )
     ).body;
     if (!versionsResponse.versions) {
@@ -298,8 +294,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         const buildURL = `${backendURL}/${version}/download/${platform.os}/${platform.arch}`;
         try {
           const res = (
-            await this.http.getJsonUnchecked<TerraformRegistryBuildResponse>(
+            await this.http.getJson(
               buildURL,
+              TerraformRegistryBuildResponseSchema,
             )
           ).body;
           const newBuild: TerraformBuild = {
@@ -379,8 +376,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     version: string,
   ): Promise<VersionDetailResponse> {
     return (
-      await this.http.getJsonUnchecked<VersionDetailResponse>(
+      await this.http.getJson(
         `${TerraformProviderDatasource.hashicorpReleaseUrl}/${backendLookUpName}/${version}/index.json`,
+        VersionDetailResponseSchema,
       )
     ).body;
   }

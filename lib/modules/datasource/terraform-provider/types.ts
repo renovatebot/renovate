@@ -1,52 +1,11 @@
-export interface VersionDetailResponse {
-  name: string;
-  version: string;
-  builds: TerraformBuild[];
-}
-
-export interface TerraformBuild {
-  name: string;
-  version: string;
-  os: string;
-  arch: string;
-  filename: string;
-  url: string;
-  shasums_url?: string;
-}
-
-/**
- * API Docs https://www.terraform.io/internals/provider-registry-protocol
- */
-export interface TerraformProviderVersions {
-  versions: TerraformProviderVersionsVersion[];
-}
-
-export interface TerraformProviderVersionsVersion {
-  version: string;
-}
-
-export interface TerraformProviderReleaseBackend {
-  name: string;
-  versions: VersionsReleaseBackend;
-}
-
-export type VersionsReleaseBackend = Record<string, VersionDetailResponse>;
-
-export interface TerraformRegistryVersions {
-  id: string;
-  versions: {
-    version: string;
-    platforms: {
-      os: string;
-      arch: string;
-    }[];
-  }[];
-}
-
-export interface TerraformRegistryBuildResponse {
-  os: string;
-  arch: string;
-  filename: string;
-  download_url: string;
-  shasums_url?: string;
-}
+// Types are now defined in schema.ts and derived via z.infer<>.
+// This file is kept for backward-compatibility but no longer contains
+// standalone interfaces.
+export type {
+  TerraformBuild,
+  TerraformProviderReleaseBackend,
+  TerraformProviderVersions,
+  TerraformRegistryBuildResponse,
+  TerraformRegistryVersions,
+  VersionDetailResponse,
+} from './schema.ts';

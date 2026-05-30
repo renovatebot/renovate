@@ -66,3 +66,79 @@ export const OpenTofuProviderDocsResponse = z
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse
 >;
+
+// VersionDetailResponse — used by the releases.hashicorp.com backend
+export const TerraformBuildSchema = z.object({
+  name: z.string(),
+  version: z.string(),
+  os: z.string(),
+  arch: z.string(),
+  filename: z.string(),
+  url: z.string(),
+  shasums_url: z.string().optional(),
+});
+
+export type TerraformBuild = z.infer<typeof TerraformBuildSchema>;
+
+export const VersionDetailResponseSchema = z.object({
+  name: z.string().optional(),
+  version: z.string().optional(),
+  builds: z.array(TerraformBuildSchema),
+});
+
+export type VersionDetailResponse = z.infer<typeof VersionDetailResponseSchema>;
+
+// TerraformProviderReleaseBackend — index.json from releases.hashicorp.com
+export const TerraformProviderReleaseBackendSchema = z.object({
+  name: z.string().optional(),
+  versions: z.record(VersionDetailResponseSchema),
+});
+
+export type TerraformProviderReleaseBackend = z.infer<
+  typeof TerraformProviderReleaseBackendSchema
+>;
+
+// TerraformProviderVersions — Provider Registry Protocol /versions endpoint
+const TerraformProviderVersionsVersionSchema = z.object({
+  version: z.string(),
+});
+
+export const TerraformProviderVersionsSchema = z.object({
+  versions: LooseArray(TerraformProviderVersionsVersionSchema),
+});
+
+export type TerraformProviderVersions = z.infer<
+  typeof TerraformProviderVersionsSchema
+>;
+
+// TerraformRegistryVersions — registry /versions endpoint (for getBuilds)
+const TerraformRegistryPlatformSchema = z.object({
+  os: z.string(),
+  arch: z.string(),
+});
+
+const TerraformRegistryVersionItemSchema = z.object({
+  version: z.string(),
+  platforms: LooseArray(TerraformRegistryPlatformSchema),
+});
+
+export const TerraformRegistryVersionsSchema = z.object({
+  versions: LooseArray(TerraformRegistryVersionItemSchema).optional(),
+});
+
+export type TerraformRegistryVersions = z.infer<
+  typeof TerraformRegistryVersionsSchema
+>;
+
+// TerraformRegistryBuildResponse — per-platform download info
+export const TerraformRegistryBuildResponseSchema = z.object({
+  os: z.string(),
+  arch: z.string(),
+  filename: z.string(),
+  download_url: z.string(),
+  shasums_url: z.string().optional(),
+});
+
+export type TerraformRegistryBuildResponse = z.infer<
+  typeof TerraformRegistryBuildResponseSchema
+>;
