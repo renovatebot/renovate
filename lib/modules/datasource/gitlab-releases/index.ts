@@ -3,7 +3,7 @@ import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import type { GitlabRelease } from './types.ts';
+import { GitlabReleasesSchema } from './schema.ts';
 
 export class GitlabReleasesDatasource extends Datasource {
   static readonly id = 'gitlab-releases';
@@ -38,7 +38,7 @@ export class GitlabReleasesDatasource extends Datasource {
 
     try {
       const gitlabReleasesResponse = (
-        await this.http.getJsonUnchecked<GitlabRelease[]>(apiUrl)
+        await this.http.getJson(apiUrl, GitlabReleasesSchema)
       ).body;
 
       return {

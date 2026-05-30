@@ -151,7 +151,8 @@ export class GitlabPrCache {
       }
 
       const [{ updated_at }] = items;
-      this.cache.updated_at = updated_at.replace(regEx(/\.\d\d\dZ$/), 'Z');
+      this.cache.updated_at =
+        updated_at?.replace(regEx(/\.\d\d\dZ$/), 'Z') ?? null;
     }
 
     this.updateItems();

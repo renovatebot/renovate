@@ -1,5 +1,5 @@
 import type { HttpResponse } from '../../../util/http/types.ts';
-import type { RepoResponse } from './types.ts';
+import type { RepoResponse } from './schema.ts';
 import { defaults, getRepoUrl } from './utils.ts';
 
 function makeRes(

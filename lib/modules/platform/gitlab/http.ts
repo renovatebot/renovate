@@ -1,14 +1,16 @@
 import { isEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
-import type { GitLabUser, GitlabUserStatus } from './types.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { GitlabUserSchema, GitlabUserStatusSchema } from './schema.ts';
 
 export const gitlabApi = new GitlabHttp();
 
 export async function getUserID(username: string): Promise<number> {
   const userInfo = (
-    await gitlabApi.getJsonUnchecked<{ id: number }[]>(
+    await gitlabApi.getJson(
       `users?username=${username}`,
+      LooseArray(GitlabUserSchema).catch([]),
     )
   ).body;
 
@@ -21,11 +23,14 @@ export async function getUserID(username: string): Promise<number> {
   return userInfo[0].id;
 }
 
-async function getMembers(group: string): Promise<GitLabUser[]> {
+async function getMembers(
+  group: string,
+): Promise<{ id: number; username: string }[]> {
   const groupEncoded = encodeURIComponent(group);
   return (
-    await gitlabApi.getJsonUnchecked<GitLabUser[]>(
+    await gitlabApi.getJson(
       `groups/${groupEncoded}/members`,
+      LooseArray(GitlabUserSchema).catch([]),
     )
   ).body;
 }
@@ -51,7 +56,7 @@ export async function getMemberUsernames(group: string): Promise<string[]> {
 export async function isUserBusy(user: string): Promise<boolean> {
   try {
     const url = `/users/${user}/status`;
-    const userStatus = (await gitlabApi.getJsonUnchecked<GitlabUserStatus>(url))
+    const userStatus = (await gitlabApi.getJson(url, GitlabUserStatusSchema))
       .body;
     return userStatus.availability === 'busy';
   } catch (err) {

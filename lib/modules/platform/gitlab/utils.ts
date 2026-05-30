@@ -9,7 +9,8 @@ import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption } from '../types.ts';
 import type { GitLabMergeRequest } from './schema.ts';
-import type { GitlabPr, RepoResponse } from './types.ts';
+import type { RepoResponse } from './schema.ts';
+import type { GitlabPr } from './types.ts';
 
 export const DRAFT_PREFIX = 'Draft: ';
 export const DRAFT_PREFIX_DEPRECATED = 'WIP: ';

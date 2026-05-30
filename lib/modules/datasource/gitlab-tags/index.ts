@@ -1,3 +1,4 @@
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
@@ -9,7 +10,7 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
-import type { GitlabCommit, GitlabTag } from './types.ts';
+import { GitlabCommitSchema, GitlabTagsSchema } from './schema.ts';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util.ts';
 
 export class GitlabTagsDatasource extends Datasource {
@@ -48,9 +49,7 @@ export class GitlabTagsDatasource extends Datasource {
     );
 
     const gitlabTags = (
-      await this.http.getJsonUnchecked<GitlabTag[]>(url, {
-        paginate: true,
-      })
+      await this.http.getJson(url, { paginate: true }, GitlabTagsSchema)
     ).body;
 
     const dependency: ReleaseResult = {
@@ -100,9 +99,8 @@ export class GitlabTagsDatasource extends Datasource {
           `repository/commits/`,
           newValue,
         );
-        const gitlabCommits =
-          await this.http.getJsonUnchecked<GitlabCommit>(url);
-        digest = gitlabCommits.body.id;
+        const gitlabCommit = await this.http.getJson(url, GitlabCommitSchema);
+        digest = gitlabCommit.body.id;
       } else {
         const url = joinUrlParts(
           depHost,
@@ -110,8 +108,10 @@ export class GitlabTagsDatasource extends Datasource {
           urlEncodedRepo,
           `repository/commits?per_page=1`,
         );
-        const gitlabCommits =
-          await this.http.getJsonUnchecked<GitlabCommit[]>(url);
+        const gitlabCommits = await this.http.getJson(
+          url,
+          z.array(GitlabCommitSchema),
+        );
         digest = gitlabCommits.body[0].id;
       }
     } catch (err) {

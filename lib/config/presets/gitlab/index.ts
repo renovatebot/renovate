@@ -2,11 +2,11 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
-import type { GitlabProject } from '../../../types/platform/gitlab/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
+import { GitlabProjectSchema } from './schema.ts';
 
 const gitlabApi = new GitlabHttp();
 export const Endpoint = 'https://gitlab.com/api/v4/';
@@ -15,8 +15,9 @@ async function getDefaultBranchName(
   urlEncodedPkgName: string,
   endpoint: string,
 ): Promise<string> {
-  const res = await gitlabApi.getJsonUnchecked<GitlabProject>(
+  const res = await gitlabApi.getJson(
     `${endpoint}projects/${urlEncodedPkgName}`,
+    GitlabProjectSchema,
   );
   return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
 }
