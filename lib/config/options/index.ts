@@ -3434,6 +3434,16 @@ const options: Readonly<RenovateOptions>[] = [
     experimentalIssues: [41485],
   },
   {
+    name: 'dockerReleaseTimestampSource',
+    description:
+      'Controls whether Docker release timestamps may fall back to client-controlled OCI image metadata when registry-controlled timestamps are unavailable.',
+    type: 'string',
+    default: 'registry',
+    allowedValues: ['registry', 'metadata'],
+    experimental: true,
+    experimentalIssues: [37196, 38656, 38659],
+  },
+  {
     name: 'dockerMaxPages',
     description:
       'By default, Renovate fetches up to 20 pages of Docker tags from registries. But you can set your own limit with this config option.',

@@ -329,6 +329,7 @@ export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
   | 'timestamp-required'
   | 'timestamp-optional';
+export type DockerReleaseTimestampSource = 'registry' | 'metadata';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -468,6 +469,7 @@ export interface RenovateConfig
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
+  dockerReleaseTimestampSource?: DockerReleaseTimestampSource;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
   /**

@@ -1621,6 +1621,327 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
+    it('does not set releaseTimestamp from OCI metadata by default', async () => {
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/chart/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/chart/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .reply(200, '', {})
+        .get('/acme/chart/manifests/1.0.0')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:123',
+            mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.created': '2024-01-02T03:04:05.000Z',
+            'org.opencontainers.image.source': 'https://github.com/acme/chart',
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        packageName: 'ghcr.io/acme/chart',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
+
+    it('sets releaseTimestamp from OCI manifest created annotation when metadata timestamps are enabled', async () => {
+      const created = '2024-01-02T03:04:05.000Z';
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/chart/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/chart/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .twice()
+        .reply(200, '', {})
+        .get('/acme/chart/manifests/1.0.0')
+        .twice()
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:123',
+            mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.created': created,
+            'org.opencontainers.image.source': 'https://github.com/acme/chart',
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        dockerReleaseTimestampSource: 'metadata',
+        packageName: 'ghcr.io/acme/chart',
+      });
+
+      expect(res).toMatchObject({
+        registryUrl: 'https://ghcr.io',
+        lookupName: 'acme/chart',
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: created,
+          },
+        ],
+        sourceUrl: 'https://github.com/acme/chart',
+      });
+    });
+
+    it('falls back to OCI image config created timestamp when metadata timestamps are enabled', async () => {
+      const created = '2024-02-03T04:05:06.000Z';
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .times(4)
+        .reply(200, '', {})
+        .get('/acme/app/manifests/1.0.0')
+        .twice()
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:config',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+        })
+        .get('/acme/app/blobs/sha256:config')
+        .twice()
+        .reply(200, {
+          architecture: 'amd64',
+          created,
+          config: {
+            Labels: {
+              'org.opencontainers.image.source': 'https://github.com/acme/app',
+            },
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        dockerReleaseTimestampSource: 'metadata',
+        packageName: 'ghcr.io/acme/app',
+      });
+
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: created,
+          },
+        ],
+        sourceUrl: 'https://github.com/acme/app',
+      });
+    });
+
+    it('prefers OCI manifest created annotation over image config created timestamp', async () => {
+      const annotationCreated = '2024-02-03T04:05:06.000Z';
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .twice()
+        .reply(200, '', {})
+        .get('/acme/app/manifests/1.0.0')
+        .twice()
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:config',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.created': annotationCreated,
+            'org.opencontainers.image.revision': 'abc123',
+            'org.opencontainers.image.source': 'https://github.com/acme/app',
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        dockerReleaseTimestampSource: 'metadata',
+        packageName: 'ghcr.io/acme/app',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '1.0.0',
+          releaseTimestamp: annotationCreated,
+        },
+      ]);
+    });
+
+    it('uses OCI image config created timestamp if manifest created annotation is invalid', async () => {
+      const created = '2024-03-04T05:06:07.000Z';
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .times(4)
+        .reply(200, '', {})
+        .get('/acme/app/manifests/1.0.0')
+        .twice()
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:config',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.created': 'not-a-timestamp',
+          },
+        })
+        .get('/acme/app/blobs/sha256:config')
+        .twice()
+        .reply(200, {
+          architecture: 'amd64',
+          created,
+          config: {
+            Labels: {
+              'org.opencontainers.image.source': 'https://github.com/acme/app',
+            },
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        dockerReleaseTimestampSource: 'metadata',
+        packageName: 'ghcr.io/acme/app',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '1.0.0',
+          releaseTimestamp: created,
+        },
+      ]);
+    });
+
+    it('ignores invalid OCI metadata timestamps', async () => {
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .thrice()
+        .reply(200, '', {})
+        .get('/acme/app/manifests/1.0.0')
+        .twice()
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:config',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.created': 'not-a-timestamp',
+            'org.opencontainers.image.revision': 'abc123',
+            'org.opencontainers.image.source': 'https://github.com/acme/app',
+          },
+        })
+        .get('/acme/app/blobs/sha256:config')
+        .reply(200, {
+          architecture: 'amd64',
+          created: '0001-01-01T00:00:00Z',
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        dockerReleaseTimestampSource: 'metadata',
+        packageName: 'ghcr.io/acme/app',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
+
+    it('limits OCI metadata timestamp lookups to the newest releases', async () => {
+      const tags = [...range(0, 20)].map((index) => `1.0.${index}`);
+      let scope = httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/acme/app/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .times(21)
+        .reply(200, '', {});
+
+      for (const tag of tags.slice(1)) {
+        scope = scope.get(`/acme/app/manifests/${tag}`).reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: `sha256:${tag}`,
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.created': '2024-01-02T03:04:05.000Z',
+          },
+        });
+      }
+
+      scope.get('/acme/app/manifests/1.0.20').reply(200, {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          digest: 'sha256:1.0.20',
+          mediaType: 'application/vnd.oci.image.config.v1+json',
+        },
+        annotations: {
+          'org.opencontainers.image.revision': 'abc123',
+          'org.opencontainers.image.source': 'https://github.com/acme/app',
+        },
+      });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        currentValue: '0.9.0',
+        dockerReleaseTimestampSource: 'metadata',
+        packageName: 'ghcr.io/acme/app',
+      });
+
+      expect(res?.releases[0]).toEqual({ version: '1.0.0' });
+      expect(
+        res?.releases.slice(1).every((release) => release.releaseTimestamp),
+      ).toBeTrue();
+    });
+
     it('uses quay api', async () => {
       const tags = [{ name: '5.0.12' }];
       httpMock

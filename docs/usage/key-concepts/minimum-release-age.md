@@ -218,34 +218,52 @@ The below is a non-exhaustive list of public registries which support release ti
 
 <!-- markdownlint-disable MD060 -->
 
-| Datasource           | Registry URL                                       | Supported | Notes                                                            |
-| -------------------- | -------------------------------------------------- | --------- | ---------------------------------------------------------------- |
-| `crate`              | `https://crates.io`                                | ✅        |                                                                  |
-| `rubygems`           | `https://rubygems.org`                             | ✅        |                                                                  |
-| `docker`             | `https://index.docker.io`                          | ✅        |                                                                  |
-| `docker`             | (not Docker Hub)                                   | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38656)    |
-| `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
-| `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
-| `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
-| `terraform-module`   | `https://registry.terraform.io`                    | ✅        |                                                                  |
-| `terraform-module`   | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
-| `terraform-provider` | `https://registry.terraform.io`                    | ✅        |                                                                  |
-| `terraform-provider` | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
-| `github-tags`        | `https://github.com`                               | ✅        |                                                                  |
-| `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                                  |
-| `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                                  |
-| `maven`              | `https://repo1.maven.org/maven2`                   | ✅        |                                                                  |
-| `node-version`       | `https://nodejs.org/dist`                          | ✅        |                                                                  |
-| `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                                  |
-| `nuget`              | `https://api.nuget.org/v3/index.json`              | ✅        |                                                                  |
-| `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                                  |
-| `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                                  |
-| `jsr`                | `https://jsr.io`                                   | ✅        | For packages without explicit timestamps, defaults to 2025-09-18 |
+| Datasource           | Registry URL                                       | Supported | Notes                                                                                                                     |
+| -------------------- | -------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `crate`              | `https://crates.io`                                | ✅        |                                                                                                                           |
+| `rubygems`           | `https://rubygems.org`                             | ✅        |                                                                                                                           |
+| `docker`             | `https://index.docker.io`                          | ✅        | Uses Docker Hub `tag_last_pushed`                                                                                         |
+| `docker`             | (not Docker Hub)                                   | 🟡        | Registry-controlled timestamps are not generally available. See [Docker metadata timestamps](#docker-metadata-timestamps) |
+| `docker`             | `https://ghcr.io`                                  | 🟡        | See [Docker metadata timestamps](#docker-metadata-timestamps)                                                             |
+| `docker`             | `https://quay.io`                                  | 🟡        | See [Docker metadata timestamps](#docker-metadata-timestamps)                                                             |
+| `github-releases`    | `https://github.com`                               | ✅        |                                                                                                                           |
+| `terraform-module`   | `https://registry.terraform.io`                    | ✅        |                                                                                                                           |
+| `terraform-module`   | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                                                                         |
+| `terraform-provider` | `https://registry.terraform.io`                    | ✅        |                                                                                                                           |
+| `terraform-provider` | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                                                                         |
+| `github-tags`        | `https://github.com`                               | ✅        |                                                                                                                           |
+| `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                                                                                           |
+| `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                                                                                           |
+| `maven`              | `https://repo1.maven.org/maven2`                   | ✅        |                                                                                                                           |
+| `node-version`       | `https://nodejs.org/dist`                          | ✅        |                                                                                                                           |
+| `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                                                                                           |
+| `nuget`              | `https://api.nuget.org/v3/index.json`              | ✅        |                                                                                                                           |
+| `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                                                                                           |
+| `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                                                                                           |
+| `jsr`                | `https://jsr.io`                                   | ✅        | For packages without explicit timestamps, defaults to 2025-09-18                                                          |
 
 It is _likely_ that if you are using a public registry (i.e. `registry.npmjs.org`, `repo1.maven.org`, etc) the release timestamp data will be present.
 We welcome user contributions to this table.
 
 If you use a custom registry, for instance as a pull-through cache, [additional configuration may be required](#how-do-i-add-timestamp-data-to-custom-registries).
+
+#### Docker metadata timestamps
+
+Docker Hub release timestamps come from Docker Hub's registry-controlled `tag_last_pushed` field.
+This is the default and preferred source for Docker release timestamps.
+
+For other Docker and OCI registries, the OCI Distribution API does not generally expose a registry-controlled publish timestamp.
+If you enable [`dockerReleaseTimestampSource=metadata`](../configuration-options.md#dockerreleasetimestampsource), Renovate can use publisher-controlled OCI metadata as a fallback for non-Docker-Hub registries:
+
+1. `org.opencontainers.image.created` on the image manifest
+2. `created` in the image config blob
+
+This fallback is opt-in because the values are controlled by the image publisher or build system, not the registry.
+They may be spoofed by anyone who can publish the image, and they may be intentionally rewritten by reproducible-build tooling such as `SOURCE_DATE_EPOCH`.
+That means metadata timestamps are less suitable when `minimumReleaseAge` is intended to protect against a compromised image publishing pipeline.
+
+The fallback can still be useful for private registries, pull-through caches, GHCR, Quay, GCR, and other registries where no supported registry timestamp exists.
+Renovate only checks the newest Docker releases for metadata timestamps to avoid excessive manifest and blob requests.
 
 If you are using a custom registry, or unsure about a public registry, you can confirm this using Renovate's debug logs by looking for the `packageFiles with updates` debug log line, which may contain a `releaseTimestamp` field in dependency updates:
 
