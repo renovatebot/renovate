@@ -15,6 +15,7 @@ import {
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
+import { toBase64 } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './forgejo-helper.ts';
@@ -3036,7 +3037,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3052,7 +3053,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/different/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope, { full_name: 'different/repo' });
@@ -3068,7 +3069,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json?ref=dev')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3089,7 +3090,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json5')
         .reply(200, {
-          content: Buffer.from(json5Data, 'utf-8'),
+          content: toBase64(json5Data),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3104,7 +3105,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from('!@#', 'utf-8'),
+          content: toBase64('!@#'),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);

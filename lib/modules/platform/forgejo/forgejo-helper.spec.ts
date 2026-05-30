@@ -276,10 +276,10 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
 
   describe('orgListRepos', () => {
     it('should call /api/v1/orgs/[organization]/repos endpoint', async () => {
-      httpMock.scope(baseUrl).get('/orgs/some/repos').reply(200, mockRepo);
+      httpMock.scope(baseUrl).get('/orgs/some/repos').reply(200, [mockRepo]);
 
       const res = await orgListRepos('some');
-      expect(res).toEqual(mockRepo);
+      expect(res).toEqual([mockRepo]);
     });
   });
 

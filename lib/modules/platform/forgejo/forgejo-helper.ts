@@ -1,4 +1,5 @@
 import { isBoolean } from '@sindresorhus/is';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
@@ -6,12 +7,23 @@ import type { ForgejoHttpOptions } from '../../../util/http/forgejo.ts';
 import { ForgejoHttp } from '../../../util/http/forgejo.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { getQueryString } from '../../../util/url.ts';
+import {
+  BranchSchema,
+  CommentSchema,
+  CommitStatusSchema,
+  IssueSchema,
+  LabelSchema,
+  PRSchema,
+  RepoContentsSchema,
+  RepoSchema,
+  RepoSearchResultsSchema,
+  UserSchema,
+  VersionSchema,
+} from './schema.ts';
 import type {
   Branch,
   CombinedCommitStatus,
   Comment,
-  CommentCreateParams,
-  CommentUpdateParams,
   CommitStatus,
   CommitStatusCreateParams,
   CommitStatusType,
@@ -29,7 +41,6 @@ import type {
   Repo,
   RepoContents,
   RepoSearchParams,
-  RepoSearchResults,
   User,
 } from './types.ts';
 import { API_PATH } from './utils.ts';
@@ -50,18 +61,15 @@ export async function getCurrentUser(
   options?: ForgejoHttpOptions,
 ): Promise<User> {
   const url = `${API_PATH}/user`;
-  const res = await forgejoHttp.getJsonUnchecked<User>(url, options);
-  return res.body;
+  const res = await forgejoHttp.getJson(url, options ?? {}, UserSchema);
+  return res.body as User;
 }
 
 export async function getVersion(
   options?: ForgejoHttpOptions,
 ): Promise<string> {
   const url = `${API_PATH}/version`;
-  const res = await forgejoHttp.getJsonUnchecked<{ version: string }>(
-    url,
-    options,
-  );
+  const res = await forgejoHttp.getJson(url, options ?? {}, VersionSchema);
   return res.body.version;
 }
 
@@ -76,7 +84,7 @@ export async function isOrg(organization: string): Promise<boolean> {
   }
   try {
     const url = `${API_PATH}/orgs/${organization}`;
-    const res = await forgejoHttp.getJsonUnchecked(url);
+    const res = await forgejoHttp.getJson(url, z.unknown());
     repoCache.platform.forgejo.orgs[organization] = res.statusCode === 200;
     return res.statusCode === 200;
   } catch (err) {
@@ -94,10 +102,14 @@ export async function searchRepos(
 ): Promise<Repo[]> {
   const query = getQueryString(params);
   const url = `${API_PATH}/repos/search?${query}`;
-  const res = await forgejoHttp.getJsonUnchecked<RepoSearchResults>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    RepoSearchResultsSchema,
+  );
 
   if (!res.body.ok) {
     throw new Error(
@@ -105,7 +117,7 @@ export async function searchRepos(
     );
   }
 
-  return res.body.data;
+  return res.body.data as Repo[];
 }
 
 export async function orgListRepos(
@@ -113,12 +125,16 @@ export async function orgListRepos(
   options?: ForgejoHttpOptions,
 ): Promise<Repo[]> {
   const url = `${API_PATH}/orgs/${organization}/repos`;
-  const res = await forgejoHttp.getJsonUnchecked<Repo[]>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    z.array(RepoSchema),
+  );
 
-  return res.body;
+  return res.body as Repo[];
 }
 
 export async function getRepo(
@@ -126,8 +142,8 @@ export async function getRepo(
   options?: ForgejoHttpOptions,
 ): Promise<Repo> {
   const url = `${API_PATH}/repos/${repoPath}`;
-  const res = await forgejoHttp.getJsonUnchecked<Repo>(url, options);
-  return res.body;
+  const res = await forgejoHttp.getJson(url, options ?? {}, RepoSchema);
+  return res.body as Repo;
 }
 
 export async function getRepoContents(
@@ -140,13 +156,13 @@ export async function getRepoContents(
   const url = `${API_PATH}/repos/${repoPath}/contents/${urlEscape(
     filePath,
   )}?${query}`;
-  const res = await forgejoHttp.getJsonUnchecked<RepoContents>(url, options);
+  const res = await forgejoHttp.getJson(url, options ?? {}, RepoContentsSchema);
 
   if (res.body.content) {
     res.body.contentString = fromBase64(res.body.content);
   }
 
-  return res.body;
+  return res.body as RepoContents;
 }
 
 export async function createPR(
@@ -208,8 +224,12 @@ export async function getPR(
   options?: ForgejoHttpOptions,
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}`;
-  const res = await forgejoHttp.getJsonUnchecked<PR>(url, options);
-  return res.body;
+  const res = await forgejoHttp.getJson(
+    url,
+    options ?? {},
+    PRSchema.nullable().catch(null),
+  );
+  return res.body as PR;
 }
 
 export async function getPRByBranch(
@@ -220,8 +240,8 @@ export async function getPRByBranch(
 ): Promise<PR | null> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${base}/${head}`;
   try {
-    const res = await forgejoHttp.getJsonUnchecked<PR>(url, options);
-    return res.body;
+    const res = await forgejoHttp.getJson(url, options ?? {}, PRSchema);
+    return res.body as PR;
   } catch (err) {
     logger.trace({ err }, 'Error while fetching PR');
     if (err.statusCode !== 404) {
@@ -306,12 +326,16 @@ export async function searchIssues(
 ): Promise<Issue[]> {
   const query = getQueryString({ ...params, type: 'issues' });
   const url = `${API_PATH}/repos/${repoPath}/issues?${query}`;
-  const res = await forgejoHttp.getJsonUnchecked<Issue[]>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    z.array(IssueSchema),
+  );
 
-  return res.body;
+  return res.body as Issue[];
 }
 
 export async function getIssue(
@@ -320,8 +344,8 @@ export async function getIssue(
   options?: ForgejoHttpOptions,
 ): Promise<Issue> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${idx}`;
-  const res = await forgejoHttp.getJsonUnchecked<Issue>(url, options);
-  return res.body;
+  const res = await forgejoHttp.getJson(url, options ?? {}, IssueSchema);
+  return res.body as Issue;
 }
 
 export async function getRepoLabels(
@@ -329,9 +353,13 @@ export async function getRepoLabels(
   options?: ForgejoHttpOptions,
 ): Promise<Label[]> {
   const url = `${API_PATH}/repos/${repoPath}/labels`;
-  const res = await forgejoHttp.getJsonUnchecked<Label[]>(url, options);
+  const res = await forgejoHttp.getJson(
+    url,
+    options ?? {},
+    z.array(LabelSchema),
+  );
 
-  return res.body;
+  return res.body as Label[];
 }
 
 export async function getOrgLabels(
@@ -339,9 +367,13 @@ export async function getOrgLabels(
   options?: ForgejoHttpOptions,
 ): Promise<Label[]> {
   const url = `${API_PATH}/orgs/${orgName}/labels`;
-  const res = await forgejoHttp.getJsonUnchecked<Label[]>(url, options);
+  const res = await forgejoHttp.getJson(
+    url,
+    options ?? {},
+    z.array(LabelSchema),
+  );
 
-  return res.body;
+  return res.body as Label[];
 }
 
 export async function unassignLabel(
@@ -360,7 +392,7 @@ export async function createComment(
   body: string,
   options?: ForgejoHttpOptions,
 ): Promise<Comment> {
-  const params: CommentCreateParams = { body };
+  const params = { body };
   const url = `${API_PATH}/repos/${repoPath}/issues/${issue}/comments`;
   const res = await forgejoHttp.postJson<Comment>(url, {
     ...options,
@@ -376,7 +408,7 @@ export async function updateComment(
   body: string,
   options?: ForgejoHttpOptions,
 ): Promise<Comment> {
-  const params: CommentUpdateParams = { body };
+  const params = { body };
   const url = `${API_PATH}/repos/${repoPath}/issues/comments/${idx}`;
   const res = await forgejoHttp.patchJson<Comment>(url, {
     ...options,
@@ -401,7 +433,11 @@ export async function getComments(
   options?: ForgejoHttpOptions,
 ): Promise<Comment[]> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${issue}/comments`;
-  const res = await forgejoHttp.getJsonUnchecked<Comment[]>(url, options);
+  const res = await forgejoHttp.getJson(
+    url,
+    options ?? {},
+    z.array(CommentSchema),
+  );
 
   return res.body;
 }
@@ -460,13 +496,17 @@ export async function getCombinedCommitStatus(
   const url = `${API_PATH}/repos/${repoPath}/commits/${urlEscape(
     branchName,
   )}/statuses`;
-  const res = await forgejoHttp.getJsonUnchecked<CommitStatus[]>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    z.array(CommitStatusSchema),
+  );
 
   let worstState = 0;
-  const statuses = filterStatus(res.body);
+  const statuses = filterStatus(res.body as CommitStatus[]);
   for (const cs of statuses) {
     worstState = Math.max(worstState, commitStatusStates.indexOf(cs.status));
   }
@@ -483,7 +523,7 @@ export async function getBranch(
   options?: ForgejoHttpOptions,
 ): Promise<Branch> {
   const url = `${API_PATH}/repos/${repoPath}/branches/${urlEscape(branchName)}`;
-  const res = await forgejoHttp.getJsonUnchecked<Branch>(url, options);
+  const res = await forgejoHttp.getJson(url, options ?? {}, BranchSchema);
 
-  return res.body;
+  return res.body as Branch;
 }
