@@ -5,6 +5,7 @@ import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -146,7 +147,7 @@ export class NugetV3Api {
       const catalogPageFull = await http.getJson(url, CatalogPage);
       items = catalogPageFull.body.items;
     }
-    return (items ?? []).map(({ catalogEntry }) => catalogEntry);
+    return coerceArray(items).map(({ catalogEntry }) => catalogEntry);
   }
 
   async getReleases(
@@ -158,7 +159,7 @@ export class NugetV3Api {
     const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
     const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
     const packageRegistration = await http.getJson(url, PackageRegistration);
-    const catalogPages = packageRegistration.body.items ?? [];
+    const catalogPages = packageRegistration.body.items;
     const catalogPagesQueue = catalogPages.map(
       (page) => (): Promise<CatalogEntrySchema[]> =>
         this.getCatalogEntry(http, page),
@@ -231,7 +232,6 @@ export class NugetV3Api {
         const nuspecUrl = `${ensureTrailingSlash(
           packageBaseAddress,
         )}${pkgName.toLowerCase()}/${
-          // TODO: types (#22198)
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
         const metaresult = await http.getText(nuspecUrl, {

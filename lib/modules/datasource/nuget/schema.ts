@@ -16,6 +16,7 @@ const DeprecationSchema = z.object({
   reasons: z.array(z.string()),
 });
 
+// See https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#catalog-entry
 export const CatalogEntrySchema = z.object({
   version: z.string(),
   published: z.string().optional(),
@@ -39,7 +40,7 @@ export const CatalogPage = z.object({
 export type CatalogPage = z.infer<typeof CatalogPage>;
 
 export const PackageRegistration = z.object({
-  items: LooseArray(CatalogPage).optional(),
+  items: LooseArray(CatalogPage).default([]),
 });
 
 export type PackageRegistration = z.infer<typeof PackageRegistration>;
