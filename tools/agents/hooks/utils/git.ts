@@ -15,6 +15,16 @@ const git: SimpleGit = simpleGit(config).env({
   LC_ALL: 'C.UTF-8',
 });
 
+export async function getRepoRoot(dir?: string): Promise<string | null> {
+  const instance = dir ? simpleGit({ ...config, baseDir: dir }) : git;
+  try {
+    const out = await instance.revparse(['--show-toplevel']);
+    return out.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 async function getBaseRef(): Promise<string> {
   try {
     const out = await git.raw(['merge-base', 'origin/main', 'HEAD']);

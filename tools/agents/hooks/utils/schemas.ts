@@ -8,6 +8,13 @@ const BaseHookInput = z.object({
   hook_event_name: z.string(),
 });
 
+// CwdChanged hook input
+// https://code.claude.com/docs/en/hooks#cwdchanged
+export const CwdChangedHookInput = BaseHookInput.extend({
+  hook_event_name: z.literal('CwdChanged'),
+});
+export type CwdChangedHookInput = z.infer<typeof CwdChangedHookInput>;
+
 // SessionStart hook input
 // https://code.claude.com/docs/en/hooks#sessionstart
 export const SessionStartHookInput = BaseHookInput.extend({

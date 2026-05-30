@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/agents/hooks/pretooluse-check.ts"
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/pretooluse-check.ts\""
           }
         ]
       }
@@ -24,7 +24,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/agents/hooks/sessionstart-check.ts"
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/sessionstart-check.ts\""
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/cwdchanged-check.ts\""
           }
         ]
       }
@@ -34,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/agents/hooks/stop-check.ts"
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/stop-check.ts\""
           }
         ]
       }
