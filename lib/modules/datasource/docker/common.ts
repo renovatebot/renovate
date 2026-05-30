@@ -1,4 +1,5 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { z } from 'zod/v3';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -31,6 +32,7 @@ import { getGoogleAuthToken } from '../util.ts';
 import { ecrRegex, getECRAuthToken } from './ecr.ts';
 import { googleRegex } from './google.ts';
 import type { OciHelmConfig } from './schema.ts';
+import { RegistryAuthToken } from './schema.ts';
 import type { RegistryRepository } from './types.ts';
 
 export const dockerDatasourceId = 'docker';
@@ -65,7 +67,7 @@ export async function getAuthHeaders(
       ? await http.get(apiCheckUrl, options)
       : // use json request, as this will be cached for tags, so it returns json
         // TODO: add cache test
-        await http.getJsonUnchecked(apiCheckUrl, options);
+        await http.getJson(apiCheckUrl, options, z.unknown());
 
     if (apiCheckResponse.statusCode === 200) {
       logger.debug(`No registry auth required for ${apiCheckUrl}`);
@@ -198,10 +200,7 @@ export async function getAuthHeaders(
     opts.noAuth = true;
     opts.cacheProvider = memCacheProvider;
     const authResponse = (
-      await http.getJsonUnchecked<{ token?: string; access_token?: string }>(
-        authUrl.href,
-        opts,
-      )
+      await http.getJson(authUrl.href, opts, RegistryAuthToken)
     ).body;
 
     const token = authResponse.token ?? authResponse.access_token;
