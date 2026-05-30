@@ -428,5 +428,42 @@ describe('workers/repository/updates/flatten', () => {
         res.find((update) => update.depName === '@mui/material'),
       ).toBeDefined();
     });
+
+    it('skips replacement update when sibling packageName matches newName', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'old-pkg',
+                updates: [
+                  {
+                    newName: '@scope/new-pkg',
+                    newValue: '^2.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
+              {
+                depName: 'alias',
+                packageName: '@scope/new-pkg',
+                updates: [
+                  {
+                    newValue: '^3.0.0',
+                    updateType: 'minor',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(
+        res.find((update) => update.depName === 'old-pkg'),
+      ).toBeUndefined();
+      expect(res.find((update) => update.depName === 'alias')).toBeDefined();
+    });
   });
 });

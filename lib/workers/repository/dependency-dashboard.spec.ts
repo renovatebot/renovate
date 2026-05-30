@@ -1562,8 +1562,12 @@ None detected
           expect(body).toInclude('Deprecations / Replacements');
           expect(body).toInclude('@material-ui/core');
           expect(body).toInclude('@material-ui/icons');
-          expect(body).not.toInclude('![Available]');
-          expect(body).toInclude('![Unavailable]');
+          expect(body).not.toInclude(
+            '![Available](https://img.shields.io/badge/available-green?style=flat-square)',
+          );
+          expect(body).toInclude(
+            '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)',
+          );
         });
 
         it('handles missing version/digest values correctly', async () => {
