@@ -324,7 +324,7 @@ function generateConfigFileNames(): string {
 
   output += '1. `package.json` _(within a `"renovate"` section)_\n';
 
-  return output.trimEnd();
+  return output;
 }
 
 function generateToolsForConstraints(): string {

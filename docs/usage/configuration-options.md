@@ -8,32 +8,6 @@ description: Configuration Options usable in renovate.json or package.json
 This document describes all the configuration options you may use in a Renovate configuration file.
 Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-You can store your Renovate configuration file in one of these locations:
-
-<!-- config-filenames-begin -->
-
-Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
-The bot first checks all the files in the `configFileNames` array before checking from the above file list.
-
-!!! warning
-  Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
-
-!!! note
-  Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
-  We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
-
-When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
-Renovate stops the search after it finds the first match.
-
-Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
-Renovate does not read/override the config from within each base branch if present.
-
-Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
-Shareable config presets only work with the JSON format.
-
-If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
-We will do our best to answer your question(s).
-
 A `subtype` in the configuration table specifies what type you're allowed to use within the main element.
 
 If a config option has a `parent` defined, it means it's only allowed to configure it within an object with the parent name, such as `packageRules` or `hostRules`.
@@ -45,6 +19,35 @@ When an array or object configuration option is `mergeable`, it means that value
 
 !!! note
   Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
+## Locations for configuration filenames
+
+You can store your Renovate configuration file in one of these locations:
+
+<!-- config-filenames-begin -->
+
+Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
+Shareable config presets work with JSON and JSON5 file formats.
+
+If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a [new "Request Help" discussion](https://github.com/renovatebot/renovate/discussions/new?category=request-help).
+We will do our best to answer your question(s).
+
+Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
+
+When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
+Renovate first checks all the files in the `configFileNames` array before checking from the above file list.
+Renovate stops the search after it finds the first match.
+
+!!! warning
+  Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
+
+!!! note
+  Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+  We also recommend you prefer using a `.jsonc` file if you want to add comments to your configuration, instead of a `.json5` file.
+  Using an explicit `.jsonc` file is preferred over using a `.json` file with comments, as it can cause issues with editors and syntax highlighting.
+
+Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
+Renovate does not read/override the config from within each base branch if present.
 
 ---
 
