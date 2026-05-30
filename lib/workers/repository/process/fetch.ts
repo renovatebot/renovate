@@ -147,31 +147,6 @@ async function fetchManagerPackagerFileUpdates(
   );
 
   pFile.deps = await p.all(queue);
-
-  // Filter out replacement updates where the target already exists as a sibling dep
-  for (const dep of pFile.deps) {
-    if (dep.updates?.length) {
-      dep.updates = dep.updates.filter((update) => {
-        if (
-          update.updateType === 'replacement' &&
-          update.newName &&
-          pFile.deps.some(
-            (sibling) =>
-              sibling !== dep &&
-              (sibling.depName === update.newName ||
-                sibling.packageName === update.newName),
-          )
-        ) {
-          logger.debug(
-            `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile}`,
-          );
-          return false;
-        }
-        return true;
-      });
-    }
-  }
-
   logger.trace(
     { manager, packageFile },
     'fetchManagerPackagerFileUpdates finished',
