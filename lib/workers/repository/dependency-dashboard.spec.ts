@@ -1497,6 +1497,59 @@ None detected
           await dryRun(branches, platform, 0, 1);
         });
 
+        it('shows replacement as unavailable when target already exists as sibling', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithExistingReplacement: Record<
+            string,
+            PackageFile[]
+          > = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: '@material-ui/core',
+                    deprecationMessage: 'This package is deprecated',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          PackageFiles.add('main', packageFilesWithExistingReplacement);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithExistingReplacement,
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            'Deprecations / Replacements',
+          );
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            '![Unavailable]',
+          );
+          expect(platform.ensureIssue.mock.calls[0][0].body).not.toInclude(
+            '![Available]',
+          );
+        });
+
         it('handles missing version/digest values correctly', async () => {
           const branches: BranchConfig[] = [];
           const packageFilesWithMissingVersions = {

@@ -392,7 +392,17 @@ export async function ensureDependencyDashboard(
         for (const dep of fileName.deps) {
           const name = dep.packageName ?? dep.depName;
           const hasReplacement = !!dep.updates?.find(
-            (update) => update.updateType === 'replacement',
+            (update) =>
+              update.updateType === 'replacement' &&
+              !(
+                update.newName &&
+                fileName.deps.some(
+                  (sibling) =>
+                    sibling !== dep &&
+                    (sibling.depName === update.newName ||
+                      sibling.packageName === update.newName),
+                )
+              ),
           );
           if (name && (dep.deprecationMessage ?? hasReplacement)) {
             hasDeprecationsOrReplacements = true;
