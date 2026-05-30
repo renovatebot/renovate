@@ -133,16 +133,5 @@ describe('modules/datasource/npm/schema', () => {
         directory: 'test',
       });
     });
-
-    it('falls back to undefined for wholly invalid repository value', () => {
-      const input = {
-        name: 'mypackage',
-        'dist-tags': { latest: '1.0.0' },
-        versions: {},
-        repository: 123,
-      };
-      const result = NpmResponseSchema.parse(input);
-      expect(result.repository).toBeUndefined();
-    });
   });
 });

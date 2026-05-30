@@ -1,15 +1,12 @@
 import { z } from 'zod/v4';
 
-const Repository = z
-  .union([
-    z.string(),
-    z.object({
-      url: z.string().nullish(),
-      directory: z.string().nullish(),
-    }),
-  ])
-  .optional()
-  .catch(undefined);
+const Repository = z.union([
+  z.string(),
+  z.object({
+    url: z.string().nullish(),
+    directory: z.string().nullish(),
+  }),
+]);
 
 const Attestations = z.object({
   url: z.string().optional(),
