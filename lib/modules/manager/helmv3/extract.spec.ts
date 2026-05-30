@@ -62,6 +62,7 @@ describe('modules/manager/helmv3/extract', () => {
           { depName: 'postgresql', currentValue: '0.8.1' },
         ],
       });
+      expect(result?.packageFileAppVersion).toBe('1.0');
     });
 
     it('extract correctly oci references', async () => {

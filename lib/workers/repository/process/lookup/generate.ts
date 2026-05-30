@@ -23,6 +23,7 @@ export async function generateUpdate(
   const update: LookupUpdate = {
     bucket,
     newVersion,
+    newAppVersion: release.appVersion,
     newValue: null!,
     hasAttestation: release.attestation,
   };

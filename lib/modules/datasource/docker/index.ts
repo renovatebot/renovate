@@ -29,6 +29,7 @@ import type {
 import { isArtifactoryServer } from '../util.ts';
 import {
   DOCKER_HUB,
+  appVersionLabel,
   dockerDatasourceId,
   extractDigestFromResponseBody,
   findHelmSourceUrl,
@@ -516,8 +517,8 @@ export class DockerDatasource extends Datasource {
 
       switch (manifest.config.mediaType) {
         case 'application/vnd.cncf.helm.config.v1+json': {
-          if (labels[sourceLabel]) {
-            // we already have the source url, so no need to pull the config
+          if (labels[sourceLabel] && labels[appVersionLabel]) {
+            // we already have the source url and app version, so no need to pull the config
             return labels;
           }
           const configResponse = await this.getHelmConfig(
@@ -531,6 +532,9 @@ export class DockerDatasource extends Datasource {
             const url = findHelmSourceUrl(configResponse.body);
             if (url) {
               labels[sourceLabel] = url;
+            }
+            if (configResponse.body.appVersion) {
+              labels[appVersionLabel] = configResponse.body.appVersion;
             }
           }
           break;
@@ -1140,6 +1144,7 @@ export class DockerDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
+    currentValue,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
@@ -1211,6 +1216,33 @@ export class DockerDatasource extends Datasource {
       }
       if (isNonEmptyString(labels[imageUrlLabel])) {
         ret.homepage = labels[imageUrlLabel];
+      }
+
+      if (isNonEmptyString(labels[appVersionLabel])) {
+        const latestRelease = releases.find((r) => r.version === latestTag);
+        if (latestRelease) {
+          latestRelease.appVersion = labels[appVersionLabel];
+        }
+
+        if (
+          currentValue &&
+          currentValue !== latestTag &&
+          tags.includes(currentValue)
+        ) {
+          const currentLabels = await this.getLabels(
+            registryHost,
+            dockerRepository,
+            currentValue,
+          );
+          if (isNonEmptyString(currentLabels?.[appVersionLabel])) {
+            const currentRelease = releases.find(
+              (r) => r.version === currentValue,
+            );
+            if (currentRelease) {
+              currentRelease.appVersion = currentLabels[appVersionLabel];
+            }
+          }
+        }
       }
     }
     return ret;

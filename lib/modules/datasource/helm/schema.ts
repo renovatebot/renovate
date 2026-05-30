@@ -8,6 +8,7 @@ import type { Release } from '../types.ts';
 
 const HelmRelease = z.object({
   version: z.string(),
+  appVersion: z.string().optional().catch(undefined),
   created: MaybeTimestamp,
   digest: z.string().optional().catch(undefined),
   home: z.string().optional().catch(undefined),
@@ -66,10 +67,12 @@ export const HelmRepository = z
           const releases = helmReleases.map(
             ({
               version,
+              appVersion,
               created: releaseTimestamp,
               digest: newDigest,
             }): Release => ({
               version,
+              appVersion,
               releaseTimestamp,
               newDigest,
             }),

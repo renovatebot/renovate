@@ -19,6 +19,7 @@ export async function extractPackageFile(
     apiVersion: string;
     name: string;
     version: string;
+    appVersion?: string;
     dependencies: { name: string; version: string; repository: string }[];
   };
   try {
@@ -43,6 +44,7 @@ export async function extractPackageFile(
     return null;
   }
   const packageFileVersion = chart.version;
+  const packageFileAppVersion = chart.appVersion;
   let deps: PackageDependency[] = [];
   if (!isNonEmptyArray(chart?.dependencies)) {
     logger.debug(`Chart has no dependencies in ${packageFile}`);
@@ -81,6 +83,7 @@ export async function extractPackageFile(
     deps,
     datasource: HelmDatasource.id,
     packageFileVersion,
+    packageFileAppVersion,
   };
   const lockFileName = getSiblingFileName(packageFile, 'Chart.lock');
   // istanbul ignore if

@@ -108,6 +108,35 @@ describe('workers/repository/process/lookup/index', () => {
       expect(skipReason).toBe('invalid-value');
     });
 
+    it('handles appVersion for helm datasource', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'some-chart';
+      config.datasource = 'helm';
+      config.versioning = 'helm';
+      config.registryUrls = ['https://example.com'];
+      const indexYaml = `
+apiVersion: v1
+entries:
+  some-chart:
+    - version: 1.0.0
+      appVersion: 0.1.0
+    - version: 1.1.0
+      appVersion: 0.2.0
+`;
+      httpMock
+        .scope('https://example.com')
+        .get('/index.yaml')
+        .reply(200, indexYaml);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.currentAppVersion).toBe('0.1.0');
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newAppVersion).toBe('0.2.0');
+    });
+
     it('returns null if unknown datasource', async () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';

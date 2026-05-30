@@ -163,6 +163,7 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentAppVersion: 'The current app version of the dependency being updated',
   currentVersionAgeInDays: 'The age of the current version in days',
   currentVersionTimestamp: 'The timestamp of the current version',
   currentDigest: 'The extracted current digest of the dependency being updated',
@@ -206,6 +207,7 @@ export const allowedFields = {
     'The minor version of the new version. e.g. "1" if the new version is "3.1.0"',
   newPatch:
     'The patch version of the new version. e.g. "0" if the new version is "3.1.0"',
+  newAppVersion: 'The new app version of the dependency being updated',
   newName:
     'The name of the new dependency that replaces the current deprecated dependency',
   newNameLinked:

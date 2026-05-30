@@ -78,6 +78,7 @@ export interface Release {
   isStable?: boolean;
   releaseTimestamp?: Timestamp | null;
   version: string;
+  appVersion?: string;
   /** The original value to which `extractVersion` was applied */
   versionOrig?: string;
   newDigest?: string | null;
