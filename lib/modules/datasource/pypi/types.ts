@@ -4,12 +4,3 @@ export interface PypiJSONRelease {
   yanked?: boolean;
 }
 export type Releases = Record<string, PypiJSONRelease[]>;
-export interface PypiJSON {
-  info: {
-    name: string;
-    home_page?: string;
-    project_urls?: Record<string, string>;
-  };
-
-  releases?: Releases;
-}

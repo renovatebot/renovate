@@ -1,7 +1,7 @@
-import { PypiJSONSchema } from './schema.ts';
+import { PypiResponseSchema } from './schema.ts';
 
 describe('modules/datasource/pypi/schema', () => {
-  describe('PypiJSONSchema', () => {
+  describe('PypiResponseSchema', () => {
     it('parses a valid PyPI JSON response', () => {
       const input = {
         info: {
@@ -28,20 +28,14 @@ describe('modules/datasource/pypi/schema', () => {
           ],
         },
       };
-      const result = PypiJSONSchema.parse(input);
+      const result = PypiResponseSchema.parse(input);
       expect(result?.info?.name).toBe('requests');
       expect(result?.releases?.['2.28.0']?.[0].requires_python).toBe('>=3.7');
       expect(result?.releases?.['2.27.0']?.[0].requires_python).toBeNull();
     });
 
-    it('returns null for empty/undefined body', () => {
-      expect(PypiJSONSchema.parse(undefined)).toBeNull();
-      expect(PypiJSONSchema.parse(null)).toBeNull();
-    });
-
-    it('returns null for completely invalid input', () => {
-      // The .catch(null) means parse errors return null
-      expect(PypiJSONSchema.parse('not-an-object')).toBeNull();
+    it('throws for genuinely invalid input (no error swallowing)', () => {
+      expect(() => PypiResponseSchema.parse('not-an-object')).toThrow();
     });
 
     it('ignores extra fields in info', () => {
@@ -54,7 +48,7 @@ describe('modules/datasource/pypi/schema', () => {
         },
         releases: {},
       };
-      const result = PypiJSONSchema.parse(input);
+      const result = PypiResponseSchema.parse(input);
       expect(result?.info?.name).toBe('mypackage');
     });
   });

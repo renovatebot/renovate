@@ -1,25 +1,22 @@
 import { z } from 'zod/v4';
 
-export const PypiJSONReleaseSchema = z.object({
+export const PypiReleaseSchema = z.object({
   requires_python: z.string().nullish(),
   upload_time: z.string().optional(),
   yanked: z.boolean().optional(),
 });
 
-export type PypiJSONReleaseSchema = z.infer<typeof PypiJSONReleaseSchema>;
+export type PypiJSONRelease = z.infer<typeof PypiReleaseSchema>;
 
-export const PypiJSONSchema = z
-  .object({
-    info: z
-      .object({
-        name: z.string().optional(),
-        home_page: z.string().optional(),
-        project_urls: z.record(z.string(), z.string()).optional(),
-      })
-      .optional(),
-    releases: z.record(z.string(), z.array(PypiJSONReleaseSchema)).optional(),
-  })
-  .nullable()
-  .catch(null);
+export const PypiResponseSchema = z.object({
+  info: z
+    .object({
+      name: z.string().optional(),
+      home_page: z.string().optional(),
+      project_urls: z.record(z.string(), z.string()).optional(),
+    })
+    .optional(),
+  releases: z.record(z.string(), z.array(PypiReleaseSchema)).optional(),
+});
 
-export type PypiJSONSchema = z.infer<typeof PypiJSONSchema>;
+export type PypiResponse = z.infer<typeof PypiResponseSchema>;

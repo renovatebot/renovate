@@ -13,7 +13,7 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { isGitHubRepo, normalizePythonDepName } from './common.ts';
-import { PypiJSONSchema } from './schema.ts';
+import { PypiResponseSchema } from './schema.ts';
 import type { PypiJSONRelease, Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
@@ -132,13 +132,9 @@ export class PypiDatasource extends Datasource {
     const rep = await this.http.getJson(
       sanitizedUrl,
       { headers },
-      PypiJSONSchema,
+      PypiResponseSchema,
     );
     const dep = rep?.body;
-    if (!dep) {
-      logger.trace({ dependency: packageName }, 'pip package not found');
-      return null;
-    }
     if (rep.authorization) {
       dependency.isPrivate = true;
     }

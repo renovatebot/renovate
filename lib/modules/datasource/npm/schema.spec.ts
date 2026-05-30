@@ -111,5 +111,38 @@ describe('modules/datasource/npm/schema', () => {
       expect(result.repository).toBe('myorg/mypackage');
       expect(result.versions?.['1.0.0']?.repository).toBe('myorg/mypackage');
     });
+
+    it('accepts repository.url: null and preserves directory', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: {
+          '1.0.0': {
+            repository: { url: null, directory: 'test' },
+          },
+        },
+        repository: { url: null, directory: 'packages/core' },
+      };
+      const result = NpmResponseSchema.parse(input);
+      expect(result.repository).toEqual({
+        url: null,
+        directory: 'packages/core',
+      });
+      expect(result.versions?.['1.0.0']?.repository).toEqual({
+        url: null,
+        directory: 'test',
+      });
+    });
+
+    it('falls back to undefined for wholly invalid repository value', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: {},
+        repository: 123,
+      };
+      const result = NpmResponseSchema.parse(input);
+      expect(result.repository).toBeUndefined();
+    });
   });
 });

@@ -3,6 +3,7 @@ import {
   resolvePackageUrl,
   resolveRegistryUrl,
 } from '../../../modules/datasource/npm/npmrc.ts';
+import type { NpmResponseVersion } from '../../../modules/datasource/npm/schema.ts';
 import { NpmResponseSchema } from '../../../modules/datasource/npm/schema.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { Http } from '../../../util/http/index.ts';
@@ -21,8 +22,7 @@ export async function getPreset({
   repo: pkg,
   presetName = 'default',
 }: PresetConfig): Promise<Preset | undefined> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let dep: Record<string, any> | undefined;
+  let dep: (NpmResponseVersion & { 'renovate-config'?: any }) | undefined;
   try {
     const registryUrl = resolveRegistryUrl(pkg);
     logger.once.warn(
