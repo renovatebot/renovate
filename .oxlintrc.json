@@ -42,6 +42,14 @@
             "name": "simple-git",
             "importNames": ["simpleGit"],
             "message": "Use createSimpleGit instead of simpleGit."
+          },
+          {
+            "name": "zod",
+            "message": "Use zod/v4 instead of the bare zod package."
+          },
+          {
+            "name": "zod/v3",
+            "message": "Use zod/v4 instead of the zod/v3 compatibility shim."
           }
         ]
       }
