@@ -1362,8 +1362,8 @@ const options: Readonly<RenovateOptions>[] = [
       'maven',
       'terraform',
       'vendir',
-      'regex',
-      'jsonata',
+      'custom.regex',
+      'custom.jsonata',
     ],
   },
   {
