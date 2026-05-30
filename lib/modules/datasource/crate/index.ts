@@ -21,17 +21,13 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
+import type { CrateMetadata } from './schema.ts';
 import {
-  CrateMetadataSchema,
+  CrateMetadataResponseSchema,
   RegistryConfigSchema,
   ReleaseTimestamp,
 } from './schema.ts';
-import type {
-  CrateMetadata,
-  CrateRecord,
-  RegistryFlavor,
-  RegistryInfo,
-} from './types.ts';
+import type { CrateRecord, RegistryFlavor, RegistryInfo } from './types.ts';
 
 type CloneResult =
   | {
@@ -227,7 +223,10 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      const { body } = await this.http.getJson(crateUrl, CrateMetadataSchema);
+      const { body } = await this.http.getJson(
+        crateUrl,
+        CrateMetadataResponseSchema,
+      );
       return body.crate;
     } catch (err) {
       logger.debug(

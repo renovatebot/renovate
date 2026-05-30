@@ -36,7 +36,7 @@ export class PuppetForgeDatasource extends Datasource {
 
     const releases: Release[] = module?.releases?.map((release) => ({
       version: release.version,
-      downloadUrl: release.file_uri,
+      downloadUrl: release.file_uri ?? undefined,
       releaseTimestamp: asTimestamp(release.created_at),
       registryUrl,
     }));
@@ -55,7 +55,7 @@ export class PuppetForgeDatasource extends Datasource {
     const result: ReleaseResult = {
       releases,
       // the homepage url in the fixtures is a github repo, we can use this as sourceUrl
-      homepage: module.homepage_url,
+      homepage: module.homepage_url ?? undefined,
     };
 
     if (module.deprecated_for) {

@@ -6,14 +6,14 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  JenkinsPluginsInfoResponse,
+  JenkinsPluginsVersionsResponse,
+} from './schema.ts';
 import {
   JenkinsPluginsInfoResponseSchema,
   JenkinsPluginsVersionsResponseSchema,
 } from './schema.ts';
-import type {
-  JenkinsPluginsInfoResponse,
-  JenkinsPluginsVersionsResponse,
-} from './types.ts';
 
 export class JenkinsPluginsDatasource extends Datasource {
   static readonly id = 'jenkins-plugins';

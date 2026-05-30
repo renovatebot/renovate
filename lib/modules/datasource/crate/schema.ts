@@ -18,11 +18,14 @@ export const ReleaseTimestamp = z
   .catch(null);
 
 export const CrateMetadataSchema = z.object({
-  crate: z.object({
-    description: z.string().optional(),
-    documentation: z.string().optional(),
-    homepage: z.string().optional(),
-    repository: z.string().optional(),
-  }),
+  description: z.string().optional(),
+  documentation: z.string().optional(),
+  homepage: z.string().optional(),
+  repository: z.string().optional(),
 });
-export type CrateMetadataResponse = z.infer<typeof CrateMetadataSchema>;
+export type CrateMetadata = z.infer<typeof CrateMetadataSchema>;
+
+export const CrateMetadataResponseSchema = z.object({
+  crate: CrateMetadataSchema,
+});
+export type CrateMetadataResponse = z.infer<typeof CrateMetadataResponseSchema>;
