@@ -11,7 +11,7 @@ export interface JenkinsPluginVersion {
   url?: string;
   requiredCore?: string;
 
-  releaseTimestamp?: Timestamp | null;
+  releaseTimestamp: Timestamp | null;
 }
 
 export interface JenkinsPluginsInfoResponse {

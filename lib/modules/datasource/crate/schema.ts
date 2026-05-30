@@ -19,10 +19,10 @@ export const ReleaseTimestamp = z
 
 export const CrateMetadataSchema = z.object({
   crate: z.object({
-    description: z.string().nullable(),
-    documentation: z.string().nullable(),
-    homepage: z.string().nullable(),
-    repository: z.string().nullable(),
+    description: z.string().optional(),
+    documentation: z.string().optional(),
+    homepage: z.string().optional(),
+    repository: z.string().optional(),
   }),
 });
 export type CrateMetadataResponse = z.infer<typeof CrateMetadataSchema>;

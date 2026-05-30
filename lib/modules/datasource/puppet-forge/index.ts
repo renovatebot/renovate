@@ -55,7 +55,7 @@ export class PuppetForgeDatasource extends Datasource {
     const result: ReleaseResult = {
       releases,
       // the homepage url in the fixtures is a github repo, we can use this as sourceUrl
-      homepage: module.homepage_url ?? undefined,
+      homepage: module.homepage_url,
     };
 
     if (module.deprecated_for) {

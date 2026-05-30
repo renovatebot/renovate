@@ -3,8 +3,8 @@ import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const PuppetReleaseAbbreviatedSchema = z.object({
   version: z.string(),
-  created_at: z.string().nullable().optional(),
-  deleted_at: z.string().nullable().optional(),
+  created_at: z.string().optional(),
+  deleted_at: z.string().optional(),
   file_uri: z.string().optional(),
   file_size: z.number().optional(),
   uri: z.string().optional(),
@@ -13,8 +13,8 @@ export const PuppetReleaseAbbreviatedSchema = z.object({
 
 export const PuppetModuleSchema = z.object({
   releases: LooseArray(PuppetReleaseAbbreviatedSchema).default([]),
-  homepage_url: z.string().nullable().optional(),
-  deprecated_for: z.string().nullable().optional(),
+  homepage_url: z.string().optional(),
+  deprecated_for: z.string().optional(),
 });
 
 export type PuppetModuleSchema = z.infer<typeof PuppetModuleSchema>;
