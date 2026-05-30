@@ -3,10 +3,7 @@ import {
   resolvePackageUrl,
   resolveRegistryUrl,
 } from '../../../modules/datasource/npm/npmrc.ts';
-import type {
-  NpmResponse,
-  NpmResponseVersion,
-} from '../../../modules/datasource/npm/types.ts';
+import { NpmResponseSchema } from '../../../modules/datasource/npm/schema.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { Http } from '../../../util/http/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';
@@ -24,7 +21,8 @@ export async function getPreset({
   repo: pkg,
   presetName = 'default',
 }: PresetConfig): Promise<Preset | undefined> {
-  let dep: (NpmResponseVersion & { 'renovate-config'?: any }) | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dep: Record<string, any> | undefined;
   try {
     const registryUrl = resolveRegistryUrl(pkg);
     logger.once.warn(
@@ -33,9 +31,11 @@ export async function getPreset({
     );
     const packageUrl = resolvePackageUrl(registryUrl, pkg);
     const body = (
-      await http.getJsonUnchecked<NpmResponse>(packageUrl, {
-        cacheProvider: memCacheProvider,
-      })
+      await http.getJson(
+        packageUrl,
+        { cacheProvider: memCacheProvider },
+        NpmResponseSchema,
+      )
     ).body;
     // TODO: check null #22198
     dep = body.versions![body['dist-tags']!.latest];
