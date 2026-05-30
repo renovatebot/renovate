@@ -4457,6 +4457,8 @@ This feature works with the following managers:
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
 - [`crow`](modules/manager/crow/index.md)
+- [`regex`](modules/manager/regex/index.md)
+- [`jsonata`](modules/manager/jsonata/index.md)
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
