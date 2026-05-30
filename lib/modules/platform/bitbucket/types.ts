@@ -52,7 +52,7 @@ export interface PrResponse {
   id: number;
   title: string;
   state: string;
-  links: {
+  links?: {
     commits: {
       href: string;
     };
@@ -70,7 +70,7 @@ export interface PrResponse {
   };
   reviewers: Account[];
   created_on: string;
-  updated_on: string;
+  updated_on?: string;
 }
 
 export interface Account {
