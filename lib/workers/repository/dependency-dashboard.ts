@@ -395,7 +395,6 @@ export async function ensureDependencyDashboard(
             (update) => update.updateType === 'replacement',
           );
           const hasAnyReplacement = !!replacementUpdate;
-          // A replacement without newName (version-only change) is still actionable
           const hasActionableReplacement =
             hasAnyReplacement &&
             !(
