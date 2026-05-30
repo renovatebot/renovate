@@ -7,7 +7,8 @@ import { clone } from '../../../util/clone.ts';
 import type { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import type { Pr } from '../types.ts';
-import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types.ts';
+import { PagedResult, PrResponse } from './schema.ts';
+import type { BitbucketPrCacheData } from './types.ts';
 import { prFieldsFilter, prInfo, prStates } from './utils.ts';
 
 export class BitbucketPrCache {
@@ -103,7 +104,9 @@ export class BitbucketPrCache {
       const oldItem = oldItems[id];
       const newItem = prInfo(rawItem);
 
-      const itemNewTime = DateTime.fromISO(rawItem.updated_on);
+      const itemNewTime = rawItem.updated_on
+        ? DateTime.fromISO(rawItem.updated_on)
+        : null;
 
       if (!dequal(oldItem, newItem)) {
         oldItems[id] = newItem;
@@ -111,8 +114,8 @@ export class BitbucketPrCache {
 
       const cacheOldTime = updated_on ? DateTime.fromISO(updated_on) : null;
       // v8 ignore else -- TODO: add test #40625
-      if (!cacheOldTime || itemNewTime > cacheOldTime) {
-        updated_on = rawItem.updated_on;
+      if (itemNewTime && (!cacheOldTime || itemNewTime > cacheOldTime)) {
+        updated_on = rawItem.updated_on ?? null;
       }
     }
 
@@ -149,7 +152,7 @@ export class BitbucketPrCache {
       pagelen: 50,
       cacheProvider: repoCacheProvider,
     };
-    const res = await http.getJsonUnchecked<PagedResult<PrResponse>>(url, opts);
+    const res = await http.getJson(url, opts, PagedResult(PrResponse));
 
     const items = res.body.values;
     logger.debug(`Fetched ${items.length} PRs to sync with cache`);
