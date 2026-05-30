@@ -20,12 +20,12 @@ import { ensureTrailingSlash } from '../../../util/url.ts';
 import { api as versioning } from '../../versioning/nuget/index.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { massageUrl, removeBuildMeta, sortNugetVersions } from './common.ts';
-import type {
-  CatalogEntry,
+import type { CatalogEntrySchema } from './schema.ts';
+import {
   CatalogPage,
   PackageRegistration,
   ServicesIndexRaw,
-} from './types.ts';
+} from './schema.ts';
 
 export class NugetV3Api {
   static readonly cacheNamespace = 'datasource-nuget-v3';
@@ -55,9 +55,11 @@ export class NugetV3Api {
       );
       if (!servicesIndexRaw) {
         servicesIndexRaw = (
-          await http.getJsonUnchecked<ServicesIndexRaw>(url, {
-            cacheProvider: memCacheProvider,
-          })
+          await http.getJson(
+            url,
+            { cacheProvider: memCacheProvider },
+            ServicesIndexRaw,
+          )
         ).body;
         await packageCache.set(
           NugetV3Api.cacheNamespace,
@@ -134,14 +136,17 @@ export class NugetV3Api {
   async getCatalogEntry(
     http: Http,
     catalogPage: CatalogPage,
-  ): Promise<CatalogEntry[]> {
+  ): Promise<CatalogEntrySchema[]> {
     let items = catalogPage.items;
     if (!items) {
       const url = catalogPage['@id'];
-      const catalogPageFull = await http.getJsonUnchecked<CatalogPage>(url);
+      if (!url) {
+        return [];
+      }
+      const catalogPageFull = await http.getJson(url, CatalogPage);
       items = catalogPageFull.body.items;
     }
-    return items.map(({ catalogEntry }) => catalogEntry);
+    return (items ?? []).map(({ catalogEntry }) => catalogEntry);
   }
 
   async getReleases(
@@ -152,11 +157,11 @@ export class NugetV3Api {
   ): Promise<ReleaseResult | null> {
     const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
     const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
-    const packageRegistration =
-      await http.getJsonUnchecked<PackageRegistration>(url);
-    const catalogPages = packageRegistration.body.items || [];
+    const packageRegistration = await http.getJson(url, PackageRegistration);
+    const catalogPages = packageRegistration.body.items ?? [];
     const catalogPagesQueue = catalogPages.map(
-      (page) => (): Promise<CatalogEntry[]> => this.getCatalogEntry(http, page),
+      (page) => (): Promise<CatalogEntrySchema[]> =>
+        this.getCatalogEntry(http, page),
     );
     const catalogEntries = (await p.all(catalogPagesQueue))
       .flat()
