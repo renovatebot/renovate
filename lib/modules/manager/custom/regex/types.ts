@@ -39,4 +39,5 @@ export interface RecursionParameter {
   regexes: RegExp[];
   index: number;
   combinedGroups: Record<string, string>;
+  registryAliases: Record<string, string> | undefined;
 }

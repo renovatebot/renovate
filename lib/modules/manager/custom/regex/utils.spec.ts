@@ -32,6 +32,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.registryUrls).toEqual(['https://registry.example.com/']);
     });
@@ -44,6 +45,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.registryUrls).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -60,6 +62,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.datasource).toBe('npm');
     });
@@ -72,8 +75,51 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.indentation).toBe('  ');
+    });
+
+    it('replaces depName when registryAliases is set', () => {
+      const dep = utils.createDependency(
+        {
+          groups: { depName: 'foo/bar' },
+          replaceString: undefined,
+        },
+        baseConfig,
+        baseFileInfo,
+        { foo: 'baz' },
+      );
+      expect(dep?.packageName).toBe('baz/bar');
+    });
+
+    it('replaces packageName when registryAliases is set', () => {
+      const dep = utils.createDependency(
+        {
+          groups: { depName: 'foo/dep', packageName: 'foo/pkg' },
+          replaceString: undefined,
+        },
+        baseConfig,
+        baseFileInfo,
+        { foo: 'baz' },
+      );
+      expect(dep?.packageName).toBe('baz/pkg');
+    });
+    it('replaces registryUrls when registryAliases is set', () => {
+      const dep = utils.createDependency(
+        {
+          groups: {
+            depName: 'foo/dep',
+            packageName: 'foo/pkg',
+            registryUrl: 'https://foo',
+          },
+          replaceString: undefined,
+        },
+        baseConfig,
+        baseFileInfo,
+        { 'https://foo': 'https://baz' },
+      );
+      expect(dep?.registryUrls).toEqual(['https://baz/']);
     });
 
     it('sets empty indentation when indentation group is non-whitespace', () => {
@@ -84,6 +130,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.indentation).toBe('');
     });
@@ -96,6 +143,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.depName).toBe('my-package');
     });
