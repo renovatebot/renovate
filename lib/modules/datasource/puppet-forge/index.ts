@@ -1,6 +1,5 @@
-import { asTimestamp } from '../../../util/timestamp.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { PUPPET_FORGE } from './common.ts';
 import { PuppetModuleSchema } from './schema.ts';
 
@@ -25,41 +24,21 @@ export class PuppetForgeDatasource extends Datasource {
     const moduleSlug = packageName.replace('/', '-');
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
-    let module: PuppetModuleSchema;
+    let result: ReleaseResult;
 
     try {
       const response = await this.http.getJson(url, PuppetModuleSchema);
-      module = response.body;
+      result = response.body;
     } catch (err) {
       this.handleGenericErrors(err);
     }
 
-    const releases: Release[] = module?.releases?.map((release) => ({
-      version: release.version,
-      downloadUrl: release.file_uri ?? undefined,
-      releaseTimestamp: asTimestamp(release.created_at),
-      registryUrl,
-    }));
-
-    if (!releases?.length) {
+    if (!result.releases.length) {
       return null;
     }
 
-    return PuppetForgeDatasource.createReleaseResult(releases, module);
-  }
-
-  static createReleaseResult(
-    releases: Release[],
-    module: PuppetModuleSchema,
-  ): ReleaseResult {
-    const result: ReleaseResult = {
-      releases,
-      // the homepage url in the fixtures is a github repo, we can use this as sourceUrl
-      homepage: module.homepage_url ?? undefined,
-    };
-
-    if (module.deprecated_for) {
-      result.deprecationMessage = module.deprecated_for;
+    for (const release of result.releases) {
+      release.registryUrl = registryUrl;
     }
 
     return result;
