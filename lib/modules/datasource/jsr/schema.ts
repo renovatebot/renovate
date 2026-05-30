@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release } from '../types.ts';
 

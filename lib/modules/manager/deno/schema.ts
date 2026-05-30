@@ -247,9 +247,9 @@ const DenoPackageFile = z
     lock: z.optional(Lock),
     workspace: z.optional(Workspace),
     importMap: z.string().optional(),
-    imports: Imports,
-    scopes: Scopes,
-    tasks: Tasks,
+    imports: z.optional(Imports).default([]),
+    scopes: z.optional(Scopes).default([]),
+    tasks: z.optional(Tasks).default([]),
     compilerOptions: z
       .optional(
         z.object({
@@ -297,8 +297,8 @@ export type DenoExtract = z.infer<typeof DenoExtract>;
 
 export const ImportMapExtract = Json.pipe(
   z.object({
-    imports: Imports,
-    scopes: Scopes,
+    imports: z.optional(Imports).default([]),
+    scopes: z.optional(Scopes).default([]),
   }),
 ).transform(({ imports, scopes }) => ({
   dependencies: [...imports, ...scopes],
