@@ -1,4 +1,4 @@
-import { type ZodType } from 'zod/v3';
+import { type ZodType, type ZodTypeDef } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { clone } from '../../../util/clone.ts';
@@ -71,10 +71,10 @@ export class JenkinsPluginsDatasource extends Datasource {
       );
 
     const info: Record<string, ReleaseResult> = {};
-    for (const name of Object.keys(plugins ?? [])) {
+    for (const name of Object.keys(plugins)) {
       info[name] = {
         releases: [], // releases
-        sourceUrl: plugins![name]?.scm,
+        sourceUrl: plugins[name]?.scm,
       };
     }
     return info;
@@ -103,13 +103,13 @@ export class JenkinsPluginsDatasource extends Datasource {
       );
 
     const versions: Record<string, Release[]> = {};
-    for (const name of Object.keys(plugins ?? [])) {
-      versions[name] = Object.keys(plugins![name]).map((version) => {
-        const downloadUrl = plugins![name][version]?.url;
-        const buildDate = plugins![name][version]?.buildDate;
+    for (const name of Object.keys(plugins)) {
+      versions[name] = Object.keys(plugins[name]).map((version) => {
+        const downloadUrl = plugins[name][version]?.url;
+        const buildDate = plugins[name][version]?.buildDate;
         const releaseTimestamp =
-          plugins![name][version]?.releaseTimestamp ?? asTimestamp(buildDate);
-        const jenkins = plugins![name][version]?.requiredCore;
+          plugins[name][version]?.releaseTimestamp ?? asTimestamp(buildDate);
+        const jenkins = plugins[name][version]?.requiredCore;
         const constraints = jenkins ? { jenkins: [`>=${jenkins}`] } : undefined;
         return {
           version,
@@ -136,7 +136,7 @@ export class JenkinsPluginsDatasource extends Datasource {
 
   private async getJenkinsUpdateCenterResponse<T>(
     url: string,
-    schema: ZodType<T>,
+    schema: ZodType<T, ZodTypeDef, unknown>,
   ): Promise<T> {
     let response: T;
 

@@ -7,7 +7,7 @@ export const JenkinsPluginInfoSchema = z.object({
 });
 
 export const JenkinsPluginsInfoResponseSchema = z.object({
-  plugins: z.record(z.string(), JenkinsPluginInfoSchema).optional(),
+  plugins: z.record(z.string(), JenkinsPluginInfoSchema).default({}),
 });
 
 export const JenkinsPluginVersionSchema = z.object({
@@ -21,5 +21,5 @@ export const JenkinsPluginVersionSchema = z.object({
 export const JenkinsPluginsVersionsResponseSchema = z.object({
   plugins: z
     .record(z.string(), z.record(z.string(), JenkinsPluginVersionSchema))
-    .optional(),
+    .default({}),
 });

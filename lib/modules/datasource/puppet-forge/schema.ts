@@ -12,7 +12,7 @@ export const PuppetReleaseAbbreviatedSchema = z.object({
 });
 
 export const PuppetModuleSchema = z.object({
-  releases: LooseArray(PuppetReleaseAbbreviatedSchema).optional(),
+  releases: LooseArray(PuppetReleaseAbbreviatedSchema).default([]),
   homepage_url: z.string().nullable().optional(),
   deprecated_for: z.string().nullable().optional(),
 });
