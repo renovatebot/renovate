@@ -15,7 +15,6 @@ import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
-import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
 
 const upper = (str: string): string =>
@@ -113,12 +112,6 @@ export async function flattenUpdates(
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates!) {
-            if (replacementAlreadyExists(update, dep, packageFile.deps)) {
-              logger.debug(
-                `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile.packageFile}`,
-              );
-              continue;
-            }
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
             if (updateConfig.updateType) {

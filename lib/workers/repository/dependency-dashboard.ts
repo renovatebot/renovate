@@ -17,7 +17,7 @@ import { regEx } from '../../util/regex.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
-import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
+import { extractRepoProblems } from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
@@ -392,9 +392,7 @@ export async function ensureDependencyDashboard(
         for (const dep of fileName.deps) {
           const name = dep.packageName ?? dep.depName;
           const hasReplacement = !!dep.updates?.find(
-            (update) =>
-              update.updateType === 'replacement' &&
-              !replacementAlreadyExists(update, dep, fileName.deps),
+            (update) => update.updateType === 'replacement',
           );
           if (name && (dep.deprecationMessage ?? hasReplacement)) {
             hasDeprecationsOrReplacements = true;

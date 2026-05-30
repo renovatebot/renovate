@@ -1,9 +1,5 @@
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger/index.ts';
-import type {
-  LookupUpdate,
-  PackageDependency,
-} from '../../modules/manager/types.ts';
 import { emojify } from '../../util/emoji.ts';
 
 export function extractRepoProblems(
@@ -35,21 +31,4 @@ export function formatProblemLevel(level: number): string {
   const emojiName = logLevelEmojis[level];
 
   return `${emojify(emojiName)} ${name}`;
-}
-
-export function replacementAlreadyExists(
-  update: LookupUpdate,
-  dep: PackageDependency,
-  siblingDeps: PackageDependency[],
-): boolean {
-  return (
-    update.updateType === 'replacement' &&
-    !!update.newName &&
-    siblingDeps.some(
-      (sibling) =>
-        sibling !== dep &&
-        (sibling.depName === update.newName ||
-          sibling.packageName === update.newName),
-    )
-  );
 }
