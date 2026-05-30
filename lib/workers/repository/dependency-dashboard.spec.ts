@@ -1519,7 +1519,26 @@ None detected
                     ],
                   },
                   {
+                    depName: '@material-ui/icons',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/icons-material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
                     depName: '@mui/material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/icons-material',
                     updates: [
                       {
                         newValue: '^6.2.0',
@@ -1539,15 +1558,12 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'Deprecations / Replacements',
-          );
-          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            '![Unavailable]',
-          );
-          expect(platform.ensureIssue.mock.calls[0][0].body).not.toInclude(
-            '![Available]',
-          );
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toInclude('Deprecations / Replacements');
+          expect(body).toInclude('@material-ui/core');
+          expect(body).toInclude('@material-ui/icons');
+          expect(body).not.toInclude('![Available]');
+          expect(body).toInclude('![Unavailable]');
         });
 
         it('handles missing version/digest values correctly', async () => {

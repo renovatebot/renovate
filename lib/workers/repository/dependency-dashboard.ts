@@ -391,24 +391,29 @@ export async function ensureDependencyDashboard(
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
           const name = dep.packageName ?? dep.depName;
-          const hasReplacement = !!dep.updates?.find(
-            (update) =>
-              update.updateType === 'replacement' &&
-              !(
-                update.newName &&
-                fileName.deps.some(
-                  (sibling) =>
-                    sibling !== dep &&
-                    (sibling.depName === update.newName ||
-                      sibling.packageName === update.newName),
-                )
-              ),
+          const hasAnyReplacement = !!dep.updates?.find(
+            (update) => update.updateType === 'replacement',
           );
-          if (name && (dep.deprecationMessage ?? hasReplacement)) {
+          const hasActionableReplacement =
+            hasAnyReplacement &&
+            !!dep.updates?.find(
+              (update) =>
+                update.updateType === 'replacement' &&
+                !(
+                  update.newName &&
+                  fileName.deps.some(
+                    (sibling) =>
+                      sibling !== dep &&
+                      (sibling.depName === update.newName ||
+                        sibling.packageName === update.newName),
+                  )
+                ),
+            );
+          if (name && (dep.deprecationMessage ?? hasAnyReplacement)) {
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= {
-              hasReplacement,
+              hasReplacement: hasActionableReplacement,
               sourceUrl: dep.sourceUrl,
             };
           }
