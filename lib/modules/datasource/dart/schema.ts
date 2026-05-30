@@ -3,23 +3,22 @@ import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 const DartVersionEntrySchema = z.object({
   version: z.string(),
-  published: z.string().optional().nullable(),
-  retracted: z.boolean().optional().nullable(),
+  published: z.string().optional(),
+  retracted: z.boolean().optional(),
 });
 
 const DartLatestSchema = z.object({
   pubspec: z
     .object({
-      homepage: z.string().optional().nullable(),
-      repository: z.string().optional().nullable(),
+      homepage: z.string().optional(),
+      repository: z.string().optional(),
     })
-    .optional()
-    .nullable(),
+    .optional(),
 });
 
 export const DartResultSchema = z.object({
   versions: LooseArray(DartVersionEntrySchema).optional(),
-  latest: DartLatestSchema.optional().nullable(),
+  latest: DartLatestSchema.optional(),
 });
 
 export type DartResult = z.infer<typeof DartResultSchema>;
