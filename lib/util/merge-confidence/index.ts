@@ -1,4 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { z } from 'zod/v3';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig, UpdateType } from '../../config/types.ts';
 import { instrument } from '../../instrumentation/index.ts';
@@ -80,6 +81,10 @@ const updateTypeConfidenceMapping: Record<UpdateType, MergeConfidence | null> =
     minor: null,
     patch: null,
   };
+
+const MergeConfidenceResponseSchema = z.object({
+  confidence: z.string(),
+});
 
 /**
  * Retrieves the merge confidence of a package update if the merge confidence API is enabled. Otherwise, undefined is returned.
@@ -193,9 +198,7 @@ async function queryApi(
   let confidence: MergeConfidence = 'neutral';
   try {
     const res = (
-      await http.getJsonUnchecked<{ confidence: MergeConfidence }>(url, {
-        cacheProvider: memCacheProvider,
-      })
+      await http.getJson(url, { cacheProvider: memCacheProvider }, MergeConfidenceResponseSchema)
     ).body;
     if (isMergeConfidence(res.confidence)) {
       confidence = res.confidence;

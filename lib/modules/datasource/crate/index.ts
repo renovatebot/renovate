@@ -21,7 +21,11 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { RegistryConfigSchema, ReleaseTimestamp } from './schema.ts';
+import {
+  CrateMetadataSchema,
+  RegistryConfigSchema,
+  ReleaseTimestamp,
+} from './schema.ts';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -223,11 +227,8 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      interface Response {
-        crate: CrateMetadata;
-      }
-      const response = await this.http.getJsonUnchecked<Response>(crateUrl);
-      return response.body.crate;
+      const { body } = await this.http.getJson(crateUrl, CrateMetadataSchema);
+      return body.crate;
     } catch (err) {
       logger.debug(
         { err, packageName, registryUrl: info.rawUrl },

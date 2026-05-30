@@ -1,3 +1,4 @@
+import { type ZodType } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { clone } from '../../../util/clone.ts';
@@ -5,6 +6,10 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import {
+  JenkinsPluginsInfoResponseSchema,
+  JenkinsPluginsVersionsResponseSchema,
+} from './schema.ts';
 import type {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
@@ -62,13 +67,14 @@ export class JenkinsPluginsDatasource extends Datasource {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsInfoResponse>(
         `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`,
+        JenkinsPluginsInfoResponseSchema,
       );
 
     const info: Record<string, ReleaseResult> = {};
     for (const name of Object.keys(plugins ?? [])) {
       info[name] = {
         releases: [], // releases
-        sourceUrl: plugins[name]?.scm,
+        sourceUrl: plugins![name]?.scm,
       };
     }
     return info;
@@ -93,16 +99,17 @@ export class JenkinsPluginsDatasource extends Datasource {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsVersionsResponse>(
         `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`,
+        JenkinsPluginsVersionsResponseSchema,
       );
 
     const versions: Record<string, Release[]> = {};
     for (const name of Object.keys(plugins ?? [])) {
-      versions[name] = Object.keys(plugins[name]).map((version) => {
-        const downloadUrl = plugins[name][version]?.url;
-        const buildDate = plugins[name][version]?.buildDate;
+      versions[name] = Object.keys(plugins![name]).map((version) => {
+        const downloadUrl = plugins![name][version]?.url;
+        const buildDate = plugins![name][version]?.buildDate;
         const releaseTimestamp =
-          plugins[name][version]?.releaseTimestamp ?? asTimestamp(buildDate);
-        const jenkins = plugins[name][version]?.requiredCore;
+          plugins![name][version]?.releaseTimestamp ?? asTimestamp(buildDate);
+        const jenkins = plugins![name][version]?.requiredCore;
         const constraints = jenkins ? { jenkins: [`>=${jenkins}`] } : undefined;
         return {
           version,
@@ -127,13 +134,16 @@ export class JenkinsPluginsDatasource extends Datasource {
     );
   }
 
-  private async getJenkinsUpdateCenterResponse<T>(url: string): Promise<T> {
+  private async getJenkinsUpdateCenterResponse<T>(
+    url: string,
+    schema: ZodType<T>,
+  ): Promise<T> {
     let response: T;
 
     try {
       logger.debug(`jenkins-plugins: Fetching Jenkins plugins from ${url}`);
       const startTime = Date.now();
-      response = (await this.http.getJsonUnchecked<T>(url)).body;
+      response = (await this.http.getJson(url, schema)).body;
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(
         { durationMs },

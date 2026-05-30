@@ -6,16 +6,20 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { RepologyPackage, RepologyPackageType } from './types.ts';
+import {
+  type RepologyPackageSchema,
+  RepologyPackagesSchema,
+} from './schema.ts';
+import type { RepologyPackageType } from './types.ts';
 
 const packageTypes: RepologyPackageType[] = ['binname', 'srcname'];
 
 function findPackageInResponse(
-  response: RepologyPackage[],
+  response: RepologyPackageSchema[],
   repoName: string,
   pkgName: string,
   types: RepologyPackageType[],
-): RepologyPackage[] | null {
+): RepologyPackageSchema[] | null {
   const repoPackages = response.filter((pkg) => pkg.repo === repoName);
 
   if (repoPackages.length === 0) {
@@ -54,9 +58,9 @@ export class RepologyDatasource extends Datasource {
     super(RepologyDatasource.id);
   }
 
-  private async queryPackages(url: string): Promise<RepologyPackage[]> {
+  private async queryPackages(url: string): Promise<RepologyPackageSchema[]> {
     try {
-      const res = await this.http.getJsonUnchecked<RepologyPackage[]>(url);
+      const res = await this.http.getJson(url, RepologyPackagesSchema);
       return res.body;
     } catch (err) {
       if (err.statusCode === 404) {
@@ -77,7 +81,7 @@ export class RepologyDatasource extends Datasource {
     repoName: string,
     packageName: string,
     packageType: RepologyPackageType,
-  ): Promise<RepologyPackage[]> {
+  ): Promise<RepologyPackageSchema[]> {
     const query = getQueryString({
       repo: repoName,
       name_type: packageType,
@@ -97,7 +101,7 @@ export class RepologyDatasource extends Datasource {
   private async queryPackagesViaAPI(
     registryUrl: string,
     packageName: string,
-  ): Promise<RepologyPackage[]> {
+  ): Promise<RepologyPackageSchema[]> {
     // Directly query the package via the API. This will only work if `packageName` has the
     // same name as the repology project
     const packages = await this.queryPackages(
@@ -111,8 +115,8 @@ export class RepologyDatasource extends Datasource {
     registryUrl: string,
     repoName: string,
     pkgName: string,
-  ): Promise<RepologyPackage[] | undefined> {
-    let response: RepologyPackage[];
+  ): Promise<RepologyPackageSchema[] | undefined> {
+    let response: RepologyPackageSchema[];
     // Try getting the packages from tools/project-by first for type binname and
     // afterwards for srcname. This needs to be done first, because some packages
     // resolve to repology projects which have a different name than the package
@@ -183,7 +187,7 @@ export class RepologyDatasource extends Datasource {
     registryUrl: string,
     repoName: string,
     pkgName: string,
-  ): Promise<RepologyPackage[] | undefined> {
+  ): Promise<RepologyPackageSchema[] | undefined> {
     return withCache(
       {
         ttlMinutes: 60,

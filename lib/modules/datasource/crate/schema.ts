@@ -16,3 +16,13 @@ export const ReleaseTimestamp = z
   .transform(({ version: { created_at } }) => created_at)
   .nullable()
   .catch(null);
+
+export const CrateMetadataSchema = z.object({
+  crate: z.object({
+    description: z.string().nullable().optional(),
+    documentation: z.string().nullable().optional(),
+    homepage: z.string().nullable().optional(),
+    repository: z.string().nullable().optional(),
+  }),
+});
+export type CrateMetadataResponse = z.infer<typeof CrateMetadataSchema>;
