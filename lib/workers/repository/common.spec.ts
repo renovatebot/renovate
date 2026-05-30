@@ -11,9 +11,9 @@ describe('workers/repository/common', () => {
         { depName: '@mui/material' },
       ];
 
-      expect(replacementAlreadyExists(deps, currentDep, '@mui/material')).toBe(
-        true,
-      );
+      expect(
+        replacementAlreadyExists(deps, currentDep, '@mui/material'),
+      ).toBeTrue();
     });
 
     it('returns true when sibling packageName matches newName', () => {
@@ -23,7 +23,7 @@ describe('workers/repository/common', () => {
         { depName: 'alias', packageName: 'new-pkg' },
       ];
 
-      expect(replacementAlreadyExists(deps, currentDep, 'new-pkg')).toBe(true);
+      expect(replacementAlreadyExists(deps, currentDep, 'new-pkg')).toBeTrue();
     });
 
     it('returns false when no sibling matches newName', () => {
@@ -33,18 +33,18 @@ describe('workers/repository/common', () => {
         { depName: 'unrelated-package' },
       ];
 
-      expect(replacementAlreadyExists(deps, currentDep, '@mui/material')).toBe(
-        false,
-      );
+      expect(
+        replacementAlreadyExists(deps, currentDep, '@mui/material'),
+      ).toBeFalse();
     });
 
     it('does not match the current dep itself', () => {
       const currentDep: PackageDependency = { depName: '@mui/material' };
       const deps: PackageDependency[] = [currentDep];
 
-      expect(replacementAlreadyExists(deps, currentDep, '@mui/material')).toBe(
-        false,
-      );
+      expect(
+        replacementAlreadyExists(deps, currentDep, '@mui/material'),
+      ).toBeFalse();
     });
   });
 
