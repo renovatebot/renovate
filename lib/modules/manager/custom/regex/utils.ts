@@ -5,7 +5,7 @@ import * as template from '../../../../util/template/index.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { ValidMatchFields } from '../utils.ts';
-import { validMatchFields } from '../utils.ts';
+import { substituteRegistryAliases, validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,
   PackageFileInfo,
@@ -45,6 +45,7 @@ export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: RegexManagerConfig,
   packageFileInfo: PackageFileInfo,
+  registryAliases: Record<string, string> | undefined,
   dep?: PackageDependency,
 ): PackageDependency | null {
   const dependency = dep ?? {};
@@ -74,6 +75,7 @@ export function createDependency(
     }
   }
   dependency.replaceString = replaceString;
+  substituteRegistryAliases(dependency, registryAliases);
   return dependency;
 }
 

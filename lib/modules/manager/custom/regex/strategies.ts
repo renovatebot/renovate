@@ -17,6 +17,7 @@ import {
 export function handleAny(
   config: RegexManagerConfig,
   packageFileInfo: PackageFileInfo,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
   return config.matchStrings
@@ -32,6 +33,7 @@ export function handleAny(
         },
         config,
         packageFileInfo,
+        registryAliases,
       ),
     )
     .filter(isTruthy)
@@ -43,6 +45,7 @@ export function handleAny(
 export function handleCombination(
   config: RegexManagerConfig,
   packageFileInfo: PackageFileInfo,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
   const matches = config.matchStrings
@@ -62,7 +65,9 @@ export function handleCombination(
           : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
-  return [createDependency(extraction, config, packageFileInfo)]
+  return [
+    createDependency(extraction, config, packageFileInfo, registryAliases),
+  ]
     .filter(isTruthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
@@ -72,6 +77,7 @@ export function handleCombination(
 export function handleRecursive(
   config: RegexManagerConfig,
   packageFileInfo: PackageFileInfo,
+  registryAliases?: Record<string, string>,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
   const regexes = config.matchStrings.map((matchString) =>
@@ -85,6 +91,7 @@ export function handleRecursive(
     index: 0,
     combinedGroups: {},
     regexes,
+    registryAliases,
   })
     .filter(isTruthy)
     .filter((dep: PackageDependency) =>
@@ -100,6 +107,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
     regexes,
     config,
     packageFileInfo,
+    registryAliases,
   }: RecursionParameter = parameters;
   // abort if we have no matchString anymore
   if (regexes.length === index) {
@@ -110,6 +118,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       },
       config,
       packageFileInfo,
+      registryAliases,
     );
     return result ? [result] : /* istanbul ignore next: can this happen? */ [];
   }

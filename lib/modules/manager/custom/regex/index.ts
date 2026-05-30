@@ -41,17 +41,28 @@ export function extractPackageFile(
     content,
     packageFile,
   };
-
   switch (config.matchStringsStrategy) {
     default:
     case 'any':
-      deps = handleAny(config as RegexManagerConfig, packageFileInfo);
+      deps = handleAny(
+        config as RegexManagerConfig,
+        packageFileInfo,
+        config.registryAliases,
+      );
       break;
     case 'combination':
-      deps = handleCombination(config as RegexManagerConfig, packageFileInfo);
+      deps = handleCombination(
+        config as RegexManagerConfig,
+        packageFileInfo,
+        config.registryAliases,
+      );
       break;
     case 'recursive':
-      deps = handleRecursive(config as RegexManagerConfig, packageFileInfo);
+      deps = handleRecursive(
+        config as RegexManagerConfig,
+        packageFileInfo,
+        config.registryAliases,
+      );
       break;
   }
 
