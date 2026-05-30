@@ -23,7 +23,6 @@ There are four times in Renovate's behavior when it may need credentials:
 - Looking up changelogs
 - Passing to package managers when updating lock files or checksums
 
-<!-- prettier-ignore -->
 !!! note
   If you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
 
@@ -156,7 +155,6 @@ Currently the preferred way to configure `github.com` credentials for self-hoste
 - Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, but we recommend you create an "empty" account for this purpose.
 - Add the PAT to Renovate using the environment variable `RENOVATE_GITHUB_COM_TOKEN`
 
-<!-- prettier-ignore -->
 !!! note
   `GITHUB_COM_TOKEN` is still parsed and takes precedence over `RENOVATE_GITHUB_COM_TOKEN`, but is considered deprecated and will be removed in a future major update.
 
@@ -270,7 +268,6 @@ module.exports = {
 };
 ```
 
-<!-- prettier-ignore -->
 !!! tip
   Remember to put a trailing slash at the end of your `matchHost` URL.
 
@@ -477,7 +474,6 @@ The pip-compile manager can extract these directives from the input file given t
 Renovate matches those URLs with credentials from matching `hostRules` blocks in the Renovate configuration.
 Then Renovate passes the information to `pip-compile` via environment variables.
 
-<!-- prettier-ignore -->
 !!! warning "Put directives in the .in file, avoid the lockfile"
   You must put the `--[extra-]index-url` directive(s) in the `.in` file, for `pip-compile` to use during Renovate jobs.
   Do _not_ put the directive(s) in the lockfile, as this is _not_ supported.
@@ -591,7 +587,6 @@ The solution to this is that you should break your presets into public and priva
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
 The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
-<!-- prettier-ignore -->
 !!! warning "Store secrets for your Mend-hosted app via the web UI"
   Mend no longer supports putting encrypted secrets in the Renovate config file on your repository.
   Going forward, all secrets must be stored in the App settings via the web UI.
@@ -642,7 +637,6 @@ For instructions on this, see the above section on encrypting secrets for the Me
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
 
-<!-- prettier-ignore -->
 !!! note
   Encrypted values can't be used in the "Admin/Bot config".
 

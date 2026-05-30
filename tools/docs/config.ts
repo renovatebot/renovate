@@ -215,13 +215,12 @@ function stringifyArrays(el: Record<string, any>): void {
 
 function genExperimentalMsg(el: Record<string, any>): string {
   const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
-  let warning =
-    '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
+  let warning = '\n!!! warning "This feature is flagged as experimental"\n';
 
   if (el.experimentalDescription) {
-    warning += indent`${2}${el.experimentalDescription}`;
+    warning += indent`${1}${el.experimentalDescription}`;
   } else {
-    warning += indent`${2}Experimental features might be changed or even removed at any time.`;
+    warning += indent`${1}Experimental features might be changed or even removed at any time.`;
   }
 
   const issues = el.experimentalIssues ?? [];
@@ -238,15 +237,14 @@ function genExperimentalMsg(el: Record<string, any>): string {
 }
 
 function genTemplatingMsg(): string {
-  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${2}See [templates](templates.md) for available variables and helpers.`}\n`;
+  return `\n!!! tip "This option supports Renovate's template syntax"\n${indent`${1}See [templates](templates.md) for available variables and helpers.`}\n`;
 }
 
 function genDeprecationMsg(el: Record<string, any>): string {
-  let warning =
-    '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
+  let warning = '\n!!! warning "This feature has been deprecated"\n';
 
   if (el.deprecationMsg) {
-    warning += indent`${2}${el.deprecationMsg}`;
+    warning += indent`${1}${el.deprecationMsg}`;
   }
 
   return `${warning}\n`;
@@ -326,7 +324,7 @@ function generateConfigFileNames(): string {
 
   output += '1. `package.json` _(within a `"renovate"` section)_\n';
 
-  return output.trimEnd();
+  return output;
 }
 
 function generateToolsForConstraints(): string {
@@ -363,7 +361,7 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of [...toolNames]) {
+  for (const tool of toolNames) {
     output += `- \`${tool}\`\n`;
   }
 
@@ -495,8 +493,5 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 }
 
 function generateAdvancedUse(): string {
-  return (
-    '\n<!-- prettier-ignore -->\n!!! warning\n' +
-    '    For advanced use only! Use at your own risk!\n'
-  );
+  return '!!! warning\n' + '  For advanced use only! Use at your own risk!\n';
 }

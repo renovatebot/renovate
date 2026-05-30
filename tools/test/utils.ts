@@ -1,4 +1,4 @@
-import { env } from 'process';
+import { env } from 'node:process';
 
 export function getCoverageIgnorePatterns(): string[] {
   const patterns = [];

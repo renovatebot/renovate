@@ -3,7 +3,6 @@
 This page lists community-maintained tools that extend or complement Renovate.
 These tools are not officially supported by the Renovate team, but may be useful for your workflow.
 
-<!-- prettier-ignore -->
 !!! note
   If you have a community tool you'd like to add to this page, please open a pull request.
 

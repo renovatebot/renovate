@@ -16,9 +16,11 @@ Mend is ISO 27001 and SOC2 certified.
 
 ### Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, please report it through the [GitHub Security Advisories process](https://github.com/renovatebot/renovate/security/advisories).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
+
+If you would like to discuss a potential finding before raising the Advisory, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
 
 Please do not create GitHub issues for security-related doubts or problems.
 
@@ -109,7 +111,6 @@ As it is difficult to craft a regular expression that may deny usage of special 
 
 Separately, there are also opportunities for malicious external code to execute, as part of Renovate's update process.
 
-<!-- prettier-ignore -->
 !!! warning
   Below are _some_ of the options, but note that this is **not exhaustive**.
 
