@@ -17,7 +17,7 @@ import { regEx } from '../../util/regex.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
-import { extractRepoProblems } from './common.ts';
+import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
@@ -391,23 +391,19 @@ export async function ensureDependencyDashboard(
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
           const name = dep.packageName ?? dep.depName;
-          const hasAnyReplacement = !!dep.updates?.find(
+          const replacementUpdate = dep.updates?.find(
             (update) => update.updateType === 'replacement',
           );
+          const hasAnyReplacement = !!replacementUpdate;
           const hasActionableReplacement =
             hasAnyReplacement &&
-            !!dep.updates?.find(
-              (update) =>
-                update.updateType === 'replacement' &&
-                !(
-                  update.newName &&
-                  fileName.deps.some(
-                    (sibling) =>
-                      sibling !== dep &&
-                      (sibling.depName === update.newName ||
-                        sibling.packageName === update.newName),
-                  )
-                ),
+            !(
+              replacementUpdate.newName &&
+              replacementAlreadyExists(
+                fileName.deps,
+                dep,
+                replacementUpdate.newName,
+              )
             );
           if (name && (dep.deprecationMessage ?? hasAnyReplacement)) {
             hasDeprecationsOrReplacements = true;
