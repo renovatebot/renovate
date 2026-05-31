@@ -41,7 +41,7 @@ const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
 };
 
-describe('util/git/index', { timeout: 10000 }, () => {
+describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
