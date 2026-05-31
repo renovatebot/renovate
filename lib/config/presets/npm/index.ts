@@ -4,7 +4,7 @@ import {
   resolveRegistryUrl,
 } from '../../../modules/datasource/npm/npmrc.ts';
 import type { NpmResponseVersion } from '../../../modules/datasource/npm/schema.ts';
-import { NpmResponseSchema } from '../../../modules/datasource/npm/schema.ts';
+import { NpmResponse } from '../../../modules/datasource/npm/schema.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { Http } from '../../../util/http/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';
@@ -34,7 +34,7 @@ export async function getPreset({
       await http.getJson(
         packageUrl,
         { cacheProvider: memCacheProvider },
-        NpmResponseSchema,
+        NpmResponse,
       )
     ).body;
     // TODO: check null #22198

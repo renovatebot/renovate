@@ -1,4 +1,4 @@
-import { PypiResponseSchema } from './schema.ts';
+import { PypiResponse } from './schema.ts';
 
 describe('modules/datasource/pypi/schema', () => {
   describe('PypiResponseSchema', () => {
@@ -28,14 +28,14 @@ describe('modules/datasource/pypi/schema', () => {
           ],
         },
       };
-      const result = PypiResponseSchema.parse(input);
+      const result = PypiResponse.parse(input);
       expect(result?.info?.name).toBe('requests');
       expect(result?.releases?.['2.28.0']?.[0].requires_python).toBe('>=3.7');
       expect(result?.releases?.['2.27.0']?.[0].requires_python).toBeNull();
     });
 
     it('throws for genuinely invalid input (no error swallowing)', () => {
-      expect(() => PypiResponseSchema.parse('not-an-object')).toThrow();
+      expect(() => PypiResponse.parse('not-an-object')).toThrow();
     });
 
     it('ignores extra fields in info', () => {
@@ -48,7 +48,7 @@ describe('modules/datasource/pypi/schema', () => {
         },
         releases: {},
       };
-      const result = PypiResponseSchema.parse(input);
+      const result = PypiResponse.parse(input);
       expect(result?.info?.name).toBe('mypackage');
     });
   });

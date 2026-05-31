@@ -16,7 +16,7 @@ const Distribution = z.object({
   attestations: Attestations.optional(),
 });
 
-export const NpmResponseVersionSchema = z.object({
+export const NpmResponseVersion = z.object({
   repository: Repository.optional(),
   homepage: z.string().optional().catch(undefined),
   deprecated: z.union([z.string(), z.boolean()]).optional(),
@@ -29,10 +29,10 @@ export const NpmResponseVersionSchema = z.object({
     .catch(undefined),
   dist: Distribution.optional(),
 });
-export type NpmResponseVersion = z.infer<typeof NpmResponseVersionSchema>;
+export type NpmResponseVersion = z.infer<typeof NpmResponseVersion>;
 
 export const CachedPackument = z.object({
-  versions: z.record(z.string(), NpmResponseVersionSchema).optional(),
+  versions: z.record(z.string(), NpmResponseVersion).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
   time: z.record(z.string(), z.string()).optional(),
@@ -45,9 +45,9 @@ export const CachedPackument = z.object({
  * Uses loose() on the version objects to preserve extra fields
  * (e.g. 'renovate-config' used by config/presets/npm/index.ts).
  */
-const NpmResponseVersionLoose = NpmResponseVersionSchema.loose();
+const NpmResponseVersionLoose = NpmResponseVersion.loose();
 
-export const NpmResponseSchema = z.object({
+export const NpmResponse = z.object({
   _id: z.string().optional(),
   name: z.string().optional(),
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
@@ -57,4 +57,4 @@ export const NpmResponseSchema = z.object({
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
 
-export type NpmResponseSchema = z.infer<typeof NpmResponseSchema>;
+export type NpmResponse = z.infer<typeof NpmResponse>;

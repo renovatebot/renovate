@@ -13,8 +13,9 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { isGitHubRepo, normalizePythonDepName } from './common.ts';
-import { PypiResponseSchema } from './schema.ts';
-import type { PypiJSONRelease, Releases } from './types.ts';
+import type { PypiRelease } from './schema.ts';
+import { PypiResponse } from './schema.ts';
+import type { Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -132,7 +133,7 @@ export class PypiDatasource extends Datasource {
     const rep = await this.http.getJson(
       sanitizedUrl,
       { headers },
-      PypiResponseSchema,
+      PypiResponse,
     );
     const dep = rep?.body;
     if (rep.authorization) {
@@ -294,7 +295,7 @@ export class PypiDatasource extends Datasource {
         packageName,
       );
       if (version) {
-        const release: PypiJSONRelease = {
+        const release: PypiRelease = {
           yanked: link.hasAttribute('data-yanked'),
         };
         const requiresPython = link.getAttribute('data-requires-python');

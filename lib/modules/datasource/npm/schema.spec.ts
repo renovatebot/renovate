@@ -1,4 +1,4 @@
-import { CachedPackument, NpmResponseSchema } from './schema.ts';
+import { CachedPackument, NpmResponse } from './schema.ts';
 
 describe('modules/datasource/npm/schema', () => {
   it('strips fields outside the cached packument shape', () => {
@@ -91,7 +91,7 @@ describe('modules/datasource/npm/schema', () => {
         repository: { url: 'https://github.com/org/mypackage' },
         homepage: 'https://example.com',
       };
-      const result = NpmResponseSchema.parse(input);
+      const result = NpmResponse.parse(input);
       expect(result.name).toBe('mypackage');
       expect(result['dist-tags']?.latest).toBe('1.0.0');
       // renovate-config must be preserved in version objects (passthrough)
@@ -107,7 +107,7 @@ describe('modules/datasource/npm/schema', () => {
         versions: { '1.0.0': { repository: 'myorg/mypackage' } },
         repository: 'myorg/mypackage',
       };
-      const result = NpmResponseSchema.parse(input);
+      const result = NpmResponse.parse(input);
       expect(result.repository).toBe('myorg/mypackage');
       expect(result.versions?.['1.0.0']?.repository).toBe('myorg/mypackage');
     });
@@ -123,7 +123,7 @@ describe('modules/datasource/npm/schema', () => {
         },
         repository: { url: null, directory: 'packages/core' },
       };
-      const result = NpmResponseSchema.parse(input);
+      const result = NpmResponse.parse(input);
       expect(result.repository).toEqual({
         url: null,
         directory: 'packages/core',
