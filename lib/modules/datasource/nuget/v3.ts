@@ -21,7 +21,7 @@ import { ensureTrailingSlash } from '../../../util/url.ts';
 import { api as versioning } from '../../versioning/nuget/index.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { massageUrl, removeBuildMeta, sortNugetVersions } from './common.ts';
-import type { CatalogEntrySchema } from './schema.ts';
+import type { CatalogEntry } from './schema.ts';
 import {
   CatalogPage,
   PackageRegistration,
@@ -137,7 +137,7 @@ export class NugetV3Api {
   async getCatalogEntry(
     http: Http,
     catalogPage: CatalogPage,
-  ): Promise<CatalogEntrySchema[]> {
+  ): Promise<CatalogEntry[]> {
     let items = catalogPage.items;
     if (!items) {
       const url = catalogPage['@id'];
@@ -161,8 +161,7 @@ export class NugetV3Api {
     const packageRegistration = await http.getJson(url, PackageRegistration);
     const catalogPages = packageRegistration.body.items;
     const catalogPagesQueue = catalogPages.map(
-      (page) => (): Promise<CatalogEntrySchema[]> =>
-        this.getCatalogEntry(http, page),
+      (page) => (): Promise<CatalogEntry[]> => this.getCatalogEntry(http, page),
     );
     const catalogEntries = (await p.all(catalogPagesQueue))
       .flat()
