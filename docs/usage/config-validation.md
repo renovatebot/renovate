@@ -56,7 +56,6 @@ $ npx --yes --package renovate -- renovate-config-validator first_config.json
  INFO: Config validated successfully
 ```
 
-<!-- prettier-ignore -->
 !!! note
   If you specify the filename, `renovate-config-validator` treats the file(s) as global self-hosted configuration instead of repo-level configuration.
   If this isn't intentional - for instance if you're validating a [shared config preset](./config-presets.md) or a non-standard filename - make sure you specify `--no-global`, i.e. `renovate-config-validator --no-global go-presets.json`.
@@ -94,7 +93,6 @@ Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovat
 
 ### Validation of Renovate config change PRs
 
-<!-- prettier-ignore -->
 !!! tip
   Using the Mend-hosted apps? Push a branch to `renovate/reconfigure` for feedback (via status check), and if there's a PR, Renovate will add comments to it!
 
@@ -113,6 +111,5 @@ The next time Renovate runs on that repo it will:
 1. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
 1. Validate each commit the next time Renovate runs on the repository, until the PR is merged.
 
-<!-- prettier-ignore -->
 !!! note
   The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.

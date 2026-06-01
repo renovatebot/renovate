@@ -64,7 +64,6 @@ For the full `re2` syntax, read [the `re2` syntax wiki page](https://github.com/
 If you want to test your patterns interactively online, we recommend [regex101.com](https://regex101.com/?flavor=javascript&flags=ginst).
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
-<!-- prettier-ignore -->
 !!! warning "Escape the backslashes from regex101"
   Before you copy/paste the regex from regex101 into your Renovate config, you must escape the backslashes (`\`) first.
   For example: `\n\s` → `\\n\\s`.

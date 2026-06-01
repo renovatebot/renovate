@@ -107,7 +107,6 @@ We recommend you use the `cron` syntax in your Renovate schedules.
 | on friday and saturday                       | `* * * * 5,6`         |
 | every 3 months on the first day of the month | `* * 1 */3 *`         |
 
-<!-- prettier-ignore -->
 !!! note
   For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
   And the cron schedule must have five parts.
@@ -131,7 +130,6 @@ The `@breejs/later` library also controls the interpretation of "days", time_bef
 | on friday and saturday                       | `* * * * 5,6`         |
 | every 3 months on the first day of the month | `* * 1 */3 *`         |
 
-<!-- prettier-ignore -->
 !!! warning
   Renovate does _not_ support scheduled minutes or "at an exact time" granularity.
   Granularity must be at least one hour.

@@ -5,7 +5,6 @@ description: How to use OpenTelemetry with Renovate
 
 # OpenTelemetry and Renovate
 
-<!-- prettier-ignore -->
 !!! warning "This feature is flagged as experimental"
   Experimental features might be changed at any time.
   <br /> <br />
@@ -19,7 +18,6 @@ OpenTelemetry has three types of observability data it supports within the OpenT
 - metrics
 - logs
 
-<!-- prettier-ignore -->
 !!! note
   While the OpenTelemetry Protocol (OTLP) support traces, metrics, and logs, Renovate only supports traces, and some metrics.
   <br /> <br />

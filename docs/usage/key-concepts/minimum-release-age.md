@@ -37,7 +37,6 @@ To prevent supply-chain attacks, Renovate requires that the registry/datasource 
 
 This ensures that a package maintainer cannot specify (maliciously or accidentally) a different timestamp to when the package was actually published.
 
-<!-- prettier-ignore -->
 !!! warning
   For instance, a suggestion for the Docker ecosystem is to use the `org.opencontainers.image.created` image annotation.
   <br>
@@ -76,7 +75,6 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
-<!-- prettier-ignore -->
 !!! warning
   Renovate 42 changed the behaviour detailed below.
   In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
@@ -120,7 +118,6 @@ If you have a Dependency Dashboard enabled, it will be found in the Dependency D
 
 You can force the dependency update by requesting it via the Dependency Dashboard, or if you are self-hosting, you can use the [`checkedBranches`](../self-hosted-configuration.md#checkedbranches) to force the branch creation.
 
-<!-- prettier-ignore -->
 !!! note
   A previous version of the documentation (up until Renovate 42.19.9) recommended configuring [`prCreation`](../configuration-options.md#prcreation). This is no longer the case.
 
@@ -158,7 +155,6 @@ Security updates bypass any `minimumReleaseAge` checks, and so will be raised as
 
 ### What happens if a package has multiple updates available?
 
-<!-- prettier-ignore -->
 !!! note
   This is based on the [recommended settings above](#recommended-settings)
 
@@ -202,13 +198,11 @@ To opt out a dependency from minimum release age checks, create a package rule w
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
   As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
 
 ### Which datasources support release timestamps?
 
-<!-- prettier-ignore -->
 !!! tip
   You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](../modules/datasource/index.md).
 

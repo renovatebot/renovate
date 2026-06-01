@@ -53,7 +53,6 @@ You mainly pin versions for certainty, and visibility.
 When you have a pinned version of each dependency in your `package.json`, you know exactly which version of each dependency is installed at any time.
 This benefits when upgrading versions as well as when rolling back in case of problems.
 
-<!-- prettier-ignore -->
 !!! note
   We'll cover lock files later, don't worry.
 

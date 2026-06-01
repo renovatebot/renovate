@@ -26,7 +26,6 @@ First of all, here is the one time when Renovate _won't_ update branches.
 If you push a new commit to a Renovate branch, for example to fix your code so the tests pass, then Renovate stops all updates of that branch.
 It is up to you to either finish the job and merge the PR, or rename it and close it so that Renovate can take over again.
 
-<!-- prettier-ignore -->
 !!! warning
   Do _not_ amend Renovate's commits, because Renovate will rebase over your amended commit.
   Keep your work safe and always push your own _new_ commit to any Renovate branch.
