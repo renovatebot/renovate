@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 /**
  * @see https://gerrit.wikimedia.org/r/Documentation/rest-api-config.html#download-scheme-info

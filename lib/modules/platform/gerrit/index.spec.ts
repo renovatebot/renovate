@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { git, hostRules, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
@@ -221,7 +221,6 @@ describe('modules/platform/gerrit/index', () => {
           {
             code: 'invalid_type',
             expected: 'object',
-            received: 'string',
             path: ['download'],
             message: 'Expected object, received string',
           },
