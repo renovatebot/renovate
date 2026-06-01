@@ -9,7 +9,6 @@ import { logger } from '../../logger/index.ts';
 import { coerceNumber } from '../number.ts';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats.ts';
 import { coerceString } from '../string.ts';
-import { hooks } from './hooks.ts';
 import {
   type GotBufferOptions,
   GotExtraOptionKeys,
