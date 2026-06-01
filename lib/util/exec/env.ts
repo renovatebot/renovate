@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 
-const basicEnvVars = [
+export const basicEnvVars = [
   'CI',
   'HTTP_PROXY',
   'HTTPS_PROXY',
@@ -27,6 +27,9 @@ const basicEnvVars = [
   'PROGRAMFILES(X86)',
   'APPDATA',
   'LOCALAPPDATA',
+  // Required for .NET dotnet-install.ps1 to work on Windows.
+  'PROCESSOR_ARCHITECTURE',
+  'PATHEXT',
   // Corepack: https://github.com/nodejs/corepack
   'COREPACK_DEFAULT_TO_LATEST',
   'COREPACK_ENABLE_NETWORK',
@@ -43,7 +46,7 @@ const basicEnvVars = [
   // pnpm specific variables
   'PNPM_WORKERS',
   'PNPM_MAX_WORKERS',
-];
+] as const;
 
 export function getChildProcessEnv(
   customEnvVars: string[] = [],

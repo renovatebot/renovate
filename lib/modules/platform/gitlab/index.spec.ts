@@ -1,5 +1,5 @@
 // TODO fix mocks
-import _timers from 'timers/promises';
+import _timers from 'node:timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '~test/http-mock.ts';
 import { git, hostRules, logger } from '~test/util.ts';
@@ -77,6 +77,15 @@ describe('modules/platform/gitlab/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
       await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
+    });
+
+    it('should throw if endpoint is not a valid URL', async () => {
+      await expect(
+        gitlab.initPlatform({
+          token: 'some-token',
+          endpoint: 'not-a-url',
+        }),
+      ).rejects.toThrow('Invalid GitLab endpoint URL');
     });
 
     it('should throw if auth fails', async () => {

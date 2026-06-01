@@ -83,6 +83,7 @@ export interface UserDetails {
   username: string;
   name: string;
   id: number;
+  email: EmailAddress | null;
 }
 
 export interface PlatformConfig {

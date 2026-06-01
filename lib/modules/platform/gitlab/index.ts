@@ -1,7 +1,7 @@
+import { setTimeout } from 'node:timers/promises';
 import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -28,7 +28,11 @@ import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
+import {
+  ensureTrailingSlash,
+  getQueryString,
+  parseUrl,
+} from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -114,11 +118,13 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  if (endpoint) {
+  if (!endpoint) {
+    logger.debug(`Using default GitLab endpoint: ${defaults.endpoint}`);
+  } else if (parseUrl(endpoint) === null) {
+    throw new Error(`Invalid GitLab endpoint URL: ${endpoint}`);
+  } else {
     defaults.endpoint = ensureTrailingSlash(endpoint);
     setBaseUrl(defaults.endpoint);
-  } else {
-    logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
@@ -151,7 +157,7 @@ export async function initPlatform({
       ).body;
       gitlabVersion = version.version;
     }
-    logger.debug('GitLab version is: ' + gitlabVersion);
+    logger.debug(`GitLab version is: ${gitlabVersion}`);
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     [gitlabVersion] = gitlabVersion.split('-');
     defaults.version = gitlabVersion;
@@ -201,7 +207,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       ),
     );
   } else {
-    urls.push('projects?' + getQueryString(queryParams));
+    urls.push(`projects?${getQueryString(queryParams)}`);
   }
 
   try {
@@ -241,9 +247,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url =
-    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
-    (branchOrTag ?? `HEAD`);
+  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
   const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
     cacheProvider: memCacheProvider,
   });
