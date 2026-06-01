@@ -6,7 +6,8 @@ const closingKeywordRe =
   /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)(?:\s*:\s*|\s+)(?:(?:renovatebot\/renovate)?#|https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/)(?<issue>\d+)\b/gi;
 const todoIssueRefRe =
   /\bTODO\b.*(?:(?:renovatebot\/renovate)?#|https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/)(?<issue>\d+)\b/i;
-const fencedCodeBlockRe = /(?:^|\n)(?:```|~~~)[\s\S]*?(?:\n(?:```|~~~)(?=\n|$)|$)/g;
+const fencedCodeBlockRe =
+  /(?:^|\n)(?:```|~~~)[\s\S]*?(?:\n(?:```|~~~)(?=\n|$)|$)/g;
 const inlineCodeRe = /`[^`\r\n]*`/g;
 
 export interface TodoIssueRef {
