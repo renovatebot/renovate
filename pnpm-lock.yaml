@@ -343,9 +343,6 @@ importers:
       strip-json-comments:
         specifier: 5.0.3
         version: 5.0.3
-      tar:
-        specifier: 7.5.13
-        version: 7.5.13
       toml-eslint-parser:
         specifier: 1.0.3
         version: 1.0.3
