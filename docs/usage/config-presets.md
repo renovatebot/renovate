@@ -91,7 +91,15 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Forgejo with preset name and path with a tag | `forgejo>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://codeberg.org/abc/foo` | `path/xyz.json` | `1.2.3`        |
 | Forgejo with subpreset name and tag          | `forgejo>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://codeberg.org/abc/foo` | `xyz.json`      | `1.2.3`        |
 
-### Self-hosted Git
+### Self-hosted Git / current Git server
+
+!!! note
+  If you're self-hosting your platform, for instance a GitHub Enterprise Server instance, you'll want to use `local>` to look up presets on the current Git server.
+  <br>
+  You can also use `local>` if you're running on `github.com`, and this will work as if you had written `github>`.
+  This can make your presets more portable if you run across many different Git platforms.
+
+For instance, if you have `platform=github` and `endpoint=https://github.company.com`:
 
 | name                                       | example use                     | preset    | resolves as                          | filename        | Git tag        |
 | ------------------------------------------ | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
