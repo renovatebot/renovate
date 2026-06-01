@@ -2584,7 +2584,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Apply group settings even when the group contains only one update.',
     type: 'boolean',
-    default: false,
+    default: true,
     cli: false,
     env: false,
   },
