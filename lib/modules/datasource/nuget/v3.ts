@@ -1,5 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import extract from 'extract-zip';
+import AdmZip from 'adm-zip';
 import semver from 'semver';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
@@ -307,7 +307,8 @@ export class NugetV3Api {
     try {
       const writeStream = fs.createCacheWriteStream(nupkgFile);
       await fs.pipeline(readStream, writeStream);
-      await extract(nupkgFile, { dir: nupkgContentsDir });
+      const zip = new AdmZip(nupkgFile);
+      zip.extractAllTo(nupkgContentsDir);
       const nuspecFile = upath.join(nupkgContentsDir, `${packageName}.nuspec`);
       const nuspec = new XmlDocument(
         await fs.readCacheFile(nuspecFile, 'utf8'),
