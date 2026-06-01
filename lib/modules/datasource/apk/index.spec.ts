@@ -1,10 +1,10 @@
+import { promisify } from 'node:util';
+import * as zlib from 'node:zlib';
 import { codeBlock } from 'common-tags';
 import { Header, Pack, ReadEntry } from 'tar';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { promisify } from 'util';
 import { vi } from 'vitest';
-import * as zlib from 'zlib';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';

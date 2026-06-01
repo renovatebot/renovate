@@ -1,5 +1,5 @@
+import readline from 'node:readline';
 import is from '@sindresorhus/is';
-import readline from 'readline';
 import { logger } from '../../../logger/index.ts';
 import * as fs from '../../../util/fs/index.ts';
 import type { ApkPackage } from './types.ts';
