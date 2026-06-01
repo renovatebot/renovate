@@ -36,6 +36,9 @@ describe('util/http/got', () => {
             method: 'GET',
             responseType: 'text',
             noAuth: true,
+            headers: {
+              Authorization: 'Bearer please-do-not-log',
+            },
           },
           [],
         ),
@@ -46,6 +49,9 @@ describe('util/http/got', () => {
     ).rejects.toThrow();
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        requestHeaderNames: ['authorization'],
+      },
       expect.stringMatching(
         /^GET https:\/\/example\.com\/test = \(code=\w+, statusCode=-1 retryCount=\d+, duration=-?\d+\)$/,
       ),
