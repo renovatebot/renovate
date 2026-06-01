@@ -42,7 +42,7 @@ export async function fetch(
   try {
     // Cheat the TS compiler using `as` to pick a specific overload.
     // Otherwise it doesn't typecheck.
-    const resp = await got(url, { ...options, hooks } as GotBufferOptions);
+    const resp = await got(url, { ...options } as GotBufferOptions);
     statusCode = resp.statusCode;
     duration = coerceNumber(resp.timings.phases.total, 0);
     return resp;
