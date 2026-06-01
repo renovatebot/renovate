@@ -141,6 +141,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchSourceUrls: ['https://github.com/renovatebot/renovate'],
+        matchUpdateTypes: ['major', 'minor', 'patch'],
         prBodyDefinitions: {
           Change:
             '[`{{{displayFrom}}}` → `{{{displayTo}}}`](https://octochangelog.com/compare?repo=renovatebot%2Frenovate&from={{ currentVersion }}&to={{ newVersion }})',
