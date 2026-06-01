@@ -140,6 +140,20 @@ describe('config/presets/github/index', () => {
       expect(content).toEqual({ foo: 'bar' });
     });
 
+    it('should query preset within the file when .jsonc extension provided', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/somefile.jsonc`)
+        .reply(200, {
+          content: toBase64('{"foo":/* nothing to see here */"bar"}'),
+        });
+      const content = await github.getPreset({
+        repo: 'some/repo',
+        presetName: 'somefile.jsonc',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
+
     it('should query subpreset', async () => {
       httpMock
         .scope(githubApiHost)

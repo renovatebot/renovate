@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 
-const basicEnvVars = [
+export const basicEnvVars = [
   'CI',
   'HTTP_PROXY',
   'HTTPS_PROXY',
@@ -46,7 +46,7 @@ const basicEnvVars = [
   // pnpm specific variables
   'PNPM_WORKERS',
   'PNPM_MAX_WORKERS',
-];
+] as const;
 
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
