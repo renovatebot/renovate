@@ -568,7 +568,8 @@ export type MergeStrategy =
 export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
-  | 'gradleWrapper';
+  | 'gradleWrapper'
+  | 'miseLock';
 
 // TODO: Proper typings
 export interface PackageRule

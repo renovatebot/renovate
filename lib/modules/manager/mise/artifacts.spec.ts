@@ -1,12 +1,6 @@
-import fsExtra from 'fs-extra';
 import upath from 'upath';
-import {
-  envMock,
-  exec,
-  mockExecAll,
-  mockExecSequence,
-} from '~test/exec-util.ts';
-import { env, fs, git, hostRules } from '~test/util.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, hostRules } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -18,7 +12,6 @@ import { updateLockedDependency } from './update-locked.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/git/index.ts');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -26,6 +19,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   binarySource: 'global',
+  allowedUnsafeExecutions: ['miseLock'],
 };
 
 process.env.CONTAINERBASE = 'true';
@@ -35,22 +29,6 @@ const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateToolCmd = 'mise lock node';
 const updateMultipleToolsCmd = 'mise lock node python';
 const lockfileMaintenanceCmd = 'mise lock';
-const mirroredCwd = '/tmp/renovate-mise-';
-const validMiseToml = '[tools]\nnode = "24.16.0"\n';
-
-function mockExecAndWriteLockfile(lockFileName = 'mise.lock'): void {
-  const originalImpl = exec.getMockImplementation()!;
-  exec.mockImplementation(async (cmd, options) => {
-    await originalImpl(cmd, options);
-    const cwd = options?.cwd;
-    await fsExtra.writeFile(
-      upath.join(cwd!, lockFileName),
-      `[[tools.node]]\nversion = "24.16.0"\n`,
-      'utf8',
-    );
-    return { stdout: '', stderr: '' } as never;
-  });
-}
 
 describe('modules/manager/mise/artifacts', () => {
   beforeEach(() => {
@@ -62,7 +40,6 @@ describe('modules/manager/mise/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    git.getFileList.mockResolvedValue(['mise.toml']);
   });
 
   it('returns null if lock file does not exist', async () => {
@@ -79,39 +56,49 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toEqual([]);
   });
 
-  it('returns null if lock file unchanged after exec', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+  it('returns null when miseLock is not allowlisted', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
     const res = await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
     expect(res).toBeNull();
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: updateToolCmd,
-        options: { cwd: expect.stringContaining(mirroredCwd) },
-      },
-    ]);
+    expect(execSnapshots).toEqual([]);
+  });
+
+  it('returns null if lock file unchanged after exec', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(res).toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
   });
 
   it('returns updated lock file on success', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
     const execSnapshots = mockExecAll();
-    mockExecAndWriteLockfile();
 
     const res = await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -124,18 +111,11 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: updateToolCmd,
-        options: { cwd: expect.stringContaining(mirroredCwd) },
-      },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
   });
 
   it('returns artifactError on exec failure with combined output', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
     const error = new Error('exec error');
     (error as any).stdout = 'stdout output';
     (error as any).stderr = 'stderr output';
@@ -144,7 +124,7 @@ describe('modules/manager/mise/artifacts', () => {
     const res = await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -152,7 +132,7 @@ describe('modules/manager/mise/artifacts', () => {
       {
         artifactError: {
           fileName: 'mise.lock',
-          stderr: 'stdout output\nstderr output\nexec error',
+          stderr: `stdout output\nstderr output\nexec error`,
         },
       },
     ]);
@@ -160,16 +140,14 @@ describe('modules/manager/mise/artifacts', () => {
   });
 
   it('rethrows TEMPORARY_ERROR', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
     mockExecSequence([new Error(TEMPORARY_ERROR)]);
 
     await expect(
       updateArtifacts({
         packageFileName: 'mise.toml',
         updatedDeps: [{ depName: 'node' }],
-        newPackageFileContent: validMiseToml,
+        newPackageFileContent: '',
         config,
       }),
     ).rejects.toThrow(TEMPORARY_ERROR);
@@ -178,13 +156,13 @@ describe('modules/manager/mise/artifacts', () => {
   it('runs mise lock for lockFileMaintenance', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
     await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config: lockMaintenanceConfig,
     });
 
@@ -194,52 +172,44 @@ describe('modules/manager/mise/artifacts', () => {
   it('runs mise lock <tools> for targeted updates', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
     await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }, { depName: 'python' }],
-      newPackageFileContent: '[tools]\nnode = "24.16.0"\npython = "3.12.0"\n',
+      newPackageFileContent: '',
       config,
     });
 
     expect(execSnapshots).toMatchObject([{ cmd: updateMultipleToolsCmd }]);
   });
 
-  it('injects GITHUB_TOKEN when host rule found', async () => {
+  it('injects CI=true and GITHUB_TOKEN when host rule found', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
     const execSnapshots = mockExecAll();
-    mockExecAndWriteLockfile();
     hostRules.add({
       hostType: 'github',
       matchHost: 'https://api.github.com/',
       token: 'github-token',
     });
 
-    const res = await updateArtifacts({
+    await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          contents: expect.stringContaining('version = "24.16.0"'),
-          path: 'mise.lock',
-          type: 'addition',
-        },
-      },
-    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: updateToolCmd,
         options: {
+          cwd: '/tmp/github/some/repo',
           env: expect.objectContaining({
+            CI: 'true',
             GITHUB_TOKEN: 'github-token',
           }),
         },
@@ -247,42 +217,16 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
-  it('sets writable HOME/XDG config envs for mirrored execution', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
-    const execSnapshots = mockExecAll();
-
-    await updateArtifacts({
-      packageFileName: 'mise.toml',
-      updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
-      config,
-    });
-
-    expect(execSnapshots[0]).toMatchObject({
-      cmd: updateToolCmd,
-      options: {
-        env: expect.objectContaining({
-          HOME: expect.stringMatching(/\/tmp\/renovate-mise-.*\/\.home$/),
-          XDG_CONFIG_HOME: expect.stringMatching(
-            /\/tmp\/renovate-mise-.*\/\.home\/\.config$/,
-          ),
-        }),
-      },
-    });
-  });
-
   it('handles empty updatedDeps with fallback to full lock', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
     await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -292,14 +236,13 @@ describe('modules/manager/mise/artifacts', () => {
   it('handles environment-specific lock files', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
     const execSnapshots = mockExecAll();
-    mockExecAndWriteLockfile('mise.test.lock');
 
     const res = await updateArtifacts({
       packageFileName: 'mise.test.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -316,7 +259,7 @@ describe('modules/manager/mise/artifacts', () => {
       {
         cmd: updateToolCmd,
         options: {
-          env: expect.objectContaining({ MISE_ENV: 'test' }),
+          env: expect.objectContaining({ CI: 'true', MISE_ENV: 'test' }),
         },
       },
     ]);
@@ -325,14 +268,13 @@ describe('modules/manager/mise/artifacts', () => {
   it('uses --local flag for local config files', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
     const execSnapshots = mockExecAll();
-    mockExecAndWriteLockfile('mise.local.lock');
 
     const res = await updateArtifacts({
       packageFileName: 'mise.local.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -351,13 +293,13 @@ describe('modules/manager/mise/artifacts', () => {
   it('uses --local flag and MISE_ENV for env-specific local config files', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
     await updateArtifacts({
       packageFileName: 'mise.test.local.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -365,7 +307,7 @@ describe('modules/manager/mise/artifacts', () => {
       {
         cmd: 'mise lock --local node',
         options: {
-          env: expect.objectContaining({ MISE_ENV: 'test' }),
+          env: expect.objectContaining({ CI: 'true', MISE_ENV: 'test' }),
         },
       },
     ]);
@@ -374,33 +316,29 @@ describe('modules/manager/mise/artifacts', () => {
   it('uses --local flag for lock file maintenance on local config', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
     await updateArtifacts({
       packageFileName: 'mise.local.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config: lockMaintenanceConfig,
     });
 
     expect(execSnapshots).toMatchObject([{ cmd: 'mise lock --local' }]);
   });
 
-  // Note: Docker and install mode tests are not included here because mise
-  // containerbase support may not be available in all test environments.
-  // The functionality is tested through the regular tests which use mockExecAll.
-
   it('prevents command injection', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
 
     await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: '|| date; echo ' }, { depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -412,14 +350,13 @@ describe('modules/manager/mise/artifacts', () => {
   it('handles subdirectory package files', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('new package file content');
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
     const execSnapshots = mockExecAll();
-    mockExecAndWriteLockfile('mise.lock');
 
     const res = await updateArtifacts({
       packageFileName: 'subdir/mise.toml',
       updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
+      newPackageFileContent: '',
       config,
     });
 
@@ -432,128 +369,15 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
-  });
-
-  it('returns artifactError if a sibling config file in scope cannot be read', async () => {
-    git.getFileList.mockResolvedValue([
-      '.config/mise/conf.d/default.toml',
-      '.config/mise/conf.d/node.toml',
-    ]);
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce(null);
-    const execSnapshots = mockExecAll();
-
-    const res = await updateArtifacts({
-      packageFileName: '.config/mise/conf.d/default.toml',
-      updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: validMiseToml,
-      config,
-    });
-
-    expect(res).toEqual([
-      {
-        artifactError: {
-          fileName: '.config/mise/mise.lock',
-          stderr:
-            'Unable to read mise config file: .config/mise/conf.d/node.toml',
-        },
-      },
-    ]);
-    expect(execSnapshots).toEqual([]);
-  });
-
-  it('returns artifactError if the target config cannot be sanitized safely', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('existing content');
-    const execSnapshots = mockExecAll();
-
-    const res = await updateArtifacts({
-      packageFileName: 'mise.toml',
-      updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: `[tools]
-node = 123
-`,
-      config,
-    });
-
-    expect(res).toEqual([
-      {
-        artifactError: {
-          fileName: 'mise.lock',
-          stderr:
-            'Unable to sanitize mise config file safely (only literal [tools] and [settings] entries are supported): mise.toml',
-        },
-      },
-    ]);
-    expect(execSnapshots).toEqual([]);
-  });
-
-  it('sanitizes array and object tool entries and preserves allowlisted settings only', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('existing content');
-    const execSnapshots = mockExecAll();
-
-    await updateArtifacts({
-      packageFileName: 'mise.toml',
-      updatedDeps: [{ depName: 'github:foo/bar' }, { depName: 'python' }],
-      newPackageFileContent: [
-        '[tools]',
-        'python = ["3.12.0", "3.11.0"]',
-        '"github:foo/bar" = { version = "1.2.3", version_prefix = "v" }',
-        '',
-        '[settings]',
-        'lockfile = true',
-        'locked = true',
-        'jobs = 4',
-        'disable_tools = ["node"]',
-        'trusted_config_paths = ["/"]',
-        'env_file = ".env"',
-        '',
-        '[settings.node]',
-        'mirror_url = "https://example.com/node"',
-        '',
-      ].join('\n'),
-      config,
-    });
-
     expect(execSnapshots).toMatchObject([
-      { cmd: 'mise lock github:foo/bar python' },
+      {
+        cmd: updateToolCmd,
+        options: {
+          cwd: '/tmp/github/some/repo/subdir',
+          env: expect.objectContaining({ CI: 'true' }),
+        },
+      },
     ]);
-    const lockCwd = execSnapshots[0].options?.cwd;
-    await expect(
-      fsExtra.readFile(upath.join(lockCwd!, 'mise.toml'), 'utf8'),
-    ).resolves.toBe(
-      [
-        '[tools]',
-        'python = [ "3.12.0", "3.11.0" ]',
-        '',
-        '[tools."github:foo/bar"]',
-        'version_prefix = "v"',
-        'version = "1.2.3"',
-        '',
-        '[settings]',
-        'lockfile = true',
-        'locked = true',
-        'disable_tools = [ "node" ]',
-        '',
-      ].join('\n'),
-    );
-  });
-  it('mirrors sibling config files in the same lockfile scope', async () => {
-    git.getFileList.mockResolvedValue(['mise.toml', 'mise.local.toml']);
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('local = "1.0.0"');
-    const execSnapshots = mockExecAll();
-
-    await updateArtifacts({
-      packageFileName: 'mise.toml',
-      updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: '[tools]\nnode = "24.16.0"\n',
-      config,
-    });
-
-    expect(execSnapshots).toMatchObject([{ cmd: updateToolCmd }]);
   });
 
   describe('updateLockedDependency', () => {

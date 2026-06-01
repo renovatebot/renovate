@@ -31,28 +31,23 @@ For more information about mise lock files, see the [mise lock file documentatio
 
 ### Trust model for lock file updates
 
-When Renovate updates an existing `mise.lock`, it mirrors the discovered mise config files for the relevant lockfile scope into a temporary working tree, strips them down to literal `[tools]` entries plus a small allowlist of lockfile-relevant `[settings]`, copies in the existing lock file, and runs `mise lock` there.
+Running `mise lock` can execute repository-defined behavior, so Renovate treats mise lockfile refreshes as an unsafe execution.
 
-This lets Renovate preserve mise's normal lockfile behavior while avoiding direct execution against the repository's original mise config files. Renovate does not call `mise trust` on the source repository or the mirrored config.
+Self-hosted administrators must explicitly allow this path with [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions):
 
-#### Security considerations
+```json
+{
+  "allowedUnsafeExecutions": ["miseLock"]
+}
+```
 
-Because Renovate only keeps literal `[tools]` data and an allowlisted subset of `[settings]` in the mirrored config files, it intentionally drops trust-gated, discovery-related, and dynamic features from the source configs, such as:
-
-- `[env]` directives
-- templates
-- hooks and tasks
-- `path:` plugin versions
-
-The preserved settings are limited to lockfile-relevant options such as `lockfile`, `locked`, `lockfile_platforms`, `locked_verify_provenance`, `minimum_release_age`, `slsa`, `disable_tools`, and `enable_tools`.
-
-This means Renovate's mise lockfile updating is limited to repositories whose lock refresh can be driven from literal `[tools]` entries and those allowlisted settings plus an existing `mise.lock`, without executing repository-defined hooks or plugin paths from the original config.
+When `miseLock` is allowed and an existing `mise.lock` is present, Renovate runs `mise lock` from the repository checkout with `CI=true`. This follows mise's CI trust behavior instead of attempting to sanitize or mirror the repository config.
 
 In particular:
 
 - an existing `mise.lock` is required
-- dynamic config behavior is not preserved in the mirrored update workspace
-- first-time lockfile generation is not supported through this path
+- self-hosted administrators decide whether this unsafe execution is acceptable for their environment
+- Mend-hosted defaults, if any, are controlled by the hosted service environment rather than repository config
 
 ### Renovate only updates primary versions
 

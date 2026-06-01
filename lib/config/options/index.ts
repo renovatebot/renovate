@@ -3266,7 +3266,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    allowedValues: ['bazelModDeps', 'goGenerate', 'gradleWrapper'],
+    allowedValues: ['bazelModDeps', 'goGenerate', 'gradleWrapper', 'miseLock'],
     stage: 'repository',
     globalOnly: true,
   },
