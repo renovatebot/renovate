@@ -18,6 +18,27 @@ describe('tools/check-todo-issue-refs', () => {
     expect(extractClosingIssueRefs('Related to #123')).toBeEmpty();
   });
 
+  it('ignores closing references in inline code', () => {
+    expect(
+      extractClosingIssueRefs(
+        "Validation used `RENOVATE_PR_TITLE='Closes: #22198'` as a negative case. Closes: #41497",
+      ),
+    ).toEqual(new Set(['41497']));
+  });
+
+  it('ignores closing references in fenced code blocks', () => {
+    expect(
+      extractClosingIssueRefs(
+        [
+          'Closes: #41497',
+          '```sh',
+          "RENOVATE_PR_TITLE='Closes: #22198'",
+          '```',
+        ].join('\n'),
+      ),
+    ).toEqual(new Set(['41497']));
+  });
+
   it('extracts pull request text from the GitHub event payload', () => {
     expect(
       extractPullRequestTextFromGitHubEvent({
