@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.5.15 linux-x64 (2026-05-23)"
+    "version": "2026.5.16 linux-x64 (2026-05-28)"
   },
   "tools": {
     "1password": {
@@ -161,7 +161,6 @@
     "ast-grep": {
       "aqua": "ast-grep/ast-grep",
       "cargo": "ast-grep",
-      "npm": "@ast-grep/cli",
       "pipx": "ast-grep-cli"
     },
     "astro": {
@@ -183,6 +182,7 @@
       "cargo": "atuin"
     },
     "aube": {
+      "cargo": "aube",
       "github": "endevco/aube"
     },
     "auto-doc": {
@@ -551,13 +551,11 @@
     },
     "claude": {
       "aqua": "anthropics/claude-code",
-      "http": "claude",
-      "npm": "@anthropic-ai/claude-code"
+      "http": "claude"
     },
     "claude-code": {
       "aqua": "anthropics/claude-code",
-      "http": "claude",
-      "npm": "@anthropic-ai/claude-code"
+      "http": "claude"
     },
     "claude-powerline": {
       "npm": "@owloops/claude-powerline"
@@ -619,8 +617,7 @@
       "aqua": "cocogitto/cocogitto"
     },
     "code": {
-      "aqua": "just-every/code",
-      "npm": "@just-every/code"
+      "aqua": "just-every/code"
     },
     "code-review-graph": {
       "pipx": "code-review-graph"
@@ -784,6 +781,9 @@
     },
     "danger-js": {
       "npm": "danger"
+    },
+    "danger-swift": {
+      "spm": "danger/swift"
     },
     "dapr": {
       "aqua": "dapr/cli",
@@ -1530,6 +1530,14 @@
     "hugo-extended": {
       "aqua": "gohugoio/hugo/hugo-extended"
     },
+    "hunk": {
+      "aqua": "modem-dev/hunk",
+      "github": "modem-dev/hunk"
+    },
+    "hunkdiff": {
+      "aqua": "modem-dev/hunk",
+      "github": "modem-dev/hunk"
+    },
     "hurl": {
       "aqua": "Orange-OpenSource/hurl",
       "asdf": "raimon49/asdf-hurl",
@@ -1944,8 +1952,7 @@
     "lefthook": {
       "aqua": "evilmartians/lefthook",
       "asdf": "jtzero/asdf-lefthook",
-      "go": "github.com/evilmartians/lefthook",
-      "npm": "lefthook"
+      "go": "github.com/evilmartians/lefthook"
     },
     "leiningen": {
       "asdf": "mise-plugins/mise-lein",
@@ -1968,7 +1975,8 @@
       "asdf": "kforsthoevel/asdf-linkerd"
     },
     "liquibase": {
-      "asdf": "mise-plugins/mise-liquibase"
+      "asdf": "mise-plugins/mise-liquibase",
+      "github": "liquibase/liquibase"
     },
     "lisette": {
       "cargo": "lisette",
@@ -1994,6 +2002,10 @@
     "loki-logcli": {
       "aqua": "grafana/loki/logcli",
       "asdf": "comdotlinux/asdf-loki-logcli"
+    },
+    "longbridge-terminal": {
+      "cargo": "longbridge-terminal",
+      "github": "longbridge/longbridge-terminal"
     },
     "ls-lint": {
       "aqua": "loeffel-io/ls-lint",
@@ -3080,7 +3092,8 @@
     },
     "swift-package-list": {
       "asdf": "mise-plugins/mise-swift-package-list",
-      "github": "FelixHerrmann/swift-package-list"
+      "github": "FelixHerrmann/swift-package-list",
+      "spm": "FelixHerrmann/swift-package-list"
     },
     "swiftformat": {
       "asdf": "mise-plugins/mise-swiftformat",
@@ -3514,6 +3527,10 @@
     "vultr-cli": {
       "asdf": "ikuradon/asdf-vultr-cli",
       "github": "vultr/vultr-cli"
+    },
+    "wacli": {
+      "aqua": "openclaw/wacli",
+      "github": "openclaw/wacli"
     },
     "wait-for-gh-rate-limit": {
       "github": "jdx/wait-for-gh-rate-limit"
