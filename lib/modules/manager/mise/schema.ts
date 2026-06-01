@@ -37,7 +37,7 @@ const MiseSettingValue: z.ZodType<MiseSettingValue> = z.lazy(() =>
   z.union([
     MiseSettingScalar,
     z.array(MiseSettingValue),
-    z.record(MiseSettingValue),
+    z.record(z.string(), MiseSettingValue),
   ]),
 );
 
