@@ -110,7 +110,6 @@ export class ApkDatasource extends Datasource {
         throw err;
       }
 
-      /* v8 ignore next 2 -- hard to test tar parser errors */
       logger.warn({ err }, 'Error extracting APK index from tar.gz');
       return [];
     } finally {
