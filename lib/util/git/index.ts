@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
 import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
@@ -10,7 +11,6 @@ import type {
   TaskOptions,
 } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
-import { setTimeout } from 'timers/promises';
 import upath from 'upath';
 import { getConfigFileNames } from '../../config/app-strings.ts';
 import { GlobalConfig } from '../../config/global.ts';

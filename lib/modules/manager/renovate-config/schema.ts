@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Json5 } from '../../../util/schema-utils/index.ts';
 
 export const RenovateJson = Json5.pipe(

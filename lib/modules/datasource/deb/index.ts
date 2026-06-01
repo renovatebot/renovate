@@ -1,4 +1,4 @@
-import readline from 'readline';
+import readline from 'node:readline';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as fs from '../../../util/fs/index.ts';
