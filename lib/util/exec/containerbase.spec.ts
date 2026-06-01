@@ -280,6 +280,31 @@ describe('util/exec/containerbase', () => {
       );
     });
 
+    it('passes registryUrls from containerbasePackageRules to getPkgReleases', async () => {
+      GlobalConfig.set({
+        containerbasePackageRules: [
+          {
+            matchDepNames: ['node'],
+            matchDepTypes: ['tool-constraint'],
+            overrideDatasource: 'node-version',
+            overridePackageName: 'node',
+            registryUrls: ['https://artifactory.custom.domain/nodejs'],
+          },
+        ],
+      });
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '20.0.0' }],
+      });
+      await resolveConstraint({ toolName: 'node' });
+      expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasource: 'node-version',
+          packageName: 'node',
+          registryUrls: ['https://artifactory.custom.domain/nodejs'],
+        }),
+      );
+    });
+
     it('applies containerbasePackageRules versioning override', async () => {
       GlobalConfig.set({
         containerbasePackageRules: [
