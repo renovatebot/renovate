@@ -1317,7 +1317,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
 }
 ```
 
-```json title="example.json"
+```json title="example.json" configType=none
 {
   "backup": {
     "test": {
