@@ -267,17 +267,8 @@ function extractOCIRefTagRange(
         item.key.value === 'tag' &&
         isScalar(item.value)
       ) {
-        const keyStart = item.key.range?.[0];
-        const valueEnd = item.value.range?.[1];
-        if (
-          keyStart === undefined ||
-          valueEnd === undefined ||
-          !isString(item.value.value) ||
-          item.value.value.trim() === ''
-        ) {
-          /* v8 ignore next: defensive guard - zod schema filters non-string tags upstream */
-          continue;
-        }
+        const keyStart = item.key.range![0];
+        const valueEnd = item.value.range![1];
         const lineStart = content.lastIndexOf('\n', keyStart - 1) + 1;
         return {
           replaceString: content.slice(keyStart, valueEnd),
