@@ -4254,7 +4254,7 @@ This can include Markdown or any other syntax that the platform supports.
     "Package": "📦 Package",
     "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
   },
-  "prBodyColumn": ["Package", "Age"]
+  "prBodyColumns": ["Package", "Age"]
 }
 ```
 
