@@ -48,7 +48,7 @@ After all transformations, the resulting JSON must match one of these formats:
 
 Minimal-supported object:
 
-```json
+```json type=custom-datasource
 {
   "releases": [
     {
@@ -63,7 +63,7 @@ Minimal-supported object:
 
 All available options:
 
-```json
+```json type=custom-datasource
 {
   "releases": [
     {
@@ -83,6 +83,9 @@ All available options:
   "homepage": "https://demo.org"
 }
 ```
+
+!!! tip
+  There is a JSON Schema for the format of a Custom Datasource at [`renovate-custom-datasources-response-schema.json`](https://docs.renovatebot.com/renovate-custom-datasources-response-schema.json).
 
 ### Debugging
 
@@ -133,7 +136,7 @@ Suppose the body of the HTTP response is as follows:
 
 When Renovate receives this response with the `plain` format, it will convert it into the following:
 
-```json
+```json type=custom-datasource
 {
   "releases": [
     {
@@ -166,7 +169,7 @@ releases:
 
 When Renovate receives this response with the `yaml` format, it will convert it into the following:
 
-```json
+```json type=custom-datasource
 {
   "releases": [
     {
@@ -201,7 +204,7 @@ version = "3.0.0"
 
 Will convert applying any `jsonata` rules defined in the `transformTemplates` section will be applied.
 
-```json
+```json type=custom-datasource
 {
   "releases": [
     {
@@ -235,7 +238,7 @@ For the following HTML document:
 
 The following JSON will be generated:
 
-```json
+```json type=custom-datasource
 {
   "releases": [
     {

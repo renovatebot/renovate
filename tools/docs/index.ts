@@ -1,9 +1,13 @@
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import * as tar from 'tar';
+import { pkg } from '../../lib/expose.ts';
 import { getProblems, logger } from '../../lib/logger/index.ts';
 import { generateConfig } from './config.ts';
-import { generateDatasources } from './datasources.ts';
+import {
+  generateCustomDatasourcesJsonSchema,
+  generateDatasources,
+} from './datasources.ts';
 import { generateEnvOptions } from './env-options.ts';
 import { generateEnvVars } from './env-vars.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
@@ -43,6 +47,7 @@ export async function generateDocs(
     // datasources
     logger.info('* datasources');
     await generateDatasources(dist, openItems.datasources);
+    await generateCustomDatasourcesJsonSchema(dist, pkg.version);
 
     // managers
     logger.info('* managers');
