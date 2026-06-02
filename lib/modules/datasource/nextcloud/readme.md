@@ -5,9 +5,13 @@ For example:
 
 ```json
 {
-  "matchDatasources": ["nextcloud"],
-  "registryUrls": [
-    "https://apps.nextcloud.com/api/v1/platform/30.0.0/apps.json"
+  "packageRules": [
+    {
+      "matchDatasources": ["nextcloud"],
+      "registryUrls": [
+        "https://apps.nextcloud.com/api/v1/platform/30.0.0/apps.json"
+      ]
+    }
   ]
 }
 ```
