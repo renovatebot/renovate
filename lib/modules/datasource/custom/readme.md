@@ -50,7 +50,7 @@ Minimal-supported object:
 
 ```json {configType=none}
 {
-  "releases":} [
+  "releases": [
     {
       "version": "v1.1.0"
     },

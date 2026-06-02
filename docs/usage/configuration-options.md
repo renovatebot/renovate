@@ -1247,7 +1247,7 @@ Example:
 
 ```json {title="matchStrings with a valid JSONata query" configType=none}
 {
-  "matchStrings":} [
+  "matchStrings": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
   ]
 }
