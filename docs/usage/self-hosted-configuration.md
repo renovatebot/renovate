@@ -633,7 +633,7 @@ You can use the `dockerSidecarImage` option to override this default.
 Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
-```json configType=global
+```json configType=global ignoreConfigWarnings=true
 {
   "dockerSidecarImage": "ghcr.io/your_company/sidecar"
 }
@@ -649,7 +649,7 @@ The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
 
-```json title="Setting UID to 1001 and GID to 1002" configType=global
+```json title="Setting UID to 1001 and GID to 1002" configType=global ignoreConfigWarnings=true
 {
   "dockerUser": "1001:1002"
 }

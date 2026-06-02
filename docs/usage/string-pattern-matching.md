@@ -18,13 +18,13 @@ It is not valid to combine `*` with any other positive or negative match.
 }
 ```
 
-```json title="Example of invalid wildcard use with additional match" configType=global
+```json title="Example of invalid wildcard use with additional match" configType=global ignoreConfigWarnings=true
 {
   "allowedEnv": ["*", "ABC"]
 }
 ```
 
-```json title="Example of invalid wildcard use with negation" configType=global
+```json title="Example of invalid wildcard use with negation" configType=global ignoreConfigWarnings=true
 {
   "allowedEnv": ["*", "!ABC"]
 }
