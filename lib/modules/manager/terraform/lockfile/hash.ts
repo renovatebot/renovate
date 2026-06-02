@@ -168,7 +168,10 @@ export class TerraformProviderHash {
       `Creating hashes for ${repository}@${version} (${registryURL})`,
     );
 
-    if (registryURL === TerraformProviderDatasource.openTofuRegistryUrl) {
+    if (
+      registryURL === TerraformProviderDatasource.openTofuRegistryUrl ||
+      registryURL === TerraformProviderDatasource.openTofuApiUrl
+    ) {
       const packagesHashes =
         await TerraformProviderHash.terraformDatasource.getProviderPackages(
           repository,

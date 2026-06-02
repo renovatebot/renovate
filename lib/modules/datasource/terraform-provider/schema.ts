@@ -97,7 +97,7 @@ export const OpenTofuProviderPackagesResponse = z
     if (!packages) {
       return null;
     }
-    return Object.values(packages).flatMap({ hashes } => hashes);
+    return Object.values(packages).flatMap(({ hashes }) => hashes);
   });
 
 export type OpenTofuProviderPackagesResponse = z.infer<
