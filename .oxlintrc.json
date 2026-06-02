@@ -70,6 +70,7 @@
     "renovate/enforce-ts-extension": "error",
     "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
+    "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
     "typescript/no-floating-promises": "error",
