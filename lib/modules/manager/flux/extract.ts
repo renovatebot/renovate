@@ -1,5 +1,5 @@
 import { isString } from '@sindresorhus/is';
-import { isMap, isPair, isScalar, parseAllDocuments } from 'yaml';
+import { type YAMLMap, isMap, isPair, isScalar, parseAllDocuments } from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -179,10 +179,11 @@ function resolveSystemManifest(
   ];
 }
 
-function extractOCIRefRange(
-  content: string,
-  resourceName: string,
-): { replaceString: string; tagFirst: boolean } | null {
+/**
+ * Returns all `spec.ref` map nodes for OCIRepository resources matching `resourceName`.
+ */
+function findOCIRefNodes(content: string, resourceName: string): YAMLMap[] {
+  const refNodes: YAMLMap[] = [];
   for (const doc of parseAllDocuments(content, { strict: false })) {
     const docContents = doc.contents;
     if (!isMap(docContents)) {
@@ -204,10 +205,19 @@ function extractOCIRefRange(
       continue;
     }
     const refNode = specNode.get('ref');
-    if (!isMap(refNode)) {
-      continue;
+    if (isMap(refNode)) {
+      refNodes.push(refNode);
     }
+  }
 
+  return refNodes;
+}
+
+function extractOCIRefTagAndDigestRange(
+  content: string,
+  resourceName: string,
+): { replaceString: string; tagFirst: boolean } | null {
+  for (const refNode of findOCIRefNodes(content, resourceName)) {
     let tagKeyRange: [number, number, number] | null = null;
     let tagValueEnd: number | null = null;
     let digestKeyRange: [number, number, number] | null = null;
@@ -218,11 +228,11 @@ function extractOCIRefRange(
         continue;
       }
       if (item.key.value === 'tag' && isScalar(item.value)) {
-        tagKeyRange = item.key.range;
-        tagValueEnd = item.value.range[1];
+        tagKeyRange = item.key.range ?? null;
+        tagValueEnd = item.value.range?.[1] ?? null;
       } else if (item.key.value === 'digest' && isScalar(item.value)) {
-        digestKeyRange = item.key.range;
-        digestValueEnd = item.value.range[1];
+        digestKeyRange = item.key.range ?? null;
+        digestValueEnd = item.value.range?.[1] ?? null;
       }
     }
 
@@ -240,6 +250,41 @@ function extractOCIRefRange(
     const end = tagFirst ? digestValueEnd : tagValueEnd;
 
     return { replaceString: content.slice(start, end), tagFirst };
+  }
+
+  return null;
+}
+
+function extractOCIRefTagRange(
+  content: string,
+  resourceName: string,
+): { replaceString: string; indentation: string } | null {
+  for (const refNode of findOCIRefNodes(content, resourceName)) {
+    for (const item of refNode.items) {
+      if (
+        isPair(item) &&
+        isScalar(item.key) &&
+        item.key.value === 'tag' &&
+        isScalar(item.value)
+      ) {
+        const keyStart = item.key.range?.[0];
+        const valueEnd = item.value.range?.[1];
+        if (
+          keyStart === undefined ||
+          valueEnd === undefined ||
+          !isString(item.value.value) ||
+          item.value.value.trim() === ''
+        ) {
+          /* v8 ignore next: defensive guard - zod schema filters non-string tags upstream */
+          continue;
+        }
+        const lineStart = content.lastIndexOf('\n', keyStart - 1) + 1;
+        return {
+          replaceString: content.slice(keyStart, valueEnd),
+          indentation: content.slice(lineStart, keyStart),
+        };
+      }
+    }
   }
 
   return null;
@@ -371,7 +416,10 @@ function resolveResourceManifest(
           // Set currentValue to the tag so the docker datasource can look up the image's new digest
           combinedDep.currentValue = resource.spec.ref.tag;
 
-          const refRange = extractOCIRefRange(content, resource.metadata.name);
+          const refRange = extractOCIRefTagAndDigestRange(
+            content,
+            resource.metadata.name,
+          );
           if (refRange) {
             combinedDep.replaceString = refRange.replaceString;
             if (refRange.tagFirst) {
@@ -405,9 +453,24 @@ function resolveResourceManifest(
             false,
             registryAliases,
           );
-          dep.autoReplaceStringTemplate =
-            '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
-          dep.replaceString = resource.spec.ref.tag;
+          const refTagRange = extractOCIRefTagRange(
+            content,
+            resource.metadata.name,
+          );
+          if (refTagRange) {
+            dep.replaceString = refTagRange.replaceString;
+            const newline = content.includes('\r\n') ? '\r\n' : '\n';
+            dep.autoReplaceStringTemplate = `${refTagRange.replaceString.replace(
+              resource.spec.ref.tag,
+              '{{newValue}}',
+            )}{{#if newDigest}}${newline}${refTagRange.indentation}digest: {{newDigest}}{{/if}}`;
+          } else {
+            logger.debug(
+              { file: manifest.file, name: resource.metadata.name },
+              'Unable to locate tag node for replacement (may be YAML alias or alias reference), skipping replacement',
+            );
+            dep.skipReason = 'invalid-value';
+          }
           deps.push(dep);
         } else {
           const dep = getDep(container, false, registryAliases);
