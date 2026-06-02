@@ -888,16 +888,16 @@ For now this datasource constraint feature only supports `python`, other compati
 }
 ```
 
-If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
+If you need to _override_ constraints that Renovate detects from the repository, wrap it in the [global self-hosted configuration's `force` object](./self-hosted-configuration.md#force) like so:
 
-```json
-{
-  "force": {
-    "constraints": {
-      "node": "< 15.0.0"
-    }
-  }
-}
+```js
+module.exports = {
+  force: {
+    constraints: {
+      node: '< 15.0.0',
+    },
+  },
+};
 ```
 
 The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
