@@ -22,6 +22,7 @@ import { id as composerVersioningId } from '../../../../modules/versioning/compo
 import { id as debianVersioningId } from '../../../../modules/versioning/debian/index.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import { id as gitVersioningId } from '../../../../modules/versioning/git/index.ts';
+import { id as githubActionsVersioningId } from '../../../../modules/versioning/github-actions/index.ts';
 import { id as mavenVersioningId } from '../../../../modules/versioning/maven/index.ts';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node/index.ts';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
@@ -4372,6 +4373,37 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
         versioning: 'npm',
+        warnings: [],
+      });
+    });
+
+    it('handles pin for github actions', async () => {
+      config.currentValue = 'v8';
+      config.rangeStrategy = 'pin';
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      getGithubTags.mockResolvedValueOnce({
+        releases: [{ version: 'v8.0.1' }, { version: 'v8' }],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toEqual({
+        currentVersion: 'v8.0.1',
+        registryUrl: 'https://github.com',
+        updates: [
+          {
+            isPin: true,
+            newMajor: 8,
+            newValue: 'v8.0.1',
+            newVersion: 'v8.0.1',
+            updateType: 'pin',
+          },
+        ],
+        versioning: 'github-actions',
         warnings: [],
       });
     });
