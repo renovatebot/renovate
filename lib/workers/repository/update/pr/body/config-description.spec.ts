@@ -80,7 +80,15 @@ describe('workers/repository/update/pr/body/config-description', () => {
 
     it('renders undefined schedule', () => {
       const res = getPrConfigDescription(config);
-      expect(res).toContain(`At any time (no schedule defined)`);
+
+      const expected = codeBlock`
+        - Branch creation
+          - At any time (no schedule defined)
+        - Automerge
+          - At any time (no schedule defined)
+      `;
+
+      expect(res).toContain(expected);
     });
 
     it('summarizes cron schedules (for automergeSchedule)', () => {
