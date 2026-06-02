@@ -1142,7 +1142,8 @@ Example:
       "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1188,7 +1189,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1203,7 +1205,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1218,7 +1221,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
