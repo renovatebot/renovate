@@ -2002,6 +2002,10 @@ For example, to group all non-major devDependencies updates together into a sing
   <br>
   Lock file maintenance will never be grouped with other dependency updates.
 
+## `groupSingleUpdates`
+
+For example, you can set it to `false` if you prefer individual dependency names in PR titles when only one update is in the group.
+
 ## `groupSlug`
 
 By default, Renovate will "slugify" the groupName to determine the branch name.
