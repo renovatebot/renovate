@@ -91,6 +91,23 @@ describe('workers/repository/update/pr/body/config-description', () => {
       expect(res).toContain(expected);
     });
 
+    it('renders empty schedule', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        // for instance when set on a vulnerability alert overrides the
+        schedule: [],
+      });
+
+      const expected = codeBlock`
+        - Branch creation
+          - At any time (no schedule defined)
+        - Automerge
+          - At any time (no schedule defined)
+      `;
+
+      expect(res).toContain(expected);
+    });
+
     // because the merging of `force` should have happened before this function, this clarifies that ?
     it('does not take into account `force`', () => {
       const res = getPrConfigDescription({
