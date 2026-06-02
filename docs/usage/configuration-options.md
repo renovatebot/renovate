@@ -605,7 +605,7 @@ Supported values are:
 This field supports templates for conditional logic.
 For example:
 
-```json
+```json configType=none
 {
   "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
 }
@@ -646,7 +646,7 @@ Templates can also be used for dynamic patterns. See [Templates](./templates.md)
 
 For example:
 
-```json
+```json configType=none
 {
   "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
 }
@@ -666,7 +666,7 @@ The `name` field is an optional identifier for the bump version rule. It is used
 
 For example:
 
-```json
+```json configType=none
 {
   "name": "Update release version"
 }
@@ -1213,7 +1213,7 @@ Each `matchStrings` must be one of the following:
 
 Example:
 
-```json title="matchStrings with a valid regular expression"
+```json title="matchStrings with a valid regular expression" configType=none
 {
   "matchStrings": [
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
@@ -1221,7 +1221,7 @@ Example:
 }
 ```
 
-```json title="matchStrings with a valid JSONata query"
+```json title="matchStrings with a valid JSONata query" configType=none
 {
   "matchStrings": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
