@@ -3238,6 +3238,7 @@ Use this field to restrict rules to a particular branch. e.g.
 
 ```json
 {
+  "baseBranchPatterns": ["main"],
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
@@ -3252,6 +3253,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 
 ```json
 {
+  "baseBranchPatterns": ["main", "/^release\\/.*/"],
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
