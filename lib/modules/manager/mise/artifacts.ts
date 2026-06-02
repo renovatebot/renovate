@@ -28,9 +28,9 @@ export async function updateArtifacts({
   }
 
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
-  if (!allowlist.includes('miseLock')) {
+  if (!allowlist.includes('mise')) {
     logger.once.warn(
-      'mise lock was requested to run, but `miseLock` is not permitted in the allowedUnsafeExecutions',
+      '`mise lock` was requested to run, but `mise` is not permitted in the allowedUnsafeExecutions',
     );
     return null;
   }
@@ -51,6 +51,8 @@ export async function updateArtifacts({
   }
 
   const extraEnv: ExtraEnv = {
+    // mise auto-trusts configs in detected CI, so `mise lock` can read the
+    // repository config without an interactive `mise trust` prompt.
     CI: 'true',
   };
   if (env) {

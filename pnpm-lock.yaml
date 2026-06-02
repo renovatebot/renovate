@@ -337,9 +337,6 @@ importers:
       slugify:
         specifier: 1.6.9
         version: 1.6.9
-      smol-toml:
-        specifier: 1.6.1
-        version: 1.6.1
       source-map-support:
         specifier: 0.5.21
         version: 0.5.21

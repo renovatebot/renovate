@@ -574,7 +574,7 @@ export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
   | 'gradleWrapper'
-  | 'miseLock';
+  | 'mise';
 
 // TODO: Proper typings
 export interface PackageRule

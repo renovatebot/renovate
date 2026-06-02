@@ -97,7 +97,7 @@ This is particularly true during, for example:
 
 - `postUpgradeTasks`, where scripts specified by the repository are run
 - when a wrapper within the repository is called, like `gradlew` (if setting [`allowedUnsafeExecutions=["gradleWrapper"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
-- when `mise lock` is run from the repository checkout (if setting [`allowedUnsafeExecutions=["miseLock"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
+- when `mise lock` is run from the repository checkout (if setting [`allowedUnsafeExecutions=["mise"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
 
 These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.

@@ -156,12 +156,12 @@ For more details of where this may be found, see ["Trusting Repository Developer
 
 Allowed options:
 
-| Option          | Description                                                                   |
-| --------------- | ----------------------------------------------------------------------------- |
-| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.  |
-| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
-| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
-| `miseLock`      | Allows running `mise lock` when updating `mise.lock` files.                   |
+| Option          | Description                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------- |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.                  |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
+| `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
 
 ## `autodiscover`
 

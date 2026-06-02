@@ -37,17 +37,16 @@ Self-hosted administrators must explicitly allow this path with [`allowedUnsafeE
 
 ```json
 {
-  "allowedUnsafeExecutions": ["miseLock"]
+  "allowedUnsafeExecutions": ["mise"]
 }
 ```
 
-When `miseLock` is allowed and an existing `mise.lock` is present, Renovate runs `mise lock` from the repository checkout with `CI=true`. This follows mise's CI trust behavior instead of attempting to sanitize or mirror the repository config.
+When `mise` is allowed and an existing `mise.lock` is present, Renovate runs `mise lock` from the repository checkout with `CI=true`. This follows mise's CI trust behavior instead of attempting to sanitize or mirror the repository config.
 
 In particular:
 
 - an existing `mise.lock` is required
 - self-hosted administrators decide whether this unsafe execution is acceptable for their environment
-- Mend-hosted defaults, if any, are controlled by the hosted service environment rather than repository config
 
 ### Renovate only updates primary versions
 

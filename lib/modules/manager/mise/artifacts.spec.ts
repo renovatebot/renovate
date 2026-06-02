@@ -19,7 +19,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   binarySource: 'global',
-  allowedUnsafeExecutions: ['miseLock'],
+  allowedUnsafeExecutions: ['mise'],
 };
 
 process.env.CONTAINERBASE = 'true';
@@ -56,7 +56,7 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toEqual([]);
   });
 
-  it('returns null when miseLock is not allowlisted', async () => {
+  it('returns null when mise is not allowlisted', async () => {
     GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
     fs.readLocalFile.mockResolvedValueOnce('existing content');
     const execSnapshots = mockExecAll();
