@@ -91,6 +91,26 @@ describe('workers/repository/update/pr/body/config-description', () => {
       expect(res).toContain(expected);
     });
 
+    // because the merging of `force` should have happened before this function, this clarifies that ?
+    it('does not take into account `force`', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        force: {
+          schedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
+          automergeSchedule: ['after 6pm on Friday'],
+        },
+      });
+
+      const expected = codeBlock`
+        - Branch creation
+          - At any time (no schedule defined)
+        - Automerge
+          - At any time (no schedule defined)
+      `;
+
+      expect(res).toContain(expected);
+    });
+
     it('summarizes cron schedules (for automergeSchedule)', () => {
       const res = getPrConfigDescription({
         ...config,
