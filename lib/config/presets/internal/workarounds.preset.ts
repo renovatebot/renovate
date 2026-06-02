@@ -25,6 +25,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
+      'workarounds:aospTagVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -336,6 +337,17 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchDepNames: ['ubuntu'],
         versioning: 'ubuntu',
+      },
+    ],
+  },
+  aospTagVersioning: {
+    description: 'Use regex versioning for AOSP submodule tags.',
+    packageRules: [
+      {
+        matchManagers: ['git-submodules'],
+        matchDatasources: ['git-refs'],
+        matchSourceUrls: ['https://android.googlesource.com/**'],
+        versioning: 'regex:^android-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_r(?<build>\\d+)$',
       },
     ],
   },
