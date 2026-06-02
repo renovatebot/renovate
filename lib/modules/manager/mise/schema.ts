@@ -25,26 +25,9 @@ const MiseTool = z.union([
 ]);
 export type MiseTool = z.infer<typeof MiseTool>;
 
-const MiseSettingScalar = z.union([z.string(), z.number(), z.boolean()]);
-export type MiseSettingScalar = z.infer<typeof MiseSettingScalar>;
-
-export type MiseSettingValue =
-  | MiseSettingScalar
-  | MiseSettingValue[]
-  | { [key: string]: MiseSettingValue };
-
-const MiseSettingValue: z.ZodType<MiseSettingValue> = z.lazy(() =>
-  z.union([
-    MiseSettingScalar,
-    z.array(MiseSettingValue),
-    z.record(z.string(), MiseSettingValue),
-  ]),
-);
-
 export const MiseFile = Toml.pipe(
   z.object({
     tools: z.record(z.string(), MiseTool).default({}),
-    settings: z.record(z.string(), MiseSettingValue).default({}),
   }),
 );
 export type MiseFile = z.infer<typeof MiseFile>;
