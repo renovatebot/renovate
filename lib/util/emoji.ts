@@ -27,14 +27,14 @@ const EmojiShortcodes = Json.pipe(
     z.union([z.string().transform((val) => [val]), z.array(z.string())]),
   ),
 );
-type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodes>;
+type EmojiShortcodes = z.infer<typeof EmojiShortcodes>;
 
-const patchedEmojis: EmojiShortcodeMapping = {
+const patchedEmojis: EmojiShortcodes = {
   '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
   '2139-FE0F': ['information_source'], // Colorful info (ℹ️) instead of black and white (ℹ)
 };
 
-function initMapping(mapping: EmojiShortcodeMapping): void {
+function initMapping(mapping: EmojiShortcodes): void {
   for (const [hex, shortcodes] of Object.entries(mapping)) {
     const mainShortcode = `:${shortcodes[0]}:`;
 

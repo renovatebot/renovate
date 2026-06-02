@@ -53,7 +53,7 @@ export const Repo = z.discriminatedUnion('type', [
   PathRepo,
   PackageRepo,
 ]);
-export type Repo = z.infer<typeof ComposerRepo>;
+export type Repo = z.infer<typeof Repo>;
 
 export const NamedRepo = z.discriminatedUnion('type', [
   ComposerRepo,
