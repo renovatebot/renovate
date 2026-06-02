@@ -21,12 +21,16 @@ For example:
 
 ```json
 {
-  "customType": "regex",
-  "managerFilePatterns": ["/(^|/)renovate.json$/"],
-  "matchStrings": [
-    "https://apps.nextcloud.com/api/v1/platform/(?<currentValue>\\d+\\.\\d+\\.\\d+)/apps.json"
-  ],
-  "depNameTemplate": "nextcloud/server",
-  "datasourceTemplate": "github-releases"
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)renovate.json$/"],
+      "matchStrings": [
+        "https://apps.nextcloud.com/api/v1/platform/(?<currentValue>\\d+\\.\\d+\\.\\d+)/apps.json"
+      ],
+      "depNameTemplate": "nextcloud/server",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
 }
 ```
