@@ -338,7 +338,7 @@ Let's assume you choose `renovate-config-fastcore` as the package name.
 You then need to publish the `renovate-config-fastcore` package where the `package.json` has the field `renovate-config` and then put your config under the field `default`.
 For example:
 
-```json
+```json {configType=none}
 {
   "name": "renovate-config-fastcore",
   "version": "0.0.1",

@@ -2740,6 +2740,26 @@ describe('config/validation', () => {
         expect(warnings).toBeEmptyArray();
         expect(errors).toBeEmptyArray();
       });
+
+      it('allows wildcards', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            'datasource-rubygems': 120,
+            'datasource-*': 60,
+            'datasource-{crate,go}': 90,
+            '/^changelog-/': 45,
+            '*': 30,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
     });
   });
 });
