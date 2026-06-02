@@ -401,7 +401,7 @@ Will then output:
 
 <summary><code>jq</code> query output</summary>
 
-```json configType=none
+```json {configType=none}
 {
   "missingCurrentVersionTimestamps": [
     {

@@ -20,7 +20,7 @@ It is possible to completely ignore this validation check by using a `<!-- schem
 Where a JSON code block is _not_ Renovate config, you can specify:
 
 ````markdown
-```json configType=none
+```json {configType=none}
 {
   "in": "valid"
 }
@@ -31,7 +31,7 @@ By default, the validation treats a JSON code block as [Repository Config](../us
 When writing a JSON snippet for [Global Self-Hosted config](../usage/self-hosted-configuration.md), you will need to note that:
 
 ````markdown
-```json configType=global
+```json {configType=global}
 {
   "allowedEnv": ["foo"]
 }
@@ -41,7 +41,7 @@ When writing a JSON snippet for [Global Self-Hosted config](../usage/self-hosted
 It may be the case that there is a configuration warning that appears which may be safe to ignore, which can be done so with:
 
 ````markdown
-```json ignoreConfigWarnings=true
+```json {ignoreConfigWarnings=true}
 {
   "example-deprecated": true
 }
