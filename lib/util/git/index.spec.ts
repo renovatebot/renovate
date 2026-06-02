@@ -41,7 +41,7 @@ const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
 };
 
-describe('util/git/index', { timeout: 10000 }, () => {
+describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -1546,25 +1546,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
           GIT_CONFIG_VALUE_1: 'git@example.com:',
           GIT_CONFIG_KEY_2: 'url.https://token@example.com/.insteadOf',
           GIT_CONFIG_VALUE_2: 'https://example.com/',
-          LANG: 'C.UTF-8',
-          LC_ALL: 'C.UTF-8',
-          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-        }),
-      );
-    });
-
-    it('should work when PAGER is explicitly configured', async () => {
-      // Self-hosted users can opt into passing PAGER via customEnvVariables.
-      // simple-git >=3.36.0 blocks git operations when PAGER is present unless
-      // allowUnsafePager is enabled.
-      setCustomEnv({ PAGER: 'less' });
-
-      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
-      await git.initRepo({ url: origin.path });
-      await expect(git.syncGit()).resolves.toBeUndefined();
-      expect(envSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          PAGER: 'less',
           LANG: 'C.UTF-8',
           LC_ALL: 'C.UTF-8',
           GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',

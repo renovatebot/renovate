@@ -15,12 +15,16 @@ You need the following dependencies for local development:
 - pnpm `^10.0.0`
 - C++ compiler
 
-We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Mise](https://mise.jdx.dev/) to manage your tool versions.
-
 For building the documentation, you also need:
 
 - Python `>=3.11`
 - PDM `>=2.26.0`
+
+#### Recommended: Mise
+
+We recommend [Mise](https://mise.jdx.dev/) to install and manage all of the tools above.
+After installing Mise, run `mise install` from the repository root.
+This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
 
 #### Linux
 
@@ -99,6 +103,9 @@ If you want to contribute to the project, you should first "fork" the main proje
 The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
+
+!!! tip "Mise users"
+  If you ran `mise install`, the `postinstall` hook already executed `pnpm install`.
 
 1. Install all dependencies with `pnpm install`
 1. Make a build with `pnpm build`, which should pass with no errors

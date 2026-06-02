@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 const Repository = z.union([
   z.string(),
@@ -21,8 +21,8 @@ const Version = z.object({
   homepage: z.string().optional().catch(undefined),
   deprecated: z.union([z.string(), z.boolean()]).optional(),
   gitHead: z.string().optional(),
-  dependencies: z.record(z.string()).optional(),
-  devDependencies: z.record(z.string()).optional(),
+  dependencies: z.record(z.string(), z.string()).optional(),
+  devDependencies: z.record(z.string(), z.string()).optional(),
   engines: z
     .object({ node: z.string().optional() })
     .optional()
@@ -31,9 +31,9 @@ const Version = z.object({
 });
 
 export const CachedPackument = z.object({
-  versions: z.record(Version).optional(),
+  versions: z.record(z.string(), Version).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
-  time: z.record(z.string()).optional(),
-  'dist-tags': z.record(z.string()).optional(),
+  time: z.record(z.string(), z.string()).optional(),
+  'dist-tags': z.record(z.string(), z.string()).optional(),
 });

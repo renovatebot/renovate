@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import extract from 'extract-zip';
+import AdmZip from 'adm-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -86,9 +86,8 @@ export class TerraformProviderHash {
     zipFilePath: string,
     extractPath: string,
   ): Promise<string> {
-    await extract(zipFilePath, {
-      dir: extractPath,
-    });
+    const zip = new AdmZip(zipFilePath);
+    zip.extractAllTo(extractPath);
     const hash = await this.hashOfDir(extractPath);
     // delete extracted files
     await fs.rmCache(extractPath);

@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -22,13 +22,10 @@ export interface CommunityActionConfig {
    */
   isInvalid?: (value: string) => boolean;
 
-  withSchema?: z.ZodEffects<
-    z.ZodTypeAny,
-    { val: string | undefined } & Record<string, unknown>
-  >;
+  withSchema?: z.ZodType<{ val: string | undefined } & Record<string, unknown>>;
 }
 
-type ActionSchema = z.ZodEffects<z.ZodTypeAny, PackageDependency>;
+type ActionSchema = z.ZodType<PackageDependency>;
 
 function actionSchema(
   name: string,
@@ -80,9 +77,7 @@ function parseValue(
   return { currentValue, depType: 'uses-with' };
 }
 
-function valSchema(
-  key: string,
-): z.ZodEffects<z.ZodTypeAny, { val: string | undefined }> {
+function valSchema(key: string): z.ZodType<{ val: string | undefined }> {
   return z
     .object({ [key]: z.string().optional() })
     .transform((val) => ({ val: val[key] }));
