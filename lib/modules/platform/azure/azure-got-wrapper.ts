@@ -1,11 +1,16 @@
 import * as azure from 'azure-devops-node-api';
-import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
+import {
+  getBasicHandler,
+  getBearerHandler,
+  getPersonalAccessTokenHandler,
+} from 'azure-devops-node-api';
 import type { ICoreApi } from 'azure-devops-node-api/CoreApi.js';
 import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { isProbablyJwt } from './util.ts';
 
 const hostType = 'azure';
 let endpoint: string;
@@ -15,7 +20,10 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
     return getBasicHandler(config.username, config.password, true);
   }
   // TODO: token can be undefined here (#22198)
-  return getHandlerFromToken(config.token!, true);
+  if (isProbablyJwt(config.token!)) {
+    return getBearerHandler(config.token!, true);
+  }
+  return getPersonalAccessTokenHandler(config.token!, true);
 }
 
 export function azureObj(): azure.WebApi {
