@@ -1837,10 +1837,12 @@ The following re-enables fetching of changelogs when creating pull-requests for 
 ```json
 {
   "fetchChangeLogs": "off",
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/lodash/lodash"],
-    "fetchChangeLogs": "pr"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/lodash/lodash"],
+      "fetchChangeLogs": "pr"
+    }
+  ]
 }
 ```
 
@@ -1849,10 +1851,12 @@ which can be time-consuming due to the repository's large number of tags:
 
 ```json
 {
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
-    "fetchChangeLogs": "off"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+      "fetchChangeLogs": "off"
+    }
+  ]
 }
 ```
 
