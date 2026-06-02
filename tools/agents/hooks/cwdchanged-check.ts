@@ -8,13 +8,19 @@ import { readStdin } from './utils/stdin.ts';
 let parsed: unknown;
 try {
   parsed = JSON.parse(await readStdin());
-} catch {
-  process.exit(0);
+} catch (e) {
+  console.error(
+    `Failed to parse Hook input as JSON. Error: ${JSON.stringify(e)}`,
+  );
+  process.exit(1);
 }
 
 const result = CwdChangedHookInput.safeParse(parsed);
 if (!result.success) {
-  process.exit(0);
+  console.error(
+    `Failed to validate Hook input against schema. Error: ${JSON.stringify(result.error)}`,
+  );
+  process.exit(1);
 }
 
 const root = await getRepoRoot(result.data.cwd);

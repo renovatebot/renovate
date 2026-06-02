@@ -31,16 +31,16 @@ beforeEach(() => {
   exitSpy.mockClear();
 });
 
-it('exits silently when stdin is not valid CwdChanged JSON', async () => {
+it('exits with code 1 when stdin is not valid JSON', async () => {
   readStdin.mockResolvedValue('not json');
 
   await expect(import('./cwdchanged-check.ts')).rejects.toThrow('process.exit');
 
-  expect(exitSpy).toHaveBeenCalledWith(0);
+  expect(exitSpy).toHaveBeenCalledWith(1);
   expect(provision).not.toHaveBeenCalled();
 });
 
-it('exits silently when hook_event_name is wrong', async () => {
+it('exits with code 1 when hook_event_name is wrong', async () => {
   readStdin.mockResolvedValue(
     JSON.stringify({
       session_id: 'x',
@@ -52,7 +52,7 @@ it('exits silently when hook_event_name is wrong', async () => {
 
   await expect(import('./cwdchanged-check.ts')).rejects.toThrow('process.exit');
 
-  expect(exitSpy).toHaveBeenCalledWith(0);
+  expect(exitSpy).toHaveBeenCalledWith(1);
   expect(provision).not.toHaveBeenCalled();
 });
 
