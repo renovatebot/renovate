@@ -127,6 +127,7 @@ Examples:
 
 ```json configType=global
 {
+  "allowedHeaders": ["X-Auth-Token"],
   "hostRules": [
     {
       "matchHost": "https://domain.com/all-versions",
