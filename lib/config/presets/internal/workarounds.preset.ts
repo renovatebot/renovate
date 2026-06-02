@@ -347,7 +347,8 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['git-submodules'],
         matchDatasources: ['git-refs'],
         matchSourceUrls: ['https://android.googlesource.com/**'],
-        versioning: 'regex:^android-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_r(?<build>\\d+)$',
+        versioning:
+          'regex:^android-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_r(?<build>\\d+)$',
       },
     ],
   },
