@@ -21,7 +21,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { RegistryConfigSchema, ReleaseTimestamp } from './schema.ts';
+import { RegistryConfig, ReleaseTimestamp } from './schema.ts';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -161,9 +161,9 @@ export class CrateDatasource extends Datasource {
    */
   private async fetchRegistryConfig(
     info: RegistryInfo,
-  ): Promise<RegistryConfigSchema | null> {
+  ): Promise<RegistryConfig | null> {
     const cacheKey = `crate-datasource/registry-config/${info.rawUrl}`;
-    const cached = memCache.get<RegistryConfigSchema>(cacheKey);
+    const cached = memCache.get<RegistryConfig>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -172,7 +172,7 @@ export class CrateDatasource extends Datasource {
       try {
         const configPath = upath.join(info.clonePath, 'config.json');
         const content = await readCacheFile(configPath, 'utf8');
-        const parsed = Json.pipe(RegistryConfigSchema).parse(content);
+        const parsed = Json.pipe(RegistryConfig).parse(content);
         memCache.set(cacheKey, parsed);
         return parsed;
       } catch {
@@ -184,10 +184,7 @@ export class CrateDatasource extends Datasource {
     } else {
       try {
         const configUrl = joinUrlParts(info.rawUrl, 'config.json');
-        const { body } = await this.http.getJson(
-          configUrl,
-          RegistryConfigSchema,
-        );
+        const { body } = await this.http.getJson(configUrl, RegistryConfig);
         memCache.set(cacheKey, body);
         return body;
       } catch {

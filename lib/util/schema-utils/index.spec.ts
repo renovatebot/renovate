@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '~test/util.ts';
 import {
   Ini,
@@ -44,10 +44,9 @@ describe('util/schema-utils/index', () => {
       expect(err).toMatchObject({
         issues: [
           {
-            message: 'Expected string, received number',
+            message: 'Invalid input: expected string, received number',
             code: 'invalid_type',
             expected: 'string',
-            received: 'number',
             path: [1],
           },
         ],
@@ -126,17 +125,15 @@ describe('util/schema-utils/index', () => {
       expect(err).toMatchObject({
         issues: [
           {
-            message: 'Expected string, received number',
+            message: 'Invalid input: expected string, received number',
             code: 'invalid_type',
             expected: 'string',
-            received: 'number',
             path: ['aaa', 'foo', 'bar'],
           },
           {
-            message: 'Required',
+            message: 'Invalid input: expected string, received undefined',
             code: 'invalid_type',
             expected: 'string',
-            received: 'undefined',
             path: ['bbb', 'foo', 'bar'],
           },
         ],
@@ -154,10 +151,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected string, received number',
+              message: 'Invalid input: expected string, received number',
               code: 'invalid_type',
               expected: 'string',
-              received: 'number',
               path: [],
             },
           ],
@@ -169,10 +165,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Invalid literal value, expected "bar"',
-              code: 'invalid_literal',
-              expected: 'bar',
-              received: 'foo',
+              message: 'Invalid input: expected "bar"',
+              code: 'invalid_value',
+              values: ['bar'],
               path: ['foo'],
             },
           ],
@@ -184,10 +179,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected object, received array',
+              message: 'Invalid input: expected object, received array',
               code: 'invalid_type',
               expected: 'object',
-              received: 'array',
               path: [],
             },
           ],
@@ -220,10 +214,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected string, received number',
+              message: 'Invalid input: expected string, received number',
               code: 'invalid_type',
               expected: 'string',
-              received: 'number',
               path: [],
             },
           ],
@@ -235,10 +228,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Invalid literal value, expected "bar"',
-              code: 'invalid_literal',
-              expected: 'bar',
-              received: 'foo',
+              message: 'Invalid input: expected "bar"',
+              code: 'invalid_value',
+              values: ['bar'],
               path: ['foo'],
             },
           ],
@@ -250,10 +242,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected object, received array',
+              message: 'Invalid input: expected object, received array',
               code: 'invalid_type',
               expected: 'object',
-              received: 'array',
               path: [],
             },
           ],
@@ -286,10 +277,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected string, received number',
+              message: 'Invalid input: expected string, received number',
               code: 'invalid_type',
               expected: 'string',
-              received: 'number',
               path: [],
             },
           ],
@@ -301,10 +291,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Invalid literal value, expected "bar"',
-              code: 'invalid_literal',
-              expected: 'bar',
-              received: 'foo',
+              message: 'Invalid input: expected "bar"',
+              code: 'invalid_value',
+              values: ['bar'],
               path: ['foo'],
             },
           ],
@@ -316,10 +305,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected object, received array',
+              message: 'Invalid input: expected object, received array',
               code: 'invalid_type',
               expected: 'object',
-              received: 'array',
               path: [],
             },
           ],
@@ -370,10 +358,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected string, received number',
+              message: 'Invalid input: expected string, received number',
               code: 'invalid_type',
               expected: 'string',
-              received: 'number',
               path: [],
             },
           ],
@@ -422,10 +409,9 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Expected string, received number',
+              message: 'Invalid input: expected string, received number',
               code: 'invalid_type',
               expected: 'string',
-              received: 'number',
               path: [],
             },
           ],
@@ -494,9 +480,8 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              received: 'brb',
-              code: 'invalid_literal',
-              expected: 'baz',
+              code: 'invalid_value',
+              values: ['baz'],
               path: ['foo', 'bar'],
             },
           ],
@@ -541,8 +526,8 @@ describe('util/schema-utils/index', () => {
         error: {
           issues: [
             {
-              message: 'Required',
               code: 'invalid_type',
+              expected: 'object',
               path: ['foo'],
             },
           ],
@@ -554,31 +539,31 @@ describe('util/schema-utils/index', () => {
 
   describe('logging utils', () => {
     it('logs debug message and returns fallback value', () => {
-      const Schema = z
+      const Str = z
         .string()
         .catch(withDebugMessage('default string', 'Debug message'));
 
-      const result = Schema.parse(42);
+      const result = Str.parse(42);
 
       expect(result).toBe('default string');
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { err: expect.any(z.ZodError) },
+        { err: expect.objectContaining({ issues: expect.any(Array) }) },
         'Debug message',
       );
     });
 
     it('logs trace message and returns fallback value', () => {
-      const Schema = z
+      const Str = z
         .string()
         .catch(withTraceMessage('default string', 'Trace message'));
 
-      const result = Schema.parse(42);
+      const result = Str.parse(42);
 
       expect(result).toBe('default string');
 
       expect(logger.logger.trace).toHaveBeenCalledWith(
-        { err: expect.any(z.ZodError) },
+        { err: expect.objectContaining({ issues: expect.any(Array) }) },
         'Trace message',
       );
     });
@@ -706,18 +691,18 @@ describe('util/schema-utils/index', () => {
     });
 
     it('can be combined with other schema types', () => {
-      const Schema = z.object({
+      const Obj = z.object({
         data: NotCircular.pipe(z.any()),
       });
 
-      expect(Schema.parse({ data: { a: 1, b: 2 } })).toEqual({
+      expect(Obj.parse({ data: { a: 1, b: 2 } })).toEqual({
         data: { a: 1, b: 2 },
       });
 
       const obj: any = { a: 1 };
       obj.self = obj;
 
-      expect(Schema.safeParse({ data: obj })).toMatchObject({
+      expect(Obj.safeParse({ data: obj })).toMatchObject({
         success: false,
         error: {
           issues: [

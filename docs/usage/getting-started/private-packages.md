@@ -111,7 +111,7 @@ Renovate will use those credentials for all requests to `org/repo`.
 Here's an example for `gomod` with private `github.com` repos.
 Assume this config is used on the `github.com/some-other-org` repo:
 
-```json
+```json {configType=global}
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "dependencyDashboard": true,

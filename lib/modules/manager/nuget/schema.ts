@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Jsonc } from '../../../util/schema-utils/index.ts';
 
 /**
@@ -57,7 +57,7 @@ export const GlobalJson = Jsonc.pipe(
      *
      * https://learn.microsoft.com/de-de/dotnet/core/tools/global-json#msbuild-sdks
      */
-    'msbuild-sdks': z.record(z.string()).optional(),
+    'msbuild-sdks': z.record(z.string(), z.string()).optional(),
   }),
 );
 

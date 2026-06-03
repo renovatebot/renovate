@@ -54,15 +54,19 @@ Example:
 
 ```json
 {
-  "matchCurrentVersion": ">=3.10.3",
-  "matchDatasources": ["npm"],
-  "matchPackageNames": [
-    "apollo-server",
-    "apollo-server-core",
-    "apollo-server-express"
-  ],
-  "replacementName": "@apollo/server",
-  "replacementVersion": "4.0.0"
+  "packageRules": [
+    {
+      "matchCurrentVersion": ">=3.10.3",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": [
+        "apollo-server",
+        "apollo-server-core",
+        "apollo-server-express"
+      ],
+      "replacementName": "@apollo/server",
+      "replacementVersion": "4.0.0"
+    }
+  ]
 }
 ```
 
