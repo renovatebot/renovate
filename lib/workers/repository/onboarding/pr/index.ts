@@ -81,27 +81,32 @@ async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
   return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatPackageFilesByParentPath(
   packageFiles: Record<string, PackageFile[]>,
 ): string {
-  const byDir = new Map<string, Array<{ manager: string; file: string }>>();
+  const byDir = new Map<string, Map<string, string[]>>();
   for (const [manager, managerFiles] of Object.entries(packageFiles)) {
     for (const { packageFile } of managerFiles) {
       const lastSlash = packageFile!.lastIndexOf('/');
       const dir = lastSlash === -1 ? '/' : packageFile!.slice(0, lastSlash);
       const base = lastSlash === -1 ? packageFile! : packageFile!.slice(lastSlash + 1);
       if (!byDir.has(dir)) {
-        byDir.set(dir, []);
+        byDir.set(dir, new Map());
       }
-      byDir.get(dir)!.push({ manager, file: base });
+      const byManager = byDir.get(dir)!;
+      if (!byManager.has(manager)) {
+        byManager.set(manager, []);
+      }
+      byManager.get(manager)!.push(base);
     }
   }
   const lines: string[] = [];
-  for (const [dir, files] of [...byDir.entries()].sort()) {
+  for (const [dir, byManager] of [...byDir.entries()].sort()) {
     const label = dir === '/' ? '`/` (root)' : `\`${dir}\``;
-    const items = files.map(({ file, manager }) => `\`${file}\` (${manager})`);
-    lines.push(`${label}: ${items.join(', ')}`);
+    lines.push(`- ${label}`);
+    for (const [manager, files] of byManager.entries()) {
+      lines.push(`  - ${files.map((f) => `\`${f}\``).join(', ')} (${manager})`);
+    }
   }
   return `### Detected Package Files\n\n${lines.join('\n')}`;
 }
