@@ -66,6 +66,31 @@ function getExpectedPrTable(branches: BranchConfig[]): string {
   return buildTable(counts, 'Manager', (k) => k);
 }
 
+function getPrSummary(branches: BranchConfig[]): string {
+  const typeTotals = new Map<string, number>();
+  let securityTotal = 0;
+  for (const branch of branches) {
+    for (const upgrade of branch.upgrades) {
+      const type = upgrade.updateType ?? 'other';
+      typeTotals.set(type, (typeTotals.get(type) ?? 0) + 1);
+      if (upgrade.isVulnerabilityAlert) {
+        securityTotal += 1;
+      }
+    }
+  }
+  const parts: string[] = [];
+  if (securityTotal > 0) {
+    parts.push(`${securityTotal} security`);
+  }
+  for (const type of TYPE_ORDER) {
+    const n = typeTotals.get(type);
+    if (n) {
+      parts.push(`${n} ${type}`);
+    }
+  }
+  return parts.length ? ` (${parts.join(', ')})` : '';
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getExpectedPrTableByPackageFile(branches: BranchConfig[]): string {
   const counts = buildCounts(
@@ -85,8 +110,8 @@ export function getExpectedPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
-  prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
-  prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
+  const prWord = branches.length > 1 ? 'Pull Requests' : 'Pull Request';
+  prDesc += `With your current configuration, Renovate will create ${branches.length} ${prWord}${getPrSummary(branches)}:\n\n`;
   prDesc += getExpectedPrTable(branches);
   // prDesc += getExpectedPrTableByPackageFile(branches);
   prDesc += '\n\n';
