@@ -100,6 +100,54 @@ function getExpectedPrTableByPackageFile(branches: BranchConfig[]): string {
   return buildTable(counts, 'Package file', (k) => `\`${k}\``);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function getExpectedPrBreakdownByDirectory(branches: BranchConfig[]): string {
+  const byDirManager = new Map<string, Map<string, UpgradeCounts>>();
+  for (const branch of branches) {
+    for (const upgrade of branch.upgrades) {
+      const pf = upgrade.packageFile ?? '?';
+      const lastSlash = pf.lastIndexOf('/');
+      const dir = lastSlash === -1 ? '/' : pf.slice(0, lastSlash);
+      const manager = upgrade.manager ?? 'unknown';
+      if (!byDirManager.has(dir)) {
+        byDirManager.set(dir, new Map());
+      }
+      const dirMap = byDirManager.get(dir)!;
+      if (!dirMap.has(manager)) {
+        dirMap.set(manager, { byType: new Map(), security: 0 });
+      }
+      const entry = dirMap.get(manager)!;
+      const type = upgrade.updateType ?? 'other';
+      entry.byType.set(type, (entry.byType.get(type) ?? 0) + 1);
+      if (upgrade.isVulnerabilityAlert) {
+        entry.security += 1;
+      }
+    }
+  }
+  const lines: string[] = [];
+  for (const [dir, dirMap] of [...byDirManager.entries()].sort()) {
+    const label = dir === '/' ? '`/` (root)' : `\`${dir}\``;
+    lines.push(`- ${label}`);
+    for (const [manager, { byType, security }] of [...dirMap.entries()].sort()) {
+      const parts: string[] = [];
+      for (const type of TYPE_ORDER) {
+        const n = byType.get(type);
+        if (n) {
+          parts.push(`${n} ${type}`);
+        }
+      }
+      for (const [type, n] of byType.entries()) {
+        if (!TYPE_ORDER.includes(type)) {
+          parts.push(`${n} ${type}`);
+        }
+      }
+      const secNote = security > 0 ? ` (${security} security)` : '';
+      lines.push(`  - ${manager}: ${parts.join(', ')}${secNote}`);
+    }
+  }
+  return lines.join('\n');
+}
+
 export function getExpectedPrList(
   config: RenovateConfig,
   branches: BranchConfig[],
@@ -112,8 +160,9 @@ export function getExpectedPrList(
   }
   const prWord = branches.length > 1 ? 'Pull Requests' : 'Pull Request';
   prDesc += `With your current configuration, Renovate will create ${branches.length} ${prWord}${getPrSummary(branches)}:\n\n`;
-  prDesc += getExpectedPrTable(branches);
+  // prDesc += getExpectedPrTable(branches);
   // prDesc += getExpectedPrTableByPackageFile(branches);
+  prDesc += getExpectedPrBreakdownByDirectory(branches);
   prDesc += '\n\n';
   // TODO: type (#22198)
   const prHourlyLimit = config.prHourlyLimit!;
