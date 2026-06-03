@@ -16,6 +16,24 @@ const Distribution = z.object({
   attestations: Attestations.optional(),
 });
 
+/**
+ * The packument `time` field maps each published version to its release
+ * timestamp, alongside metadata keys such as `created`, `modified`, and
+ * `unpublished`. Some registries (e.g. JFrog Artifactory) emit non-string
+ * values like `"unpublished": null`, which must not invalidate the whole
+ * packument. Drop any non-string entries so consumers only ever see
+ * version→timestamp strings.
+ */
+const PackumentTime = z
+  .record(z.string(), z.unknown())
+  .transform((time) =>
+    Object.fromEntries(
+      Object.entries(time).filter(
+        (entry): entry is [string, string] => typeof entry[1] === 'string',
+      ),
+    ),
+  );
+
 export const NpmResponseVersion = z.object({
   repository: Repository.optional(),
   homepage: z.string().optional().catch(undefined),
@@ -35,7 +53,7 @@ export const CachedPackument = z.object({
   versions: z.record(z.string(), NpmResponseVersion).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
-  time: z.record(z.string(), z.string()).optional(),
+  time: PackumentTime.optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
 
@@ -53,7 +71,7 @@ export const NpmResponse = z.object({
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
-  time: z.record(z.string(), z.string()).optional(),
+  time: PackumentTime.optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
 
