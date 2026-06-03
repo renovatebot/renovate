@@ -1,6 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { escapeRegExp } from '../../../util/regex.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import type { PackageDependency } from '../types.ts';
 
 export const validMatchFields = [
@@ -23,7 +23,7 @@ export function substituteRegistryAliases(
   registryAliases: Record<string, string> | undefined,
 ): void {
   for (const [original, replace] of Object.entries(registryAliases ?? {})) {
-    const re = new RegExp(`^${escapeRegExp(original)}`);
+    const re = regEx(`^${escapeRegExp(original)}`);
     if (dep.registryUrls) {
       dep.registryUrls = dep.registryUrls.map((s) => {
         return s.replace(re, replace);
