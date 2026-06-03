@@ -13,7 +13,7 @@ import { ensureCacheDir } from '../../../../util/fs/index.ts';
 import { Http } from '../../../../util/http/index.ts';
 import * as p from '../../../../util/promises.ts';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
-import type { TerraformBuild } from '../../../datasource/terraform-provider/types.ts';
+import type { TerraformBuild } from '../../../datasource/terraform-provider/schema.ts';
 
 export class TerraformProviderHash {
   static http = new Http(TerraformProviderDatasource.id);
