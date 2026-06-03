@@ -47,32 +47,60 @@ export default {
     let zodBinding = null;
     /** @type {Set<string>} */
     const schemaNames = new Set();
+    /**
+     * Local names imported from a `schema-utils` module. These helpers
+     * (`LooseArray`, `Json`, …) produce Zod schemas even though their
+     * leftmost identifier is not the `z` binding, so a `const` built from
+     * one is a schema. Non-schema exports (`withDebugMessage`, etc.) are
+     * harmless here — they never appear as the leftmost identifier of a
+     * schema `const`.
+     * @type {Set<string>}
+     */
+    const schemaHelperBindings = new Set();
 
     return {
       ImportDeclaration(node) {
-        if (node.source.value !== 'zod' && node.source.value !== 'zod/v4') {
+        if (node.source.value === 'zod' || node.source.value === 'zod/v4') {
+          for (const specifier of node.specifiers) {
+            if (
+              specifier.type === 'ImportSpecifier' &&
+              specifier.imported.type === 'Identifier' &&
+              specifier.imported.name === 'z'
+            ) {
+              zodBinding = specifier.local.name;
+            }
+          }
           return;
         }
-        for (const specifier of node.specifiers) {
-          if (
-            specifier.type === 'ImportSpecifier' &&
-            specifier.imported.type === 'Identifier' &&
-            specifier.imported.name === 'z'
-          ) {
-            zodBinding = specifier.local.name;
+        const source = node.source.value;
+        if (
+          typeof source === 'string' &&
+          source.split('/').includes('schema-utils')
+        ) {
+          for (const specifier of node.specifiers) {
+            if (
+              specifier.type === 'ImportSpecifier' &&
+              specifier.imported.type === 'Identifier'
+            ) {
+              schemaHelperBindings.add(specifier.local.name);
+            }
           }
         }
       },
 
       VariableDeclarator(node) {
-        if (!zodBinding || !node.init || node.id.type !== 'Identifier') {
+        if (!node.init || node.id.type !== 'Identifier') {
           return;
         }
         const leftmost = getLeftmostIdentifier(node.init);
         if (!leftmost) {
           return;
         }
-        if (leftmost !== zodBinding && !schemaNames.has(leftmost)) {
+        if (
+          leftmost !== zodBinding &&
+          !schemaHelperBindings.has(leftmost) &&
+          !schemaNames.has(leftmost)
+        ) {
           return;
         }
 

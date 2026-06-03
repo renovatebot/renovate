@@ -33,6 +33,19 @@ Renovate recognizes environment-specific lock files:
 
 For more information about mise lock files, see the [mise lock file documentation](https://mise.jdx.dev/dev-tools/mise-lock.html).
 
+### Trust model for lock file updates
+
+Running `mise lock` can execute repository-defined behavior, so Renovate treats mise lockfile refreshes as an unsafe execution.
+
+Self-hosted administrators must explicitly allow this path by including `mise` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
+
+When `mise` is allowed and an existing `mise.lock` is present, Renovate explicitly runs `mise trust` before `mise lock` from the repository checkout. This makes the trust step visible in logs and lets mise own any future trust behavior changes.
+
+In particular:
+
+- an existing `mise.lock` is required
+- self-hosted administrators decide whether this unsafe execution is acceptable for their environment
+
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.

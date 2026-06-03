@@ -228,7 +228,7 @@
     "jsonata": "2.2.1",
     "jsonc-weaver": "0.2.4",
     "klona": "2.0.6",
-    "lru-cache": "11.5.0",
+    "lru-cache": "11.5.1",
     "luxon": "3.7.2",
     "markdown-it": "14.2.0",
     "markdown-table": "3.0.4",
@@ -272,7 +272,7 @@
     "re2": "1.24.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.15",
+    "@biomejs/biome": "2.4.16",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/istanbul-reports-html": "2.0.5",
     "@containerbase/semantic-release-pnpm": "1.4.1",
@@ -349,7 +349,7 @@
     "vitest": "4.1.7",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@10.33.4",
+  "packageManager": "pnpm@10.34.0",
   "files": [
     "dist",
     "renovate-schema.json"
