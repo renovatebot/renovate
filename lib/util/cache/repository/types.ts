@@ -33,6 +33,7 @@ export interface BranchUpgradeCache {
   packageFile?: string;
   remediationNotPossible?: unknown;
   updateType?: UpdateType;
+  isVulnerabilityAlert?: boolean;
 }
 
 export interface OnboardingBranchCache {

@@ -13,8 +13,10 @@ import type {
 import { getInheritedOrGlobal } from '../../../util/common.ts';
 import type {
   BaseBranchMetadata,
+  BaseBranchUpdateSummary,
   BranchMetadata,
   BranchSummary,
+  UpdateSummary,
 } from '../../types.ts';
 
 export function runRenovateRepoStats(
@@ -159,5 +161,39 @@ export function runBranchSummary(config: RenovateConfig): void {
     const branchesInformation = filterDependencyDashboardData(branches);
     addBranchStats(config, branchesInformation);
     logger.debug({ branchesInformation }, 'branches info extended');
+
+    const updateSummary = getUpdateSummary(branches);
+    logger.debug({ updateSummary }, 'Updates summary');
   }
+}
+
+export function getUpdateSummary(branches: BranchCache[]): UpdateSummary {
+  const summaryByBase = new Map<string, BaseBranchUpdateSummary>();
+
+  for (const branch of branches) {
+    const baseBranch = branch.baseBranch ?? '';
+    let entry = summaryByBase.get(baseBranch);
+    if (!entry) {
+      entry = { baseBranch, total: 0, vulnerabilityAlert: 0, updates: {} };
+      summaryByBase.set(baseBranch, entry);
+    }
+    for (const upgrade of branch.upgrades ?? []) {
+      const { updateType } = upgrade;
+      if (updateType) {
+        entry.total += 1;
+        if (upgrade.isVulnerabilityAlert) {
+          entry.vulnerabilityAlert += 1;
+        }
+
+        entry.updates[updateType] = (entry.updates[updateType] ?? 0) + 1;
+      } else {
+        logger.debug(
+          { upgrade },
+          `Found an upgrade without an updateType, which shouldn't be possible`,
+        );
+      }
+    }
+  }
+
+  return Array.from(summaryByBase.values());
 }
