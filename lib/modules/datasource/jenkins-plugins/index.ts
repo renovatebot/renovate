@@ -60,11 +60,10 @@ export class JenkinsPluginsDatasource extends Datasource {
   private async _getJenkinsPluginInfo(
     updateSiteUrl: string,
   ): Promise<Record<string, ReleaseResult>> {
-    const { plugins } =
-      await this.getJenkinsUpdateCenterResponse<JenkinsPluginsInfoResponse>(
-        `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`,
-        JenkinsPluginsInfoResponse,
-      );
+    const { plugins } = await this.getJenkinsUpdateCenterResponse(
+      `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`,
+      JenkinsPluginsInfoResponse,
+    );
 
     const info: Record<string, ReleaseResult> = {};
     for (const name of Object.keys(plugins)) {
@@ -92,11 +91,10 @@ export class JenkinsPluginsDatasource extends Datasource {
   private async _getJenkinsPluginVersions(
     updateSiteUrl: string,
   ): Promise<Record<string, Release[]>> {
-    const { plugins } =
-      await this.getJenkinsUpdateCenterResponse<JenkinsPluginsVersionsResponse>(
-        `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`,
-        JenkinsPluginsVersionsResponse,
-      );
+    const { plugins } = await this.getJenkinsUpdateCenterResponse(
+      `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`,
+      JenkinsPluginsVersionsResponse,
+    );
 
     const versions: Record<string, Release[]> = {};
     for (const name of Object.keys(plugins)) {
