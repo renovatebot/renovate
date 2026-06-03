@@ -5,7 +5,7 @@ import { id as versioning } from '../../versioning/node/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
-import { NodeReleasesSchema } from './schema.ts';
+import { NodeReleases } from './schema.ts';
 
 export class NodeVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -43,7 +43,7 @@ export class NodeVersionDatasource extends Datasource {
     try {
       const resp = await this.http.getJson(
         joinUrlParts(registryUrl, 'index.json'),
-        NodeReleasesSchema,
+        NodeReleases,
       );
       result.releases.push(
         ...resp.body.map(({ version, date, lts }) => ({

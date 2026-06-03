@@ -1,4 +1,4 @@
-import { NodeRelease, NodeReleasesSchema } from './schema.ts';
+import { NodeRelease, NodeReleases } from './schema.ts';
 
 describe('modules/datasource/node-version/schema', () => {
   describe('NodeRelease', () => {
@@ -30,7 +30,7 @@ describe('modules/datasource/node-version/schema', () => {
         { notARelease: true }, // invalid — missing required fields
         { version: 'v18.0.0', date: '2022-04-19', lts: 'Hydrogen' },
       ];
-      const result = NodeReleasesSchema.parse(input);
+      const result = NodeReleases.parse(input);
       // invalid element is skipped (LooseArray behavior)
       expect(result).toHaveLength(2);
       expect(result[0].version).toBe('v20.0.0');

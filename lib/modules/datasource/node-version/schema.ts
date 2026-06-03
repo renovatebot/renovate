@@ -12,4 +12,4 @@ export const NodeRelease = z.object({
 
 export type NodeRelease = z.infer<typeof NodeRelease>;
 
-export const NodeReleasesSchema = LooseArray(NodeRelease);
+export const NodeReleases = LooseArray(NodeRelease);
