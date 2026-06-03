@@ -1,13 +1,13 @@
-import { PrekTomlSchema } from './schema.ts';
+import { PrekToml } from './schema.ts';
 
 describe('modules/manager/prek/schema', () => {
   it('strips unknown top-level fields', () => {
-    expect(PrekTomlSchema.parse('minimum_prek_version = "0.1.0"')).toEqual({});
+    expect(PrekToml.parse('minimum_prek_version = "0.1.0"')).toEqual({});
   });
 
   it('strips unknown repo-level and hook-level fields', () => {
     expect(
-      PrekTomlSchema.parse(`[[repos]]
+      PrekToml.parse(`[[repos]]
 repo = "https://github.com/crate-ci/typos"
 rev = "v1.44.0"
 managed = true

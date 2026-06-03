@@ -7,7 +7,7 @@ import {
   extractPreCommitAdditionalDependencies,
 } from '../pre-commit/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import { type PrekConfig, PrekTomlSchema } from './schema.ts';
+import { type PrekConfig, PrekToml } from './schema.ts';
 
 const repoSectionRegex = regEx(/^\s*\[\[\s*repos\s*\]\]\s*(?:#.*)?$/);
 const repoLineRegex = regEx(
@@ -222,7 +222,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  const parsed = PrekTomlSchema.safeParse(content);
+  const parsed = PrekToml.safeParse(content);
   if (!parsed.success) {
     logger.debug(
       { packageFile, err: parsed.error },

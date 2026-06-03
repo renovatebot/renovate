@@ -343,6 +343,60 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const res = await getPnpmLock('package.json');
       expect(res.lockedVersionsWithPath).toBeUndefined();
     });
+
+    it('extracts version from multi-document lockfile (configDependencies)', async () => {
+      const lockfileContent = codeBlock`
+        ---
+        lockfileVersion: '9.0'
+
+        importers:
+
+          .:
+            configDependencies:
+              '@scope/pnpm-plugin-defaults':
+                specifier: 0.1.0
+                version: 0.1.0
+
+        packages:
+
+          '@scope/pnpm-plugin-defaults@0.1.0':
+            resolution: {integrity: sha512-aaa==}
+
+        snapshots:
+
+          '@scope/pnpm-plugin-defaults@0.1.0': {}
+
+        ---
+        lockfileVersion: '9.0'
+
+        settings:
+          autoInstallPeers: true
+          excludeLinksFromLockfile: false
+
+        importers:
+
+          .:
+            dependencies:
+              lodash:
+                specifier: ^4.17.20
+                version: 4.18.1
+
+        packages:
+
+          lodash@4.18.1:
+            resolution: {integrity: sha512-bbb==}
+
+        snapshots:
+
+          lodash@4.18.1: {}
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
+      expect(res.lockedVersionsWithPath!['.'].dependencies.lodash).toBe(
+        '4.18.1',
+      );
+    });
   });
 
   describe('.extractPnpmWorkspaceFile()', () => {

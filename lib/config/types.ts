@@ -2,7 +2,11 @@ import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
+import type {
+  GitUrlOption,
+  RepoSortMethod,
+  SortMethod,
+} from '../modules/platform/types.ts';
 import type {
   AutoMergeType,
   HostRule,
@@ -11,7 +15,11 @@ import type {
   SkipReason,
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
-import type { ConstraintName, ToolName } from '../util/exec/types.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+  ToolName,
+} from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -98,6 +106,7 @@ export interface RenovateSharedConfig {
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
   groupName?: string;
+  groupSingleUpdates?: boolean;
   groupSlug?: string;
   hashedBranchLength?: number;
   ignoreDeps?: string[];
@@ -454,6 +463,10 @@ export interface RenovateConfig
   variables?: Record<string, string>;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
@@ -498,6 +511,7 @@ export interface CustomDatasourceConfig {
  */
 export interface AllConfig
   extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
+  gitUrl?: GitUrlOption;
   password?: string;
   token?: string;
   username?: string;
@@ -686,6 +700,12 @@ export interface RenovateOptionBase {
    * Conditions that must be met for this option to be required.
    */
   requiredIf?: RenovateRequiredOption[];
+
+  /**
+   * If true, the option's value supports Renovate templating.
+   * @see https://docs.renovatebot.com/templates/
+   */
+  supportsTemplating?: boolean;
 }
 
 export interface RenovateRequiredOption {

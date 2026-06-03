@@ -24,7 +24,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       const execSnapshots = mockExecAll();
       getRepoStatusMock.mockResolvedValue(
@@ -141,7 +141,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       const execSnapshots = mockExecAll();
       getRepoStatusMock.mockResolvedValue(
@@ -247,7 +247,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       const execSnapshots = mockExecAll();
       getRepoStatusMock.mockResolvedValue(
@@ -322,7 +322,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue(null);
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       mockExecAll(
         new ExecError('', {
@@ -372,7 +372,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue(null);
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
       mockExecAll();
 
       getRepoStatusMock.mockResolvedValue(
@@ -524,7 +524,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
       const execSnapshots = mockExecAll();
       await updateArtifacts({
         updatedDeps: [

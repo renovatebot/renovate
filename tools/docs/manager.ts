@@ -173,7 +173,7 @@ export async function generateManagers(
         md += '\n';
       }
       if (definition.supportsDynamicDepTypesNote) {
-        md += definition.supportsDynamicDepTypesNote + '\n\n';
+        md += `${definition.supportsDynamicDepTypesNote}\n\n`;
       }
       if (
         (!definition.knownDepTypes || definition.knownDepTypes.length === 0) &&
@@ -183,7 +183,7 @@ export async function generateManagers(
       }
       md += '## Default config\n\n';
       md += '```json\n';
-      md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';
+      md += `${JSON.stringify(definition.defaultConfig, null, 2)}\n`;
       md += '```\n\n';
     }
     const managerReadmeContent = await readFile(

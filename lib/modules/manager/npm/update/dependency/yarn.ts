@@ -47,12 +47,15 @@ export function updateYarnrcCatalogDependency({
     return null;
   }
 
-  const oldVersion =
-    catalogName === 'default'
-      ? parsedContents.catalog?.[depName!]
-      : isObject(parsedContents.catalogs?.[catalogName]) && isString(depName)
-        ? parsedContents.catalogs?.[catalogName][depName]
-        : undefined;
+  let oldVersion: string | undefined;
+  if (catalogName === 'default') {
+    oldVersion = parsedContents.catalog?.[depName!];
+  } else if (
+    isObject(parsedContents.catalogs?.[catalogName]) &&
+    isString(depName)
+  ) {
+    oldVersion = parsedContents.catalogs?.[catalogName][depName];
+  }
 
   if (oldVersion === newValue) {
     logger.trace('Version is already updated');

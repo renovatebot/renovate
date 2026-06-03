@@ -1,24 +1,24 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { LooseArray, Toml } from '../../../util/schema-utils/index.ts';
 
-export const PrekHookSchema = z.object({
+export const PrekHook = z.object({
   id: z.string().optional(),
   language: z.string().optional(),
   additional_dependencies: LooseArray(z.string()).catch([]).optional(),
 });
 
-export const PrekRepoSchema = z.object({
+export const PrekRepo = z.object({
   repo: z.string().optional(),
   rev: z.string().optional(),
-  hooks: LooseArray(PrekHookSchema).catch([]).optional(),
+  hooks: LooseArray(PrekHook).catch([]).optional(),
 });
 
-export const PrekConfigSchema = z.object({
-  repos: LooseArray(PrekRepoSchema).catch([]).optional(),
+export const PrekConfig = z.object({
+  repos: LooseArray(PrekRepo).catch([]).optional(),
 });
 
-export const PrekTomlSchema = Toml.pipe(PrekConfigSchema);
+export const PrekToml = Toml.pipe(PrekConfig);
 
-export type PrekHook = z.infer<typeof PrekHookSchema>;
-export type PrekRepo = z.infer<typeof PrekRepoSchema>;
-export type PrekConfig = z.infer<typeof PrekConfigSchema>;
+export type PrekHook = z.infer<typeof PrekHook>;
+export type PrekRepo = z.infer<typeof PrekRepo>;
+export type PrekConfig = z.infer<typeof PrekConfig>;

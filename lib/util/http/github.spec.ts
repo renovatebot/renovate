@@ -290,7 +290,7 @@ describe('util/http/github', () => {
       const apiUrl = 'some-url?per_page=2';
       httpMock
         .scope(baseUrl)
-        .get('/' + apiUrl)
+        .get(`/${apiUrl}`)
         .reply(200, ['a', 'b'], {
           link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
         })

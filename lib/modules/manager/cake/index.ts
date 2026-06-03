@@ -1,7 +1,7 @@
 import moo from 'moo';
 import type { Category } from '../../../constants/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import { isHttpUrl } from '../../../util/url.ts';
+import { isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type { NugetPackageDependency, Registry } from '../nuget/types.ts';
 import { applyRegistries, getConfiguredRegistries } from '../nuget/util.ts';
@@ -36,37 +36,36 @@ const lexer = moo.states({
 });
 
 function parseDependencyLine(line: string): NugetPackageDependency | null {
-  try {
-    let url = line.replace(regEx(/^[^:]*:/), '');
-    const isEmptyHost = url.startsWith('?');
-    url = isEmptyHost ? `http://localhost/${url}` : url;
+  let url = line.replace(regEx(/^[^:]*:/), '');
+  const isEmptyHost = url.startsWith('?');
+  url = isEmptyHost ? `http://localhost/${url}` : url;
 
-    const parsedUrl = new URL(url);
-    const { origin, pathname, searchParams } = parsedUrl;
-
-    const registryUrl = `${origin}${pathname}`;
-
-    const depName = searchParams.get('package')!;
-    const currentValue = searchParams.get('version') ?? undefined;
-
-    const result: NugetPackageDependency = {
-      datasource: NugetDatasource.id,
-      depName,
-      currentValue,
-    };
-
-    if (!isEmptyHost) {
-      if (isHttpUrl(parsedUrl)) {
-        result.registryUrls = [registryUrl];
-      } else {
-        result.skipReason = 'unsupported-url';
-      }
-    }
-
-    return result;
-  } catch {
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) {
     return null;
   }
+  const { origin, pathname, searchParams } = parsedUrl;
+
+  const registryUrl = `${origin}${pathname}`;
+
+  const depName = searchParams.get('package')!;
+  const currentValue = searchParams.get('version') ?? undefined;
+
+  const result: NugetPackageDependency = {
+    datasource: NugetDatasource.id,
+    depName,
+    currentValue,
+  };
+
+  if (!isEmptyHost) {
+    if (isHttpUrl(parsedUrl)) {
+      result.registryUrls = [registryUrl];
+    } else {
+      result.skipReason = 'unsupported-url';
+    }
+  }
+
+  return result;
 }
 
 function parseAndPushDependencyLine(

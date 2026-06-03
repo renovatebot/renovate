@@ -43,7 +43,7 @@ function determineDatasource(
   repository: string,
   hostname: string,
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  const hostUrl = 'https://' + hostname;
+  const hostUrl = `https://${hostname}`;
   const platform = detectPlatform(repository) ?? detectPlatform(hostUrl);
 
   if (hostname === 'github.com') {
@@ -57,7 +57,7 @@ function determineDatasource(
     );
     return {
       datasource: GithubTagsDatasource.id,
-      registryUrls: ['https://' + hostname],
+      registryUrls: [`https://${hostname}`],
     };
   }
   if (hostname === 'gitlab.com') {
@@ -71,7 +71,7 @@ function determineDatasource(
     );
     return {
       datasource: GitlabTagsDatasource.id,
-      registryUrls: ['https://' + hostname],
+      registryUrls: [`https://${hostname}`],
     };
   }
   const res = find({ url: hostUrl });
