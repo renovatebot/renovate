@@ -235,7 +235,7 @@ export async function updateArtifacts({
       const ageMs = toMs(config.minimumReleaseAge);
       if (isNumber(ageMs)) {
         const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
-        extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = String(days);
+        extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
       } else {
         logger.debug(
           { minimumReleaseAge: config.minimumReleaseAge },
