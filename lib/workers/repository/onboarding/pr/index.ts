@@ -81,6 +81,42 @@ async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
   return false;
 }
 
+function formatPackageFilesByParentPath(
+  packageFiles: Record<string, PackageFile[]>,
+): string {
+  const byDir = new Map<string, Array<{ manager: string; file: string }>>();
+  for (const [manager, managerFiles] of Object.entries(packageFiles)) {
+    for (const { packageFile } of managerFiles) {
+      const lastSlash = packageFile!.lastIndexOf('/');
+      const dir = lastSlash === -1 ? '/' : packageFile!.slice(0, lastSlash);
+      const base = lastSlash === -1 ? packageFile! : packageFile!.slice(lastSlash + 1);
+      if (!byDir.has(dir)) {
+        byDir.set(dir, []);
+      }
+      byDir.get(dir)!.push({ manager, file: base });
+    }
+  }
+  const sections: string[] = [];
+  for (const [dir, files] of [...byDir.entries()].sort()) {
+    const header = dir === '/' ? '#### `/` (root)' : `#### \`${dir}\``;
+    const items = files.map(({ file, manager }) => ` * \`${file}\` (${manager})`);
+    sections.push(`${header}\n\n${items.join('\n')}`);
+  }
+  return `### Detected Package Files\n\n${sections.join('\n\n')}`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function formatPackageFilesByManager(
+  packageFiles: Record<string, PackageFile[]>,
+): string {
+  const sections: string[] = [];
+  for (const [manager, managerFiles] of Object.entries(packageFiles)) {
+    const items = managerFiles.map(({ packageFile }) => ` * \`${packageFile}\``);
+    sections.push(`#### ${manager}\n\n${items.join('\n')}`);
+  }
+  return `### Detected Package Files\n\n${sections.join('\n\n')}`;
+}
+
 export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
@@ -137,17 +173,16 @@ export async function ensureOnboardingPr(
   const onboardingConfigHashComment = await getOnboardingConfigHashComment();
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [Renovate](${
-    config.productLinks!.homepage
-  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  let prTemplate = `Welcome to [Renovate](${config.productLinks!.homepage
+    })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
     getInheritedOrGlobal('requireConfig') === 'required'
       ? emojify(
-          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
-        )
+        `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
+      )
       : emojify(
-          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
-        );
+        `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
+      );
 
   prTemplate += emojify(
     `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
@@ -157,11 +192,10 @@ export async function ensureOnboardingPr(
   prTemplate += emojify(
     `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
   );
-  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
-    config.onboardingRebaseCheckbox
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${config.onboardingRebaseCheckbox
       ? ' and select the Retry/Rebase checkbox below'
       : ''
-  }. Renovate will update the Pull Request description the next time it runs.`;
+    }. Renovate will update the Pull Request description the next time it runs.`;
   prTemplate += '\n\n';
   // TODO #22198
   prTemplate += emojify(
@@ -177,26 +211,19 @@ export async function ensureOnboardingPr(
 
 ---
 
-:question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks!.documentation
+:question: Got questions? Check out Renovate's [Docs](${config.productLinks!.documentation
     }), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${
-      config.productLinks!.help
+If you need any further assistance then you can also [request help here](${config.productLinks!.help
     }).
 `,
   );
   prTemplate += rebaseCheckBox;
   let prBody = prTemplate;
   if (packageFiles && Object.entries(packageFiles).length) {
-    let files: string[] = [];
-    for (const [manager, managerFiles] of Object.entries(packageFiles)) {
-      files = files.concat(
-        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
-      );
-    }
     prBody = `${prBody.replace(
       '{{PACKAGE FILES}}',
-      `### Detected Package Files\n\n${files.join('\n')}`,
+      // formatPackageFilesByParentPath(packageFiles),
+      formatPackageFilesByManager(packageFiles),
     )}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
