@@ -219,6 +219,27 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).toBeNull();
     });
 
+    it('skips catalog page without @id or items (v3)', async () => {
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, nugetIndexV3)
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
+        .reply(200, {
+          items: [
+            {
+              // no @id and no items - should be skipped gracefully
+            },
+          ],
+        });
+
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('returns null for empty result (v3v2)', async () => {
       httpMock
         .scope('https://api.nuget.org')
@@ -315,7 +336,14 @@ describe('modules/datasource/nuget/index', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           url: 'https://api.nuget.org/v3/index.json',
-          servicesIndexRaw: JSON.parse(nugetIndex),
+          servicesIndexRaw: {
+            resources: [
+              {
+                '@id': 'https://api.nuget.org/v3/metadata',
+                '@type': 'RegistrationsBaseUrl/3.0.0-beta',
+              },
+            ],
+          },
         },
         'no PackageBaseAddress services found',
       );
