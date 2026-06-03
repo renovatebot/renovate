@@ -68,7 +68,7 @@ export type OpenTofuProviderDocsResponse = z.infer<
 >;
 
 // VersionDetailResponse — used by the releases.hashicorp.com backend
-export const TerraformBuildSchema = z.object({
+export const TerraformBuild = z.object({
   name: z.string(),
   version: z.string(),
   os: z.string(),
@@ -78,60 +78,60 @@ export const TerraformBuildSchema = z.object({
   shasums_url: z.string().optional(),
 });
 
-export type TerraformBuild = z.infer<typeof TerraformBuildSchema>;
+export type TerraformBuild = z.infer<typeof TerraformBuild>;
 
-export const VersionDetailResponseSchema = z.object({
+export const VersionDetailResponse = z.object({
   name: z.string().optional(),
   version: z.string().optional(),
-  builds: z.array(TerraformBuildSchema),
+  builds: z.array(TerraformBuild),
 });
 
-export type VersionDetailResponse = z.infer<typeof VersionDetailResponseSchema>;
+export type VersionDetailResponse = z.infer<typeof VersionDetailResponse>;
 
 // TerraformProviderReleaseBackend — index.json from releases.hashicorp.com
-export const TerraformProviderReleaseBackendSchema = z.object({
+export const TerraformProviderReleaseBackend = z.object({
   name: z.string().optional(),
-  versions: z.record(VersionDetailResponseSchema),
+  versions: z.record(z.string(), VersionDetailResponse),
 });
 
 export type TerraformProviderReleaseBackend = z.infer<
-  typeof TerraformProviderReleaseBackendSchema
+  typeof TerraformProviderReleaseBackend
 >;
 
 // TerraformProviderVersions — Provider Registry Protocol /versions endpoint
-const TerraformProviderVersionsVersionSchema = z.object({
+const TerraformProviderVersionsVersion = z.object({
   version: z.string(),
 });
 
-export const TerraformProviderVersionsSchema = z.object({
-  versions: LooseArray(TerraformProviderVersionsVersionSchema),
+export const TerraformProviderVersions = z.object({
+  versions: LooseArray(TerraformProviderVersionsVersion),
 });
 
 export type TerraformProviderVersions = z.infer<
-  typeof TerraformProviderVersionsSchema
+  typeof TerraformProviderVersions
 >;
 
 // TerraformRegistryVersions — registry /versions endpoint (for getBuilds)
-const TerraformRegistryPlatformSchema = z.object({
+const TerraformRegistryPlatform = z.object({
   os: z.string(),
   arch: z.string(),
 });
 
-const TerraformRegistryVersionItemSchema = z.object({
+const TerraformRegistryVersionItem = z.object({
   version: z.string(),
-  platforms: LooseArray(TerraformRegistryPlatformSchema),
+  platforms: LooseArray(TerraformRegistryPlatform),
 });
 
-export const TerraformRegistryVersionsSchema = z.object({
-  versions: LooseArray(TerraformRegistryVersionItemSchema).optional(),
+export const TerraformRegistryVersions = z.object({
+  versions: LooseArray(TerraformRegistryVersionItem).optional(),
 });
 
 export type TerraformRegistryVersions = z.infer<
-  typeof TerraformRegistryVersionsSchema
+  typeof TerraformRegistryVersions
 >;
 
 // TerraformRegistryBuildResponse — per-platform download info
-export const TerraformRegistryBuildResponseSchema = z.object({
+export const TerraformRegistryBuildResponse = z.object({
   os: z.string(),
   arch: z.string(),
   filename: z.string(),
@@ -140,5 +140,5 @@ export const TerraformRegistryBuildResponseSchema = z.object({
 });
 
 export type TerraformRegistryBuildResponse = z.infer<
-  typeof TerraformRegistryBuildResponseSchema
+  typeof TerraformRegistryBuildResponse
 >;

@@ -8,15 +8,15 @@ import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { TerraformBuild, VersionDetailResponse } from './schema.ts';
 import {
   OpenTofuProviderDocsResponse,
-  TerraformProviderReleaseBackendSchema,
+  type TerraformBuild,
+  TerraformProviderReleaseBackend,
   TerraformProviderV2Response,
-  TerraformProviderVersionsSchema,
-  TerraformRegistryBuildResponseSchema,
-  TerraformRegistryVersionsSchema,
-  VersionDetailResponseSchema,
+  TerraformProviderVersions,
+  TerraformRegistryBuildResponse,
+  TerraformRegistryVersions,
+  VersionDetailResponse,
 } from './schema.ts';
 
 export class TerraformProviderDatasource extends TerraformDatasource {
@@ -176,9 +176,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       serviceDiscovery,
       `${repository}/versions`,
     );
-    const res = (
-      await this.http.getJson(backendURL, TerraformProviderVersionsSchema)
-    ).body;
+    const res = (await this.http.getJson(backendURL, TerraformProviderVersions))
+      .body;
     const dep: ReleaseResult = {
       releases: res.versions.map(({ version }) => ({
         version,
@@ -199,7 +198,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       `index.json`,
     );
     const res = (
-      await this.http.getJson(backendURL, TerraformProviderReleaseBackendSchema)
+      await this.http.getJson(backendURL, TerraformProviderReleaseBackend)
     ).body;
 
     const dep: ReleaseResult = {
@@ -267,7 +266,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const versionsResponse = (
       await this.http.getJson(
         `${backendURL}/versions`,
-        TerraformRegistryVersionsSchema,
+        TerraformRegistryVersions,
       )
     ).body;
     if (!versionsResponse.versions) {
@@ -294,10 +293,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         const buildURL = `${backendURL}/${version}/download/${platform.os}/${platform.arch}`;
         try {
           const res = (
-            await this.http.getJson(
-              buildURL,
-              TerraformRegistryBuildResponseSchema,
-            )
+            await this.http.getJson(buildURL, TerraformRegistryBuildResponse)
           ).body;
           const newBuild: TerraformBuild = {
             name: repository,
@@ -378,7 +374,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return (
       await this.http.getJson(
         `${TerraformProviderDatasource.hashicorpReleaseUrl}/${backendLookUpName}/${version}/index.json`,
-        VersionDetailResponseSchema,
+        VersionDetailResponse,
       )
     ).body;
   }
