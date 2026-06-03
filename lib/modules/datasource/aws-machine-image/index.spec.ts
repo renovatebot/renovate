@@ -186,6 +186,16 @@ describe('modules/datasource/aws-machine-image/index', () => {
       expect(res).toStrictEqual(image3.Name);
     });
 
+    it('without newValue, with newest image missing a name to be null', async () => {
+      const { Name, ...imageWithoutName } = image3;
+      mockDescribeImagesCommand({ Images: [imageWithoutName] });
+      const res = await getDigest({
+        datasource,
+        packageName: '[{"Name":"owner-id","Values":["602401143452"]}]',
+      });
+      expect(res).toBeNull();
+    });
+
     it('without newValue, with 3 matching image to return the newest image', async () => {
       mockDescribeImagesCommand(mock3Images);
       const res = await getDigest({

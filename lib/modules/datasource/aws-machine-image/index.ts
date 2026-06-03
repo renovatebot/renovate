@@ -129,7 +129,7 @@ export class AwsMachineImageDatasource extends Datasource {
       return null;
     }
 
-    return images.at(-1)?.Name ?? null;
+    return images.at(-1)!.Name ?? null;
   }
 
   override getDigest(
