@@ -16,6 +16,7 @@ import type {
   BaseBranchUpdateSummary,
   BranchMetadata,
   BranchSummary,
+  ManagerUpdateSummary,
   UpdateSummary,
 } from '../../types.ts';
 
@@ -174,7 +175,13 @@ export function getUpdateSummary(branches: BranchCache[]): UpdateSummary {
     const baseBranch = branch.baseBranch ?? '';
     let entry = summaryByBase.get(baseBranch);
     if (!entry) {
-      entry = { baseBranch, total: 0, vulnerabilityAlert: 0, updates: {} };
+      entry = {
+        baseBranch,
+        total: 0,
+        vulnerabilityAlert: 0,
+        updates: {},
+        managers: {},
+      };
       summaryByBase.set(baseBranch, entry);
     }
     for (const upgrade of branch.upgrades ?? []) {
@@ -186,6 +193,20 @@ export function getUpdateSummary(branches: BranchCache[]): UpdateSummary {
         }
 
         entry.updates[updateType] = (entry.updates[updateType] ?? 0) + 1;
+
+        const manager = upgrade.manager ?? '';
+        let managerEntry: ManagerUpdateSummary | undefined =
+          entry.managers[manager];
+        if (!managerEntry) {
+          managerEntry = { total: 0, vulnerabilityAlert: 0, updates: {} };
+          entry.managers[manager] = managerEntry;
+        }
+        managerEntry.total += 1;
+        if (upgrade.isVulnerabilityAlert) {
+          managerEntry.vulnerabilityAlert += 1;
+        }
+        managerEntry.updates[updateType] =
+          (managerEntry.updates[updateType] ?? 0) + 1;
       } else {
         logger.debug(
           { upgrade },

@@ -212,20 +212,40 @@ describe('workers/repository/finalize/repository-statistics', () => {
         partial<BranchCache>({
           baseBranch: 'main',
           upgrades: [
-            partial<BranchUpgradeCache>({ updateType: 'major' }),
-            partial<BranchUpgradeCache>({ updateType: 'major' }),
-            partial<BranchUpgradeCache>({ updateType: 'pin' }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'major',
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'major',
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'pin',
+            }),
           ],
         }),
         partial<BranchCache>({
           baseBranch: 'main',
-          upgrades: [partial<BranchUpgradeCache>({ updateType: 'patch' })],
+          upgrades: [
+            partial<BranchUpgradeCache>({
+              manager: 'dockerfile',
+              updateType: 'patch',
+            }),
+          ],
         }),
         partial<BranchCache>({
           baseBranch: 'next',
           upgrades: [
-            partial<BranchUpgradeCache>({ updateType: 'replacement' }),
-            partial<BranchUpgradeCache>({ updateType: 'pin' }),
+            partial<BranchUpgradeCache>({
+              manager: 'gomod',
+              updateType: 'replacement',
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'gomod',
+              updateType: 'pin',
+            }),
           ],
         }),
       ];
@@ -236,12 +256,31 @@ describe('workers/repository/finalize/repository-statistics', () => {
           total: 4,
           vulnerabilityAlert: 0,
           updates: { major: 2, pin: 1, patch: 1 },
+          managers: {
+            npm: {
+              total: 3,
+              vulnerabilityAlert: 0,
+              updates: { major: 2, pin: 1 },
+            },
+            dockerfile: {
+              total: 1,
+              vulnerabilityAlert: 0,
+              updates: { patch: 1 },
+            },
+          },
         },
         {
           baseBranch: 'next',
           total: 2,
           vulnerabilityAlert: 0,
           updates: { replacement: 1, pin: 1 },
+          managers: {
+            gomod: {
+              total: 2,
+              vulnerabilityAlert: 0,
+              updates: { replacement: 1, pin: 1 },
+            },
+          },
         },
       ]);
     });
@@ -267,6 +306,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
           total: 0,
           vulnerabilityAlert: 0,
           updates: {},
+          managers: {},
         },
       ]);
 
@@ -280,7 +320,12 @@ describe('workers/repository/finalize/repository-statistics', () => {
     it('treats missing baseBranch as the default branch (empty string)', () => {
       const branches: BranchCache[] = [
         partial<BranchCache>({
-          upgrades: [partial<BranchUpgradeCache>({ updateType: 'minor' })],
+          upgrades: [
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'minor',
+            }),
+          ],
         }),
       ];
 
@@ -290,6 +335,38 @@ describe('workers/repository/finalize/repository-statistics', () => {
           total: 1,
           vulnerabilityAlert: 0,
           updates: { minor: 1 },
+          managers: {
+            npm: {
+              total: 1,
+              vulnerabilityAlert: 0,
+              updates: { minor: 1 },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('treats missing manager as empty string', () => {
+      const branches: BranchCache[] = [
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [partial<BranchUpgradeCache>({ updateType: 'minor' })],
+        }),
+      ];
+
+      expect(getUpdateSummary(branches)).toEqual([
+        {
+          baseBranch: 'main',
+          total: 1,
+          vulnerabilityAlert: 0,
+          updates: { minor: 1 },
+          managers: {
+            '': {
+              total: 1,
+              vulnerabilityAlert: 0,
+              updates: { minor: 1 },
+            },
+          },
         },
       ]);
     });
@@ -300,14 +377,19 @@ describe('workers/repository/finalize/repository-statistics', () => {
           baseBranch: 'main',
           upgrades: [
             partial<BranchUpgradeCache>({
+              manager: 'npm',
               updateType: 'patch',
               isVulnerabilityAlert: true,
             }),
             partial<BranchUpgradeCache>({
+              manager: 'npm',
               updateType: 'major',
               isVulnerabilityAlert: true,
             }),
-            partial<BranchUpgradeCache>({ updateType: 'major' }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'major',
+            }),
           ],
         }),
       ];
@@ -318,6 +400,13 @@ describe('workers/repository/finalize/repository-statistics', () => {
           total: 3,
           vulnerabilityAlert: 2,
           updates: { major: 2, patch: 1 },
+          managers: {
+            npm: {
+              total: 3,
+              vulnerabilityAlert: 2,
+              updates: { major: 2, patch: 1 },
+            },
+          },
         },
       ]);
     });
@@ -336,6 +425,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
           total: 0,
           vulnerabilityAlert: 0,
           updates: {},
+          managers: {},
         },
       ]);
     });

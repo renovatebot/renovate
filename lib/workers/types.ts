@@ -221,6 +221,19 @@ export interface BranchSummary {
   inactiveBranches: string[];
 }
 
+export interface ManagerUpdateSummary {
+  /** Total number of upgrades processed for this manager. */
+  total: number;
+  /**
+   * Number of upgrades flagged as a fix for a vulnerability alert.
+   *
+   * Counted separately to regular updates, as a `minor` version could include a security update.
+   */
+  vulnerabilityAlert: number;
+  /** The number of updates a given `updateType` has for this manager */
+  updates: Partial<Record<UpdateType, number>>;
+}
+
 export interface BaseBranchUpdateSummary {
   baseBranch: string;
   /** Total number of upgrades processed for this base branch. */
@@ -233,6 +246,8 @@ export interface BaseBranchUpdateSummary {
   vulnerabilityAlert: number;
   /** The number of updates a given `updateType` has on this branch, across all package files and managers */
   updates: Partial<Record<UpdateType, number>>;
+  /** Per-manager breakdown of updates on this base branch */
+  managers: Record<string, ManagerUpdateSummary>;
 }
 
 export type UpdateSummary = BaseBranchUpdateSummary[];
