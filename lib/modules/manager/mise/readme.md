@@ -11,6 +11,10 @@ Renovate supports all standard mise configuration file patterns:
 - Environment-specific variants (e.g., `mise.production.toml`, `.mise.dev.toml`)
 - Local variants (e.g., `mise.local.toml`, `.mise.local.toml`)
 
+### Supported tool locations
+
+Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#tools-dev-tools) and [`tasks.*.tools`](https://mise.jdx.dev/tasks/task-configuration.html#tools) keys.
+
 ### Lock file support
 
 Renovate supports mise lock files (`mise.lock`).

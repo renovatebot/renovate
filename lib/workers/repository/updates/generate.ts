@@ -275,7 +275,9 @@ export function generateBranchConfig(
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
-  const useGroupSettings = hasGroupName && groupEligible;
+  const useGroupSettings =
+    hasGroupName &&
+    (groupEligible || branchUpgrades[0].groupSingleUpdates === true);
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 
