@@ -1,5 +1,4 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { z } from 'zod/v3';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -67,7 +66,7 @@ export async function getAuthHeaders(
       ? await http.get(apiCheckUrl, options)
       : // use json request, as this will be cached for tags, so it returns json
         // TODO: add cache test
-        await http.getJson(apiCheckUrl, options, z.unknown());
+        await http.getJsonUnchecked(apiCheckUrl, options);
 
     if (apiCheckResponse.statusCode === 200) {
       logger.debug(`No registry auth required for ${apiCheckUrl}`);
