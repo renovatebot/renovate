@@ -5,38 +5,74 @@ import type { BranchConfig } from '../../../types.ts';
 
 const TYPE_ORDER = ['major', 'minor', 'patch', 'pin', 'digest', 'lockFileMaintenance'];
 
-function getExpectedPrTable(branches: BranchConfig[]): string {
-  const counts = new Map<string, Map<string, number>>();
+interface UpgradeCounts {
+  byType: Map<string, number>;
+  security: number;
+}
+
+function buildCounts<K>(
+  branches: BranchConfig[],
+  keyFn: (upgrade: BranchConfig['upgrades'][number]) => K,
+): Map<K, UpgradeCounts> {
+  const counts = new Map<K, UpgradeCounts>();
   for (const branch of branches) {
     for (const upgrade of branch.upgrades) {
-      const manager = upgrade.manager ?? 'unknown';
-      const type = upgrade.updateType ?? 'other';
-      if (!counts.has(manager)) {
-        counts.set(manager, new Map());
+      const key = keyFn(upgrade);
+      if (!counts.has(key)) {
+        counts.set(key, { byType: new Map(), security: 0 });
       }
-      const m = counts.get(manager)!;
-      m.set(type, (m.get(type) ?? 0) + 1);
+      const entry = counts.get(key)!;
+      const type = upgrade.updateType ?? 'other';
+      entry.byType.set(type, (entry.byType.get(type) ?? 0) + 1);
+      if (upgrade.isVulnerabilityAlert) {
+        entry.security += 1;
+      }
     }
   }
+  return counts;
+}
 
+function buildTable<K>(
+  counts: Map<K, UpgradeCounts>,
+  labelHeader: string,
+  labelFn: (key: K) => string,
+): string {
   const allTypes = new Set(
-    [...counts.values()].flatMap((m) => [...m.keys()]),
+    [...counts.values()].flatMap(({ byType }) => [...byType.keys()]),
   );
+  const hasSecurityColumn = [...counts.values()].some((e) => e.security > 0);
   const columns = [
     ...TYPE_ORDER.filter((t) => allTypes.has(t)),
     ...[...allTypes].filter((t) => !TYPE_ORDER.includes(t)).sort(),
+    ...(hasSecurityColumn ? ['security'] : []),
   ];
 
-  const header = `| Manager | ${columns.join(' | ')} |`;
+  const header = `| ${labelHeader} | ${columns.join(' | ')} |`;
   const separator = `|---------|${columns.map(() => '------:').join('|')}|`;
   const rows = [...counts.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([manager, m]) => {
-      const cells = columns.map((t) => String(m.get(t) ?? 0));
-      return `| ${manager} | ${cells.join(' | ')} |`;
+    .sort(([a], [b]) => String(a).localeCompare(String(b)))
+    .map(([key, { byType, security }]) => {
+      const cells = columns.map((t) =>
+        t === 'security' ? String(security) : String(byType.get(t) ?? 0),
+      );
+      return `| ${labelFn(key)} | ${cells.join(' | ')} |`;
     });
 
   return [header, separator, ...rows].join('\n');
+}
+
+function getExpectedPrTable(branches: BranchConfig[]): string {
+  const counts = buildCounts(branches, (u) => u.manager ?? 'unknown');
+  return buildTable(counts, 'Manager', (k) => k);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function getExpectedPrTableByPackageFile(branches: BranchConfig[]): string {
+  const counts = buildCounts(
+    branches,
+    (u) => `${u.packageFile ?? '?'} (${u.manager ?? 'unknown'})`,
+  );
+  return buildTable(counts, 'Package file', (k) => `\`${k}\``);
 }
 
 export function getExpectedPrList(
@@ -52,6 +88,7 @@ export function getExpectedPrList(
   prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
   prDesc += getExpectedPrTable(branches);
+  // prDesc += getExpectedPrTableByPackageFile(branches);
   prDesc += '\n\n';
   // TODO: type (#22198)
   const prHourlyLimit = config.prHourlyLimit!;
