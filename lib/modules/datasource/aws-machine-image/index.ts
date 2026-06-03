@@ -129,7 +129,7 @@ export class AwsMachineImageDatasource extends Datasource {
       return null;
     }
 
-    return images[images.length - 1].Name ?? /* v8 ignore next */ null;
+    return images.at(-1)?.Name ?? null;
   }
 
   override getDigest(
@@ -150,7 +150,7 @@ export class AwsMachineImageDatasource extends Datasource {
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    if (!images.length || !images[images.length - 1].ImageId) {
+    if (!images.length || !images.at(-1)!.ImageId) {
       return null;
     }
     return {
