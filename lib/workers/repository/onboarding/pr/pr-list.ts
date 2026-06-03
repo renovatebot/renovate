@@ -1,8 +1,43 @@
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
-import { regEx } from '../../../../util/regex.ts';
 import type { BranchConfig } from '../../../types.ts';
+
+const TYPE_ORDER = ['major', 'minor', 'patch', 'pin', 'digest', 'lockFileMaintenance'];
+
+function getExpectedPrTable(branches: BranchConfig[]): string {
+  const counts = new Map<string, Map<string, number>>();
+  for (const branch of branches) {
+    for (const upgrade of branch.upgrades) {
+      const manager = upgrade.manager ?? 'unknown';
+      const type = upgrade.updateType ?? 'other';
+      if (!counts.has(manager)) {
+        counts.set(manager, new Map());
+      }
+      const m = counts.get(manager)!;
+      m.set(type, (m.get(type) ?? 0) + 1);
+    }
+  }
+
+  const allTypes = new Set(
+    [...counts.values()].flatMap((m) => [...m.keys()]),
+  );
+  const columns = [
+    ...TYPE_ORDER.filter((t) => allTypes.has(t)),
+    ...[...allTypes].filter((t) => !TYPE_ORDER.includes(t)).sort(),
+  ];
+
+  const header = `| Manager | ${columns.join(' | ')} |`;
+  const separator = `|---------|${columns.map(() => '------:').join('|')}|`;
+  const rows = [...counts.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([manager, m]) => {
+      const cells = columns.map((t) => String(m.get(t) ?? 0));
+      return `| ${manager} | ${cells.join(' | ')} |`;
+    });
+
+  return [header, separator, ...rows].join('\n');
+}
 
 export function getExpectedPrList(
   config: RenovateConfig,
@@ -16,52 +51,8 @@ export function getExpectedPrList(
   }
   prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
-
-  for (const branch of branches) {
-    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
-    // TODO #22198
-    prDesc += `<details>\n<summary>${branch.prTitle!.replace(
-      prTitleRe,
-      '@&#8203;$1',
-    )}</summary>\n\n`;
-    if (branch.schedule?.length) {
-      prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
-    }
-    prDesc += `  - Branch name: \`${branch.branchName}\`\n`;
-    prDesc += branch.baseBranch
-      ? `  - Merge into: \`${branch.baseBranch}\`\n`
-      : '';
-    const seen: string[] = [];
-    for (const upgrade of branch.upgrades) {
-      let text = '';
-      if (upgrade.updateType === 'lockFileMaintenance') {
-        text += '  - Regenerate lock files to use latest dependency versions';
-      } else {
-        if (upgrade.updateType === 'pin') {
-          text += '  - Pin ';
-        } else {
-          text += '  - Upgrade ';
-        }
-        if (upgrade.sourceUrl) {
-          // TODO: types (#22198)
-          text += `[${upgrade.depName!}](${upgrade.sourceUrl})`;
-        } else {
-          text += upgrade.depName!.replace(prTitleRe, '@&#8203;$1');
-        }
-        // TODO: types (#22198)
-        text += upgrade.isLockfileUpdate
-          ? ` to \`${upgrade.newVersion!}\``
-          : ` to \`${upgrade.newDigest ?? upgrade.newValue!}\``;
-        text += '\n';
-      }
-      if (!seen.includes(text)) {
-        prDesc += text;
-        seen.push(text);
-      }
-    }
-    prDesc += '\n\n';
-    prDesc += '</details>\n\n';
-  }
+  prDesc += getExpectedPrTable(branches);
+  prDesc += '\n\n';
   // TODO: type (#22198)
   const prHourlyLimit = config.prHourlyLimit!;
   const commitHourlyLimit = config.commitHourlyLimit!;
