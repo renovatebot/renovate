@@ -81,6 +81,7 @@ async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
   return false;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatPackageFilesByParentPath(
   packageFiles: Record<string, PackageFile[]>,
 ): string {
@@ -96,25 +97,25 @@ function formatPackageFilesByParentPath(
       byDir.get(dir)!.push({ manager, file: base });
     }
   }
-  const sections: string[] = [];
+  const lines: string[] = [];
   for (const [dir, files] of [...byDir.entries()].sort()) {
-    const header = dir === '/' ? '#### `/` (root)' : `#### \`${dir}\``;
-    const items = files.map(({ file, manager }) => ` * \`${file}\` (${manager})`);
-    sections.push(`${header}\n\n${items.join('\n')}`);
+    const label = dir === '/' ? '`/` (root)' : `\`${dir}\``;
+    const items = files.map(({ file, manager }) => `\`${file}\` (${manager})`);
+    lines.push(`${label}: ${items.join(', ')}`);
   }
-  return `### Detected Package Files\n\n${sections.join('\n\n')}`;
+  return `### Detected Package Files\n\n${lines.join('\n')}`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatPackageFilesByManager(
   packageFiles: Record<string, PackageFile[]>,
 ): string {
-  const sections: string[] = [];
+  const lines: string[] = [];
   for (const [manager, managerFiles] of Object.entries(packageFiles)) {
-    const items = managerFiles.map(({ packageFile }) => ` * \`${packageFile}\``);
-    sections.push(`#### ${manager}\n\n${items.join('\n')}`);
+    const items = managerFiles.map(({ packageFile }) => `\`${packageFile}\``);
+    lines.push(`**${manager}**: ${items.join(', ')}`);
   }
-  return `### Detected Package Files\n\n${sections.join('\n\n')}`;
+  return `### Detected Package Files\n\n${lines.join('\n')}`;
 }
 
 export async function ensureOnboardingPr(
@@ -222,8 +223,8 @@ If you need any further assistance then you can also [request help here](${confi
   if (packageFiles && Object.entries(packageFiles).length) {
     prBody = `${prBody.replace(
       '{{PACKAGE FILES}}',
-      // formatPackageFilesByParentPath(packageFiles),
-      formatPackageFilesByManager(packageFiles),
+      formatPackageFilesByParentPath(packageFiles),
+      // formatPackageFilesByManager(packageFiles),
     )}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
