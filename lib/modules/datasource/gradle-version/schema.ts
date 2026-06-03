@@ -11,4 +11,4 @@ export const GradleRelease = z.object({
   version: z.string(),
 });
 
-export const GradleReleasesSchema = LooseArray(GradleRelease);
+export const GradleReleases = LooseArray(GradleRelease);
