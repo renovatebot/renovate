@@ -185,7 +185,14 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
       runBranchSummary(config);
 
-      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Branch summary',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'branches info extended',
+      );
     });
   });
 });
