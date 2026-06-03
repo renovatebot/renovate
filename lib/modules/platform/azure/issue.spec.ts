@@ -24,8 +24,6 @@ describe('modules/platform/azure/issue', () => {
   let issueService: IssueService;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-
     config = {
       repository: 'test/repo',
       project: 'testProject',
