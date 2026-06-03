@@ -3,8 +3,7 @@ import { ensureTrailingSlash } from '../../../util/url.ts';
 import { id as npmId } from '../../versioning/npm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { DartResult } from './schema.ts';
-import { DartResultSchema } from './schema.ts';
+import { DartResult } from './schema.ts';
 
 export class DartDatasource extends Datasource {
   static readonly id = 'dart';
@@ -40,7 +39,7 @@ export class DartDatasource extends Datasource {
 
     let body: DartResult | null = null;
     try {
-      const raw = await this.http.getJson(pkgUrl, DartResultSchema);
+      const raw = await this.http.getJson(pkgUrl, DartResult);
       body = raw.body;
     } catch (err) {
       this.handleGenericErrors(err);

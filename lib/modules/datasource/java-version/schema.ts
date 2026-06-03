@@ -1,12 +1,12 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
-export const AdoptiumJavaVersionSchema = z.object({
+export const AdoptiumJavaVersion = z.object({
   semver: z.string(),
 });
 
-export const AdoptiumJavaResponseSchema = z.object({
-  versions: LooseArray(AdoptiumJavaVersionSchema).optional(),
+export const AdoptiumJavaResponse = z.object({
+  versions: LooseArray(AdoptiumJavaVersion).optional(),
 });
 
-export type AdoptiumJavaResponse = z.infer<typeof AdoptiumJavaResponseSchema>;
+export type AdoptiumJavaResponse = z.infer<typeof AdoptiumJavaResponse>;

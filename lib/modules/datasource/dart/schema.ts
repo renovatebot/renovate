@@ -1,13 +1,13 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
-const DartVersionEntrySchema = z.object({
+const DartVersionEntry = z.object({
   version: z.string(),
   published: z.string().optional(),
   retracted: z.boolean().optional(),
 });
 
-const DartLatestSchema = z.object({
+const DartLatest = z.object({
   pubspec: z
     .object({
       homepage: z.string().optional(),
@@ -16,9 +16,9 @@ const DartLatestSchema = z.object({
     .optional(),
 });
 
-export const DartResultSchema = z.object({
-  versions: LooseArray(DartVersionEntrySchema).optional(),
-  latest: DartLatestSchema.optional(),
+export const DartResult = z.object({
+  versions: LooseArray(DartVersionEntry).optional(),
+  latest: DartLatest.optional(),
 });
 
-export type DartResult = z.infer<typeof DartResultSchema>;
+export type DartResult = z.infer<typeof DartResult>;

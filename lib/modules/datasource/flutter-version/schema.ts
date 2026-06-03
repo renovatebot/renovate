@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
-export const FlutterReleaseSchema = z.object({
+export const FlutterRelease = z.object({
   hash: z.string().optional(),
   channel: z.string(),
   version: z.string(),
@@ -12,11 +12,11 @@ export const FlutterReleaseSchema = z.object({
   sha256: z.string().optional(),
 });
 
-export const FlutterResponseSchema = z.object({
+export const FlutterResponse = z.object({
   base_url: z.string().optional(),
   current_release: z.record(z.string(), z.string()).optional(),
-  releases: LooseArray(FlutterReleaseSchema),
+  releases: LooseArray(FlutterRelease),
 });
 
-export type FlutterRelease = z.infer<typeof FlutterReleaseSchema>;
-export type FlutterResponse = z.infer<typeof FlutterResponseSchema>;
+export type FlutterRelease = z.infer<typeof FlutterRelease>;
+export type FlutterResponse = z.infer<typeof FlutterResponse>;

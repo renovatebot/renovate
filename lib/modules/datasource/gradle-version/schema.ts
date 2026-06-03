@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
-export const GradleReleaseSchema = z.object({
+export const GradleRelease = z.object({
   buildTime: z.string().optional(),
   broken: z.boolean().optional(),
   milestoneFor: z.string().optional(),
@@ -11,6 +11,6 @@ export const GradleReleaseSchema = z.object({
   version: z.string(),
 });
 
-export const GradleReleasesSchema = LooseArray(GradleReleaseSchema);
+export const GradleReleasesSchema = LooseArray(GradleRelease);
 
-export type GradleRelease = z.infer<typeof GradleReleaseSchema>;
+export type GradleRelease = z.infer<typeof GradleRelease>;
