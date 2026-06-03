@@ -84,11 +84,7 @@ const staticGroups = {
       {
         groupName: 'boto',
         matchDatasources: ['python'],
-        matchPackageNames: [
-          'boto3',
-          'botocore',
-          's3transfer',
-        ],
+        matchPackageNames: ['boto3', 'botocore', 's3transfer'],
       },
     ],
   },
