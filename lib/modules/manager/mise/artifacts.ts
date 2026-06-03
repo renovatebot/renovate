@@ -51,9 +51,9 @@ export async function updateArtifacts({
   }
 
   const extraEnv: ExtraEnv = {
-    // mise auto-trusts configs in detected CI, so `mise lock` can read the
-    // repository config without an interactive `mise trust` prompt.
-    CI: 'true',
+    // Trust the checked-out repository config explicitly for this subprocess
+    // instead of relying on CI auto-trust behavior.
+    MISE_TRUSTED_CONFIG_PATHS: GlobalConfig.get('localDir'),
   };
   if (env) {
     extraEnv.MISE_ENV = env;

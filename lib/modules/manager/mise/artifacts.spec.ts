@@ -185,7 +185,7 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: updateMultipleToolsCmd }]);
   });
 
-  it('injects CI=true and GITHUB_TOKEN when host rule found', async () => {
+  it('injects MISE_TRUSTED_CONFIG_PATHS and GITHUB_TOKEN when host rule found', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
       .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
@@ -209,7 +209,7 @@ describe('modules/manager/mise/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: expect.objectContaining({
-            CI: 'true',
+            MISE_TRUSTED_CONFIG_PATHS: '/tmp/github/some/repo',
             GITHUB_TOKEN: 'github-token',
           }),
         },
@@ -259,7 +259,10 @@ describe('modules/manager/mise/artifacts', () => {
       {
         cmd: updateToolCmd,
         options: {
-          env: expect.objectContaining({ CI: 'true', MISE_ENV: 'test' }),
+          env: expect.objectContaining({
+            MISE_TRUSTED_CONFIG_PATHS: '/tmp/github/some/repo',
+            MISE_ENV: 'test',
+          }),
         },
       },
     ]);
@@ -307,7 +310,10 @@ describe('modules/manager/mise/artifacts', () => {
       {
         cmd: 'mise lock --local node',
         options: {
-          env: expect.objectContaining({ CI: 'true', MISE_ENV: 'test' }),
+          env: expect.objectContaining({
+            MISE_TRUSTED_CONFIG_PATHS: '/tmp/github/some/repo',
+            MISE_ENV: 'test',
+          }),
         },
       },
     ]);
@@ -374,7 +380,9 @@ describe('modules/manager/mise/artifacts', () => {
         cmd: updateToolCmd,
         options: {
           cwd: '/tmp/github/some/repo/subdir',
-          env: expect.objectContaining({ CI: 'true' }),
+          env: expect.objectContaining({
+            MISE_TRUSTED_CONFIG_PATHS: '/tmp/github/some/repo',
+          }),
         },
       },
     ]);

@@ -41,7 +41,7 @@ Self-hosted administrators must explicitly allow this path with [`allowedUnsafeE
 }
 ```
 
-When `mise` is allowed and an existing `mise.lock` is present, Renovate runs `mise lock` from the repository checkout with `CI=true`. This follows mise's CI trust behavior instead of attempting to sanitize or mirror the repository config.
+When `mise` is allowed and an existing `mise.lock` is present, Renovate runs `mise lock` from the repository checkout with `MISE_TRUSTED_CONFIG_PATHS` scoped to the repository working directory. This makes the trust decision explicit for the artifact update subprocess instead of relying on CI auto-trust behavior.
 
 In particular:
 
