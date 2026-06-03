@@ -18,7 +18,7 @@ Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs
 
 The minimal IAM privileges required for this datasource are:
 
-```json
+```json {configType=none}
 {
   "Sid": "AllowDescribeEKSAddonVersions",
   "Effect": "Allow",

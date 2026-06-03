@@ -23,6 +23,26 @@ const COLLISION_GUARD = 'mkdocs-admonition:';
 // Matches both spaced (<!-- prettier-ignore -->) and compact (<!--prettier-ignore-->) forms.
 const PRETTIER_IGNORE_RE = /^<!--\s*prettier-ignore\s*-->$/;
 
+/** @param {string[]} bodyLines */
+function normalizeBodyIndent(bodyLines) {
+  let minIndent = Infinity;
+  for (const line of bodyLines) {
+    if (line.trim() === '') {
+      continue;
+    }
+    const m = /^(\s*)/.exec(line);
+    if (m) {
+      minIndent = Math.min(minIndent, m[1].length);
+    }
+  }
+  if (minIndent === Infinity || minIndent === 2) {
+    return bodyLines;
+  }
+  return bodyLines.map((line) =>
+    line.trim() === '' ? '' : `  ${line.slice(minIndent)}`,
+  );
+}
+
 /** @param {string} text */
 function maskAdmonitions(text) {
   const lines = text.split('\n');
@@ -67,26 +87,24 @@ function maskAdmonitions(text) {
         peekIdx++;
       }
       if (peekIdx < lines.length && ADMONITION_HEADER.test(lines[peekIdx])) {
-        const blockLines = [line]; // <!-- prettier-ignore -->
+        const prefixLines = [line]; // <!-- prettier-ignore -->
         i++;
         while (i < peekIdx) {
-          blockLines.push(lines[i]); // blank lines between ignore and !!!
+          prefixLines.push(lines[i]); // blank lines between ignore and !!!
           i++;
         }
-        // Fall through into the shared admonition-body consumption below
-        blockLines.push(lines[i]); // !!! header
+        prefixLines.push(lines[i]); // !!! header
         i++;
+        const bodyLines = [];
         while (i < lines.length && BODY_LINE.test(lines[i])) {
-          blockLines.push(lines[i]);
+          bodyLines.push(lines[i]);
           i++;
         }
-        while (
-          blockLines.length > 1 &&
-          blockLines[blockLines.length - 1] === ''
-        ) {
-          blockLines.pop();
+        while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === '') {
+          bodyLines.pop();
           i--;
         }
+        const blockLines = [...prefixLines, ...normalizeBodyIndent(bodyLines)];
         const n = placeholders.length;
         placeholders.push(blockLines.join('\n'));
         masked.push(`<!--mkdocs-admonition:${n}-->`);
@@ -95,25 +113,23 @@ function maskAdmonitions(text) {
     }
 
     if (ADMONITION_HEADER.test(line)) {
-      const blockLines = [line];
       i++;
+      const bodyLines = [];
 
       // Greedily consume body: blank lines and 2+-space-indented lines
       while (i < lines.length && BODY_LINE.test(lines[i])) {
-        blockLines.push(lines[i]);
+        bodyLines.push(lines[i]);
         i++;
       }
 
       // Strip trailing blank lines to avoid double-blank in prettier output;
       // they will be re-emitted to the masked stream as normal blank lines.
-      while (
-        blockLines.length > 1 &&
-        blockLines[blockLines.length - 1] === ''
-      ) {
-        blockLines.pop();
+      while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === '') {
+        bodyLines.pop();
         i--;
       }
 
+      const blockLines = [line, ...normalizeBodyIndent(bodyLines)];
       const n = placeholders.length;
       placeholders.push(blockLines.join('\n'));
       masked.push(`<!--mkdocs-admonition:${n}-->`);

@@ -664,7 +664,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.52.0',
+    default: 'ghcr.io/renovatebot/base-image:13.55.5',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -2578,6 +2578,15 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
     mergeable: true,
     advancedUse: true,
+  },
+  {
+    name: 'groupSingleUpdates',
+    description:
+      'Apply group settings even when the group contains only one update.',
+    type: 'boolean',
+    default: true,
+    cli: false,
+    env: false,
   },
   // Pull Request options
   {

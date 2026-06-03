@@ -461,15 +461,17 @@ function rangeToStr(fullRange: Range[] | null): string | null {
 }
 
 function tokensToStr(tokens: Token[]): string {
+  let isTransition: boolean | undefined = false;
   return tokens.reduce((result: string, token: Token) => {
     let prefix: string;
     if (token.prefix === PREFIX_DOT) {
       prefix = '.';
     } else if (token.prefix === PREFIX_HYPHEN) {
-      prefix = '-';
+      prefix = isTransition === true ? '' : '-';
     } else {
       prefix = token.prefix;
     }
+    isTransition = token.isTransition;
     return `${result}${prefix}${token.val}`;
   }, '');
 }
