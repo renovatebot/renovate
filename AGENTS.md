@@ -99,13 +99,8 @@ Two discussion categories are available:
 Use `pnpm` for all commands (NOT npm/npx).
 
 - **Install dependencies:** `pnpm install`
-- **Run single test file:** `pnpm vitest lib/modules/manager/npm/extract.spec.ts`
-- **Run tests matching pattern:** `pnpm vitest manager/npm`
+- **Lint / Test / Autofix:** `pnpm check --all <optional path>`
 - **Full test suite:** `pnpm test` (runs lint + schema validation + all tests)
-- **Type-check:** `pnpm type-check`
-- **Lint:** `pnpm lint`
-- **Auto-fix lint/format:** `pnpm lint-fix`
-- **Build:** `pnpm build` (generates code, compiles with tsdown, produces `dist/`)
 - **Run from source:** `pnpm start` or `node lib/renovate.ts`
 
 Tests use Vitest (invoked via `pnpm vitest`). Test files use `.spec.ts` suffix and are co-located with source. Globals from `jest-extended` and `expect-more-jest` are available in tests.
