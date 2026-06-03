@@ -112,6 +112,30 @@ function formatPackageFilesByParentPath(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+function formatPackageFilesByParentPathSimple(
+  packageFiles: Record<string, PackageFile[]>,
+): string {
+  const byDir = new Map<string, string[]>();
+  for (const managerFiles of Object.values(packageFiles)) {
+    for (const { packageFile } of managerFiles) {
+      const lastSlash = packageFile!.lastIndexOf('/');
+      const dir = lastSlash === -1 ? '/' : packageFile!.slice(0, lastSlash);
+      const base = lastSlash === -1 ? packageFile! : packageFile!.slice(lastSlash + 1);
+      if (!byDir.has(dir)) {
+        byDir.set(dir, []);
+      }
+      byDir.get(dir)!.push(base);
+    }
+  }
+  const lines: string[] = [];
+  for (const [dir, files] of [...byDir.entries()].sort()) {
+    const label = dir === '/' ? '`/` (root)' : `\`${dir}\``;
+    lines.push(`- ${label}: ${files.map((f) => `\`${f}\``).join(', ')}`);
+  }
+  return `### Detected Package Files\n\n${lines.join('\n')}`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatPackageFilesByManager(
   packageFiles: Record<string, PackageFile[]>,
 ): string {
@@ -229,6 +253,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = `${prBody.replace(
       '{{PACKAGE FILES}}',
       formatPackageFilesByParentPath(packageFiles),
+      // formatPackageFilesByParentPathSimple(packageFiles),
       // formatPackageFilesByManager(packageFiles),
     )}\n`;
   } else {

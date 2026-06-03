@@ -61,6 +61,7 @@ function buildTable<K>(
   return [header, separator, ...rows].join('\n');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getExpectedPrTable(branches: BranchConfig[]): string {
   const counts = buildCounts(branches, (u) => u.manager ?? 'unknown');
   return buildTable(counts, 'Manager', (k) => k);
@@ -100,7 +101,6 @@ function getExpectedPrTableByPackageFile(branches: BranchConfig[]): string {
   return buildTable(counts, 'Package file', (k) => `\`${k}\``);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getExpectedPrBreakdownByDirectory(branches: BranchConfig[]): string {
   const byDirManager = new Map<string, Map<string, UpgradeCounts>>();
   for (const branch of branches) {
@@ -124,28 +124,37 @@ function getExpectedPrBreakdownByDirectory(branches: BranchConfig[]): string {
       }
     }
   }
-  const lines: string[] = [];
+
+  const allTypes = new Set(
+    [...byDirManager.values()].flatMap((m) =>
+      [...m.values()].flatMap(({ byType }) => [...byType.keys()]),
+    ),
+  );
+  const hasSecurityColumn = [...byDirManager.values()].some((m) =>
+    [...m.values()].some((e) => e.security > 0),
+  );
+  const columns = [
+    ...TYPE_ORDER.filter((t) => allTypes.has(t)),
+    ...[...allTypes].filter((t) => !TYPE_ORDER.includes(t)).sort(),
+    ...(hasSecurityColumn ? ['security'] : []),
+  ];
+
+  const header = `| Directory | Manager | ${columns.join(' | ')} |`;
+  const separator = `|-----------|---------|${columns.map(() => '------:').join('|')}|`;
+  const rows: string[] = [];
   for (const [dir, dirMap] of [...byDirManager.entries()].sort()) {
-    const label = dir === '/' ? '`/` (root)' : `\`${dir}\``;
-    lines.push(`- ${label}`);
+    const dirLabel = dir === '/' ? '`/` (root)' : `\`${dir}\``;
+    let firstRow = true;
     for (const [manager, { byType, security }] of [...dirMap.entries()].sort()) {
-      const parts: string[] = [];
-      for (const type of TYPE_ORDER) {
-        const n = byType.get(type);
-        if (n) {
-          parts.push(`${n} ${type}`);
-        }
-      }
-      for (const [type, n] of byType.entries()) {
-        if (!TYPE_ORDER.includes(type)) {
-          parts.push(`${n} ${type}`);
-        }
-      }
-      const secNote = security > 0 ? ` (${security} security)` : '';
-      lines.push(`  - ${manager}: ${parts.join(', ')}${secNote}`);
+      const cells = columns.map((t) =>
+        t === 'security' ? String(security) : String(byType.get(t) ?? 0),
+      );
+      rows.push(`| ${firstRow ? dirLabel : ''} | ${manager} | ${cells.join(' | ')} |`);
+      firstRow = false;
     }
   }
-  return lines.join('\n');
+
+  return [header, separator, ...rows].join('\n');
 }
 
 export function getExpectedPrList(
