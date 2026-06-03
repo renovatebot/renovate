@@ -1,5 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -38,23 +39,21 @@ export async function updateArtifacts({
   const { isLocal, env } = getConfigType(packageFileName);
   const localFlag = isLocal ? ' --local' : '';
 
-  let cmd: string;
+  let lockCmd: string;
   if (config.isLockFileMaintenance) {
-    cmd = `mise lock${localFlag}`;
+    lockCmd = `mise lock${localFlag}`;
   } else {
     const tools = updatedDeps
       .map(({ depName }) => depName)
       .filter(isNonEmptyStringAndNotWhitespace)
       .map(quote)
       .join(' ');
-    cmd = tools ? `mise lock${localFlag} ${tools}` : `mise lock${localFlag}`;
+    lockCmd = tools
+      ? `mise lock${localFlag} ${tools}`
+      : `mise lock${localFlag}`;
   }
 
-  const extraEnv: ExtraEnv = {
-    // Trust the checked-out repository config explicitly for this subprocess
-    // instead of relying on CI auto-trust behavior.
-    MISE_TRUSTED_CONFIG_PATHS: GlobalConfig.get('localDir'),
-  };
+  const extraEnv: ExtraEnv = {};
   if (env) {
     extraEnv.MISE_ENV = env;
   }
@@ -80,8 +79,10 @@ export async function updateArtifacts({
     docker: {},
   };
 
+  const trustCmd = `mise trust ${quote(upath.basename(packageFileName))}`;
+
   try {
-    await exec(cmd, execOptions);
+    await exec([trustCmd, lockCmd], execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (!newLockFileContent || existingLockFileContent === newLockFileContent) {
       return null;

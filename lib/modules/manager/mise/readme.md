@@ -33,15 +33,9 @@ For more information about mise lock files, see the [mise lock file documentatio
 
 Running `mise lock` can execute repository-defined behavior, so Renovate treats mise lockfile refreshes as an unsafe execution.
 
-Self-hosted administrators must explicitly allow this path with [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions):
+Self-hosted administrators must explicitly allow this path by including `mise` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
 
-```json
-{
-  "allowedUnsafeExecutions": ["mise"]
-}
-```
-
-When `mise` is allowed and an existing `mise.lock` is present, Renovate runs `mise lock` from the repository checkout with `MISE_TRUSTED_CONFIG_PATHS` scoped to the repository working directory. This makes the trust decision explicit for the artifact update subprocess instead of relying on CI auto-trust behavior.
+When `mise` is allowed and an existing `mise.lock` is present, Renovate explicitly runs `mise trust` before `mise lock` from the repository checkout. This makes the trust step visible in logs and lets mise own any future trust behavior changes.
 
 In particular:
 
