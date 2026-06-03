@@ -18,5 +18,4 @@ export const FlutterResponse = z.object({
   releases: LooseArray(FlutterRelease),
 });
 
-export type FlutterRelease = z.infer<typeof FlutterRelease>;
 export type FlutterResponse = z.infer<typeof FlutterResponse>;

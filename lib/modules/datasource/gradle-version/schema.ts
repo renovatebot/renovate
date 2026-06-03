@@ -12,5 +12,3 @@ export const GradleRelease = z.object({
 });
 
 export const GradleReleasesSchema = LooseArray(GradleRelease);
-
-export type GradleRelease = z.infer<typeof GradleRelease>;
