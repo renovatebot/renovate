@@ -23,6 +23,7 @@ import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
+  anyMatchRegexOrGlobList,
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
@@ -1123,7 +1124,11 @@ async function validateGlobalConfig(
             );
 
             if (
-              !(packageCacheNamespaces as readonly string[]).includes(subKey)
+              !(packageCacheNamespaces as readonly string[]).includes(subKey) &&
+              !anyMatchRegexOrGlobList(
+                packageCacheNamespaces as unknown as string[],
+                [subKey],
+              )
             ) {
               errors.push({
                 message: `${currentPath}: namespace \`${subKey}\` does not exist`,

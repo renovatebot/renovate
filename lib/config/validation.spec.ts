@@ -2353,7 +2353,6 @@ describe('config/validation', () => {
         };
         const { warnings } = await configValidation.validateConfig(
           'global',
-          // @ts-expect-error: contains invalid values
           config,
         );
         expect(warnings).toEqual([
@@ -2730,6 +2729,26 @@ describe('config/validation', () => {
         const config: AllConfig = {
           cacheTtlOverride: {
             'datasource-docker-hub-tags': 90,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('allows wildcards', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            'datasource-rubygems': 120,
+            'datasource-*': 60,
+            'datasource-{crate,go}': 90,
+            '/^changelog-/': 45,
+            '*': 30,
           },
         };
 
