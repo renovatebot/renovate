@@ -1,5 +1,5 @@
 import deepmerge from 'deepmerge';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';

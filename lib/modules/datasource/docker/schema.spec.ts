@@ -1,4 +1,4 @@
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod/v4';
 import {
   DistributionListManifest,
   DistributionManifest,

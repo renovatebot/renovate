@@ -13,7 +13,9 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { isGitHubRepo, normalizePythonDepName } from './common.ts';
-import type { PypiJSON, PypiJSONRelease, Releases } from './types.ts';
+import type { PypiRelease } from './schema.ts';
+import { PypiResponse } from './schema.ts';
+import type { Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -128,14 +130,12 @@ export class PypiDatasource extends Datasource {
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const { headers, lookupUrl: sanitizedUrl } =
       await this.getAuthHeaders(lookupUrl);
-    const rep = await this.http.getJsonUnchecked<PypiJSON>(sanitizedUrl, {
-      headers,
-    });
+    const rep = await this.http.getJson(
+      sanitizedUrl,
+      { headers },
+      PypiResponse,
+    );
     const dep = rep?.body;
-    if (!dep) {
-      logger.trace({ dependency: packageName }, 'pip package not found');
-      return null;
-    }
     if (rep.authorization) {
       dependency.isPrivate = true;
     }
@@ -295,7 +295,7 @@ export class PypiDatasource extends Datasource {
         packageName,
       );
       if (version) {
-        const release: PypiJSONRelease = {
+        const release: PypiRelease = {
           yanked: link.hasAttribute('data-yanked'),
         };
         const requiresPython = link.getAttribute('data-requires-python');

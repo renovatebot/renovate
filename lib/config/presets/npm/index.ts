@@ -3,10 +3,8 @@ import {
   resolvePackageUrl,
   resolveRegistryUrl,
 } from '../../../modules/datasource/npm/npmrc.ts';
-import type {
-  NpmResponse,
-  NpmResponseVersion,
-} from '../../../modules/datasource/npm/types.ts';
+import type { NpmResponseVersion } from '../../../modules/datasource/npm/schema.ts';
+import { NpmResponse } from '../../../modules/datasource/npm/schema.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { Http } from '../../../util/http/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';
@@ -33,9 +31,11 @@ export async function getPreset({
     );
     const packageUrl = resolvePackageUrl(registryUrl, pkg);
     const body = (
-      await http.getJsonUnchecked<NpmResponse>(packageUrl, {
-        cacheProvider: memCacheProvider,
-      })
+      await http.getJson(
+        packageUrl,
+        { cacheProvider: memCacheProvider },
+        NpmResponse,
+      )
     ).body;
     // TODO: check null #22198
     dep = body.versions![body['dist-tags']!.latest];
