@@ -9,6 +9,7 @@ export const presets: Record<string, GlobalPreset> = {
       'RUSTC_BOOTSTRAP',
       'PNPM_WORKERS',
       'PNPM_MAX_WORKERS',
+      'PNPM_CONFIG_TRUST_LOCKFILE',
     ],
     description:
       'Hopefully safe environment variables to allow users to configure.',
