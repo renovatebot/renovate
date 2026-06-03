@@ -383,7 +383,10 @@ export async function ensureDependencyDashboard(
   let hasDeprecationsOrReplacements = false;
   const deprecatedPackages: Record<
     string,
-    Record<string, { hasReplacement: boolean; sourceUrl?: string | null }>
+    Record<
+      string,
+      { hasActionableReplacement: boolean; sourceUrl?: string | null }
+    >
   > = {};
   logger.debug('Checking packageFiles for deprecated or replacement packages');
   if (isNonEmptyObject(packageFiles)) {
@@ -409,7 +412,7 @@ export async function ensureDependencyDashboard(
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= {
-              hasReplacement: hasActionableReplacement,
+              hasActionableReplacement,
               sourceUrl: dep.sourceUrl,
             };
           }
@@ -461,11 +464,11 @@ export async function ensureDependencyDashboard(
     for (const manager of Object.keys(deprecatedPackages).sort()) {
       const deps = deprecatedPackages[manager];
       for (const depName of Object.keys(deps).sort()) {
-        const { hasReplacement, sourceUrl } = deps[depName];
+        const { hasActionableReplacement, sourceUrl } = deps[depName];
         const packageName = formatAsMarkdownLink(depName, sourceUrl);
 
         issueBody += `| ${manager} | ${packageName} | ${
-          hasReplacement
+          hasActionableReplacement
             ? '![Available](https://img.shields.io/badge/available-green?style=flat-square)'
             : '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)'
         } |\n`;

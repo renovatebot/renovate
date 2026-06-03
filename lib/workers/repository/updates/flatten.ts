@@ -119,6 +119,7 @@ export async function flattenUpdates(
               replacementAlreadyExists(packageFile.deps, dep, update.newName)
             ) {
               logger.debug(
+                { fileName: packageFile.packageFile },
                 `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile.packageFile}`,
               );
               continue;
