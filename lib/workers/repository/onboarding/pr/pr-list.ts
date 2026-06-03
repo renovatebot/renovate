@@ -102,21 +102,19 @@ function getExpectedPrTableByPackageFile(branches: BranchConfig[]): string {
 }
 
 function getExpectedPrBreakdownByDirectory(branches: BranchConfig[]): string {
-  const byDirManager = new Map<string, Map<string, UpgradeCounts>>();
+  const byFileManager = new Map<string, Map<string, UpgradeCounts>>();
   for (const branch of branches) {
     for (const upgrade of branch.upgrades) {
       const pf = upgrade.packageFile ?? '?';
-      const lastSlash = pf.lastIndexOf('/');
-      const dir = lastSlash === -1 ? '/' : pf.slice(0, lastSlash);
       const manager = upgrade.manager ?? 'unknown';
-      if (!byDirManager.has(dir)) {
-        byDirManager.set(dir, new Map());
+      if (!byFileManager.has(pf)) {
+        byFileManager.set(pf, new Map());
       }
-      const dirMap = byDirManager.get(dir)!;
-      if (!dirMap.has(manager)) {
-        dirMap.set(manager, { byType: new Map(), security: 0 });
+      const fileMap = byFileManager.get(pf)!;
+      if (!fileMap.has(manager)) {
+        fileMap.set(manager, { byType: new Map(), security: 0 });
       }
-      const entry = dirMap.get(manager)!;
+      const entry = fileMap.get(manager)!;
       const type = upgrade.updateType ?? 'other';
       entry.byType.set(type, (entry.byType.get(type) ?? 0) + 1);
       if (upgrade.isVulnerabilityAlert) {
@@ -126,11 +124,11 @@ function getExpectedPrBreakdownByDirectory(branches: BranchConfig[]): string {
   }
 
   const allTypes = new Set(
-    [...byDirManager.values()].flatMap((m) =>
+    [...byFileManager.values()].flatMap((m) =>
       [...m.values()].flatMap(({ byType }) => [...byType.keys()]),
     ),
   );
-  const hasSecurityColumn = [...byDirManager.values()].some((m) =>
+  const hasSecurityColumn = [...byFileManager.values()].some((m) =>
     [...m.values()].some((e) => e.security > 0),
   );
   const columns = [
@@ -139,17 +137,18 @@ function getExpectedPrBreakdownByDirectory(branches: BranchConfig[]): string {
     ...(hasSecurityColumn ? ['security'] : []),
   ];
 
-  const header = `| Directory | Manager | ${columns.join(' | ')} |`;
-  const separator = `|-----------|---------|${columns.map(() => '------:').join('|')}|`;
+  const header = `| Package file | Manager | ${columns.join(' | ')} |`;
+  const separator = `|--------------|---------|${columns.map(() => '------:').join('|')}|`;
   const rows: string[] = [];
-  for (const [dir, dirMap] of [...byDirManager.entries()].sort()) {
-    const dirLabel = dir === '/' ? '`/` (root)' : `\`${dir}\``;
+  for (const [pf, fileMap] of [...byFileManager.entries()].sort()) {
+    const showFile = fileMap.size > 1;
     let firstRow = true;
-    for (const [manager, { byType, security }] of [...dirMap.entries()].sort()) {
+    for (const [manager, { byType, security }] of [...fileMap.entries()].sort()) {
+      const fileLabel = firstRow || !showFile ? `\`${pf}\`` : '';
       const cells = columns.map((t) =>
         t === 'security' ? String(security) : String(byType.get(t) ?? 0),
       );
-      rows.push(`| ${firstRow ? dirLabel : ''} | ${manager} | ${cells.join(' | ')} |`);
+      rows.push(`| ${fileLabel} | ${manager} | ${cells.join(' | ')} |`);
       firstRow = false;
     }
   }

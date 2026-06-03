@@ -256,9 +256,12 @@ If you need any further assistance then you can also [request help here](${confi
       formatPackageFilesByParentPathSimple(packageFiles),
       // formatPackageFilesByManager(packageFiles),
     )}\n`;
+    logger.info({ len: formatPackageFilesByParentPathSimple(packageFiles).length }, 'jvt pf')
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
+
+
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
@@ -267,6 +270,7 @@ If you need any further assistance then you can also [request help here](${confi
     configDesc = getConfigDesc(config, packageFiles!);
   }
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
+  logger.info({ len: configDesc.length }, 'jvt conf')
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
     getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config),
@@ -274,6 +278,7 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
+  logger.info({ len: getExpectedPrList(config, branches).length }, 'jvt pr')
   if (isString(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
