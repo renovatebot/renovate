@@ -1,7 +1,7 @@
 [tools]
 node = "24.16.0"
 pdm  = "2.27.0"
-pnpm = "10.34.0"
+pnpm = "10.34.1"
 
 # needed for pipx backends e.g. pdm
 pipx   = "1.13.0"
