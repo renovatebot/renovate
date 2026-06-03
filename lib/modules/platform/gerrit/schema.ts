@@ -1,78 +1,94 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
-export const GerritAccountInfoSchema = z.object({
+/**
+ * The Schemas for the Gerrit API Responses ({@link https://gerrit-review.googlesource.com/Documentation/rest-api.html | REST-API})
+ * minimized to only needed properties.
+ *
+ * @packageDocumentation
+ */
+
+export const GerritAccountInfo = z.object({
   _account_id: z.number(),
   username: z.string().optional(),
 });
+export type GerritAccountInfo = z.infer<typeof GerritAccountInfo>;
 
-export const GerritLabelInfoSchema = z.object({
-  approved: GerritAccountInfoSchema.optional(),
-  rejected: GerritAccountInfoSchema.optional(),
+export const GerritLabelInfo = z.object({
+  approved: GerritAccountInfo.optional(),
+  rejected: GerritAccountInfo.optional(),
   blocking: z.boolean().optional(),
 });
+export type GerritLabelInfo = z.infer<typeof GerritLabelInfo>;
 
-export const GerritActionInfoSchema = z.object({
+export const GerritActionInfo = z.object({
   method: z.string().optional(),
   enabled: z.boolean().optional(),
 });
+export type GerritActionInfo = z.infer<typeof GerritActionInfo>;
 
-export const GerritRevisionInfoSchema = z.object({
-  uploader: GerritAccountInfoSchema.optional(),
-  ref: z.string().optional(),
-  created: z.string().optional(),
-  actions: z.record(z.string(), GerritActionInfoSchema).optional(),
+export const GerritRevisionInfo = z.object({
+  uploader: GerritAccountInfo,
+  ref: z.string(),
+  created: z.string(),
+  actions: z.record(z.string(), GerritActionInfo).optional(),
   commit_with_footers: z.string().optional(),
 });
+export type GerritRevisionInfo = z.infer<typeof GerritRevisionInfo>;
 
-export const GerritChangeMessageInfoSchema = z.object({
-  id: z.string().optional(),
+export const GerritChangeMessageInfo = z.object({
+  id: z.string(),
   message: z.string(),
   tag: z.string().optional(),
 });
+export type GerritChangeMessageInfo = z.infer<typeof GerritChangeMessageInfo>;
 
-export const GerritChangeSchema = z.object({
-  branch: z.string().optional(),
-  change_id: z.string().optional(),
-  subject: z.string().optional(),
-  status: z.enum(['NEW', 'MERGED', 'ABANDONED']).optional(),
-  created: z.string().optional(),
-  hashtags: z.array(z.string()).optional(),
+export const GerritChange = z.object({
+  branch: z.string(),
+  change_id: z.string(),
+  subject: z.string(),
+  status: z.enum(['NEW', 'MERGED', 'ABANDONED']),
+  created: z.string(),
+  hashtags: z.array(z.string()),
   submittable: z.boolean().optional(),
-  _number: z.number().optional(),
-  labels: z.record(z.string(), GerritLabelInfoSchema).optional(),
+  _number: z.number(),
+  labels: z.record(z.string(), GerritLabelInfo).optional(),
   reviewers: z
     .object({
-      REVIEWER: LooseArray(GerritAccountInfoSchema).optional(),
+      REVIEWER: LooseArray(GerritAccountInfo).optional(),
     })
     .optional(),
-  messages: LooseArray(GerritChangeMessageInfoSchema).optional(),
+  messages: LooseArray(GerritChangeMessageInfo).optional(),
   current_revision: z.string().optional(),
-  revisions: z.record(z.string(), GerritRevisionInfoSchema).optional(),
+  revisions: z.record(z.string(), GerritRevisionInfo).optional(),
   problems: z.array(z.unknown()).optional(),
   _more_changes: z.boolean().optional(),
 });
+export type GerritChange = z.infer<typeof GerritChange>;
 
-export const GerritChangesSchema = LooseArray(GerritChangeSchema);
+export const GerritChanges = LooseArray(GerritChange);
 
-export const GerritLabelTypeInfoSchema = z.object({
+export const GerritLabelTypeInfo = z.object({
   values: z.record(z.coerce.number(), z.string()),
   default_value: z.number(),
 });
+export type GerritLabelTypeInfo = z.infer<typeof GerritLabelTypeInfo>;
 
-export const GerritProjectInfoSchema = z.object({
+export const GerritProjectInfo = z.object({
   id: z.string(),
   name: z.string(),
   state: z.enum(['ACTIVE', 'READ_ONLY', 'HIDDEN']).optional(),
-  labels: z.record(z.string(), GerritLabelTypeInfoSchema).optional(),
+  labels: z.record(z.string(), GerritLabelTypeInfo).optional(),
 });
+export type GerritProjectInfo = z.infer<typeof GerritProjectInfo>;
 
-export const GerritBranchInfoSchema = z.object({
+export const GerritBranchInfo = z.object({
   ref: z.string(),
   revision: z.string(),
 });
+export type GerritBranchInfo = z.infer<typeof GerritBranchInfo>;
 
-export const GerritMergeableInfoSchema = z.object({
+export const GerritMergeableInfo = z.object({
   submit_type: z.enum([
     'MERGE_IF_NECESSARY',
     'FAST_FORWARD_ONLY',
@@ -83,12 +99,8 @@ export const GerritMergeableInfoSchema = z.object({
   ]),
   mergeable: z.boolean(),
 });
+export type GerritMergeableInfo = z.infer<typeof GerritMergeableInfo>;
 
-export const GerritReposSchema = z.record(
-  z.string(),
-  z.object({}).passthrough(),
-);
+export const GerritRepos = z.record(z.string(), z.object({}).loose());
 
-export const GerritChangeMessagesSchema = LooseArray(
-  GerritChangeMessageInfoSchema,
-);
+export const GerritChangeMessages = LooseArray(GerritChangeMessageInfo);
