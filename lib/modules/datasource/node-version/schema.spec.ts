@@ -1,9 +1,9 @@
-import { NodeReleaseSchema, NodeReleasesSchema } from './schema.ts';
+import { NodeRelease, NodeReleasesSchema } from './schema.ts';
 
 describe('modules/datasource/node-version/schema', () => {
-  describe('NodeReleaseSchema', () => {
+  describe('NodeRelease', () => {
     it('parses a stable LTS release', () => {
-      const result = NodeReleaseSchema.parse({
+      const result = NodeRelease.parse({
         version: 'v20.0.0',
         date: '2023-04-18',
         lts: 'Iron',
@@ -13,7 +13,7 @@ describe('modules/datasource/node-version/schema', () => {
     });
 
     it('parses a non-LTS release', () => {
-      const result = NodeReleaseSchema.parse({
+      const result = NodeRelease.parse({
         version: 'v21.0.0',
         date: '2023-10-17',
         lts: false,

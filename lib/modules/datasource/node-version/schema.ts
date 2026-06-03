@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
-export const NodeReleaseSchema = z.object({
+export const NodeRelease = z.object({
   /** node version */
   version: z.string(),
   /** release date */
@@ -10,6 +10,6 @@ export const NodeReleaseSchema = z.object({
   lts: z.union([z.literal(false), z.string()]),
 });
 
-export type NodeReleaseSchema = z.infer<typeof NodeReleaseSchema>;
+export type NodeRelease = z.infer<typeof NodeRelease>;
 
-export const NodeReleasesSchema = LooseArray(NodeReleaseSchema);
+export const NodeReleasesSchema = LooseArray(NodeRelease);
