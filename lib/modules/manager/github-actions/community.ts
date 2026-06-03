@@ -34,7 +34,7 @@ function actionSchema(
   return z
     .object({
       uses: matchAction(name),
-      with: withSchema ?? VersionValSchema,
+      with: withSchema ?? VersionVal,
     })
     .transform(
       ({ with: { val, ...meta } }): PackageDependency => ({
@@ -83,11 +83,11 @@ function valSchema(key: string): z.ZodType<{ val: string | undefined }> {
     .transform((val) => ({ val: val[key] }));
 }
 
-const VersionValSchema = z
+const VersionVal = z
   .object({ version: z.string().optional() })
   .transform((val) => ({ val: val.version }));
 
-const InstallBinaryWithSchema = z
+const InstallBinaryWith = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => ({ packageName: repo, val: tag }));
 
@@ -135,7 +135,7 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'jaxxstorm/action-install-gh-release': {
     datasource: GithubReleasesDatasource.id,
     packageName: '', // determined from `repo` input
-    withSchema: InstallBinaryWithSchema,
+    withSchema: InstallBinaryWith,
   },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
@@ -171,7 +171,7 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'sigoden/install-binary': {
     datasource: GithubReleasesDatasource.id,
     packageName: '', // determined from `repo` input
-    withSchema: InstallBinaryWithSchema,
+    withSchema: InstallBinaryWith,
   },
   'zizmorcore/zizmor-action': {
     datasource: DockerDatasource.id,

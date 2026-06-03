@@ -25,9 +25,17 @@ const MiseTool = z.union([
 ]);
 export type MiseTool = z.infer<typeof MiseTool>;
 
+const MiseTask = z
+  .object({
+    tools: z.record(z.string(), MiseTool).optional(),
+  })
+  .passthrough()
+  .catch({});
+
 export const MiseFile = Toml.pipe(
   z.object({
     tools: z.record(z.string(), MiseTool).default({}),
+    tasks: z.record(z.string(), MiseTask).default({}),
   }),
 );
 export type MiseFile = z.infer<typeof MiseFile>;

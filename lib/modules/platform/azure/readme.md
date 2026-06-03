@@ -109,7 +109,7 @@ To let Renovate use the Azure DevOps internal API, you must set these variables 
 - `endpoint` = `$(System.CollectionUri)`, this is an [Azure predefined variable](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml)
 - `hostRules.hostType` = `azure-pipelines-tasks`
 
-```json title="Example config file in JSON format"
+```json {title="Example config file in JSON format" configType=global}
 {
   "platform": "azure",
   "endpoint": "https://dev.azure.com/ORG_NAME",
