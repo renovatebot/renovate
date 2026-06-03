@@ -78,6 +78,20 @@ const staticGroups = {
       },
     ],
   },
+  boto: {
+    description: 'Group all Boto packages together.',
+    packageRules: [
+      {
+        groupName: 'boto',
+        matchDatasources: ['python'],
+        matchPackageNames: [
+          'boto3',
+          'botocore',
+          's3transfer',
+        ],
+      },
+    ],
+  },
   codemirror: {
     description: 'Group CodeMirror packages together.',
     packageRules: [
@@ -484,6 +498,7 @@ const staticGroups = {
       'group:nodeJs',
       'group:allApollographql',
       'group:apiPlatform',
+      'group:boto',
       'group:codemirror',
       'group:flyway',
       'group:fortawesome',
