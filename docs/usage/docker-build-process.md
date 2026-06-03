@@ -55,9 +55,8 @@ flowchart TD
 
 If you, as a user, are looking to extend the tool support that Renovate has, for instance to install it via [`constraints`](./configuration-options.md#constraints), then you will need to [request a new tool](https://github.com/containerbase/base/issues/new?template=new-tool.yml).
 
-<!-- prettier-ignore -->
 !!! note
-    In the future, there will be a [clearer guide](https://github.com/containerbase/base/issues/6570) for how to contribute tool support as a user.
+  In the future, there will be a [clearer guide](https://github.com/containerbase/base/issues/6570) for how to contribute tool support as a user.
 
 This tool will have its support added in `containerbase/base`, to allow Containerbase's `install-tool` command-line tool to install the tool.
 
@@ -69,9 +68,8 @@ If you, as a user, are looking to provide a tool installed by default (in the "s
 
 To add it to the default images, the [`renovatebot/base-image` image](https://github.com/renovatebot/base-image) will need to be amended to add this tool.
 
-<!-- prettier-ignore -->
 !!! note
-    Installed-by-default-tools will generally only be allowed for the "full" image.
+  Installed-by-default-tools will generally only be allowed for the "full" image.
 
 ## Building the Docker image locally
 

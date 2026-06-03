@@ -1753,6 +1753,30 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
+    it('returns empty body when changelog section has no content', async () => {
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/some/repository1')
+        .reply(200)
+        .get('/repos/some/repository1/git/trees/HEAD')
+        .reply(200, githubTreeResponse)
+        .get('/repos/some/repository1/git/blobs/abcd')
+        .reply(200, {
+          content: toBase64('## 1.0.0\n\n## 0.9.0\nSome old content\n'),
+        });
+      const res = await getReleaseNotesMd(
+        {
+          ...githubProject,
+          repository: 'some/repository1',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+      );
+      expect(res).toMatchObject({ body: '' });
+    });
+
     describe('shouldSkipChangelogMd', () => {
       it('should skip for flagged repository', () => {
         expect(shouldSkipChangelogMd('facebook/react-native')).toBeTrue();

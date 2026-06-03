@@ -107,7 +107,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   return packageFile;
 }
 
-function convertGoDirectiveToSemVerRange(goDirective: string | undefined):
+export function convertGoDirectiveToSemVerRange(
+  goDirective: string | undefined,
+):
   | {
       version: string;
       versioning: string;

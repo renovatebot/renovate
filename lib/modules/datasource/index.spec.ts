@@ -614,6 +614,22 @@ describe('modules/datasource/index', () => {
             override caching = true;
           }
 
+          it('returns cached result on cache hit', async () => {
+            const cachedResult: ReleaseResult = {
+              releases: [{ version: '0.0.1' }],
+            };
+            packageCache.get.mockResolvedValue(cachedResult);
+            datasources.set(datasource, new CachingDatasource());
+
+            const res = await getPkgReleases({
+              datasource,
+              packageName,
+              registryUrls: ['https://reg1.com'],
+            });
+            expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
+            expect(packageCache.set).not.toHaveBeenCalled();
+          });
+
           it('caches by default', async () => {
             const registries = {
               'https://reg1.com': {

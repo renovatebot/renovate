@@ -30,6 +30,7 @@ test/datasource/nuget/_fixtures/obj
 /.env
 /.envrc
 /config.js*
+/config.ts*
 /docker-compose.yml
 /report*.json
 

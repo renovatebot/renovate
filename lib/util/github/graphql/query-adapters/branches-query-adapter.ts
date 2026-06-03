@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Timestamp } from '../../../timestamp.ts';
 import type {
   GithubBranchItem,

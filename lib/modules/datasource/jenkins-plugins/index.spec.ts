@@ -6,7 +6,7 @@ import { JenkinsPluginsDatasource } from './index.ts';
 import type {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
-} from './types.ts';
+} from './schema.ts';
 
 const jenkinsPluginsInfo: JenkinsPluginsInfoResponse = {
   plugins: {
