@@ -115,8 +115,8 @@ function formatPackageFilesByParentPath(
 function formatPackageFilesByParentPathSimple(
   packageFiles: Record<string, PackageFile[]>,
 ): string {
-  const byDir = new Map<string, string[]>();
-  for (const managerFiles of Object.values(packageFiles)) {
+  const byDir = new Map<string, Array<{ base: string; manager: string }>>();
+  for (const [manager, managerFiles] of Object.entries(packageFiles)) {
     for (const { packageFile } of managerFiles) {
       const lastSlash = packageFile!.lastIndexOf('/');
       const dir = lastSlash === -1 ? '/' : packageFile!.slice(0, lastSlash);
@@ -124,13 +124,13 @@ function formatPackageFilesByParentPathSimple(
       if (!byDir.has(dir)) {
         byDir.set(dir, []);
       }
-      byDir.get(dir)!.push(base);
+      byDir.get(dir)!.push({ base, manager });
     }
   }
   const lines: string[] = [];
   for (const [dir, files] of [...byDir.entries()].sort()) {
     const label = dir === '/' ? '`/` (root)' : `\`${dir}\``;
-    lines.push(`- ${label}: ${files.map((f) => `\`${f}\``).join(', ')}`);
+    lines.push(`- ${label}: ${files.map(({ base, manager }) => `\`${base}\` (${manager})`).join(', ')}`);
   }
   return `### Detected Package Files\n\n${lines.join('\n')}`;
 }
@@ -223,8 +223,8 @@ export async function ensureOnboardingPr(
     `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
   );
   prTemplate += ` Add your custom config to \`${configFile}\` in this branch${config.onboardingRebaseCheckbox
-      ? ' and select the Retry/Rebase checkbox below'
-      : ''
+    ? ' and select the Retry/Rebase checkbox below'
+    : ''
     }. Renovate will update the Pull Request description the next time it runs.`;
   prTemplate += '\n\n';
   // TODO #22198
@@ -252,8 +252,8 @@ If you need any further assistance then you can also [request help here](${confi
   if (packageFiles && Object.entries(packageFiles).length) {
     prBody = `${prBody.replace(
       '{{PACKAGE FILES}}',
-      formatPackageFilesByParentPath(packageFiles),
-      // formatPackageFilesByParentPathSimple(packageFiles),
+      // formatPackageFilesByParentPath(packageFiles),
+      formatPackageFilesByParentPathSimple(packageFiles),
       // formatPackageFilesByManager(packageFiles),
     )}\n`;
   } else {
