@@ -1,5 +1,12 @@
 import { isString } from '@sindresorhus/is';
-import { type YAMLMap, isMap, isPair, isScalar, parseAllDocuments } from 'yaml';
+import {
+  type Scalar,
+  type YAMLMap,
+  isMap,
+  isPair,
+  isScalar,
+  parseAllDocuments,
+} from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -218,36 +225,36 @@ function extractOCIRefTagAndDigestRange(
   resourceName: string,
 ): { replaceString: string; tagFirst: boolean } | null {
   for (const refNode of findOCIRefNodes(content, resourceName)) {
-    let tagKeyRange: [number, number, number] | null = null;
-    let tagValueEnd: number | null = null;
-    let digestKeyRange: [number, number, number] | null = null;
-    let digestValueEnd: number | null = null;
+    let tagKey: Scalar | undefined;
+    let tagValue: Scalar | undefined;
+    let digestKey: Scalar | undefined;
+    let digestValue: Scalar | undefined;
 
     for (const item of refNode.items) {
       if (!isPair(item) || !isScalar(item.key)) {
         continue;
       }
       if (item.key.value === 'tag' && isScalar(item.value)) {
-        tagKeyRange = item.key.range ?? null;
-        tagValueEnd = item.value.range?.[1] ?? null;
+        tagKey = item.key;
+        tagValue = item.value;
       } else if (item.key.value === 'digest' && isScalar(item.value)) {
-        digestKeyRange = item.key.range ?? null;
-        digestValueEnd = item.value.range?.[1] ?? null;
+        digestKey = item.key;
+        digestValue = item.value;
       }
     }
 
     if (
-      !tagKeyRange ||
-      tagValueEnd === null ||
-      !digestKeyRange ||
-      digestValueEnd === null
+      !tagKey?.range ||
+      !tagValue?.range ||
+      !digestKey?.range ||
+      !digestValue?.range
     ) {
       continue;
     }
 
-    const tagFirst = tagKeyRange[0] < digestKeyRange[0];
-    const start = tagFirst ? tagKeyRange[0] : digestKeyRange[0];
-    const end = tagFirst ? digestValueEnd : tagValueEnd;
+    const tagFirst = tagKey.range[0] < digestKey.range[0];
+    const start = tagFirst ? tagKey.range[0] : digestKey.range[0];
+    const end = tagFirst ? digestValue.range[1] : tagValue.range[1];
 
     return { replaceString: content.slice(start, end), tagFirst };
   }
@@ -265,10 +272,12 @@ function extractOCIRefTagRange(
         isPair(item) &&
         isScalar(item.key) &&
         item.key.value === 'tag' &&
-        isScalar(item.value)
+        isScalar(item.value) &&
+        item.key.range &&
+        item.value.range
       ) {
-        const keyStart = item.key.range![0];
-        const valueEnd = item.value.range![1];
+        const keyStart = item.key.range[0];
+        const valueEnd = item.value.range[1];
         const lineStart = content.lastIndexOf('\n', keyStart - 1) + 1;
         return {
           replaceString: content.slice(keyStart, valueEnd),
