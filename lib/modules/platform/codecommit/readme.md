@@ -67,7 +67,7 @@ Create a new AWS policy for Renovate with these permissions, then attach it to t
 
 Change the `Resource` value to the resources you want to use:
 
-```json title="Example policy JSON file"
+```json {title="Example policy JSON file" configType=none}
 {
   "Version": "2012-10-17",
   "Statement": [

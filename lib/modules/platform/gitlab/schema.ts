@@ -10,14 +10,14 @@ export const LastPipelineId = z
   })
   .transform(({ last_pipeline }) => last_pipeline.id);
 
-const GitlabUserSchema = z.object({
+const GitlabUser = z.object({
   id: z.number(),
   username: z.string(),
 });
 
-const LongCommitShaSchema = z.string().transform((val) => val as LongCommitSha);
+const LongCommitSha = z.string().transform((val) => val as LongCommitSha);
 
-export const GitLabMergeRequestSchema = z.object({
+export const GitLabMergeRequest = z.object({
   iid: z.number(),
   title: z.string(),
   description: z.string().nullable(),
@@ -28,18 +28,18 @@ export const GitLabMergeRequestSchema = z.object({
   updated_at: z.string(),
   diverged_commits_count: z.number().optional(),
   merge_status: z.string().optional(),
-  assignee: GitlabUserSchema.nullish(),
-  assignees: LooseArray(GitlabUserSchema).catch([]),
-  reviewers: LooseArray(GitlabUserSchema).catch([]),
+  assignee: GitlabUser.nullish(),
+  assignees: LooseArray(GitlabUser).catch([]),
+  reviewers: LooseArray(GitlabUser).catch([]),
   labels: z.array(z.string()).optional(),
-  sha: LongCommitShaSchema.nullish(),
+  sha: LongCommitSha.nullish(),
   head_pipeline: z
     .object({
       status: z.string(),
-      sha: LongCommitShaSchema,
+      sha: LongCommitSha,
     })
     .nullish(),
 });
 
-export const GitLabMergeRequestsSchema = z.array(GitLabMergeRequestSchema);
-export type GitLabMergeRequest = z.infer<typeof GitLabMergeRequestSchema>;
+export const GitLabMergeRequests = z.array(GitLabMergeRequest);
+export type GitLabMergeRequest = z.infer<typeof GitLabMergeRequest>;

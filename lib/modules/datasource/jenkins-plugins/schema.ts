@@ -1,32 +1,32 @@
 import { z } from 'zod/v4';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
-export const JenkinsPluginInfoSchema = z.object({
+export const JenkinsPluginInfo = z.object({
   name: z.string(),
   scm: z.string().optional(),
 });
 
-export const JenkinsPluginsInfoResponseSchema = z.object({
-  plugins: z.record(z.string(), JenkinsPluginInfoSchema).default({}),
+export const JenkinsPluginsInfoResponse = z.object({
+  plugins: z.record(z.string(), JenkinsPluginInfo).default({}),
 });
 export type JenkinsPluginsInfoResponse = z.infer<
-  typeof JenkinsPluginsInfoResponseSchema
+  typeof JenkinsPluginsInfoResponse
 >;
 
-export const JenkinsPluginVersionSchema = z.object({
+export const JenkinsPluginVersion = z.object({
   version: z.string(),
   buildDate: z.string().optional(),
   url: z.string().optional(),
   requiredCore: z.string().optional(),
   releaseTimestamp: MaybeTimestamp.optional(),
 });
-export type JenkinsPluginVersion = z.infer<typeof JenkinsPluginVersionSchema>;
+export type JenkinsPluginVersion = z.infer<typeof JenkinsPluginVersion>;
 
-export const JenkinsPluginsVersionsResponseSchema = z.object({
+export const JenkinsPluginsVersionsResponse = z.object({
   plugins: z
-    .record(z.string(), z.record(z.string(), JenkinsPluginVersionSchema))
+    .record(z.string(), z.record(z.string(), JenkinsPluginVersion))
     .default({}),
 });
 export type JenkinsPluginsVersionsResponse = z.infer<
-  typeof JenkinsPluginsVersionsResponseSchema
+  typeof JenkinsPluginsVersionsResponse
 >;

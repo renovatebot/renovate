@@ -9,7 +9,7 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import * as prefixDev from './prefix-dev.ts';
-import { CondaPackageSchema } from './schema.ts';
+import { CondaPackage } from './schema.ts';
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -60,7 +60,7 @@ export class CondaDatasource extends Datasource {
     };
 
     try {
-      const response = await this.http.getJson(url, CondaPackageSchema);
+      const response = await this.http.getJson(url, CondaPackage);
 
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;

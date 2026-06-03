@@ -15,7 +15,7 @@ import { Http } from '../http/index.ts';
 import { regEx } from '../regex.ts';
 import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../url.ts';
 import { MERGE_CONFIDENCE } from './common.ts';
-import { MergeConfidenceResponseSchema } from './schema.ts';
+import { MergeConfidenceResponse } from './schema.ts';
 import type { MergeConfidence } from './types.ts';
 
 const hostType = 'merge-confidence';
@@ -197,7 +197,7 @@ async function queryApi(
       await http.getJson(
         url,
         { cacheProvider: memCacheProvider },
-        MergeConfidenceResponseSchema,
+        MergeConfidenceResponse,
       )
     ).body;
     if (isMergeConfidence(res.confidence)) {

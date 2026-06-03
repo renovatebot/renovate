@@ -352,9 +352,29 @@ By default, Renovate will detect and process only the repository's default branc
 For most projects, this is the expected approach.
 Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. for use cases such as:
 
-- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranchPatterns": ["dev"]`
-- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranchPatterns": ["main", "next"]`
-- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranchPatterns": ["main", "/^release\\/.*/"]`
+- You wish Renovate to process only a non-default branch, e.g. `dev`:
+
+  ```json
+  {
+    "baseBranchPatterns": ["dev"]
+  }
+  ```
+
+- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "next"]
+}
+```
+
+- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "/^release\\/.*/"]
+}
+```
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
@@ -605,7 +625,7 @@ Supported values are:
 This field supports templates for conditional logic.
 For example:
 
-```json
+```json {configType=none}
 {
   "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
 }
@@ -646,7 +666,7 @@ Templates can also be used for dynamic patterns. See [Templates](./templates.md)
 
 For example:
 
-```json
+```json {configType=none}
 {
   "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
 }
@@ -666,7 +686,7 @@ The `name` field is an optional identifier for the bump version rule. It is used
 
 For example:
 
-```json
+```json {configType=none}
 {
   "name": "Update release version"
 }
@@ -868,16 +888,16 @@ For now this datasource constraint feature only supports `python`, other compati
 }
 ```
 
-If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
+If you need to _override_ constraints that Renovate detects from the repository, wrap it in the [global self-hosted configuration's `force` object](./self-hosted-configuration.md#force) like so:
 
-```json
-{
-  "force": {
-    "constraints": {
-      "node": "< 15.0.0"
-    }
-  }
-}
+```js
+module.exports = {
+  force: {
+    constraints: {
+      node: '< 15.0.0',
+    },
+  },
+};
 ```
 
 The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
@@ -1122,7 +1142,8 @@ Example:
       "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1168,7 +1189,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1183,7 +1205,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1198,7 +1221,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1213,7 +1237,7 @@ Each `matchStrings` must be one of the following:
 
 Example:
 
-```json title="matchStrings with a valid regular expression"
+```json {title="matchStrings with a valid regular expression" configType=none}
 {
   "matchStrings": [
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
@@ -1221,7 +1245,7 @@ Example:
 }
 ```
 
-```json title="matchStrings with a valid JSONata query"
+```json {title="matchStrings with a valid JSONata query" configType=none}
 {
   "matchStrings": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
@@ -1317,7 +1341,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
 }
 ```
 
-```json title="example.json"
+```json {title="example.json" configType=none}
 {
   "backup": {
     "test": {
@@ -1813,10 +1837,12 @@ The following re-enables fetching of changelogs when creating pull-requests for 
 ```json
 {
   "fetchChangeLogs": "off",
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/lodash/lodash"],
-    "fetchChangeLogs": "pr"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/lodash/lodash"],
+      "fetchChangeLogs": "pr"
+    }
+  ]
 }
 ```
 
@@ -1825,10 +1851,12 @@ which can be time-consuming due to the repository's large number of tags:
 
 ```json
 {
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
-    "fetchChangeLogs": "off"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+      "fetchChangeLogs": "off"
+    }
+  ]
 }
 ```
 
@@ -2001,6 +2029,10 @@ For example, to group all non-major devDependencies updates together into a sing
   Replacement updates will never be grouped.
   <br>
   Lock file maintenance will never be grouped with other dependency updates.
+
+## `groupSingleUpdates`
+
+For example, you can set it to `false` if you prefer individual dependency names in PR titles when only one update is in the group.
 
 ## `groupSlug`
 
@@ -3206,6 +3238,7 @@ Use this field to restrict rules to a particular branch. e.g.
 
 ```json
 {
+  "baseBranchPatterns": ["main"],
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
@@ -3220,6 +3253,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 
 ```json
 {
+  "baseBranchPatterns": ["main", "/^release\\/.*/"],
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
@@ -4220,7 +4254,7 @@ This can include Markdown or any other syntax that the platform supports.
     "Package": "📦 Package",
     "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
   },
-  "prBodyColumn": ["Package", "Age"]
+  "prBodyColumns": ["Package", "Age"]
 }
 ```
 

@@ -1,11 +1,11 @@
 import { z } from 'zod/v4';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
-export const RegistryConfigSchema = z.object({
+export const RegistryConfig = z.object({
   dl: z.string(),
   api: z.string().optional(),
 });
-export type RegistryConfigSchema = z.infer<typeof RegistryConfigSchema>;
+export type RegistryConfig = z.infer<typeof RegistryConfig>;
 
 export const ReleaseTimestamp = z
   .object({
@@ -17,15 +17,15 @@ export const ReleaseTimestamp = z
   .nullable()
   .catch(null);
 
-export const CrateMetadataSchema = z.object({
+export const CrateMetadata = z.object({
   description: z.string().optional(),
   documentation: z.string().optional(),
   homepage: z.string().optional(),
   repository: z.string().optional(),
 });
-export type CrateMetadata = z.infer<typeof CrateMetadataSchema>;
+export type CrateMetadata = z.infer<typeof CrateMetadata>;
 
-export const CrateMetadataResponseSchema = z.object({
-  crate: CrateMetadataSchema,
+export const CrateMetadataResponse = z.object({
+  crate: CrateMetadata,
 });
-export type CrateMetadataResponse = z.infer<typeof CrateMetadataResponseSchema>;
+export type CrateMetadataResponse = z.infer<typeof CrateMetadataResponse>;

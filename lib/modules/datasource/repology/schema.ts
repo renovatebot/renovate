@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
-export const RepologyPackageSchema = z.object({
+export const RepologyPackage = z.object({
   repo: z.string(),
   visiblename: z.string(),
   version: z.string(),
@@ -10,8 +10,6 @@ export const RepologyPackageSchema = z.object({
   origversion: z.string().nullable().optional(),
 });
 
-export type RepologyPackageSchema = z.infer<typeof RepologyPackageSchema>;
+export type RepologyPackage = z.infer<typeof RepologyPackage>;
 
-export const RepologyPackagesSchema = LooseArray(RepologyPackageSchema).catch(
-  [],
-);
+export const RepologyPackages = LooseArray(RepologyPackage).catch([]);

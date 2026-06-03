@@ -1,7 +1,7 @@
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { PUPPET_FORGE } from './common.ts';
-import { PuppetModuleSchema } from './schema.ts';
+import { PuppetModule } from './schema.ts';
 
 export class PuppetForgeDatasource extends Datasource {
   static id = 'puppet-forge';
@@ -27,7 +27,7 @@ export class PuppetForgeDatasource extends Datasource {
     let result: ReleaseResult;
 
     try {
-      const response = await this.http.getJson(url, PuppetModuleSchema);
+      const response = await this.http.getJson(url, PuppetModule);
       result = response.body;
     } catch (err) {
       this.handleGenericErrors(err);

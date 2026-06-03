@@ -3,7 +3,7 @@ import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
-export const PuppetReleaseAbbreviatedSchema = z
+export const PuppetReleaseAbbreviated = z
   .object({
     version: z.string(),
     created_at: MaybeTimestamp,
@@ -20,9 +20,9 @@ export const PuppetReleaseAbbreviatedSchema = z
     return release;
   });
 
-export const PuppetModuleSchema = z
+export const PuppetModule = z
   .object({
-    releases: LooseArray(PuppetReleaseAbbreviatedSchema).default([]),
+    releases: LooseArray(PuppetReleaseAbbreviated).default([]),
     homepage_url: z.string().optional().nullable(),
     deprecated_for: z.string().optional().nullable(),
   })

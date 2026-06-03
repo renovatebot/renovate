@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
 
-export const MergeConfidenceResponseSchema = z.object({
+export const MergeConfidenceResponse = z.object({
   confidence: z.string(),
 });

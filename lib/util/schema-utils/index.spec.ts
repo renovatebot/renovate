@@ -539,11 +539,11 @@ describe('util/schema-utils/index', () => {
 
   describe('logging utils', () => {
     it('logs debug message and returns fallback value', () => {
-      const Schema = z
+      const Str = z
         .string()
         .catch(withDebugMessage('default string', 'Debug message'));
 
-      const result = Schema.parse(42);
+      const result = Str.parse(42);
 
       expect(result).toBe('default string');
 
@@ -554,11 +554,11 @@ describe('util/schema-utils/index', () => {
     });
 
     it('logs trace message and returns fallback value', () => {
-      const Schema = z
+      const Str = z
         .string()
         .catch(withTraceMessage('default string', 'Trace message'));
 
-      const result = Schema.parse(42);
+      const result = Str.parse(42);
 
       expect(result).toBe('default string');
 
@@ -691,18 +691,18 @@ describe('util/schema-utils/index', () => {
     });
 
     it('can be combined with other schema types', () => {
-      const Schema = z.object({
+      const Obj = z.object({
         data: NotCircular.pipe(z.any()),
       });
 
-      expect(Schema.parse({ data: { a: 1, b: 2 } })).toEqual({
+      expect(Obj.parse({ data: { a: 1, b: 2 } })).toEqual({
         data: { a: 1, b: 2 },
       });
 
       const obj: any = { a: 1 };
       obj.self = obj;
 
-      expect(Schema.safeParse({ data: obj })).toMatchObject({
+      expect(Obj.safeParse({ data: obj })).toMatchObject({
         success: false,
         error: {
           issues: [

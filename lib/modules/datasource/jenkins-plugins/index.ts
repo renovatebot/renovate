@@ -6,13 +6,9 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import type {
+import {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
-} from './schema.ts';
-import {
-  JenkinsPluginsInfoResponseSchema,
-  JenkinsPluginsVersionsResponseSchema,
 } from './schema.ts';
 
 export class JenkinsPluginsDatasource extends Datasource {
@@ -67,7 +63,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsInfoResponse>(
         `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`,
-        JenkinsPluginsInfoResponseSchema,
+        JenkinsPluginsInfoResponse,
       );
 
     const info: Record<string, ReleaseResult> = {};
@@ -99,7 +95,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsVersionsResponse>(
         `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`,
-        JenkinsPluginsVersionsResponseSchema,
+        JenkinsPluginsVersionsResponse,
       );
 
     const versions: Record<string, Release[]> = {};
