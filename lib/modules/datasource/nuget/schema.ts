@@ -12,7 +12,7 @@ export const ServicesIndexRaw = z.object({
 
 export type ServicesIndexRaw = z.infer<typeof ServicesIndexRaw>;
 
-const DeprecationSchema = z.object({
+const Deprecation = z.object({
   reasons: z.array(z.string()),
 });
 
@@ -23,7 +23,7 @@ export const CatalogEntry = z.object({
   projectUrl: z.string().optional(),
   listed: z.boolean().optional(),
   packageContent: z.string().optional(),
-  deprecation: DeprecationSchema.optional(),
+  deprecation: Deprecation.optional(),
 });
 
 export type CatalogEntry = z.infer<typeof CatalogEntry>;
