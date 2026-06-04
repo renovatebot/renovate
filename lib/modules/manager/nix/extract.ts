@@ -54,14 +54,22 @@ export async function extractPackageFile(
     return null;
   }
 
-  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
+  const mappedRoots: Record<string, string> = {};
+  for (const a in rootInputs) {
+    mappedRoots[rootInputs[a] as string] = a;
+  }
+
+  for (const [tmpName, flakeInput] of Object.entries(flakeLock.nodes)) {
+    let depName: string;
     // the root input is a magic string for the entrypoint and only references other flake inputs
-    if (depName === 'root') {
+    if (tmpName === 'root') {
       continue;
     }
 
     // skip all locked and transitivie nodes as they cannot be updated by regular means
-    if (!(depName in rootInputs)) {
+    if (tmpName in mappedRoots) {
+      depName = mappedRoots[tmpName];
+    } else {
       continue;
     }
 
