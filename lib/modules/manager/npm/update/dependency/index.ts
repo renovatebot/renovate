@@ -122,7 +122,7 @@ function updateDevEnginesDependency({
   upgrade,
 }: Pick<UpdateDependencyConfig, 'fileContent' | 'upgrade'>): string | null {
   const { depType, depName, newValue, managerData } = upgrade;
-  /* v8 ignore next 7 -- defensive: dispatcher already filtered */
+  /* v8 ignore if -- defensive: dispatcher already filtered */
   if (
     !depName ||
     !newValue ||
@@ -158,7 +158,7 @@ function updateDevEnginesDependency({
       oldVersion = block.version;
       block.version = newValue;
     }
-    /* v8 ignore next 3 -- defensive: extract filters out version-less items */
+    /* v8 ignore if -- defensive: extract filters out version-less items */
     if (oldVersion === undefined) {
       return null;
     }
@@ -169,7 +169,7 @@ function updateDevEnginesDependency({
     const newString = JSON.stringify(newValue);
     const anchor = '"devEngines"';
     let searchIndex = fileContent.indexOf(anchor);
-    /* v8 ignore next 3 -- defensive: extract verified devEngines presence */
+    /* v8 ignore if -- defensive: extract verified devEngines presence */
     if (searchIndex === -1) {
       return null;
     }
@@ -189,7 +189,7 @@ function updateDevEnginesDependency({
     }
     /* v8 ignore next -- defensive: oldVersion guaranteed to appear in JSON */
     return null;
-  } catch (err) /* v8 ignore next 4 */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'updateDevEnginesDependency error');
     return null;
   }
