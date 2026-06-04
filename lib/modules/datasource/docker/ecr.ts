@@ -53,11 +53,12 @@ export async function getECRAuthToken(
 }
 
 // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-export function isECRMaxResultsResponse(resp: HttpResponse<any>): boolean {
+export function isECRMaxResultsResponse(resp: HttpResponse<unknown>): boolean {
+  const body = resp.body as { errors?: { message?: string }[] } | undefined;
   return !!(
     resp.statusCode === 405 &&
     resp.headers?.['docker-distribution-api-version'] &&
-    resp.body?.errors?.[0]?.message?.includes(
+    body?.errors?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000',
     )
   );
