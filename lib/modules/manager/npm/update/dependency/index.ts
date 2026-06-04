@@ -141,7 +141,7 @@ function updateDevEnginesDependency({
     }
     let oldVersion: string | undefined;
     if (isArray(block)) {
-      const idx = managerData?.devEnginesIndex as number | undefined;
+      const idx = managerData?.devEnginesIndex;
       if (typeof idx !== 'number') {
         return null;
       }
