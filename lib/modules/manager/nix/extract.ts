@@ -3,7 +3,10 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { id as gitRefVersioning } from '../../versioning/git/index.ts';
-import { id as nixpkgsVersioning } from '../../versioning/nixpkgs/index.ts';
+import {
+  NixPkgsVersioning,
+  id as nixpkgsVersioning,
+} from '../../versioning/nixpkgs/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -154,20 +157,17 @@ export async function extractPackageFile(
       dep.lockedVersion = flakeLocked.rev;
     }
 
+    const versioning = new NixPkgsVersioning();
     switch (flakeLocked.type) {
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
-        if (
-          flakeOriginal.owner?.toLowerCase() === 'nixos' &&
-          flakeOriginal.repo?.toLowerCase() === 'nixpkgs'
-        ) {
-          dep.packageName = 'https://github.com/NixOS/nixpkgs';
+        dep.packageName = `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
+        if (versioning.isValid(flakeOriginal.ref ?? '')) {
           dep.currentValue = flakeOriginal.ref;
           dep.versioning = nixpkgsVersioning;
           break;
         }
 
-        dep.packageName = `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
         break;
 
       case 'gitlab':
