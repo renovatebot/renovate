@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { LooseRecord } from '../../../util/schema-utils/index.ts';
 
 const Repository = z.union([
   z.string(),
@@ -15,24 +16,6 @@ const Attestations = z.object({
 const Distribution = z.object({
   attestations: Attestations.optional(),
 });
-
-/**
- * The packument `time` field maps each published version to its release
- * timestamp, alongside metadata keys such as `created`, `modified`, and
- * `unpublished`. Some registries (e.g. JFrog Artifactory) emit non-string
- * values like `"unpublished": null`, which must not invalidate the whole
- * packument. Drop any non-string entries so consumers only ever see
- * version→timestamp strings.
- */
-const PackumentTime = z
-  .record(z.string(), z.unknown())
-  .transform((time) =>
-    Object.fromEntries(
-      Object.entries(time).filter(
-        (entry): entry is [string, string] => typeof entry[1] === 'string',
-      ),
-    ),
-  );
 
 export const NpmResponseVersion = z.object({
   repository: Repository.optional(),
@@ -53,7 +36,9 @@ export const CachedPackument = z.object({
   versions: z.record(z.string(), NpmResponseVersion).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
-  time: PackumentTime.optional(),
+  // `LooseRecord` drops non-string entries (e.g. Artifactory's
+  // `"unpublished": null`) instead of invalidating the whole packument.
+  time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
 
@@ -71,7 +56,7 @@ export const NpmResponse = z.object({
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
-  time: PackumentTime.optional(),
+  time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
 
