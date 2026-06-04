@@ -11,6 +11,7 @@ exports[`config/index > mergeChildConfig(parentConfig, childConfig) > merges 1`]
   "prBodyDefinitions": {
     "Change": "All locks refreshed",
   },
+  "rebaseWhen": "behind-base-branch",
   "recreateWhen": "always",
   "schedule": [
     "on monday",
