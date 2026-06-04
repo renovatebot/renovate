@@ -2526,7 +2526,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: {
       enabled: false,
       recreateWhen: 'always',
-      rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
