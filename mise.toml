@@ -4,7 +4,7 @@ pdm  = "2.27.0"
 pnpm = "10.34.1"
 
 # needed for pipx backends e.g. pdm
-pipx   = "1.13.0"
+pipx   = "1.14.0"
 python = "3.14.5"
 
 [hooks]
