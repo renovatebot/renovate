@@ -533,6 +533,14 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
       expect(errors).toMatchObject([
         {
+          message:
+            'Failed to parse regex pattern for packageRules[0].matchPackageNames: !/abc ([a-z]+) ([a-z]+))/',
+        },
+        {
+          message:
+            'Failed to parse regex pattern for packageRules[0].matchPackageNames: /abc ([a-z]+) ([a-z]+))/',
+        },
+        {
           message: 'Invalid configuration option: foo',
         },
         {
@@ -545,6 +553,10 @@ describe('config/validation', () => {
         {
           message:
             'Invalid regExp for packageRules[0].matchPackageNames: `/abc ([a-z]+) ([a-z]+))/`',
+        },
+        {
+          message:
+            'packageRules[0].matchPackageNames: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
         },
       ]);
     });
