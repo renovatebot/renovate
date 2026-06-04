@@ -170,7 +170,7 @@ export function extractPackageJson(
         dep.prettyDepType = depType;
         if (Array.isArray(value)) {
           dep.managerData = {
-            ...(dep.managerData ?? {}),
+            ...dep.managerData,
             devEnginesIndex: i,
           };
         }
