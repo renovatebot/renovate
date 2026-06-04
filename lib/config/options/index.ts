@@ -146,6 +146,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     parents: ['bumpVersions'],
     allowedValues: ['major', 'minor', 'patch', 'sync'],
+    supportsTemplating: true,
   },
   {
     name: 'filePatterns',
