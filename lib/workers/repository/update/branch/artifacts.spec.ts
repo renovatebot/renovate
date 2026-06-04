@@ -119,6 +119,7 @@ describe('workers/repository/update/branch/artifacts', () => {
       });
 
       it('skips status entirely when mode is "never" with no errors', async () => {
+        config.artifactErrors = [];
         config.statusCheckWhen = { artifactError: 'never' };
         await setArtifactErrorStatus(config);
         expect(logger.debug).not.toHaveBeenCalledWith(
