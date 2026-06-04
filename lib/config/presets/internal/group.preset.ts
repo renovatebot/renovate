@@ -83,7 +83,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'boto',
-        matchDatasources: ['python'],
+        matchDatasources: ['pypi'],
         matchPackageNames: ['boto3', 'botocore', 's3transfer'],
       },
     ],
