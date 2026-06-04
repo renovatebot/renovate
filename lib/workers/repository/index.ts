@@ -169,7 +169,7 @@ export async function renovateRepository(
             configMigrationRes,
           );
         }
-        await finalizeRepo(config, branchList, repoConfig, branches);
+        await finalizeRepo(config, branchList, repoConfig);
         // TODO #22198
         repoResult = processResult(config, res!);
       }

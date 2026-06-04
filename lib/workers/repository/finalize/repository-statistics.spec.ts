@@ -313,7 +313,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       // and logs to inform the user
       expect(logger.debug).toHaveBeenCalledWith(
         expect.toBeObject(),
-        `Found an upgrade without an updateType, which shouldn't be possible`,
+        'Found an upgrade without an updateType, which should not be possible',
       );
     });
 

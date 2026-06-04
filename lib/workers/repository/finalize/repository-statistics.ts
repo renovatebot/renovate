@@ -210,7 +210,7 @@ export function getUpdateSummary(branches: BranchCache[]): UpdateSummary {
       } else {
         logger.debug(
           { upgrade },
-          `Found an upgrade without an updateType, which shouldn't be possible`,
+          'Found an upgrade without an updateType, which should not be possible',
         );
       }
     }
