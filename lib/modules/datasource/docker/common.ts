@@ -80,7 +80,7 @@ export async function getAuthHeaders(
     // n>1000 with 405 even on the auth-probe request.  Fall back to probing the base
     // /v2/ endpoint so getAuthHeaders can still obtain a valid token; the main fetch
     // loop already retries with n=1000 when it encounters this same error.
-    if (isECRMaxResultsResponse(apiCheckResponse as HttpResponse<any>)) {
+    if (isECRMaxResultsResponse(apiCheckResponse)) {
       logger.debug(
         { apiCheckUrl },
         'Registry rejected n>1000 on auth probe; retrying auth check via base /v2/ endpoint',

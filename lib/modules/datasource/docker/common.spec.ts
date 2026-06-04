@@ -204,7 +204,7 @@ describe('modules/datasource/docker/common', () => {
         .get(
           '/oauth2/token?service=my.local.registry&scope=repository:repo:pull',
         )
-        .reply(200, { token: 'some-token' });
+        .reply(200, { token: 'abc' });
 
       const headers = await getAuthHeaders(
         http,
@@ -213,10 +213,9 @@ describe('modules/datasource/docker/common', () => {
         'https://my.local.registry/v2/repo/tags/list?n=10000',
       );
 
-      // do not inline, otherwise we get false positive from codeql
       expect(headers).toMatchInlineSnapshot(`
         {
-          "authorization": "Bearer some-token",
+          "authorization": "Bearer abc",
         }
       `);
     });

@@ -64,6 +64,6 @@ export function isECRMaxResultsResponse(resp: HttpResponse<any>): boolean {
 }
 
 export function isECRMaxResultsError(err: HttpError): boolean {
-  const resp = err.response as HttpResponse<any> | undefined;
+  const resp = err.response as HttpResponse<unknown> | undefined;
   return !!resp && isECRMaxResultsResponse(resp);
 }
