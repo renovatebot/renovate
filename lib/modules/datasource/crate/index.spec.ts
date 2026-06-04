@@ -296,6 +296,39 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('handles null metadata fields from crates.io API', async () => {
+      mockCratesIoConfig();
+      // crates.io returns `null` (not absent) for unset metadata fields.
+      // `homepage` is null here while `repository` is a valid string; the
+      // null must not cause the whole metadata response to be discarded.
+      mockCratesApiCallFor('scopeguard', {
+        crate: {
+          description: null,
+          documentation: null,
+          homepage: null,
+          repository: 'https://github.com/bluss/scopeguard',
+        },
+      });
+
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/sc/op/scopeguard')
+        .reply(
+          200,
+          '{"name":"scopeguard","vers":"1.2.0","deps":[],"cksum":"a0fd","features":{},"yanked":false}\n',
+        );
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'scopeguard',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/bluss/scopeguard',
+        releases: [{ version: '1.2.0' }],
+      });
+      expect(res?.homepage).toBeUndefined();
+    });
+
     it('uses cached registry config for subsequent packages', async () => {
       mockCratesIoConfig();
       mockCratesApiCallFor('libc', Fixtures.get('libc.json'));

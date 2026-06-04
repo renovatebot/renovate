@@ -18,10 +18,10 @@ export const ReleaseTimestamp = z
   .catch(null);
 
 export const CrateMetadata = z.object({
-  description: z.string().optional(),
-  documentation: z.string().optional(),
-  homepage: z.string().optional(),
-  repository: z.string().optional(),
+  description: z.string().nullish(),
+  documentation: z.string().nullish(),
+  homepage: z.string().nullish(),
+  repository: z.string().nullish(),
 });
 export type CrateMetadata = z.infer<typeof CrateMetadata>;
 
