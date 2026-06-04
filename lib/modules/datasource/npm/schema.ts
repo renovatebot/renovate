@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { LooseRecord } from '../../../util/schema-utils/index.ts';
 
 const Repository = z.union([
   z.string(),
@@ -35,7 +36,9 @@ export const CachedPackument = z.object({
   versions: z.record(z.string(), NpmResponseVersion).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
-  time: z.record(z.string(), z.string()).optional(),
+  // `LooseRecord` drops non-string entries (e.g. Artifactory's
+  // `"unpublished": null`) instead of invalidating the whole packument.
+  time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
 
@@ -53,7 +56,7 @@ export const NpmResponse = z.object({
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
   repository: Repository.optional(),
   homepage: z.string().optional(),
-  time: z.record(z.string(), z.string()).optional(),
+  time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
 

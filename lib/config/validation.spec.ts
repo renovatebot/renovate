@@ -495,6 +495,11 @@ describe('config/validation', () => {
       expect(errors).toEqual([
         {
           topic: 'Configuration Error',
+          message:
+            'Failed to parse regex pattern for baseBranchPatterns: /***$}{]][/',
+        },
+        {
+          topic: 'Configuration Error',
           message: 'Invalid regExp for baseBranchPatterns: `/***$}{]][/`',
         },
       ]);
