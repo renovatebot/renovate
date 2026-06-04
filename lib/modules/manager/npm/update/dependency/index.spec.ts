@@ -688,5 +688,19 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(res).toBeNull();
     });
+
+    it('returns null if devEngines content throws error', () => {
+      const upgrade: Upgrade = {
+        depType: 'devEngines.runtime',
+        depName: 'node',
+        newValue: '22.12.0',
+      };
+      const res = npmUpdater.updateDependency({
+        fileContent: '{invalid',
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+    });
   });
 });

@@ -189,7 +189,7 @@ function updateDevEnginesDependency({
     }
     /* v8 ignore next -- defensive: oldVersion guaranteed to appear in JSON */
     return null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) {
     logger.warn({ err }, 'updateDevEnginesDependency error');
     return null;
   }
