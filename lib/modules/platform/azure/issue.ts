@@ -222,7 +222,6 @@ export class IssueService {
             path: '/multilineFieldsFormat/System.Description',
             value: 'Markdown',
           },
-          { op: 'add', path: '/fields/System.State', value: 'New' },
         ],
         this.config.project,
         'Issue',
