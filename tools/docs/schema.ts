@@ -102,7 +102,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         { type: 'string', pattern: '^regex:' },
       ];
     } else if (option.allowedValues) {
-      if (option.allowString) {
+      if (option.allowString || option.supportsTemplating) {
         temp.anyOf = [{ enum: option.allowedValues }, { type: 'string' }];
       } else {
         temp.enum = option.allowedValues;
