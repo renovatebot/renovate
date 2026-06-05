@@ -1039,7 +1039,6 @@ describe('modules/manager/pep621/processors/uv', () => {
         ]);
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
-            uvExcludeNewer: '1 week',
             uvExcludeNewerDate: '2026-06-08T12:00:00.000Z',
             minimumReleaseAge: '3 days',
             minimumReleaseAgeDate: '2026-06-12T12:00:00.000Z',
@@ -1139,7 +1138,6 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
         ]);
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          { uvExcludeNewer: 'not a date' },
           'Could not parse [tool.uv].exclude-newer in pyproject.toml, falling back to minimumReleaseAge',
         );
       });

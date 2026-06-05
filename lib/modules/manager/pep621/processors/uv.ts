@@ -1,5 +1,5 @@
 import { isString } from '@sindresorhus/is';
-import { DateTime, Duration } from 'luxon';
+import { DateTime } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -33,22 +33,6 @@ import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
-
-function parseUvExcludeNewer(value: string): DateTime<true> | null {
-  const dur = Duration.fromISO(value);
-  if (dur.isValid) {
-    return DateTime.now().minus(dur).toUTC();
-  }
-  const ts = DateTime.fromISO(value, { zone: 'utc' });
-  if (ts.isValid) {
-    return ts;
-  }
-  const millis = toMs(value);
-  if (millis === null) {
-    return null;
-  }
-  return DateTime.now().minus(millis).toUTC();
-}
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -243,26 +227,24 @@ export class UvProcessor extends BasePyProjectProcessor {
           );
         } else {
           let excludeNewerDate = DateTime.now().minus(ms).toUTC();
-          const uvExcludeNewer = project.tool?.uv?.['exclude-newer'];
-          if (uvExcludeNewer) {
-            const uvExcludeNewerDate = parseUvExcludeNewer(uvExcludeNewer);
-            if (!uvExcludeNewerDate) {
-              logger.debug(
-                { uvExcludeNewer },
-                'Could not parse [tool.uv].exclude-newer in pyproject.toml, falling back to minimumReleaseAge',
-              );
-            } else if (uvExcludeNewerDate < excludeNewerDate) {
-              logger.debug(
-                {
-                  uvExcludeNewer,
-                  uvExcludeNewerDate: uvExcludeNewerDate.toISO(),
-                  minimumReleaseAge: config.minimumReleaseAge,
-                  minimumReleaseAgeDate: excludeNewerDate.toISO(),
-                },
-                'Using stricter [tool.uv].exclude-newer date over minimumReleaseAge date',
-              );
-              excludeNewerDate = uvExcludeNewerDate;
-            }
+          const uvExcludeNewerDate = project.tool?.uv?.['exclude-newer'];
+          if (uvExcludeNewerDate === null) {
+            logger.debug(
+              'Could not parse [tool.uv].exclude-newer in pyproject.toml, falling back to minimumReleaseAge',
+            );
+          } else if (
+            uvExcludeNewerDate &&
+            uvExcludeNewerDate < excludeNewerDate
+          ) {
+            logger.debug(
+              {
+                uvExcludeNewerDate: uvExcludeNewerDate.toISO(),
+                minimumReleaseAge: config.minimumReleaseAge,
+                minimumReleaseAgeDate: excludeNewerDate.toISO(),
+              },
+              'Using stricter [tool.uv].exclude-newer date over minimumReleaseAge date',
+            );
+            excludeNewerDate = uvExcludeNewerDate;
           }
           excludeNewerFlag = ` --exclude-newer ${excludeNewerDate.toISO()}`;
         }
