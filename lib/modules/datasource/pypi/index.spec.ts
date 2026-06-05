@@ -278,6 +278,31 @@ describe('modules/datasource/pypi/index', () => {
       expect(result?.changelogUrl).toBe(info.project_urls.changelog);
     });
 
+    it('finds urls from project_urls when home_page is null', async () => {
+      const info = {
+        name: 'flexget',
+        home_page: null,
+        project_urls: {
+          Forum: 'https://discuss.flexget.com',
+          Homepage: 'https://flexget.com',
+          changelog: 'https://github.com/Flexget/wiki/blob/master/ChangeLog.md',
+          'Issue Tracker': 'https://github.com/Flexget/Flexget/issues',
+          Repository: 'https://github.com/Flexget/Flexget',
+        },
+      };
+      httpMock
+        .scope(baseUrl)
+        .get('/flexget/json')
+        .reply(200, { ...JSON.parse(res1), info });
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'flexget',
+      });
+      expect(result?.homepage).toBeUndefined();
+      expect(result?.sourceUrl).toBe(info.project_urls.Repository);
+      expect(result?.changelogUrl).toBe(info.project_urls.changelog);
+    });
+
     it('excludes gh sponsors url from project_urls', async () => {
       const info = {
         name: 'flexget',
