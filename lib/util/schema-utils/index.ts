@@ -187,6 +187,20 @@ export function LooseRecord<
   });
 }
 
+/**
+ * Accepts `null`, `undefined`, or an absent key and normalizes all to
+ * `undefined`. Keeps the output type as `T | undefined` (never `null`), so
+ * assignment into non-nullable targets needs no `?? undefined` coalescing.
+ */
+export function Nullish<Schema extends z.ZodTypeAny>(
+  schema: Schema,
+): z.ZodOptional<z.ZodType<z.output<Schema> | undefined>> {
+  return schema
+    .nullable()
+    .transform((value) => value ?? undefined)
+    .optional();
+}
+
 export const Json = z.string().transform((str, ctx): unknown => {
   try {
     return JSON.parse(str);
