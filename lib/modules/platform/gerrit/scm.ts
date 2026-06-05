@@ -130,7 +130,7 @@ export class GerritScm extends DefaultGitScm {
     // Both are already local, so no fetch is needed.
     const ref = pendingChangeBranches.has(branchName)
       ? branchName
-      : git.virtualBranchRef(branchName);
+      : git.remoteBranchRef(branchName);
     return git.mergeToLocal(ref, { localBranch: true });
   }
 }
