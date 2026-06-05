@@ -55,7 +55,7 @@ describe('modules/datasource/pypi/schema', () => {
         releases: {},
       };
       const result = PypiResponse.parse(input);
-      expect(result?.info?.home_page).toBeNull();
+      expect(result?.info?.home_page).toBeUndefined();
       expect(result?.info?.project_urls?.Repository).toBe(
         input.info.project_urls.Repository,
       );
