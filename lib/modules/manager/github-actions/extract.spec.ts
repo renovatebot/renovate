@@ -1620,7 +1620,7 @@ describe('modules/manager/github-actions/extract', () => {
         {
           currentValue: 'v27.1.0',
           datasource: 'github-releases',
-          depName: 'docker/setup-docker-action',
+          depName: 'docker',
           depType: 'uses-with',
           packageName: 'moby/moby',
           extractVersion: '^docker-(?<version>.+)$',
