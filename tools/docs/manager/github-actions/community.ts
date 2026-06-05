@@ -5,6 +5,7 @@ import { replaceContent } from '../../utils.ts';
 
 function generateTool({ depName, packageName }: CommunityActionConfig): string {
   if (!depName && !packageName) {
+    // some actions determine the depName and packageName dynamically
     return '';
   }
   return ` ([\`${depName ?? packageName}\`](https://github.com/${packageName}))`;
