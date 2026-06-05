@@ -43,7 +43,6 @@ import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
@@ -986,46 +985,6 @@ async function validateGlobalConfig(
               },
             ).join(', ')}.`,
           });
-        } else if (
-          key === 'repositoryCache' &&
-          !['enabled', 'disabled', 'reset'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
-          });
-        } else if (
-          key === 'dryRun' &&
-          !['extract', 'lookup', 'full'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
-          });
-        } else if (
-          key === 'binarySource' &&
-          !['docker', 'global', 'install', 'hermit'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
-          });
-        } else if (
-          key === 'requireConfig' &&
-          !['required', 'optional', 'ignored'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
-          });
-        } else if (
-          key === 'gitUrl' &&
-          !['default', 'ssh', 'endpoint'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
-          });
         }
 
         if (
@@ -1065,30 +1024,6 @@ async function validateGlobalConfig(
               currentPath: currentPath!,
             }),
           );
-        }
-        if (key === 'gitNoVerify') {
-          const allowedValues = ['commit', 'push'];
-          for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
-        if (key === 'mergeConfidenceDatasources') {
-          const allowedValues = supportedDatasources;
-          for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
         }
       } else {
         warnings.push({
