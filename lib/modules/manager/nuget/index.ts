@@ -21,6 +21,7 @@ export const defaultConfig = {
     '/(^|/)dotnet-tools\\.json$/',
     '/(^|/)global\\.json$/',
   ],
+  rangeStrategy: 'bump', // this is done inorder to handle nuget's treatment of bare versions as range
 };
 
 export const supportedDatasources = [
