@@ -1,9 +1,10 @@
 import { z } from 'zod/v4';
+import { Nullish } from '../../../util/schema-utils/index.ts';
 
 export const PypiRelease = z.object({
-  requires_python: z.string().nullish(),
-  upload_time: z.string().optional(),
-  yanked: z.boolean().optional(),
+  requires_python: Nullish(z.string()),
+  upload_time: Nullish(z.string()),
+  yanked: Nullish(z.boolean()).default(false),
 });
 
 export type PypiRelease = z.infer<typeof PypiRelease>;
@@ -11,9 +12,9 @@ export type PypiRelease = z.infer<typeof PypiRelease>;
 export const PypiResponse = z.object({
   info: z
     .object({
-      name: z.string().optional(),
-      home_page: z.string().optional(),
-      project_urls: z.record(z.string(), z.string()).optional(),
+      name: Nullish(z.string()),
+      home_page: Nullish(z.string()),
+      project_urls: z.record(z.string(), Nullish(z.string())).optional(),
     })
     .optional(),
   releases: z.record(z.string(), z.array(PypiRelease)).optional(),

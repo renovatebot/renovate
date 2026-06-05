@@ -10,6 +10,7 @@ import {
   LooseRecord,
   MultidocYaml,
   NotCircular,
+  Nullish,
   Toml,
   UtcDate,
   Yaml,
@@ -138,6 +139,28 @@ describe('util/schema-utils/index', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('Nullish', () => {
+    it('converts null to undefined', () => {
+      const s = z.object({ a: Nullish(z.string()) });
+      expect(s.parse({ a: null })).toEqual({});
+    });
+
+    it('converts undefined to undefined (key absent)', () => {
+      const s = z.object({ a: Nullish(z.string()) });
+      expect(s.parse({})).toEqual({});
+    });
+
+    it('preserves valid string values', () => {
+      const s = z.object({ a: Nullish(z.string()) });
+      expect(s.parse({ a: 'hello' })).toEqual({ a: 'hello' });
+    });
+
+    it('rejects wrong types', () => {
+      const s = Nullish(z.string());
+      expect(() => s.parse(42)).toThrow();
     });
   });
 
