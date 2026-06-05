@@ -361,6 +361,27 @@ describe('modules/manager/pep621/processors/uv', () => {
       );
     });
 
+    it('logs debug and returns deps unchanged if lock file fails to parse', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('not valid toml [[[');
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+      const result = await processor.extractLockedVersions(
+        partial(),
+        deps,
+        'pyproject.toml',
+      );
+      expect(result).toEqual(deps);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packageFile: 'pyproject.toml',
+          err: expect.anything(),
+        }),
+        'Error parsing uv lock file',
+      );
+    });
+
     it('adds indirect deps from lock file not present in direct deps', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
