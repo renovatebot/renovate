@@ -253,7 +253,10 @@ export class UvProcessor extends BasePyProjectProcessor {
       // resolve because the existing lock file contains packages published
       // after the cutoff.
       try {
-        await exec(`${cmd} ${excludeNewerFlag}`, execOptions);
+        await exec(
+          excludeNewerFlag ? `${cmd} ${excludeNewerFlag}` : cmd,
+          execOptions,
+        );
       } catch (err) {
         if (excludeNewerFlag && err.stderr?.includes('exclude newer time')) {
           logger.warn(
