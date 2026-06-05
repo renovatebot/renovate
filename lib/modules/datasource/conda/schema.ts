@@ -1,14 +1,14 @@
 import { z } from 'zod/v4';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { LooseArray, Nullish } from '../../../util/schema-utils/index.ts';
 
 export const CondaFile = z.object({
   version: z.string(),
-  upload_time: z.string().optional(),
+  upload_time: Nullish(z.string()),
 });
 
 export const CondaPackage = z.object({
-  html_url: z.string().optional(),
-  dev_url: z.string().optional(),
+  html_url: Nullish(z.string()),
+  dev_url: Nullish(z.string()),
   files: LooseArray(CondaFile).optional(),
   versions: z.array(z.string()).optional(),
 });
