@@ -9,6 +9,9 @@ exports[`modules/manager/docker-compose/extract > extractPackageFile() > extract
     "datasource": "docker",
     "depName": "quay.io/something/redis",
     "packageName": "quay.io/something/redis",
+    "registryUrls": [
+      "https://quay.io",
+    ],
     "replaceString": "quay.io/something/redis:alpine",
   },
   {
@@ -83,6 +86,9 @@ exports[`modules/manager/docker-compose/extract > extractPackageFile() > extract
     "datasource": "docker",
     "depName": "quay.io/something/redis",
     "packageName": "quay.io/something/redis",
+    "registryUrls": [
+      "https://quay.io",
+    ],
     "replaceString": "quay.io/something/redis:alpine",
   },
   {
@@ -157,6 +163,9 @@ exports[`modules/manager/docker-compose/extract > extractPackageFile() > extract
     "datasource": "docker",
     "depName": "quay.io/something/redis",
     "packageName": "quay.io/something/redis",
+    "registryUrls": [
+      "https://quay.io",
+    ],
     "replaceString": "quay.io/something/redis:alpine",
   },
   {

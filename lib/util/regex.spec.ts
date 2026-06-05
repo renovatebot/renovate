@@ -1,6 +1,6 @@
 import RE2 from 're2';
 import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
-import { regEx } from './regex.ts';
+import { hostnameMatchRegex, regEx } from './regex.ts';
 
 describe('util/regex', () => {
   it('uses RE2', () => {
@@ -35,5 +35,25 @@ describe('util/regex', () => {
 
     const regex = await import('./regex.ts');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
+  });
+
+  describe('hostnameMatchRegex', () => {
+    it('captures hostname and optional registry port before image path', () => {
+      expect(hostnameMatchRegex.exec('ghcr.io/astral-sh/uv')?.groups).toEqual({
+        hostname: 'ghcr.io',
+      });
+      expect(
+        hostnameMatchRegex.exec('some-registry.example.com/cache/image')
+          ?.groups,
+      ).toEqual({
+        hostname: 'some-registry.example.com',
+      });
+      expect(
+        hostnameMatchRegex.exec('registry.example.com:5005/ns/img')?.groups,
+      ).toEqual({
+        hostname: 'registry.example.com',
+        port: '5005',
+      });
+    });
   });
 });

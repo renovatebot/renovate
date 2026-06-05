@@ -45,6 +45,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'k8s.gcr.io/external-dns/external-dns',
             packageName: 'k8s.gcr.io/external-dns/external-dns',
+            registryUrls: ['https://k8s.gcr.io'],
             replaceString: 'v0.13.4',
             versioning: DockerDatasource.id,
           },
@@ -63,6 +64,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: 'v1.8.2',
           },
         ],
@@ -482,6 +484,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1.8.2',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
           },
@@ -852,6 +855,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: 'docker',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             skipReason: 'unversioned-reference',
           },
         ],
@@ -887,6 +891,7 @@ describe('modules/manager/flux/extract', () => {
             currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.proxy.test'],
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
           },
@@ -916,6 +921,7 @@ describe('modules/manager/flux/extract', () => {
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             datasource: DockerDatasource.id,
           },
         ],
@@ -947,6 +953,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1.8.2',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             datasource: DockerDatasource.id,
             replaceString:
               'v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
@@ -983,6 +990,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: expect.stringMatching(
               /digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n\s*tag: v1\.8\.2/,
             ),
@@ -1019,6 +1027,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: expect.stringMatching(
               /tag: "v1\.8\.2"\n\s*digest: "sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc"/,
             ),
@@ -1053,6 +1062,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString:
               '"tag": v1.8.2\n    "digest": sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
           },
@@ -1087,6 +1097,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: expect.stringMatching(
               /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
             ),
@@ -1120,6 +1131,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             skipReason: 'invalid-value',
           },
         ],
@@ -1172,6 +1184,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/other/repo',
             packageName: 'ghcr.io/other/repo',
+            registryUrls: ['https://ghcr.io'],
             replaceString: 'v1.0.0',
           },
           {
@@ -1184,6 +1197,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: expect.stringMatching(
               /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
             ),
@@ -1230,6 +1244,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: expect.stringMatching(
               /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
             ),
@@ -1274,6 +1289,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: expect.stringMatching(
               /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
             ),
@@ -1312,6 +1328,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            registryUrls: ['https://ghcr.io'],
             replaceString: expect.stringMatching(
               /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
             ),
@@ -1459,6 +1476,7 @@ describe('modules/manager/flux/extract', () => {
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
               packageName: 'ghcr.io/kyverno/manifests/kyverno',
+              registryUrls: ['https://ghcr.io'],
               datasource: DockerDatasource.id,
               replaceString: 'v1.8.2',
             },

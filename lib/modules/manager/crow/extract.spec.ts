@@ -60,6 +60,7 @@ describe('modules/manager/crow/extract', () => {
           {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
+            registryUrls: ['https://quay.io'],
             currentValue: 'alpine',
             currentDigest: undefined,
             replaceString: 'quay.io/something/redis:alpine',
@@ -185,6 +186,7 @@ describe('modules/manager/crow/extract', () => {
             datasource: 'docker',
             depName: 'quay.io/nginx',
             packageName: 'my-quay-mirror.registry.com/nginx',
+            registryUrls: ['https://my-quay-mirror.registry.com'],
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],
@@ -215,6 +217,7 @@ describe('modules/manager/crow/extract', () => {
             datasource: 'docker',
             depName: 'quay.io/nginx',
             packageName: 'quay.io/nginx',
+            registryUrls: ['https://quay.io'],
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],
@@ -246,6 +249,7 @@ describe('modules/manager/crow/extract', () => {
             datasource: 'docker',
             depName: 'quay.io/nginx',
             packageName: 'my-quay-mirror.registry.com/nginx',
+            registryUrls: ['https://my-quay-mirror.registry.com'],
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],
@@ -267,6 +271,7 @@ describe('modules/manager/crow/extract', () => {
           {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
+            registryUrls: ['https://quay.io'],
             currentValue: '1.0.0',
             currentDigest: undefined,
             replaceString: 'quay.io/something/redis:1.0.0',
@@ -297,6 +302,7 @@ describe('modules/manager/crow/extract', () => {
           {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
+            registryUrls: ['https://quay.io'],
             currentValue: 'alpine',
             currentDigest: undefined,
             replaceString: 'quay.io/something/redis:alpine',
@@ -376,6 +382,7 @@ describe('modules/manager/crow/extract', () => {
           {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
+            registryUrls: ['https://quay.io'],
             currentValue: 'alpine',
             currentDigest: undefined,
             replaceString: 'quay.io/something/redis:alpine',
@@ -423,6 +430,7 @@ describe('modules/manager/crow/extract', () => {
           {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
+            registryUrls: ['https://quay.io'],
             currentValue: 'alpine',
             currentDigest: undefined,
             replaceString: 'quay.io/something/redis:alpine',
@@ -489,6 +497,7 @@ describe('modules/manager/crow/extract', () => {
       expect(res?.deps).toContainEqual({
         depName: 'quay.io/nginx',
         packageName: 'quay.io/nginx',
+        registryUrls: ['https://quay.io'],
         currentValue: '0.0.1',
         currentDigest: undefined,
         replaceString: 'quay.io/nginx:0.0.1',

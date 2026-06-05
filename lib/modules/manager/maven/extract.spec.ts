@@ -327,6 +327,7 @@ describe('modules/manager/maven/extract', () => {
           depName: 'gcr.io/paketo-buildpacks/nodejs',
           fileReplacePosition: 1566,
           packageName: 'gcr.io/paketo-buildpacks/nodejs',
+          registryUrls: ['https://gcr.io'],
           replaceString: 'gcr.io/paketo-buildpacks/nodejs:1.8.0',
         },
         {
@@ -339,6 +340,7 @@ describe('modules/manager/maven/extract', () => {
           depName: 'docker.io/paketobuildpacks/python',
           fileReplacePosition: 1634,
           packageName: 'docker.io/paketobuildpacks/python',
+          registryUrls: ['https://docker.io'],
           replaceString:
             'docker.io/paketobuildpacks/python:2.22.1@sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138',
         },
@@ -351,6 +353,7 @@ describe('modules/manager/maven/extract', () => {
           depName: 'docker.io/paketobuildpacks/ruby',
           fileReplacePosition: 1795,
           packageName: 'docker.io/paketobuildpacks/ruby',
+          registryUrls: ['https://docker.io'],
           replaceString:
             'docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
         },

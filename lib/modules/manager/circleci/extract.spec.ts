@@ -38,6 +38,7 @@ describe('modules/manager/circleci/extract', () => {
             datasource: 'docker',
             depName: 'quay.io/myName/myPackage',
             packageName: 'my-quay-mirror.registry.com/myName/myPackage',
+            registryUrls: ['https://my-quay-mirror.registry.com'],
             depType: 'docker',
             replaceString: 'quay.io/myName/myPackage:0.6.2',
           },

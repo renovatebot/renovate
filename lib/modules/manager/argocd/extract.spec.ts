@@ -115,6 +115,7 @@ spec:
             datasource: 'docker',
             depName: 'somecontainer.registry.io/someContainer',
             packageName: 'somecontainer.registry.io/someContainer',
+            registryUrls: ['https://somecontainer.registry.io'],
             replaceString: 'somecontainer.registry.io/someContainer:v2.3.4',
           },
           {
@@ -125,6 +126,7 @@ spec:
             datasource: 'docker',
             depName: 'othercontainer.registry.io/other/container',
             packageName: 'othercontainer.registry.io/other/container',
+            registryUrls: ['https://othercontainer.registry.io'],
             replaceString:
               'othercontainer.registry.io/other/container@sha256:8be5de38826b494a8ad1565b8d1eb49183d736d0277a89191bd1100d78479a42',
           },
