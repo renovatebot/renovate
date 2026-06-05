@@ -12,19 +12,19 @@ In cases where there are potentially multiple _inputs_, e.g. managers can have m
 The value `*` is a special case which means "match everything".
 It is not valid to combine `*` with any other positive or negative match.
 
-```json title="Example of valid wildcard use"
+```json {title="Example of valid wildcard use" configType=global}
 {
   "allowedEnv": ["*"]
 }
 ```
 
-```json title="Example of invalid wildcard use with additional match"
+```json title="Example of invalid wildcard use with additional match" {configType=global ignoreConfigWarnings=true}
 {
   "allowedEnv": ["*", "ABC"]
 }
 ```
 
-```json title="Example of invalid wildcard use with negation"
+```{json title="Example of invalid wildcard use with negation" configType=global ignoreConfigWarnings=true}
 {
   "allowedEnv": ["*", "!ABC"]
 }

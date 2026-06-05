@@ -278,7 +278,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
       logger.info(
         `Config validated successfully against ${filesValidated} file(s)`,
       );
-    } else {
+    } else if (!filesValidated) {
       logger.warn(`No files to perform configuration validation against`);
     }
     // Use exitCode (not process.exit) so async log streams can flush

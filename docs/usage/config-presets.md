@@ -8,7 +8,7 @@ description: Renovate's support for ESLint-like shareable configs
 This page describes how to configure your shared presets.
 Read the [Key concepts, presets](./key-concepts/presets.md) page to learn more about presets in general.
 
-Shareable config presets must use the JSON or JSON5 formats, other formats are not supported.
+Shareable config presets must use the JSON, JSONC or JSON5 formats, other formats are not supported.
 
 !!! tip
   Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
@@ -46,6 +46,7 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
 | GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
 | GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
+| GitHub with preset name (JSONC)             | `github>abc/foo:xyz.jsonc`       | `xyz`     | `https://github.com/abc/foo` | `xyz.jsonc`     | Default branch |
 | GitHub with preset name (JSON5)             | `github>abc/foo:xyz.json5`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json5`     | Default branch |
 | GitHub with preset name and path            | `github>abc/foo//path/xyz`       | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | Default branch |
 | GitHub default with a tag                   | `github>abc/foo#1.2.3`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.2.3`        |
@@ -59,6 +60,7 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
 | GitLab default                              | `gitlab>abc/foo`                 | `default` | `https://gitlab.com/abc/foo` | `default.json`  | Default branch |
 | GitLab with preset name                     | `gitlab>abc/foo:xyz`             | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | Default branch |
+| GitLab with preset name (JSONC)             | `gitlab>abc/foo:xyz.jsonc`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.jsonc`     | Default branch |
 | GitLab with preset name (JSON5)             | `gitlab>abc/foo:xyz.json5`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json5`     | Default branch |
 | GitLab default with a tag                   | `gitlab>abc/foo#1.2.3`           | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.2.3`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.2.3`        |
@@ -89,7 +91,15 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Forgejo with preset name and path with a tag | `forgejo>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://codeberg.org/abc/foo` | `path/xyz.json` | `1.2.3`        |
 | Forgejo with subpreset name and tag          | `forgejo>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://codeberg.org/abc/foo` | `xyz.json`      | `1.2.3`        |
 
-### Self-hosted Git
+### Self-hosted Git / current Git server
+
+!!! note
+  If you're self-hosting your platform, for instance a GitHub Enterprise Server instance, you'll want to use `local>` to look up presets on the current Git server.
+  <br>
+  You can also use `local>` if you're running on `github.com`, and this will work as if you had written `github>`.
+  This can make your presets more portable if you run across many different Git platforms.
+
+For instance, if you have `platform=github` and `endpoint=https://github.company.com`:
 
 | name                                       | example use                     | preset    | resolves as                          | filename        | Git tag        |
 | ------------------------------------------ | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
@@ -328,7 +338,7 @@ Let's assume you choose `renovate-config-fastcore` as the package name.
 You then need to publish the `renovate-config-fastcore` package where the `package.json` has the field `renovate-config` and then put your config under the field `default`.
 For example:
 
-```json
+```json {configType=none}
 {
   "name": "renovate-config-fastcore",
   "version": "0.0.1",

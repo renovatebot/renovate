@@ -27,6 +27,17 @@ describe('config/presets/http/index', () => {
       expect(await http.getPreset({ repo })).toEqual({ foo: 'bar' });
     });
 
+    it('should return parsed JSONC', async () => {
+      httpMock
+        .scope('https://my.server/')
+        .get('/test-preset.jsonc')
+        .reply(200, '{ "foo": "bar" } // comment');
+
+      const repo = 'https://my.server/test-preset.jsonc';
+
+      expect(await http.getPreset({ repo })).toEqual({ foo: 'bar' });
+    });
+
     it('throws if fails to parse', async () => {
       httpMock.scope(host).get(filePath).reply(200, 'not json');
 
