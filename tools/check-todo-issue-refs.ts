@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { simpleGit } from 'simple-git';
+import { createSimpleGit } from '../lib/util/git/index.ts';
 
 const closingKeywordRe =
   /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)(?:\s*:\s*|\s+)(?:(?:renovatebot\/renovate)?#|https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/)(?<issue>\d+)\b/gi;
@@ -117,7 +117,7 @@ function isGitGrepNoMatchesError(err: unknown): boolean {
 
 async function gitGrepTodos(): Promise<string> {
   try {
-    return await simpleGit().raw([
+    return await createSimpleGit().raw([
       'grep',
       '-n',
       '-I',
