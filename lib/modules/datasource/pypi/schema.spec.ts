@@ -34,6 +34,36 @@ describe('modules/datasource/pypi/schema', () => {
       expect(result?.releases?.['2.27.0']?.[0].requires_python).toBeNull();
     });
 
+    it('parses a PyPI JSON response with a null home_page', () => {
+      const input = {
+        info: {
+          name: 'mypackage',
+          home_page: null,
+          project_urls: {
+            Repository: 'https://github.com/example/mypackage',
+          },
+        },
+        releases: {},
+      };
+      const result = PypiResponse.parse(input);
+      expect(result?.info?.home_page).toBeNull();
+      expect(result?.info?.project_urls?.Repository).toBe(
+        input.info.project_urls.Repository,
+      );
+    });
+
+    it('parses a PyPI JSON response with a missing home_page', () => {
+      const input = {
+        info: {
+          name: 'mypackage',
+        },
+        releases: {},
+      };
+      const result = PypiResponse.parse(input);
+      expect(result?.info?.home_page).toBeUndefined();
+      expect(result?.info?.name).toBe(input.info.name);
+    });
+
     it('throws for genuinely invalid input (no error swallowing)', () => {
       expect(() => PypiResponse.parse('not-an-object')).toThrow();
     });
