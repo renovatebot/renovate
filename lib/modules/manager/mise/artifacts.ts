@@ -1,12 +1,13 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
-import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
-import { getRepoStatus } from '../../../util/git/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
@@ -18,7 +19,6 @@ import { getConfigType, getLockFileName } from './lockfile.ts';
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
-  newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const lockFileName = getLockFileName(packageFileName);
@@ -28,21 +28,29 @@ export async function updateArtifacts({
     return null;
   }
 
-  await writeLocalFile(packageFileName, newPackageFileContent);
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
+  if (!allowlist.includes('mise')) {
+    logger.once.warn(
+      '`mise lock` was requested to run, but `mise` is not permitted in the allowedUnsafeExecutions',
+    );
+    return null;
+  }
 
   const { isLocal, env } = getConfigType(packageFileName);
   const localFlag = isLocal ? ' --local' : '';
 
-  let cmd: string;
+  let lockCmd: string;
   if (config.isLockFileMaintenance) {
-    cmd = `mise lock${localFlag}`;
+    lockCmd = `mise lock${localFlag}`;
   } else {
     const tools = updatedDeps
       .map(({ depName }) => depName)
       .filter(isNonEmptyStringAndNotWhitespace)
       .map(quote)
       .join(' ');
-    cmd = tools ? `mise lock${localFlag} ${tools}` : `mise lock${localFlag}`;
+    lockCmd = tools
+      ? `mise lock${localFlag} ${tools}`
+      : `mise lock${localFlag}`;
   }
 
   const extraEnv: ExtraEnv = {};
@@ -71,11 +79,12 @@ export async function updateArtifacts({
     docker: {},
   };
 
-  try {
-    await exec(cmd, execOptions);
+  const trustCmd = `mise trust ${quote(upath.basename(packageFileName))}`;
 
-    const status = await getRepoStatus();
-    if (!status.modified.includes(lockFileName)) {
+  try {
+    await exec([trustCmd, lockCmd], execOptions);
+    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (!newLockFileContent || existingLockFileContent === newLockFileContent) {
       return null;
     }
 
@@ -85,7 +94,7 @@ export async function updateArtifacts({
         file: {
           type: 'addition',
           path: lockFileName,
-          contents: await readLocalFile(lockFileName),
+          contents: newLockFileContent,
         },
       },
     ];

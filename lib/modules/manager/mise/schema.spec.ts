@@ -7,11 +7,11 @@ describe('modules/manager/mise/schema', () => {
       const content = codeBlock`
         min_version = "2024.11.1"
       `;
-      expect(MiseFile.parse(content)).toEqual({ tools: {} });
+      expect(MiseFile.parse(content)).toEqual({ tools: {}, tasks: {} });
     });
 
     it('defaults tools to empty object for empty TOML', () => {
-      expect(MiseFile.parse('')).toEqual({ tools: {} });
+      expect(MiseFile.parse('')).toEqual({ tools: {}, tasks: {} });
     });
 
     it('parses [tools] when present', () => {
@@ -21,6 +21,7 @@ describe('modules/manager/mise/schema', () => {
       `;
       expect(MiseFile.parse(content)).toEqual({
         tools: { node: '20' },
+        tasks: {},
       });
     });
   });
