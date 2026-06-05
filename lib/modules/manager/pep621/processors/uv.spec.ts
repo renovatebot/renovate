@@ -369,7 +369,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ];
       const result = await processor.extractLockedVersions(
         partial(),
-        deps,
+        [...deps],
         'pyproject.toml',
       );
       expect(result).toEqual(deps);
