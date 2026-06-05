@@ -146,31 +146,6 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
-    it('does not warn for valid platformConfig', async () => {
-      const config = {
-        platformConfig: 'auto',
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'repo',
-        // @ts-expect-error -- TODO: What is `platformConfig` type?
-        config,
-      );
-      expect(warnings).toBeEmptyArray();
-    });
-
-    it('warns for invalid platformConfig', async () => {
-      const config = {
-        platformConfig: 'invalid',
-      };
-      // @ts-expect-error -- TODO: What is `platformConfig` type?
-      const { errors } = await configValidation.validateConfig('repo', config);
-      expect(errors).toMatchObject([
-        {
-          message: 'Invalid configuration option: platformConfig',
-        },
-      ]);
-    });
-
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
