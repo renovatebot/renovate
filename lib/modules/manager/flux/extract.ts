@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import {
+  type Document,
   type Scalar,
   type YAMLMap,
   isMap,
@@ -189,9 +190,12 @@ function resolveSystemManifest(
 /**
  * Returns all `spec.ref` map nodes for OCIRepository resources matching `resourceName`.
  */
-function findOCIRefNodes(content: string, resourceName: string): YAMLMap[] {
+function findOCIRefNodes(
+  docs: Document.Parsed[],
+  resourceName: string,
+): YAMLMap[] {
   const refNodes: YAMLMap[] = [];
-  for (const doc of parseAllDocuments(content, { strict: false })) {
+  for (const doc of docs) {
     const docContents = doc.contents;
     if (!isMap(docContents)) {
       continue;
@@ -221,10 +225,11 @@ function findOCIRefNodes(content: string, resourceName: string): YAMLMap[] {
 }
 
 function extractOCIRefTagAndDigestRange(
+  docs: Document.Parsed[],
   content: string,
   resourceName: string,
 ): { replaceString: string; tagFirst: boolean } | null {
-  for (const refNode of findOCIRefNodes(content, resourceName)) {
+  for (const refNode of findOCIRefNodes(docs, resourceName)) {
     let tagKey: Scalar | undefined;
     let tagValue: Scalar | undefined;
     let digestKey: Scalar | undefined;
@@ -263,10 +268,11 @@ function extractOCIRefTagAndDigestRange(
 }
 
 function extractOCIRefTagRange(
+  docs: Document.Parsed[],
   content: string,
   resourceName: string,
 ): { replaceString: string; indentation: string } | null {
-  for (const refNode of findOCIRefNodes(content, resourceName)) {
+  for (const refNode of findOCIRefNodes(docs, resourceName)) {
     for (const item of refNode.items) {
       if (
         isPair(item) &&
@@ -296,6 +302,7 @@ function resolveResourceManifest(
   registryAliases: Record<string, string> | undefined,
   content: string,
 ): PackageDependency[] {
+  let docs: Document.Parsed[] | undefined;
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
@@ -417,6 +424,7 @@ function resolveResourceManifest(
           combinedDep.currentValue = resource.spec.ref.tag;
 
           const refRange = extractOCIRefTagAndDigestRange(
+            (docs ??= parseAllDocuments(content, { strict: false })),
             content,
             resource.metadata.name,
           );
@@ -454,6 +462,7 @@ function resolveResourceManifest(
             registryAliases,
           );
           const refTagRange = extractOCIRefTagRange(
+            (docs ??= parseAllDocuments(content, { strict: false })),
             content,
             resource.metadata.name,
           );
