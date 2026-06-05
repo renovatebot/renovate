@@ -45,7 +45,7 @@ If you would like Renovate to disable updating of exact versions (warning: you m
 
 ### Getting updates for non-pinned (bare) versions
 
-Because a bare version such as `Version="1.2.3"` is an _open-ended minimum_ (`1.2.3` or greater), it is a range rather than a single version.
+Per [NuGet's versioning rules](https://learn.microsoft.com/en-us/nuget/concepts/package-versioning?tabs=semver20sort#version-ranges), a bare version such as `Version="1.2.3"` is an _open-ended minimum_ (`1.2.3` or greater) — so it is NuGet, not Renovate, that treats this as a range rather than a single version.
 The default `rangeStrategy` of `auto` resolves to `replace` for NuGet, and `replace` cannot produce an update for an open-ended minimum: every newer release already satisfies "1.2.3 or greater", so there is nothing to replace.
 The result is that Renovate detects no updates for these dependencies and closes any existing update PRs.
 
@@ -67,7 +67,7 @@ With `bump`, Renovate raises the minimum to the newest release (for example `1.2
 !!! note
   This is a change in behavior.
   Earlier versions of Renovate anchored the "current version" directly to the value in your project file, so bare versions received updates under any `rangeStrategy`.
-  Renovate no longer treats a range (including a bare NuGet version) as the current version, so the `rangeStrategy` now decides the outcome: use `bump` to restore the previous update behavior.
+  Since Renovate `43.208.2`, Renovate no longer treats a range (including a bare NuGet version) as the current version, so the `rangeStrategy` now decides the outcome: use `bump` to restore the previous update behavior.
 
 ### Workload restore
 
