@@ -12,7 +12,7 @@ export const PypiResponse = z.object({
   info: z
     .object({
       name: z.string().optional(),
-      home_page: z.string().optional(),
+      home_page: z.string().optional().nullish(),
       project_urls: z.record(z.string(), z.string()).optional(),
     })
     .optional(),
