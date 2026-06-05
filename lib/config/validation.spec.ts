@@ -2613,7 +2613,7 @@ describe('config/validation', () => {
         },
         secrets: 'invalid-type',
         cacheTtlOverride: {
-          someField: false,
+          '_test-namespace': false,
         },
       };
       const { warnings } = await configValidation.validateConfig(
@@ -2625,7 +2625,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Configuration option `cacheTtlOverride.someField` should be an integer. Found: false (boolean).',
+            'Configuration option `cacheTtlOverride._test-namespace` should be an integer. Found: false (boolean).',
         },
         {
           message: 'Configuration option `secrets` should be a JSON object.',
