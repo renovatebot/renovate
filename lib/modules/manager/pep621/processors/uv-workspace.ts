@@ -9,6 +9,24 @@ import {
 } from '../../../../util/toml.ts';
 import { PyProject, type UvConfig } from '../schema.ts';
 
+/**
+ * Fields a uv workspace root contributes to its members during resolution.
+ *
+ * Only the fields uv actually inherits (per the workspace docs) are tracked
+ * here. Other `[tool.uv]` fields (`dev-dependencies`, `required-version`,
+ * `workspace`, etc.) are member-local and do not appear in this type.
+ *
+ * @see https://docs.astral.sh/uv/concepts/projects/workspaces/
+ */
+export interface InheritedUvConfig {
+  /** `[tool.uv.sources]` from the workspace root (PEP-508-normalized keys). */
+  sources: NonNullable<UvConfig['sources']>;
+  /** `[[tool.uv.index]]` entries from the workspace root. */
+  indexes: NonNullable<UvConfig['index']>;
+  /** The workspace root's pyproject path. Used for logging only. */
+  rootPath: string;
+}
+
 const cacheKeyPrefix = 'pep621-uv-workspace-pyproject:';
 const NULL_MARKER = Symbol('null');
 
@@ -43,7 +61,7 @@ function matchesAny(
   if (!patterns?.length) {
     return false;
   }
-  // Normalize a "."  (member at root) so glob comparisons behave.
+  // Normalize "."  (member at root) so glob comparisons behave.
   const target = memberRel === '' ? '.' : memberRel;
   return patterns.some((pattern) => {
     const mm = minimatch(pattern);
@@ -53,11 +71,9 @@ function matchesAny(
 
 function* walkParentDirs(filePath: string): Generator<string> {
   let dir = upath.dirname(filePath);
-  // Yield candidate pyproject.toml paths in strictly-ancestor directories.
   while (true) {
     const parent = upath.dirname(dir);
     if (parent === dir) {
-      // Filesystem root; also check the localDir root candidate "pyproject.toml" if not already.
       break;
     }
     const candidate =
@@ -70,19 +86,16 @@ function* walkParentDirs(filePath: string): Generator<string> {
   }
 }
 
-export interface WorkspaceRoot {
-  rootPath: string;
-  uv: UvConfig;
-}
-
 /**
- * Walk up from a member pyproject.toml path looking for an ancestor
- * pyproject.toml that declares `[tool.uv.workspace]` and lists the member.
+ * Walk strictly-ancestor directories looking for a pyproject.toml that
+ * declares `[tool.uv.workspace]` and lists this member.
+ *
+ * Exported for tests; production callers should use `loadInheritedUvConfig`.
  */
 export async function findUvWorkspaceRoot(
   memberPackageFile: string,
-): Promise<WorkspaceRoot | null> {
-  let firstFound: WorkspaceRoot | null = null;
+): Promise<{ rootPath: string; uv: UvConfig } | null> {
+  let firstFound: { rootPath: string; uv: UvConfig } | null = null;
   for (const candidate of walkParentDirs(memberPackageFile)) {
     if (!(await localPathExists(candidate))) {
       continue;
@@ -98,15 +111,13 @@ export async function findUvWorkspaceRoot(
       upath.relative(rootDir === '' ? '.' : rootDir, memberDir),
     );
     if (matchesAny(memberRel, ws.exclude)) {
-      // Treated as standalone for this candidate; keep walking.
       continue;
     }
     if (!matchesAny(memberRel, ws.members)) {
       continue;
     }
     if (firstFound) {
-      // uv does not support nested workspaces; prefer the innermost one we
-      // already found and just warn about the additional ancestor.
+      // uv does not support nested workspaces; prefer the innermost match.
       logger.debug(
         { member: memberPackageFile, outerRoot: candidate },
         'pep621/uv: ignoring nested workspace root',
@@ -119,69 +130,30 @@ export async function findUvWorkspaceRoot(
 }
 
 /**
- * Merge a workspace root's uv config into a member's uv config, matching uv's
- * documented semantics:
- * - `tool.uv.sources`: member entries override root entries for the same key.
- * - `tool.uv.index`: union by name; member wins on name conflict. Indexes
- *   without a name are kept verbatim (they cannot conflict by name).
+ * If `memberPackageFile` belongs to a uv workspace, return the inherited
+ * `[tool.uv.sources]` and `[[tool.uv.index]]` declared at the workspace
+ * root. Returns null when the file is not a member of any workspace.
+ *
+ * The returned value contains *only* the bits uv actually inherits — not
+ * a synthesized whole pyproject. Callers are expected to combine these
+ * inherited entries with the member's own `[tool.uv]` at lookup time,
+ * giving member entries precedence on key/name conflicts.
  */
-export function mergeUvConfig(
-  rootUv: UvConfig | undefined,
-  memberUv: UvConfig | undefined,
-): UvConfig | undefined {
-  if (!rootUv && !memberUv) {
-    return undefined;
-  }
-  if (!memberUv && !rootUv?.sources && !rootUv?.index) {
-    return undefined;
-  }
-
-  const mergedSources =
-    rootUv?.sources || memberUv?.sources
-      ? { ...rootUv?.sources, ...memberUv?.sources }
-      : undefined;
-
-  let mergedIndex: UvConfig['index'];
-  if (rootUv?.index || memberUv?.index) {
-    const memberNames = new Set(
-      (memberUv?.index ?? [])
-        .map((i) => i.name)
-        .filter((n): n is string => !!n),
-    );
-    mergedIndex = [
-      ...(memberUv?.index ?? []),
-      ...(rootUv?.index ?? []).filter(
-        (i) => !i.name || !memberNames.has(i.name),
-      ),
-    ];
-  }
-
-  // Only sources and indexes are inherited from the workspace root. Other
-  // fields (dev-dependencies, required-version, workspace) stay member-local.
-  return {
-    'dev-dependencies': memberUv?.['dev-dependencies'] ?? [],
-    'required-version': memberUv?.['required-version'],
-    sources: mergedSources,
-    index: mergedIndex,
-    workspace: memberUv?.workspace,
-  };
-}
-
-/**
- * Convenience: load a member's pyproject's uv config merged with its
- * workspace root's, if any. Returns the member's uv config unchanged when
- * no workspace root is found.
- */
-export async function getEffectiveUvConfig(
-  memberUv: UvConfig | undefined,
-  memberPackageFile: string | undefined,
-): Promise<UvConfig | undefined> {
-  if (!memberPackageFile) {
-    return memberUv;
-  }
+export async function loadInheritedUvConfig(
+  memberPackageFile: string,
+): Promise<InheritedUvConfig | null> {
   const root = await findUvWorkspaceRoot(memberPackageFile);
   if (!root) {
-    return memberUv;
+    return null;
   }
-  return mergeUvConfig(root.uv, memberUv);
+  const sources = root.uv.sources;
+  const indexes = root.uv.index;
+  if (!sources && !indexes) {
+    return null;
+  }
+  return {
+    sources: sources ?? {},
+    indexes: indexes ?? [],
+    rootPath: root.rootPath,
+  };
 }

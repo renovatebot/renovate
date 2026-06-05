@@ -29,9 +29,55 @@ import { type PyProject, type UvConfig, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 
 import { BasePyProjectProcessor } from './abstract.ts';
-import { getEffectiveUvConfig } from './uv-workspace.ts';
+import {
+  type InheritedUvConfig,
+  loadInheritedUvConfig,
+} from './uv-workspace.ts';
 
 const uvUpdateCMD = 'uv lock';
+
+type UvSources = NonNullable<UvConfig['sources']>;
+type UvIndexes = NonNullable<UvConfig['index']>;
+
+/**
+ * Combine the member's own `[tool.uv.sources]` with what the workspace root
+ * contributes, with member entries winning on key conflicts.
+ */
+function effectiveSources(
+  memberUv: UvConfig | undefined,
+  inherited: InheritedUvConfig | null,
+): UvSources | undefined {
+  if (!memberUv?.sources && !inherited?.sources) {
+    return undefined;
+  }
+  return {
+    ...inherited?.sources,
+    ...memberUv?.sources,
+  };
+}
+
+/**
+ * Combine the member's own `[[tool.uv.index]]` entries with what the
+ * workspace root contributes. Member entries come first and win on name
+ * conflict; unnamed indexes (which cannot conflict by name) are kept as-is.
+ */
+function effectiveIndexes(
+  memberUv: UvConfig | undefined,
+  inherited: InheritedUvConfig | null,
+): UvIndexes | undefined {
+  if (!memberUv?.index && !inherited?.indexes) {
+    return undefined;
+  }
+  const memberIndexNames = new Set(
+    (memberUv?.index ?? []).map((i) => i.name).filter((n): n is string => !!n),
+  );
+  return [
+    ...(memberUv?.index ?? []),
+    ...(inherited?.indexes ?? []).filter(
+      (i) => !i.name || !memberIndexNames.has(i.name),
+    ),
+  ];
+}
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -42,29 +88,34 @@ export class UvProcessor extends BasePyProjectProcessor {
     packageFile?: string,
   ): Promise<PackageDependency[]> {
     const memberUv = project.tool?.uv;
-    const uv = await getEffectiveUvConfig(memberUv, packageFile);
-    if (!uv) {
+    const inherited = packageFile
+      ? await loadInheritedUvConfig(packageFile)
+      : null;
+    if (!memberUv && !inherited) {
       return deps;
     }
 
-    const hasExplicitDefault = uv.index?.some(
+    const sources = effectiveSources(memberUv, inherited);
+    const indexes = effectiveIndexes(memberUv, inherited);
+
+    const hasExplicitDefault = indexes?.some(
       (index) => index.default && index.explicit,
     );
-    const defaultIndex = uv.index?.find(
+    const defaultIndex = indexes?.find(
       (index) => index.default && !index.explicit,
     );
-    const implicitIndexUrls = uv.index
+    const implicitIndexUrls = indexes
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
       ?.map(({ url }) => url);
 
-    const devDependencies = uv['dev-dependencies'];
+    const devDependencies = memberUv?.['dev-dependencies'];
     if (devDependencies) {
       deps.push(...devDependencies);
     }
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
-    if (uv.sources || defaultIndex || implicitIndexUrls) {
+    if (sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
         /* v8 ignore next 3 -- needs test */
         if (!dep.packageName) {
@@ -77,14 +128,12 @@ export class UvProcessor extends BasePyProjectProcessor {
 
         // Using `packageName` as it applies PEP 508 normalization, which is
         // also applied by uv when matching a source to a dependency.
-        const depSource = uv.sources?.[dep.packageName];
+        const depSource = sources?.[dep.packageName];
         if (depSource) {
           // Dependency is pinned to a specific source.
           dep.depType = depTypes.uvSources;
           if ('index' in depSource) {
-            const index = uv.index?.find(
-              ({ name }) => name === depSource.index,
-            );
+            const index = indexes?.find(({ name }) => name === depSource.index);
             if (index) {
               dep.registryUrls = [index.url];
             }
@@ -201,14 +250,19 @@ export class UvProcessor extends BasePyProjectProcessor {
           config.constraints?.uv ?? project.tool?.uv?.['required-version'],
       };
 
-      const effectiveUv = await getEffectiveUvConfig(
-        project.tool?.uv,
-        packageFileName,
-      );
+      const memberUv = project.tool?.uv;
+      const inherited = await loadInheritedUvConfig(packageFileName);
+      const sources = effectiveSources(memberUv, inherited);
+      const indexes = effectiveIndexes(memberUv, inherited);
+
       const extraEnv = {
         ...getGitEnvironmentVariables(['pep621']),
-        ...(await getUvExtraIndexUrl(effectiveUv, updateArtifact.updatedDeps)),
-        ...(await getUvIndexCredentials(effectiveUv)),
+        ...(await getUvExtraIndexUrl(
+          sources,
+          indexes,
+          updateArtifact.updatedDeps,
+        )),
+        ...(await getUvIndexCredentials(indexes)),
       };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
@@ -312,14 +366,14 @@ async function getUsernamePassword(
 }
 
 async function getUvExtraIndexUrl(
-  uv: UvConfig | undefined,
+  sources: UvSources | undefined,
+  indexes: UvIndexes | undefined,
   deps: Upgrade[],
 ): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
-      const sources = uv?.sources;
       const packageName = dep.packageName!;
       return !sources || !(packageName in sources);
     })
@@ -327,7 +381,7 @@ async function getUvExtraIndexUrl(
     .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
-      const configuredIndexUrls = uv?.index?.map(({ url }) => url) ?? [];
+      const configuredIndexUrls = indexes?.map(({ url }) => url) ?? [];
       return (
         registryUrl !== PypiDatasource.defaultURL &&
         !configuredIndexUrls.includes(registryUrl)
@@ -362,17 +416,15 @@ async function getUvExtraIndexUrl(
 }
 
 async function getUvIndexCredentials(
-  uv: UvConfig | undefined,
+  indexes: UvIndexes | undefined,
 ): Promise<NodeJS.ProcessEnv> {
-  const uv_indexes = uv?.index;
-
-  if (!uv_indexes) {
+  if (!indexes) {
     return {};
   }
 
   const entries = [];
 
-  for (const { name, url } of uv_indexes) {
+  for (const { name, url } of indexes) {
     const parsedUrl = parseUrl(url);
     /* v8 ignore next 3 -- needs test */
     if (!parsedUrl) {

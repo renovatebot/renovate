@@ -16,7 +16,7 @@ export interface PyProjectProcessor {
    * If no relevant section for the processor exists, then it should return the received dependencies unmodified.
    * @param project PyProject object
    * @param deps List of already extracted/processed dependencies
-   * @param packageFile Path of the pyproject.toml being processed (relative to localDir)
+   * @param packageFile Path of the pyproject.toml being processed (relative to localDir). Processors that need to consult other files in the repo accept this; processors that work purely off the parsed `project` can ignore it.
    */
   process(
     project: PyProject,
