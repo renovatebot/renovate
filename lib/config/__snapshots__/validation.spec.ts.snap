@@ -196,6 +196,14 @@ exports[`config/validation > validateConfig(config) > returns custom deprecation
 exports[`config/validation > validateConfig(config) > returns nested errors 1`] = `
 [
   {
+    "message": "Failed to parse regex pattern for packageRules[0].matchPackageNames: !/abc ([a-z]+) ([a-z]+))/",
+    "topic": "Configuration Error",
+  },
+  {
+    "message": "Failed to parse regex pattern for packageRules[0].matchPackageNames: /abc ([a-z]+) ([a-z]+))/",
+    "topic": "Configuration Error",
+  },
+  {
     "message": "Invalid configuration option: foo",
     "topic": "Configuration Error",
   },
@@ -209,6 +217,10 @@ exports[`config/validation > validateConfig(config) > returns nested errors 1`] 
   },
   {
     "message": "Invalid regExp for packageRules[0].matchPackageNames: \`/abc ([a-z]+) ([a-z]+))/\`",
+    "topic": "Configuration Error",
+  },
+  {
+    "message": "packageRules[0].matchPackageNames: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.",
     "topic": "Configuration Error",
   },
 ]
