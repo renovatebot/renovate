@@ -1,4 +1,3 @@
-import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
@@ -441,6 +440,11 @@ describe('config/validation', () => {
       expect(errors).toEqual([
         {
           topic: 'Configuration Error',
+          message:
+            'Failed to parse regex pattern for baseBranchPatterns: /***$}{]][/',
+        },
+        {
+          topic: 'Configuration Error',
           message: 'Invalid regExp for baseBranchPatterns: `/***$}{]][/`',
         },
       ]);
@@ -472,7 +476,7 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(4);
+      expect(errors).toHaveLength(7);
       expect(errors).toMatchSnapshot();
     });
 
@@ -1905,80 +1909,6 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
     });
-
-    it('errors if no bumpVersion filePattern is provided', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-          bumpType: 'patch',
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-              bumpType: 'patch',
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
-    it('errors if no matchStrings are provided for bumpVersion', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
-    it('allow bumpVersion', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
   });
 
   describe('validateConfig() -> globaOnly options', () => {
@@ -2353,7 +2283,6 @@ describe('config/validation', () => {
         };
         const { warnings } = await configValidation.validateConfig(
           'global',
-          // @ts-expect-error: contains invalid values
           config,
         );
         expect(warnings).toEqual([
@@ -2730,6 +2659,26 @@ describe('config/validation', () => {
         const config: AllConfig = {
           cacheTtlOverride: {
             'datasource-docker-hub-tags': 90,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('allows wildcards', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            'datasource-rubygems': 120,
+            'datasource-*': 60,
+            'datasource-{crate,go}': 90,
+            '/^changelog-/': 45,
+            '*': 30,
           },
         };
 

@@ -2,7 +2,7 @@
 /* oxlint-disable typescript/only-throw-error */
 // TODO: fix, should only allow `Error` type
 
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '~test/util.ts';
 import { AsyncResult, Result } from './result.ts';
 
@@ -108,9 +108,7 @@ describe('util/result', () => {
         expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
         expect(Result.wrap(schema.safeParse(42))).toMatchObject(
           Result.err({
-            issues: [
-              { code: 'invalid_type', expected: 'string', received: 'number' },
-            ],
+            issues: [{ code: 'invalid_type', expected: 'string' }],
           }),
         );
       });
@@ -275,7 +273,13 @@ describe('util/result', () => {
         expect(Result.parse('foo', schema)).toEqual(Result.ok('FOO'));
 
         expect(Result.parse(42, schema).unwrap()).toMatchObject({
-          err: { issues: [{ message: 'Expected string, received number' }] },
+          err: expect.objectContaining({
+            issues: expect.arrayContaining([
+              expect.objectContaining({
+                message: 'Invalid input: expected string, received number',
+              }),
+            ]),
+          }),
         });
 
         expect(Result.parse(undefined, schema).unwrap()).toMatchObject({
@@ -308,7 +312,13 @@ describe('util/result', () => {
         expect(Result.ok('foo').parse(schema)).toEqual(Result.ok('FOO'));
 
         expect(Result.ok(42).parse(schema).unwrap()).toMatchObject({
-          err: { issues: [{ message: 'Expected string, received number' }] },
+          err: expect.objectContaining({
+            issues: expect.arrayContaining([
+              expect.objectContaining({
+                message: 'Invalid input: expected string, received number',
+              }),
+            ]),
+          }),
         });
 
         expect(Result.err('oops').parse(schema)).toEqual(Result.err('oops'));
@@ -653,7 +663,13 @@ describe('util/result', () => {
       );
 
       expect(await AsyncResult.ok(42).parse(schema).unwrap()).toMatchObject({
-        err: { issues: [{ message: 'Expected string, received number' }] },
+        err: expect.objectContaining({
+          issues: expect.arrayContaining([
+            expect.objectContaining({
+              message: 'Invalid input: expected string, received number',
+            }),
+          ]),
+        }),
       });
     });
 

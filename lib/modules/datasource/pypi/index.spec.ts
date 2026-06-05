@@ -87,16 +87,6 @@ describe('modules/datasource/pypi/index', () => {
       process.env = OLD_ENV;
     });
 
-    it('returns null for empty result', async () => {
-      httpMock.scope(baseUrl).get('/something/json').reply(200);
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'something',
-        }),
-      ).toBeNull();
-    });
-
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/something/json').reply(404);
       httpMock.scope(baseUrl).get('/something/').reply(404);

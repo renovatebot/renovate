@@ -1,5 +1,5 @@
 import { DateTime, Duration } from 'luxon';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { toMs } from '../../../util/pretty-time.ts';
 import {
   LooseArray,
@@ -95,8 +95,8 @@ const HatchConfig = z
     envs: LooseRecord(
       z.string(),
       z.object({
-        dependencies: z.unknown(),
-        'extra-dependencies': z.unknown(),
+        dependencies: z.unknown().optional(),
+        'extra-dependencies': z.unknown().optional(),
       }),
     ),
   })

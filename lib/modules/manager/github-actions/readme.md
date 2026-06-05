@@ -106,18 +106,4 @@ If you find a use case which you think Renovate could/should automatically detec
 
 Renovate also supports some commonly used community actions:
 
-- `aquasecurity/setup-trivy`
-- `aquasecurity/trivy-action`
-- `astral-sh/setup-uv`
-- `denoland/setup-deno`
-- `golangci/golangci-lint-action`
-- `jakebailey/pyright-action`
-- `jaxxstorm/action-install-gh-release`
-- `oven-sh/setup-bun`
-- `pdm-project/setup-pdm`
-- `pnpm/action-setup`
-- `prefix-dev/setup-pixi`
-- `pypa/hatch`
-- `ruby/setup-ruby`
-- `sigoden/install-binary`
-- `zizmorcore/zizmor-action`
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
