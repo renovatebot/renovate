@@ -6,6 +6,7 @@ import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
 import { GitRefsDatasource } from '../../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
@@ -35,19 +36,19 @@ const processor = new UvProcessor();
 
 describe('modules/manager/pep621/processors/uv', () => {
   describe('process()', () => {
-    it('returns initial dependencies if there is no tool.uv section', () => {
+    it('returns initial dependencies if there is no tool.uv section', async () => {
       const pyproject = parsePyProject(codeBlock`
         [tool]
       `)!;
 
       const dependencies = [{ depName: 'dep1' }];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual(dependencies);
     });
 
-    it('includes uv dev dependencies if there is a tool.uv section', () => {
+    it('includes uv dev dependencies if there is a tool.uv section', async () => {
       const pyproject = parsePyProject(codeBlock`
         [tool.uv]
         dev-dependencies = ["dep2==1.2.3", "dep3==2.3.4"]
@@ -55,7 +56,7 @@ describe('modules/manager/pep621/processors/uv', () => {
 
       const dependencies = [{ depName: 'dep1' }];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         { depName: 'dep1' },
@@ -78,7 +79,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('applies git sources', () => {
+    it('applies git sources', async () => {
       const pyproject = parsePyProject(codeBlock`
       [tool.uv]
       dev-dependencies = ["dep3", "dep4", "dep5"]
@@ -102,7 +103,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -147,7 +148,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('pinned to non-default index', () => {
+    it('pinned to non-default index', async () => {
       const pyproject = parsePyProject(codeBlock`
       [tool.uv.sources]
       dep1 = { index = "foo" }
@@ -191,7 +192,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -219,7 +220,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('index with optional name', () => {
+    it('index with optional name', async () => {
       const pyproject = parsePyProject(codeBlock`
       [[tool.uv.index]]
       url = "https://foo.com/simple"
@@ -238,7 +239,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -254,7 +255,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('override implicit default index', () => {
+    it('override implicit default index', async () => {
       const pyproject = parsePyProject(codeBlock`
       [[tool.uv.index]]
       name = "foo"
@@ -279,7 +280,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -300,7 +301,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('override explicit default index', () => {
+    it('override explicit default index', async () => {
       const pyproject = parsePyProject(codeBlock`
       [tool.uv.sources]
       dep1 = { index = "foo" }
@@ -323,7 +324,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -338,6 +339,128 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageName: 'dep2',
         },
       ]);
+    });
+
+    describe('uv workspace inheritance', () => {
+      const rootPyproject = codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [tool.uv.sources]
+        private-pkg = { index = "PrivateIndex" }
+        some-internal-pkg = { workspace = true }
+
+        [[tool.uv.index]]
+        name = "PrivateIndex"
+        url = "https://my-private-registry/simple/"
+        explicit = true
+      `;
+
+      beforeEach(() => {
+        memCache.init();
+        fs.localPathExists.mockImplementation((p: string) =>
+          Promise.resolve(p === 'pyproject.toml'),
+        );
+        fs.readLocalFile.mockImplementation((p: string) =>
+          Promise.resolve(p === 'pyproject.toml' ? rootPyproject : null),
+        );
+      });
+
+      it('inherits root sources/indexes when a member has none', async () => {
+        const member = parsePyProject(codeBlock`
+          [project]
+          name = "foo"
+          dependencies = ["private-pkg==1.0.0", "some-internal-pkg==1.0.0"]
+        `)!;
+        const dependencies = [
+          { depName: 'private-pkg', packageName: 'private-pkg' },
+          {
+            depName: 'some-internal-pkg',
+            packageName: 'some-internal-pkg',
+          },
+        ];
+        const result = await processor.process(
+          member,
+          dependencies,
+          'packages/foo/pyproject.toml',
+        );
+        expect(result).toEqual([
+          {
+            depName: 'private-pkg',
+            depType: depTypes.uvSources,
+            packageName: 'private-pkg',
+            registryUrls: ['https://my-private-registry/simple/'],
+          },
+          {
+            depName: 'some-internal-pkg',
+            depType: depTypes.uvSources,
+            packageName: 'some-internal-pkg',
+            skipReason: 'inherited-dependency',
+          },
+        ]);
+      });
+
+      it('member entries override the root for the same key', async () => {
+        const member = parsePyProject(codeBlock`
+          [project]
+          name = "foo"
+
+          [tool.uv.sources]
+          private-pkg = { index = "MemberIndex" }
+
+          [[tool.uv.index]]
+          name = "MemberIndex"
+          url = "https://member-registry/simple/"
+          explicit = true
+        `)!;
+        const dependencies = [
+          { depName: 'private-pkg', packageName: 'private-pkg' },
+        ];
+        const result = await processor.process(
+          member,
+          dependencies,
+          'packages/foo/pyproject.toml',
+        );
+        expect(result[0].registryUrls).toEqual([
+          'https://member-registry/simple/',
+        ]);
+      });
+
+      it('treats members in [tool.uv.workspace.exclude] as standalone', async () => {
+        fs.readLocalFile.mockImplementation((p: string) =>
+          Promise.resolve(
+            p === 'pyproject.toml'
+              ? codeBlock`
+                [tool.uv.workspace]
+                members = ["packages/*"]
+                exclude = ["packages/foo"]
+
+                [tool.uv.sources]
+                private-pkg = { index = "PrivateIndex" }
+
+                [[tool.uv.index]]
+                name = "PrivateIndex"
+                url = "https://my-private-registry/simple/"
+                explicit = true
+              `
+              : null,
+          ),
+        );
+        const member = parsePyProject(codeBlock`
+          [project]
+          name = "foo"
+        `)!;
+        const dependencies = [
+          { depName: 'private-pkg', packageName: 'private-pkg' },
+        ];
+        const result = await processor.process(
+          member,
+          dependencies,
+          'packages/foo/pyproject.toml',
+        );
+        // No inheritance: registryUrls untouched.
+        expect(result[0].registryUrls).toBeUndefined();
+      });
     });
   });
 

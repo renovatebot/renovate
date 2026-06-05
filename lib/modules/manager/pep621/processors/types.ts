@@ -16,8 +16,13 @@ export interface PyProjectProcessor {
    * If no relevant section for the processor exists, then it should return the received dependencies unmodified.
    * @param project PyProject object
    * @param deps List of already extracted/processed dependencies
+   * @param packageFile Path of the pyproject.toml being processed (relative to localDir)
    */
-  process(project: PyProject, deps: PackageDependency[]): PackageDependency[];
+  process(
+    project: PyProject,
+    deps: PackageDependency[],
+    packageFile?: string,
+  ): Promise<PackageDependency[]> | PackageDependency[];
 
   extractLockedVersions(
     project: PyProject,

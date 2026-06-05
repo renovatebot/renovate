@@ -25,18 +25,24 @@ import type {
   Upgrade,
 } from '../../types.ts';
 import { applyGitSource } from '../../util.ts';
-import { type PyProject, UvLockfile } from '../schema.ts';
+import { type PyProject, type UvConfig, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 
 import { BasePyProjectProcessor } from './abstract.ts';
+import { getEffectiveUvConfig } from './uv-workspace.ts';
 
 const uvUpdateCMD = 'uv lock';
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
 
-  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
-    const uv = project.tool?.uv;
+  async process(
+    project: PyProject,
+    deps: PackageDependency[],
+    packageFile?: string,
+  ): Promise<PackageDependency[]> {
+    const memberUv = project.tool?.uv;
+    const uv = await getEffectiveUvConfig(memberUv, packageFile);
     if (!uv) {
       return deps;
     }
@@ -195,10 +201,14 @@ export class UvProcessor extends BasePyProjectProcessor {
           config.constraints?.uv ?? project.tool?.uv?.['required-version'],
       };
 
+      const effectiveUv = await getEffectiveUvConfig(
+        project.tool?.uv,
+        packageFileName,
+      );
       const extraEnv = {
         ...getGitEnvironmentVariables(['pep621']),
-        ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
-        ...(await getUvIndexCredentials(project)),
+        ...(await getUvExtraIndexUrl(effectiveUv, updateArtifact.updatedDeps)),
+        ...(await getUvIndexCredentials(effectiveUv)),
       };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
@@ -302,14 +312,14 @@ async function getUsernamePassword(
 }
 
 async function getUvExtraIndexUrl(
-  project: PyProject,
+  uv: UvConfig | undefined,
   deps: Upgrade[],
 ): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
-      const sources = project.tool?.uv?.sources;
+      const sources = uv?.sources;
       const packageName = dep.packageName!;
       return !sources || !(packageName in sources);
     })
@@ -317,8 +327,7 @@ async function getUvExtraIndexUrl(
     .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
-      const configuredIndexUrls =
-        project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      const configuredIndexUrls = uv?.index?.map(({ url }) => url) ?? [];
       return (
         registryUrl !== PypiDatasource.defaultURL &&
         !configuredIndexUrls.includes(registryUrl)
@@ -353,9 +362,9 @@ async function getUvExtraIndexUrl(
 }
 
 async function getUvIndexCredentials(
-  project: PyProject,
+  uv: UvConfig | undefined,
 ): Promise<NodeJS.ProcessEnv> {
-  const uv_indexes = project.tool?.uv?.index;
+  const uv_indexes = uv?.index;
 
   if (!uv_indexes) {
     return {};

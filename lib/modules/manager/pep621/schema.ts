@@ -168,7 +168,16 @@ const UvConfig = z.object({
       }),
     )
     .optional(),
+  workspace: z
+    .object({
+      members: z.array(z.string()).optional(),
+      exclude: z.array(z.string()).optional(),
+    })
+    .optional()
+    .catch(undefined),
 });
+
+export type UvConfig = z.infer<typeof UvConfig>;
 
 export const ProjectSection = z.object({
   version: z.string().optional().catch(undefined),

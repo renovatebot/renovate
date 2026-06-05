@@ -22,7 +22,8 @@ export abstract class BasePyProjectProcessor implements PyProjectProcessor {
   abstract process(
     project: PyProject,
     deps: PackageDependency[],
-  ): PackageDependency[];
+    packageFile?: string,
+  ): Promise<PackageDependency[]> | PackageDependency[];
 
   abstract extractLockedVersions(
     project: PyProject,
