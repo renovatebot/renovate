@@ -3062,7 +3062,7 @@ describe('config/validation', () => {
     });
 
     describe('repositories', () => {
-      it('is not validated', async () => {
+      it('is validated', async () => {
         const config: AllConfig = {
           repositories: [
             {
@@ -3079,7 +3079,12 @@ describe('config/validation', () => {
         );
 
         expect(warnings).toBeEmptyArray();
-        expect(errors).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Configuration option `repositories[0].dependencyDashboardHeader` should be a string',
+          },
+        ]);
       });
     });
   });
