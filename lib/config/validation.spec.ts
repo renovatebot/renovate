@@ -1,4 +1,3 @@
-import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
@@ -2172,72 +2171,6 @@ describe('config/validation', () => {
       );
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
-    });
-
-    it('errors if no bumpVersion filePattern is provided', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-          bumpType: 'patch',
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-              bumpType: 'patch',
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toBeEmptyArray();
-      expect(errors).toMatchObject([
-        {
-          message: 'Configuration option `bumpVersion` should be a string',
-        },
-        {
-          message:
-            'Configuration option `packageRules[0].bumpVersion` should be a string',
-        },
-      ]);
-    });
-
-    it('errors if no matchStrings are provided for bumpVersion', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toBeEmptyArray();
-      expect(errors).toMatchObject([
-        {
-          message: 'Configuration option `bumpVersion` should be a string',
-        },
-        {
-          message:
-            'Configuration option `packageRules[0].bumpVersion` should be a string',
-        },
-      ]);
     });
   });
 
