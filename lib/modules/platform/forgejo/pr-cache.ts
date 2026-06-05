@@ -12,7 +12,7 @@ import {
   parseUrl,
 } from '../../../util/url.ts';
 import type { Pr } from '../types.ts';
-import { PRListSchema } from './schema.ts';
+import { PRList } from './schema.ts';
 import type { ForgejoPrCacheData, PR } from './types.ts';
 import { API_PATH, toRenovatePR } from './utils.ts';
 
@@ -174,7 +174,7 @@ export class ForgejoPrCache {
           memCache: false,
           paginate: false,
         },
-        PRListSchema,
+        PRList,
       );
 
       const needNextPage = this.reconcile(res.body as (PR | null)[]);

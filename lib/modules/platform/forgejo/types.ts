@@ -102,11 +102,6 @@ export interface RepoPermission {
   push: boolean;
 }
 
-export interface RepoSearchResults {
-  ok: boolean;
-  data: Repo[];
-}
-
 export interface RepoContents {
   path: string;
   content?: string;

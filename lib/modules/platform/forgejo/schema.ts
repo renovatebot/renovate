@@ -13,21 +13,22 @@ export type ContentsResponse = z.infer<typeof ContentsResponse>;
 export const ContentsListResponse = z.array(ContentsResponse);
 
 // Lenient User schema - email may not always be valid format in tests
-export const UserSchema = z.object({
+export const User = z.object({
   id: z.number().optional(),
   email: EmailAddress.optional(),
   full_name: z.string().optional(),
   username: z.string().optional(),
 });
+export type User = z.infer<typeof User>;
 
-const RepoPermissionSchema = z.object({
+const RepoPermission = z.object({
   admin: z.boolean().optional(),
   pull: z.boolean().optional(),
   push: z.boolean().optional(),
 });
 
 // Lenient Repo schema - only validates fields Renovate reads, most are optional
-export const RepoSchema = z.object({
+export const Repo = z.object({
   id: z.number().optional(),
   allow_fast_forward_only_merge: z.boolean().optional(),
   allow_merge_commits: z.boolean().optional(),
@@ -46,30 +47,32 @@ export const RepoSchema = z.object({
   fork: z.boolean().optional(),
   full_name: z.string(),
   mirror: z.boolean().optional(),
-  owner: UserSchema.optional(),
-  permissions: RepoPermissionSchema.optional(),
+  owner: User.optional(),
+  permissions: RepoPermission.optional(),
 });
+export type Repo = z.infer<typeof Repo>;
 
-export const ForgejoLabelSchema = z.object({
+export const ForgejoLabel = z.object({
   id: z.number().optional(),
   name: z.string().optional(),
 });
 
-export const LabelSchema = z.object({
+export const Label = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().optional(),
   color: z.string().optional(),
 });
+export type Label = z.infer<typeof Label>;
 
 // Lenient partial repo schema for embedded repo references in PRs (only full_name is read)
-const PartialRepoSchema = z
+const PartialRepo = z
   .object({
     full_name: z.string(),
   })
   .passthrough();
 
-export const PRSchema = z.object({
+export const PR = z.object({
   number: z.number(),
   state: z.union([z.literal('open'), z.literal('closed'), z.literal('all')]),
   title: z.string(),
@@ -89,7 +92,7 @@ export const PRSchema = z.object({
     .object({
       label: z.string(),
       sha: z.string(),
-      repo: PartialRepoSchema.optional(),
+      repo: PartialRepo.optional(),
     })
     .optional(),
   assignee: z
@@ -103,30 +106,33 @@ export const PRSchema = z.object({
       username: z.string().optional(),
     })
     .optional(),
-  labels: z.array(ForgejoLabelSchema).optional(),
+  labels: z.array(ForgejoLabel).optional(),
 });
+export type PR = z.infer<typeof PR>;
 
-export const NullablePRSchema = PRSchema.nullable();
+export const NullablePR = PR.nullable();
 
-export const PRListSchema = LooseArray(NullablePRSchema);
+export const PRList = LooseArray(NullablePR);
 
-export const IssueSchema = z.object({
+export const Issue = z.object({
   number: z.number(),
   state: z
     .union([z.literal('open'), z.literal('closed'), z.literal('all')])
     .optional(),
   title: z.string(),
   body: z.string().optional(),
-  assignees: z.array(UserSchema).optional(),
-  labels: z.array(LabelSchema).optional(),
+  assignees: z.array(User).optional(),
+  labels: z.array(Label).optional(),
 });
+export type Issue = z.infer<typeof Issue>;
 
-export const CommentSchema = z.object({
+export const Comment = z.object({
   id: z.number(),
   body: z.string(),
 });
+export type Comment = z.infer<typeof Comment>;
 
-export const CommitStatusSchema = z.object({
+export const CommitStatus = z.object({
   id: z.number(),
   // Accept any string as status; callers handle unknown values gracefully
   status: z.string(),
@@ -135,34 +141,37 @@ export const CommitStatusSchema = z.object({
   target_url: z.string().optional(),
   created_at: z.string(),
 });
+export type CommitStatus = z.infer<typeof CommitStatus>;
 
-const CommitUserSchema = z.object({
+const CommitUser = z.object({
   name: z.string().optional(),
   email: EmailAddress.optional(),
   username: z.string().optional(),
 });
 
-const CommitSchema = z.object({
+const Commit = z.object({
   id: z.string(),
-  author: CommitUserSchema,
+  author: CommitUser,
 });
 
-export const BranchSchema = z.object({
+export const Branch = z.object({
   name: z.string(),
-  commit: CommitSchema,
+  commit: Commit,
 });
+export type Branch = z.infer<typeof Branch>;
 
-export const RepoSearchResultsSchema = z.object({
+export const RepoSearchResults = z.object({
   ok: z.boolean(),
-  data: z.array(RepoSchema),
+  data: z.array(Repo),
 });
 
-export const RepoContentsSchema = z.object({
+export const RepoContents = z.object({
   path: z.string().optional(),
   content: z.string().optional(),
   contentString: z.string().optional(),
 });
+export type RepoContents = z.infer<typeof RepoContents>;
 
-export const VersionSchema = z.object({
+export const Version = z.object({
   version: z.string(),
 });
