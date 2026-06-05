@@ -164,6 +164,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     } else {
       logger.debug({ packageFile }, `No uv lock file found`);
     }
+
     return Promise.resolve(deps);
   }
 
