@@ -3060,5 +3060,27 @@ describe('config/validation', () => {
         expect(errors).toBeEmptyArray();
       });
     });
+
+    describe('repositories', () => {
+      it('is not validated', async () => {
+        const config: AllConfig = {
+          repositories: [
+            {
+              repository: 'valid/name',
+              // @ts-expect-error -- invalid config
+              dependencyDashboardHeader: true,
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+    });
   });
 });
