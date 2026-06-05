@@ -25,7 +25,7 @@ describe('config/validation', () => {
         const config = {
           [option]: 'something',
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'repo',
           config,
         );
@@ -35,6 +35,7 @@ describe('config/validation', () => {
             message,
           },
         ]);
+        expect(errors).toBeEmptyArray();
       },
     );
 
@@ -80,7 +81,7 @@ describe('config/validation', () => {
         username: 'user',
         ignorePrAuthor: true,
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         // @ts-expect-error -- invalid config
         config,
@@ -96,6 +97,7 @@ describe('config/validation', () => {
           message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('catches global options in inherit config', async () => {
@@ -103,7 +105,7 @@ describe('config/validation', () => {
         binarySource: 'something',
         username: 'user',
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'inherit',
         // @ts-expect-error -- invalid config
         config,
@@ -116,6 +118,7 @@ describe('config/validation', () => {
           message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('only warns for actual globals in repo config', async () => {
@@ -128,32 +131,42 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
       );
       expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('does not warn for valid inheritConfig', async () => {
       const config = {
         onboarding: false,
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'inherit',
         config,
       );
       expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message: 'Invalid template in config path: commitMessage',
+        },
+      ]);
+      expect(warnings).toMatchObject([
+        {
+          message: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
         },
       ]);
     });
@@ -167,8 +180,12 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid jsonata expressions', async () => {
@@ -180,12 +197,16 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message: expect.stringContaining('Invalid JSONata expression'),
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid allowedVersions regex', async () => {
@@ -213,7 +234,10 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -224,6 +248,7 @@ describe('config/validation', () => {
             'Invalid regExp for packageRules[3].allowedVersions: `!/***$}{]][/`',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid matchCurrentValue', async () => {
@@ -256,12 +281,16 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message: 'Invalid regExp for packageRules[4].matchNewValue: `/^2(/`',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid matchNewValue', async () => {
@@ -294,12 +323,16 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message: 'Invalid regExp for packageRules[4].matchNewValue: `/^2(/`',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates matchBaseBranches', async () => {
@@ -373,7 +406,10 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -384,6 +420,7 @@ describe('config/validation', () => {
             'Invalid regExp for packageRules[3].matchCurrentVersion: `!/***$}{]][/`',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid customDatasources content', async () => {
@@ -402,7 +439,10 @@ describe('config/validation', () => {
           },
         },
       } as any;
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -421,6 +461,7 @@ describe('config/validation', () => {
             'Invalid `customDatasources.transformTemplates` configuration: is not an array of string',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates invalid statusCheckNames', async () => {
@@ -432,8 +473,11 @@ describe('config/validation', () => {
           artifactError: null,
         },
       };
-      // @ts-expect-error invalid options
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error invalid options
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -444,6 +488,7 @@ describe('config/validation', () => {
             'Invalid `statusCheckNames.statusCheckNames.randomKey` configuration: key is not allowed.',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid customDatasources record type', async () => {
@@ -452,20 +497,27 @@ describe('config/validation', () => {
           randomKey: '',
         },
       } as any;
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
             'Invalid `customDatasources.randomKey` configuration: customDatasource is not an object',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid baseBranchPatterns regex', async () => {
       const config = {
         baseBranchPatterns: ['/***$}{]][/', '/branch/i'],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toEqual([
         {
           topic: 'Configuration Error',
@@ -477,6 +529,7 @@ describe('config/validation', () => {
           message: 'Invalid regExp for baseBranchPatterns: `/***$}{]][/`',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('returns nested errors', async () => {
@@ -1869,7 +1922,7 @@ describe('config/validation', () => {
           example2: '123',
         },
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
       );
@@ -1879,6 +1932,7 @@ describe('config/validation', () => {
           message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors if schedule is cron and has no * minutes', async () => {
@@ -1922,7 +1976,10 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           topic: 'Configuration Error',
@@ -1939,6 +1996,7 @@ describe('config/validation', () => {
           message: 'hostRules matchHost `://` is not a valid URL.',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('errors if forbidden header in hostRules', async () => {
@@ -2117,7 +2175,10 @@ describe('config/validation', () => {
       const config = {
         azureWorkItemId: -2,
       };
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -2125,6 +2186,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates prPriority', async () => {
@@ -2155,7 +2217,7 @@ describe('config/validation', () => {
         logFile: 'something',
         logFileLevel: 'DEBUG',
       };
-      const { errors } = await configValidation.validateConfig(
+      const { errors, warnings } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
         config,
@@ -2170,6 +2232,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates hostRules.headers', async () => {
@@ -2203,7 +2266,7 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig(
+      const { errors, warnings } = await configValidation.validateConfig(
         'global',
         config,
       );
@@ -2214,6 +2277,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates env', async () => {
@@ -2264,7 +2328,7 @@ describe('config/validation', () => {
           SOME_VAR: 'SOME_VALUE',
         },
       };
-      const { errors } = await configValidation.validateConfig(
+      const { errors, warnings } = await configValidation.validateConfig(
         'global',
         config,
       );
@@ -2275,6 +2339,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates env against the allowedEnv regex', async () => {
@@ -2332,7 +2397,7 @@ describe('config/validation', () => {
       const config: GlobalConfig = {
         binarySource: 'docker',
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,
       );
@@ -2343,13 +2408,14 @@ describe('config/validation', () => {
             'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('binarySource', async () => {
       const config = {
         binarySource: 'invalid' as never,
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,
       );
@@ -2360,6 +2426,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     describe('validates string type options', () => {
@@ -2367,7 +2434,7 @@ describe('config/validation', () => {
         const config = {
           binarySource: 'invalid' as never,
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2378,13 +2445,14 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('baseDir', async () => {
         const config = {
           baseDir: false as never,
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2394,13 +2462,14 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('requireConfig', async () => {
         const config = {
           requireConfig: 'invalid' as never,
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2411,13 +2480,14 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('dryRun', async () => {
         const config = {
           dryRun: 'invalid' as never,
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2428,13 +2498,14 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('repositoryCache', async () => {
         const config = {
           repositoryCache: 'invalid' as never,
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2445,13 +2516,14 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('onboardingConfigFileName', async () => {
         const config = {
           onboardingConfigFileName: 'invalid' as never,
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2461,6 +2533,7 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('onboardingConfig', async () => {
@@ -2471,11 +2544,10 @@ describe('config/validation', () => {
             managerFilePatterns: ['somefile'], // invalid at top level
           },
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
-        expect.assertions(1);
         expect(warnings).toEqual([
           {
             topic: 'Configuration Error',
@@ -2488,6 +2560,7 @@ describe('config/validation', () => {
             ),
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('force', async () => {
@@ -2501,7 +2574,7 @@ describe('config/validation', () => {
             },
           },
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2513,13 +2586,14 @@ describe('config/validation', () => {
             ),
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
 
       it('gitUrl', async () => {
         const config = {
           gitUrl: 'invalid' as never,
         };
-        const { warnings } = await configValidation.validateConfig(
+        const { warnings, errors } = await configValidation.validateConfig(
           'global',
           config,
         );
@@ -2530,6 +2604,7 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
+        expect(errors).toBeEmptyArray();
       });
     });
 
@@ -2538,7 +2613,7 @@ describe('config/validation', () => {
         unicodeEmoji: false,
         detectGlobalManagerConfig: 'invalid-type',
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
         config,
@@ -2551,6 +2626,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates integer type options', async () => {
@@ -2558,7 +2634,7 @@ describe('config/validation', () => {
         prCommitsPerRunLimit: 2,
         gitTimeout: 'invalid-type',
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
         config,
@@ -2571,6 +2647,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates array type options', async () => {
@@ -2580,7 +2657,7 @@ describe('config/validation', () => {
         gitNoVerify: ['invalid'],
         mergeConfidenceDatasources: [1],
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
         config,
@@ -2602,6 +2679,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates object type options', async () => {
@@ -2616,7 +2694,7 @@ describe('config/validation', () => {
           '_test-namespace': false,
         },
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
         config,
@@ -2632,13 +2710,14 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('warns if negative number is used for integer type', async () => {
       const config = {
         prCommitsPerRunLimit: -2,
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,
       );
@@ -2649,6 +2728,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('warns on invalid customEnvVariables objects', async () => {
@@ -2658,7 +2738,7 @@ describe('config/validation', () => {
           example2: 123,
         },
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error -- testing
         config,
@@ -2670,6 +2750,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates valid customEnvVariables objects', async () => {
