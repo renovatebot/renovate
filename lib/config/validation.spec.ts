@@ -693,36 +693,30 @@ describe('config/validation', () => {
     });
 
     it.each([
-      [
-        'single not supported manager',
-        { enabledManagers: ['foo'] },
-        'The following managers configured in enabledManagers are not supported: "foo"',
-      ],
+      ['single not supported manager', { enabledManagers: ['foo'] }, '["foo"]'],
       [
         'multiple not supported managers',
         { enabledManagers: ['foo', 'bar'] },
-        'The following managers configured in enabledManagers are not supported: "foo, bar"',
+        '["foo","bar"]',
       ],
       [
         'combined supported and not supported managers',
         { enabledManagers: ['foo', 'npm', 'gradle', 'maven'] },
-        'The following managers configured in enabledManagers are not supported: "foo"',
+        '["foo"]',
       ],
     ])(
       'errors if included not supported enabled managers for %s',
-      async (_case, config, message) => {
+      async (_case, config, invalidValues) => {
         const { warnings, errors } = await configValidation.validateConfig(
           'repo',
           config,
         );
         expect(warnings).toBeEmptyArray();
-        expect(errors).toMatchObject([
+        expect(errors).toEqual([
           {
-            message: expect.stringContaining(
-              'Invalid enabledManagers: enabledManagers had invalid values',
-            ),
+            topic: 'Configuration Error',
+            message: `Invalid enabledManagers: enabledManagers had invalid values \`${invalidValues}\` which are not part of the allowedValues, which are listed at https://docs.renovatebot.com/configuration-options/#enabledmanagers`,
           },
-          { message },
         ]);
       },
     );
@@ -1025,10 +1019,6 @@ describe('config/validation', () => {
         [
           {
             "message": "Invalid customManagers[0].customType: customType had a value \`"unknown"\` which was not part of the allowedValues: ["jsonata","regex"]",
-            "topic": "Configuration Error",
-          },
-          {
-            "message": "Invalid customType: unknown. Key is not a custom manager",
             "topic": "Configuration Error",
           },
         ]
@@ -3134,13 +3124,7 @@ describe('config/validation', () => {
         'global',
         config,
       );
-      expect(warnings).toEqual([
-        {
-          message:
-            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
-          topic: 'Configuration Error',
-        },
-      ]);
+      expect(warnings).toBeEmptyArray();
       expect(errors).toMatchObject([
         {
           message:
@@ -3158,13 +3142,7 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
-            topic: 'Configuration Error',
-          },
-        ]);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toMatchObject([
           {
             message:
@@ -3198,13 +3176,7 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `requireConfig`. The allowed values are required, optional, ignored.',
-            topic: 'Configuration Error',
-          },
-        ]);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toMatchObject([
           {
             message:
@@ -3221,13 +3193,7 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `dryRun`. The allowed values are extract, lookup, full.',
-            topic: 'Configuration Error',
-          },
-        ]);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toMatchObject([
           {
             message:
@@ -3244,13 +3210,7 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset.',
-            topic: 'Configuration Error',
-          },
-        ]);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toMatchObject([
           {
             message:
@@ -3337,12 +3297,7 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toMatchObject([
-          {
-            message:
-              'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint.',
-          },
-        ]);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toMatchObject([
           {
             message:
@@ -3413,16 +3368,6 @@ describe('config/validation', () => {
             'Configuration option `checkedBranches` should be a list (Array).',
           topic: 'Configuration Error',
         },
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid value `1` for `mergeConfidenceDatasources`. The allowed values are go, maven, npm, nuget, packagist, pypi, rubygems.',
-        },
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
-        },
       ]);
       expect(errors).toMatchObject([
         {
@@ -3488,13 +3433,7 @@ describe('config/validation', () => {
             'repositories[1]: each repository object entry must have a `repository` string property',
         },
       ]);
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
-        },
-      ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('allows repositories[] as string[]', async () => {
