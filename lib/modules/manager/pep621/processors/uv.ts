@@ -246,7 +246,7 @@ export class UvProcessor extends BasePyProjectProcessor {
             );
             excludeNewerDate = uvExcludeNewerDate;
           }
-          excludeNewerFlag = ` --exclude-newer ${excludeNewerDate.toISO()}`;
+          excludeNewerFlag = `--exclude-newer ${excludeNewerDate.toISO()}`;
         }
       }
       // Run the command, retrying without --exclude-newer if uv fails to
