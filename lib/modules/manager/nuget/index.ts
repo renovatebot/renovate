@@ -16,7 +16,7 @@ export const categories: Category[] = ['dotnet'];
 
 export const defaultConfig = {
   managerFilePatterns: [
-    '/\\.(?:cs|fs|vb)proj$/',
+    '/\\.(?:cs|fs|vb|sql)proj$/',
     '/\\.(?:props|targets)$/',
     '/(^|/)dotnet-tools\\.json$/',
     '/(^|/)global\\.json$/',

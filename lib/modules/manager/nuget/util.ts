@@ -10,6 +10,8 @@ import {
 import { minimatch } from '../../../util/minimatch.ts';
 import { regEx } from '../../../util/regex.ts';
 import { nugetOrg } from '../../datasource/nuget/index.ts';
+import * as semver from '../../versioning/semver/index.ts';
+import { id as semverCoercedId } from '../../versioning/semver-coerced/index.ts';
 import { GlobalJson } from './schema.ts';
 import type { NugetPackageDependency, Registry } from './types.ts';
 
@@ -169,6 +171,21 @@ export function findVersion(parsedXml: XmlDocument): XmlElement | null {
     }
   }
   return null;
+}
+
+/**
+ * MSBuild SDK versions are exact pins. NuGet versioning treats bare versions as
+ * minimum ranges, which breaks update detection for `msbuild-sdk` dependencies.
+ * Use strict semver when valid, otherwise fall back to semver-coerced for
+ * non-standard NuGet version strings (e.g. four-segment revisions).
+ */
+export function applyMsbuildSdkVersioning(
+  dep: NugetPackageDependency,
+): NugetPackageDependency {
+  dep.versioning = semver.isVersion(dep.currentValue ?? '')
+    ? semver.id
+    : semverCoercedId;
+  return dep;
 }
 
 export function applyRegistries(

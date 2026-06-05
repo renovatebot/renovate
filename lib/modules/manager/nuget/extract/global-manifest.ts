@@ -4,8 +4,8 @@ import { DotnetVersionDatasource } from '../../../datasource/dotnet-version/inde
 import { NugetDatasource } from '../../../datasource/nuget/index.ts';
 import type { PackageDependency, PackageFileContent } from '../../types.ts';
 import { GlobalJson } from '../schema.ts';
-import type { NugetPackageDependency, Registry } from '../types.ts';
-import { applyRegistries } from '../util.ts';
+import type { Registry } from '../types.ts';
+import { applyMsbuildSdkVersioning, applyRegistries } from '../util.ts';
 
 export function extractMsbuildGlobalManifest(
   content: string,
@@ -41,12 +41,12 @@ export function extractMsbuildGlobalManifest(
   if (manifest['msbuild-sdks']) {
     for (const depName of Object.keys(manifest['msbuild-sdks'])) {
       const currentValue = manifest['msbuild-sdks'][depName];
-      const dep: NugetPackageDependency = {
+      const dep = applyMsbuildSdkVersioning({
         depType: 'msbuild-sdk',
         depName,
         currentValue,
         datasource: NugetDatasource.id,
-      };
+      });
 
       applyRegistries(dep, registries);
 
