@@ -1,6 +1,6 @@
-import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { simpleGit } from 'simple-git';
 
 const closingKeywordRe =
   /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)(?:\s*:\s*|\s+)(?:(?:renovatebot\/renovate)?#|https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/)(?<issue>\d+)\b/gi;
@@ -76,7 +76,7 @@ export function extractPullRequestTextFromGitHubEvent(
     .join('\n');
 }
 
-function getPullRequestText(): string {
+async function getPullRequestText(): Promise<string> {
   const envText = [
     process.env.RENOVATE_PR_TITLE,
     process.env.RENOVATE_PR_BODY,
@@ -95,7 +95,7 @@ function getPullRequestText(): string {
     process.env.GITHUB_EVENT_PATH
   ) {
     const event = JSON.parse(
-      readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'),
+      await readFile(process.env.GITHUB_EVENT_PATH, 'utf8'),
     ) as GitHubPullRequestEvent;
     return extractPullRequestTextFromGitHubEvent(event);
   }
@@ -103,10 +103,21 @@ function getPullRequestText(): string {
   return '';
 }
 
-function gitGrepTodos(): string {
-  const result = spawnSync(
-    'git',
-    [
+function isGitGrepNoMatchesError(err: unknown): boolean {
+  if (typeof err !== 'object' || err === null) {
+    return false;
+  }
+
+  const maybeGitError = err as { exitCode?: number; message?: string };
+  return (
+    maybeGitError.exitCode === 1 ||
+    /\b(?:exit code|status)\s+1\b/i.test(maybeGitError.message ?? '')
+  );
+}
+
+async function gitGrepTodos(): Promise<string> {
+  try {
+    return await simpleGit().raw([
       'grep',
       '-n',
       '-I',
@@ -114,19 +125,14 @@ function gitGrepTodos(): string {
       'TODO.*((renovatebot/renovate)?#[0-9][0-9]*|github\\.com/renovatebot/renovate/(issues|discussions)/[0-9][0-9]*)',
       '--',
       '.',
-    ],
-    { encoding: 'utf-8' },
-  );
+    ]);
+  } catch (err) {
+    if (isGitGrepNoMatchesError(err)) {
+      return '';
+    }
 
-  if (result.status === 1) {
-    return '';
+    throw err;
   }
-
-  if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout || 'git grep failed');
-  }
-
-  return result.stdout;
 }
 
 export function checkTodoIssueRefs(
@@ -142,27 +148,44 @@ export function checkTodoIssueRefs(
   return findMatchingTodoRefs(grepOutput, closingRefs);
 }
 
-function main(): void {
-  const matches = checkTodoIssueRefs(getPullRequestText(), gitGrepTodos());
+function escapeWorkflowCommandValue(value: string): string {
+  return value
+    .replaceAll('%', '%25')
+    .replaceAll('\r', '%0D')
+    .replaceAll('\n', '%0A');
+}
+
+function error(message: string): void {
+  if (process.env.CI) {
+    console.error(`::error ::${escapeWorkflowCommandValue(message)}`);
+    return;
+  }
+
+  console.error(message);
+}
+
+async function main(): Promise<void> {
+  const matches = checkTodoIssueRefs(
+    await getPullRequestText(),
+    await gitGrepTodos(),
+  );
 
   if (matches.length === 0) {
     return;
   }
 
-  console.error(
-    'Found TODO comments that still reference issues this PR closes:',
-  );
+  error('Found TODO comments that still reference issues this PR closes:');
   for (const match of matches) {
-    console.error(
+    error(
       `- ${match.file}:${match.line} references #${match.issue}: ${match.text}`,
     );
   }
-  console.error(
+  error(
     'Please remove the completed TODO or update it so it no longer points to the closed issue.',
   );
   process.exitCode = 1;
 }
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
-  main();
+  await main();
 }
