@@ -12,6 +12,8 @@ export default function configSerializer<T extends Record<string, unknown>>(
   ];
   const arrayFields = ['packageFiles', 'upgrades'];
 
+  // traverse binds `this.key` and `this.update()` to the callback, requires regular function
+  // eslint-disable-next-line prefer-arrow-callback
   return traverse(config).map(function scrub(val: string) {
     if (this.key && val) {
       const key = this.key.toString();

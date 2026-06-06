@@ -195,7 +195,7 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
-      googleAuth.mockImplementationOnce(function () {
+      googleAuth.mockImplementationOnce(() => {
         return partial<InstanceType<typeof _googleAuth>>({
           getAccessToken: vi.fn().mockResolvedValue('some-token'),
         });
@@ -219,7 +219,7 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
-      googleAuth.mockImplementation(function () {
+      googleAuth.mockImplementation(() => {
         return partial<InstanceType<typeof _googleAuth>>({
           getAccessToken: vi.fn(),
         });
@@ -813,7 +813,7 @@ describe('modules/datasource/pypi/index', () => {
         'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
-    googleAuth.mockImplementationOnce(function () {
+    googleAuth.mockImplementationOnce(() => {
       return partial<InstanceType<typeof _googleAuth>>({
         getAccessToken: vi.fn().mockResolvedValue('some-token'),
       });
@@ -844,7 +844,7 @@ describe('modules/datasource/pypi/index', () => {
         'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
-    googleAuth.mockImplementationOnce(function () {
+    googleAuth.mockImplementationOnce(() => {
       return partial<InstanceType<typeof _googleAuth>>({
         getAccessToken: vi.fn().mockResolvedValue('some-token'),
       });
