@@ -22,14 +22,21 @@ export abstract class BasePyProjectProcessor implements PyProjectProcessor {
   abstract process(
     project: PyProject,
     deps: PackageDependency[],
-    packageFile?: string,
-  ): Promise<PackageDependency[]> | PackageDependency[];
+  ): PackageDependency[];
 
   abstract extractLockedVersions(
     project: PyProject,
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]>;
+
+  extractWorkspaceContext(
+    _project: PyProject,
+    deps: PackageDependency[],
+    _packageFile: string,
+  ): Promise<PackageDependency[]> {
+    return Promise.resolve(deps);
+  }
 
   async getLockfiles(
     _project: PyProject,

@@ -6,6 +6,7 @@ import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
 import { GitRefsDatasource } from '../../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
@@ -35,23 +36,19 @@ const processor = new UvProcessor();
 
 describe('modules/manager/pep621/processors/uv', () => {
   describe('process()', () => {
-    it('returns initial dependencies if there is no tool.uv section', async () => {
+    it('returns initial dependencies if there is no tool.uv section', () => {
       const pyproject = parsePyProject(codeBlock`
         [tool]
       `)!;
 
       const dependencies = [{ depName: 'dep1' }];
 
-      const result = await processor.process(
-        pyproject,
-        dependencies,
-        'pyproject.toml',
-      );
+      const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual(dependencies);
     });
 
-    it('includes uv dev dependencies if there is a tool.uv section', async () => {
+    it('includes uv dev dependencies if there is a tool.uv section', () => {
       const pyproject = parsePyProject(codeBlock`
         [tool.uv]
         dev-dependencies = ["dep2==1.2.3", "dep3==2.3.4"]
@@ -59,11 +56,7 @@ describe('modules/manager/pep621/processors/uv', () => {
 
       const dependencies = [{ depName: 'dep1' }];
 
-      const result = await processor.process(
-        pyproject,
-        dependencies,
-        'pyproject.toml',
-      );
+      const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         { depName: 'dep1' },
@@ -86,7 +79,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('applies git sources', async () => {
+    it('applies git sources', () => {
       const pyproject = parsePyProject(codeBlock`
       [tool.uv]
       dev-dependencies = ["dep3", "dep4", "dep5"]
@@ -110,11 +103,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = await processor.process(
-        pyproject,
-        dependencies,
-        'pyproject.toml',
-      );
+      const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -159,7 +148,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('pinned to non-default index', async () => {
+    it('pinned to non-default index', () => {
       const pyproject = parsePyProject(codeBlock`
       [tool.uv.sources]
       dep1 = { index = "foo" }
@@ -203,11 +192,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = await processor.process(
-        pyproject,
-        dependencies,
-        'pyproject.toml',
-      );
+      const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -235,7 +220,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('index with optional name', async () => {
+    it('index with optional name', () => {
       const pyproject = parsePyProject(codeBlock`
       [[tool.uv.index]]
       url = "https://foo.com/simple"
@@ -254,11 +239,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = await processor.process(
-        pyproject,
-        dependencies,
-        'pyproject.toml',
-      );
+      const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -274,7 +255,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('override implicit default index', async () => {
+    it('override implicit default index', () => {
       const pyproject = parsePyProject(codeBlock`
       [[tool.uv.index]]
       name = "foo"
@@ -299,11 +280,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = await processor.process(
-        pyproject,
-        dependencies,
-        'pyproject.toml',
-      );
+      const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -324,7 +301,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('override explicit default index', async () => {
+    it('override explicit default index', () => {
       const pyproject = parsePyProject(codeBlock`
       [tool.uv.sources]
       dep1 = { index = "foo" }
@@ -347,11 +324,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ];
 
-      const result = await processor.process(
-        pyproject,
-        dependencies,
-        'pyproject.toml',
-      );
+      const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -365,6 +338,247 @@ describe('modules/manager/pep621/processors/uv', () => {
           registryUrls: [],
           packageName: 'dep2',
         },
+      ]);
+    });
+  });
+
+  describe('extractWorkspaceContext()', () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
+    function mockRoot(contents: string) {
+      fs.localPathExists.mockImplementation((p: string) =>
+        Promise.resolve(p === 'pyproject.toml'),
+      );
+      fs.readLocalFile.mockImplementation((p: string) =>
+        Promise.resolve(p === 'pyproject.toml' ? contents : null),
+      );
+    }
+
+    it('returns deps unchanged when no workspace root is found', async () => {
+      fs.localPathExists.mockResolvedValue(false);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+      `)!;
+      const deps = [{ depName: 'dep1', packageName: 'dep1' }];
+      const result = await processor.extractWorkspaceContext(
+        member,
+        deps,
+        'packages/foo/pyproject.toml',
+      );
+      expect(result).toBe(deps);
+    });
+
+    it('skips deps with no packageName or requires-python depType', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [tool.uv.sources]
+        dep1 = { workspace = true }
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+      `)!;
+      const deps = [
+        {
+          depName: 'python',
+          packageName: 'python',
+          depType: 'requires-python',
+        },
+      ];
+      const result = await processor.extractWorkspaceContext(
+        member,
+        deps,
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0]).toEqual({
+        depName: 'python',
+        packageName: 'python',
+        depType: 'requires-python',
+      });
+    });
+
+    it('resolves a member source pin that references an inherited index', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [[tool.uv.index]]
+        name = "PrivateIndex"
+        url = "https://private/simple/"
+        explicit = true
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+
+        [tool.uv.sources]
+        private-pkg = { index = "PrivateIndex" }
+      `)!;
+      // process() ran member-only and set depType but left registryUrls empty
+      // because the index named "PrivateIndex" isn't in the member's [[tool.uv.index]].
+      const deps = processor.process(member, [
+        { depName: 'private-pkg', packageName: 'private-pkg' },
+      ]);
+      expect(deps[0].registryUrls).toBeUndefined();
+
+      const result = await processor.extractWorkspaceContext(
+        member,
+        deps,
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0]).toMatchObject({
+        depType: depTypes.uvSources,
+        registryUrls: ['https://private/simple/'],
+      });
+    });
+
+    it('resolves an inherited source pointing to an index declared only in the member', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [tool.uv.sources]
+        dep1 = { index = "MemberIndex" }
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+
+        [[tool.uv.index]]
+        name = "MemberIndex"
+        url = "https://member/simple/"
+        explicit = true
+      `)!;
+      const result = await processor.extractWorkspaceContext(
+        member,
+        [{ depName: 'dep1', packageName: 'dep1' }],
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0].registryUrls).toEqual(['https://member/simple/']);
+    });
+
+    it('applies an inherited git source', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [tool.uv.sources]
+        dep1 = { git = "https://github.com/foo/dep1", tag = "0.1.0" }
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+      `)!;
+      const result = await processor.extractWorkspaceContext(
+        member,
+        [{ depName: 'dep1', packageName: 'dep1' }],
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0]).toMatchObject({
+        depType: depTypes.uvSources,
+        datasource: GithubTagsDatasource.id,
+        registryUrls: ['https://github.com'],
+        packageName: 'foo/dep1',
+        currentValue: '0.1.0',
+      });
+    });
+
+    it('applies inherited url and path sources as skips', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [tool.uv.sources]
+        url-dep = { url = "https://example.com/dep.tar.gz" }
+        path-dep = { path = "../local-dep" }
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+      `)!;
+      const result = await processor.extractWorkspaceContext(
+        member,
+        [
+          { depName: 'url-dep', packageName: 'url-dep' },
+          { depName: 'path-dep', packageName: 'path-dep' },
+        ],
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0].skipReason).toBe('unsupported-url');
+      expect(result[1].skipReason).toBe('path-dependency');
+    });
+
+    it('applies inherited default index to un-pinned deps when member has no default', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [[tool.uv.index]]
+        name = "RootDefault"
+        url = "https://root-default/simple/"
+        default = true
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+      `)!;
+      const result = await processor.extractWorkspaceContext(
+        member,
+        [{ depName: 'dep1', packageName: 'dep1' }],
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0].registryUrls).toEqual(['https://root-default/simple/']);
+    });
+
+    it('applies inherited explicit default to un-pinned deps when member has none', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [[tool.uv.index]]
+        name = "RootDefault"
+        url = "https://root-default/simple/"
+        default = true
+        explicit = true
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+      `)!;
+      const result = await processor.extractWorkspaceContext(
+        member,
+        [{ depName: 'dep1', packageName: 'dep1' }],
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0].registryUrls).toEqual([]);
+    });
+
+    it('prepends inherited implicit indexes to un-pinned deps', async () => {
+      mockRoot(codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [[tool.uv.index]]
+        name = "RootImplicit"
+        url = "https://root-implicit/simple/"
+      `);
+      const member = parsePyProject(codeBlock`
+        [project]
+        name = "foo"
+      `)!;
+      const result = await processor.extractWorkspaceContext(
+        member,
+        [{ depName: 'dep1', packageName: 'dep1' }],
+        'packages/foo/pyproject.toml',
+      );
+      expect(result[0].registryUrls).toEqual([
+        'https://root-implicit/simple/',
+        'https://pypi.org/pypi/',
       ]);
     });
   });

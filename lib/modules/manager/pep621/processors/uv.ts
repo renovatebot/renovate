@@ -82,40 +82,30 @@ function effectiveIndexes(
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
 
-  async process(
-    project: PyProject,
-    deps: PackageDependency[],
-    packageFile?: string,
-  ): Promise<PackageDependency[]> {
-    const memberUv = project.tool?.uv;
-    const inherited = packageFile
-      ? await loadInheritedUvConfig(packageFile)
-      : null;
-    if (!memberUv && !inherited) {
+  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
+    const uv = project.tool?.uv;
+    if (!uv) {
       return deps;
     }
 
-    const sources = effectiveSources(memberUv, inherited);
-    const indexes = effectiveIndexes(memberUv, inherited);
-
-    const hasExplicitDefault = indexes?.some(
+    const hasExplicitDefault = uv.index?.some(
       (index) => index.default && index.explicit,
     );
-    const defaultIndex = indexes?.find(
+    const defaultIndex = uv.index?.find(
       (index) => index.default && !index.explicit,
     );
-    const implicitIndexUrls = indexes
+    const implicitIndexUrls = uv.index
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
       ?.map(({ url }) => url);
 
-    const devDependencies = memberUv?.['dev-dependencies'];
+    const devDependencies = uv['dev-dependencies'];
     if (devDependencies) {
       deps.push(...devDependencies);
     }
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
-    if (sources || defaultIndex || implicitIndexUrls) {
+    if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
         /* v8 ignore next 3 -- needs test */
         if (!dep.packageName) {
@@ -128,12 +118,14 @@ export class UvProcessor extends BasePyProjectProcessor {
 
         // Using `packageName` as it applies PEP 508 normalization, which is
         // also applied by uv when matching a source to a dependency.
-        const depSource = sources?.[dep.packageName];
+        const depSource = uv.sources?.[dep.packageName];
         if (depSource) {
           // Dependency is pinned to a specific source.
           dep.depType = depTypes.uvSources;
           if ('index' in depSource) {
-            const index = indexes?.find(({ name }) => name === depSource.index);
+            const index = uv.index?.find(
+              ({ name }) => name === depSource.index,
+            );
             if (index) {
               dep.registryUrls = [index.url];
             }
@@ -174,6 +166,142 @@ export class UvProcessor extends BasePyProjectProcessor {
             );
           }
         }
+      }
+    }
+
+    return deps;
+  }
+
+  /**
+   * Apply uv workspace-root inheritance.
+   *
+   * `process()` runs first and resolves sources/indexes from the member's
+   * own `[tool.uv]`. If this pyproject is a uv workspace member, the
+   * workspace root contributes additional sources and indexes that the
+   * member inherits (with member entries winning on conflict). This method
+   * overlays those onto the deps that `process()` already produced.
+   *
+   * Semantics, per uv's workspace docs:
+   * - Member-pinned source for a dep → member wins, untouched here.
+   *   Exception: if the member's source references an index by name and
+   *   that index lives only at the root, resolve the URL now.
+   * - Inherited source for an un-pinned dep → apply the inherited source.
+   * - Inherited indexes that the member does not declare → apply their
+   *   default / explicit-default / implicit-fallback behavior to deps that
+   *   are still un-pinned.
+   */
+  override async extractWorkspaceContext(
+    project: PyProject,
+    deps: PackageDependency[],
+    packageFile: string,
+  ): Promise<PackageDependency[]> {
+    const inherited = await loadInheritedUvConfig(packageFile);
+    if (!inherited) {
+      return deps;
+    }
+
+    const memberUv = project.tool?.uv;
+    const memberSources = memberUv?.sources;
+    const memberIndexes = memberUv?.index ?? [];
+    const memberIndexNames = new Set(
+      memberIndexes.map((i) => i.name).filter((n): n is string => !!n),
+    );
+    const memberIndexUrls = new Set(memberIndexes.map((i) => i.url));
+
+    // Indexes from the workspace root that the member doesn't already
+    // declare. Member entries with the same name OR URL take precedence.
+    const newIndexes = inherited.indexes.filter(
+      (i) =>
+        (!i.name || !memberIndexNames.has(i.name)) &&
+        !memberIndexUrls.has(i.url),
+    );
+
+    const memberHasExplicitDefault = memberIndexes.some(
+      (i) => i.default && i.explicit,
+    );
+    const memberHasDefault = memberIndexes.some(
+      (i) => i.default && !i.explicit,
+    );
+
+    const newHasExplicitDefault = newIndexes.some(
+      (i) => i.default && i.explicit,
+    );
+    const newDefaultIndex = newIndexes.find((i) => i.default && !i.explicit);
+    const newImplicitIndexUrls = newIndexes
+      .filter((i) => !i.explicit && i.name !== newDefaultIndex?.name)
+      .map((i) => i.url);
+
+    for (const dep of deps) {
+      /* v8 ignore next 3 -- needs test */
+      if (!dep.packageName) {
+        continue;
+      }
+      if (dep.depType === 'requires-python') {
+        continue;
+      }
+
+      const memberSrc = memberSources?.[dep.packageName];
+      if (memberSrc) {
+        // Member pinned this dep. If the source references an index by name
+        // and `process()` couldn't resolve it (because the index lives at
+        // the workspace root), resolve it from the inherited indexes now.
+        if (
+          'index' in memberSrc &&
+          (!dep.registryUrls || dep.registryUrls.length === 0)
+        ) {
+          const idx = inherited.indexes.find(
+            ({ name }) => name === memberSrc.index,
+          );
+          if (idx) {
+            dep.registryUrls = [idx.url];
+          }
+        }
+        continue;
+      }
+
+      const inheritedSrc = inherited.sources[dep.packageName];
+      if (inheritedSrc) {
+        dep.depType = depTypes.uvSources;
+        if ('index' in inheritedSrc) {
+          const idx =
+            memberIndexes.find(({ name }) => name === inheritedSrc.index) ??
+            inherited.indexes.find(({ name }) => name === inheritedSrc.index);
+          if (idx) {
+            dep.registryUrls = [idx.url];
+          }
+        } else if ('git' in inheritedSrc) {
+          applyGitSource(
+            dep,
+            inheritedSrc.git,
+            inheritedSrc.rev,
+            inheritedSrc.tag,
+            inheritedSrc.branch,
+          );
+        } else if ('url' in inheritedSrc) {
+          dep.skipReason = 'unsupported-url';
+        } else if ('path' in inheritedSrc) {
+          dep.skipReason = 'path-dependency';
+        } else if ('workspace' in inheritedSrc) {
+          dep.skipReason = 'inherited-dependency';
+        } else {
+          /* v8 ignore next -- unreachable through schema */
+          dep.skipReason = 'unknown-registry';
+        }
+        continue;
+      }
+
+      // Un-pinned dep: apply incremental effect of inherited indexes.
+      if (!memberHasExplicitDefault && !memberHasDefault) {
+        if (newHasExplicitDefault) {
+          dep.registryUrls = [];
+        } else if (newDefaultIndex) {
+          dep.registryUrls = [newDefaultIndex.url];
+        }
+      }
+      if (newImplicitIndexUrls.length) {
+        dep.registryUrls = newImplicitIndexUrls.concat(
+          dep.registryUrls ?? PypiDatasource.defaultURL,
+        );
       }
     }
 
