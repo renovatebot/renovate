@@ -32,6 +32,15 @@ export const RepoPermission = z.object({
 });
 export type RepoPermission = z.infer<typeof RepoPermission>;
 
+export const PRMergeMethod = z.enum([
+  'fast-forward-only',
+  'merge',
+  'rebase',
+  'rebase-merge',
+  'squash',
+]);
+export type PRMergeMethod = z.infer<typeof PRMergeMethod>;
+
 // Lenient Repo schema - only validates fields Renovate reads, most are optional
 export const Repo = z.object({
   id: z.number().optional(),
@@ -42,7 +51,7 @@ export const Repo = z.object({
   allow_squash_merge: Nullish(z.boolean()),
   archived: Nullish(z.boolean()),
   clone_url: Nullish(z.string()),
-  default_merge_style: Nullish(z.string()),
+  default_merge_style: Nullish(PRMergeMethod),
   external_tracker: z.unknown().optional(),
   has_issues: Nullish(z.boolean()),
   has_pull_requests: Nullish(z.boolean()),
@@ -70,6 +79,12 @@ export const Label = z.object({
 });
 export type Label = z.infer<typeof Label>;
 
+export const PRState = z.enum(['open', 'closed', 'all']);
+export type PRState = z.infer<typeof PRState>;
+
+export const IssueState = z.enum(['open', 'closed', 'all']);
+export type IssueState = z.infer<typeof IssueState>;
+
 // Lenient partial repo schema for embedded repo references in PRs (only full_name is read)
 const PartialRepo = z
   .object({
@@ -79,7 +94,7 @@ const PartialRepo = z
 
 export const PR = z.object({
   number: z.number(),
-  state: z.union([z.literal('open'), z.literal('closed'), z.literal('all')]),
+  state: PRState,
   title: z.string(),
   body: z.string(),
   mergeable: z.boolean(),
@@ -121,9 +136,7 @@ export const PRList = LooseArray(NullablePR);
 
 export const Issue = z.object({
   number: z.number(),
-  state: z
-    .union([z.literal('open'), z.literal('closed'), z.literal('all')])
-    .optional(),
+  state: IssueState.optional(),
   title: z.string(),
   body: Nullish(z.string()),
   assignees: z.array(User).optional(),

@@ -1,19 +1,16 @@
 import type { Pr, RepoSortMethod, SortMethod } from '../types.ts';
-import type { CommitStatus, CommitStatusType } from './schema.ts';
+import type {
+  CommitStatus,
+  CommitStatusType,
+  IssueState,
+  PRMergeMethod,
+  PRState,
+} from './schema.ts';
 
 export interface PrReviewersParams {
   reviewers?: string[];
   team_reviewers?: string[];
 }
-
-export type PRState = 'open' | 'closed' | 'all';
-export type IssueState = 'open' | 'closed' | 'all';
-export type PRMergeMethod =
-  | 'fast-forward-only'
-  | 'merge'
-  | 'rebase'
-  | 'rebase-merge'
-  | 'squash';
 
 export interface CombinedCommitStatus {
   worstStatus: CommitStatusType;

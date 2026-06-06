@@ -45,12 +45,8 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './forgejo-helper.ts';
 import { forgejoHttp } from './forgejo-helper.ts';
 import { ForgejoPrCache } from './pr-cache.ts';
-import type { Comment, Label, Repo } from './schema.ts';
-import type {
-  CombinedCommitStatus,
-  PRMergeMethod,
-  PRUpdateParams,
-} from './types.ts';
+import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
+import type { CombinedCommitStatus, PRUpdateParams } from './types.ts';
 import {
   DRAFT_PREFIX,
   getMergeMethod,
@@ -323,9 +319,7 @@ const platform: Platform = {
     // else fall back to predefined order. Order chosen to minimize commits - see
     // https://github.com/renovatebot/renovate/pull/37768 for discussion.
     const preferredOrder: PRMergeMethod[] = [
-      ...(repo.default_merge_style
-        ? [repo.default_merge_style as PRMergeMethod]
-        : []),
+      ...(repo.default_merge_style ? [repo.default_merge_style] : []),
       'fast-forward-only',
       'squash',
       'merge',

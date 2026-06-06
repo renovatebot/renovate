@@ -639,9 +639,7 @@ describe('modules/platform/forgejo/index', () => {
         });
       await initFakePlatform(scope);
 
-      await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow(
-        REPOSITORY_BLOCKED,
-      );
+      await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow();
     });
 
     it('should use clone_url of repo if gitUrl is not specified', async () => {

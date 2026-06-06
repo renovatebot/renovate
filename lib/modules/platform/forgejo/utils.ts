@@ -11,8 +11,7 @@ import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
-import type { PR, Repo } from './schema.ts';
-import type { PRMergeMethod } from './types.ts';
+import type { PR, PRMergeMethod, Repo } from './schema.ts';
 
 export function smartLinks(body: string): string {
   return body
