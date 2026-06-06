@@ -325,7 +325,7 @@ export type UpdateConfig<
 
 export type RenovateRepository =
   | string
-  | (RenovateConfig & {
+  | (AllConfig & {
       repository: string;
     });
 
