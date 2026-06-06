@@ -4,7 +4,7 @@ import { Releases } from '../../../../../../modules/datasource/forgejo-releases/
 import {
   ContentsListResponse,
   ContentsResponse,
-} from '../../../../../../modules/platform/gitea/schema.ts';
+} from '../../../../../../modules/platform/forgejo/schema.ts';
 import { ForgejoHttp } from '../../../../../../util/http/forgejo.ts';
 import { fromBase64 } from '../../../../../../util/string.ts';
 import { compareChangelogFilePath } from '../common.ts';
