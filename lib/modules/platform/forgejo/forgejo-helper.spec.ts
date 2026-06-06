@@ -47,7 +47,7 @@ import type {
   Repo,
   RepoContents,
   User,
-} from './types.ts';
+} from './schema.ts';
 
 describe('modules/platform/forgejo/forgejo-helper', () => {
   const forgejoApiHost = 'https://forgejo.renovatebot.com/';
@@ -121,7 +121,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
     body: 'Lorem ipsum dolor sit amet',
     mergeable: true,
     diff_url: `https://forgejo.renovatebot.com/${mockRepo.full_name}/pulls/13.diff`,
-    base: { ref: mockRepo.default_branch },
+    base: { ref: mockRepo.default_branch! },
     head: {
       label: 'pull-req-13',
       sha: mockCommitHash,
@@ -220,15 +220,15 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
     it('should call /api/v1/orgs/[org] endpoint', async () => {
       httpMock
         .scope(baseUrl)
-        .get(`/orgs/${mockRepo.owner.username}`)
+        .get(`/orgs/${mockRepo.owner!.username!}`)
         .reply(200, {})
         .get(`/orgs/user`)
         .reply(404)
         .get(`/orgs/error`)
         .reply(503);
-      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      expect(await isOrg(mockRepo.owner!.username!)).toEqual(true);
       // uses cached result
-      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      expect(await isOrg(mockRepo.owner!.username!)).toEqual(true);
       expect(await isOrg('user')).toEqual(false);
       await expect(isOrg('error')).rejects.toThrow();
     });
@@ -304,7 +304,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
         .reply(200, { ...mockContents, contentString: undefined });
 
-      const res = await getRepoContents(mockRepo.full_name, mockContents.path);
+      const res = await getRepoContents(mockRepo.full_name, mockContents.path!);
       expect(res).toEqual(mockContents);
     });
 
@@ -318,14 +318,14 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
 
       const res = await getRepoContents(
         mockRepo.full_name,
-        mockContents.path,
+        mockContents.path!,
         mockCommitHash,
       );
       expect(res).toEqual(mockContents);
     });
 
     it('should properly escape paths', async () => {
-      const escapedPath = encodeURIComponent(otherMockContents.path);
+      const escapedPath = encodeURIComponent(otherMockContents.path!);
 
       httpMock
         .scope(baseUrl)
@@ -334,7 +334,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
 
       const res = await getRepoContents(
         mockRepo.full_name,
-        otherMockContents.path,
+        otherMockContents.path!,
       );
       expect(res).toEqual(otherMockContents);
     });
@@ -349,7 +349,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
           contentString: undefined,
         });
 
-      const res = await getRepoContents(mockRepo.full_name, mockContents.path);
+      const res = await getRepoContents(mockRepo.full_name, mockContents.path!);
       expect(res).toEqual({
         ...mockContents,
         content: undefined,
@@ -371,7 +371,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         body: mockPR.body,
         base: mockPR.base?.ref,
         head: mockPR.head?.label,
-        assignees: [mockUser.username],
+        assignees: [mockUser.username!],
         labels: [mockLabel.id],
       });
       expect(res).toEqual(mockPR);
@@ -396,7 +396,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         state: 'closed',
         title: 'new-title',
         body: 'new-body',
-        assignees: [otherMockUser.username],
+        assignees: [otherMockUser.username!],
         labels: [otherMockLabel.id],
       });
       expect(res).toEqual(updatedMockPR);
@@ -524,7 +524,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         state: mockIssue.state,
         title: mockIssue.title,
         body: mockIssue.body,
-        assignees: [mockUser.username],
+        assignees: [mockUser.username!],
       });
       expect(res).toEqual(mockIssue);
     });
@@ -549,7 +549,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         state: 'closed',
         title: 'new-title',
         body: 'new-body',
-        assignees: [otherMockUser.username],
+        assignees: [otherMockUser.username!],
       });
       expect(res).toEqual(updatedMockIssue);
     });
@@ -642,10 +642,10 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
     it('should call /api/v1/orgs/[org]/labels endpoint', async () => {
       httpMock
         .scope(baseUrl)
-        .get(`/orgs/${mockRepo.owner.username}/labels`)
+        .get(`/orgs/${mockRepo.owner!.username!}/labels`)
         .reply(200, [mockLabel, otherMockLabel]);
 
-      const res = await getOrgLabels(mockRepo.owner.username);
+      const res = await getOrgLabels(mockRepo.owner!.username!);
       expect(res).toEqual([mockLabel, otherMockLabel]);
     });
   });

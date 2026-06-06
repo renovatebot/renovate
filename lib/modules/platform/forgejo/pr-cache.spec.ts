@@ -8,7 +8,7 @@ import {
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
 import { ForgejoPrCache } from './pr-cache.ts';
-import type { PR, Repo } from './types.ts';
+import type { PR, Repo } from './schema.ts';
 import { toRenovatePR } from './utils.ts';
 
 const http = new ForgejoHttp();
@@ -25,7 +25,7 @@ const pr1: PR = {
   diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/3.diff',
   created_at: '2011-08-18T22:30:38Z',
   updated_at: '2011-08-18T22:30:38Z',
-  closed_at: null,
+  closed_at: undefined,
   mergeable: true,
   base: { ref: 'third-party-base-branch' },
   head: {
@@ -44,7 +44,7 @@ const pr2: PR = {
   diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/3.diff',
   created_at: '2011-08-18T22:30:38Z',
   updated_at: '2011-08-18T22:30:38Z',
-  closed_at: null,
+  closed_at: undefined,
   mergeable: true,
   base: { ref: 'third-party-base-branch' },
   head: {

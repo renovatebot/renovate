@@ -30,7 +30,7 @@ import type {
   Repo,
   RepoPermission,
   User,
-} from './types.ts';
+} from './schema.ts';
 
 /**
  * latest tested forgejo version.
@@ -270,7 +270,7 @@ describe('modules/platform/forgejo/index', () => {
     scope
       .get(`/repos/${repository}`)
       .reply(200, repoResult)
-      .get(`/orgs/${repoResult.owner.username}`)
+      .get(`/orgs/${repoResult.owner!.username!}`)
       .reply(orgCode, {});
     GlobalConfig.set({ ignorePrAuthor: true, ...config });
     await forgejo.initRepo({ repository });
@@ -858,7 +858,12 @@ describe('modules/platform/forgejo/index', () => {
             description: 'some-description',
           },
         )
-        .reply(200)
+        .reply(200, {
+          id: 1,
+          status: 'success',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -886,7 +891,12 @@ describe('modules/platform/forgejo/index', () => {
             description: 'some-description',
           },
         )
-        .reply(200)
+        .reply(200, {
+          id: 1,
+          status: 'pending',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -915,7 +925,12 @@ describe('modules/platform/forgejo/index', () => {
             target_url: 'some-url',
           },
         )
-        .reply(200)
+        .reply(200, {
+          id: 1,
+          status: 'success',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -1339,7 +1354,15 @@ describe('modules/platform/forgejo/index', () => {
         .query({ state: 'all', sort: 'recentupdate', limit: 100 })
         .reply(200, [])
         .get('/repos/some/repo/pulls/42')
-        .reply(200); // TODO: 404 should be handled
+        .reply(200, {
+          number: 42,
+          state: 'open',
+          title: 'Missing PR',
+          body: '',
+          mergeable: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        }); // no head/base => toRenovatePR returns null
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1587,7 +1610,7 @@ describe('modules/platform/forgejo/index', () => {
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
       base: {
-        ref: mockRepo.default_branch,
+        ref: mockRepo.default_branch!,
       },
       diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/42.diff',
       title: 'pr-title',
@@ -2403,7 +2426,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const res = await forgejo.ensureIssue({
         title: closedIssue.title,
-        body: closedIssue.body,
+        body: closedIssue.body!,
         shouldReOpen: false,
         once: false,
       });
@@ -2545,7 +2568,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const res = await forgejo.ensureIssue({
         title: closedIssue.title,
-        body: closedIssue.body,
+        body: closedIssue.body!,
         shouldReOpen: true,
         once: false,
       });
@@ -2565,7 +2588,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const res = await forgejo.ensureIssue({
         title: closedIssue.title,
-        body: closedIssue.body,
+        body: closedIssue.body!,
         shouldReOpen: false,
         once: true,
       });
@@ -2596,7 +2619,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const res = await forgejo.ensureIssue({
         title: first.title,
-        body: first.body,
+        body: first.body!,
         shouldReOpen: false,
         once: false,
       });
@@ -3116,7 +3139,7 @@ describe('modules/platform/forgejo/index', () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
-        .reply(200, {});
+        .reply(200, { path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
       expect(await forgejo.getJsonFile('file.json')).toBeNull();

@@ -1,6 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { getRepoContents } from '../../../modules/platform/forgejo/forgejo-helper.ts';
-import type { RepoContents } from '../../../modules/platform/forgejo/types.ts';
+import type { RepoContents } from '../../../modules/platform/forgejo/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';

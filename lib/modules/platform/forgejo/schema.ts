@@ -1,5 +1,9 @@
 import { z } from 'zod/v4';
-import { EmailAddress, LooseArray } from '../../../util/schema-utils/index.ts';
+import {
+  EmailAddress,
+  LooseArray,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 
 export const ContentsResponse = z.object({
   name: z.string(),
@@ -15,38 +19,39 @@ export const ContentsListResponse = z.array(ContentsResponse);
 // Lenient User schema - email may not always be valid format in tests
 export const User = z.object({
   id: z.number().optional(),
-  email: EmailAddress.optional(),
-  full_name: z.string().optional(),
-  username: z.string().optional(),
+  email: Nullish(EmailAddress),
+  full_name: Nullish(z.string()),
+  username: Nullish(z.string()),
 });
 export type User = z.infer<typeof User>;
 
-const RepoPermission = z.object({
-  admin: z.boolean().optional(),
-  pull: z.boolean().optional(),
-  push: z.boolean().optional(),
+export const RepoPermission = z.object({
+  admin: Nullish(z.boolean()),
+  pull: Nullish(z.boolean()),
+  push: Nullish(z.boolean()),
 });
+export type RepoPermission = z.infer<typeof RepoPermission>;
 
 // Lenient Repo schema - only validates fields Renovate reads, most are optional
 export const Repo = z.object({
   id: z.number().optional(),
-  allow_fast_forward_only_merge: z.boolean().optional(),
-  allow_merge_commits: z.boolean().optional(),
-  allow_rebase: z.boolean().optional(),
-  allow_rebase_explicit: z.boolean().optional(),
-  allow_squash_merge: z.boolean().optional(),
-  archived: z.boolean().optional(),
-  clone_url: z.string().optional(),
-  default_merge_style: z.string().optional(),
+  allow_fast_forward_only_merge: Nullish(z.boolean()),
+  allow_merge_commits: Nullish(z.boolean()),
+  allow_rebase: Nullish(z.boolean()),
+  allow_rebase_explicit: Nullish(z.boolean()),
+  allow_squash_merge: Nullish(z.boolean()),
+  archived: Nullish(z.boolean()),
+  clone_url: Nullish(z.string()),
+  default_merge_style: Nullish(z.string()),
   external_tracker: z.unknown().optional(),
-  has_issues: z.boolean().optional(),
-  has_pull_requests: z.boolean().optional(),
-  ssh_url: z.string().optional(),
-  default_branch: z.string().optional(),
-  empty: z.boolean().optional(),
-  fork: z.boolean().optional(),
+  has_issues: Nullish(z.boolean()),
+  has_pull_requests: Nullish(z.boolean()),
+  ssh_url: Nullish(z.string()),
+  default_branch: Nullish(z.string()),
+  empty: Nullish(z.boolean()),
+  fork: Nullish(z.boolean()),
   full_name: z.string(),
-  mirror: z.boolean().optional(),
+  mirror: Nullish(z.boolean()),
   owner: User.optional(),
   permissions: RepoPermission.optional(),
 });
@@ -54,14 +59,14 @@ export type Repo = z.infer<typeof Repo>;
 
 export const ForgejoLabel = z.object({
   id: z.number().optional(),
-  name: z.string().optional(),
+  name: Nullish(z.string()),
 });
 
 export const Label = z.object({
   id: z.number(),
   name: z.string(),
-  description: z.string().optional(),
-  color: z.string().optional(),
+  description: Nullish(z.string()),
+  color: Nullish(z.string()),
 });
 export type Label = z.infer<typeof Label>;
 
@@ -78,11 +83,11 @@ export const PR = z.object({
   title: z.string(),
   body: z.string(),
   mergeable: z.boolean(),
-  merged: z.boolean().optional(),
+  merged: Nullish(z.boolean()),
   created_at: z.string(),
   updated_at: z.string(),
-  closed_at: z.string().nullable().optional(),
-  diff_url: z.string().optional(),
+  closed_at: Nullish(z.string()),
+  diff_url: Nullish(z.string()),
   base: z
     .object({
       ref: z.string(),
@@ -97,13 +102,13 @@ export const PR = z.object({
     .optional(),
   assignee: z
     .object({
-      login: z.string().optional(),
+      login: Nullish(z.string()),
     })
     .optional(),
   assignees: z.array(z.any()).optional(),
   user: z
     .object({
-      username: z.string().optional(),
+      username: Nullish(z.string()),
     })
     .optional(),
   labels: z.array(ForgejoLabel).optional(),
@@ -120,7 +125,7 @@ export const Issue = z.object({
     .union([z.literal('open'), z.literal('closed'), z.literal('all')])
     .optional(),
   title: z.string(),
-  body: z.string().optional(),
+  body: Nullish(z.string()),
   assignees: z.array(User).optional(),
   labels: z.array(Label).optional(),
 });
@@ -132,27 +137,32 @@ export const Comment = z.object({
 });
 export type Comment = z.infer<typeof Comment>;
 
+export const CommitStatusType = z
+  .enum(['pending', 'success', 'error', 'failure', 'warning', 'unknown'])
+  .catch('unknown');
+export type CommitStatusType = z.infer<typeof CommitStatusType>;
+
 export const CommitStatus = z.object({
   id: z.number(),
-  // Accept any string as status; callers handle unknown values gracefully
-  status: z.string(),
+  status: CommitStatusType,
   context: z.string(),
-  description: z.string().optional(),
-  target_url: z.string().optional(),
+  description: Nullish(z.string()),
+  target_url: Nullish(z.string()),
   created_at: z.string(),
 });
 export type CommitStatus = z.infer<typeof CommitStatus>;
 
 const CommitUser = z.object({
-  name: z.string().optional(),
-  email: EmailAddress.optional(),
-  username: z.string().optional(),
+  name: Nullish(z.string()),
+  email: Nullish(EmailAddress),
+  username: Nullish(z.string()),
 });
 
-const Commit = z.object({
+export const Commit = z.object({
   id: z.string(),
   author: CommitUser,
 });
+export type Commit = z.infer<typeof Commit>;
 
 export const Branch = z.object({
   name: z.string(),
@@ -166,9 +176,9 @@ export const RepoSearchResults = z.object({
 });
 
 export const RepoContents = z.object({
-  path: z.string().optional(),
-  content: z.string().optional(),
-  contentString: z.string().optional(),
+  path: Nullish(z.string()),
+  content: Nullish(z.string()),
+  contentString: Nullish(z.string()),
 });
 export type RepoContents = z.infer<typeof RepoContents>;
 

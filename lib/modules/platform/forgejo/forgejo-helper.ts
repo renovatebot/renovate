@@ -11,6 +11,7 @@ import {
   Branch,
   Comment,
   CommitStatus,
+  type CommitStatusType,
   Issue,
   Label,
   PR,
@@ -23,7 +24,6 @@ import {
 import type {
   CombinedCommitStatus,
   CommitStatusCreateParams,
-  CommitStatusType,
   IssueCreateParams,
   IssueSearchParams,
   IssueUpdateLabelsParams,
@@ -75,7 +75,7 @@ export async function isOrg(organization: string): Promise<boolean> {
   }
   try {
     const url = `${API_PATH}/orgs/${organization}`;
-    const res = await forgejoHttp.getJson(url, z.unknown());
+    const res = await forgejoHttp.getJsonUnchecked(url);
     repoCache.platform.forgejo.orgs[organization] = res.statusCode === 200;
     return res.statusCode === 200;
   } catch (err) {

@@ -5,12 +5,14 @@ import {
   REPOSITORY_BLOCKED,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
-import type { PR, PRMergeMethod, Repo } from './types.ts';
+import type { PR, Repo } from './schema.ts';
+import type { PRMergeMethod } from './types.ts';
 
 export function smartLinks(body: string): string {
   return body
@@ -124,7 +126,9 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title = title.substring(DRAFT_PREFIX.length);
     isDraft = true;
   }
-  const labels = (data?.labels ?? []).map((l) => l.name);
+  const labels = (data?.labels ?? [])
+    .map((l) => l.name)
+    .filter((n): n is string => n !== null && n !== undefined);
 
   return {
     labels,
@@ -133,7 +137,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title,
     isDraft,
     bodyStruct: getPrBodyStruct(data.body),
-    sha: data.head.sha,
+    sha: data.head.sha as LongCommitSha,
     sourceBranch: data.head.label,
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
@@ -159,7 +163,7 @@ export function usableRepo(repo: Repo): boolean {
     return false;
   }
 
-  if (repo.permissions.pull === false || repo.permissions.push === false) {
+  if (repo.permissions?.pull === false || repo.permissions?.push === false) {
     logger.debug(
       `Skipping repository ${repo.full_name} because of missing pull or push permissions`,
     );
@@ -178,15 +182,15 @@ export function usableRepo(repo: Repo): boolean {
 export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
   switch (style) {
     case 'merge':
-      return repo.allow_merge_commits;
+      return repo.allow_merge_commits === true;
     case 'rebase':
-      return repo.allow_rebase;
+      return repo.allow_rebase === true;
     case 'rebase-merge':
-      return repo.allow_rebase_explicit;
+      return repo.allow_rebase_explicit === true;
     case 'squash':
-      return repo.allow_squash_merge;
+      return repo.allow_squash_merge === true;
     case 'fast-forward-only':
-      return repo.allow_fast_forward_only_merge;
+      return repo.allow_fast_forward_only_merge === true;
   }
   logger.debug('Repo has unknown merge style - aborting renovation');
   throw new Error(REPOSITORY_BLOCKED);
