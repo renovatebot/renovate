@@ -1225,6 +1225,7 @@ describe('modules/platform/forgejo/index', () => {
         state: 'open',
         diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/3.diff',
         created_at: '2011-08-18T22:30:38Z',
+        updated_at: '2012-08-18T22:30:38Z',
         closed_at: '2016-01-09T10:03:21Z',
         mergeable: true,
         base: { ref: 'third-party-base-branch' },
