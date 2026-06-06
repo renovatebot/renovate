@@ -476,9 +476,10 @@ function resolveResourceManifest(
           } else {
             logger.debug(
               { file: manifest.file, name: resource.metadata.name },
-              'Unable to locate tag node for replacement (may be YAML alias or alias reference), skipping replacement',
+              'Unable to locate tag node for replacement (may be YAML alias or alias reference), digest pinning will not be possible',
             );
-            dep.skipReason = 'invalid-value';
+            dep.replaceString = resource.spec.ref.tag;
+            dep.autoReplaceStringTemplate = '{{newValue}}';
           }
           deps.push(dep);
         } else {

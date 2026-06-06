@@ -1470,7 +1470,7 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
-    it('skips OCIRepository with tag-only ref when tag value is a YAML alias', () => {
+    it('extracts OCIRepository with tag-only ref when tag value is a YAML alias without digest pinning', () => {
       const result = extractPackageFile(
         codeBlock`
         x-tag: &mytag v1.8.2
@@ -1488,12 +1488,13 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toEqual({
         deps: [
           {
+            autoReplaceStringTemplate: '{{newValue}}',
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
-            skipReason: 'invalid-value',
+            replaceString: 'v1.8.2',
           },
         ],
       });
