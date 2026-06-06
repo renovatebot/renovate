@@ -1,9 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types.ts';
-import {
-  CONFIG_GIT_URL_UNAVAILABLE,
-  REPOSITORY_BLOCKED,
-} from '../../../constants/error-messages.ts';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -191,6 +188,4 @@ export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
     case 'fast-forward-only':
       return repo.allow_fast_forward_only_merge === true;
   }
-  logger.debug('Repo has unknown merge style - aborting renovation');
-  throw new Error(REPOSITORY_BLOCKED);
 }
