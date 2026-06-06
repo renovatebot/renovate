@@ -438,7 +438,7 @@ export async function createCommitStatus(
 
 export const forgejoToRenovateStatusMapping: Record<
   CommitStatusType,
-  BranchStatus | null
+  BranchStatus
 > = {
   unknown: 'yellow',
   success: 'green',

@@ -473,8 +473,7 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    /* v8 ignore next */
-    return helper.forgejoToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
+    return helper.forgejoToRenovateStatusMapping[ccs.worstStatus];
   },
 
   async getBranchStatusCheck(
@@ -489,15 +488,7 @@ const platform: Platform = {
     if (!cs) {
       return null;
     } // no status check exists
-    const status = helper.forgejoToRenovateStatusMapping[cs.status];
-    if (status) {
-      return status;
-    }
-    logger.warn(
-      { check: cs },
-      'Could not map Forgejo status value to Renovate status',
-    );
-    return 'yellow';
+    return helper.forgejoToRenovateStatusMapping[cs.status];
   },
 
   getPrList(): Promise<Pr[]> {
