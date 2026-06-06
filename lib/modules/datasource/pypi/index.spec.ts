@@ -195,6 +195,8 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
+      // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+      // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementationOnce(function () {
         return partial<InstanceType<typeof _googleAuth>>({
           getAccessToken: vi.fn().mockResolvedValue('some-token'),
@@ -219,6 +221,8 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
+      // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+      // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementation(function () {
         return partial<InstanceType<typeof _googleAuth>>({
           getAccessToken: vi.fn(),
@@ -813,6 +817,8 @@ describe('modules/datasource/pypi/index', () => {
         'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({
         getAccessToken: vi.fn().mockResolvedValue('some-token'),
@@ -844,6 +850,8 @@ describe('modules/datasource/pypi/index', () => {
         'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({
         getAccessToken: vi.fn().mockResolvedValue('some-token'),
