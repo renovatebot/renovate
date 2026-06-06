@@ -8,17 +8,16 @@ import {
 export const ContentsResponse = z.object({
   name: z.string(),
   path: z.string(),
-  type: z.union([z.literal('file'), z.literal('dir')]),
-  content: z.string().nullable(),
+  type: z.enum(['file', 'dir', 'symlink', 'submodule']),
+  content: Nullish(z.string()),
 });
 
 export type ContentsResponse = z.infer<typeof ContentsResponse>;
 
 export const ContentsListResponse = z.array(ContentsResponse);
 
-// Lenient User schema - email may not always be valid format in tests
 export const User = z.object({
-  id: z.number().optional(),
+  id: z.number(),
   email: Nullish(EmailAddress),
   full_name: Nullish(z.string()),
   username: Nullish(z.string()),
@@ -51,7 +50,8 @@ export const Repo = z.object({
   allow_squash_merge: Nullish(z.boolean()),
   archived: Nullish(z.boolean()),
   clone_url: Nullish(z.string()),
-  default_merge_style: Nullish(PRMergeMethod),
+  // catch unknown merge methods e.g. `manually-merged`
+  default_merge_style: Nullish(PRMergeMethod).catch(undefined),
   external_tracker: z.unknown().optional(),
   has_issues: Nullish(z.boolean()),
   has_pull_requests: Nullish(z.boolean()),

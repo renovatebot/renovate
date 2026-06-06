@@ -3,7 +3,7 @@ import { z } from 'zod/v4';
 export const ContentsResponse = z.object({
   name: z.string(),
   path: z.string(),
-  type: z.union([z.literal('file'), z.literal('dir')]),
+  type: z.enum(['file', 'dir', 'symlink', 'submodule']),
   content: z.string().nullable(),
 });
 

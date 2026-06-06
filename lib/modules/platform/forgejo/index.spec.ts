@@ -64,6 +64,7 @@ describe('modules/platform/forgejo/index', () => {
     default_branch: 'master',
     full_name: 'some/repo',
     owner: partial<User>({
+      id: 0,
       username: 'some',
     }),
   });
@@ -629,17 +630,25 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should throw if unknown default merge style is configured', async () => {
+    it('should fall back to merge method when default merge style is unrecognized', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
-          default_merge_style: 'unknown',
+          default_merge_style: 'manually-merged',
         });
       await initFakePlatform(scope);
 
-      await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow();
+      await forgejo.initRepo(initRepoCfg);
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          mergeMethod: 'rebase',
+        }),
+      );
     });
 
     it('should use clone_url of repo if gitUrl is not specified', async () => {
