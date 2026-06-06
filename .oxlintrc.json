@@ -162,7 +162,15 @@
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error",
-    "unicorn/prefer-node-protocol": "error"
+    "unicorn/prefer-node-protocol": "error",
+
+    "typescript/no-useless-default-assignment": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/expect-expect": "off",
+    "vitest/no-conditional-expect": "off",
+    "vitest/no-standalone-expect": "off",
+    "vitest/prefer-snapshot-hint": "off",
+    "vitest/require-to-throw-message": "off"
   },
   "overrides": [
     {
