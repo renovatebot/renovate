@@ -31,6 +31,11 @@
     "oxlint": ["oxlint", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
+    "solid": [
+      "@solid-design-system/tokens",
+      "@solid-design-system/styles",
+      "@solid-design-system/components"
+    ],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
     "spock": "/^org\\.spockframework:spock-/",
     "syncfusion-dotnet": "/^Syncfusion\\./",

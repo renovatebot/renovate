@@ -1,5 +1,5 @@
 import deepmerge from 'deepmerge';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -108,9 +108,7 @@ const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional(), source: z.string().optional() })
     .transform(({ version: currentValue, source }): PackageDependency => {
-      const managerData = {
-        ...(source ? { sourceName: source.toLowerCase() } : {}),
-      };
+      const managerData = source ? { sourceName: source.toLowerCase() } : {};
 
       if (!currentValue) {
         return { datasource: PypiDatasource.id, managerData };
