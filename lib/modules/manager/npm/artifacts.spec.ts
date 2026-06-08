@@ -387,6 +387,40 @@ minimumReleaseAgeExclude:
       ]);
     });
 
+    it('uses packageName for minimumReleaseAgeExclude when override key has a version constraint', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'qs@<6.14.1',
+            packageName: 'qs',
+            currentValue: '6.14.2',
+            newVersion: '6.15.0',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: qs@6.15.0\n  - qs@6.15.0\n',
+          },
+        },
+      ]);
+    });
+
     it('updates pnpm workspace - appends new minimumReleaseAgeExclude setting', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
