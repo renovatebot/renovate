@@ -1,10 +1,9 @@
-import type { HttpResponse } from '../../../util/http/types.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { id as npmId } from '../../versioning/npm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { DartResult } from './types.ts';
+import { DartResult } from './schema.ts';
 
 export class DartDatasource extends Datasource {
   static readonly id = 'dart';
@@ -38,14 +37,14 @@ export class DartDatasource extends Datasource {
       registryUrl,
     )}api/packages/${packageName}`;
 
-    let raw: HttpResponse<DartResult> | null = null;
+    let body: DartResult | null = null;
     try {
-      raw = await this.http.getJsonUnchecked<DartResult>(pkgUrl);
+      const raw = await this.http.getJson(pkgUrl, DartResult);
+      body = raw.body;
     } catch (err) {
       this.handleGenericErrors(err);
     }
 
-    const body = raw?.body;
     if (body) {
       const { versions, latest } = body;
       const releases = versions

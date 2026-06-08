@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { MigrationsService } from '../../lib/config/migrations/index.ts';
 import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
@@ -16,11 +17,35 @@ import {
   toolNames,
 } from '../../lib/util/exec/types.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
+import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { formatCell, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
+
+const previousNames: ReadonlyMap<string, string[]> = (() => {
+  const map = new Map<string, string[]>();
+
+  function add(optionName: string, previousName: string): void {
+    const existing = map.get(optionName);
+    if (existing) {
+      existing.push(previousName);
+    } else {
+      map.set(optionName, [previousName]);
+    }
+  }
+
+  for (const [oldName, newName] of MigrationsService.renamedProperties) {
+    add(newName, oldName);
+  }
+
+  for (const [oldEnvVar, { optionName }] of convertedExperimentalEnvVars) {
+    add(optionName, oldEnvVar);
+  }
+
+  return map;
+})();
 
 /**
  * Merge string arrays one by one
@@ -141,7 +166,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         ((type === 'object' || type === 'array') &&
           (el[0] === 'default' || el[0] === 'additionalProperties')) ||
         // enum values for `allowedValues` should be printed in JSON notation
-        el[0] === 'allowedValues'
+        el[0] === 'allowedValues' ||
+        // previous names should be printed in JSON notation
+        el[0] === 'previouslyKnownAs'
       ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
@@ -172,7 +199,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
 }
 
 function stringifyArrays(el: Record<string, any>): void {
-  const ignoredKeys = ['allowedValues', 'default', 'experimentalIssues'];
+  const ignoredKeys = [
+    'allowedValues',
+    'default',
+    'experimentalIssues',
+    'previouslyKnownAs',
+  ];
 
   for (const [key, value] of Object.entries(el)) {
     if (!ignoredKeys.includes(key) && Array.isArray(value)) {
@@ -183,13 +215,12 @@ function stringifyArrays(el: Record<string, any>): void {
 
 function genExperimentalMsg(el: Record<string, any>): string {
   const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
-  let warning =
-    '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
+  let warning = '\n!!! warning "This feature is flagged as experimental"\n';
 
   if (el.experimentalDescription) {
-    warning += indent`${2}${el.experimentalDescription}`;
+    warning += indent`${1}${el.experimentalDescription}`;
   } else {
-    warning += indent`${2}Experimental features might be changed or even removed at any time.`;
+    warning += indent`${1}Experimental features might be changed or even removed at any time.`;
   }
 
   const issues = el.experimentalIssues ?? [];
@@ -206,15 +237,14 @@ function genExperimentalMsg(el: Record<string, any>): string {
 }
 
 function genTemplatingMsg(): string {
-  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${2}See [templates](templates.md) for available variables and helpers.`}\n`;
+  return `\n!!! tip "This option supports Renovate's template syntax"\n${indent`${1}See [templates](templates.md) for available variables and helpers.`}\n`;
 }
 
 function genDeprecationMsg(el: Record<string, any>): string {
-  let warning =
-    '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
+  let warning = '\n!!! warning "This feature has been deprecated"\n';
 
   if (el.deprecationMsg) {
-    warning += indent`${2}${el.deprecationMsg}`;
+    warning += indent`${1}${el.deprecationMsg}`;
   }
 
   return `${warning}\n`;
@@ -294,7 +324,7 @@ function generateConfigFileNames(): string {
 
   output += '1. `package.json` _(within a `"renovate"` section)_\n';
 
-  return output.trimEnd();
+  return output;
 }
 
 function generateToolsForConstraints(): string {
@@ -331,7 +361,7 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of [...toolNames]) {
+  for (const tool of toolNames) {
     output += `- \`${tool}\`\n`;
   }
 
@@ -380,10 +410,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       el.cli = getCliName(option);
       el.env = getEnvName(option);
+      const prevNames = previousNames.get(option.name);
+      if (prevNames) {
+        el.previouslyKnownAs = prevNames;
+      }
       stringifyArrays(el);
 
       for (const key of lookupKeys) {
-        const [headerIndex, footerIndex] = indexed[key];
+        const [headerIndex] = indexed[key];
         let sectionContent = `\n${option.description}\n\n${genTable(Object.entries(el), option.type, option.default)}`;
 
         if (el.supportsTemplating) {
@@ -393,14 +427,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         configOptionsRaw[headerIndex] += sectionContent;
 
         if (el.experimental) {
-          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+          configOptionsRaw[headerIndex] += genExperimentalMsg(el);
         }
         if (el.advancedUse) {
           configOptionsRaw[headerIndex] += generateAdvancedUse();
         }
 
         if (is.nonEmptyString(el.deprecationMsg)) {
-          configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+          configOptionsRaw[headerIndex] += genDeprecationMsg(el);
         }
       }
     });
@@ -459,8 +493,5 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 }
 
 function generateAdvancedUse(): string {
-  return (
-    '\n<!-- prettier-ignore -->\n!!! warning\n' +
-    '    For advanced use only! Use at your own risk!\n'
-  );
+  return '!!! warning\n' + '  For advanced use only! Use at your own risk!\n';
 }

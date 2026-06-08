@@ -1,14 +1,8 @@
 import ini from 'ini';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
-import type { JsonArray, JsonValue } from 'type-fest';
-import {
-  type ZodEffects,
-  type ZodString,
-  type ZodType,
-  type ZodTypeDef,
-  z,
-} from 'zod/v3';
+import type { JsonArray } from 'type-fest';
+import { z } from 'zod/v4';
 import { logger } from '../../logger/index.ts';
 import type { PackageDependency } from '../../modules/manager/types.ts';
 import { parseJsonc } from '../common.ts';
@@ -38,7 +32,7 @@ interface LooseOpts<T> {
 export function LooseArray<Schema extends z.ZodTypeAny>(
   Elem: Schema,
   { onError }: LooseOpts<unknown[]> = {},
-): z.ZodEffects<z.ZodArray<z.ZodAny, 'many'>, z.TypeOf<Schema>[], any[]> {
+): z.ZodType<z.TypeOf<Schema>[], any> {
   if (!onError) {
     // Avoid error-related computations inside the loop
     return z.array(z.any()).transform((input) => {
@@ -67,8 +61,7 @@ export function LooseArray<Schema extends z.ZodTypeAny>(
       }
 
       for (const issue of parsed.error.issues) {
-        issue.path.unshift(idx);
-        issues.push(issue);
+        issues.push({ ...issue, path: [idx, ...issue.path] });
       }
     }
 
@@ -81,19 +74,12 @@ export function LooseArray<Schema extends z.ZodTypeAny>(
   });
 }
 
-type LooseRecordResult<
-  KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny,
-> = z.ZodEffects<
-  z.ZodRecord<z.ZodString, z.ZodAny>,
-  Record<z.TypeOf<KeySchema>, z.TypeOf<ValueSchema>>,
-  Record<z.TypeOf<KeySchema>, any>
+type LooseRecordResult<ValueSchema extends z.ZodTypeAny> = z.ZodType<
+  Record<string, z.TypeOf<ValueSchema>>,
+  any
 >;
 
-type LooseRecordOpts<
-  KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny,
-> = LooseOpts<Record<z.TypeOf<KeySchema> | z.TypeOf<ValueSchema>, unknown>>;
+type LooseRecordOpts = LooseOpts<Record<string, unknown>>;
 
 /**
  * Works like `z.record()`, but drops wrong elements instead of invalidating the whole record.
@@ -108,37 +94,34 @@ type LooseRecordOpts<
  */
 export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
   Value: ValueSchema,
-): LooseRecordResult<z.ZodString, ValueSchema>;
+): LooseRecordResult<ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
   ValueSchema extends z.ZodTypeAny,
->(
-  Key: KeySchema,
-  Value: ValueSchema,
-): LooseRecordResult<KeySchema, ValueSchema>;
+>(Key: KeySchema, Value: ValueSchema): LooseRecordResult<ValueSchema>;
 export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
   Value: ValueSchema,
-  { onError }: LooseRecordOpts<z.ZodString, ValueSchema>,
-): LooseRecordResult<z.ZodString, ValueSchema>;
+  { onError }: LooseRecordOpts,
+): LooseRecordResult<ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
   ValueSchema extends z.ZodTypeAny,
 >(
   Key: KeySchema,
   Value: ValueSchema,
-  { onError }: LooseRecordOpts<KeySchema, ValueSchema>,
-): LooseRecordResult<KeySchema, ValueSchema>;
+  { onError }: LooseRecordOpts,
+): LooseRecordResult<ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
   ValueSchema extends z.ZodTypeAny,
 >(
   arg1: ValueSchema | KeySchema,
   arg2?: ValueSchema | LooseOpts<Record<string, unknown>>,
-  arg3?: LooseRecordOpts<KeySchema, ValueSchema>,
-): LooseRecordResult<KeySchema, ValueSchema> {
-  let Key: z.ZodSchema = z.any();
+  arg3?: LooseRecordOpts,
+): LooseRecordResult<ValueSchema> {
+  let Key: z.ZodType = z.any();
   let Value: ValueSchema;
-  let opts: LooseRecordOpts<KeySchema, ValueSchema> = {};
+  let opts: LooseRecordOpts = {};
   if (arg2 && arg3) {
     Key = arg1 as KeySchema;
     Value = arg2 as ValueSchema;
@@ -158,20 +141,20 @@ export function LooseRecord<
   const { onError } = opts;
   if (!onError) {
     // Avoid error-related computations inside the loop
-    return z.record(z.any()).transform((input) => {
+    return z.record(z.string(), z.any()).transform((input) => {
       const output: Record<string, z.infer<ValueSchema>> = {};
       for (const [inputKey, inputVal] of Object.entries(input)) {
         const parsedKey = Key.safeParse(inputKey);
         const parsedValue = Value.safeParse(inputVal);
         if (parsedKey.success && parsedValue.success) {
-          output[parsedKey.data] = parsedValue.data;
+          output[parsedKey.data as string] = parsedValue.data;
         }
       }
       return output;
     });
   }
 
-  return z.record(z.any()).transform((input) => {
+  return z.record(z.string(), z.any()).transform((input) => {
     const output: Record<string, z.infer<ValueSchema>> = {};
     const issues: z.ZodIssue[] = [];
 
@@ -179,8 +162,7 @@ export function LooseRecord<
       const parsedKey = Key.safeParse(inputKey);
       if (!parsedKey.success) {
         for (const issue of parsedKey.error.issues) {
-          issue.path.unshift(inputKey);
-          issues.push(issue);
+          issues.push({ ...issue, path: [inputKey, ...issue.path] });
         }
         continue;
       }
@@ -188,14 +170,12 @@ export function LooseRecord<
       const parsedValue = Value.safeParse(inputVal);
       if (!parsedValue.success) {
         for (const issue of parsedValue.error.issues) {
-          issue.path.unshift(inputKey);
-          issues.push(issue);
+          issues.push({ ...issue, path: [inputKey, ...issue.path] });
         }
         continue;
       }
 
-      output[parsedKey.data] = parsedValue.data;
-      continue;
+      output[parsedKey.data as string] = parsedValue.data;
     }
 
     if (issues.length) {
@@ -207,7 +187,92 @@ export function LooseRecord<
   });
 }
 
-export const Json = z.string().transform((str, ctx): JsonValue => {
+/**
+ * Accepts `null`, `undefined`, or an absent key and normalizes all to
+ * `undefined`. Keeps the output type as `T | undefined` (never `null`), so
+ * assignment into non-nullable targets needs no `?? undefined` coalescing.
+ */
+export function Nullish<Schema extends z.ZodTypeAny>(
+  schema: Schema,
+): z.ZodOptional<z.ZodType<z.output<Schema> | undefined>> {
+  return schema
+    .nullable()
+    .transform((value) => value ?? undefined)
+    .optional();
+}
+
+function deepNullishRewrite(node: z.ZodTypeAny): z.ZodTypeAny {
+  if (node instanceof z.ZodOptional) {
+    return Nullish(deepNullishRewrite(node.unwrap() as z.ZodTypeAny));
+  }
+  if (node instanceof z.ZodObject) {
+    const shape: Record<string, z.ZodTypeAny> = {};
+    for (const [key, value] of Object.entries(node.shape)) {
+      shape[key] = deepNullishRewrite(value as z.ZodTypeAny);
+    }
+    return z.object(shape);
+  }
+  if (node instanceof z.ZodArray) {
+    return z.array(deepNullishRewrite(node.element as z.ZodTypeAny));
+  }
+  if (node instanceof z.ZodRecord) {
+    return z.record(
+      node.keyType,
+      deepNullishRewrite(node.valueType as z.ZodTypeAny),
+    );
+  }
+  if (node instanceof z.ZodUnion) {
+    const options = node.options as z.ZodTypeAny[];
+    return z.union(
+      options.map(deepNullishRewrite) as [
+        z.ZodTypeAny,
+        z.ZodTypeAny,
+        ...z.ZodTypeAny[],
+      ],
+    );
+  }
+  if (node instanceof z.ZodDefault) {
+    return deepNullishRewrite(node.unwrap() as z.ZodTypeAny).default(
+      node.def.defaultValue,
+    );
+  }
+  if (node instanceof z.ZodNullable) {
+    return z.nullable(deepNullishRewrite(node.unwrap() as z.ZodTypeAny));
+  }
+  if (node instanceof z.ZodPipe) {
+    return z.pipe(
+      node.def.in as z.ZodTypeAny,
+      deepNullishRewrite(node.def.out as z.ZodTypeAny),
+    );
+  }
+  return node;
+}
+
+/**
+ * Walks `schema` at build time and replaces every `.optional()` position with
+ * `Nullish` semantics — accepting `null`/`undefined`/absent and normalizing all
+ * to `undefined`. Recurses through `object`, `array`, `record`, `union`,
+ * `default`, `nullable`, and the **output side** of `pipe`/transform nodes
+ * (e.g. `Json.pipe(…)`).
+ *
+ * Intentional `.nullable()` fields are preserved (null kept), distinguishing
+ * this from a blunt null-stripping preprocessor.
+ *
+ * The pipe **input** side (the decoder, e.g. `Json`) is left untouched.
+ * **`LooseArray`/`LooseRecord` remain opaque** because their element schema is
+ * captured in a closure — wrap the inner schema directly for those
+ * (e.g. `LooseArray(DeepNullish(Inner))`).
+ *
+ * Object modifiers (`.strict()`/`.catchall()`/`.passthrough()`/object-level
+ * `.refine()`) are dropped by the `z.object(shape)` rebuild.
+ */
+export function DeepNullish<Schema extends z.ZodTypeAny>(
+  schema: Schema,
+): z.ZodType<z.output<Schema>> {
+  return deepNullishRewrite(schema) as z.ZodType<z.output<Schema>>;
+}
+
+export const Json = z.string().transform((str, ctx): unknown => {
   try {
     return JSON.parse(str);
   } catch {
@@ -215,9 +280,8 @@ export const Json = z.string().transform((str, ctx): JsonValue => {
     return z.NEVER;
   }
 });
-type Json = z.infer<typeof Json>;
 
-export const Json5 = z.string().transform((str, ctx): JsonValue => {
+export const Json5 = z.string().transform((str, ctx): unknown => {
   try {
     return JSON5.parse(str);
   } catch {
@@ -226,7 +290,7 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
   }
 });
 
-export const Jsonc = z.string().transform((str, ctx): JsonValue => {
+export const Jsonc = z.string().transform((str, ctx): unknown => {
   try {
     return parseJsonc(str);
   } catch {
@@ -236,7 +300,8 @@ export const Jsonc = z.string().transform((str, ctx): JsonValue => {
 });
 
 export const UtcDate = z
-  .string({ description: 'ISO 8601 string' })
+  .string()
+  .describe('ISO 8601 string')
   .transform((str, ctx): DateTime => {
     const date = DateTime.fromISO(str, { zone: 'utc' });
     if (!date.isValid) {
@@ -246,7 +311,7 @@ export const UtcDate = z
     return date;
   });
 
-export const Yaml = z.string().transform((str, ctx): JsonValue => {
+export const Yaml = z.string().transform((str, ctx): unknown => {
   try {
     return parseSingleYaml(str);
   } catch {
@@ -255,9 +320,9 @@ export const Yaml = z.string().transform((str, ctx): JsonValue => {
   }
 });
 
-export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
+export const MultidocYaml = z.string().transform((str, ctx): unknown => {
   try {
-    return parseYaml(str) as JsonArray;
+    return parseYaml(str);
   } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
@@ -266,7 +331,7 @@ export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
 
 export function multidocYaml(
   opts?: Omit<YamlOptions, 'customSchema'>,
-): ZodEffects<ZodString, JsonArray, string> {
+): z.ZodType<JsonArray> {
   return z.string().transform((str, ctx): JsonArray => {
     try {
       return parseYaml(str, opts) as JsonArray;
@@ -297,8 +362,8 @@ export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
 
 export function withDepType<
   Output extends PackageDependency[],
-  Schema extends ZodType<Output, ZodTypeDef, unknown>,
->(schema: Schema, depType: string, force = true): ZodEffects<Schema> {
+  Schema extends z.ZodType<Output>,
+>(schema: Schema, depType: string, force = true): z.ZodType<Output> {
   return schema.transform((deps) => {
     for (const dep of deps) {
       if (!dep.depType || force) {
@@ -309,20 +374,20 @@ export function withDepType<
   });
 }
 
-export function withDebugMessage<Input, Output>(
+export function withDebugMessage<Output>(
   value: Output,
   msg: string,
-): (ctx: { error: z.ZodError; input: Input }) => Output {
+): (ctx: { error: unknown; input: unknown }) => Output {
   return ({ error: err }) => {
     logger.debug({ err }, msg);
     return value;
   };
 }
 
-export function withTraceMessage<Input, Output>(
+export function withTraceMessage<Output>(
   value: Output,
   msg: string,
-): (ctx: { error: z.ZodError; input: Input }) => Output {
+): (ctx: { error: unknown; input: unknown }) => Output {
   return ({ error: err }) => {
     logger.trace({ err }, msg);
     return value;
@@ -364,7 +429,7 @@ function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
 export const NotCircular = z.unknown().superRefine((val, ctx) => {
   if (isCircular(val)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'values cannot be circular data structures',
       fatal: true,
     });
@@ -373,7 +438,7 @@ export const NotCircular = z.unknown().superRefine((val, ctx) => {
   }
 });
 
-export const EmailAddress = z.string().email();
+export const EmailAddress = z.email();
 export type EmailAddress = z.infer<typeof EmailAddress>;
 
 export function isEmailAdress(value: string): boolean {

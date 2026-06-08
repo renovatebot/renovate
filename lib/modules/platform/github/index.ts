@@ -1,6 +1,6 @@
+import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -47,7 +47,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
@@ -100,7 +100,7 @@ import type {
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
-import { warnIfDefaultGitAuthorEmail } from './utils.ts';
+import { getRepoUrl, warnIfDefaultGitAuthorEmail } from './utils.ts';
 
 export const id = 'github';
 
@@ -130,6 +130,7 @@ export function isGHApp(): boolean {
 
 export async function detectGhe(token: string): Promise<void> {
   const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
   if (!parsedEndpoint) {
     throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
   }
@@ -165,6 +166,9 @@ export async function initPlatform({
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
+    if (!isHttpUrl(endpoint)) {
+      throw new Error(`Init: Invalid GitHub endpoint URL: ${endpoint}`);
+    }
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
@@ -205,16 +209,12 @@ export async function initPlatform({
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
       let ghHostname: string;
+      /* v8 ignore next -- false negative due to V8/source-map artifact */
       if (platformConfig.isGheCloud) {
         ghHostname = 'ghe.com';
       } else if (platformConfig.isGhe) {
-        const parsedEndpoint = parseUrl(platformConfig.endpoint);
-        // v8 ignore if: endpoint is validated before initPlatform, this is here for defensive purposes
-        if (!parsedEndpoint) {
-          throw new Error(
-            `Invalid GitHub endpoint: ${platformConfig.endpoint}`,
-          );
-        }
+        // valid url ensured at the function start
+        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
         ghHostname = parsedEndpoint.hostname;
       } else {
         ghHostname = 'github.com';
@@ -504,6 +504,7 @@ export async function initRepo({
   forkCreation,
   forkOrg,
   forkToken,
+  gitUrl,
   renovateUsername,
   cloneSubmodules,
   cloneSubmodulesFilter,
@@ -524,6 +525,7 @@ export async function initRepo({
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo | undefined;
+  let forkSshUrl: string | null = null;
   try {
     let infoQuery = repoInfoQuery;
 
@@ -679,6 +681,7 @@ export async function initRepo({
     let forkedRepo = await findFork(forkToken, repository, forkOrg);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
       const forkDefaultBranch = forkedRepo.default_branch;
       if (forkDefaultBranch !== config.defaultBranch) {
         const body = {
@@ -731,17 +734,13 @@ export async function initRepo({
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
     } else {
       logger.debug('Forked repo is not found and forkCreation is disabled');
       throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
-  const parsedEndpoint = parseUrl(platformConfig.endpoint);
-  // v8 ignore if: endpoint is validated during initPlatform
-  if (!parsedEndpoint) {
-    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
-  }
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
@@ -753,21 +752,25 @@ export async function initRepo({
     logger.debug(`Using ${tokenType} token for git init`);
     authToken = opts.token ?? null;
   }
-  if (authToken) {
-    const [username, password] = authToken.split(':');
-    parsedEndpoint.username = username;
-    parsedEndpoint.password = password ?? '';
-  }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
-    'api.github.com',
-    'github.com',
+  // endpoint is validated during initPlatform
+  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+  const workingSshUrl = forkToken ? forkSshUrl : repo.sshUrl;
+  const url = getRepoUrl(
+    config.repository!,
+    gitUrl,
+    workingSshUrl,
+    parsedEndpoint,
+    authToken,
   );
-  parsedEndpoint.pathname = `${config.repository}.git`;
-  const url = parsedEndpoint.href;
-  let upstreamUrl = undefined;
+  let upstreamUrl: string | undefined;
   if (forkCreation && config.parentRepo) {
-    parsedEndpoint.pathname = `${config.parentRepo}.git`;
-    upstreamUrl = parsedEndpoint.href;
+    upstreamUrl = getRepoUrl(
+      config.parentRepo,
+      gitUrl,
+      repo.sshUrl,
+      parsedEndpoint,
+      authToken,
+    );
   }
   await git.initRepo({
     ...config,

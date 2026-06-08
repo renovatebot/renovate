@@ -17,11 +17,13 @@ import {
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
+import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
+  anyMatchRegexOrGlobList,
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
@@ -1054,6 +1056,19 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (isArray(val)) {
+        for (const [subIndex, subval] of val.entries()) {
+          if (isObject(subval)) {
+            const subValidation = await validateConfig(
+              'global',
+              subval as AllConfig,
+              false,
+              `${currentPath}[${subIndex}]`,
+            );
+            warnings.push(...subValidation.warnings);
+            errors.push(...subValidation.errors);
+          }
+        }
+
         if (isRegexOrGlobOption(key)) {
           warnings.push(
             ...regexOrGlobValidator.check({
@@ -1120,6 +1135,19 @@ async function validateGlobalConfig(
                 subKey,
               ),
             );
+
+            if (
+              !(packageCacheNamespaces as readonly string[]).includes(subKey) &&
+              !anyMatchRegexOrGlobList(
+                packageCacheNamespaces as unknown as string[],
+                [subKey],
+              )
+            ) {
+              errors.push({
+                message: `${currentPath}: namespace \`${subKey}\` does not exist`,
+                topic: 'Configuration Error',
+              });
+            }
           }
         } else {
           const res = validatePlainObject(val);

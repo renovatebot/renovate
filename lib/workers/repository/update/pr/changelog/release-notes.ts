@@ -194,7 +194,7 @@ function getExactReleaseMatch(
   releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
   const exactReleaseReg = regEx(
-    `(?:^|/)(?:${packageName}|${depName})[@_-]v?${version}`,
+    `(?:^|/)(?:${packageName}|${depName})[@_/-]v?${version}`,
   );
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>

@@ -367,6 +367,7 @@ const staticGroups = {
           '!docker.io/calico/node',
           '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
+          '!docker.io/kindest/node',
         ],
       },
     ],
@@ -808,6 +809,17 @@ const staticGroups = {
       {
         groupName: 'spring ws',
         matchPackageNames: ['org.springframework.ws:**'],
+      },
+    ],
+  },
+  stylelint: {
+    description: 'Group stylelint packages together.',
+    packageRules: [
+      {
+        extends: ['packages:stylelint'],
+        groupName: 'stylelint packages',
+        groupSlug: 'stylelint',
+        separateMajorMinor: false,
       },
     ],
   },

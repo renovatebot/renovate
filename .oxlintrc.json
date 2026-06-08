@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "typescript", "vitest"],
+  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -42,6 +42,14 @@
             "name": "simple-git",
             "importNames": ["simpleGit"],
             "message": "Use createSimpleGit instead of simpleGit."
+          },
+          {
+            "name": "zod",
+            "message": "Use zod/v4 instead of the bare zod package."
+          },
+          {
+            "name": "zod/v3",
+            "message": "Use zod/v4 instead of the zod/v3 compatibility shim."
           }
         ]
       }
@@ -56,10 +64,13 @@
     ],
     "no-unassigned-vars": "error",
     "prefer-template": "error",
+    "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
+    "no-nested-ternary": "error",
 
     "renovate/enforce-ts-extension": "error",
     "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
+    "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
     "typescript/no-floating-promises": "error",
@@ -150,7 +161,16 @@
     "typescript/no-namespace": "error",
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
-    "typescript/no-unsafe-function-type": "error"
+    "typescript/no-unsafe-function-type": "error",
+    "unicorn/prefer-node-protocol": "error",
+
+    "typescript/no-useless-default-assignment": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/expect-expect": "off",
+    "vitest/no-conditional-expect": "off",
+    "vitest/no-standalone-expect": "off",
+    "vitest/prefer-snapshot-hint": "off",
+    "vitest/require-to-throw-message": "off"
   },
   "overrides": [
     {
@@ -210,7 +230,12 @@
       }
     },
     {
-      "files": ["lib/util/git/index.ts", "tools/**/*.mjs", "lib/**/*.spec.ts"],
+      "files": [
+        "lib/util/git/index.ts",
+        "tools/**/*.mjs",
+        "tools/**/*.ts",
+        "lib/**/*.spec.ts"
+      ],
       "rules": {
         "no-restricted-imports": [
           "error",

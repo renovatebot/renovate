@@ -5,6 +5,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
@@ -73,7 +74,7 @@ describe('modules/platform/github/index', () => {
           endpoint: 'https://[invalid',
           token: 'abc',
         }),
-      ).rejects.toThrow('Invalid GitHub endpoint: https://[invalid/');
+      ).rejects.toThrow('Invalid GitHub endpoint URL: https://[invalid');
     });
 
     it('should throw if using fine-grained token with GHE <3.10', async () => {
@@ -731,6 +732,7 @@ describe('modules/platform/github/index', () => {
       data: {
         repository: {
           isFork: false,
+          sshUrl: `git@github.com:${repository}.git`,
           isArchived: false,
           nameWithOwner: repository,
           autoMergeAllowed: true,
@@ -765,6 +767,7 @@ describe('modules/platform/github/index', () => {
         data: {
           repository: {
             isFork,
+            sshUrl: `git@github.com:${repository}.git`,
             isArchived: false,
             nameWithOwner: repository,
             hasIssuesEnabled: true,
@@ -854,6 +857,56 @@ describe('modules/platform/github/index', () => {
           forkCreation: false,
         }),
       ).rejects.toThrow(REPOSITORY_FORK_MISSING);
+    });
+
+    it('should use sshUrl if gitUrl is set to ssh', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        gitUrl: 'ssh',
+      });
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'git@github.com:some/repo.git',
+        }),
+      );
+    });
+
+    it('should throw if sshUrl is not present but gitUrl is set to ssh', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', { sshUrl: null });
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          gitUrl: 'ssh',
+        }),
+      ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
+    });
+
+    it('should use fork sshUrl when gitUrl is ssh in fork mode', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+        ssh_url: 'git@github.com:forked/repo.git',
+      });
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'token',
+        forkCreation: true,
+        gitUrl: 'ssh',
+      });
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'git@github.com:forked/repo.git',
+          upstreamUrl: 'git@github.com:some/repo.git',
+        }),
+      );
     });
 
     it('throws if the repo is a fork', async () => {
