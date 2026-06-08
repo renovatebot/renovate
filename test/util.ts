@@ -75,6 +75,10 @@ function getCallerFileName(): string | null {
 }
 
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
-  const callerDir = upath.dirname(getCallerFileName()!);
+  const callerFile = getCallerFileName();
+  if (callerFile === null) {
+    throw new Error('Unable to determine caller file for fixture path');
+  }
+  const callerDir = upath.dirname(callerFile);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
 }
