@@ -56,7 +56,7 @@
     "test-dirty": "git diff --exit-code",
     "test-e2e": "run-s 'test-e2e:*'",
     "test-e2e:pack": "pnpm pack",
-    "test-e2e:install": "cd test/e2e && pnpm --ignore-workspace install --no-lockfile --prod",
+    "test-e2e:install": "cd test/e2e && pnpm install --no-lockfile --prod",
     "test-e2e:run": "cd test/e2e && pnpm test",
     "test-schema": "run-s create-json-schema && node tools/validate-schema.ts",
     "test:docs": "node --test tools/docs/test/**/*.mjs",
