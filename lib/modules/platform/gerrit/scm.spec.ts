@@ -126,7 +126,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('uses local merge for non-pending virtual branches', async () => {
-      git.virtualBranchRef.mockImplementation(
+      git.remoteBranchRef.mockImplementation(
         (name) => `refs/remotes/origin/${name}`,
       );
       git.mergeToLocal.mockResolvedValueOnce();
