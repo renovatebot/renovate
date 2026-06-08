@@ -3,7 +3,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { FlutterResponse } from './types.ts';
+import { FlutterResponse } from './schema.ts';
 
 export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 
@@ -44,8 +44,9 @@ export class FlutterVersionDatasource extends Datasource {
     };
     try {
       const resp = (
-        await this.http.getJsonUnchecked<FlutterResponse>(
+        await this.http.getJson(
           `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
+          FlutterResponse,
         )
       ).body;
       result.releases = resp.releases

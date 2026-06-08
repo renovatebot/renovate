@@ -194,7 +194,7 @@ function getExactReleaseMatch(
   releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
   const exactReleaseReg = regEx(
-    `(?:^|/)(?:${packageName}|${depName})[@_-]v?${version}`,
+    `(?:^|/)(?:${packageName}|${depName})[@_/-]v?${version}`,
   );
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
@@ -397,7 +397,7 @@ export async function getReleaseNotesMd(
           // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
-              logger.trace({ body }, 'Found release notes for v' + version);
+              logger.trace({ body }, `Found release notes for v${version}`);
               return {
                 body: await linkifyBody(project, body),
                 url,
@@ -422,7 +422,7 @@ export async function getReleaseNotesMd(
                   !linkRefDefRegex.test(line),
               )
             ) {
-              logger.trace({ body }, 'Found release notes for v' + version);
+              logger.trace({ body }, `Found release notes for v${version}`);
               return {
                 body: await linkifyBody(project, body),
                 url,

@@ -20,7 +20,7 @@ describe('modules/datasource/jsr/util', () => {
   });
 
   it('should return null for exceed scope max length', () => {
-    const res = extractJsrPackageName(`@a`.repeat(101) + '/' + 'packagename');
+    const res = extractJsrPackageName(`${'@a'.repeat(101)}/packagename`);
     expect(res).toBeNull();
   });
 
@@ -35,7 +35,7 @@ describe('modules/datasource/jsr/util', () => {
   });
 
   it('should return null for exceed package max length', () => {
-    const res = extractJsrPackageName('@scope/' + `a`.repeat(59));
+    const res = extractJsrPackageName(`@scope/${'a'.repeat(59)}`);
     expect(res).toBeNull();
   });
 

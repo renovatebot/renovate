@@ -28,9 +28,12 @@ describe('modules/datasource/maven/cache', () => {
     vi.resetAllMocks();
     cache = {};
 
-    packageCache.get.mockImplementation((_namespace, key) =>
-      Promise.resolve(cache[key] as never),
-    );
+    packageCache.get.mockImplementation((namespace, key) => {
+      if (namespace === 'datasource-maven:metadata-not-found') {
+        return Promise.resolve(null as never);
+      }
+      return Promise.resolve(cache[key] as never);
+    });
     packageCache.getCacheType.mockReturnValue(undefined);
     packageCache.setWithRawTtl.mockImplementation((_namespace, key, value) => {
       cache[key] = value as HttpCache;
