@@ -132,7 +132,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
-  const lockFileName = pipfileName + '.lock';
+  const lockFileName = `${pipfileName}.lock`;
   if (!(await localPathExists(lockFileName))) {
     logger.debug('No Pipfile.lock found');
     return null;

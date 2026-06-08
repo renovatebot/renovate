@@ -11,6 +11,8 @@ describe('util/exec/env', () => {
     'LC_ALL',
     'LANG',
     'DOCKER_HOST',
+    'GIT_SSL_CAPATH',
+    'GIT_SSL_CAINFO',
     'SSL_CERT_FILE',
     'URL_REPLACE_1_FROM',
     'URL_REPLACE_1_TO',
@@ -33,6 +35,8 @@ describe('util/exec/env', () => {
   it('returns default environment variables', () => {
     expect(getChildProcessEnv()).toMatchObject({
       DOCKER_HOST: 'DOCKER_HOST',
+      GIT_SSL_CAPATH: 'GIT_SSL_CAPATH',
+      GIT_SSL_CAINFO: 'GIT_SSL_CAINFO',
       HOME: 'HOME',
       HTTPS_PROXY: 'HTTPS_PROXY',
       HTTP_PROXY: 'HTTP_PROXY',

@@ -106,7 +106,7 @@ export class ConanDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const conanPackage = getConanPackage(packageName);
-    const userAndChannel = '@' + conanPackage.userAndChannel;
+    const userAndChannel = `@${conanPackage.userAndChannel}`;
     if (
       isString(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl
@@ -130,8 +130,8 @@ export class ConanDatasource extends Datasource {
       );
 
       try {
-        const rep = await this.http.getJsonUnchecked(lookupUrl);
-        const conanJson = ConanJSON.parse(rep.body);
+        const rep = await this.http.getJson(lookupUrl, ConanJSON);
+        const conanJson = rep.body;
         if (conanJson) {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };

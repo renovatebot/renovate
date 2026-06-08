@@ -89,6 +89,9 @@ export const toolDefinitions = [
     name: 'maven',
   },
   {
+    name: 'mise',
+  },
+  {
     name: 'nix',
   },
   {

@@ -94,7 +94,7 @@ export function determineLockFileDirs(
   function getPackageFile(
     fileName: string,
   ): Partial<PackageFile<NpmManagerData>> {
-    logger.trace('Looking for packageFile: ' + fileName);
+    logger.trace(`Looking for packageFile: ${fileName}`);
 
     for (const packageFile of packageFiles.npm!) {
       if (packageFile.packageFile === fileName) {

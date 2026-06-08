@@ -129,7 +129,7 @@ export function replaceRange({
   const toVersionMinor = getMinor(newVersion);
   const toVersionPatch = getPatch(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)?.[0])
+    ? `-${String(semver.prerelease(newVersion)?.[0])}`
     : '';
 
   if (element.operator === '~>') {
@@ -239,7 +239,7 @@ export function widenRange(
     if (previousElement.operator === '-') {
       const splitCurrent = currentValue.split('-');
       splitCurrent.pop();
-      return splitCurrent.join('-') + '- ' + newValue;
+      return `${splitCurrent.join('-')}- ${newValue}`;
     }
     if (element.operator?.startsWith('>')) {
       logger.warn(`Complex ranges ending in greater than are not supported`);
@@ -270,7 +270,7 @@ export function bumpRange(
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)?.[0])
+    ? `-${String(semver.prerelease(newVersion)?.[0])}`
     : '';
 
   if (parsedRange.length === 1) {
@@ -343,7 +343,7 @@ export function bumpRange(
     return versions.filter((x: any) => x !== null && x !== '').join(' ');
   }
   logger.debug(
-    'Unsupported range type for rangeStrategy=bump: ' + currentValue,
+    `Unsupported range type for rangeStrategy=bump: ${currentValue}`,
   );
   return null;
 }

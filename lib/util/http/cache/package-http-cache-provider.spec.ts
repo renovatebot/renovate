@@ -1,6 +1,6 @@
 import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../cache/package/index.ts';

@@ -7,7 +7,7 @@ import type {
   ToStringOptions,
 } from 'yaml';
 import { parseAllDocuments, parseDocument, stringify } from 'yaml';
-import type { ZodType } from 'zod/v3';
+import type { ZodType } from 'zod/v4';
 import { logger } from '../logger/index.ts';
 import { stripTemplates } from './string.ts';
 
