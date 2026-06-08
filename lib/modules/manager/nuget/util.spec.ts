@@ -4,7 +4,6 @@ import { fs } from '~test/util.ts';
 import type { Registry } from './types.ts';
 import { bumpPackageVersion } from './update.ts';
 import {
-  applyMsbuildSdkVersioning,
   applyRegistries,
   findGlobalJson,
   findVersion,
@@ -14,30 +13,6 @@ import {
 vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/nuget/util', () => {
-  describe('applyMsbuildSdkVersioning', () => {
-    it('sets semver versioning for valid semver pins', () => {
-      const dep = applyMsbuildSdkVersioning({
-        depName: 'Microsoft.Build.Sql',
-        currentValue: '0.1.19-preview',
-        depType: 'msbuild-sdk',
-        datasource: 'nuget',
-      });
-
-      expect(dep.versioning).toBe('semver');
-    });
-
-    it('falls back to semver-coerced for non-semver pins', () => {
-      const dep = applyMsbuildSdkVersioning({
-        depName: 'Some.Sdk',
-        currentValue: '1.2.3.4',
-        depType: 'msbuild-sdk',
-        datasource: 'nuget',
-      });
-
-      expect(dep.versioning).toBe('semver-coerced');
-    });
-  });
-
   describe('findVersion', () => {
     it('finds the version in a later property group', () => {
       const content =

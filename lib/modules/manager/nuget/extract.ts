@@ -16,7 +16,6 @@ import { extractMsbuildGlobalManifest } from './extract/global-manifest.ts';
 import { extractPackagesFromSingleCsharpFile } from './extract/single-csharp-file.ts';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types.ts';
 import {
-  applyMsbuildSdkVersioning,
   applyRegistries,
   findVersion,
   getConfiguredRegistries,
@@ -103,27 +102,23 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       const version = attr?.Version;
       // if sdk element is present it will always have the Name field but the Version is an optional field
       if (depName && version) {
-        results.push(
-          applyMsbuildSdkVersioning({
-            depName,
-            currentValue: version,
-            depType: 'msbuild-sdk',
-            datasource: NugetDatasource.id,
-          }),
-        );
+        results.push({
+          depName,
+          currentValue: version,
+          depType: 'msbuild-sdk',
+          datasource: NugetDatasource.id,
+        });
       }
     } else if (name === 'Import') {
       const depName = attr?.Sdk;
       const version = attr?.Version;
       if (depName && version) {
-        results.push(
-          applyMsbuildSdkVersioning({
-            depName,
-            currentValue: version,
-            depType: 'msbuild-sdk',
-            datasource: NugetDatasource.id,
-          }),
-        );
+        results.push({
+          depName,
+          currentValue: version,
+          depType: 'msbuild-sdk',
+          datasource: NugetDatasource.id,
+        });
       }
     } else {
       if (name === 'Project') {
@@ -131,14 +126,12 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           const str = attr?.Sdk;
           const [name, version] = str.split('/');
           if (name && version) {
-            results.push(
-              applyMsbuildSdkVersioning({
-                depName: name,
-                depType: 'msbuild-sdk',
-                currentValue: version,
-                datasource: NugetDatasource.id,
-              }),
-            );
+            results.push({
+              depName: name,
+              depType: 'msbuild-sdk',
+              currentValue: version,
+              datasource: NugetDatasource.id,
+            });
           }
         }
 

@@ -26,4 +26,15 @@ describe('modules/manager/nuget/index', () => {
       ).toBe(false);
     });
   });
+
+  describe('defaultConfig', () => {
+    it('bumps msbuild-sdk dependencies via package rule', () => {
+      expect(defaultConfig.packageRules).toEqual([
+        {
+          matchDepTypes: ['msbuild-sdk'],
+          rangeStrategy: 'bump',
+        },
+      ]);
+    });
+  });
 });

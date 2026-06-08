@@ -3,7 +3,12 @@ import upath from 'upath';
 import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type {
+  RenovateConfig,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { Result } from '../../../util/result.ts';
 import * as lookup from '../../../workers/repository/process/lookup/index.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
@@ -11,7 +16,6 @@ import { doAutoReplace } from '../../../workers/repository/update/branch/auto-re
 import type { BranchUpgradeConfig } from '../../../workers/types.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import { id as nugetVersioningId } from '../../versioning/nuget/index.ts';
-import { id as semverVersioningId } from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -24,12 +28,11 @@ const adminConfig: RepoGlobalConfig = {
 describe('modules/manager/nuget/integration', () => {
   const getNugetReleases = vi.spyOn(NugetDatasource.prototype, 'getReleases');
 
-  let baseConfig: LookupUpdateConfig;
+  let baseConfig: RenovateConfig;
 
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
-    baseConfig = partial<LookupUpdateConfig>(getConfig() as never);
-    baseConfig.manager = 'nuget';
+    baseConfig = getConfig() as RenovateConfig;
     baseConfig.rangeStrategy = 'replace';
   });
 
@@ -37,13 +40,17 @@ describe('modules/manager/nuget/integration', () => {
     GlobalConfig.reset();
   });
 
-  function makeConfig(dep: PackageDependency): LookupUpdateConfig {
+  async function makeConfig(
+    dep: PackageDependency,
+  ): Promise<LookupUpdateConfig> {
+    const managerConfig = getManagerConfig(baseConfig, 'nuget');
+    let depConfig = mergeChildConfig(managerConfig, dep);
+    depConfig = await applyPackageRules(depConfig, 'pre-lookup');
     return {
-      ...baseConfig,
-      ...dep,
+      ...depConfig,
       currentValue: dep.currentValue ?? undefined,
       packageName: dep.packageName ?? dep.depName!,
-    };
+    } as LookupUpdateConfig;
   }
 
   it('proposes updates for Sdk elements in sqlproj files', async () => {
@@ -68,7 +75,6 @@ describe('modules/manager/nuget/integration', () => {
       currentValue: '0.1.19-preview',
       depType: 'msbuild-sdk',
       datasource: 'nuget',
-      versioning: semverVersioningId,
     });
 
     getNugetReleases.mockResolvedValueOnce({
@@ -76,7 +82,7 @@ describe('modules/manager/nuget/integration', () => {
     });
 
     const { updates } = await Result.wrap(
-      lookup.lookupUpdates(makeConfig(dep!)),
+      lookup.lookupUpdates(await makeConfig(dep!)),
     ).unwrapOrThrow();
 
     expect(updates.length).toBeGreaterThan(0);
@@ -84,19 +90,22 @@ describe('modules/manager/nuget/integration', () => {
     expect(updates[0]?.newValue).toBe('2.2.0');
   });
 
-  it('does not propose updates for msbuild-sdk when nuget versioning is used', async () => {
+  it('does not propose updates for msbuild-sdk when nuget versioning and replace range strategy are used', async () => {
     getNugetReleases.mockResolvedValueOnce({
       releases: [{ version: '0.1.19-preview' }, { version: '2.2.0' }],
     });
 
     const { updates } = await Result.wrap(
       lookup.lookupUpdates(
-        makeConfig({
+        partial<LookupUpdateConfig>({
+          manager: 'nuget',
+          rangeStrategy: 'replace',
           depName: 'Microsoft.Build.Sql',
           currentValue: '0.1.19-preview',
           depType: 'msbuild-sdk',
           datasource: 'nuget',
           versioning: nugetVersioningId,
+          packageName: 'Microsoft.Build.Sql',
         }),
       ),
     ).unwrapOrThrow();

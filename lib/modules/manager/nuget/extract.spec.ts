@@ -109,7 +109,6 @@ describe('modules/manager/nuget/extract', () => {
           depType: 'msbuild-sdk',
           currentValue: '3.4.0',
           datasource: 'nuget',
-          versioning: 'semver',
         },
       ]);
       expect(res?.deps).toHaveLength(1);
@@ -149,7 +148,6 @@ describe('modules/manager/nuget/extract', () => {
           depType: 'msbuild-sdk',
           currentValue: '3.4.0',
           datasource: 'nuget',
-          versioning: 'semver',
         },
       ]);
       expect(res?.deps).toHaveLength(1);
@@ -169,7 +167,6 @@ describe('modules/manager/nuget/extract', () => {
           depType: 'msbuild-sdk',
           currentValue: '0.1.19-preview',
           datasource: 'nuget',
-          versioning: 'semver',
         },
       ]);
     });
@@ -209,7 +206,6 @@ describe('modules/manager/nuget/extract', () => {
           depType: 'msbuild-sdk',
           currentValue: '1.2.3',
           datasource: 'nuget',
-          versioning: 'semver',
         },
       ]);
       expect(res?.deps).toHaveLength(1);
@@ -516,7 +512,6 @@ describe('modules/manager/nuget/extract', () => {
             datasource: 'nuget',
             depName: 'YoloDev.Sdk',
             depType: 'msbuild-sdk',
-            versioning: 'semver',
           },
         ],
         extractedConstraints: { 'dotnet-sdk': '5.0.302' },
@@ -641,7 +636,6 @@ describe('modules/manager/nuget/extract', () => {
                 currentValue: '6.0.0',
                 depName: 'Some.Sdk',
                 depType: 'msbuild-sdk',
-                versioning: 'semver',
               },
               {
                 datasource: 'nuget',

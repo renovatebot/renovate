@@ -2,7 +2,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { NugetDatasource } from '../../../datasource/nuget/index.ts';
 import type { PackageDependency, PackageFileContent } from '../../types.ts';
 import type { NugetPackageDependency, Registry } from '../types.ts';
-import { applyMsbuildSdkVersioning, applyRegistries } from '../util.ts';
+import { applyRegistries } from '../util.ts';
 
 // regex for finding
 // #:package Name@Version
@@ -29,10 +29,6 @@ export function extractPackagesFromSingleCsharpFile(
       datasource: NugetDatasource.id,
       depType: type === 'package' ? 'nuget' : 'msbuild-sdk',
     };
-
-    if (dep.depType === 'msbuild-sdk') {
-      applyMsbuildSdkVersioning(dep);
-    }
 
     applyRegistries(dep, registries);
     deps.push(dep);

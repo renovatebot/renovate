@@ -4,8 +4,8 @@ The NuGet package manager supports these SDK-style files and formats:
 
 - `.csproj`
 - `.fsproj`
-- `.vbproj`
 - `.sqlproj` (SSDT SQL projects)
+- `.vbproj`
 - `.props`
 - `.targets`
 - `global.json`
