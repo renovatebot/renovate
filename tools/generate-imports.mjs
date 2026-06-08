@@ -276,6 +276,28 @@ async function generateAllowedValues() {
   await updateFile('lib/config/allowed-values.generated.ts', content);
 }
 
+async function generateGlobalConfigOptionDefaults() {
+  const { getOptions } = await import('../lib/config/options/index.ts');
+  const options = getOptions();
+
+  /** @type {Record<string, unknown>} */
+  const defaults = {};
+  for (const option of options
+    .filter((o) => o.globalOnly)
+    .filter((o) => 'default' in o)
+    // if the default is null, it means there is no default, so don't include it
+    .filter((o) => o.default !== null)
+    .sort((a, b) => a.name.localeCompare(b.name))) {
+    defaults[option.name] = option.default;
+  }
+
+  const content = `
+export const globalConfigOptionDefaults: Record<string, unknown> = ${JSON.stringify(defaults, null, 2)};
+`;
+
+  await updateFile('lib/global-config-option-defaults.generated.ts', content);
+}
+
 async function generateHash() {
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
@@ -323,6 +345,15 @@ async function generateHash() {
 
 await (async () => {
   try {
+    // prevent import cycles when trying to generate config options
+    const stubFile = 'lib/global-config-option-defaults.generated.ts';
+    if (!fs.existsSync(stubFile)) {
+      await fs.writeFile(
+        stubFile,
+        '\nexport const globalConfigOptionDefaults: Record<string, unknown> = {};\n',
+      );
+    }
+
     // data-files
     await generateData();
     await generateManagerList();
@@ -330,6 +361,7 @@ await (async () => {
     await generateVersioningList();
     await generateDatasourceList();
     await generateAllowedValues();
+    await generateGlobalConfigOptionDefaults();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))

@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
-  PDM_VERSION: 2.26.8 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.27.0 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -99,8 +99,9 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -138,8 +139,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -182,8 +184,9 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -204,8 +207,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -228,8 +232,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -270,8 +275,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -303,8 +309,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -352,8 +359,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
           sparse-checkout: .github/workflows
 
@@ -363,9 +371,9 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
         with:
-          version: 1.24.1
+          version: 1.25.2
 
   test:
     needs: [setup, prefetch]
@@ -388,8 +396,9 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -425,7 +434,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           use_oidc: true
           report_type: test_results
@@ -464,8 +473,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           show-progress: false
 
@@ -478,7 +488,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -494,8 +504,9 @@ jobs:
     if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -609,8 +620,9 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -646,8 +658,9 @@ jobs:
           docker info
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Download dist
@@ -687,8 +700,9 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -736,8 +750,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -819,8 +834,9 @@ jobs:
           sudo systemctl restart docker
           docker info
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
@@ -843,7 +859,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@23f34c79d4850ff1ffb4634462479831fb522c80 # v4.6.15
+        uses: containerbase/internal-tools@c0acd0557771a8c771b458770c0956193ee916e4 # v4.6.42
         with:
           command: docker-config
 
@@ -856,7 +872,7 @@ jobs:
       - name: Install newer npm
         run: npm install -g npm
 
-      - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Docker registry login
         run: |

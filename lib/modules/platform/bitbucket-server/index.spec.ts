@@ -10,7 +10,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import type { ReattemptPlatformAutomergeConfig } from '../types.ts';
 import * as bitbucket from './index.ts';
 
@@ -171,8 +171,8 @@ function prMock(
   };
 }
 
-const endpointWithNoPath = new URL('https://stash.renovatebot.com');
-const endpointWithPath = new URL('https://stash.renovatebot.com/vcs');
+const endpointWithNoPath = parseUrl('https://stash.renovatebot.com')!;
+const endpointWithPath = parseUrl('https://stash.renovatebot.com/vcs')!;
 
 describe('modules/platform/bitbucket-server/index', () => {
   describe('endpoint with path', () => {

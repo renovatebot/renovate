@@ -39,7 +39,7 @@ export async function extractPackageFile(
     if (contentArr[lineNumber].match(depSectionRegExp)) {
       let depBuffer = '';
       do {
-        depBuffer += contentArr[lineNumber] + '\n';
+        depBuffer += `${contentArr[lineNumber]}\n`;
         lineNumber += 1;
       } while (contentArr[lineNumber].trim() !== 'end');
       let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;

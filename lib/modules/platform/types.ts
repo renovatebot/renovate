@@ -14,6 +14,7 @@ import type { GithubVulnerabilityAlert } from './github/schema.ts';
 export type VulnerabilityAlert = GithubVulnerabilityAlert;
 
 export interface PlatformParams {
+  dryRun?: string;
   endpoint?: string;
   token?: string;
   username?: string;
@@ -95,9 +96,12 @@ export interface Issue {
   number?: number;
   state?: string;
   title?: string;
+  createdAt?: string;
+  lastModified?: string;
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
+  automergeCommitMessage?: string;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;

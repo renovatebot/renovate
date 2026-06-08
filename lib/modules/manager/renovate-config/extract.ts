@@ -1,6 +1,8 @@
 import { isNonEmptyArray, isNullOrUndefined } from '@sindresorhus/is';
 import { parsePreset } from '../../../config/presets/parse.ts';
 import { logger } from '../../../logger/index.ts';
+import { getToolConfig } from '../../../util/exec/containerbase.ts';
+import { isToolName } from '../../../util/exec/types.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -53,6 +55,54 @@ export function extractPackageFile(
       datasource,
       currentValue: parsedPreset.tag,
     });
+  }
+
+  for (const [constraint, value] of Object.entries(
+    config.data.constraints ?? {},
+  )) {
+    if (isToolName(constraint)) {
+      const toolConfig = getToolConfig(constraint);
+      deps.push({
+        ...toolConfig,
+        depName: constraint,
+        currentValue: value,
+        depType: 'tool-constraint',
+        commitMessageTopic: '{{{depName}}} tool constraint',
+      });
+    } else {
+      deps.push({
+        depName: constraint,
+        currentValue: value,
+        skipReason: 'unsupported',
+        depType: 'constraint',
+        commitMessageTopic: '{{{depName}}} constraint',
+      });
+    }
+  }
+
+  for (const packageRule of config.data.packageRules ?? []) {
+    for (const [constraint, value] of Object.entries(
+      packageRule.constraints ?? {},
+    )) {
+      if (isToolName(constraint)) {
+        const toolConfig = getToolConfig(constraint);
+        deps.push({
+          ...toolConfig,
+          depName: constraint,
+          currentValue: value,
+          depType: 'tool-constraint',
+          commitMessageTopic: '{{{depName}}} tool constraint',
+        });
+      } else {
+        deps.push({
+          depName: constraint,
+          currentValue: value,
+          skipReason: 'unsupported',
+          depType: 'constraint',
+          commitMessageTopic: '{{{depName}}} constraint',
+        });
+      }
+    }
   }
 
   return isNonEmptyArray(deps) ? { deps } : null;

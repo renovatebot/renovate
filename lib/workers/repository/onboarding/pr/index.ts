@@ -194,11 +194,10 @@ If you need any further assistance then you can also [request help here](${
         managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
       );
     }
-    prBody =
-      prBody.replace(
-        '{{PACKAGE FILES}}',
-        '### Detected Package Files\n\n' + files.join('\n'),
-      ) + '\n';
+    prBody = `${prBody.replace(
+      '{{PACKAGE FILES}}',
+      `### Detected Package Files\n\n${files.join('\n')}`,
+    )}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
@@ -226,7 +225,7 @@ If you need any further assistance then you can also [request help here](${
 
   prBody += onboardingConfigHashComment;
 
-  logger.trace('prBody:\n' + prBody);
+  logger.trace(`prBody:\n${prBody}`);
 
   prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 

@@ -1,4 +1,4 @@
-import { createReadStream } from 'fs';
+import { createReadStream } from 'node:fs';
 import { copyFile, stat } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
@@ -420,8 +420,7 @@ export function mockFetchInReleaseContent(
   const mockCall = httpMock
     .scope(debBaseUrl)
     .get(
-      getBaseSuiteUrl(getComponentUrl('', release, component, arch)) +
-        '/InRelease',
+      `${getBaseSuiteUrl(getComponentUrl('', release, component, arch))}/InRelease`,
     );
 
   if (error) {
