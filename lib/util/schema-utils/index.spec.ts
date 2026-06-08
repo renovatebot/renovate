@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { z } from 'zod/v4';
 import { logger } from '~test/util.ts';
 import {
+  DeepNullish,
   Ini,
   Json,
   Json5,
@@ -162,6 +163,145 @@ describe('util/schema-utils/index', () => {
       const s = Nullish(z.string());
       expect(() => s.parse(42)).toThrow();
     });
+  });
+
+  describe('DeepNullish', () => {
+    describe('optional leaf', () => {
+      const s = DeepNullish(z.object({ a: z.string().optional() }));
+
+      it.each`
+        input             | expected
+        ${{ a: null }}    | ${{}}
+        ${{}}             | ${{}}
+        ${{ a: 'hello' }} | ${{ a: 'hello' }}
+      `('parses $input', ({ input, expected }) => {
+        expect(s.parse(input)).toEqual(expected);
+      });
+
+      it('rejects wrong types', () => {
+        expect(() => s.parse({ a: 42 })).toThrow();
+      });
+    });
+
+    it.each`
+      input                         | expected
+      ${{ outer: { inner: null } }} | ${{ outer: {} }}
+      ${{ outer: null }}            | ${{}}
+    `('recurses into nested objects: $input', ({ input, expected }) => {
+      const s = DeepNullish(
+        z.object({
+          outer: z.object({ inner: z.string().optional() }).optional(),
+        }),
+      );
+      expect(s.parse(input)).toEqual(expected);
+    });
+
+    it('recurses into record valueType', () => {
+      const s = DeepNullish(z.record(z.string(), z.string().optional()));
+      const result = s.parse({ key: null });
+      expect(result.key).toBeUndefined();
+    });
+
+    it('recurses into array element', () => {
+      const s = DeepNullish(z.array(z.string().optional()));
+      expect(s.parse([null, 'hello'])).toEqual([undefined, 'hello']);
+    });
+
+    it.each`
+      input                   | expected
+      ${{ val: { a: null } }} | ${{ val: {} }}
+      ${{ val: { a: 'x' } }}  | ${{ val: { a: 'x' } }}
+      ${{ val: 42 }}          | ${{ val: 42 }}
+    `('recurses into union options: $input', ({ input, expected }) => {
+      const s = DeepNullish(
+        z.object({
+          val: z.union([z.object({ a: z.string().optional() }), z.number()]),
+        }),
+      );
+      expect(s.parse(input)).toEqual(expected);
+    });
+
+    it.each`
+      input          | expected
+      ${{}}          | ${{ y: false }}
+      ${{ y: null }} | ${{ y: false }}
+      ${{ y: true }} | ${{ y: true }}
+    `('handles default over optional: $input', ({ input, expected }) => {
+      const s = DeepNullish(
+        z.object({ y: z.boolean().optional().default(false) }),
+      );
+      expect(s.parse(input)).toEqual(expected);
+    });
+
+    it.each`
+      input             | expected
+      ${{ a: null }}    | ${{ a: null }}
+      ${{ a: 'hello' }} | ${{ a: 'hello' }}
+    `(
+      'preserves nullable fields (null not stripped): $input',
+      ({ input, expected }) => {
+        const s = DeepNullish(z.object({ a: z.nullable(z.string()) }));
+        expect(s.parse(input)).toEqual(expected);
+      },
+    );
+
+    describe('recurses into pipe output side', () => {
+      const s = DeepNullish(Json.pipe(z.object({ a: z.string().optional() })));
+
+      it('parses valid input', () => {
+        expect(s.parse('{"a":"x"}')).toEqual({ a: 'x' });
+      });
+
+      it('strips optional inside pipe', () => {
+        expect(s.parse('{"a":null}')).toEqual({});
+        expect(s.parse('{}')).toEqual({});
+      });
+
+      it('still rejects invalid JSON', () => {
+        expect(s.safeParse('{{{')).toMatchObject({ success: false });
+      });
+    });
+
+    describe('Loose* schemas remain opaque (closure boundary)', () => {
+      it('LooseArray element optionals are not rewritten, but cleaned up', () => {
+        const s = DeepNullish(
+          LooseArray(z.object({ b: z.string().optional() })),
+        );
+        expect(s.parse([{ b: null }])).toEqual([]);
+        expect(s.parse([{ b: 'x' }])).toEqual([{ b: 'x' }]);
+      });
+
+      it('LooseRecord value optionals are not rewritten, but cleaned up', () => {
+        const s = DeepNullish(
+          LooseRecord(z.object({ b: z.string().optional() })),
+        );
+        expect(s.parse({ k: { b: null } })).toEqual({});
+        expect(s.parse({ k: { b: null }, j: { b: '' } })).toEqual({
+          j: { b: '' },
+        });
+        expect(s.parse({ k: { b: 'x' } })).toEqual({ k: { b: 'x' } });
+      });
+    });
+
+    it('passes through leaf types unchanged', () => {
+      expect(DeepNullish(z.string()).parse('hello')).toBe('hello');
+    });
+
+    it('rejects wrong types on leaf', () => {
+      expect(() => DeepNullish(z.string()).parse(42)).toThrow();
+    });
+
+    it.each`
+      input          | expected
+      ${{ a: null }} | ${{}}
+      ${{ a: 'x' }}  | ${{ a: 'x' }}
+    `(
+      'is idempotent when schema already uses Nullish: $input',
+      ({ input, expected }) => {
+        const s = DeepNullish(z.object({ a: Nullish(z.string()) }));
+        expect(s.parse(input)).toEqual(expected);
+      },
+    );
   });
 
   describe('Json', () => {
@@ -593,45 +733,37 @@ describe('util/schema-utils/index', () => {
   });
 
   describe('NotCircular', () => {
-    it('allows non-circular primitive values', () => {
-      const Schema = NotCircular.pipe(z.any());
+    const Schema = NotCircular.pipe(z.any());
 
-      expect(Schema.parse(undefined)).toBeUndefined();
-      expect(Schema.parse(null)).toBeNull();
-      expect(Schema.parse(123)).toBe(123);
-      expect(Schema.parse('string')).toBe('string');
-      expect(Schema.parse(true)).toBe(true);
+    it.each`
+      value
+      ${undefined}
+      ${null}
+      ${123}
+      ${'string'}
+      ${true}
+    `('allows non-circular primitive $value', ({ value }) => {
+      expect(Schema.parse(value)).toBe(value);
     });
 
-    it('allows non-circular arrays', () => {
-      const Schema = NotCircular.pipe(z.any());
-
-      expect(Schema.parse([1, 2, 3])).toEqual([1, 2, 3]);
-      expect(Schema.parse([{ a: 1 }, { b: 2 }])).toEqual([{ a: 1 }, { b: 2 }]);
-      expect(
-        Schema.parse([
-          [1, 2],
-          [3, 4],
-        ]),
-      ).toEqual([
-        [1, 2],
-        [3, 4],
-      ]);
+    it.each`
+      value
+      ${[1, 2, 3]}
+      ${[{ a: 1 }, { b: 2 }]}
+      ${[[1, 2], [3, 4]]}
+    `('allows non-circular array $value', ({ value }) => {
+      expect(Schema.parse(value)).toEqual(value);
     });
 
-    it('allows non-circular objects', () => {
-      const Schema = NotCircular.pipe(z.any());
-
-      expect(Schema.parse({ a: 1, b: 2 })).toEqual({ a: 1, b: 2 });
-      expect(Schema.parse({ a: { b: 1 }, c: { d: 2 } })).toEqual({
-        a: { b: 1 },
-        c: { d: 2 },
-      });
+    it.each`
+      value
+      ${{ a: 1, b: 2 }}
+      ${{ a: { b: 1 }, c: { d: 2 } }}
+    `('allows non-circular object $value', ({ value }) => {
+      expect(Schema.parse(value)).toEqual(value);
     });
 
     it('allows objects reuse', () => {
-      const Schema = NotCircular.pipe(z.any());
-
       const reused = { value: 42 };
       const obj = {
         foo: reused,
@@ -645,8 +777,6 @@ describe('util/schema-utils/index', () => {
     });
 
     it('rejects circular objects', () => {
-      const Schema = NotCircular.pipe(z.any());
-
       const obj: any = { a: 1 };
       obj.self = obj;
 
@@ -665,8 +795,6 @@ describe('util/schema-utils/index', () => {
     });
 
     it('rejects circular arrays', () => {
-      const Schema = NotCircular.pipe(z.any());
-
       const arr: any[] = [1, 2, 3];
       arr.push(arr);
 
@@ -685,8 +813,6 @@ describe('util/schema-utils/index', () => {
     });
 
     it('rejects deeply nested circular references', () => {
-      const Schema = NotCircular.pipe(z.any());
-
       const obj: any = {
         a: {
           b: {
