@@ -34,6 +34,18 @@ const presetsToSuggest = [
   'security:only-security-updates',
 ];
 
+function getOptionDocsUrl(option: RenovateOptions): string {
+  const parent = option.parents?.find((parent) => parent !== '.');
+  const anchor = parent
+    ? `${parent}${option.name}`.toLowerCase()
+    : option.name.toLowerCase();
+  const page = option.globalOnly
+    ? 'self-hosted-configuration'
+    : 'configuration-options';
+
+  return `https://docs.renovatebot.com/${page}/#${anchor}`;
+}
+
 /**
  * When suggesting presets in `extends`, suggest a number of values that users may want to use
  */
@@ -59,8 +71,9 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     type?: JsonSchemaType;
   } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
-    temp.description = option.description;
-    temp.markdownDescription = option.description;
+    const docsUrl = getOptionDocsUrl(option);
+    temp.description = `${option.description}\nSee also: ${docsUrl}`;
+    temp.markdownDescription = `${option.description}\n\nSee also: [${option.name}](${docsUrl})`;
   }
   temp.type = option.type;
   if (option.type === 'array') {

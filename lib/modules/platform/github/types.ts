@@ -33,6 +33,7 @@ export interface Comment {
 export interface GhRestRepo {
   full_name: string;
   default_branch: string;
+  ssh_url: string | null;
   owner: {
     login: string;
   };
@@ -123,6 +124,7 @@ export interface LocalRepoConfig {
 
 export interface GhRepo {
   id: string;
+  sshUrl: string | null;
   isFork: boolean;
   parent?: {
     nameWithOwner: string;
