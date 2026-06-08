@@ -1,5 +1,5 @@
 import { XmlDocument, type XmlElement } from 'xmldoc';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>';
 

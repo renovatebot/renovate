@@ -38,7 +38,7 @@ function getStringValue(node) {
  */
 function reportJsExtension(context, node, value) {
   const quote = node.raw?.[0] ?? "'";
-  const fixed = value.slice(0, -3) + '.ts';
+  const fixed = `${value.slice(0, -3)}.ts`;
   context.report({
     node,
     messageId: 'useTsExtension',

@@ -216,7 +216,7 @@ const platform: Platform = {
       baseEndpoint = ensureTrailingSlash(baseEndpoint);
       defaults.endpoint = baseEndpoint;
     } else {
-      logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
+      logger.debug(`Using default Gitea endpoint: ${defaults.endpoint}`);
     }
     setBaseUrl(defaults.endpoint);
 
@@ -289,7 +289,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
     // Try to fetch information about repository
     try {

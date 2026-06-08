@@ -2,8 +2,8 @@ import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, OptionsInit, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
-import type { z } from 'zod/v3';
-import { ZodType } from 'zod/v3';
+import type { z } from 'zod/v4';
+import { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.ts';
@@ -16,6 +16,7 @@ import { acquireLock } from '../mutex.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
+import { compile } from '../template/index.ts';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization } from './auth.ts';
@@ -47,7 +48,7 @@ export interface InternalJsonUnsafeOptions<
 export interface InternalJsonOptions<
   Opts extends HttpOptions,
   ResT = unknown,
-  Schema extends ZodType<ResT> = ZodType<ResT>,
+  Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
 > extends InternalJsonUnsafeOptions<Opts> {
   schema?: Schema;
 }
@@ -63,12 +64,12 @@ export interface InternalHttpOptions extends HttpOptions {
 }
 
 export function applyDefaultHeaders(options: OptionsInit): void {
-  const renovateVersion = pkg.version;
+  const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
     ...options.headers,
-    'user-agent':
-      GlobalConfig.get('userAgent') ??
-      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+    'user-agent': compile(userAgentTemplate, {
+      renovateVersion: pkg.version,
+    }),
   };
 }
 
@@ -377,7 +378,10 @@ export abstract class HttpBase<
     return this.request<ResT>(url, { ...opts, responseType: 'json' });
   }
 
-  private async requestJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  private async requestJson<
+    ResT,
+    Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
+  >(
     method: HttpMethod,
     options: InternalJsonOptions<JSONOpts, ResT, Schema>,
   ): Promise<HttpResponse<ResT>> {
@@ -614,9 +618,9 @@ export abstract class HttpBase<
   putJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
-    arg3?: ZodType,
+    arg3?: Schema,
   ): Promise<HttpResponse<T>> {
-    const args = this.resolveArgs(arg1, arg2, arg3);
+    const args = this.resolveArgs<T>(arg1, arg2, arg3);
     return this.requestJson<T>('put', args);
   }
 
@@ -727,6 +731,6 @@ export abstract class HttpBase<
       res.body = (await Toml.parseAsync(res.body)) as z.infer<Schema>;
     }
 
-    return res;
+    return res as HttpResponse<z.infer<Schema>>;
   }
 }

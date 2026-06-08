@@ -105,4 +105,3 @@ Here's an example of grouping all non-breaking updates together:
 ## Supported Versioning
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->

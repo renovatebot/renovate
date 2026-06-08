@@ -17,11 +17,13 @@ import {
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
+import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
+  anyMatchRegexOrGlobList,
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
@@ -286,10 +288,8 @@ export async function validateConfig(
       }
       if (optionSupportsTemplating.has(key) && val) {
         try {
-          // TODO: validate string #22198
-          let res = template.compile((val as string).toString(), config, false);
-          res = template.compile(res, config, false);
-          template.compile(res, config, false);
+          // TODO: types (#22198)
+          template.validate((val as string).toString());
         } catch {
           errors.push({
             topic: 'Configuration Error',
@@ -418,13 +418,15 @@ export async function validateConfig(
                       });
                     }
                   }
-                  try {
-                    parsePreset(subval);
-                  } catch {
-                    errors.push({
-                      topic: 'Configuration Error',
-                      message: `${currentPath}: preset "${subval}" is not valid`,
-                    });
+                  if (!subval.includes('{{')) {
+                    try {
+                      parsePreset(subval);
+                    } catch {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `${currentPath}: preset "${subval}" is not valid`,
+                      });
+                    }
                   }
                 } else {
                   errors.push({
@@ -680,7 +682,7 @@ export async function validateConfig(
               const allowedEnvVars =
                 configType === 'global'
                   ? (config.allowedEnv ?? [])
-                  : GlobalConfig.get('allowedEnv', []);
+                  : GlobalConfig.get('allowedEnv');
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!isString(envVarValue)) {
                   errors.push({
@@ -874,7 +876,7 @@ export async function validateConfig(
       const allowedHeaders =
         configType === 'global'
           ? (config.allowedHeaders ?? [])
-          : GlobalConfig.get('allowedHeaders', []);
+          : GlobalConfig.get('allowedHeaders');
       for (const rule of val as HostRule[]) {
         if (isNonEmptyString(rule.matchHost)) {
           if (rule.matchHost.includes('://')) {
@@ -1058,6 +1060,19 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (isArray(val)) {
+        for (const [subIndex, subval] of val.entries()) {
+          if (isObject(subval)) {
+            const subValidation = await validateConfig(
+              'global',
+              subval as AllConfig,
+              false,
+              `${currentPath}[${subIndex}]`,
+            );
+            warnings.push(...subValidation.warnings);
+            errors.push(...subValidation.errors);
+          }
+        }
+
         if (isRegexOrGlobOption(key)) {
           warnings.push(
             ...regexOrGlobValidator.check({
@@ -1145,6 +1160,19 @@ async function validateGlobalConfig(
                 subKey,
               ),
             );
+
+            if (
+              !(packageCacheNamespaces as readonly string[]).includes(subKey) &&
+              !anyMatchRegexOrGlobList(
+                packageCacheNamespaces as unknown as string[],
+                [subKey],
+              )
+            ) {
+              errors.push({
+                message: `${currentPath}: namespace \`${subKey}\` does not exist`,
+                topic: 'Configuration Error',
+              });
+            }
           }
         } else {
           const res = validatePlainObject(val);
