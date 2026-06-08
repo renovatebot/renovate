@@ -801,6 +801,11 @@ Possible values:
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
+!!! note
+  On GitHub, `default` and `endpoint` are equivalent: both build the HTTPS URL from the configured endpoint with credentials embedded.
+  `ssh` uses the repository's `sshUrl` and authenticates via SSH key.
+  In fork mode (`forkToken` set with `forkCreation`), `ssh` applies to both the fork's working URL and the upstream URL.
+
 ## `githubTokenWarn`
 
 By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
