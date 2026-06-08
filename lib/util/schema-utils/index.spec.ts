@@ -263,7 +263,7 @@ describe('util/schema-utils/index', () => {
     });
 
     describe('Loose* schemas remain opaque (closure boundary)', () => {
-      it('LooseArray element optionals are not rewritten', () => {
+      it('LooseArray element optionals are not rewritten, but cleaned up', () => {
         const s = DeepNullish(
           LooseArray(z.object({ b: z.string().optional() })),
         );
@@ -271,11 +271,14 @@ describe('util/schema-utils/index', () => {
         expect(s.parse([{ b: 'x' }])).toEqual([{ b: 'x' }]);
       });
 
-      it('LooseRecord value optionals are not rewritten', () => {
+      it('LooseRecord value optionals are not rewritten, but cleaned up', () => {
         const s = DeepNullish(
           LooseRecord(z.object({ b: z.string().optional() })),
         );
         expect(s.parse({ k: { b: null } })).toEqual({});
+        expect(s.parse({ k: { b: null }, j: { b: '' } })).toEqual({
+          j: { b: '' },
+        });
         expect(s.parse({ k: { b: 'x' } })).toEqual({ k: { b: 'x' } });
       });
     });
