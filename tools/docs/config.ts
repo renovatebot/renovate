@@ -324,7 +324,7 @@ function generateConfigFileNames(): string {
 
   output += '1. `package.json` _(within a `"renovate"` section)_\n';
 
-  return output.trimEnd();
+  return output;
 }
 
 function generateToolsForConstraints(): string {
@@ -361,7 +361,7 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of [...toolNames]) {
+  for (const tool of toolNames) {
     output += `- \`${tool}\`\n`;
   }
 

@@ -1,6 +1,7 @@
 import type { ExecaChildProcess } from 'execa';
 
 export interface CliArgs {
+  all: boolean;
   fix: boolean;
   noTest: boolean;
   targets: string[];
