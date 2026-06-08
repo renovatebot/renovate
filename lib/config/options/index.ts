@@ -666,7 +666,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.56.3',
+    default: 'ghcr.io/renovatebot/base-image:13.56.8',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -2544,7 +2544,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: {
       enabled: false,
       recreateWhen: 'always',
-      rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
@@ -3326,6 +3325,7 @@ const options: Readonly<RenovateOptions>[] = [
       'forgejo',
       'gerrit',
       'gitea',
+      'github',
       'gitlab',
       'scm-manager',
     ],
